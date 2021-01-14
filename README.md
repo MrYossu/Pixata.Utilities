@@ -11,11 +11,18 @@ I stated off with some Blazor components that I've been developing recently. The
 ## Documentation
 I know, I really ought to document them. I probably will at some point, but haven't had time yet. I've spent most of this afternoon trying to work out how to publish a Nuget package.
 
-## Sample project
+## Pixata.Extensions
+Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time.
+
+## Pixata.Blazor
+I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
+
+### Warning
+The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can a 30-day trial version from them. I make no apologies for relying on this package, I have been using Telerik components for many years, and wouldn't develop without them.
+
+### Sample project
 I have added a Blazor web project to the repository, and intend to use that to try out and demonstrate the components. At the moment, it's a just-out-of-the-box template project.
 
 ## Blog
 Random thoughts and notes that are sometimes useful, and sometimes related to these components can be found on [my blog](https://www.pixata.co.uk/).
 
-## Warning
-The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can a 30-day trial version from them. I make no apologies for relying on this package, I have been using Telerik components for many years, and wouldn't develop without them.
