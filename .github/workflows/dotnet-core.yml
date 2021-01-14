@@ -12,8 +12,8 @@ jobs:
     runs-on: windows-latest  
   
     env:
-      TELERIK_USERNAME: ${{ secrets.MyTelerikAccountUsername }}
-      TELERIK_PASSWORD: ${{ secrets.MyTelerikAccountPassword }}
+      TELERIK_USERNAME: ${{secrets.MyTelerikAccountUsername}}
+      TELERIK_PASSWORD: ${{secrets.MyTelerikAccountPassword}}
   
     steps:  
     - uses: actions/checkout@v2  
