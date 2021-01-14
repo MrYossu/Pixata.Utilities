@@ -1,6 +1,6 @@
 # Pixata.Utilities
 
-I seem to keep adding the same utility classes to every project I work on, resulting in (amlost) identical code spread across different projects.
+I seem to keep adding the same utility classes to every project I work on, resulting in (almost) identical code spread across different projects.
 
 I used to get around this by maintaining the utilities in a separate project, and referencing the DLL. However, apart from being soooo 1990s, it also has problems like VS locking the DLL, preventing you from building the utility project and so on.
 
@@ -18,4 +18,4 @@ I have added a Blazor web project to the repository, and intend to use that to t
 Random thoughts and notes that are sometimes useful, and sometimes related to these components can be found on [my blog](https://www.pixata.co.uk/).
 
 ## Warning
-The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can a 30-day trial version from them. I make no apologies for relying on this package, I ahve been using Telerik components for many years, and wouldn't develop without them.
+The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can a 30-day trial version from them. I make no apologies for relying on this package, I have been using Telerik components for many years, and wouldn't develop without them.
