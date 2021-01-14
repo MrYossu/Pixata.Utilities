@@ -11,11 +11,6 @@ jobs:
   
     runs-on: windows-latest  
   
-    env:
-      Actions_Allow_Unsecure_Commands: true
-      TELERIK_USERNAME: ${{secrets.TELERIK_USERNAME}}
-      TELERIK_PASSWORD: ${{secrets.TELERIK_PASSWORD}}
-  
     steps:  
     - uses: actions/checkout@v2  
     - name: Setup .NET Core  
@@ -24,8 +19,16 @@ jobs:
         dotnet-version: '5.0'
     - name: Install dependencies  
       run: dotnet restore --configfile Nuget.config
+      env:
+        Actions_Allow_Unsecure_Commands: true
+        TELERIK_USERNAME: ${{secrets.MyTelerikAccountUsername}}
+        TELERIK_PASSWORD: ${{secrets.MyTelerikAccountPassword}}
     - name: Build  
       run: dotnet build --configuration Release --no-restore --configfile Nuget.config
+      env:
+        Actions_Allow_Unsecure_Commands: true
+        TELERIK_USERNAME: ${{secrets.MyTelerikAccountUsername}}
+        TELERIK_PASSWORD: ${{secrets.MyTelerikAccountPassword}}
     - name: Test  
       run: dotnet test --no-restore --verbosity normal 
     - name: Publish  
