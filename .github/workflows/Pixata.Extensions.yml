@@ -1,0 +1,30 @@
+name: Pixata.Extensions
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core  
+        uses: actions/setup-dotnet@v1.7.2  
+        with:  
+          dotnet-version: '5.0'
+      - name: Build  
+        run: dotnet build --configuration Release --no-restore
+      - name: Test  
+        run: dotnet test --no-restore --verbosity normal 
+      - name: Publish  
+        uses: brandedoutcast/publish-nuget@v2.5.5  
+        with:   
+         PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
+         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
