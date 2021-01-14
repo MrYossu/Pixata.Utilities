@@ -1,0 +1,61 @@
+﻿@* NOTE - In order to have the overlay cover just the component's container, you must set the display style of the container to relative *@
+<div id="informOverlay" style="display: @_displayStyle">
+  <div id="informOverlayContent">
+    <p>@Caption</p>
+    <button class="btn btn-primary" @onclick="@(ButtonClicked)">@OkText</button>
+  </div>
+</div>
+
+@ChildContent
+
+<style>
+  #informOverlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+  }
+
+  #informOverlay #informOverlayContent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 18px;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    padding: 10px;
+    background: #fff;
+    color: #000;
+    text-align: center;
+    box-shadow: 10px 10px 5px #333;
+    border-radius: 10px;
+  }
+</style>
+
+@code {
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string OkText { get; set; } = "OK";
+
+  [Parameter]
+  public RenderFragment ChildContent { get; set; }
+
+  private string _displayStyle = "none";
+
+  public void Display(string caption = "") {
+    if (!string.IsNullOrWhiteSpace(caption)) {
+      Caption = caption;
+    }
+    _displayStyle = "block";
+  }
+
+  private void ButtonClicked() =>
+    _displayStyle = "none";
+
+}

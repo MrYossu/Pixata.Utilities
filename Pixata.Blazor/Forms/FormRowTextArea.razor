@@ -1,0 +1,61 @@
+﻿@using System.Linq.Expressions
+<div class="form-group row">
+  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text" style="display: inline-block">
+        <i class="far fa-@Icon"></i>
+      </span>
+    </div>
+    <textarea class="form-control" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" rows="@Rows">@Value</textarea>
+    @if (_showValidationMsg) {
+      <div class="input-group-append"><label class="input-group-text has-error" for="@PropertyName"><ValidationMessage For="@ValueExpression" /></label></div>
+    }
+  </div>
+</div>
+
+@code {
+
+  [CascadingParameter]
+  public EditContext CascadedEditContext { get; set; }
+
+  [Parameter]
+  public string PropertyName { get; set; }
+
+  [Parameter]
+  public string Value { get; set; }
+
+  [Parameter]
+  public EventCallback<string> ValueChanged { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  [Parameter]
+  public int Rows { get; set; } = 4;
+
+  [Parameter]
+  public Expression<Func<string>> ValueExpression { get; set; }
+
+  private bool _showValidationMsg;
+
+  private async Task OnChanged(ChangeEventArgs cea) {
+    await ValueChanged.InvokeAsync(cea.Value?.ToString() ?? "");
+    FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
+    CascadedEditContext.NotifyFieldChanged(identifier);
+  }
+
+  protected override void OnInitialized() {
+    CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
+    base.OnInitialized();
+  }
+
+  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+    FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
+    _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+  }
+
+}

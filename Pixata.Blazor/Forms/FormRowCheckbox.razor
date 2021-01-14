@@ -1,0 +1,40 @@
+﻿<div class="form-group row">
+  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="far fa-@Icon"></i>
+      </span>
+    </div>
+    @if (Checked) {
+      <input type="checkbox" class="form-control col-1" checked="checked" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
+    } else {
+      <input type="checkbox" class="form-control col-1" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
+    }
+  </div>
+</div>
+
+@code {
+
+  [Parameter]
+  public string PropertyName { get; set; }
+
+  [Parameter]
+  public bool Checked { get; set; }
+
+  [Parameter]
+  public EventCallback<bool> CheckedChanged { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Text { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  private async Task OnChanged(ChangeEventArgs cea) =>
+    await CheckedChanged.InvokeAsync(((bool?)cea.Value) ?? false);
+
+}

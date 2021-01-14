@@ -1,0 +1,18 @@
+﻿@if (Data == null) {
+  <p><span class="fad fa-spin fa-spinner" aria-hidden="true"></span> @Message</p>
+} else {
+  @ChildContent
+}
+
+@code {
+
+  [Parameter]
+  public string Message { get; set; } = "Loading...";
+
+  [Parameter]
+  public object Data { get; set; }
+
+  [Parameter]
+  public RenderFragment ChildContent { get; set; }
+
+}

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.Test", "Pixata.Blazor.Test\Pixata.Blazor.Test.csproj", "{972DA1C6-19D3-4035-89A3-20F92FAD0E02}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor", "Pixata.Blazor\Pixata.Blazor.csproj", "{0841B022-8BF7-4E19-BA16-A5B08B85C119}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{972DA1C6-19D3-4035-89A3-20F92FAD0E02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{972DA1C6-19D3-4035-89A3-20F92FAD0E02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{972DA1C6-19D3-4035-89A3-20F92FAD0E02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{972DA1C6-19D3-4035-89A3-20F92FAD0E02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0841B022-8BF7-4E19-BA16-A5B08B85C119}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0841B022-8BF7-4E19-BA16-A5B08B85C119}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0841B022-8BF7-4E19-BA16-A5B08B85C119}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0841B022-8BF7-4E19-BA16-A5B08B85C119}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {475E3D99-4AE5-426A-9394-8E4957C8D509}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,23 @@
+﻿@using Telerik.DataSource.Extensions
+@typeparam TEnum
+
+<div class="form-group row">
+  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="far fa-@Icon"></i>
+      </span>
+    </div>
+    <select class="form-control" name="@PropertyName" id="@PropertyName" @bind="Value">
+
+      @foreach (TEnum enumValue in EnumValues) {
+        if (ChildContent == default) {
+          <option value="@enumValue">@enumValue.ToString().SplitPascalCase()</option>
+        } else {
+          @ChildContent(enumValue)
+        }
+      }
+    </select>
+  </div>
+</div>

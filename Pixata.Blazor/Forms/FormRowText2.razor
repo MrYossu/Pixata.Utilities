@@ -1,0 +1,88 @@
+﻿@using System.Linq.Expressions
+<div class="form-group row">
+  <label class="col-lg-2 col-form-label" for="@PropertyName1">@Caption</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="far fa-@Icon"></i>
+      </span>
+    </div>
+    <input class="form-control" Value="@Value1" type="text" id="@PropertyName1" name="@PropertyName1" @onchange="@OnChanged1" /> <input class="form-control" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" />
+    @if (_showValidationMsg1 || _showValidationMsg2) {
+      <div class="input-group-append">
+        @if (_showValidationMsg1) {
+          <label class="input-group-text has-error" for="@PropertyName1"><ValidationMessage For="@Value1Expression" /></label>
+        }
+        @if (_showValidationMsg2) {
+          <label class="input-group-text has-error" for="@PropertyName2"><ValidationMessage For="@Value2Expression" /></label>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@code {
+
+  [CascadingParameter]
+  public EditContext CascadedEditContext { get; set; }
+
+  [Parameter]
+  public string PropertyName1 { get; set; }
+
+  [Parameter]
+  public string PropertyName2 { get; set; }
+
+  [Parameter]
+  public string Value1 { get; set; }
+
+  [Parameter]
+  public string Value2 { get; set; }
+
+  [Parameter]
+  public EventCallback<string> Value1Changed { get; set; }
+
+  [Parameter]
+  public EventCallback<string> Value2Changed { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> Value1Expression { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> Value2Expression { get; set; }
+
+  private bool _showValidationMsg1 = false;
+  private bool _showValidationMsg2 = false;
+
+  protected override void OnInitialized() {
+    CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
+    base.OnInitialized();
+  }
+
+  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+    FieldIdentifier identifier1 = CascadedEditContext.Field(PropertyName1);
+    _showValidationMsg1 = CascadedEditContext.GetValidationMessages(identifier1).Any();
+    FieldIdentifier identifier2 = CascadedEditContext.Field(PropertyName2);
+    _showValidationMsg2 = CascadedEditContext.GetValidationMessages(identifier2).Any();
+  }
+
+  private async Task OnChanged1(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, Value1Changed, PropertyName1);
+
+  private async Task OnChanged2(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, Value2Changed, PropertyName2);
+
+  private async Task CheckValidationFor(ChangeEventArgs cea, EventCallback<string> valueChangedEventCallback, string propertyName) {
+    await valueChangedEventCallback.InvokeAsync(cea.Value?.ToString() ?? "");
+    FieldIdentifier identifier = CascadedEditContext.Field(propertyName);
+    CascadedEditContext.NotifyFieldChanged(identifier);
+  //CascadedEditContext.Validate();
+  //return CascadedEditContext.GetValidationMessages(identifier).Any();
+  }
+
+}
