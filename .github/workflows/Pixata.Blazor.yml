@@ -12,13 +12,11 @@ jobs:
     runs-on: windows-latest  
   
     env:
+      Actions_Allow_Unsecure_Commands: true
       TELERIK_USERNAME: ${{secrets.TELERIK_USERNAME}}
       TELERIK_PASSWORD: ${{secrets.TELERIK_PASSWORD}}
   
     steps:  
-    - name: hello
-      run: |
-        echo "Hello"
     - uses: actions/checkout@v2  
     - name: Setup .NET Core  
       uses: actions/setup-dotnet@v1.7.2  
