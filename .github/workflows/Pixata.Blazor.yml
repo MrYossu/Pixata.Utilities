@@ -1,4 +1,4 @@
-name: .NET Core  
+name: Pixata.Blazor
   
 on:  
   push:  
@@ -12,8 +12,9 @@ jobs:
     runs-on: windows-latest  
   
     env:
-      TELERIK_USERNAME: ${{secrets.MyTelerikAccountUsername}}
-      TELERIK_PASSWORD: ${{secrets.MyTelerikAccountPassword}}
+      Actions_Allow_Unsecure_Commands: true
+      TELERIK_USERNAME: ${{secrets.TELERIK_USERNAME}}
+      TELERIK_PASSWORD: ${{secrets.TELERIK_PASSWORD}}
   
     steps:  
     - uses: actions/checkout@v2  
@@ -22,9 +23,9 @@ jobs:
       with:  
         dotnet-version: '5.0'
     - name: Install dependencies  
-      run: dotnet restore  
+      run: dotnet restore --configfile Nuget.config
     - name: Build  
-      run: dotnet build --configuration Release --no-restore  
+      run: dotnet build --configuration Release --no-restore --configfile Nuget.config
     - name: Test  
       run: dotnet test --no-restore --verbosity normal 
     - name: Publish  
