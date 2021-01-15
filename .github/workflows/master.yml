@@ -1,5 +1,5 @@
 name: Master Branch Workflow
-  
+
 on:  
   push:  
     branches: [ master ]
@@ -18,7 +18,9 @@ jobs:
       with:  
         dotnet-version: '5.0'
     
-    # BLAZOR PROJRECT
+# ***************** BUILDS **************** #
+
+    # BLAZOR PROJECT
     - name: Restore - Pixata.Blazor Dependencies
       run: dotnet restore Pixata.Blazor/Pixata.Blazor.csproj  --configfile ./nuget.config
       env:
@@ -34,13 +36,13 @@ jobs:
 
     # BLAZOR.TEST PROJECT
     - name: Restore - Pixata.Blazor.Test Dependencies
-      run: dotnet restore Pixata.Extensions/Pixata.Blazor.Test.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.Blazor.Test/Pixata.Blazor.Test.csproj --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.Blazor.Test
-      run: dotnet build Pixata.Extensions/Pixata.Blazor.Test.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Blazor.Test/Pixata.Blazor.Test.csproj --configuration Release --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
@@ -62,18 +64,23 @@ jobs:
 
     # EXTENSIONS.TESTS PROJECT
     - name: Restore - Pixata.Extensions.Tests Dependencies
-      run: dotnet restore Pixata.Extensions/Pixata.Extensions.Tests.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.Extensions.Tests
-      run: dotnet build Pixata.Extensions/Pixata.Extensions.Tests.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configuration Release --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+# ***************** TESTS **************** #
 
 # IMPORTANT - ALL PROJECTS SHOULD BE RESTORED (and built) BEFORE USING dotnet tests
     - name: Run Tests
       run: dotnet test --verbosity normal 
+
+# ***************** PUBLISHING **************** #
+
+# nuget pushes moved to release.yml workflow
