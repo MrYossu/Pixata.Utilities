@@ -1,4 +1,4 @@
-name: Pixata.Blazor
+name: Master Branch Workflow
   
 on:  
   push:  

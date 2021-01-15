@@ -1,4 +1,4 @@
-name: Pixata.Blazor
+name: Release Branch Workflow
   
 on:  
   push:  
