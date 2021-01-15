@@ -1,8 +1,8 @@
 name: Pixata.Blazor
   
 on:  
-  push:  
-    branches: [ master ]  
+  # push:  
+  #   branches: [ master ]  
   # pull_request:  
   #   branches: [ master ]  
 
@@ -33,6 +33,7 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
     
+    # This will cause the Extensions project to be compiled, in that case you must also add the Extensinos build step in this workflow (includeing the )
     - name: Test  
       run: dotnet test --verbosity normal 
     
