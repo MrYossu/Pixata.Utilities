@@ -21,6 +21,11 @@ namespace Pixata.Extensions {
       return msg;
     }
 
+    /// <summary>
+    /// Gets the innermost exception in a stack
+    /// </summary>
+    /// <param name="ex">The top-level exception</param>
+    /// <returns>The innermost exception</returns>
     public static string InnerType(this Exception ex) {
       string type = ex.GetType().ToString();
       Exception innerException = ex.InnerException;
