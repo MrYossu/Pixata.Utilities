@@ -8,7 +8,7 @@ namespace Pixata.Extensions {
     /// <param name="date"></param>
     /// <returns></returns>
     public static string ToPrettyString(this DateTime date) =>
-      date.Day + date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy");
+      date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy");
 
     /// <summary>
     /// Gets the last second of the month, ie 23:59:59 on th elast day
