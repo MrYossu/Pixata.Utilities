@@ -4,7 +4,7 @@ I seem to keep adding the same utility classes to every project I work on, resul
 
 I used to get around this by maintaining the utilities in a separate project, and referencing the DLL. However, apart from being soooo 1990s, it also has problems like VS locking the DLL, preventing you from building the utility project and so on.
 
-So, I decided to take a leap into the mdoern world, and try publishing a Nuget package. This is the first time I've done this, so goodness knows what's going to happen.
+So, I decided to take a leap into the modern world, and try publishing a Nuget package. This is the first time I've done this, so goodness knows what's going to happen.
 
 I stated off with some Blazor components that I've been developing recently. These are offered as-is, with no guarantee that they will work for you. I'm still working on them, and cannot offer much in the way of support, although I'd be very happy to receive any feedback you have.
 
