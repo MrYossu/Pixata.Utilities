@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<package>
+  <metadata>
+    <id>Pixata.Extensions</id>
+    <version>1.0.0</version>
+    <title>Pixata.Extensions</title>
+    <authors>Pixata Ltd</authors>
+    <owners>Avrohom Yisroel Silver</owners>
+    <projectUrl>https://www.pixata.co.uk/</projectUrl>
+    <!--iconUrl>https://www.website.com/logo.png</iconUrl-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A set of C# extension methods that may be useful</description>
+    <releaseNotes>Initial 1.0.0 release</releaseNotes>
+    <copyright>Copyright 2021 Pixata Ltd</copyright>
+    <tags>Extensions</tags>
+    <!--dependencies>
+      <dependency id="Microsoft.AspNetCore.Components.Web" version="5.0.0" />
+      <dependency id="Microsoft.AspNetCore.WebUtilities" version="2.2.0" />
+      <dependency id="PeterLeslieMorris.Extensions.FluentValidation" version="1.5.0" />
+      <dependency id="PeterLeslieMorris.Extensions.Validation" version="1.5.0" />
+      <dependency id="Telerik.UI.for.Extensions" version="2.20.0" />
+	</dependencies-->
+    <summary>A set of C# extension methods that may be useful. These include methods to format a date in a plesant way, split CamelCase strings, add ordinal suffixes to numbers, etc.</summary>
+  </metadata>
+  <!--files>
+    <file src="readme.txt" />
+    <file src="transforms\web.config.install.xdt" target="content\web.config.install.xdt" />
+    <file src="transforms\views.web.config.install.xdt" target="content\Views\web.config.install.xdt" />
+    <file src="App_Data\Models\**" target="content\App_Data\Models" />
+    <file src="Controllers\**" target="content\Controllers" />
+    <file src="Models\**" target="content\Models" />
+    <file src="Views\**" target="content\Views" />
+    <file src="Helpers\**" target="content\Helpers" />
+    <file src="Content\**" target="content\Content" />
+  </files-->
+</package>
