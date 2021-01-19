@@ -13,6 +13,12 @@ namespace Pixata.Extensions.Tests {
     }
 
     [TestMethod]
+    public void DateExtensionMethods_7thApril1961() {
+      DateTime d = new(1961, 4, 7);
+      Assert.AreEqual("7th April 1961", d.ToPrettyString());
+    }
+
+    [TestMethod]
     public void DateExtensionMethods_31stDec2021() {
       DateTime d = new(2021, 12, 31);
       Assert.AreEqual("31st December 2021", d.ToPrettyString());
