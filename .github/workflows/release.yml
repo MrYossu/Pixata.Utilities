@@ -82,14 +82,14 @@ jobs:
     
 # ***************** PUBLISHING **************** #
 
-    # - name: Publish  
-    #   uses: brandedoutcast/publish-nuget@v2.5.5  
-    #   with:   
-    #    PROJECT_FILE_PATH: Pixata.Blazor/Pixata.Blazor.csproj  
-    #    NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+    - name: Publish  
+      uses: brandedoutcast/publish-nuget@v2.5.5  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Blazor/Pixata.Blazor.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
-    # - name: Publish  
-    #   uses: brandedoutcast/publish-nuget@v2.5.5  
-    #   with:   
-    #     PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
-    #     NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+    - name: Publish  
+      uses: brandedoutcast/publish-nuget@v2.5.5  
+      with:   
+        PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
