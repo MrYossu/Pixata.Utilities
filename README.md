@@ -9,7 +9,7 @@ So, I decided to take a leap into the modern world, and try publishing a Nuget p
 I stated off with some Blazor components that I've been developing recently. These are offered as-is, with no guarantee that they will work for you. I'm still working on them, and cannot offer much in the way of support, although I'd be very happy to receive any feedback you have.
 
 ## Documentation
-I know, I really ought to document them. I probably will at some point, but haven't had time yet. I've spent most of this afternoon trying to work out how to publish a Nuget package.
+I know, I really ought to document them. I probably will at some point, but haven't had time yet. I've made a start on the two project pages (see below), and will hopefully improve on this soon.
 
 ## Pixata.Extensions
 Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time. You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions).
