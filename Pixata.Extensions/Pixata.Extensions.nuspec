@@ -2,11 +2,11 @@
 <package>
   <metadata>
     <id>Pixata.Extensions</id>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
     <title>Pixata.Extensions</title>
     <authors>Pixata Ltd</authors>
     <owners>Avrohom Yisroel Silver</owners>
-    <projectUrl>https://www.pixata.co.uk/</projectUrl>
+    <projectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</projectUrl>
     <!--iconUrl>https://www.website.com/logo.png</iconUrl-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A set of C# extension methods that may be useful</description>
