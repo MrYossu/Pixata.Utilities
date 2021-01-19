@@ -11,7 +11,7 @@ namespace Pixata.Extensions {
       date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy");
 
     /// <summary>
-    /// Gets the last second of the month, ie 23:59:59 on th elast day
+    /// Gets the last second of the month, ie 23:59:59 on the last day
     /// </summary>
     /// <param name="d">A date in the desired month</param>
     /// <returns>A DateTime that represents the last second of the month</returns>
