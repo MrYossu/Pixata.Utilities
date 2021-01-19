@@ -8,6 +8,12 @@
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Extensions</Product>
+    <Description>A set of C# extension methods</Description>
+    <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</ProjectUrl>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</RepositoryUrl>
+    <Copyright>Copyright 2021 Pixata Ltd</Copyright>
+    <PackageTags>C# extension-methods</PackageTags>
   </PropertyGroup>
 
 </Project>
