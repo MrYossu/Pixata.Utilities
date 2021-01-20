@@ -1,4 +1,7 @@
 # Pixata.Blazor
+
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/avion.png "Pixata") 
+
 I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
 
 ## The components
