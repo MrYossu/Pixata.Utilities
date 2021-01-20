@@ -14,10 +14,14 @@ I stated off with some Blazor components that I've been developing recently. The
 I know, I really ought to document them. I probably will at some point, but haven't had time yet. I've made a start on the two project pages (see below), and will hopefully improve on this soon.
 
 ## Pixata.Extensions
-Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time. You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions).
+Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions).
 
 ## Pixata.Blazor
-I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components. You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor).
+I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor).
 
 ## Blog
 Random thoughts and notes that are sometimes useful, and sometimes related to these components can be found on [my blog](https://www.pixata.co.uk/).
