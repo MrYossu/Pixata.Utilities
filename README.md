@@ -1,4 +1,4 @@
-# Pixata.Utilities
+# ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Borsalino.png "Pixata") Pixata.Utilities
 
 I seem to keep adding the same utility classes to every project I work on, resulting in (almost) identical code spread across different projects.
 
