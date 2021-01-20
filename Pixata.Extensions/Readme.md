@@ -1,4 +1,7 @@
 # Pixata.Extensions
+
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Extensions/Icon/Vroum%20Vroum.png "Pixata") 
+
 Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time. Here is a brief description of the methods in the classes so far...
 
 ## CollectionExtensionMethods
