@@ -16,10 +16,14 @@ I know, I really ought to document them. I probably will at some point, but have
 ## Pixata.Extensions
 Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time.
 
+A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
+
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions).
 
 ## Pixata.Blazor
 I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for this project.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor).
 
