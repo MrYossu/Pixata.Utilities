@@ -26,3 +26,9 @@ You can find more detail on the [project page](https://github.com/MrYossu/Pixata
 ## Blog
 Random thoughts and notes that are sometimes useful, and sometimes related to these components can be found on [my blog](https://www.pixata.co.uk/).
 
+## Things to do
+Some of the more important issues that need addressing...
+
+* The Blazor project should be split into two, one that doesn't rely on Telerik, and one that does. That way anyone who wants to use most of the compoents, but doesn't have a licence for Telerik still can
+* The form components in the Blazor project need a common base class pulling out, as they are all almost identical
+* Those form components also need to use the built-in Blazor form components, not the HTML form elements
