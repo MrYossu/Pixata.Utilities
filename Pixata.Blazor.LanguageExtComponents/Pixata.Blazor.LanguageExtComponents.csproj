@@ -2,13 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <Authors>Avrohom Yisroel Silver</Authors>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
     <Company>Pixata Ltd</Company>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Product>Pixata.Blazor.LanguageExtComponents</Product>
     <Description>A set of reusable Blazor components related to the LanguageExt Nuget package</Description>
     <Copyright>Copyright 2021 Pixata Ltd</Copyright>
+    <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</PackageProjectUrl>
-    <PackageIcon>performance systeme OS.png</PackageIcon>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</RepositoryUrl>
+    <PackageIcon>performance systeme OS.png</PackageIcon>
     <PackageTags>Blazor C# languageext</PackageTags>
   </PropertyGroup>
 
