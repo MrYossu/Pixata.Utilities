@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Company>Pixata Ltd</Company>
+    <Description>A set of reusable Blazor components related to the LanguageExt Nuget package</Description>
+    <Copyright>Copyright 2021 Pixata Ltd</Copyright>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</PackageProjectUrl>
+    <PackageIcon>performance systeme OS.png</PackageIcon>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</RepositoryUrl>
+    <PackageTags>Blazor C# languageext</PackageTags>
+  </PropertyGroup>
+
+  
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LanguageExt.Core" Version="3.4.15" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Icon\performance systeme OS.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
+  </ItemGroup>
+
+</Project>

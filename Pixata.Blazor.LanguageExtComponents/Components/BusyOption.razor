@@ -1,0 +1,24 @@
+﻿@using LanguageExt
+@typeparam T
+
+@if (!Data.HasValue) {
+  <p><span class="fad fa-spin fa-spinner" aria-hidden="true"></span> @Message</p>
+} else {
+  @Data.Value.Match(x => Some(x), None)
+}
+
+@code {
+
+  [Parameter]
+  public string Message { get; set; } = "Loading...";
+
+  [Parameter]
+  public Option<T>? Data { get; set; }
+
+  [Parameter]
+  public RenderFragment<T> Some { get; set; }
+
+  [Parameter]
+  public RenderFragment None { get; set; }
+
+}

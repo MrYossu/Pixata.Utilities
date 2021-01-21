@@ -1,6 +1,6 @@
 using System;
 
-namespace Pixata.Blazor.Test.Data {
+namespace Pixata.Blazor.Sample.Data {
   public class WeatherForecast {
     public DateTime Date { get; set; }
 

@@ -1,0 +1,27 @@
+﻿@page "/OptionSample"
+@using Pixata.Blazor.Sample.Models
+<h1>OptionBlazor</h1>
+
+<p>This sample shows how you can display an Option&lt;T&gt; on a Blazor component.</p>
+
+<h3>Some:</h3>
+<p>Here, the value being passed to the &lt;OptionBlazor&gt; component is of type Some&lt;Customer&gt;, so the customer details are displayed...</p>
+<OptionBlazor Value="_some" Context="customer">
+  <Some>@customer.Name (id: @customer.Id) is @customer.Age years old</Some>
+  <None>No customer</None>
+</OptionBlazor>
+
+<hr />
+<h3>None:</h3>
+<p>Here, the value being passed to the &lt;OptionBlazor&gt; component is of type None, so an error message is diplayed...</p>
+<OptionBlazor Value="_none" Context="customer">
+  <Some>@customer.Name (id: @customer.Id) is @customer.Age years old</Some>
+  <None>No customer</None>
+</OptionBlazor>
+
+@code {
+
+  private readonly Option<Customer> _some = new Customer(1, "Jim Spriggs", 42);
+  private readonly Option<Customer> _none = Option<Customer>.None;
+
+}
