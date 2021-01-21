@@ -1,5 +1,12 @@
 # Pixata.Extensions
-Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time. Here is a brief description of the methods in the classes so far...
+
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Extensions/Icon/Vroum%20Vroum.png "Pixata") 
+
+Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
+
+Here is a brief description of the methods in the classes so far...
 
 ## CollectionExtensionMethods
 `ToObservableCollection<T>()` - Converts any collection that implements IEnumerable<T> into an ObservableCollection<T>. Provides a neater syntax than passing the collection to the `ObservableCollection`'s constructor.
