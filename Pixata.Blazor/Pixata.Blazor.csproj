@@ -14,7 +14,7 @@
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor</RepositoryUrl>
     <PackageIcon>avion.png</PackageIcon>
-    <PackageTags>C# extension-methods</PackageTags>
+    <PackageTags>C# Blazor</PackageTags>
   </PropertyGroup>
 
   
