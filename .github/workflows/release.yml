@@ -20,7 +20,7 @@ jobs:
     
 # ***************** BUILDS **************** #
 
-    # BLAZOR PROJECT
+    # Pixata.Blazor
     - name: Restore - Pixata.Blazor Dependencies
       run: dotnet restore Pixata.Blazor/Pixata.Blazor.csproj  --configfile ./nuget.config
       env:
@@ -33,22 +33,33 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
-
-    # BLAZOR.TEST PROJECT
-    - name: Restore - Pixata.Blazor.Test Dependencies
-      run: dotnet restore Pixata.Blazor.Test/Pixata.Blazor.Test.csproj --configfile ./nuget.config
+    # Pixata.Blazor.LanguageExtComponents
+    - name: Restore - Pixata.Blazor.LanguageExtComponents Dependencies
+      run: dotnet restore Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-
-    - name: Build - Pixata.Blazor.Test
-      run: dotnet build Pixata.Blazor.Test/Pixata.Blazor.Test.csproj --configuration Release --configfile ./nuget.config
-      env:
-        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
-        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-
     
-    # EXTENSIONS PROJECT
+    - name: Build - Pixata.Blazor.LanguageExtComponents.csproj
+      run: dotnet build Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    # Pixata.Blazor.Sample
+    - name: Restore - Pixata.Blazor.Sample Dependencies
+      run: dotnet restore Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.Blazor.Sample
+      run: dotnet build Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+    
+    # Pixata.Extensions
     - name: Restore - Pixata.Extensions Dependencies
       run: dotnet restore Pixata.Extensions/Pixata.Extensions.csproj --configfile ./nuget.config
       env:
@@ -60,9 +71,8 @@ jobs:
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-    
 
-    # EXTENSIONS.TESTS PROJECT
+    # Pixata.Extensions.Tests
     - name: Restore - Pixata.Extensions.Tests Dependencies
       run: dotnet restore Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configfile ./nuget.config
       env:
@@ -82,13 +92,19 @@ jobs:
     
 # ***************** PUBLISHING **************** #
 
-    - name: Publish  
+    - name: Publish Pixata.Blazor
       uses: brandedoutcast/publish-nuget@v2.5.5  
       with:   
        PROJECT_FILE_PATH: Pixata.Blazor/Pixata.Blazor.csproj  
        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
-    - name: Publish  
+    - name: Publish Pixata.Blazor.LanguageExtComponents
+      uses: brandedoutcast/publish-nuget@v2.5.5  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
+    - name: Publish Pixata.Extensions
       uses: brandedoutcast/publish-nuget@v2.5.5  
       with:   
         PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  

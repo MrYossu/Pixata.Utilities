@@ -1,0 +1,15 @@
+﻿@using LanguageExt
+@typeparam T
+
+@Value.Match(x => Some(x), None)
+
+@code {
+  [Parameter]
+  public Option<T> Value { get; set; }
+
+  [Parameter]
+  public RenderFragment<T> Some { get; set; }
+
+  [Parameter]
+  public RenderFragment None { get; set; }
+}

@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.Test", "Pixata.Blazor.Test\Pixata.Blazor.Test.csproj", "{972DA1C6-19D3-4035-89A3-20F92FAD0E02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.Sample", "Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj", "{972DA1C6-19D3-4035-89A3-20F92FAD0E02}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor", "Pixata.Blazor\Pixata.Blazor.csproj", "{0841B022-8BF7-4E19-BA16-A5B08B85C119}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Extensions", "Pixata.Extensions\Pixata.Extensions.csproj", "{491D8E7C-F298-4AE0-8FE2-2578601C73A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Extensions", "Pixata.Extensions\Pixata.Extensions.csproj", "{491D8E7C-F298-4AE0-8FE2-2578601C73A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Extensions.Tests", "Pixata.Extensions.Tests\Pixata.Extensions.Tests.csproj", "{FC120586-9270-4672-A6BD-20301D26282D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Extensions.Tests", "Pixata.Extensions.Tests\Pixata.Extensions.Tests.csproj", "{FC120586-9270-4672-A6BD-20301D26282D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.LanguageExtComponents", "Pixata.Blazor.LanguageExtComponents\Pixata.Blazor.LanguageExtComponents.csproj", "{C6C22636-6847-4AB7-BDDD-DA31584ED0A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{FC120586-9270-4672-A6BD-20301D26282D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC120586-9270-4672-A6BD-20301D26282D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC120586-9270-4672-A6BD-20301D26282D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6C22636-6847-4AB7-BDDD-DA31584ED0A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6C22636-6847-4AB7-BDDD-DA31584ED0A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6C22636-6847-4AB7-BDDD-DA31584ED0A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6C22636-6847-4AB7-BDDD-DA31584ED0A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
