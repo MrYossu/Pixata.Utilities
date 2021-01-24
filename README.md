@@ -27,6 +27,9 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available fo
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor).
 
+## Pixata.Blazor.Sample
+The source code for a sample web project that uses the Blazor components. You can see a [live version of this sample](https://test.pixata.co.uk/), or [browse the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Sample).
+
 ## Pixata.Blazor.LanguageExtComponents
 Some Blazor components for us with the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package.
 
