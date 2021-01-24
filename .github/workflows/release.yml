@@ -117,7 +117,7 @@ jobs:
     - name: Deploy files
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        local-dir: ./bin/Release/net5.0/
-        server: ${{ secrets.pixatatestserver }}
+        server: ${{ secrets.pixatatestftpserver }}
         username: ${{ secrets.pixatatestuser }}
         password: ${{ secrets.pixatatestpassword }}
+        local-dir: ./bin/Release/net5.0/
