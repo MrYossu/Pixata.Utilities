@@ -4,24 +4,26 @@
 
 <p>This sample shows how you can display an Option&lt;T&gt; on a Blazor component.</p>
 
-<h3>Some:</h3>
-<p>Here, the value being passed to the &lt;OptionBlazor&gt; component is of type Some&lt;Customer&gt;, so the customer details are displayed...</p>
-<OptionBlazor Value="_some" Context="customer">
-  <Some>@customer.Name (id: @customer.Id) is @customer.Age years old</Some>
-  <None>No customer</None>
-</OptionBlazor>
+<p>Click one of the buttons below to load existing customer details, or see what happens when the customer cannot be found...</p>
+<p><button class="btn btn-primary" @onclick="LoadCustomerSome">Existing customer</button> <button class="btn btn-secondary" @onclick="LoadCustomerNone">No such customer</button></p>
+<p>Note that as Option&lt;T&gt; is a struct, it cannot be null, so when this page loads, the &lt;OptionBlazor&gt; component will show the None content. If you want to show something that indicates the data has not yet been loaded, please see the &lt;BusyOption&gt; component.</p>
 
-<hr />
-<h3>None:</h3>
-<p>Here, the value being passed to the &lt;OptionBlazor&gt; component is of type None, so an error message is diplayed...</p>
-<OptionBlazor Value="_none" Context="customer">
-  <Some>@customer.Name (id: @customer.Id) is @customer.Age years old</Some>
-  <None>No customer</None>
-</OptionBlazor>
+<fieldset>
+  <legend>Customer details</legend>
+  <OptionBlazor Value="_customer" Context="customer">
+    <Some>@customer.Name (id: @customer.Id) is @customer.Age years old</Some>
+    <None>No customer</None>
+  </OptionBlazor>
+</fieldset>
 
 @code {
 
-  private readonly Option<Customer> _some = new Customer(1, "Jim Spriggs", 42);
-  private readonly Option<Customer> _none = Option<Customer>.None;
+  private Option<Customer> _customer;
+
+  private void LoadCustomerSome() =>
+    _customer = new Customer(1, "Jim Spriggs", 42);
+
+  private void LoadCustomerNone() =>
+    _customer = Option<Customer>.None;
 
 }

@@ -48,3 +48,16 @@ a, .btn-link {
   right: 0.75rem;
   top: 0.5rem;
 }
+
+fieldset {
+  border: 1px solid #000;
+  padding: 10px;
+}
+
+fieldset legend {
+  width: auto;
+}
+
+span.fa, span.far, span.fal, span.fad, span.fas {
+  margin-right: 15px;
+}
