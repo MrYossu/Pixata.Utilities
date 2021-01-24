@@ -1,16 +1,16 @@
-﻿@* NOTE - In order to have the overlay cover just the component's container, you must set the display style of the container to relative *@
-<div id="confirmOverlay" style="display: @_displayStyle">
-  <div id="confirmOverlayContent">
-    <p>@Caption</p>
-    <button class="btn btn-primary" @onclick="@(() => ButtonClicked(true))">@YesText</button> <button class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))">@NoText</button>
+﻿<div style="position: relative">
+  <div id="confirmOverlay" style="display: @_displayStyle; position: @_position">
+    <div id="confirmOverlayContent">
+      <p>@Caption</p>
+      <button class="btn btn-primary" @onclick="@(() => ButtonClicked(true))">@YesText</button> <button class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))">@NoText</button>
+    </div>
   </div>
-</div>
 
-@ChildContent
+  @ChildContent
+</div>
 
 <style>
   #confirmOverlay {
-    position: @_position;
     width: 100%;
     height: 100%;
     top: 0;
@@ -61,7 +61,7 @@
   private string _displayStyle = "none";
   private string _position;
 
-  protected override void OnParametersSet() =>
+  protected override void OnInitialized() =>
     _position = DisplayOption == DisplayOptions.Container ? "absolute" : "fixed";
 
   public void Display(string caption = "") {
