@@ -109,3 +109,15 @@ jobs:
       with:   
         PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
+  web-deploy:
+    name: Deploy Pixata.Blazor.Sample
+    runs-on: windows-latest
+    steps:
+    - name: Deploy files
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+        local-dir: ./bin/Release/net5.0/
+        server: ${{ secrets.pixatatestserver }}
+        username: ${{ secrets.pixatatestuser }}
+        password: ${{ secrets.pixatatestpassword }}
