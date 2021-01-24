@@ -1,0 +1,35 @@
+﻿@page "/ConfirmSample"
+@using Pixata.Blazor.Containers
+<h3>ConfirmSample</h3>
+
+<p>Use this when you want to confirm some operation.</p>
+<fieldset>
+  <legend style="width: auto">Container for overlay</legend>
+  <Confirm @ref="_confirm" DisplayOption="@DisplayOptions.Container" ResultChanged="ResultChanged">
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi fermentum molestie massa, aliquam eleifend metus iaculis dictum.</p>
+    <p>Etiam molestie ex augue, tincidunt aliquet odio tincidunt id. Suspendisse a lectus orci.</p>
+    <button class="btn btn-primary" @onclick="DeleteDatabase">Click here to delete the database</button>
+    <button class="btn btn-secondary" @onclick="DeleteTable">Click here to delete one table</button>
+  </Confirm>
+</fieldset>
+<p>Confirmed?: @((MarkupString)_msg)</p>
+
+<style>
+  fieldset {
+    border: 1px solid #000;
+    padding: 20px;
+    position: relative
+  }
+</style>
+
+@code {
+  private Confirm _confirm;
+  private string _msg;
+
+  private void DeleteDatabase() => _confirm.Display("Delete the database?");
+
+  private void DeleteTable() => _confirm.Display("Delete one table?");
+
+  private void ResultChanged(bool yes) => _msg = $"{yes}<br/>";
+
+}
