@@ -120,4 +120,4 @@ jobs:
         server: ${{ secrets.PIXATATESTFTPSERVER }}
         username: ${{ secrets.PIXATATESTFTPUSER }}
         password: ${{ secrets.PIXATATESTFTPPASSWORD }}
-        local-dir: .\Pixata.Blazor.Sample\bin\Release\net5.0\
+        local-dir: ./Pixata.Blazor.Sample/bin/Release/net5.0/
