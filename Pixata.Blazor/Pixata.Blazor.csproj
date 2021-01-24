@@ -41,4 +41,8 @@
     <ProjectReference Include="..\Pixata.Extensions\Pixata.Extensions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>
