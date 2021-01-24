@@ -8,9 +8,7 @@
 
 <fieldset>
   <legend style="width: auto">Overlaying the parent container</legend>
-  <Confirm @ref="_confirmContainer" DisplayOption="@DisplayOptions.Container" ResultChanged="ResultChanged">
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi fermentum molestie massa, aliquam eleifend metus iaculis dictum.</p>
-    <p>Etiam molestie ex augue, tincidunt aliquet odio tincidunt id. Suspendisse a lectus orci.</p>
+  <Confirm @ref="_confirmContainer" DisplayOption="@DisplayOptions.Container">
     <button class="btn btn-primary" @onclick="DeleteDatabaseC">Click here to delete the database</button>
     <button class="btn btn-secondary" @onclick="DeleteTableC">Click here to delete one table</button>
   </Confirm>
@@ -18,23 +16,23 @@
 
 <fieldset>
   <legend style="width: auto">Overlaying the entire window</legend>
-  <Confirm @ref="_confirmWindow" DisplayOption="@DisplayOptions.Window" ResultChanged="ResultChanged">
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi fermentum molestie massa, aliquam eleifend metus iaculis dictum.</p>
-    <p>Etiam molestie ex augue, tincidunt aliquet odio tincidunt id. Suspendisse a lectus orci.</p>
+  <Confirm @ref="_confirmWindow" DisplayOption="@DisplayOptions.Window">
     <button class="btn btn-primary" @onclick="DeleteDatabaseW">Click here to delete the database</button>
     <button class="btn btn-secondary" @onclick="DeleteTableW">Click here to delete one table</button>
   </Confirm>
 </fieldset>
 
-<p>Confirmed?: @((MarkupString)_msg)</p>
+<p class="text-danger strong">Result: <HtmlRaw Html="@_msg" /></p>
 
-<h3>Spurious content to add vertical space...</h3>
-<p>Just to confirm that when the page contents are longer than the window, the confirm buttons are centered vertically, we'll add some more, erm, interesting reading!</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus non ex et leo ultrices lobortis. Quisque iaculis ullamcorper est luctus vestibulum. Nunc aliquam nisl id enim aliquet elementum. Sed vehicula leo id leo vulputate, at viverra risus iaculis. Pellentesque condimentum mauris sapien, non rhoncus sem dictum vel. Nullam dolor enim, semper eu orci ut, ultricies egestas quam. Pellentesque placerat odio vitae leo venenatis fermentum. Quisque ac libero eget arcu viverra sodales.</p>
-<p>Nulla facilisi. Nam sit amet aliquet risus. Fusce aliquet suscipit metus, quis accumsan nunc dictum nec. Aenean nec congue sapien. Suspendisse cursus arcu id ullamcorper dapibus. Pellentesque placerat nunc nibh, a tristique arcu pellentesque vitae. Donec congue lacus vel sapien egestas mollis. Nunc a magna ac magna venenatis euismod nec eu dui. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Sed sed quam elementum, luctus sapien at, pulvinar est. Pellentesque finibus massa et mi auctor, sed ultrices tortor lobortis. Nunc lacus ipsum, porta nec odio a, ullamcorper pharetra eros. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum lacus tortor, egestas ac varius eget, condimentum quis eros. Duis eget urna ante. Aenean eget orci quis erat luctus ultrices.</p>
-<p>Aenean ante augue, tempor eu nulla eget, tristique condimentum mi. Integer aliquam velit ac eleifend laoreet. Nunc non massa ut arcu tristique scelerisque. Donec tempus felis ac nunc sodales, sed accumsan velit fermentum. Maecenas pretium hendrerit augue. Duis facilisis velit nisl, in laoreet erat malesuada sed. Praesent malesuada semper neque, at posuere neque posuere eu. Pellentesque lacus tortor, interdum eget dui id, tempor ullamcorper erat. Donec ligula arcu, consequat et odio id, bibendum bibendum felis. Duis posuere convallis est ornare tincidunt. Vivamus nec aliquam diam. Vestibulum venenatis ipsum vel luctus viverra. Proin porta iaculis risus non placerat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
-<p>Fusce a aliquet nulla. Morbi interdum scelerisque eros vel laoreet. Nam pellentesque porta hendrerit. Fusce tincidunt, nisl a faucibus facilisis, lectus elit venenatis dui, eu eleifend ipsum sem ut erat. Maecenas imperdiet sit amet nulla quis fringilla. Nulla porta pulvinar efficitur. Maecenas erat justo, finibus quis felis ut, vulputate fermentum sapien. Integer convallis lobortis pulvinar. Nam convallis nunc elit, a tempus neque dictum ut. Phasellus tempus arcu metus, non suscipit odio accumsan quis. Sed sem odio, posuere et rutrum vitae, pretium vel enim. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce et metus et nulla volutpat dignissim nec eget arcu. Sed iaculis vehicula sodales.</p>
-<p>Sed suscipit est purus, malesuada hendrerit ex efficitur eget. Quisque fermentum leo nulla, sit amet vehicula risus hendrerit eget. Suspendisse at eleifend mauris. Phasellus facilisis ex massa, consequat rutrum odio hendrerit quis. Pellentesque at dui enim. Maecenas nec elit eget odio suscipit aliquam. Curabitur id metus blandit, sagittis tortor a, egestas ligula. Nulla luctus congue facilisis. Maecenas tempus ultricies tellus efficitur ultricies. Nulla tempus enim vitae ex semper pretium. Aliquam varius auctor mollis. Pellentesque vel lobortis odio. Ut sit amet metus eget ex eleifend egestas et nec mi. Cras est neque, malesuada ac dignissim vel, vehicula eget velit. Aliquam tempus consequat nunc non posuere. Praesent ante dui, elementum in eros at, venenatis tempor nisi.</p>
+<fieldset>
+  <legend>Spurious content to add vertical space...</legend>
+  <p>Just to confirm that when the page contents are longer than the window and we use DisplayOptions.Window, the confirm buttons are centered vertically, we'll add some, erm, interesting reading!</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus non ex et leo ultrices lobortis. Quisque iaculis ullamcorper est luctus vestibulum. Nunc aliquam nisl id enim aliquet elementum. Sed vehicula leo id leo vulputate, at viverra risus iaculis. Pellentesque condimentum mauris sapien, non rhoncus sem dictum vel. Nullam dolor enim, semper eu orci ut, ultricies egestas quam. Pellentesque placerat odio vitae leo venenatis fermentum. Quisque ac libero eget arcu viverra sodales.</p>
+  <p>Nulla facilisi. Nam sit amet aliquet risus. Fusce aliquet suscipit metus, quis accumsan nunc dictum nec. Aenean nec congue sapien. Suspendisse cursus arcu id ullamcorper dapibus. Pellentesque placerat nunc nibh, a tristique arcu pellentesque vitae. Donec congue lacus vel sapien egestas mollis. Nunc a magna ac magna venenatis euismod nec eu dui. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Sed sed quam elementum, luctus sapien at, pulvinar est. Pellentesque finibus massa et mi auctor, sed ultrices tortor lobortis. Nunc lacus ipsum, porta nec odio a, ullamcorper pharetra eros. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum lacus tortor, egestas ac varius eget, condimentum quis eros. Duis eget urna ante. Aenean eget orci quis erat luctus ultrices.</p>
+  <p>Aenean ante augue, tempor eu nulla eget, tristique condimentum mi. Integer aliquam velit ac eleifend laoreet. Nunc non massa ut arcu tristique scelerisque. Donec tempus felis ac nunc sodales, sed accumsan velit fermentum. Maecenas pretium hendrerit augue. Duis facilisis velit nisl, in laoreet erat malesuada sed. Praesent malesuada semper neque, at posuere neque posuere eu. Pellentesque lacus tortor, interdum eget dui id, tempor ullamcorper erat. Donec ligula arcu, consequat et odio id, bibendum bibendum felis. Duis posuere convallis est ornare tincidunt. Vivamus nec aliquam diam. Vestibulum venenatis ipsum vel luctus viverra. Proin porta iaculis risus non placerat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+  <p>Fusce a aliquet nulla. Morbi interdum scelerisque eros vel laoreet. Nam pellentesque porta hendrerit. Fusce tincidunt, nisl a faucibus facilisis, lectus elit venenatis dui, eu eleifend ipsum sem ut erat. Maecenas imperdiet sit amet nulla quis fringilla. Nulla porta pulvinar efficitur. Maecenas erat justo, finibus quis felis ut, vulputate fermentum sapien. Integer convallis lobortis pulvinar. Nam convallis nunc elit, a tempus neque dictum ut. Phasellus tempus arcu metus, non suscipit odio accumsan quis. Sed sem odio, posuere et rutrum vitae, pretium vel enim. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce et metus et nulla volutpat dignissim nec eget arcu. Sed iaculis vehicula sodales.</p>
+  <p>Sed suscipit est purus, malesuada hendrerit ex efficitur eget. Quisque fermentum leo nulla, sit amet vehicula risus hendrerit eget. Suspendisse at eleifend mauris. Phasellus facilisis ex massa, consequat rutrum odio hendrerit quis. Pellentesque at dui enim. Maecenas nec elit eget odio suscipit aliquam. Curabitur id metus blandit, sagittis tortor a, egestas ligula. Nulla luctus congue facilisis. Maecenas tempus ultricies tellus efficitur ultricies. Nulla tempus enim vitae ex semper pretium. Aliquam varius auctor mollis. Pellentesque vel lobortis odio. Ut sit amet metus eget ex eleifend egestas et nec mi. Cras est neque, malesuada ac dignissim vel, vehicula eget velit. Aliquam tempus consequat nunc non posuere. Praesent ante dui, elementum in eros at, venenatis tempor nisi.</p>
+</fieldset>
 
 <style>
   fieldset {
@@ -49,12 +47,27 @@
   private Confirm _confirmWindow;
   private string _msg;
 
-  private void DeleteDatabaseC() => _confirmContainer.Display("Delete the database?");
-  private void DeleteTableC() => _confirmContainer.Display("Delete one table?");
+  private void DeleteDatabaseC() =>
+    _confirmContainer.Display(
+      () => UpdateMsg("Deleted database"),
+      () => UpdateMsg("Didn't delete the database"));
 
-  private void DeleteDatabaseW() => _confirmWindow.Display("Delete the database?");
-  private void DeleteTableW() => _confirmWindow.Display("Delete one table?");
+  private void DeleteTableC() =>
+    _confirmContainer.Display(
+      "Delete one table?",
+      () => UpdateMsg("Deleted table"));
 
-  private void ResultChanged(bool yes) => _msg = $"{yes}<br/>";
+  private void DeleteDatabaseW() =>
+    _confirmWindow.Display(
+      () => UpdateMsg("Deleted database"));
+
+  private void DeleteTableW() =>
+    _confirmWindow.Display(
+      () => UpdateMsg("Deleted table"));
+
+  private void UpdateMsg(string msg) {
+    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: {msg}";
+    StateHasChanged();
+  }
 
 }
