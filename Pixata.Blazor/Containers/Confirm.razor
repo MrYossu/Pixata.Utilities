@@ -38,7 +38,7 @@
 @code {
 
   [Parameter]
-  public DisplayOptions DisplayOption { get; set; } = DisplayOptions.Container;
+  public PopUpDisplayOptions PopUpDisplayOption { get; set; } = PopUpDisplayOptions.Container;
 
   [Parameter]
   public string Caption { get; set; } = "Are you sure?";
@@ -52,20 +52,16 @@
   [Parameter]
   public RenderFragment ChildContent { get; set; }
 
+  [Parameter]
+  public EventCallback<bool> Result { get; set; }
+
   private string _displayStyle = "none";
   private string _position;
-  private Action _yesAction;
-  private Action _noAction;
 
   protected override void OnParametersSet() =>
-    _position = DisplayOption == DisplayOptions.Container ? "absolute" : "fixed";
+    _position = PopUpDisplayOption == PopUpDisplayOptions.Container ? "absolute" : "fixed";
 
-  public void Display(Action yesAction, Action noAction = null) =>
-    Display(Caption, yesAction, noAction);
-
-  public void Display(string caption, Action yesAction, Action noAction = null) {
-    _yesAction = yesAction;
-    _noAction = noAction;
+  public void Display(string caption = "") {
     if (!string.IsNullOrWhiteSpace(caption)) {
       Caption = caption;
     }
@@ -73,11 +69,7 @@
   }
 
   private void ButtonClicked(bool yes) {
-    if (yes) {
-      _yesAction();
-    } else {
-      _noAction?.Invoke();
-    }
+    Result.InvokeAsync(yes);
     _displayStyle = "none";
   }
 

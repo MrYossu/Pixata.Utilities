@@ -1,5 +1,5 @@
 ﻿namespace Pixata.Blazor.Containers {
-  public enum DisplayOptions {
+  public enum PopUpDisplayOptions {
     Container,
     Window
   }

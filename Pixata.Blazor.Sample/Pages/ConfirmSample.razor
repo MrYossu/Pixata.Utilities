@@ -8,16 +8,16 @@
 
 <fieldset>
   <legend style="width: auto">Overlaying the parent container</legend>
-  <Confirm @ref="_confirmContainer" DisplayOption="@DisplayOptions.Container">
-    <button class="btn btn-primary" @onclick="DeleteDatabaseC">Click here to delete the database</button>
-    <button class="btn btn-secondary" @onclick="DeleteTableC">Click here to delete one table</button>
+  <Confirm @ref="_confirmContainer" PopUpDisplayOption="@PopUpDisplayOptions.Container" Result="@DeleteDatabaseClicked">
+    <p>The pop-up will only cover the fieldset in which this text and the button appear.</p>
+    <button class="btn btn-primary" @onclick="DeleteDatabase">Click here to delete the database</button>
   </Confirm>
 </fieldset>
 
 <fieldset>
   <legend style="width: auto">Overlaying the entire window</legend>
-  <Confirm @ref="_confirmWindow" DisplayOption="@DisplayOptions.Window">
-    <button class="btn btn-primary" @onclick="DeleteDatabaseW">Click here to delete the database</button>
+  <Confirm @ref="_confirmWindow" PopUpDisplayOption="@PopUpDisplayOptions.Window" Result="@DeleteTableClicked">
+    <p>The pop-up will cover the entire browser window. Even if the page contents are longer than the window size allows, the pop-up will always appear in the middle of the viewport.</p>
     <button class="btn btn-secondary" @onclick="DeleteTableW">Click here to delete one table</button>
   </Confirm>
 </fieldset>
@@ -47,27 +47,17 @@
   private Confirm _confirmWindow;
   private string _msg;
 
-  private void DeleteDatabaseC() =>
-    _confirmContainer.Display(
-      () => UpdateMsg("Deleted database"),
-      () => UpdateMsg("Didn't delete the database"));
+  private void DeleteDatabase() =>
+    _confirmContainer.Display("Delete database (container)?");
 
-  private void DeleteTableC() =>
-    _confirmContainer.Display(
-      "Delete one table?",
-      () => UpdateMsg("Deleted table"));
-
-  private void DeleteDatabaseW() =>
-    _confirmWindow.Display(
-      () => UpdateMsg("Deleted database"));
+  private void DeleteDatabaseClicked(bool yes) =>
+    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Database delete result: {yes}";
 
   private void DeleteTableW() =>
-    _confirmWindow.Display(
-      () => UpdateMsg("Deleted table"));
+  _confirmWindow.Display("Delete table (parent)?");
 
-  private void UpdateMsg(string msg) {
-    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: {msg}";
-    StateHasChanged();
-  }
+  private void DeleteTableClicked(bool yes)=>
+    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Table delete result: {yes}";
+
 
 }
