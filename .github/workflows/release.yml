@@ -6,7 +6,7 @@ on:
 
 jobs:  
   build_pixata: 
-    runs-on: windows-latest  
+    runs-on: ubuntu-latest  
     steps:  
     - name: Checkout
       uses: actions/checkout@v2
@@ -142,6 +142,6 @@ jobs:
         host: ${{ secrets.PIXATATESTFTPSERVER }}
         user: ${{ secrets.PIXATATESTFTPUSER }}
         password: ${{ secrets.PIXATATESTFTPPASSWORD }}
-        remoteFiles: "TmpFolder/app_offline.htm"
+        remoteFiles: "app_offline.htm"
         #workingDir: "/public_html"
         ignoreSSL: "1"
