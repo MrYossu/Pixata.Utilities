@@ -28,10 +28,14 @@ Here is a brief description of the methods in the classes so far...
 
 `InnerType()` - Returns the type of the innermost exception.
 
-## IntExtensionMethods
+## NumberExtensionMethods
 `OrdinalSuffix()` - Returns the ordinal suffix, eg "st" for 1, 21, 31, etc, "nd" for 2, 22, etc, "rd" for 3, 23, etc and "th" for pretty much everything else.
+
+`DoubleToFraction()` - Converts a double to its improper fractional representation, eg 3.5 is converted to (7, 2), ie 7/2. Slightly modified from https://stackoverflow.com/a/32903747/706346
+
+`DoubleToProperFraction()` - Similar to `RealToFraction()`, but returns a 3-tuple representing a proper fraction, eg 3.5 is converted to (3, 2, 1), meaning 3 1/2. Note that this method has a slight quirk, in that if you pass in a whole number, say 5, you will get (5, 0, 1) returned. technically this is correct, but it looks odd. If you are going to display this result, you would probably want to check for this and neaten the display. At some point I hope to add a `DoubleToProperFractionString()` method to handle this.
 
 ## StringExtensionMethods
 `SplitCamelCase()` - Splits a camcel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums.
 
-`RemoveDiacritics()` - Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents
+`RemoveDiacritics()` - Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents. Note that for boring technical reasons, the returned string is lowercase.

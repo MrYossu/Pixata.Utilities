@@ -1,8 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Pixata.Extensions.Tests {
   [TestClass]
-  public class IntExtensionMethods_Tests {
+  public class NumberExtensionMethods_Tests {
     #region OrdinalSuffix
 
     [DataRow(1, "st", false)]
@@ -46,7 +47,7 @@ namespace Pixata.Extensions.Tests {
     [DataRow(39, "th", false)]
     [DataRow(40, "th", false)]
     [DataTestMethod]
-    public void IntExtensionMethods_OrdinalSuffix_IncludeNumber_False(int n, string suffix, bool includeNumber) =>
+    public void NumberExtensionMethods_OrdinalSuffix_IncludeNumber_False(int n, string suffix, bool includeNumber) =>
       Assert.AreEqual(suffix, n.OrdinalSuffix(includeNumber));
 
     [DataRow(1, "1st")]
@@ -90,8 +91,42 @@ namespace Pixata.Extensions.Tests {
     [DataRow(39, "39th")]
     [DataRow(40, "40th")]
     [DataTestMethod]
-    public void IntExtensionMethods_OrdinalSuffix_DoNotIncludeNumber_False(int n, string suffix) =>
+    public void NumberExtensionMethods_OrdinalSuffix_DoNotIncludeNumber_False(int n, string suffix) =>
       Assert.AreEqual(suffix, n.OrdinalSuffix());
+
+    #endregion
+
+    #region DoubleToFraction
+
+    // As tuples cannot be used in attribute values, we cheat and supply the expected value as a string, which we will convert to an integer tuple
+    [DataRow(1, "1|1")]
+    [DataRow(1.5, "3|2")]
+    [DataRow(1.25, "5|4")]
+    [DataRow(0.3333333333333333, "1|3")]
+    [DataRow(3.5, "7|2")]
+    [DataRow(5, "5|1")]
+    [TestMethod]
+    public void NumberExtensionMethods_DoubleToFraction(double value, string expected) {
+      (int n, int d) expectedResult = (Convert.ToInt32(expected.Split('|')[0]), Convert.ToInt32(expected.Split('|')[1]));
+      Assert.AreEqual(expectedResult, value.DoubleToFraction(0.001));
+    }
+
+    #endregion
+
+    #region DoubleToProperFraction
+
+    // As tuples cannot be used in attribute values, we cheat and supply the expected value as a string, which we will convert to an integer tuple
+    [DataRow(1, "0|1|1")]
+    [DataRow(1.5, "1|1|2")]
+    [DataRow(1.25, "1|1|4")]
+    [DataRow(0.3333333333333333, "0|1|3")]
+    [DataRow(3.5, "3|1|2")]
+    [DataRow(5, "5|0|1")]
+    [TestMethod]
+    public void NumberExtensionMethods_DoubleToProperFraction(double value, string expected) {
+      (int, int, int) expectedResult = (Convert.ToInt32(expected.Split('|')[0]), Convert.ToInt32(expected.Split('|')[1]), Convert.ToInt32(expected.Split('|')[2]));
+      Assert.AreEqual(expectedResult, value.DoubleToProperFraction(0.001));
+    }
 
     #endregion
   }

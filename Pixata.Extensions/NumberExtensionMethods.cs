@@ -23,8 +23,8 @@ namespace Pixata.Extensions {
     /// <param name="value">The number to be converted</param>
     /// <param name="accuracy">The accuracy of the conversion. Where value doesn't have a neat fractional representation, this determines how far we go trying to find one</param>
     /// <returns></returns>
-    public static (int, int, int) RealToProperFraction(double value, double accuracy) {
-      (int n, int d) = RealToFraction(value, accuracy);
+    public static (int, int, int) DoubleToProperFraction(this double value, double accuracy) {
+      (int n, int d) = DoubleToFraction(value, accuracy);
       if (n <= d) {
         return (0, n, d);
       }
@@ -37,7 +37,7 @@ namespace Pixata.Extensions {
     /// <param name="value"></param>
     /// <param name="accuracy"></param>
     /// <returns></returns>
-    public static (int, int) RealToFraction(double value, double accuracy) {
+    public static (int, int) DoubleToFraction(this double value, double accuracy) {
       if (accuracy <= 0.0 || accuracy >= 1.0) {
         throw new ArgumentOutOfRangeException("accuracy", "Must be > 0 and < 1.");
       }
