@@ -33,3 +33,5 @@ Here is a brief description of the methods in the classes so far...
 
 ## StringExtensionMethods
 `SplitCamelCase()` - Splits a camcel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums.
+
+`RemoveDiacritics()` - Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents
