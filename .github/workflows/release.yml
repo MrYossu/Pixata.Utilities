@@ -136,12 +136,12 @@ jobs:
         password: ${{ secrets.PIXATATESTFTPPASSWORD }}
         local-dir: ./Pixata.Blazor.Sample.Publish/
 
-    - name: Delete TmpFolder
-      uses: StephanThierry/ftp-delete-action@releases/v1
-      with:
-        host: ${{ secrets.PIXATATESTFTPSERVER }}
-        user: ${{ secrets.PIXATATESTFTPUSER }}
-        password: ${{ secrets.PIXATATESTFTPPASSWORD }}
-        remoteFiles: "app_offline.htm"
-        #workingDir: "/public_html"
-        ignoreSSL: "1"
+    #- name: Delete TmpFolder
+    #  uses: StephanThierry/ftp-delete-action@releases/v1
+    #  with:
+    #    host: ${{ secrets.PIXATATESTFTPSERVER }}
+    #    user: ${{ secrets.PIXATATESTFTPUSER }}
+    #    password: ${{ secrets.PIXATATESTFTPPASSWORD }}
+    #    remoteFiles: "app_offline.htm"
+    #    #workingDir: "/public_html"
+    #    ignoreSSL: "1"
