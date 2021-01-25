@@ -4,11 +4,12 @@
 
 <p>Use this when you want to confirm some operation.</p>
 
-<p>The component has two modes, one where it overlays the entire window, and one where it only overlays the immediate parent container. Both are shown below.</p>
+<p>The component has two display modes, one where it overlays the entire window, and one where it only overlays the immediate parent container. Both are shown below.</p>
+<p>Also, you can use an EventCallback, which will notify you immediately when the user clicks a button, or pass in an action which will be run before the pop-up closes if the user clicks yes. In this case, you may need to call StateHasChanged() to see the updates in the UI.</p>
 
 <fieldset>
   <legend style="width: auto">Overlaying the parent container</legend>
-  <Confirm @ref="_confirmContainer" PopUpDisplayOption="@PopUpDisplayOptions.Container" Result="@DeleteDatabaseClicked">
+  <Confirm @ref="_confirmContainer" PopUpDisplayOption="@PopUpDisplayOptions.Container" >
     <p>The pop-up will only cover the fieldset in which this text and the button appear.</p>
     <button class="btn btn-primary" @onclick="DeleteDatabase">Click here to delete the database</button>
   </Confirm>
@@ -48,10 +49,10 @@
   private string _msg;
 
   private void DeleteDatabase() =>
-    _confirmContainer.Display("Delete database (container)?");
-
-  private void DeleteDatabaseClicked(bool yes) =>
-    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Database delete result: {yes}";
+    _confirmContainer.Display("Delete database (container)?", yes => {
+      _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Database delete result: {yes}";
+      StateHasChanged();
+    });
 
   private void DeleteTableW() =>
   _confirmWindow.Display("Delete table (parent)?");
