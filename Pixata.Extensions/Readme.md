@@ -29,9 +29,9 @@ Here is a brief description of the methods in the classes so far...
 `InnerType()` - Returns the type of the innermost exception.
 
 ## NumberExtensionMethods
-`OrdinalSuffix()` - Returns the ordinal suffix, eg "st" for 1, 21, 31, etc, "nd" for 2, 22, etc, "rd" for 3, 23, etc and "th" for pretty much everything else.
+`OrdinalSuffix()` - Returns the ordinal suffix, eg "st" for 1, 21, 31, etc, "nd" for 2, 22, etc, "rd" for 3, 23, etc and "th" for pretty much everything else. Has an optional parameter that allows you to specify if you want 1 to return "1st" (default) or just "st".
 
-`DoubleToFraction()` - Converts a double to its improper fractional representation, eg 3.5 is converted to (7, 2), ie 7/2. Slightly modified from https://stackoverflow.com/a/32903747/706346
+`DoubleToFraction()` - Converts a double to a 2-tuples of its improper fractional representation, eg 3.5 is converted to (7, 2), ie 7/2. Slightly modified from https://stackoverflow.com/a/32903747/706346
 
 `DoubleToProperFraction()` - Similar to `RealToFraction()`, but returns a 3-tuple representing a proper fraction, eg 3.5 is converted to (3, 2, 1), meaning 3 1/2. Note that this method has a slight quirk, in that if you pass in a whole number, say 5, you will get (5, 0, 1) returned. technically this is correct, but it looks odd. If you are going to display this result, you would probably want to check for this and neaten the display. At some point I hope to add a `DoubleToProperFractionString()` method to handle this.
 
