@@ -1,5 +1,9 @@
 name: Test FTP rename
 
+on:  
+  push:  
+    branches: [ master ]
+    
 jobs:
   Rename_File: 
     runs-on: windows-latest
