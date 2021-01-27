@@ -12,6 +12,6 @@ jobs:
       shell: python
       run: |
         import ftplib
-        with FTP(${{ secrets.PIXATATESTFTPSERVER }}) as ftp:
-            ftp.login(${{ secrets.PIXATATESTFTPUSER }}, ${{ secrets.PIXATATESTFTPPASSWORD }})
+        with FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
+            ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
             ftp.delete('jim.txt')
