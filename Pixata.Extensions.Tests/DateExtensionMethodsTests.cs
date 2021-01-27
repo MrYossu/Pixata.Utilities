@@ -26,26 +26,48 @@ namespace Pixata.Extensions.Tests {
 
     #endregion
 
+    #region EndOfDay
+
+    [TestMethod]
+    public void DateExtensionMethods_EndOfDay_14thJan2021() {
+      DateTime d = new(2021, 1, 14);
+      Assert.AreEqual(new DateTime(2021, 1, 14, 23, 59, 59).AddMilliseconds(999), d.EndOfDay());
+    }
+
+    [TestMethod]
+    public void DateExtensionMethods_EndOfDay_28thFeb1900() {
+      DateTime d = new(1900, 2, 28);
+      Assert.AreEqual(new DateTime(1900, 2, 28, 23, 59, 59).AddMilliseconds(999), d.EndOfDay());
+    }
+
+    [TestMethod]
+    public void DateExtensionMethods_EndOfDay_28thFeb1904() {
+      DateTime d = new(1904, 2, 28);
+      Assert.AreEqual(new DateTime(1904, 2, 28, 23, 59, 59).AddMilliseconds(999), d.EndOfDay());
+    }
+
+    #endregion
+
     #region EndOfMonth
 
     [TestMethod]
     public void DateExtensionMethods_EndOfMonth_14thJan2021() {
       DateTime d = new(2021, 1, 14);
-      Assert.AreEqual(new DateTime(2021, 1, 31, 23, 59, 59), d.EndOfMonth());
+      Assert.AreEqual(new DateTime(2021, 1, 31, 23, 59, 59).AddMilliseconds(999), d.EndOfMonth());
     }
 
     [TestMethod]
     public void DateExtensionMethods_EndOfMonth_28thFeb1900() {
       // As 1900 was the start of a new century, it was not a leap year, so the end of Feb would have been the 28th
       DateTime d = new(1900, 2, 28);
-      Assert.AreEqual(new DateTime(1900, 2, 28, 23, 59, 59), d.EndOfMonth());
+      Assert.AreEqual(new DateTime(1900, 2, 28, 23, 59, 59).AddMilliseconds(999), d.EndOfMonth());
     }
 
     [TestMethod]
     public void DateExtensionMethods_EndOfMonth_28thFeb1904() {
       // 1904 was a leap year
       DateTime d = new(1904, 2, 28);
-      Assert.AreEqual(new DateTime(1904, 2, 29, 23, 59, 59), d.EndOfMonth());
+      Assert.AreEqual(new DateTime(1904, 2, 29, 23, 59, 59).AddMilliseconds(999), d.EndOfMonth());
     }
 
     #endregion
