@@ -111,38 +111,31 @@ jobs:
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
   # *** Publish Pixata.Blazor.Sample ***
-#    - name: Create TmpFolder
-#      run: mkdir TmpFolder
-#
-#    - name: Create app_offline.htm
-#      run: echo "Updating, please wait" > TmpFolder/app_offline.htm
-#
-#    - name: Upload app_offline.htm
-#      uses: SamKirkland/FTP-Deploy-Action@4.0.0
-#      with:
-#        server: ${{ secrets.PIXATATESTFTPSERVER }}
-#        username: ${{ secrets.PIXATATESTFTPUSER }}
-#        password: ${{ secrets.PIXATATESTFTPPASSWORD }}
-#        local-dir: ./TmpFolder/
-#
-#    - name: Publish Pixata.Blazor.Sample
-#      run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net5.0 --output Pixata.Blazor.Sample.Publish
-#
-#    - name: Deploy Pixata.Blazor.Sample
-#      uses: SamKirkland/FTP-Deploy-Action@4.0.0
-#      with:
-#        server: ${{ secrets.PIXATATESTFTPSERVER }}
-#        username: ${{ secrets.PIXATATESTFTPUSER }}
-#        password: ${{ secrets.PIXATATESTFTPPASSWORD }}
-#        local-dir: ./Pixata.Blazor.Sample.Publish/
-#
-#     - name: Delete TmpFolder
-#       uses: StephanThierry/ftp-delete-action@releases/v1
-#       with:
-#         host: ${{ secrets.PIXATATESTFTPSERVER }}
-#         user: ${{ secrets.PIXATATESTFTPUSER }}
-#         password: ${{ secrets.PIXATATESTFTPPASSWORD }}
-#         remoteFiles: "app_offline.htm"
-#         #workingDir: "/public_html"
-#         ignoreSSL: "1"
+    - name: Rename _app_offline.htm to app_offline.htm to stop the site
+      shell: python
+      run: |
+        import ftplib
+        ftp = ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}')
+        ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+        ftp.rename('_app_offline.htm', 'app_offline.htm')
+        ftp.quit()
 
+    - name: Publish Pixata.Blazor.Sample
+      run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net5.0 --output Pixata.Blazor.Sample.Publish
+
+    - name: Deploy Pixata.Blazor.Sample
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+        server: ${{ secrets.PIXATATESTFTPSERVER }}
+        username: ${{ secrets.PIXATATESTFTPUSER }}
+        password: ${{ secrets.PIXATATESTFTPPASSWORD }}
+        local-dir: ./Pixata.Blazor.Sample.Publish/
+
+    - name: Rename app_offline.htm back to _app_offline.htm to start the site
+      shell: python
+      run: |
+        import ftplib
+        ftp = ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}')
+        ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+        ftp.rename('app_offline.htm', '_app_offline.htm')
+        ftp.quit()
