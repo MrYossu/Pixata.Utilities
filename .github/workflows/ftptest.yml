@@ -1,0 +1,13 @@
+name: Test FTP rename
+
+jobs:
+  Rename_File: 
+    runs-on: windows-latest
+    steps:
+    - name: rename file
+      shell: python
+      run: |
+        import ftplib
+        with FTP(${{ secrets.PIXATATESTFTPSERVER }}) as ftp:
+            ftp.login(${{ secrets.PIXATATESTFTPUSER }}, ${{ secrets.PIXATATESTFTPPASSWORD }})
+            ftp.delete('jim.txt')
