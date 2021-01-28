@@ -1,12 +1,13 @@
-﻿@* NOTE - In order to have the overlay cover just the component's container, you must set the display style of the container to relative *@
-<div id="informOverlay" style="display: @_displayStyle">
-  <div id="informOverlayContent">
-    <p>@Caption</p>
-    <button class="btn btn-primary" @onclick="@(ButtonClicked)">@OkText</button>
+﻿<div style="position: relative">
+  <div id="informOverlay" style="display: @_displayStyle">
+    <div id="informOverlayContent">
+      <p>@Caption</p>
+      <button class="btn btn-primary" @onclick="@(ButtonClicked)">@OkText</button>
+    </div>
   </div>
-</div>
 
-@ChildContent
+  @ChildContent
+</div>
 
 <style>
   #informOverlay {
