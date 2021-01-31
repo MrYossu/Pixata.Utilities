@@ -115,7 +115,7 @@ jobs:
       shell: python
       run: |
         import ftplib
-        with FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
+        with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
           ftp.rename('_app_offline.htm', 'app_offline.htm')
           ftp.quit()
@@ -135,7 +135,7 @@ jobs:
       shell: python
       run: |
         import ftplib
-        with FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
+        with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
           ftp.rename('app_offline.htm', '_app_offline.htm')
           ftp.quit()
