@@ -14,7 +14,7 @@ These are offered as-is, with no guarantee that they will work for you. I'm stil
 I know, I really ought to document them. I probably will at some point, but haven't had time yet.
 
 ## Pixata.Extensions
-Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time.
+Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is <strike>woefully empty</strike> less desolate than it used to be, but hopefully that will change over time.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
 
