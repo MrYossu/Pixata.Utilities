@@ -115,10 +115,10 @@ jobs:
       shell: python
       run: |
         import ftplib
-        ftp = ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}')
-        ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-        ftp.rename('_app_offline.htm', 'app_offline.htm')
-        ftp.quit()
+        with FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
+          ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+          ftp.rename('_app_offline.htm', 'app_offline.htm')
+          ftp.quit()
 
     - name: Publish Pixata.Blazor.Sample
       run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net5.0 --output Pixata.Blazor.Sample.Publish
@@ -135,7 +135,7 @@ jobs:
       shell: python
       run: |
         import ftplib
-        ftp = ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}')
-        ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-        ftp.rename('app_offline.htm', '_app_offline.htm')
-        ftp.quit()
+        with FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
+          ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+          ftp.rename('app_offline.htm', '_app_offline.htm')
+          ftp.quit()
