@@ -1,4 +1,4 @@
-# Pixata.Utilities [![release Actions Status](https://github.com/MrYossu/Pixata.Utilities/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions)
+# Pixata.Utilities [![Release status](https://github.com/MrYossu/Pixata.Utilities/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions)
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Borsalino.png "Pixata")
 
