@@ -4,7 +4,7 @@
 
 I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
 
-There is a [complimentary package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents), whichbcontains additional components for those who have a subscription to Telerik.
+There is a [complimentary package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents), which contains additional components for those who have a subscription to Telerik.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for this project.
 
