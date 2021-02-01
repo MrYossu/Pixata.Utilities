@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Company>Pixata Ltd</Company>
+    <Description>A set of reusable Blazor components that rely on the Blazor components produced by Telerik. This compliments the Pixata.Blazor package</Description>
+    <Copyright>Copyright 2021 Pixata Ltd</Copyright>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</RepositoryUrl>
+    <PackageIcon>mail old school.png</PackageIcon>
+    <PackageTags>C# Blazor</PackageTags>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</PackageProjectUrl>
   </PropertyGroup>
 
   
@@ -17,6 +25,13 @@
   <ItemGroup>
     <Folder Include="Icon\" />
     <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Icon\mail old school.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
