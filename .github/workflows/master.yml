@@ -1,4 +1,4 @@
-name: Master branch workflow 
+name: master
 
 on:  
   push:  
@@ -29,6 +29,19 @@ jobs:
     
     - name: Build - Pixata.Blazor.csproj
       run: dotnet build Pixata.Blazor/Pixata.Blazor.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    # Pixata.Blazor.TelerikComponents
+    - name: Restore - Pixata.Blazor.TelerikComponents Dependencies
+      run: dotnet restore Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+    
+    - name: Build - Pixata.Blazor.TelerikComponents.csproj
+      run: dotnet build Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configuration Release --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}

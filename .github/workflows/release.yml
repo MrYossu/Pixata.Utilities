@@ -1,4 +1,4 @@
-name: Release Branch Workflow
+name: release
   
 on:  
   push:  
@@ -29,6 +29,19 @@ jobs:
     
     - name: Build - Pixata.Blazor.csproj
       run: dotnet build Pixata.Blazor/Pixata.Blazor.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    # Pixata.Blazor.TelerikComponents
+    - name: Restore - Pixata.Blazor.TelerikComponents Dependencies
+      run: dotnet restore Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+    
+    - name: Build - Pixata.Blazor.TelerikComponents.csproj
+      run: dotnet build Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configuration Release --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
@@ -98,6 +111,12 @@ jobs:
        PROJECT_FILE_PATH: Pixata.Blazor/Pixata.Blazor.csproj  
        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
+    - name: Publish Pixata.Blazor.TelerikComponents
+      uses: brandedoutcast/publish-nuget@v2.5.5  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
     - name: Publish Pixata.Blazor.LanguageExtComponents
       uses: brandedoutcast/publish-nuget@v2.5.5  
       with:   
@@ -115,10 +134,10 @@ jobs:
       shell: python
       run: |
         import ftplib
-        ftp = ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}')
-        ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-        ftp.rename('_app_offline.htm', 'app_offline.htm')
-        ftp.quit()
+        with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
+          ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+          ftp.rename('_app_offline.htm', 'app_offline.htm')
+          ftp.quit()
 
     - name: Publish Pixata.Blazor.Sample
       run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net5.0 --output Pixata.Blazor.Sample.Publish
@@ -135,7 +154,7 @@ jobs:
       shell: python
       run: |
         import ftplib
-        ftp = ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}')
-        ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-        ftp.rename('app_offline.htm', '_app_offline.htm')
-        ftp.quit()
+        with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
+          ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+          ftp.rename('app_offline.htm', '_app_offline.htm')
+          ftp.quit()
