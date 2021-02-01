@@ -16,7 +16,6 @@
     <PackageIcon>avion.png</PackageIcon>
     <PackageTags>C# Blazor</PackageTags>
   </PropertyGroup>
-
   
   <ItemGroup>
     <SupportedPlatform Include="browser" />
