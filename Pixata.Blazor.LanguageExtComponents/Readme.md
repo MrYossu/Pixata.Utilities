@@ -1,4 +1,4 @@
-# Pixata.Blazor.LanguageExtComponents
+# Pixata.Blazor.LanguageExtComponents [![Pixata.Blazor.LanguageExtComponents Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor.LanguageExtComponents)](https://www.nuget.org/packages/Pixata.Blazor.LanguageExtComponents/)
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor.LanguageExtComponents/Icon/performance%20systeme%20OS.png "Pixata") 
 
