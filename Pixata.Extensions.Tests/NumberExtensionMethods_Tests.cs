@@ -129,5 +129,17 @@ namespace Pixata.Extensions.Tests {
     }
 
     #endregion
+
+    #region ToPercentageString
+
+    [DataRow(10, 100, 0, "10%")]
+    [DataRow(10, 100, 1, "10%")]
+    [DataRow(17.5, 100, 0, "18%")]
+    [DataRow(17.5, 100, 1, "17.5%")]
+    [DataTestMethod]
+    public void NumberExtensionMethods_ToPercentageString(double qty, double max, int digits, string result) =>
+      Assert.AreEqual(result, qty.ToPercentageString(max, digits));
+
+    #endregion
   }
 }
