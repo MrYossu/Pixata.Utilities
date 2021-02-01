@@ -1,4 +1,4 @@
-# Pixata.Utilities [![Release status](https://github.com/MrYossu/Pixata.Utilities/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Arelease) [![Master status](https://github.com/MrYossu/Pixata.Utilities/workflows/master/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Amaster) ![Last commit to master](https://img.shields.io/github/last-commit/MrYossu/Pixata.Utilities/master, "Last commit to master")
+# Pixata.Utilities [![Release status](https://github.com/MrYossu/Pixata.Utilities/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Arelease) [![Master status](https://github.com/MrYossu/Pixata.Utilities/workflows/master/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Amaster) ![Last commit to master](https://img.shields.io/github/last-commit/MrYossu/Pixata.Utilities/master)
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Borsalino.png "Pixata")
 
