@@ -89,5 +89,24 @@ namespace Pixata.Extensions {
         }
       }
     }
+
+    /// <summary>
+    /// Converts a number into the string representation of it as a percentage of a maximum.
+    /// </summary>
+    /// <param name="qty">The number that is to be a percentage. Can be an int or a double</param>
+    /// <param name="max">The maximum value. Can be an int or a double</param>
+    /// <param name="digits">The number of decimal digits to be included in the result, default is zero. Eg 15.ToPercentageString(100) would return "15%", 17.5.ToPercentageString(100) would return "17%" and 17.5.ToPercentageString(100, 1) would return "17.5%"</param>
+    /// <returns></returns>
+    public static string ToPercentageString(this int qty, int max, int digits = 0) =>
+      ToPercentageString((double)qty, (double)max, digits);
+
+    public static string ToPercentageString(this int qty, double max, int digits = 0) =>
+      ToPercentageString((double)qty, max, digits);
+
+    public static string ToPercentageString(this double qty, int max, int digits = 0) =>
+      ToPercentageString(qty, (double)max, digits);
+
+    public static string ToPercentageString(this double qty, double max, int digits = 0) =>
+      $"{Math.Round(100 * qty / max, digits)}%";
   }
 }
