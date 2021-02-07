@@ -9,17 +9,17 @@
 
 <fieldset>
   <legend style="width: auto">Overlaying the parent container</legend>
-  <Confirm @ref="_confirmContainer" PopUpDisplayOption="@PopUpDisplayOptions.Container" >
+  <Confirm @ref="_confirmContainer" PopUpDisplayOption="@PopUpDisplayOptions.Container" OnClicked="@FormatYourHardDriveClicked">
     <p>The pop-up will only cover the fieldset in which this text and the button appear.</p>
-    <button class="btn btn-primary" @onclick="DeleteDatabase">Click here to delete the database</button>
+    <button class="btn btn-primary" @onclick="FormatYourHardDrive">Format your hard drive</button>
   </Confirm>
 </fieldset>
 
 <fieldset>
   <legend style="width: auto">Overlaying the entire window</legend>
-  <Confirm @ref="_confirmWindow" PopUpDisplayOption="@PopUpDisplayOptions.Window" Result="@DeleteTableClicked">
+  <Confirm @ref="_confirmWindow" PopUpDisplayOption="@PopUpDisplayOptions.Window" OnClicked="@FormatYourFriendsHardDriveClicked">
     <p>The pop-up will cover the entire browser window. Even if the page contents are longer than the window size allows, the pop-up will always appear in the middle of the viewport.</p>
-    <button class="btn btn-secondary" @onclick="DeleteTableW">Click here to delete one table</button>
+    <button class="btn btn-secondary" @onclick="FormatYourFriendsHardDrive">Click here to format your friend's hard drive</button>
   </Confirm>
 </fieldset>
 
@@ -48,17 +48,23 @@
   private Confirm _confirmWindow;
   private string _msg;
 
-  private void DeleteDatabase() =>
-    _confirmContainer.Display("Delete database (container)?", yes => {
-      _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Database delete result: {yes}";
-      StateHasChanged();
-    });
+  private void FormatYourHardDrive() =>
+    _confirmContainer.Display("Are you sure you want to format your hard drive?");
 
-  private void DeleteTableW() =>
-  _confirmWindow.Display("Delete table (parent)?");
+  private void FormatYourHardDriveClicked(bool yes) =>
+    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Did they want to format their hard drive?: {yes}";
 
-  private void DeleteTableClicked(bool yes)=>
-    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Table delete result: {yes}";
+  private void FormatYourFriendsHardDrive() =>
+    _confirmWindow.Display("Are you sure you want to format your hard drive? This may take some time", false);
 
+  private async Task FormatYourFriendsHardDriveClicked(bool yes) {
+    _msg += $"<br/>{DateTime.Now.ToLongTimeString()}: Did they want to format their friend's hard drive?: {yes}";
+    if (yes) {
+      _msg += ". Formatting, please wait...";
+      await Task.Delay(5000);
+      _msg += " Done";
+      _confirmWindow.Close();
+    }
+  }
 
 }

@@ -19,23 +19,23 @@
     z-index: 1000;
   }
 
-    #confirmOverlay #confirmOverlayContent {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      font-size: 18px;
-      -moz-transform: translate(-50%, -50%);
-      -ms-transform: translate(-50%, -50%);
-      -o-transform: translate(-50%, -50%);
-      -webkit-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
-      padding: 10px;
-      background: #fff;
-      color: #000;
-      text-align: center;
-      box-shadow: 10px 10px 5px #333;
-      border-radius: 10px;
-    }
+  #confirmOverlay #confirmOverlayContent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 18px;
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    background: #fff;
+    color: #000;
+    text-align: center;
+    box-shadow: 10px 10px 5px #333;
+    border-radius: 10px;
+  }
 </style>
 
 @code {
@@ -56,29 +56,32 @@
   public RenderFragment ChildContent { get; set; }
 
   [Parameter]
-  public EventCallback<bool> Result { get; set; }
+  public EventCallback<bool> OnClicked { get; set; }
 
   private string _displayStyle = "none";
   private string _position;
-  private Action<bool> _yesAction;
+  private bool _closeOnClick;
 
   protected override void OnParametersSet() =>
     _position = PopUpDisplayOption == PopUpDisplayOptions.Container ? "absolute" : "fixed";
 
-  public void Display(string caption = "", Action<bool> yesAction = null) {
+  public void Display(string caption = "", bool closeOnClick = true) {
     if (!string.IsNullOrWhiteSpace(caption)) {
       Caption = caption;
     }
+    _closeOnClick = closeOnClick;
     _displayStyle = "block";
-    _yesAction = yesAction;
   }
 
   private void ButtonClicked(bool yes) {
-    if (yes) {
-      _yesAction?.Invoke(yes);
+    if (!yes || _closeOnClick) {
+      _displayStyle = "none";
     }
-    Result.InvokeAsync(yes);
-    _displayStyle = "none";
+    OnClicked.InvokeAsync(yes);
   }
+
+
+  public void Close() =>
+    _displayStyle = "none";
 
 }
