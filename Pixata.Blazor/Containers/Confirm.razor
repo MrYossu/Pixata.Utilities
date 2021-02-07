@@ -2,7 +2,7 @@
   <div id="confirmOverlay" style="display: @_displayStyle; position: @_position">
     <div id="confirmOverlayContent">
       <p>@Caption</p>
-      <button class="btn btn-primary" @onclick="@(() => ButtonClicked(true))">@YesText</button> <button class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))">@NoText</button>
+      <button class="btn btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon mr-1"></i>@YesText</button> <button class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button>
     </div>
   </div>
 
@@ -60,7 +60,9 @@
 
   private string _displayStyle = "none";
   private string _position;
+  private bool _disabled;
   private bool _closeOnClick;
+  private string _busyIcon;
 
   protected override void OnParametersSet() =>
     _position = PopUpDisplayOption == PopUpDisplayOptions.Container ? "absolute" : "fixed";
@@ -76,12 +78,17 @@
   private void ButtonClicked(bool yes) {
     if (!yes || _closeOnClick) {
       _displayStyle = "none";
+    } else {
+      _disabled = true;
+      _busyIcon = "fas fa-spinner fa-spin";
     }
     OnClicked.InvokeAsync(yes);
   }
 
-
-  public void Close() =>
+  public void Close() {
     _displayStyle = "none";
+    _disabled = false;
+    _busyIcon = "";
+  }
 
 }
