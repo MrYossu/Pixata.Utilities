@@ -1,4 +1,4 @@
-# Pixata.Blazor.TelerikComponents
+# Pixata.Blazor.TelerikComponents [![Pixata.Blazor.TelerikComponents Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor.TelerikComponents)](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents/)
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor.TelerikComponents/Icon/mail%20old%20school.png "Pixata") 
 
