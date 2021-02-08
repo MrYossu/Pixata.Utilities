@@ -1,0 +1,17 @@
+﻿@using Microsoft.JSInterop
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject IJSRuntime JsRuntime;
+
+@code {
+
+  [Parameter]
+  public string Title { get; set; }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) =>
+    await SetTitle();
+
+  private async Task SetTitle() =>
+    await JsRuntime.InvokeVoidAsync("setTitle", Title + " - " + Configuration["WebSiteName"]);
+
+}

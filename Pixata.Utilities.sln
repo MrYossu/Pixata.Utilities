@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Extensions.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.LanguageExtComponents", "Pixata.Blazor.LanguageExtComponents\Pixata.Blazor.LanguageExtComponents.csproj", "{C6C22636-6847-4AB7-BDDD-DA31584ED0A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Blazor.TelerikComponents", "Pixata.Blazor.TelerikComponents\Pixata.Blazor.TelerikComponents.csproj", "{8363C657-0D37-4648-BD26-6D5ABD19160D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.TelerikComponents", "Pixata.Blazor.TelerikComponents\Pixata.Blazor.TelerikComponents.csproj", "{8363C657-0D37-4648-BD26-6D5ABD19160D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
