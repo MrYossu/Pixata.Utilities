@@ -15,6 +15,16 @@ namespace Pixata.Extensions {
       collection != null ? new ObservableCollection<T>(collection) : new ObservableCollection<T>();
 
     /// <summary>
+    /// Removes items from an ObservableCollection based on a predicate. Mimics the List&lt;T&gt;.RemoveAll method that doesn't exist for ObservableCollections
+    /// </summary>
+    /// <typeparam name="T">Generic type parameter</typeparam>
+    /// <param name="coll">The ObservableCollection</param>
+    /// <param name="p">A predicate that specifies which items to remove</param>
+    /// <returns></returns>
+    public static ObservableCollection<T> RemoveWhere<T>(this ObservableCollection<T> coll, Predicate<T> p) =>
+      coll.Where(t1 => !p(t1)).Select(t => t).ToObservableCollection();
+
+    /// <summary>
     /// Same a the ForEach method on List<T>, but works on IEnumerable<T></T>
     /// </summary>
     /// <typeparam name="T">Generic type</typeparam>
