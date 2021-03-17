@@ -11,6 +11,16 @@ namespace Pixata.Extensions {
       date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy");
 
     /// <summary>
+    /// Returns true of the specified date is within the range given
+    /// </summary>
+    /// <param name="date">The date to check</param>
+    /// <param name="start">The start of the range</param>
+    /// <param name="end">The end of the range</param>
+    /// <returns>true is date is within the range, false otherwise</returns>
+    public static bool IsWithin(this DateTime date, DateTime start, DateTime end) =>
+      date >= start && date <= end;
+
+    /// <summary>
     /// gets the last second of the day. Useful when you want to set a date range, and want the time of the end date to be 23:59:59.000
     /// </summary>
     /// <param name="d">A date in the desired month</param>
