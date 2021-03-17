@@ -26,6 +26,26 @@ namespace Pixata.Extensions.Tests {
 
     #endregion
 
+    #region IsWithin
+
+    [TestMethod]
+    public void DateExtensionMethods_IsWithin_True() {
+      DateTime start = new(2020, 1, 1);
+      DateTime end = new(2020, 2, 1);
+      DateTime date = new(2020, 1, 15);
+      Assert.IsTrue(date.IsWithin(start, end));
+    }
+
+    [TestMethod]
+    public void DateExtensionMethods_IsWithin_False() {
+      DateTime start = new(2020, 1, 1);
+      DateTime end = new(2020, 2, 1);
+      DateTime date = new(2020, 2, 15);
+      Assert.IsFalse(date.IsWithin(start, end));
+    }
+
+    #endregion
+
     #region EndOfDay
 
     [TestMethod]
