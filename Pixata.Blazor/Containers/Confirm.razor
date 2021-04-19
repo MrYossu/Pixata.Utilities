@@ -1,7 +1,7 @@
 ﻿<div style="position: relative">
   <div id="confirmOverlay" style="display: @_displayStyle; position: @_position">
     <div id="confirmOverlayContent">
-      <p>@Caption</p>
+      <div><HtmlRaw Html="@Caption" /></div>
       <button class="btn btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon"></i>@YesText</button> <button class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button>
     </div>
   </div>
