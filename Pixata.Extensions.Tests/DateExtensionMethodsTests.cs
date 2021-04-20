@@ -68,6 +68,16 @@ namespace Pixata.Extensions.Tests {
 
     #endregion
 
+    #region StartOfMonth
+
+    [TestMethod]
+    public void DateExtensionMethods_StartOfMonth_14thJan2021() {
+      DateTime d = new(2021, 1, 14);
+      Assert.AreEqual(new DateTime(2021, 1, 1), d.StartOfMonth());
+    }
+
+    #endregion
+
     #region EndOfMonth
 
     [TestMethod]

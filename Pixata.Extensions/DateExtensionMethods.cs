@@ -29,6 +29,14 @@ namespace Pixata.Extensions {
       new DateTime(d.Year, d.Month, d.Day, 23, 59, 59).AddMilliseconds(999);
 
     /// <summary>
+    /// Returns the first day of the given month
+    /// </summary>
+    /// <param name="d">A date in the desired month</param>
+    /// <returns>the first day of the month</returns>
+    public static DateTime StartOfMonth(this DateTime d) =>
+      new(d.Year, d.Month, 1);
+
+    /// <summary>
     /// Gets the last second of the month, ie 23:59:59 on the last day
     /// </summary>
     /// <param name="d">A date in the desired month</param>
