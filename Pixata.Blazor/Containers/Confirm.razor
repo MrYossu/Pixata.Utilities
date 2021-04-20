@@ -2,7 +2,7 @@
   <div id="confirmOverlay" style="display: @_displayStyle; position: @_position">
     <div id="confirmOverlayContent">
       <div><HtmlRaw Html="@Caption" /></div>
-      <button class="btn btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon mr-1"></i>@YesText</button> <button class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button>
+      <button class="btn btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon"></i>@YesText</button> <button class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button>
     </div>
   </div>
 
@@ -19,23 +19,23 @@
     z-index: 1000;
   }
 
-  #confirmOverlay #confirmOverlayContent {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 18px;
-    -moz-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    -o-transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    padding: 10px;
-    background: #fff;
-    color: #000;
-    text-align: center;
-    box-shadow: 10px 10px 5px #333;
-    border-radius: 10px;
-  }
+    #confirmOverlay #confirmOverlayContent {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: 18px;
+      -moz-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      -o-transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      padding: 10px;
+      background: #fff;
+      color: #000;
+      text-align: center;
+      box-shadow: 10px 10px 5px #333;
+      border-radius: 10px;
+    }
 </style>
 
 @code {
@@ -51,6 +51,9 @@
 
   [Parameter]
   public string NoText { get; set; } = "No";
+
+  [Parameter]
+  public string SpinnerClass { get; set; } = "spinner-border spinner-border-sm";
 
   [Parameter]
   public RenderFragment ChildContent { get; set; }
@@ -80,7 +83,7 @@
       _displayStyle = "none";
     } else {
       _disabled = true;
-      _busyIcon = "fas fa-spinner fa-spin";
+      _busyIcon = SpinnerClass + " mr-1";
     }
     OnClicked.InvokeAsync(yes);
   }
