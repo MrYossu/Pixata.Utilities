@@ -24,6 +24,18 @@ namespace Pixata.Extensions.Tests {
       Assert.AreEqual("31st December 2021", d.ToPrettyString());
     }
 
+    [TestMethod]
+    public void DateExtensionMethods_ToPrettyString_Nullable_14thJan2021() {
+      DateTime? d = new(2021, 1, 14);
+      Assert.AreEqual("14th January 2021", d.ToPrettyString());
+    }
+
+    [TestMethod]
+    public void DateExtensionMethods_ToPrettyString_Nullable_Null() {
+      DateTime? d = null;
+      Assert.AreEqual("", d.ToPrettyString());
+    }
+
     #endregion
 
     #region IsWithin

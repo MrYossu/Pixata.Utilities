@@ -5,10 +5,20 @@ namespace Pixata.Extensions {
     /// <summary>
     /// Formats a DateTime in a more readable way than the built-in methods, eg 31st December 2021
     /// </summary>
-    /// <param name="date"></param>
-    /// <returns></returns>
+    /// <param name="date">The DateTime to be formatted</param>
+    /// <returns>A string representation of the date in a pleasant form</returns>
     public static string ToPrettyString(this DateTime date) =>
       date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy");
+
+    /// <summary>
+    /// Overload of ToPrettyString for nullable DateTime
+    /// </summary>
+    /// <param name="date">The DateTime to be formatted</param>
+    /// <returns>A string representation of the date in a pleasant form, or the empty string if the date were null</returns>
+    public static string ToPrettyString(this DateTime? date) =>
+      date == null
+        ? ""
+        : date.Value.ToPrettyString();
 
     /// <summary>
     /// Returns true of the specified date is within the range given
