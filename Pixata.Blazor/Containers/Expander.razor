@@ -1,0 +1,21 @@
+﻿<div id="expander-container" style="display: @_display">@ChildContent</div>
+
+@code {
+
+  [Parameter]
+  public bool Expanded { get; set; }
+
+  [Parameter]
+  public RenderFragment ChildContent { get; set; }
+
+  private const string DisplayNone = "none";
+  private const string DisplayBlock = "block";
+  private string _display;
+
+  protected override void OnInitialized() => 
+    _display = Expanded ? DisplayBlock : DisplayNone;
+
+  public void Toggle() =>
+    _display = _display == DisplayBlock ? DisplayNone : DisplayBlock;
+
+}

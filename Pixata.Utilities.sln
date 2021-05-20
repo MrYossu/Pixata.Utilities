@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.LanguageExtCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.TelerikComponents", "Pixata.Blazor.TelerikComponents\Pixata.Blazor.TelerikComponents.csproj", "{8363C657-0D37-4648-BD26-6D5ABD19160D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.SimilarityChooser", "Pixata.SimilarityChooser\Pixata.SimilarityChooser.csproj", "{026EA109-72B3-4EAF-A8AC-61B062FFE0C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.SimilarityChooser", "Pixata.SimilarityChooser\Pixata.SimilarityChooser.csproj", "{026EA109-72B3-4EAF-A8AC-61B062FFE0C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
