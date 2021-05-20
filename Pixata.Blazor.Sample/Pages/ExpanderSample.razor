@@ -1,0 +1,56 @@
+﻿@page "/ExpanderSample"
+@using Pixata.Extensions
+@using Pixata.Blazor.Containers
+<h3>Expander</h3>
+
+<div class="row my-3">
+  <div class="col card mx-3 rounded-10">
+    <div class="h3 card-title border-bottom p-3 pt-4 d-flex justify-content-between">
+      <div><span class="fa fa-bell-on text-danger"></span> Reminders for the next 30 days</div>
+      <div><button @onclick="()=>_reminderExpander.Toggle()">+/-</button></div>
+    </div>
+    <div class="card-body py-0">
+      <Expander @ref="_reminderExpander" Expanded="false">
+        <table class="table table-striped table-hover detailsTable m-1 mx-2">
+          <tr class="thead-dark">
+            <th class="topLeft">Investor</th>
+            <th>Due</th>
+            <th>Description</th>
+            <th class="topRight"> </th>
+          </tr>
+          <tbody>
+            @foreach (ReminderOverview reminder in _reminders.OrderBy(r => r.Due)) {
+              string overDueClass = reminder.Overdue ? "text-danger" : "";
+              <tr class="@overDueClass">
+                <td>@reminder.Investor</td>
+                <td>@reminder.Due.ToPrettyString()</td>
+                <td>@reminder.Text</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </Expander>
+    </div>
+  </div>
+</div>
+
+@code {
+  private Expander _reminderExpander;
+
+  private readonly List<ReminderOverview> _reminders = new() {
+    new ReminderOverview { Investor = "Billy Shears", Due = DateTime.Today, Text = "Ring Jim and arrange a meeting" },
+    new ReminderOverview { Investor = "Jim Spriggs", Due = DateTime.Today.AddDays(-2), Text = "Check mortgage payment" },
+    new ReminderOverview { Investor = "Syd", Due = DateTime.Today.AddDays(3), Text = "Feed dog" },
+  };
+
+  private class ReminderOverview {
+    public string Investor { get; set; }
+    public DateTime Due { get; set; }
+
+    public bool Overdue =>
+      Due.Date < DateTime.Today;
+
+    public string Text { get; set; }
+  }
+
+}
