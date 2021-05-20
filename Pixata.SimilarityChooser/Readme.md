@@ -52,6 +52,6 @@ There are two points to keep in mind when using the similarity chooser...
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.SimilarityChooser/Icon/FalseMatch.png "A false match") 
 
-I'm not an expert in linguists, but must of th etime I can work out why a match appears, but it can confuse people. Generally, the longer the search text they enter, the better the matches, but there will always be some unexpected results.
+I'm not an expert in linguists, but must of the time I can work out why a match appears, but it can confuse people. Generally, the longer the search text they enter, the better the matches, but there will always be some unexpected results.
 
 2. The chooser isn't too good at matching plurals. For example, if you search for "apple", it will not match "apples." This is a known limitation, and something I'd like to address at some point.
