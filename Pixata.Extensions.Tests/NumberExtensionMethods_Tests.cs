@@ -130,6 +130,24 @@ namespace Pixata.Extensions.Tests {
 
     #endregion
 
+    #region DoubleToProperFractionString
+
+    [DataRow(0, "0")]
+    [DataRow(0.25, "1/4")]
+    [DataRow(0.5, "1/2")]
+    [DataRow(0.75, "3/4")]
+    [DataRow(1, "1")]
+    [DataRow(1.5, "1 1/2")]
+    [DataRow(1.25, "1 1/4")]
+    [DataRow(0.3333333333333333, "1/3")]
+    [DataRow(3.5, "3 1/2")]
+    [DataRow(5, "5")]
+    [TestMethod]
+    public void NumberExtensionMethods_DoubleToProperFractionString(double value, string expected) =>
+      Assert.AreEqual(expected, value.DoubleToProperFractionString(0.001));
+
+    #endregion
+
     #region ToPercentageString
 
     [DataRow(10, 100, 0, "10%")]
