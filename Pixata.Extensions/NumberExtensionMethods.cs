@@ -31,6 +31,14 @@ namespace Pixata.Extensions {
       return (n / d, n - (n / d) * d, d);
     }
 
+    public static string DoubleToProperFractionString(this double value, double accuracy) =>
+      value.DoubleToProperFraction(accuracy) switch {
+        (int n1, 0, _) => $"{n1}",
+        (0, int n2, int n3) when n2 == n3 => $"1",
+        (0, int n2, int n3) => $"{n2}/{n3}",
+        (int n1, int n2, int n3) => $"{n1} {n2}/{n3}"
+      };
+
     /// <summary>
     /// Converts a double to its improper fractional representation, eg 3.5 is converted to (7, 2), ie 7/2. Slightly modified from https://stackoverflow.com/a/32903747/706346
     /// </summary>
