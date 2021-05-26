@@ -7,12 +7,21 @@
         <i class="far fa-@Icon"></i>
       </span>
     </div>
-    <TelerikDatePicker Id="@PropertyName"
-                       Value="@Value"
-                       ValueExpression="@(() => Value)"
-                       Format="@_dpFormat"
-                       Class="form-control"
-                       ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
+    @if (ShowTime) {
+      <TelerikDateTimePicker Id="@PropertyName"
+                             Value="@Value"
+                             ValueExpression="@(() => Value)"
+                             Format="@_dpFormat"
+                             Class="form-control"
+                             ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
+    } else {
+      <TelerikDatePicker Id="@PropertyName"
+                         Value="@Value"
+                         ValueExpression="@(() => Value)"
+                         Format="@_dpFormat"
+                         Class="form-control"
+                         ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
+    }
     @if (_showValidationMsg) {
       <div class="input-group-append"><label class="input-group-text has-error" for="@PropertyName"><ValidationMessage For="@ValueExpression" /></label></div>
     }
@@ -39,15 +48,18 @@
   [Parameter]
   public string Icon { get; set; }
 
+  [Parameter]
+  public bool ShowTime { get; set; }
+
   private string _dpFormat = "";
 
   protected override void OnParametersSet() =>
-    _dpFormat = Value.HasValue ? "dd MMMM yyyy" : "";
+    _dpFormat = Value.HasValue ? "dd MMMM yyyy" + (ShowTime ? " HH:mm" : "") : "";
 
   [Parameter]
   public Expression<Func<DateTime?>> ValueExpression { get; set; }
 
-  private bool _showValidationMsg = false;
+  private bool _showValidationMsg;
 
   protected override void OnInitialized() {
     CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
