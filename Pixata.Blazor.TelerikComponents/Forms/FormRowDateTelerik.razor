@@ -7,12 +7,21 @@
         <i class="far fa-@Icon"></i>
       </span>
     </div>
-    <TelerikDatePicker Id="@PropertyName"
-                       Value="@Value"
-                       ValueExpression="@(() => Value)"
-                       Format="dd MMMM yyyy"
-                       Class="form-control"
-                       ValueChanged="@(async (DateTime d) => await OnChanged(d))" />
+    @if (ShowTime) {
+      <TelerikDateTimePicker Id="@PropertyName"
+                             Value="@Value"
+                             ValueExpression="@(() => Value)"
+                             Format="dd MMMM yyyy HH:mm"
+                             Class="form-control"
+                             ValueChanged="@(async (DateTime d) => await OnChanged(d))" />
+    } else {
+      <TelerikDatePicker Id="@PropertyName"
+                         Value="@Value"
+                         ValueExpression="@(() => Value)"
+                         Format="dd MMMM yyyy"
+                         Class="form-control"
+                         ValueChanged="@(async (DateTime d) => await OnChanged(d))" />
+    }
     @if (_showValidationMsg) {
       <div class="input-group-append"><label class="input-group-text has-error" for="@PropertyName"><ValidationMessage For="@ValueExpression" /></label></div>
     }
@@ -39,7 +48,8 @@
   [Parameter]
   public string Icon { get; set; }
 
-  private string _dpFormat = "";
+  [Parameter]
+  public bool ShowTime { get; set; }
 
   [Parameter]
   public Expression<Func<DateTime>> ValueExpression { get; set; }
