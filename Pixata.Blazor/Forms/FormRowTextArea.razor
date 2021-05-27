@@ -1,16 +1,20 @@
-﻿@using System.Linq.Expressions
+﻿
 <div class="form-group row">
   <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
   <div class="col-lg-10 input-group">
     <div class="input-group-prepend h-100">
       <span class="input-group-text" style="display: inline-block">
-        <i class="far fa-@Icon"></i>
+        <i class="@Icon"></i>
       </span>
     </div>
     <textarea class="form-control" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" rows="@Rows">@Value</textarea>
-    @if (_showValidationMsg) {
-      <div class="input-group-append h-100"><label class="input-group-text has-error" for="@PropertyName"><ValidationMessage For="@ValueExpression" /></label></div>
-    }
+    <div class="input-group-append h-100">
+      <div class="input-group-text has-error">
+        @if (_showValidationMsg) {
+          <ValidationMessage For="@ValueExpression" />
+        }
+      </div>
+    </div>
   </div>
 </div>
 

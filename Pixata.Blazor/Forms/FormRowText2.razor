@@ -1,23 +1,28 @@
-﻿@using System.Linq.Expressions
+﻿
 <div class="form-group row">
   <label class="col-lg-2 col-form-label" for="@PropertyName1">@Caption</label>
   <div class="col-lg-10 input-group">
     <div class="input-group-prepend">
       <span class="input-group-text">
-        <i class="far fa-@Icon"></i>
+        <i class="@Icon"></i>
       </span>
     </div>
-    <input class="form-control" Value="@Value1" type="text" id="@PropertyName1" name="@PropertyName1" @onchange="@OnChanged1" /> <input class="form-control" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" />
-    @if (_showValidationMsg1 || _showValidationMsg2) {
-      <div class="input-group-append">
-        @if (_showValidationMsg1) {
-          <label class="input-group-text has-error" for="@PropertyName1"><ValidationMessage For="@Value1Expression" /></label>
-        }
+    <input class="form-control" Value="@Value1" type="text" id="@PropertyName1" name="@PropertyName1" @onchange="@OnChanged1" />
+    <div class="input-group-append">
+      @if (_showValidationMsg1) {
+        <div class="input-group-text has-error">
+          <ValidationMessage For="@Value1Expression" />
+        </div>
+      }
+    </div>
+    <input class="form-control" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" />
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
         @if (_showValidationMsg2) {
-          <label class="input-group-text has-error" for="@PropertyName2"><ValidationMessage For="@Value2Expression" /></label>
+          <ValidationMessage For="@Value2Expression" />
         }
       </div>
-    }
+    </div>
   </div>
 </div>
 
@@ -81,8 +86,8 @@
     await valueChangedEventCallback.InvokeAsync(cea.Value?.ToString() ?? "");
     FieldIdentifier identifier = CascadedEditContext.Field(propertyName);
     CascadedEditContext.NotifyFieldChanged(identifier);
-  //CascadedEditContext.Validate();
-  //return CascadedEditContext.GetValidationMessages(identifier).Any();
+    //CascadedEditContext.Validate();
+    //return CascadedEditContext.GetValidationMessages(identifier).Any();
   }
 
 }
