@@ -1,0 +1,17 @@
+﻿@page "/FormSample"
+@using Pixata.Blazor.Sample.Models
+
+<h1>Form components</h1>
+
+<EditForm Model="_person">
+  <FluentValidationValidator />
+  <FormRowText2 PropertyName1="@nameof(Person.FirstName)" PropertyName2="@nameof(Person.Surname)" @bind-Value1="_person.FirstName" @bind-Value2="_person.Surname" Icon="user" Caption="Name" />
+  <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="house-day" />
+  <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="clock" />
+</EditForm>
+
+@code {
+
+  private readonly Person _person = new() { Id = 1, FirstName = "Jim", Surname = "Spriggs", DateOfBirth = new(1980, 4, 7), EmailConfirmed = true, NumberOfDependents = 3, Notes = "A very nice chap, if a little weird\n\nHas a pet halibut named Simon." };
+
+}

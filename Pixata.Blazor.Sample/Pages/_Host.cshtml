@@ -14,8 +14,10 @@
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.13.0/css/all.css" />
+    <link rel="stylesheet" href="_content/Telerik.UI.for.Blazor/css/kendo-theme-default/all.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="Pixata.Blazor.Sample.styles.css" rel="stylesheet" />
+    <script src="_content/Telerik.UI.for.Blazor/js/telerik-blazor.js" defer></script>
   </head>
   <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
@@ -33,7 +35,7 @@
 
     <script src="_framework/blazor.server.js"></script>
     <script>
-      Blazor.defaultReconnectionHandler._reconnectCallback = function (d) {
+      Blazor.defaultReconnectionHandler._reconnectCallback = function(d) {
         document.location.reload();
       };
     </script>
