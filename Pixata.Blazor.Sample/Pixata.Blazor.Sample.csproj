@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazored.FluentValidation" Version="2.0.0" />
     <PackageReference Include="LanguageExt.Core" Version="3.4.15" />
+    <PackageReference Include="Telerik.UI.for.Blazor" Version="2.24.0" />
   </ItemGroup>
 
   <ItemGroup>

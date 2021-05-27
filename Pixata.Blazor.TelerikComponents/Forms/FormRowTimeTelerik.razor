@@ -7,32 +7,17 @@
         <i class="far fa-@Icon"></i>
       </span>
     </div>
-    @if (ShowTime) {
-      <TelerikDateTimePicker Id="@PropertyName"
+      <TelerikTimePicker Id="@PropertyName"
                              Value="@Value"
                              ValueExpression="@(() => Value)"
-                             Format="dd MMMM yyyy HH:mm"
-                             Class="form-control w-min-content"
+                             Format="HH:mm"
+                             Class="form-control"
                              ValueChanged="@(async (DateTime d) => await OnChanged(d))" />
-    } else {
-      <TelerikDatePicker Id="@PropertyName"
-                         Value="@Value"
-                         ValueExpression="@(() => Value)"
-                         Format="dd MMMM yyyy"
-                         Class="form-control w-min-content"
-                         ValueChanged="@(async (DateTime d) => await OnChanged(d))" />
-    }
     @if (_showValidationMsg) {
       <div class="input-group-append"><label class="input-group-text has-error" for="@PropertyName"><ValidationMessage For="@ValueExpression" /></label></div>
     }
   </div>
 </div>
-
-<style>
-  .w-min-content {
-    width: min-content;
-  }
-</style>
 
 @code {
 
