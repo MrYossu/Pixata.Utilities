@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp5.0</TargetFramework>
     <Version>1.0.14</Version>
-    <AssemblyVersion>1.0.14Pixata.Extensions v1.0.13</AssemblyVersion>
+    <AssemblyVersion>1.0.14</AssemblyVersion>
     <FileVersion>1.0.14</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
