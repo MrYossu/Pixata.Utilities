@@ -1,9 +1,10 @@
-﻿<div class="form-group row">
+﻿
+<div class="form-group row">
   <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
   <div class="col-lg-10 input-group">
     <div class="input-group-prepend">
       <span class="input-group-text">
-        <i class="far fa-@Icon"></i>
+        <i class="@Icon"></i>
       </span>
     </div>
     @if (Checked) {

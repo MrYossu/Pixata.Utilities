@@ -1,4 +1,4 @@
-﻿@using System.Linq.Expressions
+﻿
 <div class="form-group row">
   <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
   <div class="col-lg-10 input-group">
@@ -22,9 +22,13 @@
                          Class="form-control"
                          ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
     }
-    @if (_showValidationMsg) {
-      <div class="input-group-append"><label class="input-group-text has-error" for="@PropertyName"><ValidationMessage For="@ValueExpression" /></label></div>
-    }
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
+        @if (_showValidationMsg) {
+          <ValidationMessage For="@ValueExpression" />
+        }
+      </div>
+    </div>
   </div>
 </div>
 
