@@ -9,7 +9,7 @@ namespace Pixata.Extensions {
     /// <param name="includeTime">Optional. Specifies whether or not the time is included</param>
     /// <returns>A string representation of the date in a pleasant form</returns>
     public static string ToPrettyString(this DateTime date, bool includeTime = false) =>
-      date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy") + (includeTime ? " " + date.ToShortTimeString() : "");
+      date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy") + (includeTime ? " " + date.ToString("HH:mm") : "");
 
     /// <summary>
     /// Overload of ToPrettyString for nullable DateTime
