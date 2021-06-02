@@ -6,9 +6,10 @@ namespace Pixata.Extensions {
     /// Formats a DateTime in a more readable way than the built-in methods, eg 31st December 2021
     /// </summary>
     /// <param name="date">The DateTime to be formatted</param>
+    /// <param name="includeTime">Optional. Specifies whether or not the time is included</param>
     /// <returns>A string representation of the date in a pleasant form</returns>
-    public static string ToPrettyString(this DateTime date) =>
-      date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy");
+    public static string ToPrettyString(this DateTime date, bool includeTime = false) =>
+      date.Day.OrdinalSuffix() + date.ToString(" MMMM yyyy") + (includeTime ? " " + date.ToShortTimeString() : "");
 
     /// <summary>
     /// Overload of ToPrettyString for nullable DateTime
