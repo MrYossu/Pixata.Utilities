@@ -1,0 +1,42 @@
+﻿@page "/LoadingOptionSample"
+@using Pixata.Blazor.Sample.Models
+<h3>Loading option</h3>
+
+<p>This sample shows how you can display a loading message while waiting for an Option&lt;T&gt; to be loaded into a Blazor component.</p>
+
+<p>Note that as the data being passed to the &lt;BusyOption&gt; component is nullable (it's declared as Option&lt;Customer&gt;<strong>?</strong>), this allows the component to show a "Loading..." message before the data has been set. Click a button to "load" the data, or refresh the page to see what it looks like while still loading.</p>
+
+<p>The "Loading" content has only basic styling, leaving you free to add your own styles.</p>
+
+<p>Click one of the buttons below to load existing customer details, or see what happens when the customer cannot be found...</p>
+
+<p><button class="btn btn-primary" @onclick="LoadCustomerSome">Existing customer</button> <button class="btn btn-secondary" @onclick="LoadCustomerNone">No such customer</button></p>
+
+<fieldset>
+  <legend>Customer details</legend>
+  <LoadingOption Data="_customer" Loaded="@_loaded" Context="customer">
+    <Some>@customer.Name (id: @customer.Id) is @customer.Age years old</Some>
+    <None>No customer</None>
+  </LoadingOption>
+</fieldset>
+
+@code {
+
+  private bool _loaded;
+  private Option<Customer> _customer;
+
+  private async Task LoadCustomerSome() {
+    _loaded = false;
+    await Task.Delay(2000);
+    _customer = new Customer(1, "Jim Spriggs", 42);
+    _loaded = true;
+  }
+
+  private async Task LoadCustomerNone() {
+    _loaded = false;
+    await Task.Delay(2000);
+    _customer = Option<Customer>.None;
+    _loaded = true;
+  }
+
+}
