@@ -1,0 +1,35 @@
+﻿@page "/LoadingOptionSample"
+@using Pixata.Blazor.Sample.Models
+<h3>Loader sample</h3>
+
+<p><button class="btn btn-primary" @onclick="LoadCustomerFound">Existing customer</button> <button class="btn btn-secondary" @onclick="LoadCustomerNotFound">No such customer</button></p>
+
+<Loader Data="_customer" Context="customer">
+  <Loading>
+    <p>Please wait while we look for the customer...</p>
+  </Loading>
+  <Loaded>
+    <p>Found @customer.Value.Name (id: @customer.Value.Id), who is @customer.Value.Age years old</p>
+  </Loaded>
+  <NotLoaded>
+    <p>Big flop, we can't find him</p>
+  </NotLoaded>
+</Loader>
+
+@code {
+
+  private LoadingOption<Customer> _customer;
+
+  private async Task LoadCustomerFound() {
+    _customer = new Loading<Customer>();
+    await Task.Delay(2000);
+    _customer = new Loaded<Customer>(new Customer(1, "Jim Spriggs", 42));
+  }
+
+  private async Task LoadCustomerNotFound() {
+    _customer = new Loading<Customer>();
+    await Task.Delay(2000);
+    _customer = new NotLoaded<Customer>();
+  }
+
+}
