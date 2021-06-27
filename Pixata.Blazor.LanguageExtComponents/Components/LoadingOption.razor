@@ -1,0 +1,49 @@
+﻿@typeparam T
+
+@if (!Loaded) {
+  <div class="@ContainerClass">
+    <p><span class="@SpinnerClass" aria-hidden="true" style="color: @SpinnerColour;"></span> @Message</p>
+  </div>
+} else {
+  @Data.Match(x => Some(x), None)
+}
+
+@code {
+
+  /// <summary>
+  /// Message to show whilst loading
+  /// </summary>
+  [Parameter]
+  public string Message { get; set; } = "Loading...";
+
+  [Parameter]
+  public bool Loaded { get; set; }
+
+  [Parameter]
+  public Option<T> Data { get; set; }
+
+  [Parameter]
+  public RenderFragment<T> Some { get; set; }
+
+  [Parameter]
+  public RenderFragment None { get; set; }
+
+  /// <summary>
+  /// This helps with styling the busy indicator. You may wish to center it using the 'text-center' Bootstrap class
+  /// </summary>
+  [Parameter]
+  public string ContainerClass { get; set; }
+
+  /// <summary>
+  /// Change the default Bootstrap spinner to something else, e.g. a Font Awesome class
+  /// </summary>
+  [Parameter]
+  public string SpinnerClass { get; set; } = "spinner-border spinner-border-sm";
+
+  /// <summary>
+  /// Optionally add a colour to match the rest of the page
+  /// </summary>
+  [Parameter]
+  public string SpinnerColour { get; set; } = "inherit";
+
+}
