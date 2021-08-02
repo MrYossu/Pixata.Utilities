@@ -1,0 +1,23 @@
+﻿@typeparam T
+@(Data switch {
+  Loading<T> => Loading,
+  Loaded<T> t => Loaded(t),
+  NotLoaded<T> => NotLoaded,
+  _ => NotLoaded
+  })
+
+@code {
+
+  [Parameter]
+  public LoaderContainer<T> Data { get; set; }
+
+  [Parameter]
+  public RenderFragment Loading { get; set; }
+
+  [Parameter]
+  public RenderFragment<Loaded<T>> Loaded { get; set; }
+
+  [Parameter]
+  public RenderFragment NotLoaded { get; set; }
+
+}
