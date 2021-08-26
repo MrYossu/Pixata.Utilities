@@ -6,12 +6,36 @@
 <EditForm Model="_person">
   <FluentValidationValidator />
   <FormRowText2 PropertyName1="@nameof(Person.FirstName)" PropertyName2="@nameof(Person.Surname)" @bind-Value1="_person.FirstName" @bind-Value2="_person.Surname" Icon="user" Caption="Name" />
+  <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="at" Attributes="attributes" />
   <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="house-day" />
   <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="clock" />
 </EditForm>
 
+<p>Please note, any resemblance to a genuine Jim Spriggs is purely co-incidental. No implications about Jim's weirdness or pet halibut should be implied!</p>
+
+<p>TODO - The markup needs tidying...</p>
+<ul>
+  <li>Some of the icons are missing, need to check the right names</li>
+  <li>The input group prepend sections should all be the same width. Needs a CSS rule</li>
+  <li>Needs examples for the other controls</li>
+</ul>
+
 @code {
 
-  private readonly Person _person = new() { Id = 1, FirstName = "Jim", Surname = "Spriggs", DateOfBirth = new(1980, 4, 7), EmailConfirmed = true, NumberOfDependents = 3, Notes = "A very nice chap, if a little weird\n\nHas a pet halibut named Simon." };
+  private readonly Person _person = new() {
+    Id = 1,
+    FirstName = "Jim",
+    Surname = "Spriggs",
+    Email = "jim@spriggs.com",
+    DateOfBirth = new(1980, 4, 7),
+    EmailConfirmed = true,
+    NumberOfDependents = 3,
+    Notes = "A very nice chap, if a little weird\n\nHas a pet halibut named Simon."
+  };
+
+  public Dictionary<string, object> attributes { get; set; } = new() {
+    { "required", "required" },
+    { "placeholder", "Email address" }
+  };
 
 }

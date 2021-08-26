@@ -5,6 +5,7 @@ namespace Pixata.Blazor.Sample.Models {
     public int Id { get; set; }
     public string FirstName { get; set; }
     public string Surname { get; set; }
+    public string Email { get; set; }
     public DateTime DateOfBirth { get; set; }
     public DateTime TeaTime { get; set; }
     public bool EmailConfirmed { get; set; }

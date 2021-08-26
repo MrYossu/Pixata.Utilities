@@ -7,7 +7,7 @@
         <i class="@Icon"></i>
       </span>
     </div>
-    <textarea class="form-control" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" rows="@Rows">@Value</textarea>
+    <textarea class="form-control" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" rows="@Rows" @attributes="Attributes">@Value</textarea>
     <div class="input-group-append h-100">
       <div class="input-group-text has-error">
         @if (_showValidationMsg) {
@@ -43,6 +43,9 @@
 
   [Parameter]
   public Expression<Func<string>> ValueExpression { get; set; }
+
+  [Parameter]
+  public Dictionary<string, object> Attributes { get; set; } = new();
 
   private bool _showValidationMsg;
 
