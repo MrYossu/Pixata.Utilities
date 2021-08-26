@@ -5,8 +5,8 @@
 
 <EditForm Model="_person">
   <FluentValidationValidator />
-  <FormRowText2 PropertyName1="@nameof(Person.FirstName)" PropertyName2="@nameof(Person.Surname)" @bind-Value1="_person.FirstName" @bind-Value2="_person.Surname" Icon="user" Caption="Name" />
-  <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="at" Attributes="attributes" />
+  <FormRowText2 PropertyName1="@nameof(Person.FirstName)" PropertyName2="@nameof(Person.Surname)" @bind-Value1="_person.FirstName" @bind-Value2="_person.Surname" Icon="user" Caption="Name" Attributes1="attributesFirstName" Attributes2="attributesSurname" />
+  <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="at" Attributes="attributesEmail" />
   <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="house-day" />
   <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="clock" />
 </EditForm>
@@ -33,7 +33,17 @@
     Notes = "A very nice chap, if a little weird\n\nHas a pet halibut named Simon."
   };
 
-  public Dictionary<string, object> attributes { get; set; } = new() {
+  public Dictionary<string, object> attributesFirstName { get; set; } = new() {
+    { "required", "required" },
+    { "placeholder", "First name" }
+  };
+
+  public Dictionary<string, object> attributesSurname { get; set; } = new() {
+    { "required", "required" },
+    { "placeholder", "Surname" }
+  };
+
+  public Dictionary<string, object> attributesEmail { get; set; } = new() {
     { "required", "required" },
     { "placeholder", "Email address" }
   };
