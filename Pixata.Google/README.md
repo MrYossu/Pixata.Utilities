@@ -6,7 +6,7 @@ This project contains utility code for working with Google's APIs. At the moment
 
 Note that the Google logo is (c) Google, and is used without permission. I hope that doesn't get me into trouble!
 
-A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.LanguageExtComponents/) is available for this project.
+A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available for this project.
 
 ## Setting up Google authentication
 
