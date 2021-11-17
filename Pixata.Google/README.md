@@ -1,4 +1,4 @@
-# Pixata.Google [![Release status](https://github.com/MrYossu/Pixata.Google/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Google/actions?query=workflow%3Arelease) [![Master status](https://github.com/MrYossu/Pixata.Google/workflows/master/badge.svg)](https://github.com/MrYossu/Pixata.Google/actions?query=workflow%3Amaster) ![Last commit to master](https://img.shields.io/github/last-commit/MrYossu/Pixata.Google/master)
+# Pixata.Google [![Pixata.Google Nuget package](https://img.shields.io/nuget/v/Pixata.Google)](https://www.nuget.org/packages/Pixata.Google/)
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Google/Icon/PixataGoogle.png "Pixata")
 
