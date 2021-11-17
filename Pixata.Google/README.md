@@ -58,6 +58,8 @@ Note that as both lambdas passed to `Match` return the same type (a `string`), w
 
 If this isn't clear, then I very strongly recommend you read [Functional Programming in C#](https://www.manning.com/books/functional-programming-in-c-sharp?query=functional%20programming%20c#), which is one of the best C# books I've read (and re-read, and re-read...) for a long time. Once you are familiar with the concepts, the above will be much clearer.
 
+**Small note** - The one (current) exception to the rule above is the `CreateFolder` method, which returns a `Task<Either<Exception, string>>` rather than a `TryAsync<T>`. I had trouble converting this method from the current form to use `TryAsync<T>`, and so left it for now. The usage is the same, so this is purely an internal issue, so probably wasn't really worth the note.
+
 ## The classes
 ### GoogleDriveHelper
 This allows easy access to a Google Drive account. You will need to inject an instance of the class into your code.
