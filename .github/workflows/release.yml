@@ -160,6 +160,12 @@ jobs:
         PROJECT_FILE_PATH: Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj  
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
+    - name: Publish Pixata.Google
+      uses: brandedoutcast/publish-nuget@v2.5.5  
+      with:   
+        PROJECT_FILE_PATH: Pixata.Google/Pixata.Google.csproj  
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
   # *** Publish Pixata.Blazor.Sample ***
     - name: Rename _app_offline.htm to app_offline.htm to stop the site
       shell: python
