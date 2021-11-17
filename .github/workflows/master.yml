@@ -102,6 +102,13 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Google
+    - name: Restore - Pixata.Google Dependencies
+      run: dotnet restore Pixata.Google/Pixata.Google.csproj --configfile ./nuget.config
+
+    - name: Build - Pixata.Google.csproj
+      run: dotnet build Pixata.Google/Pixata.Google.csproj --configuration Release --configfile ./nuget.config
+
     # Pixata.Extensions.Tests
     - name: Restore - Pixata.Extensions.Tests Dependencies
       run: dotnet restore Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configfile ./nuget.config
