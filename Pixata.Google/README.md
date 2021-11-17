@@ -64,4 +64,4 @@ This allows easy access to a Google Drive account. You will need to inject an in
 
 If you look in the source code, you can see the methods. They all have XML comments, so you should get hints when you use them as well.
 
-Note that the API expects file and folder `Id`s, **not** names. This is easy to forget at first, and will result in errors.
+Note that the API expects file and folder Ids, **not** names. This is easy to forget at first, and will result in errors.
