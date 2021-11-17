@@ -16,7 +16,7 @@ In order to use this class, you need to follow a small convention. I would like 
 
 You will need to create a credentials file for your Google account. For details, see the [.NET Quickstart](https://developers.google.com/drive/api/v3/quickstart/dotnet), and follow the first few steps. This will give you a JSON file, which you will need to save as `credentials.json` in a top-level folder named `Google`...
 
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Google/Icon/GoogleFolder.png "A false match") 
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Google/Icon/GoogleFolder.png "The Google folder in the ASP.NET project") 
 
 When you first run the application, you will be prompted to autheticate. This will create a folder named `Token` in the `Google` folder (see the image above), which will contain a JSON file with the details needed for your application to access Google Drive with the account you used when authenticating.
 
@@ -34,7 +34,7 @@ Make sure that the port number shown in the file matches the one you see in your
 ## LanguageExt
 The classes here are based on the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. What this means for you is that you will need to adopt a functional approach to using the methods in these classes. This gives a much more robust code base than would have been possible without.
 
-In general, most methods return a `TryAsync<T>`, where `T` is the type of the value you want returned. This can be consumed with code like the following. Suppose you have a `List<File>` (where `File` is the Google Drive API type for a file or folder) named `Folders` and a `string` variable named `Msg` which is used to display messages to the user. You could then get the subfolders of a specified folder as follows...
+In general, most methods return a `TryAsync<T>` [*], where `T` is the type of the value you want returned. This can be consumed with code like the following. Suppose you have a `List<File>` (where `File` is the Google Drive API type for a file or folder) named `Folders` and a `string` variable named `Msg` which is used to display messages to the user. You could then get the subfolders of a specified folder as follows...
 
 ```c#
     private async Task LoadSubfolders() =>
@@ -58,7 +58,7 @@ Note that as both lambdas passed to `Match` return the same type (a `string`), w
 
 If this isn't clear, then I very strongly recommend you read [Functional Programming in C#](https://www.manning.com/books/functional-programming-in-c-sharp?query=functional%20programming%20c#), which is one of the best C# books I've read (and re-read, and re-read...) for a long time. Once you are familiar with the concepts, the above will be much clearer.
 
-**Small note** - The one (current) exception to the rule above is the `CreateFolder` method, which returns a `Task<Either<Exception, string>>` rather than a `TryAsync<T>`. I had trouble converting this method from the current form to use `TryAsync<T>`, and so left it for now. The usage is the same, so this is purely an internal issue, so probably wasn't really worth the note.
+[*] The one (current) exception to the rule above is the `CreateFolder` method, which returns a `Task<Either<Exception, string>>` rather than a `TryAsync<T>`. I had trouble converting this method from the current form to use `TryAsync<T>`, and so left it for now. The usage is the same, so this is purely an internal issue, so probably wasn't really worth the note.
 
 ## The classes
 ### GoogleDriveHelper
