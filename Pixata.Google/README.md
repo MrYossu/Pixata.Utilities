@@ -1,8 +1,10 @@
 # Pixata.Google [![Release status](https://github.com/MrYossu/Pixata.Google/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Google/actions?query=workflow%3Arelease) [![Master status](https://github.com/MrYossu/Pixata.Google/workflows/master/badge.svg)](https://github.com/MrYossu/Pixata.Google/actions?query=workflow%3Amaster) ![Last commit to master](https://img.shields.io/github/last-commit/MrYossu/Pixata.Google/master)
 
-![Pixata](https://github.com/MrYossu/Pixata.Google/raw/master/PixataGoogle.png "Pixata")
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Google/Icon/PixataGoogle.png "Pixata")
 
-This project contains utility code for working with Google's APIs. At the moment, it onl contains one class, but I'll refer to "classes" (in th eplural) below, as I will hopefully add more as time goes on.
+This project contains utility code for working with Google's APIs. At the moment, it onl contains one class, but I'll refer to "classes" (in the plural) below, as I will hopefully add more as time goes on.
+
+Note that the Google logo is (c) Google, and is used without permission. I hope that doesn't get me into trouble!
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.LanguageExtComponents/) is available for this project.
 
