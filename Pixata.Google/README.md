@@ -64,6 +64,6 @@ If this isn't clear, then I very strongly recommend you read [Functional Program
 ### GoogleDriveHelper
 This allows easy access to a Google Drive account. You will need to inject an instance of the class into your code.
 
-If you look in the source code, you can see the methods. They all have XML comments, so you should get hints when you use them as well.
+If you look in the [source code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Google/GoogleDriveHelper.cs), you can see the methods. They all have XML comments, so you should get hints when you use them as well. At some point I hope to add some better documentation here, but don't hold your breath!
 
 Note that the API expects file and folder Ids, **not** names. This is easy to forget at first, and will result in errors.
