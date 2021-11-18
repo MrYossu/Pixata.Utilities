@@ -10,11 +10,9 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available fo
 
 ## Setting up Google authentication
 
-This class was designed to be used within an ASP.NET Core application, and allows easy access to a Google Drive account.
+These classes were designed to be used within an ASP.NET Core application. In order to use them, you need to follow a small convention. I would like to be able to relax this, but haven't found a way yet, so bear with me...
 
-In order to use this class, you need to follow a small convention. I would like to be able to relax this, but haven't found a way yet, so bear with me...
-
-You will need to create a credentials file for your Google account. For details, see the [.NET Quickstart](https://developers.google.com/drive/api/v3/quickstart/dotnet), and follow the first few steps. This will give you a JSON file, which you will need to save as `credentials.json` in a top-level folder named `Google`...
+You will need to create a credentials file for your Google account. For details, see the [.NET Quickstart](https://developers.google.com/drive/api/v3/quickstart/dotnet), and follow the first few steps. This will give you a JSON file, which you will need to save as `credentials.json` in a top-level folder named `Google` (note the fab hand-drawn arrow)...
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Google/Icon/GoogleFolder.png "The Google folder in the ASP.NET project") 
 
@@ -58,12 +56,36 @@ Note that as both lambdas passed to `Match` return the same type (a `string`), w
 
 If this isn't clear, then I very strongly recommend you read [Functional Programming in C#](https://www.manning.com/books/functional-programming-in-c-sharp?query=functional%20programming%20c#), which is one of the best C# books I've read (and re-read, and re-read...) for a long time. Once you are familiar with the concepts, the above will be much clearer.
 
-[*] The one (current) exception to the rule above is the `CreateFolder` method, which returns a `Task<Either<Exception, string>>` rather than a `TryAsync<T>`. I had trouble converting this method from the current form to use `TryAsync<T>`, and so left it for now. The usage is the same, so this is purely an internal issue, so probably wasn't really worth the note.
+[*] The one (current) exception to the rule above is the `GoogleDriveHelper.CreateFolder` method, which returns a `Task<Either<Exception, string>>` rather than a `TryAsync<T>`. I had trouble converting this method from the current form to use `TryAsync<T>`, and so left it for now. The usage is the same, so this is purely an internal issue, so probably wasn't really worth the note.
 
-## The classes
-### GoogleDriveHelper
+## GoogleDriveHelper
 This allows easy access to a Google Drive account. You will need to inject an instance of the class into your code.
 
-If you look in the [source code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Google/GoogleDriveHelper.cs), you can see the methods. They all have XML comments, so you should get hints when you use them as well. At some point I hope to add some better documentation here, but don't hold your breath!
-
 Note that the API expects file and folder Ids, **not** names. This is easy to forget at first, and will result in errors.
+
+The class contains a `const string` named `RootFolderName`, which contains the name of the root folder (bet you didnn't see that coming did you?), and is used when you want to check if the folder object you have is the root or not. As the `Id` will be different for every account, this is the easiest way I could think of to check this. It will fail if you have a subfolder with the same name, in which case the only way to tell if you are at the root is to try and get the parent folder and see if the exceptional (second) action in the `TryAsync` call is executed.
+
+### The methods
+In order to avoid ambiguity with the `System.IO.File` type, I have added the following type alias in the class...
+
+`using DriveFile = Google.Apis.Drive.v3.Data.File;`
+
+This aliased type is used below. If you don't want to do this, you can leave the type as `File` and make sure to ensure you don't mix it up with `System.IO.File`.
+
+As mentioned above, (nearly) all of these methods return a `TryAsync`, so will need to be handled as shown earlier. For convenience, I will refer to the return type as the inner type (eg `DriveFile` or `string`) rather than the true return type (ie `TryAsync<DriveFile>>`, etc) as this is clearer.
+
+`TryAsync<DriveFile> GetFolder(string folderId = "root")` - Returns an object representing the folder whose `Id` was passed
+
+`TryAsync<DriveFile> GetParentFolder(string folderId)` - Returns an object representing the parent folder of the folder whose `Id` was passed
+
+`TryAsync<List<DriveFile>> GetBreadcrumb(string folderId)` - Returns a `List<DriveFile>` representing the trail from the folder whose `Id` was passed up to the root folder
+
+`TryAsync<List<DriveFile>> GetSubfolders(string folderId = "root")` - Returns all the immediate subfolders of the folder whose `Id` was passed
+
+`async Task<Either<Exception, string>> CreateFolder(string folderName, string parentFolderId = "root")` - Creates a new folder with the given name. If the `parentFolderId` parameter is omitted, the new folder is created in the root
+
+`TryAsync<List<DriveFile>> GetFilesInFolder(string folderId = "root")` - Returns all the files (not folders) in the specified folder
+
+`TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId)` - Uploads a file to the folder whose `Id` is passed
+
+`TryAsync<string> DeleteFile(string fileId)` - Deletes the file whose `Id` is passed
