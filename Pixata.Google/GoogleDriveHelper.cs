@@ -55,6 +55,25 @@ namespace Pixata.Google {
     }
 
     /// <summary>
+    /// Get a collection of folder objects that represent the path from the Google Drive root down to the specified folder
+    /// </summary>
+    /// <param name="folderId">The Id of the folder at the end of the breadcrumb</param>
+    /// <returns>A collection of folder objects representing the breadcrumb</returns>
+    public TryAsync<List<DriveFile>> GetBreadcrumb(string folderId) =>
+      TryAsync(() => GetBreadcrumbDo(folderId));
+
+    private async Task<List<DriveFile>> GetBreadcrumbDo(string folderId) {
+      List<DriveFile> breadcrumb = new();
+      DriveFile folder = (await GetFolder(folderId)).Match(f => f, _ => null);
+      while (folder != null) {
+        breadcrumb.Add(folder);
+        folder = (await GetParentFolder(folder.Id)).Match(f => f, _ => null);
+      }
+      breadcrumb.Reverse();
+      return breadcrumb;
+    }
+
+    /// <summary>
     /// Returns a list of the subfolders of the folder who Id is passed in
     /// </summary>
     /// <param name="folderId">The Id of the folder in Google Drive</param>
