@@ -63,9 +63,8 @@ This allows easy access to a Google Drive account. You will need to inject an in
 
 Note that the API expects file and folder Ids, **not** names. This is easy to forget at first, and will result in errors.
 
-The class contains a `const string` named `RootFolderName`, which contains the name of the root folder (bet you didnn't see that coming did you?), and is used when you want to check if the folder object you have is the root or not. As the `Id` will be different for every account, this is the easiest way I could think of to check this. It will fail if you have a subfolder with the same name, in which case the only way to tell if you are at the root is to try and get the parent folder and see if the exceptional (second) action in the `TryAsync` call is executed.
+The class contains a `const string` named `RootFolderName`, which contains the name of the root folder (bet you didn't see that coming did you?), and is used when you want to check if the folder object you have is the root or not. As the `Id` will be different for everyone's individual Google account, this is the easiest way I could think of to check this. It will fail if you have a subfolder named "My Drive", in which case the only way to tell if you are at the root is to try and get the parent folder and see if the exceptional (second) action in the `TryAsync` call is executed. As this is slower and more code, it's only worth doing if you suspect there will be a subfolder named "My Drive".
 
-### The methods
 In order to avoid ambiguity with the `System.IO.File` type, I have added the following type alias in the class...
 
 `using DriveFile = Google.Apis.Drive.v3.Data.File;`
@@ -74,6 +73,7 @@ This aliased type is used below. If you don't want to do this, you can leave the
 
 As mentioned above, (nearly) all of these methods return a `TryAsync`, so will need to be handled as shown earlier. For convenience, I will refer to the return type as the inner type (eg `DriveFile` or `string`) rather than the true return type (ie `TryAsync<DriveFile>>`, etc) as this is clearer.
 
+### The methods
 `TryAsync<DriveFile> GetFolder(string folderId = "root")` - Returns an object representing the folder whose `Id` was passed
 
 `TryAsync<DriveFile> GetParentFolder(string folderId)` - Returns an object representing the parent folder of the folder whose `Id` was passed
