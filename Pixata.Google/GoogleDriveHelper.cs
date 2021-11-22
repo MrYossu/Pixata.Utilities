@@ -161,6 +161,24 @@ namespace Pixata.Google {
       });
 
     /// <summary>
+    /// Move a file from one folder to another. Note that this will NOT work for folders
+    /// </summary>
+    /// <param name="fileId">The Id of the file to be moved</param>
+    /// <param name="newFolderId">The Id of the target folder</param>
+    /// <returns>Unit</returns>
+    public TryAsync<Unit> MoveFile(string fileId, string newFolderId) =>
+      TryAsync(() => {
+        DriveFile file = _service.Files.Get(fileId).Execute();
+        FilesResource.UpdateRequest updateRequest = _service.Files.Update(new DriveFile(), file.Id);
+        updateRequest.AddParents = newFolderId;
+        if (file.Parents != null) {
+          updateRequest.RemoveParents = file.Parents[0];
+        }
+        DriveFile movedFile = updateRequest.Execute();
+        return Task.Run(() => unit);
+      });
+
+    /// <summary>
     /// Deletes a file
     /// </summary>
     /// <param name="fileId">The Id of the file to be deleted</param>
