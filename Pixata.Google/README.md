@@ -32,7 +32,7 @@ Make sure that the port number shown in the file matches the one you see in your
 ## LanguageExt
 The classes here are based on the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. What this means for you is that you will need to adopt a functional approach to using the methods in these classes. This gives a much more robust code base than would have been possible without.
 
-In general, most methods return a `TryAsync<T>` [*], where `T` is the type of the value you want returned. This can be consumed with code like the following. Suppose you have a `List<File>` (where `File` is the Google Drive API type for a file or folder) named `Folders` and a `string` variable named `Msg` which is used to display messages to the user. You could then get the subfolders of a specified folder as follows...
+All methods return a `TryAsync<T>`, where `T` is the type of the value you want returned. This can be consumed with code like the following. Suppose you have a `List<File>` (where `File` is the Google Drive API type for a file or folder) named `Folders` and a `string` variable named `Msg` which is used to display messages to the user. You could then get the subfolders of a specified folder as follows...
 
 ```c#
     private async Task LoadSubfolders() =>
@@ -54,9 +54,25 @@ private async Task CreateFolder(MouseEventArgs arg) =>
 
 Note that as both lambdas passed to `Match` return the same type (a `string`), we can move the assignment (`Msg += `) outside the call to `Match`.
 
-If this isn't clear, then I very strongly recommend you read [Functional Programming in C#](https://www.manning.com/books/functional-programming-in-c-sharp?query=functional%20programming%20c#), which is one of the best C# books I've read (and re-read, and re-read...) for a long time. Once you are familiar with the concepts, the above will be much clearer.
+As all methods return the same type, chaining them together is easy. Suppose you want to create a folder as a child of the folder with `Id` of `folderId`, then upload a file to the new child folder, you could do the following...
 
-[*] The one (current) exception to the rule above is the `GoogleDriveHelper.CreateFolder` method, which returns a `Task<Either<Exception, string>>` rather than a `TryAsync<T>`. I had trouble converting this method from the current form to use `TryAsync<T>`, and so left it for now. The usage is the same, so this is purely an internal issue, so probably wasn't really worth the note.
+```c#
+Msg += await GoogleDriveHelper.GetFolder(parentFolderId)
+       .Bind(folder => GoogleDriveHelper.CreateFolder(newFolderName, folder.Id))
+       .Bind(folderId => GoogleDriveHelper.UploadFile(stream, mimetype, folderId))
+       .Match(newId => $"New Id: {newId}", ex => $"Ex: {ex.Message}");
+```
+
+If you prefer the fluent syntax, then you can do that instead...
+
+```c#
+Msg += from folder in GoogleDriveHelper.GetFolder(CurrentFolder.Id)
+  from folderId in GoogleDriveHelper.CreateFolder(_newFolderId, folder.Id)
+  from newId in GoogleDriveHelper.UploadFile(Stream.Null, "New file.txt", "text/text", folderId)
+  select newId;
+```
+
+If this isn't clear, then I very strongly recommend you read [Functional Programming in C#](https://www.manning.com/books/functional-programming-in-c-sharp?query=functional%20programming%20c#), which is one of the best C# books I've read (and re-read, and re-read...) for a long time. Once you are familiar with the concepts, the above will be much clearer.
 
 ## GoogleDriveHelper
 This allows easy access to a Google Drive account. You will need to inject an instance of the class into your code.
@@ -87,5 +103,7 @@ As mentioned above, (nearly) all of these methods return a `TryAsync`, so will n
 `TryAsync<List<DriveFile>> GetFilesInFolder(string folderId = "root")` - Returns all the files (not folders) in the specified folder
 
 `TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId)` - Uploads a file to the folder whose `Id` is passed
+
+`TryAsync<Unit> MoveFile(string fileId, string newFolderId)` - Move the file to a new folder
 
 `TryAsync<string> DeleteFile(string fileId)` - Deletes the file whose `Id` is passed
