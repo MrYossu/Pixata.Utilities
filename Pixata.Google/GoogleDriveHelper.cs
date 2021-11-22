@@ -90,18 +90,13 @@ namespace Pixata.Google {
     /// <param name="folderName">The name for the new folder</param>
     /// <param name="parentFolderId">The Id of the parent folder. If omitted, the new folder will be created in the root</param>
     /// <returns>The Id of the new folder</returns>
-    // TODO AYS - Convert to use TryAsync
-    public async Task<Either<Exception, string>> CreateFolder(string folderName, string parentFolderId = "root") =>
-      await (await GetSubfolders(parentFolderId))
-        .Match(async folders => await CreateNewFolder(folderName, parentFolderId, folders), ex => throw ex);
+    public TryAsync<string> CreateFolder(string folderName, string parentFolderId = "root") =>
+      GetSubfolders(parentFolderId)
+        .Bind(folders => CreateNewFolder(folderName, parentFolderId, folders));
 
-    // Gives compiler error - call is ambiguous
-    //public TryAsync<string> CreateFolder2(string folderName, string parentFolderId = "root") =>
-    //  GetSubfolders(parentFolderId).Match(folders => CreateNewFolder(folderName, parentFolderId, folders), ex => throw ex);
-
-    private async Task<string> CreateNewFolder(string folderName, string parentFolderId, List<DriveFile> folders) {
+    private TryAsync<string> CreateNewFolder(string folderName, string parentFolderId, List<DriveFile> folders) {
       if (folders.Any()) {
-        return folders.First().Id;
+        return TryAsync(() => Task.Run(() => folders.First().Id));
       }
       DriveFile newFolder = new() {
         Name = folderName,
@@ -109,8 +104,10 @@ namespace Pixata.Google {
         Parents = new[] { parentFolderId }
       };
       FilesResource.CreateRequest command = _service.Files.Create(newFolder);
-      DriveFile folder = await command.ExecuteAsync();
-      return folder.Id;
+      return TryAsync(async () => {
+        DriveFile folder = await command.ExecuteAsync();
+        return folder.Id;
+      });
     }
 
     #endregion
