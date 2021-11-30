@@ -95,7 +95,7 @@ namespace Pixata.Google {
         .Bind(folders => CreateNewFolder(folderName, parentFolderId, folders));
 
     private TryAsync<string> CreateNewFolder(string folderName, string parentFolderId, List<DriveFile> folders) {
-      if (folders.Any(f => f.Name.ToLower() == folderName.ToLower()))) {
+      if (folders.Any(f => f.Name.ToLower() == folderName.ToLower())) {
         return TryAsync(() => Task.Run(() => folders.First().Id));
       }
       DriveFile newFolder = new() {
