@@ -104,6 +104,8 @@ As mentioned above, (nearly) all of these methods return a `TryAsync`, so will n
 
 `TryAsync<Permission> SetPermission(string fileId, Permission permission)` - Sets a permission on a file. An example `Permission` object could look like `new Permission { Role = "reader", Type = "domain", Domain = "mydomain.com" }`. Returns the newly-created permission (not sure why you'd need this, but the API returns it, so I'm passing it back to you dear developer!).
 
+`TryAsync<DriveFile> GetWebLink(string fileId)` - Gets a link that allows anyone with permissions to access the file. Note that you will probably need to set at least some permission on the file before you can generate a link. See the SetPermission method above
+
 `TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId)` - Uploads a file to the folder whose `Id` is passed
 
 `TryAsync<Unit> MoveFile(string fileId, string newFolderId)` - Move the file to a new folder
