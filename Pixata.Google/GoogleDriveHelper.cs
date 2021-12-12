@@ -176,12 +176,12 @@ namespace Pixata.Google {
     /// Gets a link that allows anyone with permissions to access the file. Note that you will probably need to set at least some permission on the file before you can generate a link. See the SetPermission method
     /// </summary>
     /// <param name="fileId">The Id of a file in the Google Drive</param>
-    /// <returns>A File object that contains just the WebViewLink property, which is the link you need</returns>
-    public TryAsync<DriveFile> GetWebLink(string fileId) =>
+    /// <returns>A link to the file</returns>
+    public TryAsync<string> GetWebLink(string fileId) =>
       TryAsync(async () => {
         FilesResource.GetRequest request = _service.Files.Get(fileId);
         request.Fields = "webViewLink";
-        return await _service.Files.Get(fileId).ExecuteAsync();
+        return (await request.ExecuteAsync()).WebViewLink;
       });
 
     /// <summary>
