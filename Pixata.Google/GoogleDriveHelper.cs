@@ -161,6 +161,30 @@ namespace Pixata.Google {
       });
 
     /// <summary>
+    /// Sets a permission on a file
+    /// </summary>
+    /// <param name="fileId">The Id of the file whose permissions are to be set</param>
+    /// <param name="permission">A Permission object (see https://developers.google.com/drive/api/v3/reference/permissions#resource for some vaguely helpful info on these)</param>
+    /// <returns>The newly-created permission</returns>
+    public TryAsync<Permission> SetPermission(string fileId, Permission permission) =>
+      TryAsync(async () => {
+        PermissionsResource.CreateRequest request = _service.Permissions.Create(permission, fileId);
+        return await request.ExecuteAsync();
+      });
+
+    /// <summary>
+    /// Gets a link that allows anyone with permissions to access the file. Note that you will probably need to set at least some permission on the file before you can generate a link. See the SetPermission method
+    /// </summary>
+    /// <param name="fileId">The Id of a file in the Google Drive</param>
+    /// <returns>A File object that contains just the WebViewLink property, which is the link you need</returns>
+    public TryAsync<DriveFile> GetWebLink(string fileId) =>
+      TryAsync(async () => {
+        FilesResource.GetRequest request = _service.Files.Get(fileId);
+        request.Fields = "webViewLink";
+        return await _service.Files.Get(fileId).ExecuteAsync();
+      });
+
+    /// <summary>
     /// Move a file from one folder to another. Note that this will NOT work for folders
     /// </summary>
     /// <param name="fileId">The Id of the file to be moved</param>
