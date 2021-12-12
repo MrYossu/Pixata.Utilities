@@ -102,6 +102,8 @@ As mentioned above, (nearly) all of these methods return a `TryAsync`, so will n
 
 `TryAsync<List<DriveFile>> GetFilesInFolder(string folderId = "root")` - Returns all the files (not folders) in the specified folder
 
+`TryAsync<Permission> SetPermission(string fileId, Permission permission)` - Sets a permission on a file. An example `Permission` object could look like `new Permission { Role = "reader", Type = "domain", Domain = "mydomain.com" }`. Returns the newly-created permission (not sure why you'd need this, but the API returns it, so I'm passing it back to you dear developer!).
+
 `TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId)` - Uploads a file to the folder whose `Id` is passed
 
 `TryAsync<Unit> MoveFile(string fileId, string newFolderId)` - Move the file to a new folder
