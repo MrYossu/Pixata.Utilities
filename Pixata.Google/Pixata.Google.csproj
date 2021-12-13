@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.65.0.2481" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.55.0.2481" />
     <PackageReference Include="LanguageExt.Core" Version="4.0.3" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
