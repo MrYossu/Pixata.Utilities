@@ -106,6 +106,8 @@ As mentioned above, (nearly) all of these methods return a `TryAsync`, so will n
 
 `TryAsync<DriveFile> GetWebLink(string fileId)` - Gets a link that allows anyone with permissions to access the file. Note that you will probably need to set at least some permission on the file before you can generate a link. See the SetPermission method above
 
+`Try<byte[]> DownloadFile(string fileId)` - Gets the contents of the file as a byte array. Note that this method returns a `Try`, not a `TryAsync` like the other emthods here, so should not (and connot) be awaited. Otherwise, the usage is the same.
+
 `TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId)` - Uploads a file to the folder whose `Id` is passed
 
 `TryAsync<Unit> MoveFile(string fileId, string newFolderId)` - Move the file to a new folder

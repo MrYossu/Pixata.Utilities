@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
@@ -13,6 +13,7 @@ using Google.Apis.Util.Store;
 using LanguageExt;
 using Microsoft.AspNetCore.Hosting;
 using static LanguageExt.Prelude;
+using Array = System.Array;
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace Pixata.Google {
@@ -183,6 +184,29 @@ namespace Pixata.Google {
         request.Fields = "webViewLink";
         return (await request.ExecuteAsync()).WebViewLink;
       });
+
+    /// <summary>
+    /// Downloads the contents of a file
+    /// </summary>
+    /// <param name="fileId">The Id of the file to be downloaded</param>
+    /// <returns>A byte array of the file contents</returns>
+    public Try<byte[]> DownloadFile(string fileId) => () => {
+      byte[] bytes = Array.Empty<byte>();
+      FilesResource.GetRequest request = _service.Files.Get(fileId);
+      MemoryStream stream = new();
+      request.MediaDownloader.ProgressChanged += progress => {
+        switch (progress.Status) {
+          case DownloadStatus.Completed: {
+            bytes = stream.ToArray();
+            break;
+          }
+          case DownloadStatus.Failed:
+            throw new FileNotFoundException();
+        }
+      };
+      request.Download(stream);
+      return bytes;
+    };
 
     /// <summary>
     /// Move a file from one folder to another. Note that this will NOT work for folders
