@@ -4,30 +4,13 @@
 
 This project contains utility code for working with Google's APIs. At the moment, it onl contains one class, but I'll refer to "classes" (in the plural) below, as I will hopefully add more as time goes on.
 
-Note that the Google logo is (c) Google, and is used without permission. I hope that doesn't get me into trouble!
+Note that the Google logo is &copy;Google, and is used without permission. I hope that doesn't get me into trouble!
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available for this project.
 
 ## Setting up Google authentication
 
-These classes were designed to be used within an ASP.NET Core application. In order to use them, you need to follow a small convention. I would like to be able to relax this, but haven't found a way yet, so bear with me...
-
-You will need to create a credentials file for your Google account. For details, see the [.NET Quickstart](https://developers.google.com/drive/api/v3/quickstart/dotnet), and follow the first few steps. This will give you a JSON file, which you will need to save as `credentials.json` in a top-level folder named `Google` (note the fab hand-drawn arrow)...
-
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Google/Icon/GoogleFolder.png "The Google folder in the ASP.NET project") 
-
-When you first run the application, you will be prompted to autheticate. This will create a folder named `Token` in the `Google` folder (see the image above), which will contain a JSON file with the details needed for your application to access Google Drive with the account you used when authenticating.
-
-Note that you will need to edit `credentials.json` to include the URL for the application. You may need to add two entries, one with and one without a trailing slash...
-
-```json
-"redirect_uris": [
-  "https://localhost:44365/authorize/",
-  "https://localhost:44365/authorize"
-],
-```
-
-Make sure that the port number shown in the file matches the one you see in your browser when running the site. When you come to deploy your application, don't forget to add the URIs for the deployed site. If you get a Google error saying the URI doesn't match, ignore the one they suggest as it is almost always wrong! Double-check the URI in your browser and use that.
+TODO - Needs rewriting after my disastrous discovery that the code I included was only for desktop applications, not web sites.
 
 ## LanguageExt
 The classes here are based on the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. What this means for you is that you will need to adopt a functional approach to using the methods in these classes. This gives a much more robust code base than would have been possible without.
