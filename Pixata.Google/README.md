@@ -10,7 +10,54 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available fo
 
 ## Setting up Google authentication
 
-TODO - Needs rewriting after my disastrous discovery that the code I included was only for desktop applications, not web sites.
+In order to use the package, you will need to set up authorisation with Google.
+
+First [create an oAuth credential](https://developers.google.com/workspace/guides/create-credentials), making sure to use the "web application" type. Make a note of the client Id and secret as you'll need them later. They should probably be saved in a settings file.
+
+You'll need to add at least one redirect URI. For running in Visual Studio, you need to add `https://localhost:nnn/signin-oidc`, where `nnn` is the port number. I usually add this URI with and without the traling slash, but I'm not sure if you need to. When you're ready to deploy, you can add another redirect URI for your real domain or (recommended) create a new credential and add the new client Id and secret to your production settings file.
+
+In Visual Studio, add the [Google.Apis.Auth.AspNetCore3 Nuget package](https://www.nuget.org/packages/Google.Apis.Auth.AspNetCore3/) to your application.
+
+Then you need to add the following code to the `ConfigureServices` method in `Startup`...
+
+```c#
+services
+  .AddAuthentication(o => {
+    o.DefaultChallengeScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+    o.DefaultForbidScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+    o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+  })
+  .AddCookie()
+  .AddGoogleOpenIdConnect(options => {
+    options.ClientId = "Google ClientId"; // From settings file
+    options.ClientSecret = "Google ClientSecret"; // From settings file
+  });
+```
+
+Next you will need to add code to your application to perform the authorisation. If you are working in an MVC application, you can do this pretty much anywhere you like. However, if you are doing this in a Blazor application, you'll need to add an MVC controller, as authorisation cannot be done within Blazor (as far as I know).
+
+Add a new controller as follows...
+
+```c#
+public class GoogleController : Controller {
+  [GoogleScopedAuthorize(DriveService.ScopeConstants.Drive)]
+  public async Task<IActionResult> Index([FromServices] IGoogleAuthProvider auth) {
+    try {
+      GoogleCredential cred = await auth.GetCredentialAsync();
+      return new JsonResult(new { Result = "OK" });
+    }
+    catch (Exception ex) {
+      return new JsonResult(new { Error = "Error trying to authorise the Google account", ex.Message, ex.StackTrace });
+    }
+  }
+}
+```
+
+Before you can use the `GoogleDriveHelper` class, you'll need to make sure that you (or someone) hits the `GoogleController`'s action, as that will pop up the Google oAuth screen, and create the credentials that the class needs.
+
+Optionally, you can add a check to your code elsewhere to check that the authentication has been set up, and if not, redirect to this action. This should (hopefully) avoid any errors later on.
+
+Once that is done, you can inject the `GoogleDriveHelper` class into your controllers or Blazor components 
 
 ## LanguageExt
 The classes here are based on the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. What this means for you is that you will need to adopt a functional approach to using the methods in these classes. This gives a much more robust code base than would have been possible without.
