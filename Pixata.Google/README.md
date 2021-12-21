@@ -16,7 +16,7 @@ First [create an oAuth credential](https://developers.google.com/workspace/guide
 
 You'll need to add at least one redirect URI. For running in Visual Studio, you need to add `https://localhost:nnn/signin-oidc`, where `nnn` is the port number. I usually add this URI with and without the traling slash, but I'm not sure if you need to. When you're ready to deploy, you can add another redirect URI for your real domain or (recommended) create a new credential and add the new client Id and secret to your production settings file.
 
-In Visual Studio, add the [Google.Apis.Auth.AspNetCore3 Nuget package](https://www.nuget.org/packages/Google.Apis.Auth.AspNetCore3/) to your application.
+In Visual Studio, add the [Google.Apis.Auth.AspNetCore3 Nuget package](https://www.nuget.org/packages/Google.Apis.Auth.AspNetCore3/) to your application. You'll probably want to add the [Google.Apis.Drive.v3](https://www.nuget.org/packages/Google.Apis.Drive.v3) package as well.
 
 Then you need to add the following code to the `ConfigureServices` method in `Startup`...
 
