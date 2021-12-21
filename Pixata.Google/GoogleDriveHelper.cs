@@ -18,7 +18,7 @@ namespace Pixata.Google {
 
     public const string RootFolderName = "My Drive";
 
-    private DriveService _service;
+    private static DriveService _service;
 
     public DriveService Service {
       get {
