@@ -20,7 +20,7 @@ namespace Pixata.Google {
 
     private static DriveService _service;
 
-    public DriveService Service {
+    public static DriveService Service {
       get {
         if (_service == null) {
           throw new NullReferenceException("Google Drive service has not been set");
