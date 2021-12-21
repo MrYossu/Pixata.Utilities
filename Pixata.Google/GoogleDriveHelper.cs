@@ -1,17 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
-using Google.Apis.Services;
 using Google.Apis.Upload;
-using Google.Apis.Util.Store;
 using LanguageExt;
-using Microsoft.AspNetCore.Hosting;
 using static LanguageExt.Prelude;
 using Array = System.Array;
 using DriveFile = Google.Apis.Drive.v3.Data.File;
@@ -22,10 +18,18 @@ namespace Pixata.Google {
 
     public const string RootFolderName = "My Drive";
 
-    private readonly DriveService _service;
+    private DriveService _service;
 
-    public GoogleDriveHelper(IWebHostEnvironment environment) =>
-      _service = GetDriveService(environment);
+    public DriveService Service {
+      get {
+        if (_service == null) {
+          throw new NullReferenceException("Google Drive service has not been set");
+        }
+        return _service;
+      }
+      private set =>
+        _service = value;
+    }
 
     #endregion
 
@@ -37,7 +41,7 @@ namespace Pixata.Google {
     /// <param name="folderId"></param>
     /// <returns>The specified folder</returns>
     public TryAsync<DriveFile> GetFolder(string folderId = "root") =>
-      TryAsync(() => _service.Files.Get(folderId).ExecuteAsync());
+      TryAsync(() => Service.Files.Get(folderId).ExecuteAsync());
 
     /// <summary>
     /// Gets the parent folder of the one whose Id is passed in
@@ -48,10 +52,10 @@ namespace Pixata.Google {
       TryAsync(() => GetParentFolderDo(folderId));
 
     private async Task<DriveFile> GetParentFolderDo(string folderId) {
-      FilesResource.GetRequest request = _service.Files.Get(folderId);
+      FilesResource.GetRequest request = Service.Files.Get(folderId);
       request.Fields = "id, name, parents";
       DriveFile folder = await request.ExecuteAsync();
-      request = _service.Files.Get(folder.Parents[0]);
+      request = Service.Files.Get(folder.Parents[0]);
       return await request.ExecuteAsync();
     }
 
@@ -80,7 +84,7 @@ namespace Pixata.Google {
     /// <param name="folderId">The Id of the folder in Google Drive</param>
     /// <returns>A list of the subfolders of the folder who Id is passed in</returns>
     public TryAsync<List<DriveFile>> GetSubfolders(string folderId = "root") {
-      FilesResource.ListRequest request = _service.Files.List();
+      FilesResource.ListRequest request = Service.Files.List();
       request.Q = $"mimeType = 'application/vnd.google-apps.folder' and '{folderId}' in parents and trashed = false";
       return TryAsync(async () => (await request.ExecuteAsync()).Files.OrderBy(f => f.Name).ToList());
     }
@@ -104,7 +108,7 @@ namespace Pixata.Google {
         MimeType = "application/vnd.google-apps.folder",
         Parents = new[] { parentFolderId }
       };
-      FilesResource.CreateRequest command = _service.Files.Create(newFolder);
+      FilesResource.CreateRequest command = Service.Files.Create(newFolder);
       return TryAsync(async () => {
         DriveFile folder = await command.ExecuteAsync();
         return folder.Id;
@@ -122,7 +126,7 @@ namespace Pixata.Google {
     /// <returns>The files in the specified folder</returns>
     public TryAsync<List<DriveFile>> GetFilesInFolder(string folderId = "root") =>
       TryAsync(async () => {
-        FilesResource.ListRequest fileList = _service.Files.List();
+        FilesResource.ListRequest fileList = Service.Files.List();
         fileList.Q = $"mimeType != 'application/vnd.google-apps.folder' and '{folderId}' in parents and trashed = false";
         fileList.Fields = "nextPageToken, files(id, name, size, mimeType)";
         List<DriveFile> files = new();
@@ -152,7 +156,7 @@ namespace Pixata.Google {
           MimeType = mimeType,
           Parents = new[] { folderId }
         };
-        FilesResource.CreateMediaUpload request = _service.Files.Create(driveFile, file, mimeType);
+        FilesResource.CreateMediaUpload request = Service.Files.Create(driveFile, file, mimeType);
         request.Fields = "id";
         IUploadProgress response = await request.UploadAsync();
         if (response.Status != UploadStatus.Completed) {
@@ -169,7 +173,7 @@ namespace Pixata.Google {
     /// <returns>The newly-created permission</returns>
     public TryAsync<Permission> SetPermission(string fileId, Permission permission) =>
       TryAsync(async () => {
-        PermissionsResource.CreateRequest request = _service.Permissions.Create(permission, fileId);
+        PermissionsResource.CreateRequest request = Service.Permissions.Create(permission, fileId);
         return await request.ExecuteAsync();
       });
 
@@ -180,7 +184,7 @@ namespace Pixata.Google {
     /// <returns>A link to the file</returns>
     public TryAsync<string> GetWebLink(string fileId) =>
       TryAsync(async () => {
-        FilesResource.GetRequest request = _service.Files.Get(fileId);
+        FilesResource.GetRequest request = Service.Files.Get(fileId);
         request.Fields = "webViewLink";
         return (await request.ExecuteAsync()).WebViewLink;
       });
@@ -192,7 +196,7 @@ namespace Pixata.Google {
     /// <returns>A byte array of the file contents</returns>
     public Try<byte[]> DownloadFile(string fileId) => () => {
       byte[] bytes = Array.Empty<byte>();
-      FilesResource.GetRequest request = _service.Files.Get(fileId);
+      FilesResource.GetRequest request = Service.Files.Get(fileId);
       MemoryStream stream = new();
       request.MediaDownloader.ProgressChanged += progress => {
         switch (progress.Status) {
@@ -216,8 +220,8 @@ namespace Pixata.Google {
     /// <returns>Unit</returns>
     public TryAsync<Unit> MoveFile(string fileId, string newFolderId) =>
       TryAsync(() => {
-        DriveFile file = _service.Files.Get(fileId).Execute();
-        FilesResource.UpdateRequest updateRequest = _service.Files.Update(new DriveFile(), file.Id);
+        DriveFile file = Service.Files.Get(fileId).Execute();
+        FilesResource.UpdateRequest updateRequest = Service.Files.Update(new DriveFile(), file.Id);
         updateRequest.AddParents = newFolderId;
         if (file.Parents != null) {
           updateRequest.RemoveParents = file.Parents[0];
@@ -232,24 +236,14 @@ namespace Pixata.Google {
     /// <param name="fileId">The Id of the file to be deleted</param>
     /// <returns>An empty string if the deletion succeeded. Not sure if this can ever return a non-empty string, as if the deletion was not successful, it's most likely an exception occurred</returns>
     public TryAsync<string> DeleteFile(string fileId) =>
-      TryAsync(() => _service.Files.Delete(fileId).ExecuteAsync());
+      TryAsync(() => Service.Files.Delete(fileId).ExecuteAsync());
 
     #endregion
 
     #region Utility
 
-    private DriveService GetDriveService(IWebHostEnvironment environment) {
-      UserCredential credential;
-      using (FileStream stream = new(@$"{environment.ContentRootPath}\Google\credentials.json", FileMode.Open, FileAccess.Read)) {
-        // If you modify the scopes, make sure to delete your previously saved credentials so new ones can be created
-        credential = GoogleWebAuthorizationBroker.AuthorizeAsync(GoogleClientSecrets.FromStream(stream).Secrets, new[] { DriveService.Scope.Drive }, "user", CancellationToken.None, new FileDataStore(@$"{environment.ContentRootPath}\Google\Token", true)).Result;
-      }
-      DriveService service = new(new BaseClientService.Initializer {
-        HttpClientInitializer = credential,
-        ApplicationName = ""
-      });
-      return service;
-    }
+    public void SetDriveService(DriveService service) =>
+      Service = service;
 
     #endregion
   }
