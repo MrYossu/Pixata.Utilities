@@ -41,13 +41,24 @@ Add a new controller as follows...
 ```c#
 public class GoogleController : Controller {
   [GoogleScopedAuthorize(DriveService.ScopeConstants.Drive)]
-  public async Task<IActionResult> Index([FromServices] IGoogleAuthProvider auth) {
+  public async Task<IActionResult> Index([FromServices] IGoogleAuthProvider auth, [FromServices] GoogleDriveHelper googleDriveHelper) {
+    string whereAmI = "About to get credentials";
     try {
       GoogleCredential cred = await auth.GetCredentialAsync();
+      whereAmI = "About to create Google Drive service";
+      DriveService ds = new(new BaseClientService.Initializer {
+        HttpClientInitializer = cred,
+        ApplicationName = "Synoptic Web"
+      });
+      
+      googleDriveHelper.SetDriveService(new(new BaseClientService.Initializer {
+        HttpClientInitializer = cred,
+        ApplicationName = "Your application name"
+      }));
       return new JsonResult(new { Result = "OK" });
     }
     catch (Exception ex) {
-      return new JsonResult(new { Error = "Error trying to authorise the Google account", ex.Message, ex.StackTrace });
+      return new JsonResult(new { WhereWasI = whereAmI, ex.Message, ex.StackTrace });
     }
   }
 }
@@ -55,14 +66,20 @@ public class GoogleController : Controller {
 
 Before you can use the `GoogleDriveHelper` class, you'll need to make sure that you (or someone) hits the `GoogleController`'s action, as that will pop up the Google oAuth screen, and create the credentials that the class needs.
 
-Optionally, you can add a check to your code elsewhere to check that the authentication has been set up, and if not, redirect to this action. This should (hopefully) avoid any errors later on.
+Optionally, you can add a check to your code elsewhere to check that the drive service has been set up, and if not, redirect to this action. This should (hopefully) avoid any errors later on. One way of doing this is to add code like this to your main page (this is for Blazor, but MVC would be very similar, you'd just return a `Redirect` instead of calling the navigation manager)...
+
+```c#
+if (!GoogleDriveHelper.DriveIsSet) {
+  NavManager.NavigateTo("/Google");
+}
+```
 
 Once that is done, you can inject the `GoogleDriveHelper` class into your controllers or Blazor components 
 
 ## LanguageExt
 The classes here are based on the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. What this means for you is that you will need to adopt a functional approach to using the methods in these classes. This gives a much more robust code base than would have been possible without.
 
-All methods return a `TryAsync<T>`, where `T` is the type of the value you want returned. This can be consumed with code like the following. Suppose you have a `List<File>` (where `File` is the Google Drive API type for a file or folder) named `Folders` and a `string` variable named `Msg` which is used to display messages to the user. You could then get the subfolders of a specified folder as follows...
+Most of the methods return a `TryAsync<T>`, where `T` is the type of the value you want returned. This can be consumed with code like the following. Suppose you have a `List<File>` (where `File` is the Google Drive API type for a file or folder) named `Folders` and a `string` variable named `Msg` which is used to display messages to the user. You could then get the subfolders of a specified folder as follows...
 
 ```c#
     private async Task LoadSubfolders() =>
@@ -128,15 +145,17 @@ As mentioned above, (nearly) all of these methods return a `TryAsync`, so will n
 
 `TryAsync<List<DriveFile>> GetSubfolders(string folderId = "root")` - Returns all the immediate subfolders of the folder whose `Id` was passed
 
-`async Task<Either<Exception, string>> CreateFolder(string folderName, string parentFolderId = "root")` - Creates a new folder with the given name. If the `parentFolderId` parameter is omitted, the new folder is created in the root
+`TryAsync<string> CreateFolder(string folderName, string parentFolderId = "root")` - Creates a new folder with the given name. If the `parentFolderId` parameter is omitted, the new folder is created in the root
 
 `TryAsync<List<DriveFile>> GetFilesInFolder(string folderId = "root")` - Returns all the files (not folders) in the specified folder
 
-`TryAsync<Permission> SetPermission(string fileId, Permission permission)` - Sets a permission on a file. An example `Permission` object could look like `new Permission { Role = "reader", Type = "domain", Domain = "mydomain.com" }`. Returns the newly-created permission (not sure why you'd need this, but the API returns it, so I'm passing it back to you dear developer!).
+`TryAsync<Permission> SetAndGetPermission(string fileId, Permission permission)` - Sets a permission on a file. An example `Permission` object could look like `new Permission { Role = "reader", Type = "domain", Domain = "mydomain.com" }`. Returns the newly-created permission (not sure why you'd need this, but the API returns it, so I'm passing it back to you dear developer!). If you would prefer the file Id back (far more likely in my opnion), use the `SetPermission` method below.
 
-`TryAsync<DriveFile> GetWebLink(string fileId)` - Gets a link that allows anyone with permissions to access the file. Note that you will probably need to set at least some permission on the file before you can generate a link. See the SetPermission method above
+`TryAsync<string> SetPermission(string fileId, Permission permission)` - Same as the previous method, but returns the file Id passed in. This is useful if you follow this call with code that refers to the file, rather than the permission.
 
-`Try<byte[]> DownloadFile(string fileId)` - Gets the contents of the file as a byte array. Note that this method returns a `Try`, not a `TryAsync` like the other emthods here, so should not (and connot) be awaited. Otherwise, the usage is the same.
+`TryAsync<DriveFile> GetWebLink(string fileId)` - Gets a link that allows anyone with permissions to access the file. Note that you will probably need to set at least some permission on the file before you can generate a link. See the `SetPermission` and `SetAndGetPermission` methods above
+
+`Try<byte[]> DownloadFile(string fileId)` - Gets the contents of the file as a byte array. Note that this method returns a `Try`, not a `TryAsync` like the other methods here, so should not (and connot) be awaited. Otherwise, the usage is the same.
 
 `TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId)` - Uploads a file to the folder whose `Id` is passed
 
