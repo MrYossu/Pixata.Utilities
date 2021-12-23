@@ -20,14 +20,14 @@ namespace Pixata.Google {
 
     private static DriveService _service;
 
-    public static DriveService Service {
+    private static DriveService Service {
       get {
         if (_service == null) {
           throw new NullReferenceException("Google Drive service has not been set");
         }
         return _service;
       }
-      private set =>
+      set =>
         _service = value;
     }
 
@@ -40,6 +40,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="folderId"></param>
     /// <returns>The specified folder</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<DriveFile> GetFolder(string folderId = "root") =>
       TryAsync(() => Service.Files.Get(folderId).ExecuteAsync());
 
@@ -48,6 +49,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="folderId">The Id of the folder whose parent is required</param>
     /// <returns>The DriveFile object representing the parent folder</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<DriveFile> GetParentFolder(string folderId) =>
       TryAsync(() => GetParentFolderDo(folderId));
 
@@ -64,6 +66,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="folderId">The Id of the folder at the end of the breadcrumb</param>
     /// <returns>A collection of folder objects representing the breadcrumb</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<List<DriveFile>> GetBreadcrumb(string folderId) =>
       TryAsync(() => GetBreadcrumbDo(folderId));
 
@@ -83,6 +86,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="folderId">The Id of the folder in Google Drive</param>
     /// <returns>A list of the subfolders of the folder who Id is passed in</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<List<DriveFile>> GetSubfolders(string folderId = "root") {
       FilesResource.ListRequest request = Service.Files.List();
       request.Q = $"mimeType = 'application/vnd.google-apps.folder' and '{folderId}' in parents and trashed = false";
@@ -95,6 +99,7 @@ namespace Pixata.Google {
     /// <param name="folderName">The name for the new folder</param>
     /// <param name="parentFolderId">The Id of the parent folder. If omitted, the new folder will be created in the root</param>
     /// <returns>The Id of the new folder</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<string> CreateFolder(string folderName, string parentFolderId = "root") =>
       GetSubfolders(parentFolderId)
         .Bind(folders => CreateNewFolder(folderName, parentFolderId, folders));
@@ -124,6 +129,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="folderId">The Id of the specific folder</param>
     /// <returns>The files in the specified folder</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<List<DriveFile>> GetFilesInFolder(string folderId = "root") =>
       TryAsync(async () => {
         FilesResource.ListRequest fileList = Service.Files.List();
@@ -149,6 +155,7 @@ namespace Pixata.Google {
     /// <param name="mimeType">The MIME type of the file</param>
     /// <param name="folderId">The parent folder Id</param>
     /// <returns>The Id of the uploaded file</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId) =>
       TryAsync(async () => {
         DriveFile driveFile = new() {
@@ -170,8 +177,23 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="fileId">The Id of the file whose permissions are to be set</param>
     /// <param name="permission">A Permission object (see https://developers.google.com/drive/api/v3/reference/permissions#resource for some vaguely helpful info on these)</param>
+    /// <returns>The file Id that was passed in</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
+    public TryAsync<string> SetPermission(string fileId, Permission permission) =>
+      TryAsync(async () => {
+        PermissionsResource.CreateRequest request = Service.Permissions.Create(permission, fileId);
+        await request.ExecuteAsync();
+        return fileId;
+      });
+
+    /// <summary>
+    /// Sets a permission on a file
+    /// </summary>
+    /// <param name="fileId">The Id of the file whose permissions are to be set</param>
+    /// <param name="permission">A Permission object (see https://developers.google.com/drive/api/v3/reference/permissions#resource for some vaguely helpful info on these)</param>
     /// <returns>The newly-created permission</returns>
-    public TryAsync<Permission> SetPermission(string fileId, Permission permission) =>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
+    public TryAsync<Permission> SetAndGetPermission(string fileId, Permission permission) =>
       TryAsync(async () => {
         PermissionsResource.CreateRequest request = Service.Permissions.Create(permission, fileId);
         return await request.ExecuteAsync();
@@ -182,6 +204,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="fileId">The Id of a file in the Google Drive</param>
     /// <returns>A link to the file</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<string> GetWebLink(string fileId) =>
       TryAsync(async () => {
         FilesResource.GetRequest request = Service.Files.Get(fileId);
@@ -194,6 +217,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="fileId">The Id of the file to be downloaded</param>
     /// <returns>A byte array of the file contents</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public Try<byte[]> DownloadFile(string fileId) => () => {
       byte[] bytes = Array.Empty<byte>();
       FilesResource.GetRequest request = Service.Files.Get(fileId);
@@ -201,9 +225,9 @@ namespace Pixata.Google {
       request.MediaDownloader.ProgressChanged += progress => {
         switch (progress.Status) {
           case DownloadStatus.Completed: {
-              bytes = stream.ToArray();
-              break;
-            }
+            bytes = stream.ToArray();
+            break;
+          }
           case DownloadStatus.Failed:
             throw new FileNotFoundException();
         }
@@ -218,6 +242,7 @@ namespace Pixata.Google {
     /// <param name="fileId">The Id of the file to be moved</param>
     /// <param name="newFolderId">The Id of the target folder</param>
     /// <returns>Unit</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<Unit> MoveFile(string fileId, string newFolderId) =>
       TryAsync(() => {
         DriveFile file = Service.Files.Get(fileId).Execute();
@@ -235,6 +260,7 @@ namespace Pixata.Google {
     /// </summary>
     /// <param name="fileId">The Id of the file to be deleted</param>
     /// <returns>An empty string if the deletion succeeded. Not sure if this can ever return a non-empty string, as if the deletion was not successful, it's most likely an exception occurred</returns>
+    /// <exception cref="Pixata.Google.GoogleDriveNotSetException">Thrown if the Google Drive service has not been set using the SetDriveService() method</exception>
     public TryAsync<string> DeleteFile(string fileId) =>
       TryAsync(() => Service.Files.Delete(fileId).ExecuteAsync());
 
@@ -242,8 +268,19 @@ namespace Pixata.Google {
 
     #region Utility
 
+    /// <summary>
+    /// Sets the Google Drive service. This must be called before you can use any of the other methods here, otherwise they will throw a GoogleDriveNotSetException
+    /// </summary>
+    /// <param name="service">An instance of the DriveService from the Google Drive .NET API</param>
     public void SetDriveService(DriveService service) =>
       Service = service;
+
+    /// <summary>
+    /// Checks if the Google Drive service has been set using the SetDriveService() method
+    /// </summary>
+    /// <returns>A bool indicating whether or not the drive has been set</returns>
+    public bool DriveIsSet =>
+      _service != null;
 
     #endregion
   }
