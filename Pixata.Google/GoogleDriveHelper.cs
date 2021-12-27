@@ -102,7 +102,7 @@ namespace Pixata.Google {
 
     private TryAsync<string> CreateNewFolder(string folderName, string parentFolderId, List<DriveFile> folders) {
       if (folders.Any(f => f.Name.ToLower() == folderName.ToLower())) {
-        return TryAsync(() => Task.Run(() => folders.First().Id));
+        return TryAsync(() => Task.Run(() => folders.First(f => f.Name.ToLower() == folderName.ToLower()).Id));
       }
       DriveFile newFolder = new() {
         Name = folderName,
