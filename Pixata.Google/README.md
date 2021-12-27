@@ -10,71 +10,17 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available fo
 
 ## Setting up Google authentication
 
-In order to use the package, you will need to set up authorisation with Google.
+In order to use the package, you will need to set up authorisation with Google. **Note** that this package assumes you are doing server-to-server communication with Google, meaning that your app uses a pre-defined Google account, and the user does not need to know anything about it. If you want to use the user's Google account (ie have them sign in to Google to use your app), then you would need to use a slightly different method of authentication. It wouldn't be hard to add code to do that, but as I do't have the need for it, I haven't done it yet. If you need this approach, please [open an issue](https://github.com/MrYossu/Pixata.Utilities/issues) and ask. No promises, but I'll see what I can do!
 
-First [create an oAuth credential](https://developers.google.com/workspace/guides/create-credentials), making sure to use the "web application" type. Make a note of the client Id and secret as you'll need them later. They should probably be saved in a settings file.
+These classes were designed to be used within an ASP.NET Core application. In order to use them, you need to follow a small convention. I would like to be able to relax this, but haven't found a way yet, so bear with me.
 
-You'll need to add at least one redirect URI. For running in Visual Studio, you need to add `https://localhost:nnn/signin-oidc`, where `nnn` is the port number. I usually add this URI with and without the traling slash, but I'm not sure if you need to. When you're ready to deploy, you can add another redirect URI for your real domain or (recommended) create a new credential and add the new client Id and secret to your production settings file.
+First, set up a [service account](https://developers.google.com/identity/protocols/oauth2/service-account) with Google. The service account will have a dummy email address, which you will be able to see in the credentials file you download.
 
-In Visual Studio, add the [Google.Apis.Auth.AspNetCore3 Nuget package](https://www.nuget.org/packages/Google.Apis.Auth.AspNetCore3/) to your application. You'll probably want to add the [Google.Apis.Drive.v3](https://www.nuget.org/packages/Google.Apis.Drive.v3) package as well.
+Save the JSON file as `credentials.json` in the root folder of your ASP.NET application project.
 
-Then you need to add the following code to the `ConfigureServices` method in `Startup`...
+Once that is done, you can inject the `GoogleDriveHelper` class into your controllers or Blazor components.
 
-```c#
-services
-  .AddAuthentication(o => {
-    o.DefaultChallengeScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
-    o.DefaultForbidScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
-    o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-  })
-  .AddCookie()
-  .AddGoogleOpenIdConnect(options => {
-    options.ClientId = "Google ClientId"; // From settings file
-    options.ClientSecret = "Google ClientSecret"; // From settings file
-  });
-```
-
-Next you will need to add code to your application to perform the authorisation. If you are working in an MVC application, you can do this pretty much anywhere you like. However, if you are doing this in a Blazor application, you'll need to add an MVC controller, as authorisation cannot be done within Blazor (as far as I know).
-
-Add a new controller as follows...
-
-```c#
-public class GoogleController : Controller {
-  [GoogleScopedAuthorize(DriveService.ScopeConstants.Drive)]
-  public async Task<IActionResult> Index([FromServices] IGoogleAuthProvider auth, [FromServices] GoogleDriveHelper googleDriveHelper) {
-    string whereAmI = "About to get credentials";
-    try {
-      GoogleCredential cred = await auth.GetCredentialAsync();
-      whereAmI = "About to create Google Drive service";
-      DriveService ds = new(new BaseClientService.Initializer {
-        HttpClientInitializer = cred,
-        ApplicationName = "Synoptic Web"
-      });
-      
-      googleDriveHelper.SetDriveService(new(new BaseClientService.Initializer {
-        HttpClientInitializer = cred,
-        ApplicationName = "Your application name"
-      }));
-      return new JsonResult(new { Result = "OK" });
-    }
-    catch (Exception ex) {
-      return new JsonResult(new { WhereWasI = whereAmI, ex.Message, ex.StackTrace });
-    }
-  }
-}
-```
-
-Before you can use the `GoogleDriveHelper` class, you'll need to make sure that you (or someone) hits the `GoogleController`'s action, as that will pop up the Google oAuth screen, and create the credentials that the class needs.
-
-Optionally, you can add a check to your code elsewhere to check that the drive service has been set up, and if not, redirect to this action. This should (hopefully) avoid any errors later on. One way of doing this is to add code like this to your main page (this is for Blazor, but MVC would be very similar, you'd just return a `Redirect` instead of calling the navigation manager)...
-
-```c#
-if (!GoogleDriveHelper.DriveIsSet) {
-  NavManager.NavigateTo("/Google");
-}
-```
-
-Once that is done, you can inject the `GoogleDriveHelper` class into your controllers or Blazor components 
+If you want to access a specific Google Drive, you will need to share a folder in that drive with the service account user. All of this is very well [explained in a short video](https://www.youtube.com/watch?v=Q5b0ivBYqeQ) by Linda Lawton, who is a certified Google Expert, and who gave me some very helpful guidance on getting this working. If you want to find the Id of a specific folder, see [this short video](https://www.youtube.com/watch?v=m3euwXcuvrs).
 
 ## LanguageExt
 The classes here are based on the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. What this means for you is that you will need to adopt a functional approach to using the methods in these classes. This gives a much more robust code base than would have been possible without.
