@@ -22,7 +22,7 @@ namespace Pixata.Extensions {
     /// </summary>
     /// <param name="value">The number to be converted</param>
     /// <param name="accuracy">The accuracy of the conversion. Where value doesn't have a neat fractional representation, this determines how far we go trying to find one</param>
-    /// <returns></returns>
+    /// <returns>A tuple containing the whole part, the numerator and denominator of a proper fraction converted from the decimal passed in</returns>
     public static (int, int, int) DoubleToProperFraction(this double value, double accuracy) {
       (int n, int d) = DoubleToFraction(value, accuracy);
       if (n <= d) {
@@ -31,6 +31,12 @@ namespace Pixata.Extensions {
       return (n / d, n - (n / d) * d, d);
     }
 
+    /// <summary>
+    /// Converts a double to a string representation of its proper fractional representation
+    /// </summary>
+    /// <param name="value">The number to be converted</param>
+    /// <param name="accuracy">The accuracy of the conversion. Where value doesn't have a neat fractional representation, this determines how far we go trying to find one</param>
+    /// <returns>A string of the form "2/3" or "3 2/7"</returns>
     public static string DoubleToProperFractionString(this double value, double accuracy) =>
       value.DoubleToProperFraction(accuracy) switch {
         (int n1, 0, _) => $"{n1}",
