@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,6 +13,45 @@ namespace Pixata.Extensions {
     /// <returns>The input string split into space-separated words</returns>
     public static string SplitCamelCase(this string str) =>
       Regex.Replace(Regex.Replace(str, @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), @"(\p{Ll})(\P{Ll})", "$1 $2");
+
+    /// <summary>
+    /// Splits an enum member name using camel case as the rule. Splits CamelCase into "Camel Case"
+    /// </summary>
+    /// <typeparam name="T">The enum type</typeparam>
+    /// <param name="e">The enum value</param>
+    /// <returns>A space-separated string containing the enum member name split by camel case</returns>
+    /// <exception cref="ArgumentException">Thrown if the input is not an enum</exception>
+    public static string SplitEnumCamelCase<T>(this T e) where T : struct, IConvertible {
+      if (!typeof(T).IsEnum) {
+        throw new ArgumentException("T must be an enumerated type");
+      }
+      return Regex.Replace(Regex.Replace(e.ToString(), @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), @"(\p{Ll})(\P{Ll})", "$1 $2");
+    }
+
+    /// <summary>
+    /// Splits an enum member value (assumed to be an int) using camel case as the rule. Splits CamelCase into "Camel Case"
+    /// </summary>
+    /// <typeparam name="T">The enum type</typeparam>
+    /// <param name="n">The int value of the enum value</param>
+    /// <returns>A space-separated string containing the enum member value split by camel case</returns>
+    /// <exception cref="ArgumentException">ArgumentException thrown if the generic type is not an enum, or ArgumentOutOfRangeException if the int value does not correspond to an enum member value</exception>
+    public static string SplitEnumValueCamelCase<T>(this int n) where T : struct, IConvertible {
+      if (!typeof(T).IsEnum) {
+        throw new ArgumentException("T must be an enumerated type");
+      }
+      if (!Enum.IsDefined(typeof(T), n)) {
+        throw new ArgumentOutOfRangeException($"{n} is not a valid value for the {typeof(T).Name} enum");
+      }
+      return Regex.Replace(Regex.Replace(((T)Enum.Parse(typeof(T), n.ToString())).ToString(), @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), @"(\p{Ll})(\P{Ll})", "$1 $2");
+    }
+
+    /// <summary>
+    /// Returns the first line of a multi-line string. Useful for getting the first line of someone's address
+    /// </summary>
+    /// <param name="str">The multi-line string</param>
+    /// <returns>The first line of the input, assuming Environment.NewLine is the line delimiter</returns>
+    public static string FirstLine(this string str) =>
+      str.IndexOf(Environment.NewLine) > 0 ? str.Substring(0, str.IndexOf(Environment.NewLine)) : str;
 
     /// <summary>
     /// Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents
