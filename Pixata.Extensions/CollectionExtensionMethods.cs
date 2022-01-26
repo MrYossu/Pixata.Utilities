@@ -60,7 +60,7 @@ namespace Pixata.Extensions {
       coll.Where(t1 => !p(t1)).Select(t => t).ToObservableCollection();
 
     /// <summary>
-    /// Same a the ForEach method on List<T>, but works on IEnumerable<T></T>
+    /// Same as the List<T>.ForEach method, but works on IEnumerable<T>
     /// </summary>
     /// <typeparam name="T">Generic type</typeparam>
     /// <param name="items">The collection</param>

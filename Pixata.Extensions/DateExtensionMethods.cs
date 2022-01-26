@@ -15,11 +15,12 @@ namespace Pixata.Extensions {
     /// Overload of ToPrettyString for nullable DateTime
     /// </summary>
     /// <param name="date">The DateTime to be formatted</param>
+    /// <param name="includeTime">Optional. Specifies whether or not the time is included</param>
     /// <returns>A string representation of the date in a pleasant form, or the empty string if the date were null</returns>
-    public static string ToPrettyString(this DateTime? date) =>
+    public static string ToPrettyString(this DateTime? date, bool includeTime = false) =>
       date == null
         ? ""
-        : date.Value.ToPrettyString();
+        : date.Value.ToPrettyString(includeTime);
 
     /// <summary>
     /// Returns true of the specified date is within the range given
