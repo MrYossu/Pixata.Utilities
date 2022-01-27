@@ -1,0 +1,119 @@
+﻿<div class="form-group row">
+  <label class="col-lg-2 col-form-label" for="@PropertyNameTitle">@Caption</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="@Icon"></i>
+      </span>
+    </div>
+
+    <input class="form-control" Value="@ValueTitle" type="text" id="@PropertyNameTitle" name="@PropertyNameTitle" @onchange="@OnChangedTitle" placeholder="Title" style="max-width: 90px"/>
+    @if (_showValidationMsgTitle) {
+      <div class="input-group-append">
+        <div class="input-group-text has-error">
+          <ValidationMessage For="@ValueTitleExpression" />
+        </div>
+      </div>
+    }
+
+    <input class="form-control" Value="@ValueFirstName" type="text" id="@PropertyNameFirstName" name="@PropertyNameFirstName" @onchange="@OnChangedFirstName" placeholder="First name" />
+    @if (_showValidationMsgFirstName) {
+      <div class="input-group-append">
+        <div class="input-group-text has-error">
+          <ValidationMessage For="@ValueFirstNameExpression" />
+        </div>
+      </div>
+    }
+
+    <input class="form-control" Value="@ValueSurname" type="text" id="@PropertyNameSurname" name="@PropertyNameSurname" @onchange="@OnChangedSurname" placeholder="Surname" />
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
+        @if (_showValidationMsgSurname) {
+          <ValidationMessage For="@ValueSurnameExpression" />
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  [CascadingParameter]
+  public EditContext CascadedEditContext { get; set; }
+
+  [Parameter]
+  public string PropertyNameTitle { get; set; }
+
+  [Parameter]
+  public string PropertyNameFirstName { get; set; }
+
+  [Parameter]
+  public string PropertyNameSurname { get; set; }
+
+  [Parameter]
+  public string ValueTitle { get; set; }
+
+  [Parameter]
+  public string ValueFirstName { get; set; }
+
+  [Parameter]
+  public string ValueSurname { get; set; }
+
+  [Parameter]
+  public EventCallback<string> ValueTitleChanged { get; set; }
+
+  [Parameter]
+  public EventCallback<string> ValueFirstNameChanged { get; set; }
+
+  [Parameter]
+  public EventCallback<string> ValueSurnameChanged { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> ValueTitleExpression { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> ValueFirstNameExpression { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> ValueSurnameExpression { get; set; }
+
+  private bool _showValidationMsgTitle;
+  private bool _showValidationMsgFirstName;
+  private bool _showValidationMsgSurname;
+
+  protected override void OnInitialized() {
+    CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
+    base.OnInitialized();
+  }
+
+  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+    FieldIdentifier identifierTitle = CascadedEditContext.Field(PropertyNameTitle);
+    _showValidationMsgTitle = CascadedEditContext.GetValidationMessages(identifierTitle).Any();
+    FieldIdentifier identifierFirstName = CascadedEditContext.Field(PropertyNameFirstName);
+    _showValidationMsgFirstName = CascadedEditContext.GetValidationMessages(identifierFirstName).Any();
+    FieldIdentifier identifierSurname = CascadedEditContext.Field(PropertyNameSurname);
+    _showValidationMsgSurname = CascadedEditContext.GetValidationMessages(identifierSurname).Any();
+  }
+
+  private async Task OnChangedTitle(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, ValueTitleChanged, PropertyNameTitle);
+
+  private async Task OnChangedFirstName(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, ValueFirstNameChanged, PropertyNameFirstName);
+
+  private async Task OnChangedSurname(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, ValueSurnameChanged, PropertyNameSurname);
+
+  private async Task CheckValidationFor(ChangeEventArgs cea, EventCallback<string> valueChangedEventCallback, string propertyName) {
+    await valueChangedEventCallback.InvokeAsync(cea.Value?.ToString() ?? "");
+    FieldIdentifier identifier = CascadedEditContext.Field(propertyName);
+    CascadedEditContext.NotifyFieldChanged(identifier);
+  }
+
+}

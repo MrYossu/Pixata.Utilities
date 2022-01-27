@@ -5,17 +5,27 @@
 
 <EditForm Model="_person">
   <FluentValidationValidator />
-  <FormRowText2 PropertyName1="@nameof(Person.FirstName)" PropertyName2="@nameof(Person.Surname)" @bind-Value1="_person.FirstName" @bind-Value2="_person.Surname" Icon="user" Caption="Name" Attributes1="attributesFirstName" Attributes2="attributesSurname" />
-  <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="at" Attributes="attributesEmail" />
-  <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="house-day" />
-  <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="clock" />
+  <FormRowTextName Caption="Name"
+                   Icon="fa fa-user"
+                   PropertyNameTitle="@nameof(Person.Title)"
+                   PropertyNameFirstName="@nameof(Person.FirstName)"
+                   PropertyNameSurname="@nameof(Person.Surname)"
+                   @bind-ValueTitle="@_person.Title"
+                   @bind-ValueFirstName="@_person.FirstName"
+                   @bind-ValueSurname="@_person.Surname" />
+  <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="fas fa-at"  />
+  <FormRowCheckbox PropertyName="@nameof(Person.EmailConfirmed)" @bind-Checked="@_person.EmailConfirmed" Icon="fas fa-check" Caption="Email confirmed" />
+  <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="fa fa-house-day" Caption="Date of birth" />
+  <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="fa fa-clock" />
+  <FormRowDropdown PropertyName="@nameof(Person.FavouriteFoodId)" @bind-Value="@_person.FavouriteFoodId" Values="@_foods" Icon="fa fa-utensils" Caption="Fave food" />
+  <FormRowDropdownEnum PropertyName="@nameof(Person.Pet)" @bind-Value="@_person.Pet" Icon="fa fa-paw" />
+  <FormRowTextArea PropertyName="@nameof(Person.Notes)" @bind-Value="@_person.Notes" Icon="fab fa-itunes-note" />
 </EditForm>
 
 <p>Please note, any resemblance to a genuine Jim Spriggs is purely co-incidental. No implications about Jim's weirdness or pet halibut should be implied!</p>
 
 <p>TODO - The markup needs tidying...</p>
 <ul>
-  <li>Some of the icons are missing, need to check the right names</li>
   <li>The input group prepend sections should all be the same width. Needs a CSS rule</li>
   <li>Needs examples for the other controls</li>
 </ul>
@@ -24,23 +34,22 @@
 
   private readonly Person _person = new() {
     Id = 1,
+    Title = "Mr",
     FirstName = "Jim",
     Surname = "Spriggs",
     Email = "jim@spriggs.com",
     DateOfBirth = new(1980, 4, 7),
     EmailConfirmed = true,
     NumberOfDependents = 3,
-    Notes = "A very nice chap, if a little weird\n\nHas a pet halibut named Simon."
+    Notes = "A very nice chap, if a little weird\n\nHas a pet halibut named Simon.",
+    FavouriteFoodId = 1,
+    Pet = Pets.Ferret
   };
 
-  public Dictionary<string, object> attributesFirstName { get; set; } = new() {
-    { "required", "required" },
-    { "placeholder", "First name" }
-  };
-
-  public Dictionary<string, object> attributesSurname { get; set; } = new() {
-    { "required", "required" },
-    { "placeholder", "Surname" }
+  private readonly List<(int val, string name)> _foods = new() {
+    (0, "Chocolate"),
+    (1, "More chocolate"),
+    (2, "Nuts"),
   };
 
   public Dictionary<string, object> attributesEmail { get; set; } = new() {
