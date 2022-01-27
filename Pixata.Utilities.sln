@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.Sample", "Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj", "{972DA1C6-19D3-4035-89A3-20F92FAD0E02}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Blazor.TelerikCompon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.SimilarityChooser", "Pixata.SimilarityChooser\Pixata.SimilarityChooser.csproj", "{026EA109-72B3-4EAF-A8AC-61B062FFE0C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Google", "Pixata.Google\Pixata.Google.csproj", "{D630FF46-4D0C-4151-85FC-B96B271FF5B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Google", "Pixata.Google\Pixata.Google.csproj", "{D630FF46-4D0C-4151-85FC-B96B271FF5B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
