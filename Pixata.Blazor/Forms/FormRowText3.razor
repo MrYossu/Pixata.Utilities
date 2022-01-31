@@ -16,11 +16,11 @@
     </div>
     <input class="form-control" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" @attributes="Attributes2" />
     <div class="input-group-append">
-      <div class="input-group-text has-error">
-        @if (_showValidationMsg2) {
+      @if (_showValidationMsg2) {
+        <div class="input-group-text has-error">
           <ValidationMessage For="@Value2Expression" />
-        }
-      </div>
+        </div>
+      }
     </div>
     <input class="form-control" Value="@Value3" type="text" id="@PropertyName3" name="@PropertyName3" @onchange="@OnChanged3" @attributes="Attributes3" />
     <div class="input-group-append">
