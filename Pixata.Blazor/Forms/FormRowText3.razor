@@ -1,0 +1,125 @@
+﻿<div class="form-group row">
+  <label class="col-lg-2 col-form-label" for="@PropertyName1">@Caption</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="@Icon"></i>
+      </span>
+    </div>
+    <input class="form-control" Value="@Value1" type="text" id="@PropertyName1" name="@PropertyName1" @onchange="@OnChanged1" @attributes="Attributes1" />
+    <div class="input-group-append">
+      @if (_showValidationMsg1) {
+        <div class="input-group-text has-error">
+          <ValidationMessage For="@Value1Expression" />
+        </div>
+      }
+    </div>
+    <input class="form-control" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" @attributes="Attributes2" />
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
+        @if (_showValidationMsg2) {
+          <ValidationMessage For="@Value2Expression" />
+        }
+      </div>
+    </div>
+    <input class="form-control" Value="@Value3" type="text" id="@PropertyName3" name="@PropertyName3" @onchange="@OnChanged3" @attributes="Attributes3" />
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
+        @if (_showValidationMsg3) {
+          <ValidationMessage For="@Value3Expression" />
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  [CascadingParameter]
+  public EditContext CascadedEditContext { get; set; }
+
+  [Parameter]
+  public string PropertyName1 { get; set; }
+
+  [Parameter]
+  public string PropertyName2 { get; set; }
+
+  [Parameter]
+  public string PropertyName3 { get; set; }
+
+  [Parameter]
+  public string Value1 { get; set; }
+
+  [Parameter]
+  public string Value2 { get; set; }
+
+  [Parameter]
+  public string Value3 { get; set; }
+
+  [Parameter]
+  public EventCallback<string> Value1Changed { get; set; }
+
+  [Parameter]
+  public EventCallback<string> Value2Changed { get; set; }
+
+  [Parameter]
+  public EventCallback<string> Value3Changed { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> Value1Expression { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> Value2Expression { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> Value3Expression { get; set; }
+
+  [Parameter]
+  public Dictionary<string, object> Attributes1 { get; set; } = new();
+
+  [Parameter]
+  public Dictionary<string, object> Attributes2 { get; set; } = new();
+
+  [Parameter]
+  public Dictionary<string, object> Attributes3 { get; set; } = new();
+
+  private bool _showValidationMsg1;
+  private bool _showValidationMsg2;
+  private bool _showValidationMsg3;
+
+  protected override void OnInitialized() {
+    CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
+    base.OnInitialized();
+  }
+
+  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+    FieldIdentifier identifier1 = CascadedEditContext.Field(PropertyName1);
+    _showValidationMsg1 = CascadedEditContext.GetValidationMessages(identifier1).Any();
+    FieldIdentifier identifier2 = CascadedEditContext.Field(PropertyName2);
+    _showValidationMsg2 = CascadedEditContext.GetValidationMessages(identifier2).Any();
+    FieldIdentifier identifier3 = CascadedEditContext.Field(PropertyName3);
+    _showValidationMsg3 = CascadedEditContext.GetValidationMessages(identifier3).Any();
+  }
+
+  private async Task OnChanged1(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, Value1Changed, PropertyName1);
+
+  private async Task OnChanged2(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, Value2Changed, PropertyName2);
+
+  private async Task OnChanged3(ChangeEventArgs cea) =>
+    await CheckValidationFor(cea, Value3Changed, PropertyName3);
+
+  private async Task CheckValidationFor(ChangeEventArgs cea, EventCallback<string> valueChangedEventCallback, string propertyName) {
+    await valueChangedEventCallback.InvokeAsync(cea.Value?.ToString() ?? "");
+    FieldIdentifier identifier = CascadedEditContext.Field(propertyName);
+    CascadedEditContext.NotifyFieldChanged(identifier);
+  }
+
+}
