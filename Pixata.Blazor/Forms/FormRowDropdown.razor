@@ -7,7 +7,7 @@
         <i class="@Icon"></i>
       </span>
     </div>
-    <select class="form-control" name="@PropertyName" id="@PropertyName" @onchange="@OnChanged">
+    <select class="form-control @_invalid" name="@PropertyName" id="@PropertyName" @onchange="@OnChanged">
       @foreach ((int val, string name) v in Values) {
         <!-- TODO AYS - This will only set the value when the control is loaded. If the selection is changed, the parent will not be informed of the change. Need to work out how to do two-way binding -->
         if (v.val == Value) {
@@ -54,6 +54,7 @@
   public Expression<Func<int>> ValueExpression { get; set; }
 
   private bool _showValidationMsg = false;
+  private string _invalid = "";
 
   private async Task OnChanged(ChangeEventArgs cea) {
     await ValueChanged.InvokeAsync(Convert.ToInt32(cea.Value));
@@ -69,6 +70,7 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+    _invalid = _showValidationMsg ? "invalid" : "";
   }
 
 }

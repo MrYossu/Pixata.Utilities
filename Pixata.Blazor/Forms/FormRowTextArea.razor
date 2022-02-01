@@ -7,7 +7,7 @@
         <i class="@Icon"></i>
       </span>
     </div>
-    <textarea class="form-control" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" rows="@Rows" @attributes="Attributes">@Value</textarea>
+    <textarea class="form-control @_invalid" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" rows="@Rows" @attributes="Attributes">@Value</textarea>
     <div class="input-group-append h-100">
       <div class="input-group-text has-error">
         @if (_showValidationMsg) {
@@ -48,6 +48,7 @@
   public Dictionary<string, object> Attributes { get; set; } = new();
 
   private bool _showValidationMsg;
+  private string _invalid = "";
 
   private async Task OnChanged(ChangeEventArgs cea) {
     await ValueChanged.InvokeAsync(cea.Value?.ToString() ?? "");
@@ -63,6 +64,7 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+    _invalid = _showValidationMsg ? "invalid" : "";
   }
 
 }

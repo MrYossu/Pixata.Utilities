@@ -16,4 +16,12 @@
     <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Touch Files="App_Offline.htm" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Delete Files="App_Offline.htm" />
+  </Target>
+
 </Project>
