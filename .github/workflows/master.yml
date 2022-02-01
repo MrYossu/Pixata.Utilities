@@ -89,6 +89,13 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Functional
+    - name: Restore - Pixata.Functional Dependencies
+      run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config
+
+    - name: Build - Pixata.Functional.csproj
+      run: dotnet build Pixata.Functional/Pixata.Functional.csproj --configuration Release --configfile ./nuget.config
+
     # Pixata.SimilarityChooser
     - name: Restore - Pixata.SimilarityChooser Dependencies
       run: dotnet restore Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configfile ./nuget.config

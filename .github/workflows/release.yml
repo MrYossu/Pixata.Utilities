@@ -90,6 +90,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Functional
+    - name: Restore - Pixata.Functional Dependencies
+      run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.Functional.csproj
+      run: dotnet build Pixata.Functional/Pixata.Functional.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.SimilarityChooser
     - name: Restore - Pixata.SimilarityChooser Dependencies
       run: dotnet restore Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configfile ./nuget.config
@@ -152,6 +165,12 @@ jobs:
       uses: brandedoutcast/publish-nuget@v2.5.5  
       with:   
         PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
+    - name: Publish Pixata.Functional
+      uses: brandedoutcast/publish-nuget@v2.5.5  
+      with:   
+        PROJECT_FILE_PATH: Pixata.Functional/Pixata.Functional.csproj  
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
     - name: Publish Pixata.SimilarityChooser
