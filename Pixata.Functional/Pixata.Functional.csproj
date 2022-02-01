@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <Company>Pixata Ltd</Company>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Product>Pixata.Functional</Product>
+    <Description>C# classes for functional programming</Description>
+    <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Functional</ProjectUrl>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Functional</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Functional</RepositoryUrl>
+    <Copyright>Copyright Pixata Ltd</Copyright>
+    <PackageTags>C# functional-programming language-ext</PackageTags>
+    <PackageIcon>old explorerv2.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LanguageExt.Core" Version="4.0.3" />
+
+    <PackageReference Include="LanguageExt.CodeGen" Version="4.0.3" PrivateAssets="all" />
+
+    <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.6.1" PrivateAssets="all" />
+
+    <DotNetCliToolReference Include="dotnet-codegen" Version="0.6.1" />
+  </ItemGroup>
+
+</Project>
