@@ -12,7 +12,7 @@
                        Value="@Value"
                        ValueExpression="@(() => Value)"
                        Format="HH:mm"
-                       Class="form-control"
+                       Class="@_css"
                        ValueChanged="@(async (DateTime d) => await OnChanged(d))" />
     <div class="input-group-append">
       <div class="input-group-text has-error">
@@ -51,6 +51,9 @@
   public Expression<Func<DateTime>> ValueExpression { get; set; }
 
   private bool _showValidationMsg = false;
+  private string _css =>
+    "form-control " + _invalid;
+  private string _invalid = "";
 
   protected override void OnInitialized() {
     CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
@@ -60,6 +63,7 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+    _invalid = _showValidationMsg ? "invalid" : "";
   }
 
   async Task OnChanged(DateTime cea) {

@@ -6,7 +6,7 @@
         <i class="@Icon"></i>
       </span>
     </div>
-    <input class="form-control" Value="@Value1" type="text" id="@PropertyName1" name="@PropertyName1" @onchange="@OnChanged1" @attributes="Attributes1" />
+    <input class="form-control @_invalid1" Value="@Value1" type="text" id="@PropertyName1" name="@PropertyName1" @onchange="@OnChanged1" @attributes="Attributes1" />
     <div class="input-group-append">
       @if (_showValidationMsg1) {
         <div class="input-group-text has-error">
@@ -14,7 +14,7 @@
         </div>
       }
     </div>
-    <input class="form-control" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" @attributes="Attributes2" />
+    <input class="form-control @_invalid2" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" @attributes="Attributes2" />
     <div class="input-group-append">
       @if (_showValidationMsg2) {
         <div class="input-group-text has-error">
@@ -22,7 +22,7 @@
         </div>
       }
     </div>
-    <input class="form-control" Value="@Value3" type="text" id="@PropertyName3" name="@PropertyName3" @onchange="@OnChanged3" @attributes="Attributes3" />
+    <input class="form-control @_invalid3" Value="@Value3" type="text" id="@PropertyName3" name="@PropertyName3" @onchange="@OnChanged3" @attributes="Attributes3" />
     <div class="input-group-append">
       <div class="input-group-text has-error">
         @if (_showValidationMsg3) {
@@ -90,8 +90,11 @@
   public Dictionary<string, object> Attributes3 { get; set; } = new();
 
   private bool _showValidationMsg1;
+  private string _invalid1 = "";
   private bool _showValidationMsg2;
+  private string _invalid2 = "";
   private bool _showValidationMsg3;
+  private string _invalid3 = "";
 
   protected override void OnInitialized() {
     CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
@@ -101,14 +104,17 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier1 = CascadedEditContext.Field(PropertyName1);
     _showValidationMsg1 = CascadedEditContext.GetValidationMessages(identifier1).Any();
+    _invalid1 = _showValidationMsg1 ? "invalid" : "";
     FieldIdentifier identifier2 = CascadedEditContext.Field(PropertyName2);
     _showValidationMsg2 = CascadedEditContext.GetValidationMessages(identifier2).Any();
+    _invalid2 = _showValidationMsg2 ? "invalid" : "";
     FieldIdentifier identifier3 = CascadedEditContext.Field(PropertyName3);
     _showValidationMsg3 = CascadedEditContext.GetValidationMessages(identifier3).Any();
+    _invalid3 = _showValidationMsg3 ? "invalid" : "";
   }
 
   private async Task OnChanged1(ChangeEventArgs cea) =>
-    await CheckValidationFor(cea, Value1Changed, PropertyName1);
+  await CheckValidationFor(cea, Value1Changed, PropertyName1);
 
   private async Task OnChanged2(ChangeEventArgs cea) =>
     await CheckValidationFor(cea, Value2Changed, PropertyName2);

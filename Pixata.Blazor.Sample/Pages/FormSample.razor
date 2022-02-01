@@ -20,13 +20,19 @@
   <FormRowDropdown PropertyName="@nameof(Person.FavouriteFoodId)" @bind-Value="@_person.FavouriteFoodId" Values="@_foods" Icon="fa fa-utensils" Caption="Fave food" />
   <FormRowDropdownEnum PropertyName="@nameof(Person.Pet)" @bind-Value="@_person.Pet" Icon="fa fa-paw" />
   <FormRowTextArea PropertyName="@nameof(Person.Notes)" @bind-Value="@_person.Notes" Icon="fab fa-itunes-note" />
+  
+  <div class="row justify-content-md-center">
+    <button type="submit">Submit</button>
+  </div>
 </EditForm>
 
 <p>Please note, any resemblance to a genuine Jim Spriggs is purely co-incidental. No implications about Jim's weirdness or pet halibut should be implied!</p>
 
-<p>TODO - The markup needs tidying...</p>
+<p>Try clearing all the text fields, and you should see the validation. Some may require you to change the value, or click the Submit button.</p>
+
+<p>Things to do...</p>
 <ul>
-  <li>The input group prepend sections should all be the same width. Needs a CSS rule</li>
+  <li>There is a lot of repetition in the controls. Need to refactor them so that we reuse the code</li>
   <li>Needs examples for the other controls</li>
 </ul>
 

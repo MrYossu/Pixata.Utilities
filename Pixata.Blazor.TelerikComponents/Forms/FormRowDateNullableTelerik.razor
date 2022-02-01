@@ -12,14 +12,14 @@
                              Value="@Value"
                              ValueExpression="@(() => Value)"
                              Format="@_dpFormat"
-                             Class="form-control"
+                             Class="@_css"
                              ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
     } else {
       <TelerikDatePicker Id="@PropertyName"
                          Value="@Value"
                          ValueExpression="@(() => Value)"
                          Format="@_dpFormat"
-                         Class="form-control"
+                         Class="@_css"
                          ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
     }
     <div class="input-group-append">
@@ -65,6 +65,10 @@
 
   private bool _showValidationMsg;
 
+  private string _css =>
+    "form-control " + _invalid;
+  private string _invalid = "";
+
   protected override void OnInitialized() {
     CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
     base.OnInitialized();
@@ -73,6 +77,7 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+    _invalid = _showValidationMsg ? "invalid" : "";
   }
 
   async Task OnChanged(DateTime? cea) {

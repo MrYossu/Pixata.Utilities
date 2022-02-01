@@ -8,7 +8,7 @@
         <i class="@Icon"></i>
       </span>
     </div>
-    <TelerikEditor Value="@Value" ValueChanged="@OnChanged" ValueExpression="@(() => Value)" Height="@Height" Width="@Width"></TelerikEditor>
+    <TelerikEditor Value="@Value" ValueChanged="@OnChanged" ValueExpression="@(() => Value)" Height="@Height" Width="@Width" Class="@_invalid"></TelerikEditor>
     <div class="input-group-append">
       <div class="input-group-text has-error">
         @if (_showValidationMsg) {
@@ -49,6 +49,7 @@
   public Expression<Func<string>> ValueExpression { get; set; }
 
   private bool _showValidationMsg;
+  private string _invalid = "";
 
   private async Task OnChanged(string s) {
     await ValueChanged.InvokeAsync(s ?? "");
@@ -64,6 +65,7 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+    _invalid = _showValidationMsg ? "invalid" : "";
   }
 
 }

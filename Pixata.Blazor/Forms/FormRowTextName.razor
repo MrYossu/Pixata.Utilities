@@ -7,7 +7,7 @@
       </span>
     </div>
 
-    <input class="form-control" Value="@ValueTitle" type="text" id="@PropertyNameTitle" name="@PropertyNameTitle" @onchange="@OnChangedTitle" placeholder="Title" style="max-width: 90px"/>
+    <input class="form-control @_invalid1" Value="@ValueTitle" type="text" id="@PropertyNameTitle" name="@PropertyNameTitle" @onchange="@OnChangedTitle" placeholder="Title" style="max-width: 90px"/>
     @if (_showValidationMsgTitle) {
       <div class="input-group-append">
         <div class="input-group-text has-error">
@@ -16,7 +16,7 @@
       </div>
     }
 
-    <input class="form-control" Value="@ValueFirstName" type="text" id="@PropertyNameFirstName" name="@PropertyNameFirstName" @onchange="@OnChangedFirstName" placeholder="First name" />
+    <input class="form-control @_invalid2" Value="@ValueFirstName" type="text" id="@PropertyNameFirstName" name="@PropertyNameFirstName" @onchange="@OnChangedFirstName" placeholder="First name" />
     @if (_showValidationMsgFirstName) {
       <div class="input-group-append">
         <div class="input-group-text has-error">
@@ -25,7 +25,7 @@
       </div>
     }
 
-    <input class="form-control" Value="@ValueSurname" type="text" id="@PropertyNameSurname" name="@PropertyNameSurname" @onchange="@OnChangedSurname" placeholder="Surname" />
+    <input class="form-control @_invalid3" Value="@ValueSurname" type="text" id="@PropertyNameSurname" name="@PropertyNameSurname" @onchange="@OnChangedSurname" placeholder="Surname" />
     <div class="input-group-append">
       <div class="input-group-text has-error">
         @if (_showValidationMsgSurname) {
@@ -84,8 +84,11 @@
   public Expression<Func<string>> ValueSurnameExpression { get; set; }
 
   private bool _showValidationMsgTitle;
+  private string _invalid1 = "";
   private bool _showValidationMsgFirstName;
+  private string _invalid2 = "";
   private bool _showValidationMsgSurname;
+  private string _invalid3 = "";
 
   protected override void OnInitialized() {
     CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
@@ -95,14 +98,17 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifierTitle = CascadedEditContext.Field(PropertyNameTitle);
     _showValidationMsgTitle = CascadedEditContext.GetValidationMessages(identifierTitle).Any();
+    _invalid1 = _showValidationMsgTitle ? "invalid" : "";
     FieldIdentifier identifierFirstName = CascadedEditContext.Field(PropertyNameFirstName);
     _showValidationMsgFirstName = CascadedEditContext.GetValidationMessages(identifierFirstName).Any();
+    _invalid2 = _showValidationMsgFirstName ? "invalid" : "";
     FieldIdentifier identifierSurname = CascadedEditContext.Field(PropertyNameSurname);
     _showValidationMsgSurname = CascadedEditContext.GetValidationMessages(identifierSurname).Any();
+    _invalid3 = _showValidationMsgSurname ? "invalid" : "";
   }
 
   private async Task OnChangedTitle(ChangeEventArgs cea) =>
-    await CheckValidationFor(cea, ValueTitleChanged, PropertyNameTitle);
+  await CheckValidationFor(cea, ValueTitleChanged, PropertyNameTitle);
 
   private async Task OnChangedFirstName(ChangeEventArgs cea) =>
     await CheckValidationFor(cea, ValueFirstNameChanged, PropertyNameFirstName);

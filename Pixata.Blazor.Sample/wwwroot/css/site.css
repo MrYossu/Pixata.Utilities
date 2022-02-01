@@ -26,6 +26,10 @@ a, .btn-link {
   outline: 1px solid red;
 }
 
+.input-group-prepend span {
+  width: 45px;
+}
+
 .validation-message {
   color: red;
 }
