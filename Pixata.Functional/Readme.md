@@ -1,6 +1,6 @@
 ﻿# Pixata.Functional [![Pixata.Functional Nuget package](https://img.shields.io/nuget/v/Pixata.Functional)](https://www.nuget.org/packages/Pixata.Functional/)
 
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Functional/Icon/old%20explorerv2.png "Pixata") 
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Functional/Icon/Explorer.png "Pixata") 
 
 Some classes that I found useful when doing functional programming (FP). These are dependent on the rather excellent LanguageExt Nuget package.  If you aren't familiar with this, I very strongly recommend you read [Functional Programming in C#](https://www.manning.com/books/functional-programming-in-c-sharp?query=functional%20programming%20c#), which is one of the best C# books I've read (and re-read, and re-read...) for a long time. Once you are familiar with the concepts, and want to use them, grab a reference to LanguageExt and watch your code become more elegant, more robust, and easier to read.
 
@@ -25,7 +25,7 @@ GetCustomer(int id)
       // Do something with the customer
     },
     () => {
-      // The customer wasn't found. Inform the user and feel smug that you didn't ahve to handle an NRE!
+      // The customer wasn't found. Inform the user and feel smug that you didn't have to handle an NRE!
     });
 ```
 
