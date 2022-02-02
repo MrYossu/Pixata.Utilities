@@ -18,6 +18,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Icon\Explorer.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LanguageExt.Core" Version="4.0.3" />
 
     <PackageReference Include="LanguageExt.CodeGen" Version="4.0.3" PrivateAssets="all" />
