@@ -25,7 +25,7 @@ GetCustomer(int id)
       // Do something with the customer
     },
     () => {
-      // The customer wasn't found. Inform the user and feel smug that you didn't ahve to handle an NRE!
+      // The customer wasn't found. Inform the user and feel smug that you didn't have to handle an NRE!
     });
 ```
 
