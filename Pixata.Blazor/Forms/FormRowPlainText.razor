@@ -1,0 +1,40 @@
+﻿<div class="form-group row">
+  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="@Icon"></i>
+      </span>
+    </div>
+    <input type="text" disabled="disabled" id="@PropertyName" class="flex-fill" value="@Value"/>
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  [Parameter]
+  public string PropertyName { get; set; }
+
+  [Parameter]
+  public string Value { get; set; }
+
+  [Parameter]
+  public EventCallback<string> ValueChanged { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  [Parameter]
+  public Expression<Func<string>> ValueExpression { get; set; }
+
+  [Parameter]
+  public Dictionary<string, object> Attributes { get; set; } = new();
+
+}
