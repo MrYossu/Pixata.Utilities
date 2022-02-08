@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.SimilarityChooser", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Google", "Pixata.Google\Pixata.Google.csproj", "{D630FF46-4D0C-4151-85FC-B96B271FF5B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Functional", "Pixata.Functional\Pixata.Functional.csproj", "{D3429233-AF22-4F9B-A776-92E4C8E83E12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Functional", "Pixata.Functional\Pixata.Functional.csproj", "{D3429233-AF22-4F9B-A776-92E4C8E83E12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
