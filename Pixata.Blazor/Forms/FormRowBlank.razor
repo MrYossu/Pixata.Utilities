@@ -1,0 +1,36 @@
+﻿<div class="form-group row">
+  @if (string.IsNullOrWhiteSpace(PropertyName)) {
+    <div class="col-lg-2 col-form-label">@Caption</div>
+  } else {
+    <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
+  }
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="@Icon"></i>
+      </span>
+    </div>
+    <div class="flex-fill">@ChildContent</div>
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  [Parameter]
+  public string PropertyName { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  [Parameter]
+  public RenderFragment ChildContent { get; set; } = null!;
+
+}
+

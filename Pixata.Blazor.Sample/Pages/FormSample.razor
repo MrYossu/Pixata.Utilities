@@ -3,28 +3,33 @@
 
 <h1>Form components</h1>
 
-<EditForm Model="_person">
-  <FluentValidationValidator />
-  <FormRowTextName Caption="Name"
-                   Icon="fa fa-user"
-                   PropertyNameTitle="@nameof(Person.Title)"
-                   PropertyNameFirstName="@nameof(Person.FirstName)"
-                   PropertyNameSurname="@nameof(Person.Surname)"
-                   @bind-ValueTitle="@_person.Title"
-                   @bind-ValueFirstName="@_person.FirstName"
-                   @bind-ValueSurname="@_person.Surname" />
-  <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="fas fa-at"  />
-  <FormRowCheckbox PropertyName="@nameof(Person.EmailConfirmed)" @bind-Checked="@_person.EmailConfirmed" Icon="fas fa-check" Caption="Email confirmed" />
-  <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="fa fa-house-day" Caption="Date of birth" />
-  <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="fa fa-clock" />
-  <FormRowDropdown PropertyName="@nameof(Person.FavouriteFoodId)" @bind-Value="@_person.FavouriteFoodId" Values="@_foods" Icon="fa fa-utensils" Caption="Fave food" />
-  <FormRowDropdownEnum PropertyName="@nameof(Person.Pet)" @bind-Value="@_person.Pet" Icon="fa fa-paw" />
-  <FormRowTextArea PropertyName="@nameof(Person.Notes)" @bind-Value="@_person.Notes" Icon="fab fa-itunes-note" />
-  
-  <div class="row justify-content-md-center">
-    <button type="submit">Submit</button>
-  </div>
-</EditForm>
+<div style="border: 1px solid #000; margin: 20px; padding: 20px 30px">
+  <EditForm Model="_person">
+    <FluentValidationValidator />
+    <FormRowTextName Caption="Name"
+                     Icon="fa fa-user"
+                     PropertyNameTitle="@nameof(Person.Title)"
+                     PropertyNameFirstName="@nameof(Person.FirstName)"
+                     PropertyNameSurname="@nameof(Person.Surname)"
+                     @bind-ValueTitle="@_person.Title"
+                     @bind-ValueFirstName="@_person.FirstName"
+                     @bind-ValueSurname="@_person.Surname" />
+    <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="fas fa-at" />
+    <FormRowCheckbox PropertyName="@nameof(Person.EmailConfirmed)" @bind-Checked="@_person.EmailConfirmed" Icon="fas fa-check" Caption="Email confirmed" />
+    <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="fa fa-house-day" Caption="Date of birth" />
+    <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="fa fa-clock" />
+    <FormRowDropdown PropertyName="@nameof(Person.FavouriteFoodId)" @bind-Value="@_person.FavouriteFoodId" Values="@_foods" Icon="fa fa-utensils" Caption="Fave food" />
+    <FormRowDropdownEnum PropertyName="@nameof(Person.Pet)" @bind-Value="@_person.Pet" Icon="fa fa-paw" />
+    <FormRowTextArea PropertyName="@nameof(Person.Notes)" @bind-Value="@_person.Notes" Icon="fab fa-itunes-note" />
+    <FormRowBlank Caption="Random content" Icon="fas fa-random">
+      Put your own content here...
+    </FormRowBlank>
+
+    <div class="row justify-content-md-center">
+      <button type="submit">Submit</button>
+    </div>
+  </EditForm>
+</div>
 
 <p>Please note, any resemblance to a genuine Jim Spriggs is purely co-incidental. No implications about Jim's weirdness or pet halibut should be implied!</p>
 
