@@ -1,9 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Pixata.Extensions.Tests {
   [TestClass]
   public class StringExtensionMethods_Tests {
+    #region JoinStr
+
+    [DataRow(new[] { "" }, "")]
+    [DataRow(new[] { "Jim" }, "Jim")]
+    [DataRow(new[] { "Jim", "Spriggs" }, "Jim, Spriggs")]
+    [DataTestMethod]
+    public void StringExtensionMethods_JoinStr_NoSep(IEnumerable<string> strs, string output) =>
+      Assert.AreEqual(strs.JoinStr(), output);
+
+    [DataRow(new[] { "" }, "", "")]
+    [DataRow(new[] { "Jim" }, ",", "Jim")]
+    [DataRow(new[] { "Jim", "Spriggs" }, ",", "Jim,Spriggs")]
+    [DataRow(new[] { "Jim", "Spriggs" }, " ", "Jim Spriggs")]
+    [DataTestMethod]
+    public void StringExtensionMethods_JoinStrWithSep(IEnumerable<string> strs, string separator, string output) =>
+      Assert.AreEqual(strs.JoinStr(separator), output);
+
+    #endregion
+
     #region SplitCamelCase
 
     [DataRow("", "")]
