@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,15 @@ using System.Text.RegularExpressions;
 
 namespace Pixata.Extensions {
   public static class StringExtensionMethods {
+    /// <summary>
+    /// Does the same as string.Join, but as an extension method, so it can be chained
+    /// </summary>
+    /// <param name="strs">An IEnumerable of strings to be joined</param>
+    /// <param name="separator">An optional parameter that specifies the separator to use. Defaults to ", "</param>
+    /// <returns>A string containing the joined input strings</returns>
+    public static string JoinStr(this IEnumerable<string> strs, string separator = ", ") =>
+      string.Join(separator, strs);
+
     /// <summary>
     /// Splits a CamelCase string into "Camel Case"
     /// </summary>

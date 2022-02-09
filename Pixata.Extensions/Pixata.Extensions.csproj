@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp5.0</TargetFramework>
-    <Version>1.16.0</Version>
-    <AssemblyVersion>1.16.0</AssemblyVersion>
-    <FileVersion>1.16.0</FileVersion>
+    <Version>1.17.0</Version>
+    <AssemblyVersion>1.17.0</AssemblyVersion>
+    <FileVersion>1.17.0</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Extensions</Product>
-    <Description>A set of C# extension methods</Description>
+    <Description>A set of C# extension methods that I found useful. See the GitHub page for more information</Description>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</RepositoryUrl>
