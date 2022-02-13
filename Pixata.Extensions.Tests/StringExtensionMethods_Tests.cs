@@ -66,6 +66,7 @@ namespace Pixata.Extensions.Tests {
     [DataRow("", "")]
     [DataRow(@"1 Acacia Mews
 West Byfleet", "1 Acacia Mews")]
+    [DataRow("Jim\nSpriggs", "Jim")]
     [DataTestMethod]
     public void StringExtensionMethods_FirstLine(string multi, string output) =>
       Assert.AreEqual(output, multi.FirstLine());

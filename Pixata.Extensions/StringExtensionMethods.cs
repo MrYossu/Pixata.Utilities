@@ -61,7 +61,11 @@ namespace Pixata.Extensions {
     /// <param name="str">The multi-line string</param>
     /// <returns>The first line of the input, assuming Environment.NewLine is the line delimiter</returns>
     public static string FirstLine(this string str) =>
-      str.IndexOf(Environment.NewLine) > 0 ? str.Substring(0, str.IndexOf(Environment.NewLine)) : str;
+      str.IndexOf(Environment.NewLine) > 0
+        ? str.Substring(0, str.IndexOf(Environment.NewLine))
+        : str.IndexOf("\n") > 0
+          ? str.Substring(0, str.IndexOf("\n"))
+          : str;
 
     /// <summary>
     /// Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents
