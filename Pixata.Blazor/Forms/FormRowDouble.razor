@@ -1,0 +1,68 @@
+﻿
+<div class="form-group row">
+  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="col-lg-10 input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text">
+        <i class="@Icon"></i>
+      </span>
+    </div>
+    <input class="form-control @_invalid" Value="@Value" type="text" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" @attributes="Attributes" />
+    <div class="input-group-append">
+      <div class="input-group-text has-error">
+        @if (_showValidationMsg) {
+          <ValidationMessage For="@ValueExpression" />
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  [CascadingParameter]
+  public EditContext CascadedEditContext { get; set; }
+
+  [Parameter]
+  public string PropertyName { get; set; }
+
+  [Parameter]
+  public double Value { get; set; }
+
+  [Parameter]
+  public EventCallback<double> ValueChanged { get; set; }
+
+  [Parameter]
+  public string Caption { get; set; }
+
+  [Parameter]
+  public string Icon { get; set; }
+
+  [Parameter]
+  public Expression<Func<double>> ValueExpression { get; set; }
+
+  [Parameter]
+  public Dictionary<string, object> Attributes { get; set; } = new();
+
+  private bool _showValidationMsg;
+  private string _invalid = "";
+
+  protected override void OnInitialized() {
+    CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
+    base.OnInitialized();
+  }
+
+  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+    FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
+    _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+    _invalid = _showValidationMsg ? "invalid" : "";
+  }
+
+  private async Task OnChanged(ChangeEventArgs cea) {
+    double.TryParse(cea.Value?.ToString() ?? "0", out double val);
+    await ValueChanged.InvokeAsync(Convert.ToDouble(val));
+    FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
+    CascadedEditContext.NotifyFieldChanged(identifier);
+  }
+
+}
