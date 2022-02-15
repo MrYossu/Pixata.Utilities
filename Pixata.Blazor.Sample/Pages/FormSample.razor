@@ -21,8 +21,9 @@
     <FormRowDropdown PropertyName="@nameof(Person.FavouriteFoodId)" @bind-Value="@_person.FavouriteFoodId" Values="@_foods" Icon="fa fa-utensils" Caption="Fave food" />
     <FormRowDropdownEnum PropertyName="@nameof(Person.Pet)" @bind-Value="@_person.Pet" Icon="fa fa-paw" />
     <FormRowTextArea PropertyName="@nameof(Person.Notes)" @bind-Value="@_person.Notes" Icon="fab fa-itunes-note" />
+    <FormRowDropdownNullable PropertyName="@nameof(Person.FriendId)" @bind-Value="@_person.FriendId" Values="@_friends" Icon="fas fa-user-astronaut" Caption="Friend" />
     <FormRowBlank Caption="Random content" Icon="fas fa-random">
-      Put your own content here...
+      <div class="ml-1">Here is a picture of me... <img src="https://www.nuget.org/profiles/MrYossu/avatar?imageSize=32" alt="Mr Yossu" />... lovely, wasn''t it?</div>
     </FormRowBlank>
     <FormRowPlainText PropertyName="Plain text" Icon="fas fa-text" Value="this is some plain old text" />
     <div class="row justify-content-md-center">
@@ -39,6 +40,7 @@
 <ul>
   <li>There is a lot of repetition in the controls. Need to refactor them so that we reuse the code</li>
   <li>Needs examples for the other controls</li>
+  <li>FormRowDropdownNullable automatically selects the first item in the list, even if the bound value is null</li>
 </ul>
 
 @code {
@@ -55,6 +57,14 @@
     Notes = "A very nice chap, if a little weird\n\nHas a pet halibut named Simon.",
     FavouriteFoodId = 1,
     Pet = Pets.Ferret
+  };
+
+  private readonly IEnumerable<(int? Id, string Name)> _friends = new List<(int? Id, string Name)> {
+    (null, "(please choose)"),
+    (1, "Jimmy"),
+    (2, "Fred"),
+    (3, "Simon"),
+    (4, "George")
   };
 
   private readonly List<(int val, string name)> _foods = new() {
