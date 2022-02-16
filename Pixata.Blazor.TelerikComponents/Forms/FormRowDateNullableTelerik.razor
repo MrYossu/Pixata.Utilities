@@ -1,5 +1,4 @@
-﻿
-<div class="form-group row">
+﻿<div class="form-group row">
   <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
   <div class="col-lg-10 input-group">
     <div class="input-group-prepend">
@@ -22,13 +21,13 @@
                          Class="@_css"
                          ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
     }
-    <div class="input-group-append">
-      <div class="input-group-text has-error">
-        @if (_showValidationMsg) {
+    @if (_showValidationMsg) {
+      <div class="input-group-append">
+        <div class="input-group-text has-error">
           <ValidationMessage For="@ValueExpression" />
-        }
+        </div>
       </div>
-    </div>
+    }
   </div>
 </div>
 
@@ -67,6 +66,7 @@
 
   private string _css =>
     "form-control " + _invalid;
+
   private string _invalid = "";
 
   protected override void OnInitialized() {
