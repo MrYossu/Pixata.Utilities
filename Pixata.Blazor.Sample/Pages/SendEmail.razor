@@ -1,10 +1,9 @@
 ﻿@page "/SendEmail"
 @using Pixata.Email
-@using Microsoft.Extensions.Logging
 @inject PixataEmailService _emailService
 
 <h1>Send an email</h1>
-<p>Note that if you want to copy this code, you'll need to set up your SmtpSettings as shown on the GitHub page (TODO).</p>
+<p>Note that if you want to copy this code, you'll need to set up your SmtpSettings as shown on <a href="https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email">the GitHub page</a>.</p>
 
 <TelerikLoaderContainer Size="LoaderSize.Large" LoaderPosition="LoaderPosition.Start" LoaderType="LoaderType.ConvergingSpinner" Text="@Text" Visible="!string.IsNullOrWhiteSpace(Text)" />
 
