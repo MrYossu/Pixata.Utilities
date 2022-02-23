@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.FluentValidation" Version="2.0.0" />
-    <PackageReference Include="LanguageExt.Core" Version="3.4.15" />
+    <PackageReference Include="LanguageExt.Core" Version="4.0.3" />
     <PackageReference Include="Telerik.UI.for.Blazor" Version="2.24.0" />
   </ItemGroup>
 
@@ -14,6 +14,7 @@
     <ProjectReference Include="..\Pixata.Blazor.LanguageExtComponents\Pixata.Blazor.LanguageExtComponents.csproj" />
     <ProjectReference Include="..\Pixata.Blazor.TelerikComponents\Pixata.Blazor.TelerikComponents.csproj" />
     <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
+    <ProjectReference Include="..\Pixata.Email\Pixata.Email.csproj" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

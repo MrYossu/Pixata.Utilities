@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pixata.Blazor.Sample.Data;
+using Pixata.Email;
 
 namespace Pixata.Blazor.Sample {
   public class Startup {
@@ -19,6 +20,9 @@ namespace Pixata.Blazor.Sample {
       services.AddServerSideBlazor();
       services.AddSingleton<WeatherForecastService>();
       services.AddTelerikBlazor();
+      SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>();
+      services.AddSingleton(smtpSettings);
+      services.AddTransient<PixataEmailService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

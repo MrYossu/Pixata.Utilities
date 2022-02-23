@@ -1,0 +1,46 @@
+﻿@page "/SendEmail"
+@using Pixata.Email
+@inject PixataEmailService _emailService
+
+<h1>Send an email</h1>
+<p>Note that if you want to copy this code, you'll need to set up your SmtpSettings as shown on the GitHub page (TODO).</p>
+
+<TelerikLoaderContainer Size="LoaderSize.Large" LoaderPosition="LoaderPosition.Start" LoaderType="LoaderType.ConvergingSpinner" Text="@Text" Visible="!string.IsNullOrWhiteSpace(Text)" />
+
+<p class="text-warning">@Msg</p>
+
+<div class="w-50">
+  <EditForm Model="@TheContactModel" OnValidSubmit="Send">
+    <FluentValidationValidator />
+    <FormRowText PropertyName="@nameof(ContactModel.Name)" @bind-Value="TheContactModel.Name" Icon="@IconsHelper.UserAlt" />
+    <FormRowText PropertyName="@nameof(ContactModel.Email)" @bind-Value="TheContactModel.Email" Icon="@IconsHelper.Email" />
+    <FormRowText PropertyName="@nameof(ContactModel.Subject)" @bind-Value="TheContactModel.Subject" Icon="@IconsHelper.Signature" />
+    <FormRowTextArea PropertyName="@nameof(ContactModel.Body)" @bind-Value="TheContactModel.Body" Icon="@IconsHelper.DocumentUser" />
+
+    <div class="row justify-content-md-center">
+      <TelerikButton ButtonType="ButtonType.Submit" Primary="true">Send</TelerikButton>
+    </div>
+  </EditForm>
+</div>
+
+@code {
+
+  public ContactModel TheContactModel { get; set; } = new();
+  public string Text { get; set; }
+  public string Msg { get; set; }
+
+  private async Task Send() {
+    Text="Sending email...";
+    Msg = await _emailService.SendEmailAsync(new(TheContactModel.Subject, TheContactModel.Body, TheContactModel.Email, TheContactModel.Name))
+      .Match(_ => "Success", ex => $"Exception: {ex.Message}");
+    Text = "";
+  }
+
+  public class ContactModel {
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public string Subject { get; set; }
+    public string Body { get; set; }
+  }
+
+}
