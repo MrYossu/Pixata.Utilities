@@ -90,6 +90,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Email
+    - name: Restore - Pixata.Email Dependencies
+      run: dotnet restore Pixata.Email/Pixata.Email.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+    
+    - name: Build - Pixata.Email.csproj
+      run: dotnet build Pixata.Email/Pixata.Email.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.Functional
     - name: Restore - Pixata.Functional Dependencies
       run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config
@@ -172,6 +185,12 @@ jobs:
       with:   
         PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
+    - name: Publish Pixata.Email
+      uses: brandedoutcast/publish-nuget@v2.5.5  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Email/Pixata.Email.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
     - name: Publish Pixata.Functional
       uses: brandedoutcast/publish-nuget@v2.5.5  

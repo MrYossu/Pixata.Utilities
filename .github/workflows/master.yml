@@ -89,6 +89,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Email
+    - name: Restore - Pixata.Email Dependencies
+      run: dotnet restore Pixata.Email/Pixata.Email.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+    
+    - name: Build - Pixata.Email.csproj
+      run: dotnet build Pixata.Email/Pixata.Email.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.Functional
     - name: Restore - Pixata.Functional Dependencies
       run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config
