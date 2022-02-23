@@ -1,5 +1,6 @@
 ﻿@page "/SendEmail"
 @using Pixata.Email
+@using Microsoft.Extensions.Logging
 @inject PixataEmailService _emailService
 
 <h1>Send an email</h1>
@@ -30,7 +31,7 @@
   public string Msg { get; set; }
 
   private async Task Send() {
-    Text="Sending email...";
+    Text = "Sending email...";
     Msg = await _emailService.SendEmailAsync(new(TheContactModel.Subject, TheContactModel.Body, TheContactModel.Email, TheContactModel.Name))
       .Match(_ => "Success", ex => $"Exception: {ex.Message}");
     Text = "";

@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using LanguageExt;
 
 namespace Pixata.Email {
   public interface PixataEmailServiceInterface {
-    Task<string> SendEmailAsync(string email, string subject, string htmlMessage);
-    Task<string> SendEmailAsync(EmailParameters emailParameters);
+    TryAsync<Unit> SendEmailAsync(string email, string subject, string htmlMessage);
+    TryAsync<Unit> SendEmailAsync(EmailParameters emailParameters);
   }
 }
