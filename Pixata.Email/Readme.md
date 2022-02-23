@@ -4,7 +4,7 @@
 
 An email service for use in .NET Core projects. Backed by Mailkit, it eases the effort needed to add email facilities to your project.
 
-A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) will be available for this project.
+A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
 ## Setup
 
