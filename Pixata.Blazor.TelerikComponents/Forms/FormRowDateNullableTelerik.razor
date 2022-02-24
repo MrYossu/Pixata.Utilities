@@ -10,14 +10,14 @@
       <TelerikDateTimePicker Id="@PropertyName"
                              Value="@Value"
                              ValueExpression="@(() => Value)"
-                             Format="@_dpFormat"
+                             Format="dd MMMM yyyy HH:mm"
                              Class="@_css"
                              ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
     } else {
       <TelerikDatePicker Id="@PropertyName"
                          Value="@Value"
                          ValueExpression="@(() => Value)"
-                         Format="@_dpFormat"
+                         Format="dd MMMM yyyy"
                          Class="@_css"
                          ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
     }
@@ -53,11 +53,6 @@
 
   [Parameter]
   public bool ShowTime { get; set; }
-
-  private string _dpFormat = "";
-
-  protected override void OnParametersSet() =>
-    _dpFormat = Value.HasValue ? "dd MMMM yyyy" + (ShowTime ? " HH:mm" : "") : "";
 
   [Parameter]
   public Expression<Func<DateTime?>> ValueExpression { get; set; }
