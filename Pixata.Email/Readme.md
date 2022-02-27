@@ -26,9 +26,15 @@ Unless your name is Jim Spriggs, you'll need to change these to you own name and
 Then in your `Startup` class, add the following lines...
 
 ```c#
+// .NET5
 SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>();
 services.AddSingleton(smtpSettings);
 services.AddTransient<PixataEmailService>();
+
+// .NET6
+SmtpSettings smtpSettings = builder.Configuration.GetSection("Smtp").Get<SmtpSettings>();
+builder.Services.AddSingleton(smtpSettings);
+builder.Services.AddTransient<PixataEmailService>();
 ```
 
 This allows you to inject an instance of `PixataEmailService` into your code as usual, and it will have the settings baked in for you.
