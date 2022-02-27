@@ -60,7 +60,7 @@ Msg = await _emailService.SendEmailAsync(new(TheContactModel.Subject, TheContact
 
 If you wanted to shorten that line, you could add a method to the `ContactModel` that returned an `EmailParameters` object, and pass that in to `SendEmailAsync` instead.
 
-Obviously, as with any of the LanguageExt classes that supply a `Match` function, you can do much than just return a value...
+Obviously, as with any of the LanguageExt classes that supply a `Match` function, you can do more than just return a value...
 
 ```c#
 await _emailService.SendEmailAsync(new(TheContactModel.Subject, TheContactModel.Body, TheContactModel.Email, TheContactModel.Name))
