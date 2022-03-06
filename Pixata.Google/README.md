@@ -2,7 +2,7 @@
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Google/Icon/PixataGoogle.png "Pixata")
 
-This project contains utility code for working with Google's APIs. At the moment, it onl contains one class, but I'll refer to "classes" (in the plural) below, as I will hopefully add more as time goes on.
+This project contains utility code for working with Google's APIs. At the moment, it only contains one class, but I'll refer to "classes" (in the plural) below, as I will hopefully add more as time goes on.
 
 Note that the Google logo is &copy;Google, and is used without permission. I hope that doesn't get me into trouble!
 
