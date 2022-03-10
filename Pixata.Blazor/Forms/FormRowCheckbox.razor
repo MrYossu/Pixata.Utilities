@@ -8,9 +8,9 @@
       </span>
     </div>
     @if (Checked) {
-      <input type="checkbox" class="form-control col-1" checked="checked" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
+      <input type="checkbox" class="form-control col-1 @Class" checked="checked" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
     } else {
-      <input type="checkbox" class="form-control col-1" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
+      <input type="checkbox" class="form-control col-1 @Class" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
     }
   </div>
 </div>
@@ -35,7 +35,10 @@
   [Parameter]
   public string Icon { get; set; }
 
+  [Parameter]
+  public string Class { get; set; }
+
   private async Task OnChanged(ChangeEventArgs cea) =>
-    await CheckedChanged.InvokeAsync(((bool?)cea.Value) ?? false);
+  await CheckedChanged.InvokeAsync(((bool?)cea.Value) ?? false);
 
 }
