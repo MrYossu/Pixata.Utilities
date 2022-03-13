@@ -1,0 +1,25 @@
+﻿@page "/InformSample"
+@using Pixata.Blazor.Containers
+
+<h3>Inform sample</h3>
+<p>The inform component offers similar functionality to the JavaScript <code>alert</code> function, but in pure Blazor.</p>
+
+<p>You drop the component into your markup and add an <code>@@ref</code> reference to your code. When you want to show the pop-up, call the <code>Display</code> method.</p>
+
+<fieldset>
+  <legend>Inform restricted to the current container</legend>
+  <Inform @ref="_viewportInform" OkText="OK, I got it">
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet consectetur arcu. Donec eget odio vel justo venenatis accumsan non at nisl. Suspendisse vehicula diam nec tincidunt molestie. Donec nec placerat dolor. Proin cursus metus lectus, ut vehicula est viverra id. Vestibulum mollis purus a felis porta, vel tempus ex aliquet. Phasellus sed mauris rutrum, malesuada libero et, suscipit nisl.</p>
+    <p>Nunc consequat nunc et turpis rhoncus, ut ullamcorper sapien ultricies. Proin ultrices tellus et risus rutrum pretium. Maecenas nec ligula ante. Aliquam vel efficitur elit. Pellentesque mattis, odio at vehicula pharetra, ante dolor pellentesque erat, eget consectetur tellus nibh non neque. Sed nec sem nunc. Nullam suscipit dolor in odio lobortis, sit amet rhoncus elit porta. Fusce et pharetra urna.</p>
+    <p>Proin varius diam in lobortis feugiat. Praesent at accumsan leo. Etiam eros quam, dapibus a arcu ac, scelerisque mollis libero. Pellentesque justo urna, molestie quis sagittis et, rhoncus at felis. Duis porttitor neque in justo molestie, commodo accumsan purus mattis. Etiam tincidunt ante ac metus interdum, vitae congue nibh auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+    <TelerikButton @onclick="@ShowInform">Inform</TelerikButton>
+  </Inform>
+</fieldset>
+
+@code {
+  private Inform _viewportInform;
+
+  private void ShowInform() =>
+    _viewportInform.Display("Please don't click that button again!");
+
+}
