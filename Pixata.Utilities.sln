@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Google", "Pixata.Goo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Functional", "Pixata.Functional\Pixata.Functional.csproj", "{D3429233-AF22-4F9B-A776-92E4C8E83E12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Email", "Pixata.Email\Pixata.Email.csproj", "{72767C4D-470F-499E-9BF7-AFFAB288CA96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixata.Email", "Pixata.Email\Pixata.Email.csproj", "{72767C4D-470F-499E-9BF7-AFFAB288CA96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

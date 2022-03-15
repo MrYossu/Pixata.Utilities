@@ -23,15 +23,15 @@ First thing you need to do is add your SMTP server and "From" details to appSett
 
 Unless your name is Jim Spriggs, you'll need to change these to you own name and server settings!
 
-Then in your `Startup` class, add the following lines...
+Then add the following lines...
 
 ```c#
-// .NET5
+// .NET5 - Goes in Startup.cs
 SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>();
 services.AddSingleton(smtpSettings);
 services.AddTransient<PixataEmailService>();
 
-// .NET6
+// .NET6 - Goes in Program.cs
 SmtpSettings smtpSettings = builder.Configuration.GetSection("Smtp").Get<SmtpSettings>();
 builder.Services.AddSingleton(smtpSettings);
 builder.Services.AddTransient<PixataEmailService>();

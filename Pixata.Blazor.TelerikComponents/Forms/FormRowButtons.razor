@@ -1,0 +1,35 @@
+﻿@inject NavigationManager _navManager
+<div class="row justify-content-md-center">
+  @if (!string.IsNullOrWhiteSpace(CancelUrl)) {
+    <TelerikButton ButtonType="ButtonType.Button" OnClick="@(()=>_navManager.NavigateTo(CancelUrl))" Class="@cancelClass">@CancelCaption</TelerikButton>
+  }
+  <TelerikButton ButtonType="ButtonType.Submit" Primary="true" Class="@submitClass">@SubmitCaption</TelerikButton>
+</div>
+
+@code {
+
+  [Parameter]
+  public string SubmitCaption { get; set; } = "Submit";
+
+  [Parameter]
+  public string SubmitClass { get; set; } = "";
+
+  private string submitClass =>
+    $"ml-2 {SubmitClass}";
+
+  [Parameter]
+  public bool ShowCancel { get; set; } = true;
+
+  [Parameter]
+  public string CancelCaption { get; set; } = "Cancel";
+
+  [Parameter]
+  public string CancelClass { get; set; } = "";
+
+  private string cancelClass =>
+    $"mr-2 {CancelClass}";
+
+  [Parameter]
+  public string CancelUrl { get; set; } = "";
+
+}
