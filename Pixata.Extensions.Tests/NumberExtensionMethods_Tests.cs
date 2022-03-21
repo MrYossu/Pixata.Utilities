@@ -159,5 +159,30 @@ namespace Pixata.Extensions.Tests {
       Assert.AreEqual(result, qty.ToPercentageString(max, digits));
 
     #endregion
+
+    #region ToDurationString
+
+    [DataRow(0, "zero")]
+    [DataRow(1, "1 second")]
+    [DataRow(5, "5 seconds")]
+    [DataRow(30, "30 seconds")]
+    [DataRow(59, "59 seconds")]
+    [DataRow(60, "1 minute")]
+    [DataRow(90, "1 minute 30 seconds")]
+    [DataRow(120, "2 minutes")]
+    [DataRow(125, "2 minutes 5 seconds")]
+    [DataRow(3599, "59 minutes 59 seconds")]
+    [DataRow(3600, "1 hour")]
+    [DataRow(3601, "1 hour 1 second")]
+    [DataRow(3660, "1 hour 1 minute")]
+    [DataRow(3665, "1 hour 1 minute 5 seconds")]
+    [DataRow(7200, "2 hours")]
+    [DataRow(7205, "2 hours 5 seconds")]
+    [DataRow(7275, "2 hours 1 minute 15 seconds")]
+    [TestMethod]
+    public void NumberExtensionMethods_ToDurationString(int value, string expected) =>
+      Assert.AreEqual(expected, value.ToDurationString());
+
+    #endregion
   }
 }

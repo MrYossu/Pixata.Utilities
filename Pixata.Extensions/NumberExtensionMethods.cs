@@ -122,5 +122,29 @@ namespace Pixata.Extensions {
 
     public static string ToPercentageString(this double qty, double max, int digits = 0) =>
       $"{Math.Round(100 * qty / max, digits)}%";
+
+    /// <summary>
+    /// Returns a string representation of the number of seconds passed in, eg returns "2 minutes 5 seconds" for an input of 125. Returns "zero" is th eparameter is <= zero
+    /// </summary>
+    /// <param name="seconds">The number of seconds in the duration</param>
+    /// <returns>A string in the form "h hours m minutes s seconds"</returns>
+    public static string ToDurationString(this int seconds) {
+      if (seconds <= 0) {
+        return "zero";
+      }
+      string hoursStr = Hours(seconds);
+      string minutesStr = Minutes(seconds);
+      string secondsStr = Seconds(seconds);
+      string duration = (hoursStr.StartsWith("0") ? "" : hoursStr)
+                        + " " + (minutesStr.StartsWith("0") ? "" : minutesStr)
+                        + " " + (secondsStr.StartsWith("0") ? "" : secondsStr);
+      return duration.Replace("  ", " ").Trim();
+    }
+
+    private static string Hours(int n) => $"{n / 3600} hour{S(n / 3600)}";
+    private static string Minutes(int n) => $"{(n / 60) % 60} minute{S((n / 60) % 60)}";
+    private static string Seconds(int n) => $"{n % 60} second{S(n % 60)}";
+    private static string S(int n) =>
+      n == 1 ? "" : "s";
   }
 }
