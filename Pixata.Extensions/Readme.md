@@ -51,6 +51,8 @@ Here is a brief description of the methods in the classes so far...
 
 `ToPercentageString()` - Converts a number into the string representation of it as a percentage of a maximum (four overloads to allow for all combinations of the two parameters being `int` or `decimal`)
 
+`ToDurationString` - Converts a number of seconds to a string representation of the duration. For example, 125 will be converted to "2 minutes 5 seconds".
+
 ## StringExtensionMethods
 `SplitCamelCase()` - Splits a camcel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums.
 
