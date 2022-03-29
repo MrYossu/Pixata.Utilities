@@ -59,13 +59,25 @@ namespace Pixata.Extensions {
     /// Returns the first line of a multi-line string. Useful for getting the first line of someone's address
     /// </summary>
     /// <param name="str">The multi-line string</param>
-    /// <returns>The first line of the input, assuming Environment.NewLine is the line delimiter</returns>
+    /// <returns>The first line of the input, assuming Environment.NewLine or \n is the line delimiter</returns>
     public static string FirstLine(this string str) =>
       str.IndexOf(Environment.NewLine) > 0
         ? str.Substring(0, str.IndexOf(Environment.NewLine))
         : str.IndexOf("\n") > 0
           ? str.Substring(0, str.IndexOf("\n"))
           : str;
+
+    /// <summary>
+    /// Returns all but the first line of a multi-line string. Useful for getting the second and subsequent line(s) of someone's address
+    /// </summary>
+    /// <param name="str">The multi-line string</param>
+    /// <returns>The second and subsequent line(s) of the input, assuming Environment.NewLine or \n is the line delimiter</returns>
+    public static IEnumerable<string> OtherLines(this string str) =>
+      str.IndexOf(Environment.NewLine) > 0 
+        ? str.Split(Environment.NewLine).Skip(1)
+        : str.IndexOf("\n") > 0
+          ? str.Split("\n").Skip(1)
+          : new List<string>();
 
     /// <summary>
     /// Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents
