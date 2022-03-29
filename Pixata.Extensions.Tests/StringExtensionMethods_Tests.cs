@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Pixata.Extensions.Tests {
@@ -70,6 +71,27 @@ West Byfleet", "1 Acacia Mews")]
     [DataTestMethod]
     public void StringExtensionMethods_FirstLine(string multi, string output) =>
       Assert.AreEqual(output, multi.FirstLine());
+
+    #endregion
+
+    #region OtherLines
+
+    [DataTestMethod]
+    [DynamicData(nameof(GetOtherLinesTestData), DynamicDataSourceType.Method)]
+    public void StringExtensionMethods_OtherLines(string multi, IEnumerable<string> otherLines) {
+      IEnumerable<string> res = multi.OtherLines();
+      //Assert.AreEqual(otherLines.Count(), res.Count());
+      CollectionAssert.AreEqual(otherLines.ToList(), multi.OtherLines().ToList());
+    }
+
+    private static IEnumerable<object[]> GetOtherLinesTestData() {
+      yield return new object[] { "", new List<string>() };
+      yield return new object[] { "1 Jim Street", new List<string>() };
+      yield return new object[] { "1 Jim Street\nJimsville", new List<string>{ "Jimsville" } };
+      yield return new object[] { "1 Jim Street\nJimsville\nJV1 7YT", new List<string>{ "Jimsville", "JV1 7YT" } };
+      yield return new object[] { $"1 Jim Street{Environment.NewLine}Jimsville", new List<string> { "Jimsville" } };
+      yield return new object[] { $"1 Jim Street{Environment.NewLine}Jimsville{Environment.NewLine}JV1 7YT", new List<string> { "Jimsville", "JV1 7YT" } };
+    }
 
     #endregion
 
