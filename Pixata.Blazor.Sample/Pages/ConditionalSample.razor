@@ -1,0 +1,21 @@
+﻿@page "/ConditionalSample"
+<h3>Conditional</h3>
+
+<p>The <code>&lt;Conditional&gt;</code> component provides a powerful alternative to the regular C# <code>if</code> statement. The main benefit is that VS doesn't make a pig's breakfast of your code if you try and type HTML or plain text inside a Razor <code>if</code> block!</p>
+
+<h4>Simple example</h4>
+<p>Try checking or clearing the checkbox to say whether or not <label for="raining">it's raining today...</label> <input id="raining" type="checkbox" @bind-value="@Rain" /> </p>
+
+<Conditional IfTrue="@Rain">
+  <If>
+    <p>It's raining today</p>
+  </If>
+  <Else>
+    <p>It's not raining today - hurray!</p>
+  </Else>
+</Conditional>
+
+@code {
+  public bool Rain { get; set; }
+
+}
