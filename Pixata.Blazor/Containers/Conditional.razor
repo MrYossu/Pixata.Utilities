@@ -1,0 +1,25 @@
+﻿@if (IfTrue) {
+  @If
+} else {
+  @Else
+}
+
+@code {
+
+  /// <summary>
+  /// The boolean on which to condition
+  /// </summary>
+  [Parameter]
+  public bool IfTrue { get; set; }
+  /// <summary>
+  /// The elements to display if IfTrue is true
+  /// </summary>
+  [Parameter]
+  public RenderFragment If { get; set; }
+  /// <summary>
+  /// The elements to display if IfTrue is false
+  /// </summary>
+  [Parameter]
+  public RenderFragment Else { get; set; }
+
+}
