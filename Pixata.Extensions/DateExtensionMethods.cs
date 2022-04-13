@@ -40,6 +40,16 @@ namespace Pixata.Extensions {
     public static DateTime EndOfDay(this DateTime d) =>
       new DateTime(d.Year, d.Month, d.Day, 23, 59, 59).AddMilliseconds(999);
 
+    // Reduced to a one-liner from https://stackoverflow.com/a/38064/706346
+    /// <summary>
+    /// Returns a DateTime representing the start of the week (as defined by the startOfWeek parameter) for the given DateTime
+    /// </summary>
+    /// <param name="dt">The DateTime that falls in the week whose start you want</param>
+    /// <param name="startOfWeek">A DayOfWeek that specifies which day you consider the week to start</param>
+    /// <returns>A DateTime representing the start of the week for the given DateTime</returns>
+    public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek) =>
+      dt.AddDays(-1 * ((7 + (dt.DayOfWeek - startOfWeek)) % 7)).Date;
+
     /// <summary>
     /// Returns the first day of the given month
     /// </summary>
