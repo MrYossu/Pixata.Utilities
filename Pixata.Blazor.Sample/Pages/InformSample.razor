@@ -8,18 +8,40 @@
 
 <fieldset>
   <legend>Inform restricted to the current container</legend>
-  <Inform @ref="_viewportInform" OkText="OK, I got it">
+  <Inform @ref="_containerInform" PopUpDisplayOption="PopUpDisplayOptions.Container" OkText="OK, I got it">
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet consectetur arcu. Donec eget odio vel justo venenatis accumsan non at nisl. Suspendisse vehicula diam nec tincidunt molestie. Donec nec placerat dolor. Proin cursus metus lectus, ut vehicula est viverra id. Vestibulum mollis purus a felis porta, vel tempus ex aliquet. Phasellus sed mauris rutrum, malesuada libero et, suscipit nisl.</p>
     <p>Nunc consequat nunc et turpis rhoncus, ut ullamcorper sapien ultricies. Proin ultrices tellus et risus rutrum pretium. Maecenas nec ligula ante. Aliquam vel efficitur elit. Pellentesque mattis, odio at vehicula pharetra, ante dolor pellentesque erat, eget consectetur tellus nibh non neque. Sed nec sem nunc. Nullam suscipit dolor in odio lobortis, sit amet rhoncus elit porta. Fusce et pharetra urna.</p>
     <p>Proin varius diam in lobortis feugiat. Praesent at accumsan leo. Etiam eros quam, dapibus a arcu ac, scelerisque mollis libero. Pellentesque justo urna, molestie quis sagittis et, rhoncus at felis. Duis porttitor neque in justo molestie, commodo accumsan purus mattis. Etiam tincidunt ante ac metus interdum, vitae congue nibh auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
-    <TelerikButton @onclick="@ShowInform">Inform</TelerikButton>
+    <TelerikButton @onclick="@ShowInformContainer">Inform</TelerikButton>
   </Inform>
 </fieldset>
 
+<fieldset>
+  <legend>Inform that covers the full viewport</legend>
+  <Inform @ref="_viewportInform" PopUpDisplayOption="PopUpDisplayOptions.Window" OkText="OK, I got it">
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet consectetur arcu. Donec eget odio vel justo venenatis accumsan non at nisl. Suspendisse vehicula diam nec tincidunt molestie. Donec nec placerat dolor. Proin cursus metus lectus, ut vehicula est viverra id. Vestibulum mollis purus a felis porta, vel tempus ex aliquet. Phasellus sed mauris rutrum, malesuada libero et, suscipit nisl.</p>
+    <p>Nunc consequat nunc et turpis rhoncus, ut ullamcorper sapien ultricies. Proin ultrices tellus et risus rutrum pretium. Maecenas nec ligula ante. Aliquam vel efficitur elit. Pellentesque mattis, odio at vehicula pharetra, ante dolor pellentesque erat, eget consectetur tellus nibh non neque. Sed nec sem nunc. Nullam suscipit dolor in odio lobortis, sit amet rhoncus elit porta. Fusce et pharetra urna.</p>
+    <p>Proin varius diam in lobortis feugiat. Praesent at accumsan leo. Etiam eros quam, dapibus a arcu ac, scelerisque mollis libero. Pellentesque justo urna, molestie quis sagittis et, rhoncus at felis. Duis porttitor neque in justo molestie, commodo accumsan purus mattis. Etiam tincidunt ante ac metus interdum, vitae congue nibh auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+    <TelerikButton @onclick="@ShowInformViewport">Inform</TelerikButton>
+  </Inform>
+</fieldset>
+
+<h3 class="mt-3">More text added so that the page is longer than the viewport</h3>
+<p>This is to demonstrate that when the display style is Window, the pop-up is always in the centre of the viewport, rather than being shown halfway down the page (which is possibly off-screen)</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet consectetur arcu. Donec eget odio vel justo venenatis accumsan non at nisl. Suspendisse vehicula diam nec tincidunt molestie. Donec nec placerat dolor. Proin cursus metus lectus, ut vehicula est viverra id. Vestibulum mollis purus a felis porta, vel tempus ex aliquet. Phasellus sed mauris rutrum, malesuada libero et, suscipit nisl.</p>
+<p>Nunc consequat nunc et turpis rhoncus, ut ullamcorper sapien ultricies. Proin ultrices tellus et risus rutrum pretium. Maecenas nec ligula ante. Aliquam vel efficitur elit. Pellentesque mattis, odio at vehicula pharetra, ante dolor pellentesque erat, eget consectetur tellus nibh non neque. Sed nec sem nunc. Nullam suscipit dolor in odio lobortis, sit amet rhoncus elit porta. Fusce et pharetra urna.</p>
+<p>Proin varius diam in lobortis feugiat. Praesent at accumsan leo. Etiam eros quam, dapibus a arcu ac, scelerisque mollis libero. Pellentesque justo urna, molestie quis sagittis et, rhoncus at felis. Duis porttitor neque in justo molestie, commodo accumsan purus mattis. Etiam tincidunt ante ac metus interdum, vitae congue nibh auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet consectetur arcu. Donec eget odio vel justo venenatis accumsan non at nisl. Suspendisse vehicula diam nec tincidunt molestie. Donec nec placerat dolor. Proin cursus metus lectus, ut vehicula est viverra id. Vestibulum mollis purus a felis porta, vel tempus ex aliquet. Phasellus sed mauris rutrum, malesuada libero et, suscipit nisl.</p>
+<p>Nunc consequat nunc et turpis rhoncus, ut ullamcorper sapien ultricies. Proin ultrices tellus et risus rutrum pretium. Maecenas nec ligula ante. Aliquam vel efficitur elit. Pellentesque mattis, odio at vehicula pharetra, ante dolor pellentesque erat, eget consectetur tellus nibh non neque. Sed nec sem nunc. Nullam suscipit dolor in odio lobortis, sit amet rhoncus elit porta. Fusce et pharetra urna.</p>
+<p>Proin varius diam in lobortis feugiat. Praesent at accumsan leo. Etiam eros quam, dapibus a arcu ac, scelerisque mollis libero. Pellentesque justo urna, molestie quis sagittis et, rhoncus at felis. Duis porttitor neque in justo molestie, commodo accumsan purus mattis. Etiam tincidunt ante ac metus interdum, vitae congue nibh auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+
 @code {
+  private Inform _containerInform;
   private Inform _viewportInform;
 
-  private void ShowInform() =>
+  private void ShowInformViewport() =>
     _viewportInform.Display("Please don't click that button again!");
+
+  private void ShowInformContainer() =>
+    _containerInform.Display("Please don't click that button again!");
 
 }

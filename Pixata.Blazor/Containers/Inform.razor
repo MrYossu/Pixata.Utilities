@@ -1,5 +1,5 @@
 ﻿<div style="position: relative">
-  <div id="informOverlay" style="display: @_displayStyle">
+  <div id="informOverlay" style="display: @_displayStyle; position: @_position">
     <div id="informOverlayContent">
       <div><HtmlRaw Html="@Caption" /></div>
       <button class="btn btn-primary" @onclick="@(ButtonClicked)">@OkText</button>
@@ -11,7 +11,6 @@
 
 <style>
   #informOverlay {
-    position: absolute;
     width: 100%;
     height: 100%;
     top: 0;
@@ -42,6 +41,9 @@
 @code {
 
   [Parameter]
+  public PopUpDisplayOptions PopUpDisplayOption { get; set; } = PopUpDisplayOptions.Container;
+
+  [Parameter]
   public string Caption { get; set; }
 
   [Parameter]
@@ -51,8 +53,15 @@
   public RenderFragment ChildContent { get; set; }
 
   private string _displayStyle = "none";
+  private string _position;
+
+  protected override void OnParametersSet() =>
+    _position = PopUpDisplayOption == PopUpDisplayOptions.Container ? "absolute" : "fixed";
 
   public void Display(string caption = "") {
+    _position = PopUpDisplayOption == PopUpDisplayOptions.Container ? "absolute" : "fixed";
+    Console.WriteLine($"PopUpDisplayOption: {PopUpDisplayOption}");
+    Console.WriteLine($"position: {_position}");
     if (!string.IsNullOrWhiteSpace(caption)) {
       Caption = caption;
     }
@@ -61,6 +70,6 @@
   }
 
   private void ButtonClicked() =>
-  _displayStyle = "none";
+    _displayStyle = "none";
 
 }
