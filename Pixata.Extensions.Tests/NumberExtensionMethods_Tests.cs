@@ -184,5 +184,17 @@ namespace Pixata.Extensions.Tests {
       Assert.AreEqual(expected, value.ToDurationString());
 
     #endregion
+
+    #region ToFileSizeString
+
+    [DataRow(0, 0, "0Kb")]
+    [DataRow(1024, 0, "1Kb")]
+    [DataRow(1024, 1, "1.0Kb")]
+    [DataRow(1024 * 1024, 1, "1.0Mb")]
+    [TestMethod]
+    public void NumberExtensionMethods_ToFileSizeString(long value, int precision, string expected) =>
+      Assert.AreEqual(expected, value.ToFileSizeString(precision));
+
+    #endregion
   }
 }
