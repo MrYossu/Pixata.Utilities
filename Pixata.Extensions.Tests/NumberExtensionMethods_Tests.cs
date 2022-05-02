@@ -187,7 +187,9 @@ namespace Pixata.Extensions.Tests {
 
     #region ToFileSizeString
 
-    [DataRow(0, 0, "0Kb")]
+    [DataRow(0, 0, "0 bytes")]
+    [DataRow(10, 0, "10 bytes")]
+    [DataRow(10, 1, "10 bytes")]
     [DataRow(1024, 0, "1Kb")]
     [DataRow(1024, 1, "1.0Kb")]
     [DataRow(1024 * 1024, 1, "1.0Mb")]
