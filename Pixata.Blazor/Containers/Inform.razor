@@ -60,8 +60,6 @@
 
   public void Display(string caption = "") {
     _position = PopUpDisplayOption == PopUpDisplayOptions.Container ? "absolute" : "fixed";
-    Console.WriteLine($"PopUpDisplayOption: {PopUpDisplayOption}");
-    Console.WriteLine($"position: {_position}");
     if (!string.IsNullOrWhiteSpace(caption)) {
       Caption = caption;
     }
