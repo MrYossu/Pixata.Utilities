@@ -83,6 +83,8 @@ This aliased type is used below. If you don't want to do this, you can leave the
 As mentioned above, (nearly) all of these methods return a `TryAsync`, so will need to be handled as shown earlier. For convenience, I will refer to the return type as the inner type (eg `DriveFile` or `string`) rather than the true return type (ie `TryAsync<DriveFile>>`, etc) as this is clearer.
 
 ### The methods
+`TryAsync<About> GetAbout()` - Returns an `About` object that contains information about the drive. See [the Google API docs](https://developers.google.com/drive/api/v3/reference/about/get) for more information about the `About` object. This method only returns the `User` and `StorageQuota` sections, as these seemed to be the most useful.
+
 `TryAsync<DriveFile> GetFolder(string folderId = "root")` - Returns an object representing the folder whose `Id` was passed
 
 `TryAsync<DriveFile> GetParentFolder(string folderId)` - Returns an object representing the parent folder of the folder whose `Id` was passed
