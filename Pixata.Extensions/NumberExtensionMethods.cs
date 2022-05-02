@@ -156,7 +156,7 @@ namespace Pixata.Extensions {
     // Modified from code found at https://stackoverflow.com/a/62698159/706346
     public static string ToFileSizeString(this long bytes, int precision = 1) =>
       bytes < 1024 
-        ? $"{bytes}Kb" 
+        ? $"{bytes} byte{(bytes==1?"":"s")}" 
         : $"{(bytes / Math.Pow(1024, (int)(Math.Log(bytes) / Math.Log(1024)))).ToString($"F{precision}")}{("KMGTPE")[(int)(Math.Log(bytes) / Math.Log(1024)) - 1]}b";
   }
 }
