@@ -146,5 +146,17 @@ namespace Pixata.Extensions {
     private static string Seconds(int n) => $"{n % 60} second{S(n % 60)}";
     private static string S(int n) =>
       n == 1 ? "" : "s";
+
+    /// <summary>
+    /// Converts a number (presumed to be bytes) to a readable representation using Kb, Mb, Gb, etc unit
+    /// </summary>
+    /// <param name="bytes">The number of bytes</param>
+    /// <param name="precision">The number of digits to the right of the decimal point. Defaults to 1, eg 1.2Mb</param>
+    /// <returns>A formatted string of the number of bytes</returns>
+    // Modified from code found at https://stackoverflow.com/a/62698159/706346
+    public static string ToFileSizeString(this long bytes, int precision = 1) =>
+      bytes < 1024 
+        ? $"{bytes}Kb" 
+        : $"{(bytes / Math.Pow(1024, (int)(Math.Log(bytes) / Math.Log(1024)))).ToString($"F{precision}")}{("KMGTPE")[(int)(Math.Log(bytes) / Math.Log(1024)) - 1]}b";
   }
 }
