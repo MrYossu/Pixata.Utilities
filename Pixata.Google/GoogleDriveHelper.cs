@@ -27,6 +27,21 @@ namespace Pixata.Google {
 
     #endregion
 
+    #region Information
+
+    /// <summary>
+    /// Gets meta information about the Google Drive. Specifically, the User and StorageQuota sections are returned, as these seemed to be the most useful. More information can be found at https://developers.google.com/drive/api/v3/reference/about/get
+    /// </summary>
+    /// <returns>The About object that contains the drive information</returns>
+    public TryAsync<About> GetAbout() =>
+      TryAsync(() => {
+        AboutResource.GetRequest aboutRequest = _service.About.Get();
+        aboutRequest.Fields = "user, storageQuota";
+        return aboutRequest.ExecuteAsync();
+      });
+
+    #endregion
+
     #region Folders
 
     /// <summary>
