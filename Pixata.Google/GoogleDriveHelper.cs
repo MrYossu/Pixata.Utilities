@@ -175,6 +175,28 @@ namespace Pixata.Google {
       });
 
     /// <summary>
+    /// Updates the content of an existing file
+    /// </summary>
+    /// <param name="id">The Id of the existing Google Drive file</param>
+    /// <param name="file">A Stream containing the file content</param>
+    /// <param name="fileName">The file name. If this is different from the existing name, the file will be renamed</param>
+    /// <param name="mimeType">The file's MIME type</param>
+    /// <returns></returns>
+    public TryAsync<string> UpdateFile(string id, Stream file, string fileName, string mimeType) =>
+      TryAsync(async () => {
+        DriveFile driveFile = new() {
+          Name = fileName
+        };
+        FilesResource.UpdateMediaUpload request = _service.Files.Update(driveFile, id, file, mimeType);
+        request.Fields = "id";
+        IUploadProgress response = await request.UploadAsync();
+        if (response.Status != UploadStatus.Completed) {
+          throw response.Exception;
+        }
+        return request.ResponseBody.Id;
+      });
+
+    /// <summary>
     /// Sets a permission on a file
     /// </summary>
     /// <param name="fileId">The Id of the file whose permissions are to be set</param>
