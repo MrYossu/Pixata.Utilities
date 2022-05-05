@@ -107,6 +107,8 @@ As mentioned above, (nearly) all of these methods return a `TryAsync`, so will n
 
 `TryAsync<string> UploadFile(Stream file, string fileName, string mimeType, string folderId)` - Uploads a file to the folder whose `Id` is passed
 
+`TryAsync<string> UpdateFile(string id, Stream file, string fileName, string mimeType)` - Updates an existing file
+
 `TryAsync<Unit> MoveFile(string fileId, string newFolderId)` - Move the file to a new folder
 
 `TryAsync<string> DeleteFile(string fileId)` - Deletes the file whose `Id` is passed
