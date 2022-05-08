@@ -16,7 +16,7 @@
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: @ZIndex;
   }
 
   #informOverlay #informOverlayContent {
@@ -48,6 +48,9 @@
 
   [Parameter]
   public string OkText { get; set; } = "OK";
+
+  [Parameter]
+  public int ZIndex { get; set; } = 2147483647;
 
   [Parameter]
   public RenderFragment ChildContent { get; set; }
