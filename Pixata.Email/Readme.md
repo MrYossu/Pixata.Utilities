@@ -14,6 +14,7 @@ First thing you need to do is add your SMTP server and "From" details to appSett
   "Smtp": {
     "Server": "your.smtp.server",
     "Port": 999,
+    "UseSsl": "true",
     "UserName": "your.username",
     "Password": "your.password",
     "FromEmail": "jim@spriggs.com",
@@ -49,25 +50,13 @@ services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
 
 As with most of the code I write, this service uses the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. This allows you to handle both the happy path and sad path with ease.
 
-If you look at the code in [the sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/SendEmail.razor), you'll see that it (essentially) does this...
+There are two overloads of the `SendEmail` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
 
 ```c#
-Msg = await _emailService.SendEmailAsync(new(TheContactModel.Subject, TheContactModel.Body, TheContactModel.Email, TheContactModel.Name))
-  .Match(_ => "Success", ex => $"Exception: {ex.Message}");
+await _emailService.SendEmailAsync("billy@shears.com", "Hello from Jim Spriggs", htmlBody))
+  .Match(_ => /* code on success */, ex => /* code on failure */);
 ```
 
-`Msg` is a `string` variable that is displayed on the page. 
+If you want more control over what is sent and how, the second overload takes an `EmailParameters` object. The various constructors allow you to specify more detail, as well as adding multiple recipients. You can also add attachments, which are tuples of the form `(string FileName, string MimeType, byte[] Data)`.
 
-If you wanted to shorten that line, you could add a method to the `ContactModel` that returned an `EmailParameters` object, and pass that in to `SendEmailAsync` instead.
-
-Obviously, as with any of the LanguageExt classes that supply a `Match` function, you can do more than just return a value...
-
-```c#
-await _emailService.SendEmailAsync(new(TheContactModel.Subject, TheContactModel.Body, TheContactModel.Email, TheContactModel.Name))
-  .Match(_ => {
-    _navMan.NavigateTo("/EmailSent");
-  }, ex => {
-    _logger.LogError($"Exception sending email: {ex.Message}");
-    Msg = "Sorry, your email could not be sent";
-  });
-```
+See [the `EmailParameters` code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Email/EmailParameters.cs) for more details.
