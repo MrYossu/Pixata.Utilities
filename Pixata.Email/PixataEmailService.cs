@@ -18,20 +18,19 @@ namespace Pixata.Email {
     /// <param name="htmlMessage">An HTML string for the body of the email</param>
     /// <param name="useSsl">An optiona bool that specifies whether to use SSL or not. Default true</param>
     /// <returns>Unit</returns>
-    public TryAsync<Unit> SendEmailAsync(string email, string subject, string htmlMessage, bool useSsl = true) =>
-      SendEmailAsync(new(subject, htmlMessage, email), useSsl);
+    public TryAsync<Unit> SendEmailAsync(string email, string subject, string htmlMessage) =>
+      SendEmailAsync(new(subject, htmlMessage, email));
 
     /// <summary>
     /// Send an email from the user specified in the settings to the email passed in. Allows multiple recipients and attachments
     /// </summary>
     /// <param name="emailParameters">An EmailParameters object, which contains all the data for the email</param>
-    /// <param name="useSsl">An optiona bool that specifies whether to use SSL or not. Default true</param>
     /// <returns>Unit</returns>
-    public TryAsync<Unit> SendEmailAsync(EmailParameters emailParameters, bool useSsl = true) =>
+    public TryAsync<Unit> SendEmailAsync(EmailParameters emailParameters) =>
       TryAsync(async () => {
         MimeMessage msg = CreateMailMessage(emailParameters);
         using SmtpClient client = new();
-        await client.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, useSsl);
+        await client.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, _smtpSettings.UseSsl);
         await client.AuthenticateAsync(_smtpSettings.UserName, _smtpSettings.Password);
         await client.SendAsync(msg);
         await client.DisconnectAsync(true);
