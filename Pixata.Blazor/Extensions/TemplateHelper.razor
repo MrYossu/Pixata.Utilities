@@ -1,0 +1,16 @@
+﻿@code {
+
+  public RenderFragment<object> BuildTemplate<T>(Func<T, string> convert, string style = "", string classCss = "") where T : class =>
+    context => __builder => {
+      <div class="@classCss" style="@style">@convert(context as T)</div>
+    };
+
+  public RenderFragment<object> BuildTemplateLink<T>(Func<T, string> convert, Func<T, string> uri, string style = "", string classCss = "", string title = "") where T : class =>
+    context => __builder => {
+      if (string.IsNullOrWhiteSpace(title)) {
+        title = context.ToString();
+      }
+      <div class="@classCss" style="@style"><a href="@uri(context as T)" title="@title">@convert(context as T)</a></div>
+    };
+
+}
