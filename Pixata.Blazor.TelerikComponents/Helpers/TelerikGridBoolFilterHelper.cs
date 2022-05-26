@@ -23,3 +23,4 @@ namespace Pixata.Blazor.TelerikComponents.Helpers {
       }
     }
   }
+}
