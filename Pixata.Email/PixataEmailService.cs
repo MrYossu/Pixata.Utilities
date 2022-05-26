@@ -16,7 +16,6 @@ namespace Pixata.Email {
     /// <param name="email">The recipient email address</param>
     /// <param name="subject">The email subject line</param>
     /// <param name="htmlMessage">An HTML string for the body of the email</param>
-    /// <param name="useSsl">An optiona bool that specifies whether to use SSL or not. Default true</param>
     /// <returns>Unit</returns>
     public TryAsync<Unit> SendEmailAsync(string email, string subject, string htmlMessage) =>
       SendEmailAsync(new(subject, htmlMessage, email));
