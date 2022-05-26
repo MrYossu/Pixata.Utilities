@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <Folder Include="Icon\" />
-    <Folder Include="Helpers\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
