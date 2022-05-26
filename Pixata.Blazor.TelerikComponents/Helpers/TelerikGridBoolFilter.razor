@@ -1,0 +1,39 @@
+﻿@using Telerik.DataSource
+@code {
+
+  public RenderFragment<FilterCellTemplateContext> BuildTemplate() =>
+    context => __builder => {
+      BoolFilterContext = context;
+      <TelerikCheckBox @bind-Value="@IsTrue"
+                       Indeterminate="@(!IsTrue.HasValue)"
+                       OnChange="@SetupFilter"
+                       Class="mt-1">
+      </TelerikCheckBox>
+      <TelerikButton ButtonType="ButtonType.Button"
+                     Class="k-clear-button-visible ml-2"
+                     Icon="filter-clear"
+                     Enabled="@IsTrue.HasValue"
+                     OnClick="@ClearBoolFilter">
+      </TelerikButton>
+    };
+
+  public FilterCellTemplateContext BoolFilterContext { get; set; } = null!;
+  public bool? IsTrue { get; set; }
+
+  public async Task ClearBoolFilter() {
+    IsTrue = null;
+    await BoolFilterContext.ClearFilterAsync();
+  }
+
+  public async Task SetupFilter() {
+    if (!IsTrue.HasValue) {
+      await BoolFilterContext.ClearFilterAsync();
+    } else {
+      FilterDescriptor filterRule = BoolFilterContext.FilterDescriptor.FilterDescriptors[0] as FilterDescriptor;
+      filterRule.Value = IsTrue.Value;
+      filterRule.Operator = FilterOperator.IsEqualTo;
+      await BoolFilterContext.FilterAsync();
+    }
+  }
+
+}
