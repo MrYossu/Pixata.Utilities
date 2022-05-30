@@ -9,10 +9,11 @@ namespace Pixata.Blazor.Sample.Data {
     };
 
     public Task<WeatherForecast[]> GetForecastAsync(DateTime startDate) {
-      var rng = new Random();
-      return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast {
+      Random rng = new();
+      return Task.FromResult(Enumerable.Range(1, 15).Select(index => new WeatherForecast {
         Date = startDate.AddDays(index),
         TemperatureC = rng.Next(-20, 55),
+        Rain = rng.Next(100) < 30,
         Summary = Summaries[rng.Next(Summaries.Length)]
       }).ToArray());
     }

@@ -1,0 +1,36 @@
+﻿@page "/TelerikGrid"
+@using Pixata.Blazor.Sample.Data
+@using Pixata.Blazor.Extensions
+@using Pixata.Blazor.TelerikComponents.Helpers
+@using Pixata.Extensions
+@inject WeatherForecastService _service
+
+<h3>Telerik grid</h3>
+
+<TelerikGrid Data="_forecasts"
+             FilterMode="GridFilterMode.FilterRow">
+  <GridColumns>
+    <GridColumn Field="@nameof(WeatherForecast.Date)" Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f=>f.Date.ToPrettyString(), "text-align: right"))" />
+    <GridColumn Field="@nameof(WeatherForecast.TemperatureC)" Title="Temp (C)" />
+    <GridColumn Field="@nameof(WeatherForecast.TemperatureF)" Title="Temp (F)" />
+    <GridColumn Field="@nameof(WeatherForecast.Rain)" 
+                Title="Rain?" 
+                FilterCellTemplate="@_lockedFilter.BuildTemplate()" 
+                Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f=>f.Rain?"<img src='/rain.png' width='24' >":"<img src='/sun.png' width='24' >", "text-align: center"))" />
+    <GridColumn Field="@nameof(WeatherForecast.Summary)" />
+  </GridColumns>
+</TelerikGrid>
+
+<TemplateHelper @ref="@_templateHelper" />
+<TelerikGridBoolFilter @ref="@_lockedFilter" />
+
+@code {
+  private static TemplateHelper _templateHelper = null!;
+  TelerikGridBoolFilter _lockedFilter = null!;
+
+  private List<WeatherForecast> _forecasts = new();
+
+  protected override async Task OnInitializedAsync() =>
+    _forecasts = (await _service.GetForecastAsync(DateTime.Today)).ToList();
+
+}

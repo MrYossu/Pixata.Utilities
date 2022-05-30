@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Version>2.9</Version>
     <AssemblyVersion>2.9</AssemblyVersion>
     <FileVersion>2.9</FileVersion>
@@ -18,9 +18,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.55.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.55.0.2502" />
-    <PackageReference Include="LanguageExt.Core" Version="4.0.3" />
+    <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.57.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.57.0.2684" />
+    <PackageReference Include="LanguageExt.Core" Version="4.1.1" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
