@@ -162,8 +162,29 @@ jobs:
     
 # ***************** PUBLISHING **************** #
 
-    - name: Publish all Nuget packages
-      run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+    - name: Publish Pixata.Blazor
+      run: dotnet nuget push Pixata.Blazor.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+
+    - name: Publish Pixata.Extensions
+      run: dotnet nuget push Pixata.Extensions.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+
+    - name: Publish Pixata.Blazor.LanguageExtComponents
+      run: dotnet nuget push Pixata.Blazor.LanguageExtComponents.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+
+    - name: Publish Pixata.Blazor.TelerikComponents
+      run: dotnet nuget push Pixata.Blazor.TelerikComponents.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+
+    - name: Publish Pixata.SimilarityChooser
+      run: dotnet nuget push Pixata.SimilarityChooser.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+
+    - name: Publish Pixata.Google
+      run: dotnet nuget push Pixata.Google.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+
+    - name: Publish Pixata.Functional
+      run: dotnet nuget push Pixata.Functional.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+
+    - name: Publish Pixata.Email
+      run: dotnet nuget push Pixata.Email.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
 
   # *** Publish Pixata.Blazor.Sample ***
     - name: Rename _app_offline.htm to app_offline.htm to stop the site
