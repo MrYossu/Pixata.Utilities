@@ -162,53 +162,8 @@ jobs:
     
 # ***************** PUBLISHING **************** #
 
-    - name: Publish Pixata.Blazor
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-       PROJECT_FILE_PATH: Pixata.Blazor/Pixata.Blazor.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.Blazor.TelerikComponents
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-       PROJECT_FILE_PATH: Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.Blazor.LanguageExtComponents
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-       PROJECT_FILE_PATH: Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.Extensions
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-        PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.Email
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-       PROJECT_FILE_PATH: Pixata.Email/Pixata.Email.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.Functional
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-        PROJECT_FILE_PATH: Pixata.Functional/Pixata.Functional.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.SimilarityChooser
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-        PROJECT_FILE_PATH: Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.Google
-      uses: brandedoutcast/publish-nuget@v2.5.5  
-      with:   
-        PROJECT_FILE_PATH: Pixata.Google/Pixata.Google.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+    - name: Publish all Nuget packages
+      run: dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
 
   # *** Publish Pixata.Blazor.Sample ***
     - name: Rename _app_offline.htm to app_offline.htm to stop the site
