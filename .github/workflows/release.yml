@@ -1,4 +1,4 @@
-# Release 
+# Release
 name: release 
   
 on:  
@@ -18,10 +18,10 @@ jobs:
       uses: actions/setup-dotnet@v1.7.2  
       with:  
         dotnet-version: '2.1.x'
-    - name: Setup .NET Core 6.0
+    - name: Setup .NET Core  
       uses: actions/setup-dotnet@v1.7.2  
       with:  
-        dotnet-version: '6.0'
+        dotnet-version: '5.0'
     
 # ***************** BUILDS **************** #
 
@@ -163,28 +163,52 @@ jobs:
 # ***************** PUBLISHING **************** #
 
     - name: Publish Pixata.Blazor
-      run: dotnet nuget push Pixata.Blazor.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
-
-    - name: Publish Pixata.Extensions
-      run: dotnet nuget push Pixata.Extensions.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
-
-    - name: Publish Pixata.Blazor.LanguageExtComponents
-      run: dotnet nuget push Pixata.Blazor.LanguageExtComponents.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Blazor/Pixata.Blazor.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
     - name: Publish Pixata.Blazor.TelerikComponents
-      run: dotnet nuget push Pixata.Blazor.TelerikComponents.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
-    - name: Publish Pixata.SimilarityChooser
-      run: dotnet nuget push Pixata.SimilarityChooser.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+    - name: Publish Pixata.Blazor.LanguageExtComponents
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
-    - name: Publish Pixata.Google
-      run: dotnet nuget push Pixata.Google.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
-
-    - name: Publish Pixata.Functional
-      run: dotnet nuget push Pixata.Functional.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+    - name: Publish Pixata.Extensions
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+        PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
     - name: Publish Pixata.Email
-      run: dotnet nuget push Pixata.Email.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate -n 
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Email/Pixata.Email.csproj  
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
+    - name: Publish Pixata.Functional
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+        PROJECT_FILE_PATH: Pixata.Functional/Pixata.Functional.csproj  
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
+    - name: Publish Pixata.SimilarityChooser
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+        PROJECT_FILE_PATH: Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj  
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+
+    - name: Publish Pixata.Google
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+        PROJECT_FILE_PATH: Pixata.Google/Pixata.Google.csproj  
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
   # *** Publish Pixata.Blazor.Sample ***
     - name: Rename _app_offline.htm to app_offline.htm to stop the site
@@ -197,7 +221,7 @@ jobs:
           ftp.quit()
 
     - name: Publish Pixata.Blazor.Sample
-      run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net6.0 --output Pixata.Blazor.Sample.Publish
+      run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net5.0 --output Pixata.Blazor.Sample.Publish
 
     - name: Deploy Pixata.Blazor.Sample
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
