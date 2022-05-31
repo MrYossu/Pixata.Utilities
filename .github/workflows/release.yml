@@ -221,7 +221,7 @@ jobs:
           ftp.quit()
 
     - name: Publish Pixata.Blazor.Sample
-      run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net5.0 --output Pixata.Blazor.Sample.Publish
+      run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net6.0 --output Pixata.Blazor.Sample.Publish
 
     - name: Deploy Pixata.Blazor.Sample
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
