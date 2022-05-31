@@ -1,22 +1,32 @@
 ﻿@page "/TelerikGrid"
-@using Pixata.Blazor.Sample.Data
-@using Pixata.Blazor.Extensions
-@using Pixata.Blazor.TelerikComponents.Helpers
 @using Pixata.Extensions
+@using Pixata.Blazor.Sample.Data
+@using Pixata.Blazor.TelerikComponents.Helpers
+@using Pixata.Blazor.Extensions
 @inject WeatherForecastService _service
 
 <h3>Telerik grid</h3>
 
+<p>This page shows a Telerik grid using of two components, the <code>TemplateHelper</code> (which has nothing to do with Telerik, and can be used in any component that accepts templates) and the <code>TelerikGridBoolFilter</code> component.</p>
+
+<p>The <code>TemplateHelper</code> cuts down on the amount of code you need to write when supplying a template, as it allows you to use a helper method to build the HTML for the template.</p>
+
+<p>The <code>TelerikGridBoolFilter</code> component changes the row filter that the Telerik grid uses on a bool column from a default dropdown containing "All", "Is true" and "Is False" to a checkbox. This takes up a lot less space (usually a benefit on a bool column, as the contents tend to be smaller) and is more intuitive.</p>
+
+<p>The grid below uses both components on the column for the <code>Rain</code> bool property that I added to the standard weather forecast model. As you can see, the result is a lot better than the default (which you can see in the "Rain default" column)</p>
+
 <TelerikGrid Data="_forecasts"
              FilterMode="GridFilterMode.FilterRow">
   <GridColumns>
-    <GridColumn Field="@nameof(WeatherForecast.Date)" Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f=>f.Date.ToPrettyString(), "text-align: right"))" />
+    <GridColumn Field="@nameof(WeatherForecast.Date)" Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f => f.Date.ToPrettyString(), "text-align: right"))" />
     <GridColumn Field="@nameof(WeatherForecast.TemperatureC)" Title="Temp (C)" />
     <GridColumn Field="@nameof(WeatherForecast.TemperatureF)" Title="Temp (F)" />
-    <GridColumn Field="@nameof(WeatherForecast.Rain)" 
-                Title="Rain?" 
-                FilterCellTemplate="@_lockedFilter.BuildTemplate()" 
-                Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f=>f.Rain?"<img src='/rain.png' width='24' >":"<img src='/sun.png' width='24' >", "text-align: center"))" />
+    <GridColumn Field="@nameof(WeatherForecast.Rain)" Width="100px"
+                Title="Rain?"
+                FilterCellTemplate="@_lockedFilter.BuildTemplate()"
+                Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f => f.Rain ? "<img src='/rain.png' width='24' >" : "<img src='/sun.png' width='24' >", "text-align: center"))" />
+    <GridColumn Field="@nameof(WeatherForecast.Rain)" Width="200px"
+                Title="Rain default"/>
     <GridColumn Field="@nameof(WeatherForecast.Summary)" />
   </GridColumns>
 </TelerikGrid>
