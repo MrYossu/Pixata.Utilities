@@ -26,13 +26,19 @@
   }
 
   public async Task SetupFilter() {
-    if (!IsTrue.HasValue) {
+    if (BoolFilterContext != null && !IsTrue.HasValue) {
       await BoolFilterContext.ClearFilterAsync();
     } else {
-      FilterDescriptor filterRule = BoolFilterContext.FilterDescriptor.FilterDescriptors[0] as FilterDescriptor;
-      filterRule.Value = IsTrue.Value;
-      filterRule.Operator = FilterOperator.IsEqualTo;
-      await BoolFilterContext.FilterAsync();
+      if (BoolFilterContext?.FilterDescriptor?.FilterDescriptors != null
+          && BoolFilterContext.FilterDescriptor.FilterDescriptors.Any()
+          && BoolFilterContext.FilterDescriptor.FilterDescriptors[0] is FilterDescriptor) {
+        FilterDescriptor? filterRule = BoolFilterContext.FilterDescriptor.FilterDescriptors[0] as FilterDescriptor;
+        if (filterRule != null) {
+          filterRule.Value = IsTrue != null && IsTrue.Value;
+          filterRule.Operator = FilterOperator.IsEqualTo;
+          await BoolFilterContext.FilterAsync();
+        }
+      }
     }
   }
 
