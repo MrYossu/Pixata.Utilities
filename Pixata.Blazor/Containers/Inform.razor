@@ -1,5 +1,5 @@
 ﻿<div style="position: relative">
-  <div id="informOverlay" style="display: @_displayStyle; position: @_position">
+  <div id="informOverlay" style="display: @_displayStyle; position: @_position; z-index: @ZIndex">
     <div id="informOverlayContent">
       <div><HtmlRaw Html="@Caption" /></div>
       <button type="button" class="btn btn-primary" @onclick="@(ButtonClicked)">@OkText</button>
@@ -8,35 +8,6 @@
 
   @ChildContent
 </div>
-
-<style>
-  #informOverlay {
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: @ZIndex;
-  }
-
-  #informOverlay #informOverlayContent {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 18px;
-    -moz-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    -o-transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    padding: 10px;
-    background: #fff;
-    color: #000;
-    text-align: center;
-    box-shadow: 10px 10px 5px #333;
-    border-radius: 10px;
-  }
-</style>
 
 @code {
 
