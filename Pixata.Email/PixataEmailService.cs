@@ -1,5 +1,6 @@
 ﻿using LanguageExt;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 using static LanguageExt.Prelude;
 
@@ -30,6 +31,23 @@ namespace Pixata.Email {
         MimeMessage msg = CreateMailMessage(emailParameters);
         using SmtpClient client = new();
         await client.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, _smtpSettings.UseSsl);
+        await client.AuthenticateAsync(_smtpSettings.UserName, _smtpSettings.Password);
+        await client.SendAsync(msg);
+        await client.DisconnectAsync(true);
+        return unit;
+      });
+
+    /// <summary>
+    /// Send an email from the user specified in the settings to the email passed in. Allows multiple recipients and attachments
+    /// </summary>
+    /// <param name="emailParameters">An EmailParameters object, which contains all the data for the email</param>
+    /// <param name="secureSocketOptions">A member of the MailKit.Security.SecureSocketOptions</param>
+    /// <returns></returns>
+    public TryAsync<Unit> SendEmailAsync(EmailParameters emailParameters, SecureSocketOptions secureSocketOptions) =>
+      TryAsync(async () => {
+        MimeMessage msg = CreateMailMessage(emailParameters);
+        using SmtpClient client = new();
+        await client.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, secureSocketOptions);
         await client.AuthenticateAsync(_smtpSettings.UserName, _smtpSettings.Password);
         await client.SendAsync(msg);
         await client.DisconnectAsync(true);
