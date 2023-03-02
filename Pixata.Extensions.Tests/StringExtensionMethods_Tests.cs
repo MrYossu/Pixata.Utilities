@@ -27,12 +27,15 @@ namespace Pixata.Extensions.Tests {
 
     #region SplitCamelCase
 
-    [DataRow("", "")]
-    [DataRow("Hello", "Hello")]
-    [DataRow("HelloWorld", "Hello World")]
+    [DataRow("", true, "")]
+    [DataRow("", false, "")]
+    [DataRow("Hello", true, "Hello")]
+    [DataRow("Hello", false, "Hello")]
+    [DataRow("HelloWorld", true, "Hello world")]
+    [DataRow("HelloWorld", false, "Hello World")]
     [DataTestMethod]
-    public void StringExtensionMethods_SplitCamelCase(string input, string output) =>
-      Assert.AreEqual(output, input.SplitCamelCase());
+    public void StringExtensionMethods_SplitCamelCase(string input, bool toLower, string output) =>
+      Assert.AreEqual(output, input.SplitCamelCase(toLower));
 
     #endregion
 
@@ -43,17 +46,21 @@ namespace Pixata.Extensions.Tests {
       BigFatOrangUtan = 1
     }
 
-    [DataRow(Animals.HairyGibbon, "Hairy Gibbon")]
-    [DataRow(Animals.BigFatOrangUtan, "Big Fat Orang Utan")]
+    [DataRow(Animals.HairyGibbon, true, "Hairy gibbon")]
+    [DataRow(Animals.HairyGibbon, false, "Hairy Gibbon")]
+    [DataRow(Animals.BigFatOrangUtan, true, "Big fat orang utan")]
+    [DataRow(Animals.BigFatOrangUtan, false, "Big Fat Orang Utan")]
     [DataTestMethod]
-    public void StringExtensionMethods_SplitEnumCamelCase(Animals animal, string output) =>
-      Assert.AreEqual(output, animal.SplitEnumCamelCase());
+    public void StringExtensionMethods_SplitEnumCamelCase(Animals animal, bool toLower, string output) =>
+      Assert.AreEqual(output, animal.SplitEnumCamelCase(toLower));
 
-    [DataRow(0, "Hairy Gibbon")]
-    [DataRow(1, "Big Fat Orang Utan")]
+    [DataRow(0, true, "Hairy gibbon")]
+    [DataRow(0, false, "Hairy Gibbon")]
+    [DataRow(1, true, "Big fat orang utan")]
+    [DataRow(1, false, "Big Fat Orang Utan")]
     [DataTestMethod]
-    public void StringExtensionMethods_SplitEnumValueCamelCaseValid(int id, string output) =>
-      Assert.AreEqual(output, id.SplitEnumValueCamelCase<Animals>());
+    public void StringExtensionMethods_SplitEnumValueCamelCaseValid(int id, bool toLower, string output) =>
+      Assert.AreEqual(output, id.SplitEnumValueCamelCase<Animals>(toLower));
 
     [TestMethod]
     [ExpectedException(typeof(ArgumentOutOfRangeException))]

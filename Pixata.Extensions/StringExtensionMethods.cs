@@ -20,40 +20,43 @@ namespace Pixata.Extensions {
     /// Splits a CamelCase string into "Camel Case"
     /// </summary>
     /// <param name="str">The input string</param>
+    /// <param name="toLower">An optional bool that specifies whether the second and subsequent words in the returned string should be lower case. Default is true</param>
     /// <returns>The input string split into space-separated words</returns>
-    public static string SplitCamelCase(this string str) =>
-      Regex.Replace(Regex.Replace(str, @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), @"(\p{Ll})(\P{Ll})", "$1 $2");
+    public static string SplitCamelCase(this string str, bool toLower = true) {
+      if (string.IsNullOrWhiteSpace(str)) {
+        return "";
+      }
+      string s = Regex.Replace(Regex.Replace(str, @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), @"(\p{Ll})(\P{Ll})", "$1 $2");
+      return toLower ? s[0].ToString().ToUpper() + s.Substring(1).ToLower() : s;
+    }
 
     /// <summary>
     /// Splits an enum member name using camel case as the rule. Splits CamelCase into "Camel Case"
     /// </summary>
     /// <typeparam name="T">The enum type</typeparam>
     /// <param name="e">The enum value</param>
+    /// <param name="toLower">An optional bool that specifies whether the second and subsequent words in the returned string should be lower case. Default is true</param>
     /// <returns>A space-separated string containing the enum member name split by camel case</returns>
     /// <exception cref="ArgumentException">Thrown if the input is not an enum</exception>
-    public static string SplitEnumCamelCase<T>(this T e) where T : struct, IConvertible {
-      if (!typeof(T).IsEnum) {
-        throw new ArgumentException("T must be an enumerated type");
-      }
-      return Regex.Replace(Regex.Replace(e.ToString(), @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), @"(\p{Ll})(\P{Ll})", "$1 $2");
-    }
+    public static string SplitEnumCamelCase<T>(this T e, bool toLower = true) where T : struct, IConvertible =>
+      !typeof(T).IsEnum
+        ? throw new ArgumentException("T must be an enumerated type")
+        : SplitCamelCase(e.ToString(), toLower);
 
     /// <summary>
     /// Splits an enum member value (assumed to be an int) using camel case as the rule. Splits CamelCase into "Camel Case"
     /// </summary>
     /// <typeparam name="T">The enum type</typeparam>
     /// <param name="n">The int value of the enum value</param>
+    /// <param name="toLower">An optional bool that specifies whether the second and subsequent words in the returned string should be lower case. Default is true</param>
     /// <returns>A space-separated string containing the enum member value split by camel case</returns>
     /// <exception cref="ArgumentException">ArgumentException thrown if the generic type is not an enum, or ArgumentOutOfRangeException if the int value does not correspond to an enum member value</exception>
-    public static string SplitEnumValueCamelCase<T>(this int n) where T : struct, IConvertible {
-      if (!typeof(T).IsEnum) {
-        throw new ArgumentException("T must be an enumerated type");
-      }
-      if (!Enum.IsDefined(typeof(T), n)) {
-        throw new ArgumentOutOfRangeException($"{n} is not a valid value for the {typeof(T).Name} enum");
-      }
-      return Regex.Replace(Regex.Replace(((T)Enum.Parse(typeof(T), n.ToString())).ToString(), @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), @"(\p{Ll})(\P{Ll})", "$1 $2");
-    }
+    public static string SplitEnumValueCamelCase<T>(this int n, bool toLower = true) where T : struct, IConvertible =>
+      !typeof(T).IsEnum
+        ? throw new ArgumentException("T must be an enumerated type")
+        : !Enum.IsDefined(typeof(T), n)
+          ? throw new ArgumentOutOfRangeException($"{n} is not a valid value for the {typeof(T).Name} enum")
+          : SplitCamelCase(((T)Enum.Parse(typeof(T), n.ToString())).ToString(), toLower);
 
     /// <summary>
     /// Returns the first line of a multi-line string. Useful for getting the first line of someone's address
@@ -73,7 +76,7 @@ namespace Pixata.Extensions {
     /// <param name="str">The multi-line string</param>
     /// <returns>The second and subsequent line(s) of the input, assuming Environment.NewLine or \n is the line delimiter</returns>
     public static IEnumerable<string> OtherLines(this string str) =>
-      str.IndexOf(Environment.NewLine) > 0 
+      str.IndexOf(Environment.NewLine) > 0
         ? str.Split(Environment.NewLine).Skip(1)
         : str.IndexOf("\n") > 0
           ? str.Split("\n").Skip(1)
