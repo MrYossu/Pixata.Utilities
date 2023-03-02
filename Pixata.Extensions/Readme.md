@@ -54,11 +54,11 @@ Here is a brief description of the methods in the classes so far...
 `ToDurationString` - Converts a number of seconds to a string representation of the duration. For example, 125 will be converted to "2 minutes 5 seconds".
 
 ## StringExtensionMethods
-`SplitCamelCase()` - Splits a camcel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums.
+`SplitCamelCase()` - Splits a camel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums (although see below for variations of this method that work directly with enums). Takes an option `bool` parameter that specifies whether the second and subsequent words in the returned string should be lower case. Default is true.
 
-`SplitEnumCamelCase<T>()` - Splits an enum member name using camel case as the rule. For example, if you had an `enum` named `Aminals`, and it had a member named `JimSpriggs`, then `Animals.JimSpriggs.SplitEnumCamelCase()` would return "Jim Spriggs"
+`SplitEnumCamelCase<T>()` - Splits an enum member name using camel case as the rule. For example, if you had an `enum` named `Aminals`, and it had a member named `JimSpriggs`, then `Animals.JimSpriggs.SplitEnumCamelCase()` would return "Jim Spriggs". Takes an option `bool` parameter  as above.
 
-`SplitEnumValueCamelCase<T>()` - Splits an enum member value (assumed to be an int) using camel case as the rule. Using the same `enum` as in the previous comment, if `JimSpriggs` had a value of 2, then `2.SplitEnumValueCamelCase<Animals>()` would return "Jim Spriggs"
+`SplitEnumValueCamelCase<T>()` - Splits an enum member value (assumed to be an int) using camel case as the rule. Using the same `enum` as in the previous comment, if `JimSpriggs` had a value of 2, then `2.SplitEnumValueCamelCase<Animals>()` would return "Jim Spriggs". Takes an option `bool` parameter  as above.
 
 `FirstLine()` - Returns the first line of a multi-line string. Useful for getting the first line of someone's address
 
