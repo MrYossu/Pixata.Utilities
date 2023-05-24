@@ -20,7 +20,7 @@ namespace Pixata.Extensions {
       string msg = $"{ex.Message}{separator}{ex.StackTrace}{separator}";
       Exception innerException = ex.InnerException;
       while (innerException != null) {
-        msg += $"{separator}{innerException.Message}{separator}";
+        msg += $"{separator}{innerException.Message}{separator}{innerException.StackTrace}";
         innerException = innerException.InnerException;
       }
       return msg;
