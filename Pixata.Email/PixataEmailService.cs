@@ -58,7 +58,7 @@ namespace Pixata.Email {
       MimeMessage mm = new() {
         Subject = parameters.Subject,
       };
-      mm.From.Add(new MailboxAddress(_smtpSettings.FromName, _smtpSettings.FromEmail));
+      mm.From.Add(parameters.From ?? new MailboxAddress(_smtpSettings.FromName, _smtpSettings.FromEmail));
       parameters.Recipients.ForEach(r => mm.To.Add(r));
       if (parameters.IsReplyToSet) {
         mm.ReplyTo.Add(parameters.ReplyTo);

@@ -29,6 +29,7 @@ namespace Pixata.Email {
       ReplyTo = MailboxAddress.Parse(Jim);
     }
 
+    public MailboxAddress From { get; set; }
     public string Subject { get; set; }
     public string Body { get; set; }
     public List<MailboxAddress> Recipients { get; set; }
