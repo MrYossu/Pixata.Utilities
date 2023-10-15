@@ -2,7 +2,7 @@
   <div id="confirmOverlay" style="display: @_displayStyle; position: @_position; z-index: @ZIndex">
     <div id="confirmOverlayContent">
       <div><HtmlRaw Html="@Caption" /></div>
-      <button type="button" class="btn btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon"></i>@YesText</button> <button type="button" class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button>
+      <button type="button" class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button> <button type="button" class="btn btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon"></i>@YesText</button>
     </div>
   </div>
 
