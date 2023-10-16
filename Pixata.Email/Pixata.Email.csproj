@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Version>1.2.3</Version>
     <AssemblyVersion>1.2.3</AssemblyVersion>
     <FileVersion>1.2.3</FileVersion>
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LanguageExt.Core" Version="4.0.3" />
+    <PackageReference Include="LanguageExt.Core" Version="4.4.6" />
     <PackageReference Include="MailKit" Version="4.2.0" />
   </ItemGroup>
 

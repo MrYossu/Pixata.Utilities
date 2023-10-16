@@ -1,9 +1,9 @@
 ﻿@inject NavigationManager _navManager
 <div class="row justify-content-md-center">
   @if (!string.IsNullOrWhiteSpace(CancelUrl)) {
-    <TelerikButton ButtonType="ButtonType.Button" OnClick="@(()=>_navManager.NavigateTo(CancelUrl))" Class="@cancelClass">@CancelCaption</TelerikButton>
+    <TelerikButton ButtonType="ButtonType.Button" OnClick="@(() => _navManager.NavigateTo(CancelUrl))" Class="@cancelClass">@CancelCaption</TelerikButton>
   }
-  <TelerikButton ButtonType="ButtonType.Submit" Primary="true" Class="@submitClass">@SubmitCaption</TelerikButton>
+  <TelerikButton ButtonType="ButtonType.Submit" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" Class="@submitClass">@SubmitCaption</TelerikButton>
 </div>
 
 @code {

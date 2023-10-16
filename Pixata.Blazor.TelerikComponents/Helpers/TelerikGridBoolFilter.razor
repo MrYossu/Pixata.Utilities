@@ -11,10 +11,8 @@
       </TelerikCheckBox>
       <TelerikButton ButtonType="ButtonType.Button"
                      Class="k-clear-button-visible ml-2"
-                     Icon="filter-clear"
                      Enabled="@IsTrue.HasValue"
-                     OnClick="@ClearBoolFilter">
-      </TelerikButton>
+                     OnClick="@ClearBoolFilter">X</TelerikButton>
     };
 
   public FilterCellTemplateContext BoolFilterContext { get; set; } = null!;
