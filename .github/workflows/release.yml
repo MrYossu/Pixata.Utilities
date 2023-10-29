@@ -1,4 +1,4 @@
-# Release
+# Release 
 name: release 
   
 on:  
@@ -18,10 +18,10 @@ jobs:
       uses: actions/setup-dotnet@v1.7.2  
       with:  
         dotnet-version: '2.1.x'
-    - name: Setup .NET Core  
+    - name: Setup .NET Core 7
       uses: actions/setup-dotnet@v1.7.2  
       with:  
-        dotnet-version: '6.0'
+        dotnet-version: '7.0'
     
 # ***************** BUILDS **************** #
 
