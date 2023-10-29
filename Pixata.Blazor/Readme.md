@@ -96,11 +96,11 @@ There is a similar method named `BuildTemplateLink` which works the same, but ta
                                                                "text-align: right"))" />
 ```
 
-There is also an overload (added in v1.23) for this that takes `Func`s for the style, CSS and link title. For example, if you want to base your CSS on an entity property, you can do something like this...
+There is also a similar method (added in v1.23) for this that takes `Func`s for the style, CSS and link title. For example, if you want to base your CSS on an entity property, you can do something like this...
 
 ```html
     <GridColumn Field="@nameof(TransactionView.Amount)"
-      Template="@(MainLayout.BuildTemplateLink<TransactionView>(tv => tv.Amount.ToString("C2"),
+      Template="@(MainLayout.BuildLink<TransactionView>(tv => tv.Amount.ToString("C2"),
                                                                 tv => $"/transaction/{tv.Id}"
                                                                 tv => tv.Amount >= 0 ? "" : "withdrawl"
                                                                "text-align: right"))" />
