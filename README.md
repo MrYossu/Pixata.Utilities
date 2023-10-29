@@ -2,6 +2,8 @@
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Borsalino.png "Pixata")
 
+## Note: As of Oct '23, all packages have the source code updated to .NET7. The Nuget packages will be updated as I get around to releasing them. If you are still using .NET6, you'll need to upgrade or stay on the older versions of my packages
+
 I seem to keep adding the same utility classes to every project I work on, resulting in (almost) identical code spread across different projects.
 
 I used to get around this by maintaining the utilities in a separate project, and referencing the DLL. However, apart from being soooo 1990s, it also has problems like VS locking the DLL, preventing you from building the utility project and so on.
