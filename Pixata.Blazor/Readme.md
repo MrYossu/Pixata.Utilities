@@ -47,6 +47,67 @@ Similar to `Confirm`, but only has one button. At the moment, the pop-up id dism
 
 ## Extensions
 
+### TemplateHelper
+Are you fed up of writing code like this (sample from a Telerik grid, but it's the same for Microsoft's or anyone else's)...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)" >
+      <Template>
+        @{
+          TransactionView tv = context as TransactionView;
+          <div style="text-align: right">@tv.Amount.ToString("C2")</div>
+        }
+      </Template>
+    </GridColumn>
+```
+
+So am I, so I added the `TemplateHelper` to help. It contains three methods...
+
+`BuildTemplate<T>` allows you to reduce the above code to...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)"
+       Template="@(MainLayout.BuildTemplate<TransactionView>(tv => tv.Amount.ToString("C2"), "text-align: right"))" />
+```
+
+The method takes a `Func` that converts your entity to a `string`, which is what is displayed. There are two optional `string` parameters that allow you to set the style (as above) and/or CSS class(es).
+
+There is a similar method named `BuildTemplateLink` which works the same, but takes a URI, and allows you to replace...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)" >
+      <Template>
+        @{
+          TransactionView tv = context as TransactionView;
+          <div style="text-align: right">
+            <a href="/transaction/@tv.Id">@tv.Amount.ToString("C2")</a>
+          </div>
+        }
+      </Template>
+    </GridColumn>
+```
+
+...with...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)"
+      Template="@(MainLayout.BuildTemplateLink<TransactionView>(tv => tv.Amount.ToString("C2"),
+                                                                tv => $"/transaction/{tv.Id}"
+                                                               "text-align: right"))" />
+```
+
+There is also an overload (added in v1.23) for this that takes `Func`s for the style, CSS and link title. For example, if you want to base your CSS on an entity property, you can do something like this...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)"
+      Template="@(MainLayout.BuildTemplateLink<TransactionView>(tv => tv.Amount.ToString("C2"),
+                                                                tv => $"/transaction/{tv.Id}"
+                                                                tv => tv.Amount >= 0 ? "" : "withdrawl"
+                                                               "text-align: right"))" />
+```
+
+This will add a CSS class `withdrawl` if the transaction amount were negative. You can do similar things for the style and link title.
+
 ### TryGetQueryString()
 Documentation coming soon...
 
