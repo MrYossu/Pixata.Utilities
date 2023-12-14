@@ -1,32 +1,44 @@
 ﻿@page "/TelerikGrid"
 @using Pixata.Extensions
-@using Pixata.Blazor.Sample.Data
-@using Pixata.Blazor.TelerikComponents.Helpers
 @using Pixata.Blazor.Extensions
+@using Pixata.Blazor.TelerikComponents.Helpers
+@using Pixata.Blazor.Sample.Data
 @inject WeatherForecastService _service
 
 <h3>Telerik grid</h3>
 
-<p>This page shows a Telerik grid using of two components, the <code>TemplateHelper</code> (which has nothing to do with Telerik, and can be used in any component that accepts templates) and the <code>TelerikGridBoolFilter</code> component.</p>
+<p>This page shows a Telerik grid using two components, the <code>TemplateHelper</code> (which has nothing to do with Telerik, and can be used in any component that accepts templates) and the <code>TelerikGridBoolFilter</code> component.</p>
 
 <p>The <code>TemplateHelper</code> cuts down on the amount of code you need to write when supplying a template, as it allows you to use a helper method to build the HTML for the template.</p>
 
 <p>The <code>TelerikGridBoolFilter</code> component changes the row filter that the Telerik grid uses on a bool column from a default dropdown containing "All", "Is true" and "Is False" to a checkbox. This takes up a lot less space (usually a benefit on a bool column, as the contents tend to be smaller) and is more intuitive.</p>
 
-<p>The grid below uses both components on the column for the <code>Rain</code> bool property that I added to the standard weather forecast model. As you can see, the result is a lot better than the default (which you can see in the "Rain default" column)</p>
+<p>The grid below uses the <code>TemplateHelper</code> component as follows:</p>
+<dl>
+  <dt>Date</dt>
+  <dd>This does two things to the date, it sets the text colour based on the temperature, and turns the text into a link (which doesn't go anywhere in this example). Both of these use the <code>Link</code> method overload that accepts a <code>Func</code> for the style, CSS and link title. This allows you to set these based on entity properties.</dd>
+  <dt>Temperature (C and F)</dt>
+  <dd>These use the simple overload of the <code>Text</code> method that takes a plain string for the style and CSS. In the sample below, it merely right-aligns the text</dd>
+  <dt>Rain</dt>
+  <dd>Uses a <code>Rain</code> bool property that I added to the standard weather forecast model, and uses the <code>Func</code> overload of the <code>Text</code> method to set an icon based on whether or not it will rain. As you can see, the result is a lot better than the default (which you can see in the "Rain default" column)</dd>
+</dl>
+
+<p>It also uses the <code>TelerikGridBoolFilter</code> component in the Rain column to create a much simpler filter than the one the Telerik grid supplies by default.</p>
+
+<p>See the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/GridSample.razor">source code for this page</a> for the code that produces the grid below, or the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Extensions/TemplateHelper.razor">TemplateHelper source code</a> for the method definitions and comments</p>
 
 <TelerikGrid Data="_forecasts"
              FilterMode="GridFilterMode.FilterRow">
   <GridColumns>
-    <GridColumn Field="@nameof(WeatherForecast.Date)" Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f => f.Date.ToPrettyString(), "text-align: right"))" />
-    <GridColumn Field="@nameof(WeatherForecast.TemperatureC)" Title="Temp (C)" />
-    <GridColumn Field="@nameof(WeatherForecast.TemperatureF)" Title="Temp (F)" />
+    <GridColumn Field="@nameof(WeatherForecast.Date)" Template="@(_templateHelper.Link<WeatherForecast>(f => f.Date.ToPrettyString(), f => $"/Day?temp={f.TemperatureC}", f => f.TemperatureC < 20 ? "text-align: right; color: blue" : "text-align: right;color: red", titleFunc: f => f.Summary))" />
+    <GridColumn Field="@nameof(WeatherForecast.TemperatureC)" Template="@(_templateHelper.Text<WeatherForecast>(f => f.TemperatureC.ToString(), "text-align: right"))" Title="Temp (C)" />
+    <GridColumn Field="@nameof(WeatherForecast.TemperatureF)" Template="@(_templateHelper.Text<WeatherForecast>(f => f.TemperatureF.ToString(), "text-align: right"))" Title="Temp (F)" />
     <GridColumn Field="@nameof(WeatherForecast.Rain)" Width="100px"
                 Title="Rain?"
                 FilterCellTemplate="@_lockedFilter.BuildTemplate()"
-                Template="@(_templateHelper.BuildTemplate<WeatherForecast>(f => f.Rain ? "<img src='/rain.png' width='24' >" : "<img src='/sun.png' width='24' >", "text-align: center"))" />
+                Template="@(_templateHelper.Text<WeatherForecast>(f => f.Rain ? "<img src='/rain.png' width='24' >" : "<img src='/sun.png' width='24' >", "text-align: center"))" />
     <GridColumn Field="@nameof(WeatherForecast.Rain)" Width="200px"
-                Title="Rain default"/>
+                Title="Rain default" />
     <GridColumn Field="@nameof(WeatherForecast.Summary)" />
   </GridColumns>
 </TelerikGrid>

@@ -1,11 +1,32 @@
 ﻿@code {
 
+  #region Depracated methods
+
+  [Obsolete("This method is being replaced by Text and will be removed in a future version")]
   public RenderFragment<object> BuildTemplate<T>(Func<T, string> convert, string style = "", string classCss = "") where T : class =>
+    Text(convert, style, classCss);
+
+  [Obsolete("This method is being replaced by Link and will be removed in a future version")]
+  public RenderFragment<object> BuildTemplateLink<T>(Func<T, string> convert, Func<T, string> uri, string style = "", string classCss = "", string title = "") where T : class =>
+    Link(convert, uri, style, classCss, title);
+
+  [Obsolete("This method is being replaced by Link and will be removed in a future version")]
+  public RenderFragment<object> BuildLink<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
+    Link(convert, uri, styleFunc, cssFunc, titleFunc);
+
+  #endregion
+
+  public RenderFragment<object> Text<T>(Func<T, string> convert, string style = "", string classCss = "") where T : class =>
     context => __builder => {
       <div class="@classCss" style="@style">@(new MarkupString(convert(context as T)))</div>
     };
 
-  public RenderFragment<object> BuildTemplateLink<T>(Func<T, string> convert, Func<T, string> uri, string style = "", string classCss = "", string title = "") where T : class =>
+  public RenderFragment<object> Text<T>(Func<T, string> convert, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
+    context => __builder => {
+      <div class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))" style="@(styleFunc is null ? "" : styleFunc(context as T))" title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</div>
+    };
+
+  public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri, string style = "", string classCss = "", string title = "") where T : class =>
     context => __builder => {
       if (string.IsNullOrWhiteSpace(title)) {
         title = context.ToString();
@@ -13,9 +34,9 @@
       <div class="@classCss" style="@style"><a href="@uri(context as T)" title="@title">@(new MarkupString(convert(context as T)))</a></div>
     };
 
-  public RenderFragment<object> BuildLink<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
+  public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
     context => __builder => {
-      <div class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))" style="@(styleFunc is null ? context.ToString() : styleFunc(context as T))"><a href="@uri(context as T)" title="@(titleFunc is null ? context.ToString() : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</a></div>
+      <div class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))" style="@(styleFunc is null ? "" : styleFunc(context as T))"><a href="@uri(context as T)" title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</a></div>
     };
 
 }
