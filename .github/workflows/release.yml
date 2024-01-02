@@ -2,6 +2,7 @@
 name: release 
   
 on:  
+  workflow_dispatch:
   push:  
     branches: [ release ] # this workflow publishes to nuget, ONLY run it on a PUSH (no PRs)
 
