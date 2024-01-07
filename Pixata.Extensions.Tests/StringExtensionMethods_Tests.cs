@@ -119,5 +119,13 @@ West Byfleet", "1 Acacia Mews")]
       Assert.AreEqual(expected, value.RemoveDiacritics());
 
     #endregion
+
+    #region ToTitleCase
+    [DataRow("", "")]
+    [DataRow("This is an example", "This Is An Example")]
+    [DataTestMethod]
+    public void StringExtensionMethods_ToTitleCase(string value, string expected) =>
+      Assert.AreEqual(expected, value.ToTitleCase());
+    #endregion
   }
 }

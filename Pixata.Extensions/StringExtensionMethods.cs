@@ -94,5 +94,13 @@ namespace Pixata.Extensions {
         // For some reason, the character ð isn't converted, so we have to do that one manually. I don't know how often they use it, but for the (really only a) few extra milliseconds it adds to the execution time, it will make the users happy :)
         // Actually, it won't make them sad, which it would if it didn't work, but it amounts to the same thing!
         .Replace("ð", "o");
+
+    /// <summary>
+    /// Replaces the first character of each word with upper case e.g. This is an example - This Is An Example
+    /// </summary>
+    /// <param name="text">The string on which to capitalise</param>
+    /// <returns>The string capitalised</returns>
+    public static string ToTitleCase(this string text) =>
+      CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
   }
 }
