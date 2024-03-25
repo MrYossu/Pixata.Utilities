@@ -64,4 +64,4 @@ Here is a brief description of the methods in the classes so far...
 
 `OtherLines()` - Returns all but the first line of a multi-line string. Useful for getting the second and subsequent line(s) of someone's address
 
-`RemoveDiacritics()` - Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents. Note that for boring technical reasons, the returned string is lowercase.
+`RemoveDiacritics()` - Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents. Note that for boring technical reasons, the returned string was lowercase in earlier versions of this package. Starting with version 1.27.0, case is preserved.
