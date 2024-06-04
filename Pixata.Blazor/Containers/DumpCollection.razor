@@ -1,0 +1,23 @@
+﻿@typeparam T
+
+<ul class="@UlClass">
+  @foreach (T t in Collection) {
+    <li class="@LiClass">@Display(t)</li>
+  }
+</ul>
+
+@code {
+
+  [Parameter]
+  public IEnumerable<T> Collection { get; set; }
+
+  [Parameter]
+  public Func<T, string> Display { get; set; }
+
+  [Parameter]
+  public string UlClass { get; set; } = "";
+
+  [Parameter]
+  public string LiClass { get; set; } = "";
+
+}
