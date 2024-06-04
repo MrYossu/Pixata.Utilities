@@ -45,6 +45,29 @@ Convenience component for displaying raw HTML. Instead of doing this...
 ### Inform
 Similar to `Confirm`, but only has one button. At the moment, the pop-up id dismissed as soon as you click the button, but I intned to add the feature described above to this component as well.
 
+### DumpCollection
+OK, so this isn't striclty a container, but it's close enough to put here.
+
+I often find the need to see the contents of a collection while developing. I found myself writing code like this far too often...
+
+```html
+<ul>
+  @foreach (var t in SomeCollection) {
+    <li>(@t.Id) @t.Name</li>
+  }
+</ul>
+```
+
+...where the exact contents of the `<li>` tag varies with each usage.
+
+To make this quicker and easier, I added the `DumpCollection` component to do this...
+
+```html
+<DumpCollection Collection="SomeCollection" Display="@(t => $"({t.Id})  {t.Name})" />
+```
+
+The component has two extra paramters, `UlClass` and `LiClass` that allow you to pass in CSS classes for the `<ul>` element and the `<li>` elements.
+
 ## Extensions
 
 ### TemplateHelper
