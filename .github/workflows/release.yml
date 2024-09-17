@@ -211,32 +211,3 @@ jobs:
         PROJECT_FILE_PATH: Pixata.Google/Pixata.Google.csproj  
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
-  # *** Publish Pixata.Blazor.Sample ***
-    - name: Rename _app_offline.htm to app_offline.htm to stop the site
-      shell: python
-      run: |
-        import ftplib
-        with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
-          ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-          ftp.rename('_app_offline.htm', 'app_offline.htm')
-          ftp.quit()
-
-    - name: Publish Pixata.Blazor.Sample
-      run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net7.0 --output Pixata.Blazor.Sample.Publish
-
-    - name: Deploy Pixata.Blazor.Sample
-      uses: SamKirkland/FTP-Deploy-Action@4.0.0
-      with:
-        server: ${{ secrets.PIXATATESTFTPSERVER }}
-        username: ${{ secrets.PIXATATESTFTPUSER }}
-        password: ${{ secrets.PIXATATESTFTPPASSWORD }}
-        local-dir: ./Pixata.Blazor.Sample.Publish/
-
-    - name: Rename app_offline.htm back to _app_offline.htm to start the site
-      shell: python
-      run: |
-        import ftplib
-        with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
-          ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-          ftp.rename('app_offline.htm', '_app_offline.htm')
-          ftp.quit()
