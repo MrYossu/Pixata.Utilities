@@ -13,7 +13,7 @@ These were writen to make it quicker to create forms in Blazor. They are all ver
 ### Dapper helper method
 I had the delights of discovering how much faster your data can load if you use [Dapper](https://github.com/DapperLib/Dapper) instead of EF Core, and wrote an extension method to make it easy to use Dapper with the Telerik Blazor grid. Version 1.9.0 of this package includes a `TelerikGridHelper` class that holds that extension method.
 
-More details and sample code can be found in [this blog pst](https://www.pixata.co.uk/2024/09/09/using-dapper-with-the-telerik-blazor-grid/).
+More details and sample code can be found in [this blog post](https://www.pixata.co.uk/2024/09/09/using-dapper-with-the-telerik-blazor-grid/).
 
 ## Warning
 The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can get a 30-day trial version from them.
