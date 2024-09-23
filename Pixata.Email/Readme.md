@@ -46,6 +46,16 @@ If you are into interfaces, you can tell it to inject one of those instead...
 services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
 ```
 
+### Allowing multiple email servers or accounts
+>Note that this feature is only available from v1.2.4 onwards
+
+If you need to be able to send emails from multiple servers or accounts, you can set up a default `SmtpSettings` as above, and then when you want to send from a different server or account, just change the `SmtpSettings` property on the service to use the appropriate settings...
+
+```c#
+SmtpSettings myStmpSettings = // Pick them up from wherever you store them
+_emailService.SmtpSettings = myStmpSettings;
+```
+
 ## Usage
 
 As with most of the code I write, this service uses the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. This allows you to handle both the happy path and sad path with ease.
