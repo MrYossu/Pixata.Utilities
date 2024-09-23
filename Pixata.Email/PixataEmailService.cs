@@ -6,10 +6,13 @@ using static LanguageExt.Prelude;
 
 namespace Pixata.Email {
   public class PixataEmailService : PixataEmailServiceInterface {
-    private readonly SmtpSettings _smtpSettings;
-
     public PixataEmailService(SmtpSettings smtpSettings) =>
-      _smtpSettings = smtpSettings;
+      SmtpSettings = smtpSettings;
+
+    /// <summary>
+    /// The settings for the SMTP server. You would normally pass these in to the constructor, but they are exposed as a property to allow you to override them in case you want to send emails from a different account
+    /// </summary>
+    public SmtpSettings SmtpSettings { get; set; }
 
     /// <summary>
     /// Send an email from the user specified in the settings to the email passed in
@@ -30,8 +33,8 @@ namespace Pixata.Email {
       TryAsync(async () => {
         MimeMessage msg = CreateMailMessage(emailParameters);
         using SmtpClient client = new();
-        await client.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, _smtpSettings.UseSsl);
-        await client.AuthenticateAsync(_smtpSettings.UserName, _smtpSettings.Password);
+        await client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, SmtpSettings.UseSsl);
+        await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
         await client.SendAsync(msg);
         await client.DisconnectAsync(true);
         return unit;
@@ -47,8 +50,8 @@ namespace Pixata.Email {
       TryAsync(async () => {
         MimeMessage msg = CreateMailMessage(emailParameters);
         using SmtpClient client = new();
-        await client.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, secureSocketOptions);
-        await client.AuthenticateAsync(_smtpSettings.UserName, _smtpSettings.Password);
+        await client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, secureSocketOptions);
+        await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
         await client.SendAsync(msg);
         await client.DisconnectAsync(true);
         return unit;
@@ -58,7 +61,7 @@ namespace Pixata.Email {
       MimeMessage mm = new() {
         Subject = parameters.Subject,
       };
-      mm.From.Add(parameters.From ?? new MailboxAddress(_smtpSettings.FromName, _smtpSettings.FromEmail));
+      mm.From.Add(parameters.From ?? new MailboxAddress(SmtpSettings.FromName, SmtpSettings.FromEmail));
       parameters.Recipients.ForEach(r => mm.To.Add(r));
       if (parameters.IsReplyToSet) {
         mm.ReplyTo.Add(parameters.ReplyTo);

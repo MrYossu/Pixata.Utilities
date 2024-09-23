@@ -16,7 +16,7 @@
     <PackageIcon>mail old school.png</PackageIcon>
     <PackageTags>C# Blazor Telerik</PackageTags>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
