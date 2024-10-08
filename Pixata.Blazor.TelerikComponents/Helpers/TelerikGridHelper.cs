@@ -3,32 +3,18 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
+using Microsoft.EntityFrameworkCore;
 using Telerik.Blazor.Components;
 using Telerik.DataSource;
 
 namespace Pixata.Blazor.TelerikComponents.Helpers;
 
 public static class TelerikGridHelper {
-  public static async Task<(int, string, Dictionary<string, object>)> GetData<T>(this GridReadEventArgs args, string connectionString, string tableName, string defaultColumnForSort, ListSortDirection defaultSort = ListSortDirection.Ascending) =>
-    await GetData<T>(args, connectionString, tableName, defaultColumnForSort, new List<TelerikGridFilterOptions>(), defaultSort);
+  public static async Task<TelerikGridFilterResults<T>> GetData<T>(this GridReadEventArgs args, DbContext context, string tableName, string defaultColumnForSort, ListSortDirection defaultSort = ListSortDirection.Ascending) where T : class =>
+    await GetData<T>(args, context, tableName, defaultColumnForSort, new List<CompositeFilterDescriptor>().AsReadOnly(), defaultSort);
 
-  /// <summary>
-  /// Extension method to the Telerik GridReadEventArgs object that loads the grid data using Dapper
-  /// </summary>
-  /// <typeparam name="T">The type of the grid data</typeparam>
-  /// <param name="args">The GridReadEventArgs object</param>
-  /// <param name="connectionString">Connection string to the SQL Server database</param>
-  /// <param name="tableName">The table name to be queried for the data</param>
-  /// <param name="defaultColumnForSort">If sorting is not specified in the grid, this column will be used by default</param>
-  /// <param name="extraFilter">A collection of extra filter specifications. Useful if you roll your own custom filter</param>
-  /// <param name="defaultSort">The default sort direction (if the user does not set one in the grid). Defaults to ascending</param>
-  /// <returns>A 3-tuple containing total number of rows matching the current filtering, the SQL for the filtering (useful if you want to do any extra queries using the same filters), and a collection of data values used by the SQL</returns>
-  public static async Task<(int, string, Dictionary<string, object>)> GetData<T>(this GridReadEventArgs args, string connectionString, string tableName, string defaultColumnForSort, IEnumerable<TelerikGridFilterOptions> extraFilter, ListSortDirection defaultSort = ListSortDirection.Ascending) {
-    // Create a connection to the database
-    await using SqlConnection connection = new(connectionString);
-    // Create a dictionary that will hold the data for filtering and paging
-    Dictionary<string, object> values = new();
+  public static async Task<TelerikGridFilterResults<T>> GetData<T>(this GridReadEventArgs args, DbContext context, string tableName, string defaultColumnForSort, IEnumerable<CompositeFilterDescriptor> extraFilters, ListSortDirection defaultSort = ListSortDirection.Ascending) where T : class {
+    List<SqlParameter> values = new();
 
     // Set up SQL for filtering
     string sqlFilters = "";
@@ -36,22 +22,26 @@ public static class TelerikGridHelper {
     int n = 0;
 
     // First handle the grid's built-in filters
-    Console.WriteLine();
-    foreach (CompositeFilterDescriptor cfd in args.Request.Filters.Cast<CompositeFilterDescriptor>()) {
-      foreach (FilterDescriptor fd in cfd.FilterDescriptors.Cast<FilterDescriptor>()) {
-        AddValue(values, fd.Member, fd.Operator, fd.Value, n);
-        sqlFilters += AddSql(fd.Member, fd.Operator, n, sqlFilterConjunction);
-        sqlFilterConjunction = " and";
-        n++;
+    foreach (CompositeFilterDescriptor cfd in args.Request.Filters.Cast<CompositeFilterDescriptor>().Union(extraFilters)) {
+      if (cfd.LogicalOperator == FilterCompositionLogicalOperator.And) {
+        foreach (FilterDescriptor fd in cfd.FilterDescriptors.Cast<FilterDescriptor>()) {
+          AddValue(values, fd.Member, fd.Operator, fd.Value, n);
+          sqlFilters += AddSql(fd.Member, fd.Operator, n, sqlFilterConjunction);
+          sqlFilterConjunction = " and";
+          n++;
+        }
+      } else {
+        sqlFilters += $"{sqlFilterConjunction} (";
+        string thisLogicalOperator = "";
+        foreach (FilterDescriptor fd in cfd.FilterDescriptors.Cast<FilterDescriptor>()) {
+          AddValue(values, fd.Member, fd.Operator, fd.Value, n);
+          sqlFilters += AddSql(fd.Member, fd.Operator, n, thisLogicalOperator);
+          thisLogicalOperator = " or";
+          sqlFilterConjunction = " and";
+          n++;
+        }
+        sqlFilters += ") ";
       }
-    }
-
-    // Now add in any extra filters
-    foreach (TelerikGridFilterOptions option in extraFilter) {
-      AddValue(values, option.Member, option.Operator, option.Value, n);
-      sqlFilters += AddSql(option.Member, option.Operator, n, sqlFilterConjunction);
-      sqlFilterConjunction = " and";
-      n++;
     }
 
     if (!string.IsNullOrWhiteSpace(sqlFilters)) {
@@ -59,8 +49,8 @@ public static class TelerikGridHelper {
     }
 
     // Paging
-    values.Add("Skip", args.Request.Skip);
-    values.Add("PageSize", args.Request.PageSize);
+    values.Add(new("@Skip", args.Request.Skip));
+    values.Add(new("@PageSize", args.Request.PageSize));
 
     // SQL for sorting
     string sqlSort = $" order by {defaultColumnForSort} {(defaultSort == ListSortDirection.Ascending ? "asc" : "desc")}";
@@ -73,32 +63,39 @@ public static class TelerikGridHelper {
     string sql = $"select * from {tableName}{sqlFilters} {sqlSort} offset (@Skip) rows fetch next (@PageSize) rows only";
 
     // Dump the SQL and values
-    //foreach (KeyValuePair<string, object> pair in values) {
-    //  Console.WriteLine($"  {pair.Key}: {pair.Value}");
+    //Console.WriteLine("\n");
+    //Console.WriteLine("Parameters");
+    //foreach (SqlParameter pair in values) {
+    //  Console.WriteLine($"  {pair.ParameterName}: {pair.Value}");
     //}
     //Console.WriteLine(sql);
 
     // Get the data and the total number of rows that match the filters
-    int matchingRows = await connection.ExecuteScalarAsync<int>($"select count(*) from {tableName}{sqlFilters}", values);
-    args.Data = await connection.QueryAsync<T>(sql, values);
+    args.Data = await context.Set<T>().FromSqlRaw(sql, values.ToArray()).ToListAsync();
+    values.Remove(values.Single(v => v.ParameterName == "@Skip"));
+    values.Remove(values.Single(v => v.ParameterName == "@PageSize"));
+    int matchingRows = await context.Database.SqlQueryRaw<int>($"select count(*) as Value from {tableName}{sqlFilters}", values.ToArray()).SingleAsync();
     args.Total = matchingRows;
 
     // Return the filter SQL in case the calling code wants to use it (eg to show some totals)
-    values.Remove("Skip");
-    values.Remove("PageSize");
-    return (matchingRows, sqlFilters, values);
+    return new(matchingRows, sqlFilters, values.ToArray());
   }
 
-  private static void AddValue(Dictionary<string, object> values, string member, FilterOperator op, object value, int n) =>
-    values.Add($"@{member}{n}", op == FilterOperator.Contains
-      ? $"%{value}%"
-      : value);
+  private static void AddValue(List<SqlParameter> parameters, string member, FilterOperator op, object value, int n) =>
+    parameters.Add(new($"@{member}{n}", op switch {
+      FilterOperator.Contains => $"%{value}%",
+      FilterOperator.StartsWith => $"{value}%",
+      FilterOperator.EndsWith => $"%{value}",
+      _ => value
+    }));
 
   private static string AddSql(string member, FilterOperator op, int n, string sqlFilterConjunction) =>
     $"{sqlFilterConjunction} {member}" + op switch {
       FilterOperator.IsEqualTo => $"=@{member}{n}",
       FilterOperator.IsNotEqualTo => $"<>@{member}{n}",
       FilterOperator.Contains => $" like @{member}{n}",
+      FilterOperator.StartsWith => $" like @{member}{n}",
+      FilterOperator.EndsWith => $" like @{member}{n}",
       FilterOperator.IsGreaterThan => $">@{member}{n}",
       FilterOperator.IsGreaterThanOrEqualTo => $">=@{member}{n}",
       FilterOperator.IsLessThan => $"<@{member}{n}",
@@ -161,3 +158,5 @@ public static class TelerikGridHelper {
 }
 
 public record TelerikGridFilterOptions(string Member, object Value, FilterOperator Operator);
+
+public record TelerikGridFilterResults<T>(int MatchingRows, string SqlFilters, SqlParameter[] Parameters);
