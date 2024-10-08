@@ -92,7 +92,6 @@ public static class TelerikGridHelper {
   private static string AddSql(string member, FilterOperator op, int n, string sqlFilterConjunction) =>
     $"{sqlFilterConjunction} {member}" + op switch {
       FilterOperator.IsEqualTo => $"=@{member}{n}",
-      FilterOperator.IsNotEqualTo => $"<>@{member}{n}",
       FilterOperator.Contains => $" like @{member}{n}",
       FilterOperator.StartsWith => $" like @{member}{n}",
       FilterOperator.EndsWith => $" like @{member}{n}",
@@ -102,59 +101,6 @@ public static class TelerikGridHelper {
       FilterOperator.IsLessThanOrEqualTo => $"<=@{member}{n}",
       _ => throw new Exception($"Unknown operator: {op}")
     };
-
-  public static async Task<(string, Dictionary<string, object>)> GetDataOrig<T>(this GridReadEventArgs args, string connectionString, string tableName, string defaultColumnForSort, string defaultSortDirection = "asc") {
-    // Create a connection to the database
-    await using SqlConnection connection = new(connectionString);
-    // Create a dictionary that will hold the data for filtering and paging
-    Dictionary<string, object> values = new();
-
-    // Set up SQL for filtering
-    string sqlFilters = "";
-    string sqlFilterConjunction = "";
-    foreach (CompositeFilterDescriptor cfd in args.Request.Filters.Cast<CompositeFilterDescriptor>()) {
-      foreach (FilterDescriptor fd in cfd.FilterDescriptors.Cast<FilterDescriptor>()) {
-        if (!values.ContainsKey("@{fd.Member}")) {
-          values.Add($"@{fd.Member}", fd.Operator == FilterOperator.Contains
-            ? $"%{fd.Value}%"
-            : fd.Value);
-        }
-        sqlFilters += $"{sqlFilterConjunction} {fd.Member}" + fd.Operator switch {
-          FilterOperator.IsEqualTo => $"=@{fd.Member}",
-          FilterOperator.Contains => $" like @{fd.Member}",
-          FilterOperator.IsGreaterThan => $">@{fd.Member}",
-          FilterOperator.IsGreaterThanOrEqualTo => $">=@{fd.Member}",
-          FilterOperator.IsLessThan => $"<@{fd.Member}",
-          FilterOperator.IsLessThanOrEqualTo => $"<=@{fd.Member}",
-          _ => throw new Exception($"Unknown operator: {fd.Operator}")
-        };
-        sqlFilterConjunction = " and";
-      }
-    }
-    if (!string.IsNullOrWhiteSpace(sqlFilters)) {
-      sqlFilters = $" where {sqlFilters}";
-    }
-
-    // Paging
-    values.Add("Skip", args.Request.Skip);
-    values.Add("PageSize", args.Request.PageSize);
-
-    // SQL for sorting
-    string sqlSort = $" order by {defaultColumnForSort} {defaultSortDirection}";
-    if (args.Request.Sorts.Any()) {
-      SortDescriptor sortDescriptor = (args.Request.Sorts.First())!;
-      sqlSort = $" order by {sortDescriptor.Member} " + (sortDescriptor.SortDirection == ListSortDirection.Ascending ? "asc" : "desc");
-    }
-
-    // Get the data and the total number of rows that match the filters
-    args.Data = await connection.QueryAsync<T>($"select * from {tableName}{sqlFilters} {sqlSort} offset (@Skip) rows fetch next (@PageSize) rows only", values);
-    args.Total = await connection.ExecuteScalarAsync<int>($"select count(*) from {tableName}{sqlFilters}", values);
-
-    // Return the filter SQL in case the calling code wants to use it (eg to show some totals)
-    values.Remove("Skip");
-    values.Remove("PageSize");
-    return (sqlFilters, values);
-  }
 }
 
 public record TelerikGridFilterOptions(string Member, object Value, FilterOperator Operator);
