@@ -92,6 +92,7 @@ public static class TelerikGridHelper {
   private static string AddSql(string member, FilterOperator op, int n, string sqlFilterConjunction) =>
     $"{sqlFilterConjunction} {member}" + op switch {
       FilterOperator.IsEqualTo => $"=@{member}{n}",
+      FilterOperator.IsNotEqualTo => $"<>@{member}{n}",
       FilterOperator.Contains => $" like @{member}{n}",
       FilterOperator.StartsWith => $" like @{member}{n}",
       FilterOperator.EndsWith => $" like @{member}{n}",
