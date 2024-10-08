@@ -10,10 +10,15 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents
 ### Form components
 These were writen to make it quicker to create forms in Blazor. They are all very much based around Bootstrap, which I was using heavily when I wrote these components. If you look at the [form page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor) on the sample web site you can see the usage.)
 
-### Dapper helper method
+### Dapper helper method (only in version 1.9.0, see the EF Core version below)
 I had the delights of discovering how much faster your data can load if you use [Dapper](https://github.com/DapperLib/Dapper) instead of EF Core, and wrote an extension method to make it easy to use Dapper with the Telerik Blazor grid. Version 1.9.0 of this package includes a `TelerikGridHelper` class that holds that extension method.
 
 More details and sample code can be found in [this blog post](https://www.pixata.co.uk/2024/09/09/using-dapper-with-the-telerik-blazor-grid/).
+
+### Extension method to improve the performance of the Telerik Blazor grid
+After writing the method mentioned above, a colleague reminded me that I could do the same with pure EF Core, no need for Dapper. From version 1.10.0 of this package, the method uses the EF Core version.
+
+There is a [sample repo](https://github.com/MrYossu/TelerikGridWithFromSql) that shows the method in usage, and two blog posts that explain it, [an introduction](https://www.pixata.co.uk/2024/10/08/hmm-maybe-ef-core-isnt-so-bad-after-all/) (with far too many anecdotes and rambling), and one that shows the code and explains the features (coming soon).
 
 ## Warning
 The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can get a 30-day trial version from them.
