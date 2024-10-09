@@ -9,7 +9,8 @@ public static class TelerikFilterHelper {
         new FilterDescriptor {
           Member = member,
           Operator = op,
-          Value = value
+          Value = value,
+          MemberType = value.GetType()
         }
       }
     };
