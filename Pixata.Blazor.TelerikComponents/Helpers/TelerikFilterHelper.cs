@@ -18,17 +18,18 @@ public static class TelerikFilterHelper {
   public static CompositeFilterDescriptor CreateAnd(string member, params OperatorValue[] ovs) {
     FilterDescriptorCollection filters = new();
     foreach (OperatorValue ov in ovs) {
-      filters.Add(new FilterDescriptor(member, ov.Op, ov.Value));
+      filters.Add(new FilterDescriptor(member, ov.Op, ov.Value) { MemberType = ov.Value.GetType() });
     }
     return new CompositeFilterDescriptor {
       LogicalOperator = FilterCompositionLogicalOperator.And,
       FilterDescriptors = filters
     };
   }
+
   public static CompositeFilterDescriptor CreateOr(string member, params OperatorValue[] ovs) {
     FilterDescriptorCollection filters = new();
     foreach (OperatorValue ov in ovs) {
-      filters.Add(new FilterDescriptor(member, ov.Op, ov.Value));
+      filters.Add(new FilterDescriptor(member, ov.Op, ov.Value) { MemberType = ov.Value.GetType() });
     }
     return new CompositeFilterDescriptor {
       LogicalOperator = FilterCompositionLogicalOperator.Or,
