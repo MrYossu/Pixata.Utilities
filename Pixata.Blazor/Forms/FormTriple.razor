@@ -1,0 +1,97 @@
+﻿<div class="triple-element d-flex flex-wrap gap-col-3">
+  <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+    @if (FirstRequired) {
+      <label for="@FirstId">@FirstLabel <span class="text-danger">*</span></label>
+    } else {
+      <label for="@FirstId">@FirstLabel</label>
+    }
+    @First
+  </div>
+  <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+    @if (SecondRequired) {
+      <label for="@SecondId">@SecondLabel <span class="text-danger">*</span></label>
+    } else {
+      <label for="@SecondId">@SecondLabel</label>
+    }
+    @Second
+  </div>
+  <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+    @if (ThirdRequired) {
+      <label for="@ThirdId">@ThirdLabel <span class="text-danger">*</span></label>
+    } else {
+      <label for="@ThirdId">@ThirdLabel</label>
+    }
+    @Third
+  </div>
+</div>
+<style>
+  .triple-element > div {
+    width: calc(33% - 2rem);
+  }
+
+  .gap-col-3 {
+    -moz-column-gap: 1rem;
+    -ms-column-gap: 1rem;
+    -webkit-column-gap: 1rem;
+    column-gap: 1rem;
+  }
+</style>
+
+@code {
+  /// <summary>
+  /// Specifies the first element's id to be used in the label for
+  /// </summary>
+  [Parameter]
+  public string FirstId { get; set; } = "";
+  /// <summary>
+  /// Specifies the second element's id to be used in the label for
+  /// </summary>
+  [Parameter]
+  public string SecondId { get; set; } = "";
+  /// <summary>
+  /// Specifies the third element's id to be used in the label for
+  /// </summary>
+  [Parameter]
+  public string ThirdId { get; set; } = "";
+  /// <summary>
+  /// The value of the first label element
+  /// </summary>
+  [Parameter]
+  public string FirstLabel { get; set; } = "";
+  /// <summary>
+  /// The value of the second label element
+  /// </summary>
+  [Parameter]
+  public string SecondLabel { get; set; } = "";
+  /// <summary>
+  /// The value of the third label element
+  /// </summary>
+  [Parameter]
+  public string ThirdLabel { get; set; } = "";
+  /// <summary>
+  /// Specifies if the first element is required (adds a red * after the label)
+  /// </summary>
+  [Parameter]
+  public bool FirstRequired { get; set; }
+  /// <summary>
+  /// Specifies if the second element is required (adds a red * after the label)
+  /// </summary>
+  [Parameter]
+  public bool SecondRequired { get; set; }
+  /// <summary>
+  /// Specifies if the third element is required (adds a red * after the label)
+  /// </summary>
+  [Parameter]
+  public bool ThirdRequired { get; set; }
+  /// <summary>
+  /// Specifies if the element should have the mt-3 class added
+  /// </summary>
+  [Parameter]
+  public bool MarginTop { get; set; } = true;
+  [Parameter]
+  public RenderFragment First { get; set; } = null!;
+  [Parameter]
+  public RenderFragment Second { get; set; } = null!;
+  [Parameter]
+  public RenderFragment Third { get; set; } = null!;
+}

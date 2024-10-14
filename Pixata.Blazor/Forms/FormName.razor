@@ -1,0 +1,93 @@
+﻿<div class="d-flex flex-wrap gap-col-3">
+  <div class="@(MarginTop ? "mt-3 " : "")flex-fill" style="max-width: 100px;">
+    @if (TitleRequired) {
+      <label for="@TitleId">@TitleLabel <span class="text-danger">*</span></label>
+    } else {
+      <label for="@TitleId">@TitleLabel</label>
+    }
+    @Title
+  </div>
+  <div class="@(MarginTop ? "mt-3 " : "")flex-fill">
+    @if (SalutationRequired) {
+      <label for="@SalutationId">@SalutationLabel <span class="text-danger">*</span></label>
+    } else {
+      <label for="@SalutationId">@SalutationLabel</label>
+    }
+    @Salutation
+  </div>
+  <div class="@(MarginTop ? "mt-3 " : "")flex-fill">
+    @if (SurnameRequired) {
+      <label for="@SurnameId">@SurnameLabel <span class="text-danger">*</span></label>
+    } else {
+      <label for="@SurnameId">@SurnameLabel</label>
+    }
+    @Surname
+  </div>
+</div>
+<style>
+  .gap-col-3 {
+    -moz-column-gap: 1rem;
+    -ms-column-gap: 1rem;
+    -webkit-column-gap: 1rem;
+    column-gap: 1rem;
+  }
+</style>
+
+@code {
+  /// <summary>
+  /// Specifies the title id to be used in the label for
+  /// </summary>
+  [Parameter]
+  public string TitleId { get; set; } = "";
+  /// <summary>
+  /// Specifies the salutation id to be used in the label for
+  /// </summary>
+  [Parameter]
+  public string SalutationId { get; set; } = "";
+  /// <summary>
+  /// Specifies the surname id to be used in the label for
+  /// </summary>
+  [Parameter]
+  public string SurnameId { get; set; } = "";
+  /// <summary>
+  /// The value of the title label element
+  /// </summary>
+  [Parameter]
+  public string TitleLabel { get; set; } = "";
+  /// <summary>
+  /// The value of the salutation label element
+  /// </summary>
+  [Parameter]
+  public string SalutationLabel { get; set; } = "";
+  /// <summary>
+  /// The value of the surname label element
+  /// </summary>
+  [Parameter]
+  public string SurnameLabel { get; set; } = "";
+  /// <summary>
+  /// Specifies if the title is required (adds a red * after the label)
+  /// </summary>
+  [Parameter]
+  public bool TitleRequired { get; set; }
+  /// <summary>
+  /// Specifies if the salutation is required (adds a red * after the label)
+  /// </summary>
+  [Parameter]
+  public bool SalutationRequired { get; set; }
+  /// <summary>
+  /// Specifies if the surname is required (adds a red * after the label)
+  /// </summary>
+  [Parameter]
+  public bool SurnameRequired { get; set; }
+  /// <summary>
+  /// Specifies if the element should have the mt-3 class added
+  /// </summary>
+  [Parameter]
+  public bool MarginTop { get; set; } = true;
+  [Parameter]
+  public RenderFragment Title { get; set; } = null!;
+  [Parameter]
+  public RenderFragment Salutation { get; set; } = null!;
+  [Parameter]
+  public RenderFragment Surname { get; set; } = null!;
+}
