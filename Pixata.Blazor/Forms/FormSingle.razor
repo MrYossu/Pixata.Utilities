@@ -1,0 +1,67 @@
+﻿@if (IsContainer) {
+  <div class="d-flex @Id">
+    <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+      @if (Required) {
+        <label for="@Id" class="w-100">@Label <span class="text-danger">*</span></label>
+      } else {
+        <label for="@Id" class="w-100">@Label</label>
+      }
+      @ChildContent
+    </div>
+  </div>
+  <style>
+    .@Id {
+      container-type: inline-size;
+    }
+
+      .@Id > div {
+        max-width: calc(50% - .5rem);
+      }
+
+    @@container (max-width: 429px) {
+      .@Id > div {
+        max-width: unset;
+      }
+    }
+  </style>
+} else {
+  <div class="mt-3 position-relative">
+    @if (Required) {
+      <label for="@Id">@Label <span class="text-danger">*</span></label>
+    } else {
+      <label for="@Id">@Label</label>
+    }
+    @ChildContent
+  </div>
+}
+
+@code {
+  /// <summary>
+  /// Specifies the id to be used in the label for
+  /// </summary>
+  [Parameter]
+  public string Id { get; set; } = "";
+  /// <summary>
+  /// The value of the label element
+  /// </summary>
+  [Parameter]
+  public string Label { get; set; } = "";
+  /// <summary>
+  /// If the element should not exceed 50% of larger size windows then set this to true. You MUST set the Id for this to work.
+  /// See <see href="https://mryossu.atlassian.net/wiki/spaces/SA/pages/21594114/Form+components#IsContainer">wiki for more info</see>
+  /// </summary>
+  [Parameter]
+  public bool IsContainer { get; set; }
+  /// <summary>
+  /// Specifies if the content is required (adds a red * after the label)
+  /// </summary>
+  [Parameter]
+  public bool Required { get; set; }
+  /// <summary>
+  /// Specifies if the element should have the mt-3 class added
+  /// </summary>
+  [Parameter]
+  public bool MarginTop { get; set; } = true;
+  [Parameter]
+  public RenderFragment ChildContent { get; set; } = null!;
+}
