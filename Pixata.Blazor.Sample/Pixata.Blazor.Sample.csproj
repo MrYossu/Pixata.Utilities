@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
     <PackageReference Include="LanguageExt.Core" Version="4.4.9" />
+    <PackageReference Include="MailKit" Version="4.8.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.10" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageReference Include="Telerik.UI.for.Blazor" Version="6.2.0" />
