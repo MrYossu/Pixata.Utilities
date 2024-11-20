@@ -26,130 +26,130 @@ jobs:
 
     # Pixata.Blazor
     - name: Restore - Pixata.Blazor Dependencies
-      run: dotnet restore Pixata.Blazor/Pixata.Blazor.csproj  --configfile ./nuget.config
+      run: dotnet restore Pixata.Blazor/Pixata.Blazor.csproj  --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
     
     - name: Build - Pixata.Blazor.csproj
-      run: dotnet build Pixata.Blazor/Pixata.Blazor.csproj  --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Blazor/Pixata.Blazor.csproj  --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.Blazor.TelerikComponents
     - name: Restore - Pixata.Blazor.TelerikComponents Dependencies
-      run: dotnet restore Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configfile ./nuget.config
+      run: dotnet restore Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
     
     - name: Build - Pixata.Blazor.TelerikComponents.csproj
-      run: dotnet build Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.Blazor.LanguageExtComponents
     - name: Restore - Pixata.Blazor.LanguageExtComponents Dependencies
-      run: dotnet restore Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configfile ./nuget.config
+      run: dotnet restore Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
     
     - name: Build - Pixata.Blazor.LanguageExtComponents.csproj
-      run: dotnet build Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.Blazor.Sample
     - name: Restore - Pixata.Blazor.Sample Dependencies
-      run: dotnet restore Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.Blazor.Sample
-      run: dotnet build Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
     
     # Pixata.Extensions
     - name: Restore - Pixata.Extensions Dependencies
-      run: dotnet restore Pixata.Extensions/Pixata.Extensions.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.Extensions/Pixata.Extensions.csproj --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.Extensions.csproj
-      run: dotnet build Pixata.Extensions/Pixata.Extensions.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Extensions/Pixata.Extensions.csproj --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.Email
     - name: Restore - Pixata.Email Dependencies
-      run: dotnet restore Pixata.Email/Pixata.Email.csproj  --configfile ./nuget.config
+      run: dotnet restore Pixata.Email/Pixata.Email.csproj  --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
     
     - name: Build - Pixata.Email.csproj
-      run: dotnet build Pixata.Email/Pixata.Email.csproj  --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Email/Pixata.Email.csproj  --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.Functional
     - name: Restore - Pixata.Functional Dependencies
-      run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.Functional.csproj
-      run: dotnet build Pixata.Functional/Pixata.Functional.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Functional/Pixata.Functional.csproj --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.SimilarityChooser
     - name: Restore - Pixata.SimilarityChooser Dependencies
-      run: dotnet restore Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.SimilarityChooser.csproj
-      run: dotnet build Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.Google
     - name: Restore - Pixata.Google Dependencies
-      run: dotnet restore Pixata.Google/Pixata.Google.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.Google/Pixata.Google.csproj --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.Google.csproj
-      run: dotnet build Pixata.Google/Pixata.Google.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Google/Pixata.Google.csproj --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     # Pixata.Extensions.Tests
     - name: Restore - Pixata.Extensions.Tests Dependencies
-      run: dotnet restore Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configfile ./nuget.config
+      run: dotnet restore Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
     - name: Build - Pixata.Extensions.Tests
-      run: dotnet build Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configuration Release --configfile ./nuget.config
+      run: dotnet build Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --configuration Release --configfile ./nuget.config --ignore-failed-sources
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
