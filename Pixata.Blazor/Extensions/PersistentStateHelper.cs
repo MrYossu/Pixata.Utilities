@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Pixata.Blazor.Extensions;
 
@@ -25,11 +27,11 @@ public class PersistentStateHelper<T> : IDisposable {
   /// Get data. Uses both persistent storage and a cache to ensure that data is only loaded once, even if the user navigates to another page within the same WASM assembly
   /// </summary>
   /// <param name="getData">A Func&lt;Task&lt;T&gt;&gt; that specifies how to get the data. This should use a method in an interface that is implemented in both the server and WASM assemblies</param>
-  /// <param name="key">The name of the data item. If omitted, the current URI is used. This makes the usage slightly cleaner for components that use one data item per URI</param>
+  /// <param name="key">The name of the data item. If omitted, the current URI is used (path only, no https://domain). This makes the usage slightly cleaner for components that use one data item per URI</param>
   /// <returns>The data returned by the getData parameter</returns>
   public async Task<T> Get(Func<Task<T>> getData, string key = "") {
     _key = string.IsNullOrWhiteSpace(key)
-      ? _navManager.Uri
+      ? UriPath(_navManager.Uri)
       : key;
     // See if the data is in the state. If so, then it will also be in the cache, so save
     // it locally (so it can be persisted) and return it
@@ -59,10 +61,29 @@ public class PersistentStateHelper<T> : IDisposable {
 
   /// <summary>
   /// Remove the data from the cache. This will force the data to be reloaded next time it is requested
+  /// <param name="key">The name of the entry to be removed. Defaults to the current URI (path only, no https://domain)</param>
   /// </summary>
-  public void Remove() =>
-    _cache.Remove(_key);
+  public void Remove(string key = "") =>
+    _cache.Remove(string.IsNullOrWhiteSpace(key) ? _key : key);
+
+  /// <summary>
+  /// Gets the keys of all items stored in the cache. Intended for debugging purposes
+  /// </summary>
+  /// <returns>A string[] containing the keys</returns>
+  public string[] GetKeys() =>
+    (((IEnumerable<object>)(typeof(MemoryCache).GetProperty("Keys"))!.GetValue(_cache)!)).Select(o => o.ToString() ?? "").ToArray();
 
   public void Dispose() =>
     _subscription.Dispose();
+
+  private static string UriPath(string uri) {
+    if (!uri.Contains("//")) {
+      return uri;
+    }
+    uri = uri.Substring(uri.IndexOf("//", StringComparison.Ordinal) + 2);
+    if (!uri.StartsWith("/")) {
+      uri = uri.Contains("/") ? uri.Substring(uri.IndexOf("/", StringComparison.Ordinal)) : "/";
+    }
+    return uri;
+  }
 }
