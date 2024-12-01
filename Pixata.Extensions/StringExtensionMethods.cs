@@ -95,11 +95,13 @@ namespace Pixata.Extensions {
         .Replace("ð", "o");
 
     /// <summary>
-    /// Replaces the first character of each word with upper case e.g. This is an example - This Is An Example
+    /// Replaces the first character of each word with upper case e.g. This is an example - This Is An Example. If the parameter is null, an empty string is returned
     /// </summary>
     /// <param name="text">The string on which to capitalise</param>
     /// <returns>The string capitalised</returns>
-    public static string ToTitleCase(this string text) =>
-      CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
+    public static string ToTitleCase(this string? text) =>
+      text is null
+        ? ""
+        : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
   }
 }
