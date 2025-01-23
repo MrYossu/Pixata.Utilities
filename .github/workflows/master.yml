@@ -17,10 +17,6 @@ jobs:
       uses: actions/setup-dotnet@v4 
       with:  
         dotnet-version: '2.1.x'
-    - name: Setup .NET Core 7
-      uses: actions/setup-dotnet@v4
-      with:  
-        dotnet-version: '7.0'
     - name: Setup .NET Core 8
       uses: actions/setup-dotnet@v4
       with:  
