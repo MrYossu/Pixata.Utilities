@@ -1,0 +1,23 @@
+@typeparam T
+
+@if (Each is not null) {
+  @foreach (T t in Collection) {
+    @Each(t)
+  }
+}
+
+@code {
+
+  /// <summary>
+  /// A collection of objects for the component to iterate
+  /// </summary>
+  [Parameter]
+  public IEnumerable<T> Collection { get; set; } = [];
+
+  /// <summary>
+  /// The markup to display for each item in the collection
+  /// </summary>
+  [Parameter]
+  public RenderFragment<T>? Each { get; set; }
+
+}
