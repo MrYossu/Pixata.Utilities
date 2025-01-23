@@ -11,6 +11,58 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available fo
 ## Containers
 These components are intended to wrap up other parts of your page, and add functionality.
 
+### If
+I have found some issues using `@if` in Razor markup. For one, Visual Studio seems to have its own ideas about how the braces should be formatted, and these are usually different from my ideas! Also, the functionality from the rather fabulous [ZenCoding ](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.ZenCoding) extension doesn't work consistently with `@if` statements.
+
+For this reason, I have added the `If` component. Usage is pretty simple. Assume `_n` is an `int` variable...
+
+```xml
+<If>
+  <Then Condition="@(_n > 10)">
+    <p>Number is greater than 10</p>
+  </Then>
+  <ElseIf Condition="@(_n == 5)">
+    <p>Number is 5</p>
+  </ElseIf>
+  <ElseIf Condition="@(_n > 5)">
+    <p>Number is greater than 5</p>
+  </ElseIf>
+  <Else>
+    <p>Number is 5 or less</p>
+  </Else>
+</If>
+```
+
+The `ElseIf` and `Else` components are optional, and you can have as many `ElseIf` components as you like. The `Condition` parameter is a `bool` that determines if the content is displayed.
+
+**Note:** This package also contains a deprecated `Conditional` component, which is a more basic version of the above. Apart from the fact that "if", "then" and "else" are keywords familiar to generations of programmers, `Conditonal` only allows for the "if" clause, and an optional "else". By contrast, `If` allows for as many "else if" clauses as you like.
+
+### ForEach
+In the same spirit as the above, the `ForEach` component allows you to replace usages of `@foreach` with a component...
+
+```xml
+<ul>
+  <ForEach Collection="@Enumerable.Range(0, 3)">
+    <Each Context="n">
+      <li>@n</li>
+    </Each>
+  </ForEach>
+</ul>
+```
+
+The `Collection` parameter can be any `IEnumerable<T>`. The `Context` parameter on `Each` supplies an item from the collection.
+
+### HtmlRaw
+Convenience component for displaying raw HTML. Instead of doing this...
+
+    @((MarkupString)_html)
+
+...where `_html` is a string variable in your code, you can now do...
+
+    <HtmlRaw Html="@_html" />
+
+...which is (for me anyway) slightly easier to remember.
+
 ### Busy
 Useful when data is loading. You bind the `Data` parameter to whatever model you are using. When the page first loads, and the model is (presumably) null, a busy indicator will show. When the data has loaded, and the model is non-null, the display is automatically switched to the real content.
 
@@ -30,17 +82,6 @@ You can also set the class for the container, in case you want to add your own s
 Replaces the nasty JavaScript `confirm` function with something that looks nicer, and doesn't require any JSInterop.
 
 See the [sample code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ConfirmSample.razor) ([live demo](https://test.pixata.co.uk/ConfirmSample)) for an example of how to use it. You can set the pop-up to disable the entire window, or just one section of it. You can also specify if the pop-up should disappear as soon as a button is clicked, or if it should remain visible, but disabled (with a busy indicator) until you dismiss it.
-
-### HtmlRaw
-Convenience component for displaying raw HTML. Instead of doing this...
-
-    @((MarkupString)_html)
-
-...where `_html` is a string variable in your code, you can now do...
-
-    <HtmlRaw Html="@_html" />
-
-...which is (for me anyway) slightly easier to remember.
 
 ### Inform
 Similar to `Confirm`, but only has one button. At the moment, the pop-up id dismissed as soon as you click the button, but I intned to add the feature described above to this component as well.
