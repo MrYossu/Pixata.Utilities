@@ -1,0 +1,41 @@
+Brief explanation of how these components work (as I'll forget, even if no-one else wants to know!)
+
+1. If Component:
+
+* Tracks whether any condition has been rendered
+* Condition parameter determines if initial rendering is possible
+* CanRender() method checks if no condition has been rendered yet
+* MarkAsRendered() prevents further rendering after a condition is met
+* Uses a CascadingValue to pass itself to child components
+
+
+2. Then Component:
+
+* Renders when the main If condition is true and no previous condition has rendered
+* Calls MarkAsRendered() to prevent subsequent conditions from rendering
+
+
+3. ElseIf Component:
+
+* Inherits from Then
+* Has its own Condition parameter
+* Renders only if:
+   a) Its specific condition is true
+   b) The main If condition is false
+   c) No previous condition has rendered
+
+
+4. Else Component:
+
+* Renders only if no previous conditions have rendered (using CanRender())
+
+
+The key mechanism is the _hasRendered flag in the If component, which ensures only one section (the first matching condition) gets displayed.
+
+The BuildRenderTree method in the If component creates a CascadingValue component with three key attributes:
+
+* Value = this: Passes the current If instance to child components
+* IsFixed = false: Allows the cascading value to change
+* ChildContent = ChildContent: Renders the child components within the If
+
+The method essentially creates a context where child Then, ElseIf, and Else components can access the parent If component's state and methods via the cascading value, enabling the conditional rendering logic.
