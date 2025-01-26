@@ -1,0 +1,44 @@
+﻿@page "/Conditionals"
+
+<h1>Conditionals</h1>
+
+<h2>If/Then/Else</h2>
+
+<p>Enter a number and click the button to set the variable to that number. The display should change depending on the value of the number.</p>
+<input type="text" @bind-value="@_input" />
+<button @onclick="Set">Set</button>
+<h3>_n: @_n</h3>
+
+<If Condition="@(_n > 10)">
+  <Then>
+    <p>Number is greater than 10</p>
+  </Then>
+  <ElseIf Condition="@(_n == 5)">
+    <p>Number is 5</p>
+  </ElseIf>
+  <ElseIf Condition="@(_n > 5)">
+    <p>Number is greater than 5</p>
+  </ElseIf>
+  <Else>
+    <p>Number is 5 or less</p>
+  </Else>
+</If>
+
+<h2>ForEach</h2>
+
+<ul>
+  <ForEach Collection="@Enumerable.Range(0, 3)">
+    <Each Context="n">
+      <li>@n</li>
+    </Each>
+  </ForEach>
+</ul>
+
+@code {
+  private int _input = 0;
+  private int _n;
+
+  private void Set() =>
+    _n = _input;
+
+}

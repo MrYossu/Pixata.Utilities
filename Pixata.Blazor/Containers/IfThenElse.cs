@@ -5,14 +5,18 @@ namespace Pixata.Blazor.Containers;
 
 public class If : ComponentBase {
   [Parameter]
+  public bool Condition { get; set; } = true;
+
+  [Parameter]
   public RenderFragment ChildContent { get; set; } = null!;
 
-  private bool _anyConditionMet;
+  private bool _hasRendered;
 
-  internal void MarkConditionMet() =>
-    _anyConditionMet = true;
+  internal void MarkAsRendered() =>
+    _hasRendered = true;
 
-  internal bool CanRender() => !_anyConditionMet;
+  internal bool CanRender() =>
+    !_hasRendered;
 
   protected override void BuildRenderTree(RenderTreeBuilder builder) {
     builder.OpenComponent<CascadingValue<If>>(0);
@@ -23,28 +27,34 @@ public class If : ComponentBase {
   }
 
   protected override void OnParametersSet() =>
-    _anyConditionMet = false;
+    _hasRendered = false;
 }
 
 public class Then : ComponentBase {
   [CascadingParameter]
-  private If Parent { get; set; } = null!;
-
-  [Parameter]
-  public bool Condition { get; set; } = true;
+  protected If Parent { get; set; } = null!;
 
   [Parameter]
   public RenderFragment ChildContent { get; set; } = null!;
 
   protected override void BuildRenderTree(RenderTreeBuilder builder) {
-    if (Condition && Parent.CanRender()) {
-      Parent.MarkConditionMet();
+    if (Parent.Condition && Parent.CanRender()) {
+      Parent.MarkAsRendered();
       builder.AddContent(0, ChildContent);
     }
   }
 }
 
 public class ElseIf : Then {
+  [Parameter]
+  public bool Condition { get; set; } = true;
+
+  protected override void BuildRenderTree(RenderTreeBuilder builder) {
+    if (Condition && !Parent.Condition && Parent.CanRender()) {
+      Parent.MarkAsRendered();
+      builder.AddContent(0, ChildContent);
+    }
+  }
 }
 
 public class Else : ComponentBase {

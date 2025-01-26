@@ -17,8 +17,8 @@ I have found some issues using `@if` in Razor markup. For one, Visual Studio see
 For this reason, I have added the `If` component. Usage is pretty simple. Assume `_n` is an `int` variable...
 
 ```xml
-<If>
-  <Then Condition="@(_n > 10)">
+<If Condition="@(_n > 10)">
+  <Then>
     <p>Number is greater than 10</p>
   </Then>
   <ElseIf Condition="@(_n == 5)">
