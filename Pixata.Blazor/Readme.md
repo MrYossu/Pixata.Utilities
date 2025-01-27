@@ -81,6 +81,8 @@ In the case above, you can use the `EachFunc` parameter to do the same with much
 </ul>
 ```
 
+**Note:** If you specify both `Each` and `EachFunc`, `Each` alone will be used.
+
 ## Containers
 
 These components are intended to wrap up other parts of your page, and add functionality.
