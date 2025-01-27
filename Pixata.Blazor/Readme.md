@@ -9,12 +9,14 @@ There is a [complimentary package](https://github.com/MrYossu/Pixata.Utilities/t
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for this project.
 
 ## Containers
-These components are intended to wrap up other parts of your page, and add functionality.
+
+I have found some issues using some `@` statements in Razor markup. For one, Visual Studio seems to have its own ideas about how the braces should be formatted, and these are usually different from my ideas! Also, the functionality from the rather fabulous [ZenCoding ](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.ZenCoding) extension doesn't work consistently with `@` statements.
+
+For this reason, I have added some components to replace these statements with Blazor components.
 
 ### If
-I have found some issues using `@if` in Razor markup. For one, Visual Studio seems to have its own ideas about how the braces should be formatted, and these are usually different from my ideas! Also, the functionality from the rather fabulous [ZenCoding ](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.ZenCoding) extension doesn't work consistently with `@if` statements.
 
-For this reason, I have added the `If` component. Usage is pretty simple. Assume `_n` is an `int` variable...
+The `If` component replaces the Razor `@if` statement. Usage is pretty simple. Assume `_n` is an `int` variable...
 
 ```xml
 <If Condition="@(_n > 10)">
@@ -37,8 +39,27 @@ The `ElseIf` and `Else` components are optional, and you can have as many `ElseI
 
 **Note:** This package also contains a deprecated `Conditional` component, which is a more basic version of the above. Apart from the fact that "if", "then" and "else" are keywords familiar to generations of programmers, `Conditonal` only allows for the "if" clause, and an optional "else". By contrast, `If` allows for as many "else if" clauses as you like.
 
+### Switch
+
+The `Switch` component replaces the Razor `@switch` statement. Assume the same `int` variable as above...
+
+```xml
+<Switch Variable="@_n">
+  <Case Equals="1">
+    <p>n is one</p>
+  </Case>
+  <Case Equals="2">
+    <p>n is two</p>
+  </Case>
+  <Default>
+    <p>n is not one or two</p>
+  </Default>
+</Switch>
+```
+
 ### ForEach
-In the same spirit as the above, the `ForEach` component allows you to replace usages of `@foreach` with a component...
+
+The `ForEach` component allows you to replace usages of `@foreach` with a component...
 
 ```xml
 <ul>
@@ -52,7 +73,12 @@ In the same spirit as the above, the `ForEach` component allows you to replace u
 
 The `Collection` parameter can be any `IEnumerable<T>`. The `Context` parameter on `Each` supplies an item from the collection.
 
+## Containers
+
+These components are intended to wrap up other parts of your page, and add functionality.
+
 ### HtmlRaw
+
 Convenience component for displaying raw HTML. Instead of doing this...
 
     @((MarkupString)_html)

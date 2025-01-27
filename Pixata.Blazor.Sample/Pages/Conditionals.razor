@@ -2,12 +2,14 @@
 
 <h1>Conditionals</h1>
 
-<h2>If/Then/Else</h2>
+<h2>See the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/Conditionals.razor" target="_blank">source code for this page</a> to see how the components are used.</h2>
 
-<p>Enter a number and click the button to set the variable to that number. The display should change depending on the value of the number.</p>
+<p><code>If</code> and <code>Switch</code> can be tested using the controls below. Enter a number and click the button to set the variable to that number. The display should change depending on the value of the number.</p>
 <input type="text" @bind-value="@_input" />
 <button @onclick="Set">Set</button>
-<h3>_n: @_n</h3>
+
+<h2>If</h2>
+<p>Replaces the Razor <code>@@if</code> with a component.</p>
 
 <If Condition="@(_n > 10)">
   <Then>
@@ -24,7 +26,25 @@
   </Else>
 </If>
 
+<h2>Switch</h2>
+
+<Switch Variable="@_n">
+  <Case Equals="1">
+    <p>n is one</p>
+  </Case>
+  <Case Equals="2">
+    <p>n is two</p>
+  </Case>
+  <Case Equals="3">
+    <p>n is three</p>
+  </Case>
+  <Default>
+    <p>n is not one, two or three</p>
+  </Default>
+</Switch>
+
 <h2>ForEach</h2>
+<p>Replaces the Razor <code>@@foreach</code> statement with a component.</p>
 
 <ul>
   <ForEach Collection="@Enumerable.Range(0, 3)">
