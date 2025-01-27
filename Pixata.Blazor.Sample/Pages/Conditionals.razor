@@ -54,6 +54,10 @@
   </ForEach>
 </ul>
 
+<ul>
+  <ForEach Collection="@Enumerable.Range(0, 3)" EachFunc="@(n => $"<li>{n}</li>")" />
+</ul>
+
 @code {
   private int _input = 0;
   private int _n;

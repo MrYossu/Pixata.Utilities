@@ -73,6 +73,14 @@ The `ForEach` component allows you to replace usages of `@foreach` with a compon
 
 The `Collection` parameter can be any `IEnumerable<T>`. The `Context` parameter on `Each` supplies an item from the collection.
 
+In the case above, you can use the `EachFunc` parameter to do the same with much less code...
+
+```xml
+<ul>
+  <ForEach Collection="@Enumerable.Range(0, 3)" EachFunc="@(n => $"<li>{n}</li>")" />
+</ul>
+```
+
 ## Containers
 
 These components are intended to wrap up other parts of your page, and add functionality.
