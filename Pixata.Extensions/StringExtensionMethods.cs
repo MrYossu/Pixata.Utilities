@@ -71,6 +71,16 @@ namespace Pixata.Extensions {
           : str;
 
     /// <summary>
+    /// Returns the last line  of a multi-line string. Useful for getting the last line of someone's address
+    /// </summary>
+    /// <param name="str">The multi-line string</param>
+    /// <returns>The last line of the input, assuming Environment.NewLine or \n is the line delimiter</returns>
+    public static string LastLine(this string str) =>
+      str.IndexOf(Environment.NewLine, StringComparison.Ordinal) == -1 && str.IndexOf('\n') == -1
+        ? str
+        : str.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries).Last();
+
+    /// <summary>
     /// Returns all but the first line of a multi-line string. Useful for getting the second and subsequent line(s) of someone's address
     /// </summary>
     /// <param name="str">The multi-line string</param>
