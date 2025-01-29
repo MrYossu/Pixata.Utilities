@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Telerik.Blazor.Components;
 using Telerik.DataSource;
@@ -22,7 +22,7 @@ public static class TelerikGridHelper {
     int n = 0;
 
     // First handle the grid's built-in filters
-    foreach (CompositeFilterDescriptor cfd in args.Request.Filters.Cast<CompositeFilterDescriptor>().Union(extraFilters)) {
+    foreach (CompositeFilterDescriptor cfd in (args.Request.Filters ?? []).Cast<CompositeFilterDescriptor>().Union(extraFilters)) {
       if (cfd.LogicalOperator == FilterCompositionLogicalOperator.And) {
         foreach (FilterDescriptor fd in cfd.FilterDescriptors.Cast<FilterDescriptor>()) {
           AddValue(values, fd.Member, fd.Operator, fd.Value, n);
@@ -54,8 +54,8 @@ public static class TelerikGridHelper {
 
     // SQL for sorting
     string sqlSort = $" order by {defaultColumnForSort} {(defaultSort == ListSortDirection.Ascending ? "asc" : "desc")}";
-    if (args.Request.Sorts.Any()) {
-      SortDescriptor sortDescriptor = (args.Request.Sorts.First())!;
+    if ((args.Request.Sorts ?? []).Any()) {
+      SortDescriptor sortDescriptor = ((args.Request.Sorts ?? []).First())!;
       sqlSort = $" order by {sortDescriptor.Member} " + (sortDescriptor.SortDirection == ListSortDirection.Ascending ? "asc" : "desc");
     }
 
