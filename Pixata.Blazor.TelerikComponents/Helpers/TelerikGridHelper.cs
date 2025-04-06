@@ -81,13 +81,16 @@ public static class TelerikGridHelper {
     return new(matchingRows, sqlFilters, values.ToArray());
   }
 
-  private static void AddValue(List<SqlParameter> parameters, string member, FilterOperator op, object value, int n) =>
-    parameters.Add(new($"@{member}{n}", op switch {
-      FilterOperator.Contains => $"%{value}%",
-      FilterOperator.StartsWith => $"{value}%",
-      FilterOperator.EndsWith => $"%{value}",
-      _ => value
-    }));
+  private static void AddValue(List<SqlParameter> parameters, string member, FilterOperator op, object value, int n) {
+    if (op != FilterOperator.IsNull && op != FilterOperator.IsNotNull) {
+      parameters.Add(new($"@{member}{n}", op switch {
+        FilterOperator.Contains => $"%{value}%",
+        FilterOperator.StartsWith => $"{value}%",
+        FilterOperator.EndsWith => $"%{value}",
+        _ => value
+      }));
+    }
+  }
 
   private static string AddSql(string member, FilterOperator op, int n, string sqlFilterConjunction) =>
     $"{sqlFilterConjunction} {member}" + op switch {
@@ -100,6 +103,8 @@ public static class TelerikGridHelper {
       FilterOperator.IsGreaterThanOrEqualTo => $">=@{member}{n}",
       FilterOperator.IsLessThan => $"<@{member}{n}",
       FilterOperator.IsLessThanOrEqualTo => $"<=@{member}{n}",
+      FilterOperator.IsNull => "=null",
+      FilterOperator.IsNotNull => "<>null",
       _ => throw new Exception($"Unknown operator: {op}")
     };
 }
