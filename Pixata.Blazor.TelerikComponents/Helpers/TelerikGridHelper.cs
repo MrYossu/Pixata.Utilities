@@ -103,8 +103,8 @@ public static class TelerikGridHelper {
       FilterOperator.IsGreaterThanOrEqualTo => $">=@{member}{n}",
       FilterOperator.IsLessThan => $"<@{member}{n}",
       FilterOperator.IsLessThanOrEqualTo => $"<=@{member}{n}",
-      FilterOperator.IsNull => "is null",
-      FilterOperator.IsNotNull => "is not null",
+      FilterOperator.IsNull => " is null",
+      FilterOperator.IsNotNull => " is not null",
       _ => throw new Exception($"Unknown operator: {op}")
     };
 }
