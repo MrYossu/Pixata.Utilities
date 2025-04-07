@@ -55,8 +55,11 @@ public static class TelerikGridHelper {
     // SQL for sorting
     string sqlSort = $" order by {defaultColumnForSort} {(defaultSort == ListSortDirection.Ascending ? "asc" : "desc")}";
     if ((args.Request.Sorts ?? []).Any()) {
-      SortDescriptor sortDescriptor = ((args.Request.Sorts ?? []).First())!;
+      SortDescriptor sortDescriptor = (args.Request.Sorts ?? []).First()!;
       sqlSort = $" order by {sortDescriptor.Member} " + (sortDescriptor.SortDirection == ListSortDirection.Ascending ? "asc" : "desc");
+      foreach (SortDescriptor sd in (args.Request.Sorts ?? []).Skip(1)) {
+        sqlSort += $", {sd.Member} {(sd.SortDirection == ListSortDirection.Ascending ? "asc" : "desc")}";
+      }
     }
 
     // Assemble the final SQL
