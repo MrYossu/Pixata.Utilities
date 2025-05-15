@@ -144,7 +144,13 @@ namespace Pixata.Extensions {
     private static string Hours(int n) => $"{n / 3600} hour{S(n / 3600)}";
     private static string Minutes(int n) => $"{(n / 60) % 60} minute{S((n / 60) % 60)}";
     private static string Seconds(int n) => $"{n % 60} second{S(n % 60)}";
-    private static string S(int n) =>
+
+    /// <summary>
+    /// Returns "" if the input is 1, otherwise returns "s". This is useful for pluralising words in a string. For example, instead of $"We have {cats.Count} cat(s)", you can use $"We have {cats.Count} cat{cats.Count.S()}", which is much easier to read.
+    /// </summary>
+    /// <param name="n">The input number</param>
+    /// <returns></returns>
+    public static string S(int n) =>
       n == 1 ? "" : "s";
 
     /// <summary>
