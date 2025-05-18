@@ -150,7 +150,7 @@ namespace Pixata.Extensions {
     /// </summary>
     /// <param name="n">The input number</param>
     /// <returns></returns>
-    public static string S(int n) =>
+    public static string S(this int n) =>
       n == 1 ? "" : "s";
 
     /// <summary>
