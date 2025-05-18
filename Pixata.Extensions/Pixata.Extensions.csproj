@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>1.30.0</Version>
-    <AssemblyVersion>1.30.0</AssemblyVersion>
-    <FileVersion>1.30.0</FileVersion>
+    <Version>1.31.0</Version>
+    <AssemblyVersion>1.31.0</AssemblyVersion>
+    <FileVersion>1.31.0</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Extensions</Product>
