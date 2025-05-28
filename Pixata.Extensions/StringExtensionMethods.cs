@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -78,7 +79,7 @@ namespace Pixata.Extensions {
     public static string LastLine(this string str) =>
       str.IndexOf(Environment.NewLine, StringComparison.Ordinal) == -1 && str.IndexOf('\n') == -1
         ? str
-        : str.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries).Last();
+        : str.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries).Last();
 
     /// <summary>
     /// Returns all but the first line of a multi-line string. Useful for getting the second and subsequent line(s) of someone's address
@@ -113,5 +114,54 @@ namespace Pixata.Extensions {
       text is null
         ? ""
         : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
+
+    /// <summary>
+    /// Sanitises a string to be safe for use as a file name.
+    /// Invalid characters are replaced, and sequences of invalid characters are condensed.
+    /// </summary>
+    /// <param name="inputName">The string to sanitise.</param>
+    /// <param name="replacementChar">The character to use for replacing invalid characters. Defaults to '_'. Must not be an invalid file character itself.</param>
+    /// <returns>A sanitised string suitable for use as a file name.</returns>
+    /// <exception cref="ArgumentException">Thrown if the provided replacementChar is itself an invalid file name character.</exception>
+    public static string Sanitise(this string inputName, char replacementChar = '_') {
+      char[] systemInvalidChars = Path.GetInvalidFileNameChars();
+      if (systemInvalidChars.Contains(replacementChar)) {
+        throw new ArgumentException($"Replacement character '{replacementChar}' is an invalid file name character.", nameof(replacementChar));
+      }
+      if (string.IsNullOrWhiteSpace(inputName)) {
+        return "";
+      }
+      string currentName = inputName.Trim();
+
+      StringBuilder sb = new();
+      bool prevCharWasReplaced = false;
+
+      foreach (char c in currentName) {
+        if (systemInvalidChars.Contains(c)) {
+          // Only append the replacement character if the previous character wasn't also replaced. This collapses sequences of invalid characters.
+          if (!prevCharWasReplaced) {
+            sb.Append(replacementChar);
+            prevCharWasReplaced = true;
+          }
+        } else {
+          sb.Append(c);
+          prevCharWasReplaced = false;
+        }
+      }
+
+      string sanitisedName = sb.ToString();
+
+      // Trim any leading or trailing replacement characters, which could happen if the input string started or ended with invalid characters.
+      // For example, if input was "/file/" and replacement is '_', sb would be "_file_", Trim(replacementChar) makes it "file".
+      sanitisedName = sanitisedName.Trim(replacementChar);
+      // Trim whitespace from the final result again, as valid spaces might be at the ends after replacements or if replacementChar itself was a space.
+      sanitisedName = sanitisedName.Trim();
+
+      if (string.IsNullOrWhiteSpace(sanitisedName)) {
+        return "";
+      }
+
+      return sanitisedName;
+    }
   }
 }

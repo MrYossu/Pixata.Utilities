@@ -67,3 +67,7 @@ Here is a brief description of the methods in the classes so far...
 `OtherLines()` - Returns all but the first line of a multi-line string. Useful for getting the second and subsequent line(s) of someone's address
 
 `RemoveDiacritics()` - Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents. Note that for boring technical reasons, the returned string was lowercase in earlier versions of this package. Starting with version 1.27.0, case is preserved.
+
+`ToTitleCase` - Replaces the first character of each word with upper case e.g. This is an example - This Is An Example. If the parameter is null, an empty string is returned
+
+`Sanitise` - Sanitises a string to be safe for use as a file name. Invalid characters are replaced, and sequences of invalid characters are condensed.
