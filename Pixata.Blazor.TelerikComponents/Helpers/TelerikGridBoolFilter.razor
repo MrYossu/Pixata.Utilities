@@ -1,18 +1,23 @@
 ﻿@using Telerik.DataSource
+
 @code {
 
   public RenderFragment<FilterCellTemplateContext> BuildTemplate() =>
     context => __builder => {
       BoolFilterContext = context;
-      <TelerikCheckBox @bind-Value="@IsTrue"
-                       Indeterminate="@(!IsTrue.HasValue)"
-                       OnChange="@SetupFilter"
-                       Class="mt-1">
-      </TelerikCheckBox>
-      <TelerikButton ButtonType="ButtonType.Button"
-                     Class="k-clear-button-visible ml-2"
-                     Enabled="@IsTrue.HasValue"
-                     OnClick="@ClearBoolFilter">X</TelerikButton>
+      <div class="d-flex align-items-center">
+        <TelerikCheckBox @bind-Value="@IsTrue"
+                         Indeterminate="@(!IsTrue.HasValue)"
+                         OnChange="@SetupFilter"
+                         Class="mt-1">
+        </TelerikCheckBox>
+        <TelerikButton ButtonType="ButtonType.Button"
+                       Class="k-clear-button-visible ml-2"
+                       Enabled="@IsTrue.HasValue"
+                       OnClick="@ClearBoolFilter">
+          X
+        </TelerikButton>
+      </div>
     };
 
   public FilterCellTemplateContext BoolFilterContext { get; set; } = null!;
