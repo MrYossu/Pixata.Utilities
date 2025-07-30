@@ -31,12 +31,12 @@
       if (string.IsNullOrWhiteSpace(title)) {
         title = context.ToString();
       }
-      <div class="@classCss" style="@style"><a href="@uri(context as T)" title="@title">@(new MarkupString(convert(context as T)))</a></div>
+      <div class="@classCss" style="@style"><a href="@uri(context as T)" style="display: block; width: 100%;" title="@title">@(new MarkupString(convert(context as T)))</a></div>
     };
 
   public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
     context => __builder => {
-      <div class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))" style="@(styleFunc is null ? "" : styleFunc(context as T))"><a href="@uri(context as T)" title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</a></div>
+      <div class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))" style="@(styleFunc is null ? "" : styleFunc(context as T))"><a href="@uri(context as T)" style="display: block; width: 100%;" title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</a></div>
     };
 
 }
