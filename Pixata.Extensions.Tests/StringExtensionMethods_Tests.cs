@@ -12,8 +12,12 @@ namespace Pixata.Extensions.Tests {
     [DataRow(new[] { "Jim" }, "Jim")]
     [DataRow(new[] { "Jim", "Spriggs" }, "Jim, Spriggs")]
     [DataTestMethod]
-    public void StringExtensionMethods_JoinStr_NoSep(IEnumerable<string> strs, string output) =>
+    public void StringExtensionMethods_JoinStr_Strings_NoSep(IEnumerable<string> strs, string output) =>
       Assert.AreEqual(strs.JoinStr(), output);
+
+    [TestMethod]
+    public void StringExtensionMethods_JoinStr_Ints_NoSep() =>
+      Assert.AreEqual(new List<int> { 1, 2 }.JoinStr(), "1, 2");
 
     [DataRow(new[] { "" }, "", "")]
     [DataRow(new[] { "Jim" }, ",", "Jim")]
@@ -94,8 +98,8 @@ West Byfleet", "1 Acacia Mews")]
     private static IEnumerable<object[]> GetOtherLinesTestData() {
       yield return new object[] { "", new List<string>() };
       yield return new object[] { "1 Jim Street", new List<string>() };
-      yield return new object[] { "1 Jim Street\nJimsville", new List<string>{ "Jimsville" } };
-      yield return new object[] { "1 Jim Street\nJimsville\nJV1 7YT", new List<string>{ "Jimsville", "JV1 7YT" } };
+      yield return new object[] { "1 Jim Street\nJimsville", new List<string> { "Jimsville" } };
+      yield return new object[] { "1 Jim Street\nJimsville\nJV1 7YT", new List<string> { "Jimsville", "JV1 7YT" } };
       yield return new object[] { $"1 Jim Street{Environment.NewLine}Jimsville", new List<string> { "Jimsville" } };
       yield return new object[] { $"1 Jim Street{Environment.NewLine}Jimsville{Environment.NewLine}JV1 7YT", new List<string> { "Jimsville", "JV1 7YT" } };
     }
@@ -121,11 +125,13 @@ West Byfleet", "1 Acacia Mews")]
     #endregion
 
     #region ToTitleCase
+
     [DataRow("", "")]
     [DataRow("This is an example", "This Is An Example")]
     [DataTestMethod]
     public void StringExtensionMethods_ToTitleCase(string value, string expected) =>
       Assert.AreEqual(expected, value.ToTitleCase());
+
     #endregion
   }
 }
