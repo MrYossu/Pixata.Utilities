@@ -65,5 +65,61 @@ namespace Pixata.Extensions {
     /// <returns>A DateTime that represents the last millisecond of the month</returns>
     public static DateTime EndOfMonth(this DateTime d) =>
       new DateTime(d.Year, d.Month, DateTime.DaysInMonth(d.Year, d.Month), 23, 59, 59).AddMilliseconds(999);
+
+    /// <summary>
+    /// Formats a date/time range in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="fromDate">The beginning of the range. May be null</param>
+    /// <param name="toDate">The end of the range. May be null</param>
+    /// <returns>A concise summary of the range, eg "From 29th Sept 25 00:00", "To 29th Sept 25 00:00", "28th Sept 00:00 - 29th Sept 25 12:00" or "29th Sept 25 00:00-12:00"</returns>
+    public static string DateRangeToString(DateTime? fromDate, DateTime? toDate) {
+      switch (fromDate) {
+        case null when toDate == null:
+          return "";
+        case null:
+          return $"To {FormatDateTime(toDate.Value)}";
+      }
+
+      if (toDate == null) {
+        return $"From {FormatDateTime(fromDate.Value)}";
+      }
+
+      DateTime from = fromDate.Value;
+      DateTime to = toDate.Value;
+
+      // Same year, month, and day - only show date once
+      if (from.Date == to.Date) {
+        return $"{FormatDate(from)} {from:HH:mm}-{to:HH:mm}";
+      }
+
+      // Same year and month - show each date with time
+      if (from.Year == to.Year && from.Month == to.Month) {
+        return $"{GetDayWithSuffix(from.Day)} {from:MMM} {from:HH:mm} - {GetDayWithSuffix(to.Day)} {to:MMM yy} {to:HH:mm}";
+      }
+
+      // Same year - omit year from first date
+      if (from.Year == to.Year) {
+        return $"{FormatDayMonth(from)} {from:HH:mm} - {FormatDate(to)} {to:HH:mm}";
+      }
+
+      // Different years - show full dates
+      return $"{FormatDateTime(from)} - {FormatDateTime(to)}";
+    }
+
+    private static string FormatDateTime(DateTime dt) =>
+      $"{FormatDate(dt)} {dt:HH:mm}";
+
+    private static string FormatDate(DateTime dt) =>
+      $"{GetDayWithSuffix(dt.Day)} {dt:MMM yy}";
+
+    private static string FormatDayMonth(DateTime dt) =>
+      $"{GetDayWithSuffix(dt.Day)} {dt:MMM}";
+
+    private static string GetDayWithSuffix(int day) =>
+      day switch {
+        1 or 21 or 31 => $"{day}st",
+        2 or 22 => $"{day}nd",
+        3 or 23 => $"{day}rd",
+        _ => $"{day}th"
+      };
   }
-}
