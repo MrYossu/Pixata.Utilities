@@ -69,11 +69,40 @@ namespace Pixata.Extensions {
     /// <summary>
     /// Formats a date/time range in a human-friendly way, omitting redundant information
     /// </summary>
-    /// <param name="fromDate">The beginning of the range. May be null</param>
-    /// <param name="toDate">The end of the range. May be null</param>
+    /// <param name="dates">A tuple of two nullable DateTimes</param>
     /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
     /// <returns>A concise summary of the range, eg "From 29th Sept 25 00:00", "To 29th Sept 25 00:00", "28th Sept 00:00 - 29th Sept 25 12:00" or "29th Sept 25 00:00-12:00"</returns>
-    public static string DateRangeToString(DateTime? fromDate, DateTime? toDate, bool showTime = false) {
+    public static string DateRangeToString(this (DateTime? fromDate, DateTime? toDate) dates, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime);
+
+    /// <summary>
+    /// Formats a date/time range in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of a non-nullable DateTime and a nullable DateTime</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
+    /// <returns>A concise summary of the range, eg "From 29th Sept 25 00:00", "To 29th Sept 25 00:00", "28th Sept 00:00 - 29th Sept 25 12:00" or "29th Sept 25 00:00-12:00"</returns>
+    public static string DateRangeToString(this (DateTime fromDate, DateTime? toDate) dates, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime);
+
+    /// <summary>
+    /// Formats a date/time range in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of a nullable DateTime and a non-nullable DateTime</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
+    /// <returns>A concise summary of the range, eg "From 29th Sept 25 00:00", "To 29th Sept 25 00:00", "28th Sept 00:00 - 29th Sept 25 12:00" or "29th Sept 25 00:00-12:00"</returns>
+    public static string DateRangeToString(this (DateTime? fromDate, DateTime toDate) dates, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime);
+
+    /// <summary>
+    /// Formats a date/time range in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of two non-nullable DateTimes</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
+    /// <returns>A concise summary of the range, eg "From 29th Sept 25 00:00", "To 29th Sept 25 00:00", "28th Sept 00:00 - 29th Sept 25 12:00" or "29th Sept 25 00:00-12:00"</returns>
+    public static string DateRangeToString(this (DateTime fromDate, DateTime toDate) dates, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime);
+
+    private static string DateRangeToString(DateTime? fromDate, DateTime? toDate, bool showTime = false) {
       switch (fromDate) {
         case null when toDate == null:
           return "";
