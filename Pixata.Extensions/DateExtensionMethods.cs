@@ -71,39 +71,42 @@ namespace Pixata.Extensions {
     /// </summary>
     /// <param name="fromDate">The beginning of the range. May be null</param>
     /// <param name="toDate">The end of the range. May be null</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
     /// <returns>A concise summary of the range, eg "From 29th Sept 25 00:00", "To 29th Sept 25 00:00", "28th Sept 00:00 - 29th Sept 25 12:00" or "29th Sept 25 00:00-12:00"</returns>
-    public static string DateRangeToString(DateTime? fromDate, DateTime? toDate) {
+    public static string DateRangeToString(DateTime? fromDate, DateTime? toDate, bool showTime = false) {
       switch (fromDate) {
         case null when toDate == null:
           return "";
         case null:
-          return $"To {FormatDateTime(toDate.Value)}";
+          return showTime ? $"To {FormatDateTime(toDate.Value)}" : $"To {FormatDate(toDate.Value)}";
       }
-
       if (toDate == null) {
-        return $"From {FormatDateTime(fromDate.Value)}";
+        return showTime ? $"From {FormatDateTime(fromDate.Value)}" : $"From {FormatDate(fromDate.Value)}";
       }
-
       DateTime from = fromDate.Value;
       DateTime to = toDate.Value;
-
       // Same year, month, and day - only show date once
       if (from.Date == to.Date) {
-        return $"{FormatDate(from)} {from:HH:mm}-{to:HH:mm}";
+        return showTime
+          ? $"{FormatDate(from)} {from:HH:mm}-{to:HH:mm}"
+          : FormatDate(from);
       }
-
       // Same year and month - show each date with time
       if (from.Year == to.Year && from.Month == to.Month) {
-        return $"{GetDayWithSuffix(from.Day)} {from:MMM} {from:HH:mm} - {GetDayWithSuffix(to.Day)} {to:MMM yy} {to:HH:mm}";
+        return showTime
+          ? $"{GetDayWithSuffix(from.Day)} {from:MMM} {from:HH:mm} - {GetDayWithSuffix(to.Day)} {to:MMM yy} {to:HH:mm}"
+          : $"{GetDayWithSuffix(from.Day)}-{GetDayWithSuffix(to.Day)} {from:MMM yy}";
       }
-
       // Same year - omit year from first date
       if (from.Year == to.Year) {
-        return $"{FormatDayMonth(from)} {from:HH:mm} - {FormatDate(to)} {to:HH:mm}";
+        return showTime
+          ? $"{FormatDayMonth(from)} {from:HH:mm} - {FormatDate(to)} {to:HH:mm}"
+          : $"{FormatDayMonth(from)} - {FormatDate(to)}";
       }
-
       // Different years - show full dates
-      return $"{FormatDateTime(from)} - {FormatDateTime(to)}";
+      return showTime
+        ? $"{FormatDateTime(from)} - {FormatDateTime(to)}"
+        : $"{FormatDate(from)} - {FormatDate(to)}";
     }
 
     private static string FormatDateTime(DateTime dt) =>
@@ -123,3 +126,4 @@ namespace Pixata.Extensions {
         _ => $"{day}th"
       };
   }
+}
