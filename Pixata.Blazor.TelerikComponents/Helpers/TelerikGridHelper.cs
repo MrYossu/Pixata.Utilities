@@ -12,15 +12,47 @@ using Telerik.DataSource;
 namespace Pixata.Blazor.TelerikComponents.Helpers;
 
 public static class TelerikGridHelper {
-  public static async Task<TelerikGridFilterResults> GetData<T>(this GridReadEventArgs args, DbContext context, string tableName, string defaultColumnForSort, ListSortDirection defaultSort = ListSortDirection.Ascending) where T : class =>
-    await GetData<T>(args, context, tableName, defaultColumnForSort, new List<CompositeFilterDescriptor>().AsReadOnly(), defaultSort);
+  public static Task<TelerikGridFilterResults> GetData<T>(this GridReadEventArgs args, DbContext context, string tableName, string defaultColumnForSort, ListSortDirection defaultSort = ListSortDirection.Ascending, SqlParameter[]? functionParameters = null) where T : class =>
+    GetData<T>(args, context, tableName, defaultColumnForSort, [], defaultSort, functionParameters);
 
-  public static async Task<TelerikGridFilterResults> GetData<T>(this GridReadEventArgs args, DbContext context, string tableName, string defaultColumnForSort, IEnumerable<CompositeFilterDescriptor> extraFilters, ListSortDirection defaultSort = ListSortDirection.Ascending) where T : class {
+  public static async Task<TelerikGridFilterResults> GetData<T>(this GridReadEventArgs args, DbContext context, string tableName, string defaultColumnForSort, IEnumerable<CompositeFilterDescriptor> extraFilters, ListSortDirection defaultSort = ListSortDirection.Ascending, SqlParameter[]? functionParameters = null) where T : class {
     // Validate identifiers that will be embedded directly into SQL text
-    string sanitisedTableName = ValidateSqlIdentifier(tableName, nameof(tableName));
+    string sanitisedTableNameOrFunction = functionParameters is null
+      ? ValidateSqlIdentifier(tableName, nameof(tableName))
+      : ValidateSqlFunctionIdentifier(tableName, nameof(tableName));
     string sanitisedDefaultColumnForSort = ValidateSqlIdentifier(defaultColumnForSort, nameof(defaultColumnForSort));
 
     List<SqlParameter> values = [];
+
+    // If calling a TVF, normalise function parameters into internally-named parameters to avoid collisions
+    string sourceFragment;
+    if (functionParameters is not null) {
+      List<string> internalNames = [];
+      for (int i = 0; i < functionParameters.Length; i++) {
+        SqlParameter orig = functionParameters[i];
+        string internalName = $"@__fn{i}";
+        internalNames.Add(internalName);
+        SqlParameter p = new(internalName, orig.Value ?? DBNull.Value) {
+          Direction = orig.Direction,
+          Size = orig.Size
+        };
+        // Copy common type info if available
+        try {
+          p.SqlDbType = orig.SqlDbType;
+        } catch {
+          // No, we don't normally swallow exceptions, but SqlDbType is not always set
+        }
+        try {
+          p.DbType = orig.DbType;
+        } catch {
+          // See previous comment
+        }
+        values.Add(p);
+      }
+      sourceFragment = sanitisedTableNameOrFunction + "(" + string.Join(", ", internalNames) + ")";
+    } else {
+      sourceFragment = sanitisedTableNameOrFunction;
+    }
 
     // Set up SQL for filtering
     string sqlFilters = "";
@@ -56,13 +88,16 @@ public static class TelerikGridHelper {
       sqlFilters = $" where {sqlFilters}";
     }
 
-    // Paging
-    values.Add(new("@Skip", args.Request.Skip));
-    values.Add(new("@PageSize", args.Request.PageSize));
+    // Only apply paging if PageSize > 0
+    bool usePaging = (args.Request?.PageSize ?? 0) > 0;
+    if (usePaging) {
+      values.Add(new("@Skip", args.Request!.Skip));
+      values.Add(new("@PageSize", args.Request.PageSize));
+    }
 
     // SQL for sorting
     string sqlSort = $" order by {sanitisedDefaultColumnForSort} {(defaultSort == ListSortDirection.Ascending ? "asc" : "desc")}";
-    if ((args.Request.Sorts ?? []).Any()) {
+    if ((args.Request!.Sorts ?? []).Any()) {
       SortDescriptor sortDescriptor = (args.Request.Sorts ?? []).First()!;
       string firstSortMember = ValidateSqlIdentifier(sortDescriptor.Member, "sort member");
       sqlSort = $" order by {firstSortMember} " + (sortDescriptor.SortDirection == ListSortDirection.Ascending ? "asc" : "desc");
@@ -73,24 +108,27 @@ public static class TelerikGridHelper {
     }
 
     // Assemble the final SQL
-    string sql = $"select * from {sanitisedTableName}{sqlFilters} {sqlSort} offset (@Skip) rows fetch next (@PageSize) rows only";
+    string paginationClause = usePaging ? " offset (@Skip) rows fetch next (@PageSize) rows only" : "";
+    string sql = $"select * from {sourceFragment}{sqlFilters} {sqlSort}{paginationClause}";
 
     // Get the data and the total number of rows that match the filters
-    args.Data = await context.Set<T>().FromSqlRaw(sql, values.ToArray()).ToListAsync();
+    args.Data = await context.Set<T>().FromSqlRaw(sql, values.Cast<object>().ToArray()).ToListAsync();
 
-    // Prepare for count - remove paging parameters
-    values.Remove(values.Single(v => v.ParameterName == "@Skip"));
-    values.Remove(values.Single(v => v.ParameterName == "@PageSize"));
+    // Prepare for count - remove paging parameters if they were added
+    if (usePaging) {
+      values.Remove(values.Single(v => v.ParameterName == "@Skip"));
+      values.Remove(values.Single(v => v.ParameterName == "@PageSize"));
+    }
 
     int matchingRows;
-    // Use a DbCommand to execute a parameterized scalar query safely
+    // Use a DbCommand to execute a parameterised scalar query safely
     DbConnection conn = context.Database.GetDbConnection();
     try {
       if (conn.State != System.Data.ConnectionState.Open) {
         await conn.OpenAsync();
       }
       await using DbCommand cmd = conn.CreateCommand();
-      cmd.CommandText = $"select count(*) as Value from {sanitisedTableName}{sqlFilters}";
+      cmd.CommandText = $"select count(*) as Value from {sourceFragment}{sqlFilters}";
       foreach (SqlParameter p in values) {
         cmd.Parameters.Add(p);
       }
@@ -106,7 +144,7 @@ public static class TelerikGridHelper {
 
     args.Total = matchingRows;
 
-    // Return the filter SQL in case the calling code wants to use it (eg to show some totals)
+    // Return the filter SQL in case the calling code wants to use it (say, to show some totals)
     return new(matchingRows, sqlFilters, values.ToArray());
   }
 
@@ -145,6 +183,25 @@ public static class TelerikGridHelper {
     return !Regex.IsMatch(id, "^[A-Za-z_][A-Za-z0-9_]*$")
       ? throw new ArgumentException($"Invalid SQL identifier for {paramName}: {id}", paramName)
       : id;
+  }
+
+  private static string ValidateSqlFunctionIdentifier(string id, string paramName) {
+    if (string.IsNullOrWhiteSpace(id)) {
+      throw new ArgumentException($"{paramName} must be provided and non-empty", paramName);
+    }
+    // Allow either 'name' or 'schema.name'
+    string[] parts = id.Split('.');
+    switch (parts.Length) {
+      case 1:
+        return ValidateSqlIdentifier(parts[0], paramName);
+      case 2: {
+          string schema = ValidateSqlIdentifier(parts[0], paramName + " (schema)");
+          string name = ValidateSqlIdentifier(parts[1], paramName + " (function name)");
+          return schema + "." + name;
+        }
+      default:
+        throw new ArgumentException($"Invalid SQL function identifier for {paramName}: {id}", paramName);
+    }
   }
 }
 
