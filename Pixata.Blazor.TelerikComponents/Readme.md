@@ -20,6 +20,23 @@ After writing the method mentioned above, a colleague reminded me that I could d
 
 There is a [sample repo](https://github.com/MrYossu/TelerikGridWithFromSql) that shows the method in usage, and two blog posts that explain it, [an introduction](https://www.pixata.co.uk/2024/10/08/hmm-maybe-ef-core-isnt-so-bad-after-all/) (with far too many anecdotes and rambling), and one that shows the code and explains the features (coming soon).
 
+Note that as from version 2.0.0 of the package, the method allows you to query a table-valued function as well as a table or view.
+
+#### Breaking change
+As of version 2.0.0, the generic parameter has been removed from `TelerikGridFilterResults` (as it wasn't needed), so you will need to update your code if you capture this as an explicit type. For example, change this:
+
+```csharp
+TelerikGridFilterResults<MyType> data = await args.GetData<MyType>(/* args go here */)
+```
+
+...to this...
+
+```csharp
+TelerikGridFilterResults data = await args.GetData<MyType>(/* args go here */)
+```
+
+Not a major issue, but worth noting.
+
 ## Warning
 The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can get a 30-day trial version from them.
 
