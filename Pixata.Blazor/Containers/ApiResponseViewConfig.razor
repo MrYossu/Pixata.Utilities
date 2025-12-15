@@ -1,6 +1,10 @@
+@using PropertyComparables.Common.Components.Shared
 @code {
 
   public static string LogInUrl = "";
+
+  public static ApiResponseViewMessagePositions MessagePosition = ApiResponseViewMessagePositions.Top;
+  public static ApiResponseViewFeedbackType FeedbackType = ApiResponseViewFeedbackType.MessageView;
 
   public static RenderFragment<Yunit> NotFound = _ => @<div>
                                                         <h2>Not found</h2>
