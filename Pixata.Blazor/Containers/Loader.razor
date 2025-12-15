@@ -1,0 +1,117 @@
+@if (Data == null) {
+  <div style="position: relative; min-height: @MinHeight;">
+    <div class="loader-container@(Horizontal ? " d-flex align-items-center gap-2" : "")">
+      <div class="loader@(!string.IsNullOrWhiteSpace(CssClass) ? $"-{CssClass}" : "") @(!Horizontal ? "m-auto" : "")"></div>
+      @if (!string.IsNullOrWhiteSpace(Text)) {
+        <div class="@(!Horizontal ? "mt-4 " : "")text-center" style="font-size: @TextSize; color: @TextColour;">@Text</div>
+      }
+    </div>
+  </div>
+
+  <style>
+    .loader-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -moz-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      -o-transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .loader @(!string.IsNullOrWhiteSpace(CssClass) ? $"-{CssClass}" : " ") {
+      width: @CircleSize;
+      height: @CircleSize;
+      -moz-border-radius: 50%;
+      -webkit-border-radius: 50%;
+      border-radius: 50%;
+      position: relative;
+      -moz-animation: rotate 1.5s linear infinite;
+      -o-animation: rotate 1.5s linear infinite;
+      -webkit-animation: rotate 1.5s linear infinite;
+      animation: rotate 1.5s linear infinite;
+    }
+
+      .loader @(!string.IsNullOrWhiteSpace(CssClass) ? $"-{CssClass}" : " ") ::before {
+        content: "";
+        box-sizing: border-box;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        -moz-border-radius: 50%;
+        -webkit-border-radius: 50%;
+        border-radius: 50%;
+        border-width: @BorderSize;
+        border: solid @CircleColour;
+        -moz-animation: prixClipFix 4s linear infinite;
+        -o-animation: prixClipFix 4s linear infinite;
+        -webkit-animation: prixClipFix 4s linear infinite;
+        animation: prixClipFix 4s linear infinite;
+      }
+
+    @@keyframes rotate {
+      100% {
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+
+    @@keyframes prixClipFix {
+      0% {
+        clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0)
+      }
+
+      25% {
+        clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0)
+      }
+
+      50% {
+        clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%)
+      }
+
+      75% {
+        clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%)
+      }
+
+      100% {
+        clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 -1%)
+      }
+    }
+  </style>
+} else {
+  @ChildContent
+}
+
+@code {
+  [Parameter]
+  public string Text { get; set; } = "Loading...";
+  [Parameter]
+  public string MinHeight { get; set; } = "200px";
+  [Parameter]
+  public string CircleSize { get; set; } = "100px";
+  [Parameter]
+  public string BorderSize { get; set; } = "7px";
+  [Parameter]
+  public string CssClass { get; set; } = "";
+  [Parameter]
+  public string TextSize { get; set; } = "1.5rem";
+  [Parameter]
+  public string TextColour { get; set; } = "inherit";
+  [Parameter]
+  public string CircleColour { get; set; } = "var(--loader-colour)";
+  [Parameter]
+  public bool Horizontal { get; set; }
+  /// <summary>
+  /// The data on which to await the loading
+  /// </summary>
+  [Parameter]
+  public object? Data { get; set; }
+  [Parameter]
+  public RenderFragment ChildContent { get; set; } = default!;
+}

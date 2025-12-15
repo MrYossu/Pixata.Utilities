@@ -32,7 +32,7 @@ SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>()
 services.AddSingleton(smtpSettings);
 services.AddTransient<PixataEmailService>();
 
-// .NET6 - Goes in Program.cs
+// .NET6+ - Goes in Program.cs
 SmtpSettings smtpSettings = builder.Configuration.GetSection("Smtp").Get<SmtpSettings>();
 builder.Services.AddSingleton(smtpSettings);
 builder.Services.AddTransient<PixataEmailService>();
@@ -59,6 +59,8 @@ _emailService.SmtpSettings = myStmpSettings;
 ## Usage
 
 As with most of the code I write, this service uses the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. This allows you to handle both the happy path and sad path with ease.
+
+>Note that I am moving away from LanguageExt, and at some point will remove it from this package. LanguageExt was far too complex for my simple use, so I intend to replace the monads I was using (mainly just `Either`) with my own simpler implementations. Hopefully, the public API will not change, so this should not break any exising code. However, please check this page before updating the package.
 
 There are two overloads of the `SendEmail` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
 
