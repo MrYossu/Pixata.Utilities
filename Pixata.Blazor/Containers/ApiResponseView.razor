@@ -111,12 +111,12 @@
       ? _apiResponse.Data
       : default)!;
 
-  public async Task Do<TOut>(Func<Task<ApiResponse<TOut>>> action, Action<TOut> onSuccess, Action? onNotSuccess = null) {
+  public async Task Do<TOut>(Func<Task<ApiResponse<TOut>>> action, Action<TOut> onSuccess, Action? onNotSuccess = null, bool changeStateOnNotSuccess = false) {
     Message = "";
-    HandleResponse(await action(), onSuccess, onNotSuccess);
+    HandleResponse(await action(), onSuccess, onNotSuccess, changeStateOnNotSuccess);
   }
 
-  public void HandleResponse<TOut>(ApiResponse<TOut> response, Action<TOut> onSuccess, Action? onNotSuccess = null) {
+  public void HandleResponse<TOut>(ApiResponse<TOut> response, Action<TOut> onSuccess, Action? onNotSuccess = null, bool changeStateOnNotSuccess = false) {
     Console.WriteLine($"HandleResponse: {response.State}");
     switch (response.State) {
       case ApiResponseStates.Success:
@@ -124,20 +124,34 @@
         onSuccess.Invoke(response.Data!);
         break;
       case ApiResponseStates.HttpFailure:
-        Notify(NotificationType.Error, "You don't seem to be connected. Please check your Internet connection and try again");
-        onNotSuccess?.Invoke();
+        if (changeStateOnNotSuccess) {
+          _apiResponse = new ApiResponse<T>(ApiResponseStates.HttpFailure);
+        } else {
+          Notify(NotificationType.Error, "You don't seem to be connected. Please check your Internet connection and try again");
+          onNotSuccess?.Invoke();
+        }
         break;
       case ApiResponseStates.Failure:
         if (response.Message.Contains($"{HttpStatusCode.Unauthorized}") || response.Message == "HTTP error (Unauthorized) You are not authenticated") {
+          // TODO AYS - How do we handle this case if changeStateOnNotSuccess is true? We don't have an ApiResponseStates value for not authenticated
           Notify(NotificationType.Error, "Your session has expired, so you need to log in again", onClick: () => NavigationManager.NavigateTo($"{NavigationManager.ToAbsoluteUri(ApiResponseViewConfig.LogInUrl)}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true));
-        }else {
-          Notify(NotificationType.Error, response.Message);
+          onNotSuccess?.Invoke();
+        } else {
+          if (changeStateOnNotSuccess) {
+            _apiResponse = new ApiResponse<T>(ApiResponseStates.ServiceUnavailable);
+          } else {
+            Notify(NotificationType.Error, response.Message);
+            onNotSuccess?.Invoke();
+          }
         }
-        onNotSuccess?.Invoke();
         break;
       case ApiResponseStates.ServiceUnavailable:
-        Notify(NotificationType.Error, "An update is currently in progress. The average update time is under 2 minutes. Please try again soon");
-        onNotSuccess?.Invoke();
+        if (changeStateOnNotSuccess) {
+          _apiResponse = new ApiResponse<T>(ApiResponseStates.ServiceUnavailable);
+        } else {
+          Notify(NotificationType.Error, "An update is currently in progress. The average update time is under 2 minutes. Please try again soon");
+          onNotSuccess?.Invoke();
+        }
         break;
       default:
         throw new ArgumentException($"Unexpected state: {response.State}");
