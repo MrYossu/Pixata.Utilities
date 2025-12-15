@@ -86,10 +86,10 @@
   public RenderFragment<Yunit> ServiceUnavailable { get; set; } = ApiResponseViewConfig.ServiceUnavailable;
 
   [Parameter]
-  public ApiResponseViewMessagePositions MessagePosition { get; set; } = ApiResponseViewMessagePositions.Top;
+  public ApiResponseViewMessagePositions MessagePosition { get; set; } = ApiResponseViewConfig.MessagePosition;
 
   [Parameter]
-  public ApiResponseViewFeedbackType FeedbackType { get; set; } = ApiResponseViewFeedbackType.MessageView;
+  public ApiResponseViewFeedbackType FeedbackType { get; set; } = ApiResponseViewConfig.FeedbackType;
 
   [Parameter]
   public string MessageCssClass { get; set; } = "";
