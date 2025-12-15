@@ -1,0 +1,31 @@
+<div class="dd-item position-relative">
+  <div class="d-flex gap-3" @onclick="OpenFromNotification">
+    <div class="notif-icon d-grid-center" style="background: #@NotificationHelper.GetIcon(Type).Item2;">
+      <i class="@NotificationHelper.GetIcon(Type).Item1 @(Type == NotificationType.General ? "tilt" : "")"></i>
+    </div>
+    <div class="message">
+      <div>@Message</div>
+      <small class="time">@Time.ToPrettyString(true)</small>
+    </div>
+  </div>
+  <div class="dismiss" @onclick="@DismissIt"><button class="btn btn-close" /></div>
+</div>
+
+@code {
+  [Parameter]
+  public string Message { get; set; } = "";
+  [Parameter]
+  public DateTime Time { get; set; } = DateTime.Now;
+  [Parameter]
+  public NotificationType Type { get; set; }
+  [Parameter]
+  public EventCallback Dismiss { get; set; }
+  [Parameter]
+  public EventCallback Open { get; set; }
+
+  private Task OpenFromNotification() =>
+    Open.InvokeAsync();
+
+  private Task DismissIt() =>
+    Dismiss.InvokeAsync();
+}

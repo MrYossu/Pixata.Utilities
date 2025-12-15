@@ -1,0 +1,77 @@
+@layer components {
+  .top-row .drop-down .dd-item {
+    display: block;
+    color: #262a2e;
+    -moz-border-radius: .25rem;
+    -webkit-border-radius: .25rem;
+    border-radius: .25rem;
+    cursor: pointer;
+  }
+
+    .top-row .drop-down .dd-item:hover,
+    .top-row .drop-down .dd-item:active,
+    .top-row .drop-down .dd-item.active {
+      color: #262a2e;
+      background-color: #f7f7f7;
+    }
+
+    .top-row .drop-down .dd-item > div {
+      padding: .75rem;
+    }
+
+    .top-row .drop-down .dd-item .notif-icon {
+      color: #fff;
+      -moz-border-radius: 50%;
+      -webkit-border-radius: 50%;
+      border-radius: 50%;
+      height: 51px;
+      min-width: 51px;
+    }
+
+      .top-row .drop-down .dd-item .notif-icon i {
+        font-size: 1.5rem;
+      }
+
+        .top-row .drop-down .dd-item .notif-icon i.tilt {
+          -moz-transform: rotate(15deg);
+          -ms-transform: rotate(15deg);
+          -o-transform: rotate(15deg);
+          -webkit-transform: rotate(15deg);
+          transform: rotate(15deg);
+        }
+
+    .top-row .drop-down .dd-item .time {
+      font-size: 0.75rem;
+      color: #6f6f6f;
+    }
+
+    .top-row .drop-down .dd-item .message {
+      max-width: 225px;
+      margin-right: 17px;
+    }
+
+      .top-row .drop-down .dd-item .message > div {
+        text-wrap: pretty;
+      }
+
+    .top-row .drop-down .dd-item .dismiss {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: grid;
+      margin: 4px;
+      padding: .5rem;
+      -moz-border-radius: 50%;
+      -webkit-border-radius: 50%;
+      border-radius: 50%;
+    }
+
+      .top-row .drop-down .dd-item .dismiss:hover {
+        background-color: #5d5d5d17;
+      }
+
+      .top-row .drop-down .dd-item .dismiss button {
+        width: .35rem;
+        height: .35rem;
+      }
+}

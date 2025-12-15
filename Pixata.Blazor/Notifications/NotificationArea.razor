@@ -1,0 +1,15 @@
+<div class="notifications-area">
+  @foreach (Notification notif in Notifications) {
+    <div class="notification @(notif.Show ? "new" : "remove") m-3 p-3 round-it bg-white position-relative" @onclick="@(() => OpenFromNotification(notif))" @key="notif">
+      <div class="d-flex gap-3">
+        <div class="icon d-grid-center" style="background-color: #@NotificationHelper.GetIcon(notif.Type).Item2;">
+          <i class="@NotificationHelper.GetIcon(notif.Type).Item1"></i>
+        </div>
+        <div class="message">
+          <div>@notif.Message</div>
+        </div>
+        <div class="dismiss" @onclick="@(() => Dismiss(notif))"><button class="btn btn-close" /></div>
+      </div>
+    </div>
+  }
+</div>

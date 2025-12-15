@@ -1,0 +1,130 @@
+@layer components {
+  .d-grid-center {
+    display: grid;
+    place-content: center;
+  }
+
+  .notifications-area {
+    position: fixed;
+    top: 60px;
+    right: 0;
+    max-height: calc(100vh - 5rem);
+    overflow: auto;
+    z-index: 100000;
+  }
+
+    .notifications-area .notification {
+      max-width: 330px;
+      cursor: pointer;
+      -moz-box-shadow: 0px 6px 16px rgba(47, 52, 58, 0.1);
+      -webkit-box-shadow: 0px 6px 16px rgba(47, 52, 58, 0.1);
+      box-shadow: 0px 6px 16px rgba(47, 52, 58, 0.1);
+      -moz-transition: all .5s ease-in-out;
+      -o-transition: all .5s ease-in-out;
+      -webkit-transition: all .5s ease-in-out;
+      transition: all .5s ease-in-out;
+    }
+
+      .notifications-area .notification.new {
+        -moz-animation: fadeIn 2s;
+        -o-animation: fadeIn 2s;
+        -webkit-animation: fadeIn 2s;
+        animation: fadeIn 2s;
+      }
+
+      .notifications-area .notification.remove {
+        -moz-animation: fadeOut 2s;
+        -o-animation: fadeOut 2s;
+        -webkit-animation: fadeOut 2s;
+        animation: fadeOut 2s;
+      }
+
+      .notifications-area .notification .icon {
+        color: #fff;
+        min-width: 40px;
+        height: 40px;
+        -moz-border-radius: 50%;
+        -webkit-border-radius: 50%;
+        border-radius: 50%;
+      }
+
+      .notifications-area .notification .message {
+        max-width: 225px;
+        margin-right: 17px;
+      }
+
+        .notifications-area .notification .message > div {
+          overflow-wrap: anywhere;
+        }
+
+      .notifications-area .notification .dismiss {
+        position: absolute;
+        right: 14px;
+        top: 10px;
+      }
+
+        .notifications-area .notification .dismiss button {
+          width: .35rem;
+          height: .35rem;
+        }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @-moz-keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @-webkit-keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  @-moz-keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  @-webkit-keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 ﻿@page "/LoaderSample"
 @using Pixata.Blazor.Sample.Models
 
+<h1 class="text-danger">Sample disabled, please ignore</h1>
 <h3>Loading option</h3>
 
 <p>This sample shows how you can display a loading message while waiting for an entity to be loaded into a Blazor component. Unlike the <a href="/LoadingOptionSample"><code>LoadingOption</code></a> component, it doesn't require a nullable data type. Instead, it uses a generated type called <code>LoaderContainer&lt;T&gt;</code>.</p>
@@ -10,7 +11,7 @@
   <button class="btn btn-secondary" @onclick="LoadCustomerNotFound">No such customer</button>
 </p>
 
-<Loader Data="_customer" Context="customer">
+@* <Loader Data="_customer" Context="customer">
   <Loading>
     <p><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Please wait while we look for the customer...</p>
   </Loading>
@@ -20,7 +21,7 @@
   <NotLoaded>
     <p>Big flop, we can't find him</p>
   </NotLoaded>
-</Loader>
+</Loader> *@
 
 @code {
 

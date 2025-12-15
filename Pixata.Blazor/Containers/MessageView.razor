@@ -1,0 +1,32 @@
+@if (!string.IsNullOrEmpty(Message)) {
+  string statusMessageClass = Error ? "danger" : "success";
+  <div class="d-flex justify-content-between alert alert-@statusMessageClass @Class" role="alert">
+    <HtmlRaw Html="@Message" />
+    <If Condition="@ShowCloseButton">
+      <Then>
+        <div>
+          <button class="ms-2 border border-dark" @onclick="Close">X</button>
+        </div>
+      </Then>
+    </If>
+  </div>
+}
+
+@code {
+
+  [Parameter]
+  public bool Error { get; set; } = true; // Assume that most of the time, we'll only be using this to show errors
+
+  [Parameter]
+  public string Message { get; set; } = "";
+
+  [Parameter]
+  public string Class { get; set; } = "";
+
+  [Parameter]
+  public bool ShowCloseButton { get; set; } = true;
+
+  private void Close() =>
+    Message = "";
+
+}

@@ -1,0 +1,155 @@
+@using System.Net
+@using Pixata.Blazor.Extensions
+@using Pixata.Blazor.Notifications
+@using PropertyComparables.Common.Components.Shared
+@using static Pixata.Extensions.Yunit
+@typeparam T
+@inject PersistentStateHelper<ApiResponse<T>> StateHelper
+@inject NavigationManager NavigationManager
+
+<If Condition="@(FeedbackType == ApiResponseViewFeedbackType.Notifications)">
+  <Then>
+    <NotificationArea NotificationHelper="NotificationHelper" />
+  </Then>
+</If>
+
+<If Condition="@(FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Top)">
+  <Then>
+    <MessageView Message="@Message" Class="@MessageCssClass" />
+  </Then>
+</If>
+<Switch Variable="@_apiResponse.State">
+  <Case Equals="ApiResponseStates.Loading">
+    <Loader />
+  </Case>
+  <Case Equals="ApiResponseStates.Success">
+    @Success(_apiResponse.Data!)
+  </Case>
+  <Case Equals="ApiResponseStates.NotFound">
+    @NotFound(yunit)
+  </Case>
+  <Case Equals="ApiResponseStates.Failure">
+    <If Condition="@(_apiResponse.Message.Contains($"{HttpStatusCode.Unauthorized}"))">
+      <Then>
+        @RequiresLogIn(_apiResponse.Message)
+      </Then>
+      <Else>
+        @Failure(_apiResponse.Message)
+      </Else>
+    </If>
+  </Case>
+  <Case Equals="ApiResponseStates.HttpFailure">
+    @HttpFailure(_apiResponse.Message)
+  </Case>
+  <Case Equals="ApiResponseStates.ServiceUnavailable">
+    @ServiceUnavailable(yunit)
+  </Case>
+</Switch>
+<If Condition="@(FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Bottom)">
+  <Then>
+    <MessageView Message="@Message" Class="@MessageCssClass" />
+  </Then>
+</If>
+
+@code {
+
+  private ApiResponse<T> _apiResponse = new(ApiResponseStates.Loading);
+
+  [Inject]
+  public NotificationHelper NotificationHelper { get; set; } = null!;
+
+  [Parameter]
+  public string Key { get; set; } = "";
+
+  [Parameter]
+  public Func<Task<ApiResponse<T>>> LoadApiResponse { get; set; } = () => Task.FromResult(new ApiResponse<T>(ApiResponseStates.Success));
+
+  [Parameter]
+  public RenderFragment<T> Success { get; set; } = _ => @<div>
+                                                          <h2>Big success</h2>
+                                                          <div>You shouldn't see this, as the developer should have handled this case</div>
+                                                        </div>;
+
+  [Parameter]
+  public RenderFragment<Yunit> NotFound { get; set; } = ApiResponseViewConfig.NotFound;
+
+  [Parameter]
+  public RenderFragment<string> Failure { get; set; } = ApiResponseViewConfig.Failure;
+
+  [Parameter]
+  public RenderFragment<string> RequiresLogIn { get; set; } = ApiResponseViewConfig.RequiresLogIn;
+
+  [Parameter]
+  public RenderFragment<string> HttpFailure { get; set; } = ApiResponseViewConfig.HttpFailure;
+
+  [Parameter]
+  public RenderFragment<Yunit> ServiceUnavailable { get; set; } = ApiResponseViewConfig.ServiceUnavailable;
+
+  [Parameter]
+  public ApiResponseViewMessagePositions MessagePosition { get; set; } = ApiResponseViewMessagePositions.Top;
+
+  [Parameter]
+  public ApiResponseViewFeedbackType FeedbackType { get; set; } = ApiResponseViewFeedbackType.MessageView;
+
+  [Parameter]
+  public string MessageCssClass { get; set; } = "";
+
+  public string Message { get; set; } = "";
+
+  protected override async Task OnInitializedAsync() {
+    _apiResponse = await StateHelper.Get(LoadApiResponse, Key);
+    if (_apiResponse.Message.Contains("Unauthorized")) {
+      NavigationManager.NavigateTo($"{ApiResponseViewConfig.LogInUrl}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
+    }
+  }
+
+  public async Task Reload() =>
+    _apiResponse = await LoadApiResponse();
+
+  public T Data =>
+    (_apiResponse.State == ApiResponseStates.Success
+      ? _apiResponse.Data
+      : default)!;
+
+  public async Task Do<TOut>(Func<Task<ApiResponse<TOut>>> action, Action<TOut> onSuccess, Action? onNotSuccess = null) {
+    Message = "";
+    HandleResponse(await action(), onSuccess, onNotSuccess);
+  }
+
+  public void HandleResponse<TOut>(ApiResponse<TOut> response, Action<TOut> onSuccess, Action? onNotSuccess = null) {
+    Console.WriteLine($"HandleResponse: {response.State}");
+    switch (response.State) {
+      case ApiResponseStates.Success:
+        Message = "";
+        onSuccess.Invoke(response.Data!);
+        break;
+      case ApiResponseStates.HttpFailure:
+        Notify(NotificationType.Error, "You don't seem to be connected. Please check your Internet connection and try again");
+        onNotSuccess?.Invoke();
+        break;
+      case ApiResponseStates.Failure:
+        if (response.Message.Contains($"{HttpStatusCode.Unauthorized}") || response.Message == "HTTP error (Unauthorized) You are not authenticated") {
+          Notify(NotificationType.Error, "Your session has expired, so you need to log in again", onClick: () => NavigationManager.NavigateTo($"{NavigationManager.ToAbsoluteUri(ApiResponseViewConfig.LogInUrl)}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true));
+        }else {
+          Notify(NotificationType.Error, response.Message);
+        }
+        onNotSuccess?.Invoke();
+        break;
+      case ApiResponseStates.ServiceUnavailable:
+        Notify(NotificationType.Error, "An update is currently in progress. The average update time is under 2 minutes. Please try again soon");
+        onNotSuccess?.Invoke();
+        break;
+      default:
+        throw new ArgumentException($"Unexpected state: {response.State}");
+    }
+  }
+
+  public void Notify(NotificationType type, string message, DateTime? dateTime = null, Action? onClick = null) {
+    if (FeedbackType == ApiResponseViewFeedbackType.Notifications) {
+      NotificationHelper.Send(type, message, dateTime ?? DateTime.Now, onClick);
+    } else {
+      Message = message;
+    }
+  }
+
+}
