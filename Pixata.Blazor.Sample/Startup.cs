@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pixata.Blazor.Extensions;
+using Pixata.Blazor.Notifications;
 using Pixata.Blazor.Sample.Data;
 using Pixata.Email;
 
@@ -23,6 +25,9 @@ namespace Pixata.Blazor.Sample {
       SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>();
       services.AddSingleton(smtpSettings);
       services.AddTransient<PixataEmailService>();
+      services.AddHttpClient();
+      services.AddTransient<NotificationHelper>();
+      services.AddScoped(typeof(PersistentStateHelper<>));
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

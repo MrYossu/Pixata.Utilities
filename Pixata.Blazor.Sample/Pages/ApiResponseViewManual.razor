@@ -1,0 +1,35 @@
+﻿@page "/ApiResponseViewManual"
+@using Pixata.Extensions
+
+<h3>ApiResponseView - Manual loading</h3>
+
+<p>See the <a href="/ApiResponseViewRegular">ApiResponseView page</a> for more information on the component.</p>
+
+<p>Sometimes you want to handle loading the data yourself, so you can't rely on the <code>ApiResponseView</code> to know when loading has finished, nor when an error occurs. In these cases, you need to wire up a little more code.</p>
+
+<p>OK, so not that much actually! All you need to do is set the <code>ManualLoading</code> property of the <code>ApiResponseView</code> to <code>true</code>, and use the <code>Do</code> method to load your code. In the callback lambda, return a new <code>ApiResponse</code> with a state of Success and the required data.</p>
+
+<p>See the source code for this page to see how the example below is done.</p>
+
+<ApiResponseView T="int" ManualLoading="true" @ref="@_apiResponseView">
+  <Success>
+    <div style="padding: 5px; border: 1px solid #0d6efd">
+      <div style="font-weight: bold">This is the Success component, which will be shown when the manual loading has completed.</div>
+      <div>The winning number is... <span class="text-success fw-bold">@_number</span></div>
+    </div>
+  </Success>
+</ApiResponseView>
+
+@code {
+  private ApiResponseView<int> _apiResponseView = null!;
+  private int _number;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) =>
+    await _apiResponseView.Do(GetData, n => _number = n);
+
+  private async Task<ApiResponse<int>> GetData() {
+    await Task.Delay(2000);
+    return new ApiResponse<int>(ApiResponseStates.Success, 42);
+  }
+
+}

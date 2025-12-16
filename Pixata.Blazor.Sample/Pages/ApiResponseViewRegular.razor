@@ -1,0 +1,97 @@
+﻿@page "/ApiResponseViewRegular"
+@using System.Collections.ObjectModel
+@using System.Text.Json
+@using Pixata.Extensions
+@inject HttpClient Http
+
+<h3>ApiResponseView - Standard usage</h3>
+
+<p><code>ApiResponse</code> is intended to be used as a container for returning values from API endpoints, but is also useful for any method that can fail, or relies on external services (so may have HTTP issues, etc). <code>ApiResponseView</code> is a Blazor container that consumes an <code>ApiResponse</code>, and modifies the display appropriately, depending on the state of the response.</p>
+
+<p>A very common use is to set the <code>LoadApiResponse</code> property of the <code>ApiResponseView</code> to a method that returns a <code>ApiResponse</code>. While the component is waiting got the method to complete, it displays a loader. Once the method has completed, it changes the display to match the state of the response...</p>
+
+<dl>
+  <dt>Success</dt>
+  <dd>Everything went well, and the <code>ApiResponseView</code> will display the data, which it receives through the <code>Context</code> parameter.</dd>
+  <dt>Not found</dt>
+  <dd>The requested entity was not found.</dd>
+  <dt>Failure</dt>
+  <dd>An error occured when calling the method. If this was due to an unauthorised HTTP request, a suitable message is displayed, along with a link to your log-in page. That link is set in the <code>Program.cs</code> file (both client and server if you have a mixed-mode Blazor app).</dd>
+  <dt>HTTP failure</dt>
+  <dd>An HTTP transport error occured, most likely due to a lack of Internet connection. The user is prompted to check their connection and refresh.</dd>
+  <dt>Service unavailable</dt>
+  <dd>Useful for when your app is being updated. Shows a message and suggests that the user tries refreshing soon.</dd>
+</dl>
+
+<p>Any or all of these can be overwritten to suit your own preferences. This can be done on an app-wide basis, meaning that every <code>ApiResponseView</code> will pick them up, or on an individual basis, in which case only this instance of the component will use it.</p>
+
+<h4>Usage</h4>
+<p>The <code>LoadApiResponse</code> property of the <code>ApiResponseView</code> is set to a method that returns an object of type <code>Task&lt;ApiResponse&lt;T&gt;&gt;</code>. The object of type <code>T</code> is passed to the <code>Success</code> content of the view, where it can be used to display the data.</p>
+
+<p>The <code>ApiResponseView</code> automatically handles HTTP failures, non-authorised requests, general failure and service unavailable cases, meaning you don't have to write boilerplate code.</p>
+
+<h4>Sample</h4>
+<p>When this page loads, it calls out to an external service to get a list of (dummy) users. This has a delay included to show the way the display changes automatically when the data has been received. Try refreshing the page and watch what happens below to see it in action.</p>
+
+<ApiResponseView LoadApiResponse="@GetTeams">
+  <Success Context="teams">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Name</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (Team t in teams) {
+          <tr>
+            <td>@t.Id</td>
+            <td>@t.Name</td>
+            <td>@t.Email</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </Success>
+</ApiResponseView>
+
+@code {
+
+  private class Team {
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+  }
+
+  private async Task<ApiResponse<ObservableCollection<Team>>> GetTeams() {
+    ObservableCollection<Team> teams = [];
+    try {
+      // Add delay to simulate a slow response. This enables us to see the loader
+      await Task.Delay(2000);
+      string json = await Http.GetStringAsync("https://randomuser.me/api/?results=20");
+      using JsonDocument doc = JsonDocument.Parse(json);
+      if (!doc.RootElement.TryGetProperty("results", out JsonElement results)) {
+        return new ApiResponse<ObservableCollection<Team>>(ApiResponseStates.Failure);
+      }
+
+      int id = 1;
+      foreach (JsonElement item in results.EnumerateArray()) {
+        JsonElement nameElem = item.GetProperty("name");
+        string first = nameElem.GetProperty("first").GetString() ?? "";
+        string last = nameElem.GetProperty("last").GetString() ?? "";
+
+        teams.Add(new Team {
+          Id = id++,
+          Name = string.IsNullOrWhiteSpace(first) && string.IsNullOrWhiteSpace(last) ? $"Unknown {id}" : $"{first} {last}",
+          Email = item.GetProperty("email").GetString() ?? ""
+        });
+      }
+    }
+    catch {
+      // ignore errors in this sample - in real app consider logging or user feedback
+    }
+    return new ApiResponse<ObservableCollection<Team>>(ApiResponseStates.Success, teams);
+  }
+
+}
