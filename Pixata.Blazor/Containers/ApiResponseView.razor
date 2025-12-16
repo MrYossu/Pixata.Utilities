@@ -23,7 +23,14 @@
     <Loader />
   </Case>
   <Case Equals="ApiResponseStates.Success">
-    @Success(_apiResponse.Data!)
+    <div style="@_arvSuccessStyle">
+      @Success(_apiResponse.Data!)
+    </div>
+    <If Condition="@(ManualLoading && !_manualLoadingComplete)">
+      <Then>
+        <Loader />
+      </Then>
+    </If>
   </Case>
   <Case Equals="ApiResponseStates.NotFound">
     @NotFound(yunit)
@@ -94,9 +101,17 @@
   [Parameter]
   public string MessageCssClass { get; set; } = "";
 
+  [Parameter]
+  public bool ManualLoading { get; set; }
+
+  private bool _manualLoadingComplete;
+
+  private string _arvSuccessStyle = "";
+
   public string Message { get; set; } = "";
 
   protected override async Task OnInitializedAsync() {
+    _arvSuccessStyle = ManualLoading && !_manualLoadingComplete ? "position: absolute; left: 1000000px" : "";
     _apiResponse = await StateHelper.Get(LoadApiResponse, Key);
     if (_apiResponse.Message.Contains("Unauthorized")) {
       NavigationManager.NavigateTo($"{ApiResponseViewConfig.LogInUrl}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
@@ -122,6 +137,9 @@
       case ApiResponseStates.Success:
         Message = "";
         onSuccess.Invoke(response.Data!);
+        _manualLoadingComplete = true;
+        _arvSuccessStyle = "";
+        StateHasChanged();
         break;
       case ApiResponseStates.HttpFailure:
         if (changeStateOnNotSuccess) {
