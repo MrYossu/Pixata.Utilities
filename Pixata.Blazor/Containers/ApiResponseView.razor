@@ -20,7 +20,7 @@
 </If>
 <Switch Variable="@_apiResponse.State">
   <Case Equals="ApiResponseStates.Loading">
-    <Loader />
+    @Loader(yunit)
   </Case>
   <Case Equals="ApiResponseStates.Success">
     <div style="@_arvSuccessStyle">
@@ -28,7 +28,7 @@
     </div>
     <If Condition="@(ManualLoading && !_manualLoadingComplete)">
       <Then>
-        <Loader />
+        @Loader(yunit)
       </Then>
     </If>
   </Case>
@@ -76,6 +76,9 @@
                                                           <h2>Big success</h2>
                                                           <div>You shouldn't see this, as the developer should have handled this case</div>
                                                         </div>;
+
+  [Parameter]
+  public RenderFragment<Yunit> Loader { get; set; } = ApiResponseViewConfig.Loader;
 
   [Parameter]
   public RenderFragment<Yunit> NotFound { get; set; } = ApiResponseViewConfig.NotFound;
