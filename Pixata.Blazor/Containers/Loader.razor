@@ -1,4 +1,4 @@
-<div class="busy-container" style="--icon-size:@IconSize; --primary-color:@PrimaryColour; --secondary-color:@SecondaryColour; --text-color:@TextColor; --text-font-size:@TextFontSize; --border-width:@BorderWidth;">
+<div class="busy-container" style="--icon-size:@IconSize; --primary-color:@PrimaryColour; --secondary-color:@SecondaryColour; --text-color:@TextColour; --text-font-size:@TextFontSize; --border-width:@BorderWidth;">
   <div class="spinner"></div>
   <div class="busy-text">@Text</div>
 </div>
@@ -55,7 +55,6 @@
   public string BorderWidth { get; set; } = "20px";
 
   [Parameter]
-  public string TextColor { get; set; } = "#212529";
-
+  public string TextColour { get; set; } = "#212529";
 
 }
