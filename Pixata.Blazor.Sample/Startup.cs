@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pixata.Blazor.Containers;
 using Pixata.Blazor.Extensions;
 using Pixata.Blazor.Notifications;
 using Pixata.Blazor.Sample.Data;
@@ -49,6 +50,9 @@ namespace Pixata.Blazor.Sample {
         endpoints.MapBlazorHub();
         endpoints.MapFallbackToPage("/_Host");
       });
+
+      // As this sample does not use authentication, the following line is not actually needed, but is included here to show how to set up the link to your log-in page
+      ApiResponseViewConfig.LogInUrl = "LogIn";
     }
   }
 }

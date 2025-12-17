@@ -8,26 +8,6 @@
 
 <p><code>ApiResponse</code> is intended to be used as a container for returning values from API endpoints, but is also useful for any method that can fail, or relies on external services (so may have HTTP issues, etc). <code>ApiResponseView</code> is a Blazor container that consumes an <code>ApiResponse</code>, and modifies the display appropriately, depending on the state of the response.</p>
 
-<p>A very common use is to set the <code>LoadApiResponse</code> property of the <code>ApiResponseView</code> to a method that returns a <code>ApiResponse</code>. While the component is waiting got the method to complete, it displays a loader. Once the method has completed, it changes the display to match the state of the response...</p>
-
-<dl>
-  <dt>Success</dt>
-  <dd>Everything went well, and the <code>ApiResponseView</code> will display the data, which it receives through the <code>Context</code> parameter.</dd>
-  <dt>Not found</dt>
-  <dd>The requested entity was not found.</dd>
-  <dt>Failure</dt>
-  <dd>An error occured when calling the method. If this was due to an unauthorised HTTP request, a suitable message is displayed, along with a link to your log-in page. That link is set in the <code>Program.cs</code> file (both client and server if you have a mixed-mode Blazor app).</dd>
-  <dt>HTTP failure</dt>
-  <dd>An HTTP transport error occured, most likely due to a lack of Internet connection. The user is prompted to check their connection and refresh.</dd>
-  <dt>Service unavailable</dt>
-  <dd>Useful for when your app is being updated. Shows a message and suggests that the user tries refreshing soon.</dd>
-</dl>
-
-<p>Any or all of these can be overwritten to suit your own preferences. This can be done on an app-wide basis, meaning that every <code>ApiResponseView</code> will pick them up, or on an individual basis, in which case only this instance of the component will use it.</p>
-
-<h4>Usage</h4>
-<p>The <code>LoadApiResponse</code> property of the <code>ApiResponseView</code> is set to a method that returns an object of type <code>Task&lt;ApiResponse&lt;T&gt;&gt;</code>. The object of type <code>T</code> is passed to the <code>Success</code> content of the view, where it can be used to display the data.</p>
-
 <p>The <code>ApiResponseView</code> automatically handles HTTP failures, non-authorised requests, general failure and service unavailable cases, meaning you don't have to write boilerplate code.</p>
 
 <h4>Sample</h4>
@@ -56,6 +36,50 @@
   </Success>
 </ApiResponseView>
 
+<h4>Usage</h4>
+<p>The <code>LoadApiResponse</code> property of the <code>ApiResponseView</code> is set to a method that returns an object of type <code>Task&lt;ApiResponse&lt;T&gt;&gt;</code>. The object of type <code>T</code> is passed as a <code>Context</code> parameter to the <code>Success</code> content of the view, where it can be used to display the data.</p>
+
+<p>While the component is waiting got the method to complete, it displays a loader. Once the method has completed, it changes the display to match the state of the response...</p>
+
+<dl>
+  <dt>Success</dt>
+  <dd>Everything went well, and the <code>ApiResponseView</code> will display the data, which it receives through the <code>Context</code> parameter.</dd>
+  <dt>Not found</dt>
+  <dd>The requested entity was not found.</dd>
+  <dt>Failure</dt>
+  <dd>An error occured when calling the method. If this was due to an unauthorised HTTP request, a suitable message is displayed, along with a link to your log-in page. That link is set in the <code>Program.cs</code> file (both client and server if you have a mixed-mode Blazor app). As this sample is from an ancient era, the link is set up in <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Startup.cs">the Startup.cs file</a> (right at the bottom), but the principle is the same.</dd>
+  <dt>HTTP failure</dt>
+  <dd>An HTTP transport error occured, most likely due to a lack of Internet connection. The user is prompted to check their connection and refresh.</dd>
+  <dt>Service unavailable</dt>
+  <dd>Useful for when your app is being updated. Shows a message and suggests that the user tries refreshing soon.</dd>
+</dl>
+
+<p>If you want to load the data manually (for example if a data grid does its own loading), then you need to set the <code>ManualLoading</code> property to <code>true</code>. See the <a href="/ApiResponseViewManual">ApiResponseView - Manual loading</a> page for details.</p>
+
+<h4>Overriding the defaults</h4>
+<p>Any or all of these can be overwritten to suit your own preferences...</p>
+
+<h5>On an app-wide basis, meaning that every <code>ApiResponseView</code> will pick them up.</h5>
+<p>The best way to do this is to add a Blazor component to hold a <code>RenderFragment</code> for each property you wish to override. For example, you could name it <code>MyApiResponseViewConfig.razor</code>, and include code such as...</p>
+<p><code>public static RenderFragment&lt;Yunit&gt; Loader = _ =>@@&lt;Loader PrimaryColor="red" SecondaryColor="pink" Text="Hang on, we'll be there soon..." /&gt;;</code></p>
+<p>Then, set this as the default for all <code>ApiResponseView</code> components by including the following line in <code>Program.cs</code> (see the note above)...</p>
+<p><code>ApiResponseView.Loader = MyApiResponseViewConfig.Loader;</code></p>
+
+<h5>On an individual basis, in which case only this instance of the component will use it.</h5>
+<p>In this case, you just include the code you want inside the <code>ApiResponseView</code> markup...</p>
+<p><code>
+  &lt;ApiResponseView&gt;
+  <br />&nbsp;&nbsp;@@* Markup for &lt;Success&gt; and any other parts goes here *@@
+  <br />&nbsp;&nbsp;&lt;Loader&gt;
+  <br />&nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;Hang on, we'll be there soon..."&lt;/h3&gt;
+  <br />&nbsp;&nbsp;&lt;/Loader&gt;
+  <br />&lt;/ApiResponseView&gt;
+</code></p>
+
+<p>The example above uses a simple &lt;h3&gt; tag, but obviously, you can use any markup you like, including <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Containers/Loader.razor">the &lt;Loader&gt; component</a> from the Pixata.Blazor package. This component is used by default, but you override the default settings as you wish. See the previous section.</p>
+
+<p>See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ApiResponseViewRegular.razor">the source code for this page</a>.</p>
+
 @code {
 
   private class Team {
@@ -69,7 +93,7 @@
     try {
       // Add delay to simulate a slow response. This enables us to see the loader
       await Task.Delay(2000);
-      string json = await Http.GetStringAsync("https://randomuser.me/api/?results=20");
+      string json = await Http.GetStringAsync("https://randomuser.me/api/?results=10");
       using JsonDocument doc = JsonDocument.Parse(json);
       if (!doc.RootElement.TryGetProperty("results", out JsonElement results)) {
         return new ApiResponse<ObservableCollection<Team>>(ApiResponseStates.Failure);

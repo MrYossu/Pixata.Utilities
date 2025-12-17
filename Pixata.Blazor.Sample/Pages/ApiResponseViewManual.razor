@@ -3,11 +3,13 @@
 
 <h3>ApiResponseView - Manual loading</h3>
 
-<p>See the <a href="/ApiResponseViewRegular">ApiResponseView page</a> for more information on the component.</p>
+<p>See the <a href="/ApiResponseViewRegular">ApiResponseView - Standard use page</a> for more information on the component, or <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ApiResponseViewManual.razor">the source code for this page</a>.</p>
 
 <p>Sometimes you want to handle loading the data yourself, so you can't rely on the <code>ApiResponseView</code> to know when loading has finished, nor when an error occurs. In these cases, you need to wire up a little more code.</p>
 
 <p>OK, so not that much actually! All you need to do is set the <code>ManualLoading</code> property of the <code>ApiResponseView</code> to <code>true</code>, and use the <code>Do</code> method to load your code. In the callback lambda, return a new <code>ApiResponse</code> with a state of Success and the required data.</p>
+
+<p>In this sample, we have also overridden the default values for the loader. As with all of the <code>RenderFragment</code> properties in the component, this can be done on a global or individual level. See the <a href="/ApiResponseViewRegular">ApiResponseView - Standard usage</a> page for details.</p>
 
 <p>See the source code for this page to see how the example below is done.</p>
 
@@ -18,6 +20,9 @@
       <div>The winning number is... <span class="text-success fw-bold">@_number</span></div>
     </div>
   </Success>
+  <Loader>
+    <Loader PrimaryColor="red" SecondaryColor="pink" Text="Hang on, we'll be there soon..." />
+  </Loader>
 </ApiResponseView>
 
 @code {
