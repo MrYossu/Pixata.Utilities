@@ -135,7 +135,6 @@
   }
 
   public void HandleResponse<TOut>(ApiResponse<TOut> response, Action<TOut> onSuccess, Action? onNotSuccess = null, bool changeStateOnNotSuccess = false) {
-    Console.WriteLine($"HandleResponse: {response.State}");
     switch (response.State) {
       case ApiResponseStates.Success:
         Message = "";
