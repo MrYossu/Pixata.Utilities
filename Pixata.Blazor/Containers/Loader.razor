@@ -40,10 +40,10 @@
   public string IconSize { get; set; } = "150px";
 
   [Parameter]
-  public string PrimaryColor { get; set; } = "#0d6efd";
+  public string PrimaryColor { get; set; } = "var(--loader-primary-colour, #0d6efd)";
 
   [Parameter]
-  public string SecondaryColor { get; set; } = "rgba(13,110,253,0.15)";
+  public string SecondaryColor { get; set; } = "var(--loader-secondary-colour, rgba(13,110,253,0.15))";
 
   [Parameter]
   public string Text { get; set; } = "Loading...";
