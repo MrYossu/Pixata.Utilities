@@ -29,8 +29,11 @@
   private ApiResponseView<int> _apiResponseView = null!;
   private int _number;
 
-  protected override async Task OnAfterRenderAsync(bool firstRender) =>
-    await _apiResponseView.Do(GetData, n => _number = n);
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if(firstRender) {
+      await _apiResponseView.Do(GetData, n => _number = n);
+    }
+  }
 
   private async Task<ApiResponse<int>> GetData() {
     await Task.Delay(2000);

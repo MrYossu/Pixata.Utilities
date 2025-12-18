@@ -7,56 +7,52 @@
 @inject PersistentStateHelper<ApiResponse<T>> StateHelper
 @inject NavigationManager NavigationManager
 
-<If Condition="@(FeedbackType == ApiResponseViewFeedbackType.Notifications)">
-  <Then>
-    <NotificationArea NotificationHelper="NotificationHelper" />
-  </Then>
-</If>
+@if (FeedbackType == ApiResponseViewFeedbackType.Notifications) {
+  <NotificationArea NotificationHelper="NotificationHelper" />
+}
 
-<If Condition="@(FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Top)">
-  <Then>
-    <MessageView Message="@Message" Class="@MessageCssClass" />
-  </Then>
-</If>
-<Switch Variable="@_apiResponse.State">
-  <Case Equals="ApiResponseStates.Loading">
+@if (FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Top) {
+  <MessageView Message="@Message" Class="@MessageCssClass" />
+}
+
+@switch (_apiResponse.State) {
+  case ApiResponseStates.Loading:
     @Loader(yunit)
-  </Case>
-  <Case Equals="ApiResponseStates.Success">
+    break;
+
+  case ApiResponseStates.Success:
     <div style="@_arvSuccessStyle">
       @Success(_apiResponse.Data!)
     </div>
-    <If Condition="@(ManualLoading && !_manualLoadingComplete)">
-      <Then>
-        @Loader(yunit)
-      </Then>
-    </If>
-  </Case>
-  <Case Equals="ApiResponseStates.NotFound">
+    @if (ManualLoading && !_manualLoadingComplete) {
+      @Loader(yunit)
+    }
+    break;
+
+  case ApiResponseStates.NotFound:
     @NotFound(yunit)
-  </Case>
-  <Case Equals="ApiResponseStates.Failure">
-    <If Condition="@(_apiResponse.Message.Contains($"{HttpStatusCode.Unauthorized}"))">
-      <Then>
-        @RequiresLogIn(_apiResponse.Message)
-      </Then>
-      <Else>
-        @Failure(_apiResponse.Message)
-      </Else>
-    </If>
-  </Case>
-  <Case Equals="ApiResponseStates.HttpFailure">
+    break;
+
+  case ApiResponseStates.Failure:
+    @if (_apiResponse.Message.Contains($"{HttpStatusCode.Unauthorized}")) {
+      @RequiresLogIn(_apiResponse.Message)
+    } else {
+      @Failure(_apiResponse.Message)
+    }
+    break;
+
+  case ApiResponseStates.HttpFailure:
     @HttpFailure(_apiResponse.Message)
-  </Case>
-  <Case Equals="ApiResponseStates.ServiceUnavailable">
+    break;
+
+  case ApiResponseStates.ServiceUnavailable:
     @ServiceUnavailable(yunit)
-  </Case>
-</Switch>
-<If Condition="@(FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Bottom)">
-  <Then>
-    <MessageView Message="@Message" Class="@MessageCssClass" />
-  </Then>
-</If>
+    break;
+}
+
+@if (FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Bottom) {
+  <MessageView Message="@Message" Class="@MessageCssClass" />
+}
 
 @code {
 
@@ -187,3 +183,4 @@
   }
 
 }
+
