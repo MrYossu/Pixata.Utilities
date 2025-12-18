@@ -82,6 +82,9 @@ The component has two extra paramters, `UlClass` and `LiClass` that allow you to
 ## Extensions
 
 ### Persistent state and caching helper
+
+>**Note:** Starting from .NET 10, there is a built-in way to do this, see [the .NET documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor/state-management/prerendered-state-persistence?view=aspnetcore-10.0) for more details.
+
 When using the Blazor web app template introduced in .NET8, you have to deal with avoiding loading the data twice, once when the code is rendered on the server, and once when is rendered again on the client.
 
 The `PersistentStateHelper` helper class in this package does that for you. Please see [this blog post](https://www.pixata.co.uk/2024/11/21/loading-data-in-a-blazor-web-app-without-multiple-database-or-api-calls/) where I describe it, and show some sample code.
@@ -153,7 +156,61 @@ You can see a sample of these in action on the sample project, [demo here](https
 Documentation coming soon...
 
 ## Forms
-A set of components for laying out forms.
+A set of components for laying out forms. These come in two flavours, Bootstrap style, and floating label style.
+
+The [form page on the sample project]() shows examples of the Bootstrap style. A live sample of the Bootstrap style can be seen here... [live demo](https://test.pixata.co.uk/FormSample), [source code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor). You can see the full collection of components by checking the ones named `FormRowAbc` in [the Forms section of the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor/Forms).
+
+I hope to add a sample for the floating label style soon. The controls are...
+
+- `FormSingle` - a single input control with label
+- `FormDouble` - a row with two input controls and labels
+- `FormTriple` - a row with three input controls and labels
+- `FormQuad` - a row with four input controls and labels
+- `FormName` - a row with title, first name and surname input controls and labels
+
+Sample usage of these is as follows (Telerik input controls used, but you can use any input controls you like)...
+
+```xml
+<FormSingle Label="Email" Id="Email" Required="true">
+  <TelerikTextBox @bind-Value="@user.Email" Id="Email" />
+  <ValidationMessage For="@(() => user.Email)" />
+</FormSingle>
+```
+
+This looks like this...
+
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormSingle.png "FormSingle") 
+
+The `FormDouble`, `FormTriple` and `FormQuad` components work in a similar way, except that the properties for setting the Ids are named   `FirstId`, `SecondId`, `ThirdId` and `FourthId`. The properties for the labels and required are named similarly.
+
+The `FormName` component is very similar to `FormTriple`, except that the controls are sized more appropriately for names. Sample usage is as follows...`
+
+```xml
+<FormName TitleLabel="Title" TitleId="Title" TitleRequired="true"
+          FirstNameLabel="First name" FirstNameId="FirstName" FirstNameRequired="true"
+          SurnameLabel="Surname" SurnameId="Surname" SurnameRequired="true">
+  <Title>
+    <TelerikTextBox @bind-Value="@user.Title" Id="Title" />
+    <ValidationMessage For="@(() => user.Title)" />
+  </Title>
+  <Salutation>
+    <div style="max-width: 300px">
+      <TelerikTextBox @bind-Value="@user.FirstName" Id="FirstName" />
+      <ValidationMessage For="@(() => user.FirstName)" />
+    </div>
+  </Salutation>
+  <Surname>
+    <div style="max-width: 300px">
+      <TelerikTextBox @bind-Value="@user.Surname" Id="Surname" />
+      <ValidationMessage For="@(() => user.Surname)" />
+    </div>
+  </Surname>
+</FormName>
+```
+
+This looks like this...
+
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormName.png "FormName") 
 
 ## Replacing Razor code with declarative components
 
