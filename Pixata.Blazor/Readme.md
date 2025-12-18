@@ -181,6 +181,8 @@ This looks like this...
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormSingle.png "FormSingle") 
 
+Note that the `Required` property merely adds a red asterisk to the label, it does not enforce any validation. You still need to do that yourself.
+
 The `FormDouble`, `FormTriple` and `FormQuad` components work in a similar way, except that the properties for setting the Ids are named   `FirstId`, `SecondId`, `ThirdId` and `FourthId`. The properties for the labels and required are named similarly.
 
 The `FormName` component is very similar to `FormTriple`, except that the controls are sized more appropriately for names. Sample usage is as follows...`
