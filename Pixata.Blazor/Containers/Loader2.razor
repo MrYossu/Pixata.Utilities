@@ -1,0 +1,60 @@
+<div class="busy-container" style="--icon-size:@IconSize; --primary-color:@PrimaryColour; --secondary-color:@SecondaryColour; --text-color:@TextColour; --text-font-size:@TextFontSize; --border-width:@BorderWidth;">
+  <div class="spinner"></div>
+  <div class="busy-text">@Text</div>
+</div>
+
+<style>
+
+  .busy-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    border: var(--border-width) solid var(--secondary-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @@keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .busy-text {
+    color: var(--text-color);
+    font-size: var(--text-font-size);
+  }
+
+</style>
+
+@code {
+
+  [Parameter]
+  public string IconSize { get; set; } = "100px";
+
+  [Parameter]
+  public string PrimaryColour { get; set; } = "var(--loader-primary-colour, #0d6efd)";
+
+  [Parameter]
+  public string SecondaryColour { get; set; } = "var(--loader-secondary-colour, rgba(13,110,253,0.15))";
+
+  [Parameter]
+  public string Text { get; set; } = "Loading...";
+
+  [Parameter]
+  public string TextFontSize { get; set; } = "2rem";
+
+  [Parameter]
+  public string BorderWidth { get; set; } = "10px";
+
+  [Parameter]
+  public string TextColour { get; set; } = "#212529";
+
+}

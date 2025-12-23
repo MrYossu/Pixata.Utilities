@@ -1,6 +1,10 @@
 ﻿@page "/LoaderSample"
 
-<h3>Loader</h3>
+<h3>Loaders</h3>
+
+<p>We offer two loaders, <code>Loader</code> and <code>Loader2</code>.</p>
+
+<h4>Loader</h4>
 
 <p>Sometimes you need to show a busy indicator while data is loading. The <code>Loader</code> component allows you to do that.</p>
 
@@ -8,8 +12,16 @@
 
 <Loader />
 
-<p>...but if that looks too nice for you, it can easily be configured to look really ugly...</p>
+<blockquote>
+  For some reason, when you have two loaders on the same page, one with custom properties set and one without, the one without some of the settings from the other. Not sure why, but as this is an unusual scenario, I haven't put too much time into investigating it.
+</blockquote>
 
-<Loader IconSize="50px" PrimaryColour="green" SecondaryColour="red" Text="An ugly busy icon!" TextColour="blue" TextFontSize="10px" BorderWidth="4px" />
+<p>If your CSS file includes a variable named <code>--loader-colour</code>, then this will be used. If not, then a fallback value will be used, see <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Containers/Loader.razor">the source code</a> for the exact values.</p>
 
-<p>If your CSS file includes variables named <code>--loader-primary-colour</code> and <code>--loader-secondary-colour</code>, then these will be used. If not, then fallback values will be used, see <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Containers/Loader.razor">the source code</a> for the exact values.</p>
+<h4>Loader2</h4>
+
+<p>This imaginatively named component shows a different loading animation. Take your pick...</p>
+
+<Loader2 />
+
+<p>Again, this one can be configured, see <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Containers/Loader2.razor">the source code</a> for the exact values.</p>
