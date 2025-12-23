@@ -12,7 +12,7 @@
   public IEnumerable<T> Collection { get; set; }
 
   [Parameter]
-  public Func<T, string> Display { get; set; }
+  public Func<T, string> Display { get; set; } = t => t.ToString();
 
   [Parameter]
   public string UlClass { get; set; } = "";

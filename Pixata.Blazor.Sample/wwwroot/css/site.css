@@ -8,6 +8,11 @@ a, .btn-link {
   color: #0366d6;
 }
 
+blockquote {
+  padding-left: 20px;
+  border-left: 2px solid lightsteelblue;
+}
+
 .btn-primary {
   color: #fff;
   background-color: #1b6ec2;

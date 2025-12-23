@@ -140,12 +140,8 @@
         StateHasChanged();
         break;
       case ApiResponseStates.HttpFailure:
-        if (changeStateOnNotSuccess) {
-          _apiResponse = new ApiResponse<T>(ApiResponseStates.HttpFailure);
-        } else {
-          Notify(NotificationType.Error, "You don't seem to be connected. Please check your Internet connection and try again");
-          onNotSuccess?.Invoke();
-        }
+        Notify(NotificationType.Error, "You don't seem to be connected. Please check your Internet connection and try again");
+        onNotSuccess?.Invoke();
         break;
       case ApiResponseStates.Failure:
         if (response.Message.Contains($"{HttpStatusCode.Unauthorized}") || response.Message == "HTTP error (Unauthorized) You are not authenticated") {
@@ -154,7 +150,7 @@
           onNotSuccess?.Invoke();
         } else {
           if (changeStateOnNotSuccess) {
-            _apiResponse = new ApiResponse<T>(ApiResponseStates.ServiceUnavailable);
+            _apiResponse = new ApiResponse<T>(ApiResponseStates.Failure, Message: response.Message);
           } else {
             Notify(NotificationType.Error, response.Message);
             onNotSuccess?.Invoke();

@@ -8,7 +8,215 @@ There is a [complimentary package](https://github.com/MrYossu/Pixata.Utilities/t
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for this project.
 
+## Sample project
+I have added a [Blazor web project](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Test) to the repository, and intend to use that to try out and demonstrate the components. It doesn't contain samples for all the components yet, but I hope to add more over time.
+
 ## Containers
+
+These components are intended to wrap up other parts of your page, and add functionality.
+
+### HtmlRaw
+
+Convenience component for displaying raw HTML. Instead of doing this...
+
+    @((MarkupString)_html)
+
+...where `_html` is a string variable in your code, you can now do...
+
+    <HtmlRaw Html="@_html" />
+
+...which is (for me anyway) slightly easier to remember.
+
+### Busy
+Useful when data is loading. You bind the `Data` parameter to whatever model you are using. When the page first loads, and the model is (presumably) null, a busy indicator will show. When the data has loaded, and the model is non-null, the display is automatically switched to the real content.
+
+Sample usage...
+
+```
+<Busy Data="_avreich">
+  <!-- HTML and other Blazor components go here... -->
+</Busy>
+```
+
+By default, the message "Loading..." is displayed while the data is loading, but you can override that by setting the `Message` parameter.
+
+You can also set the class for the container, in case you want to add your own styling, and set the classes for the spinner and spinner colour. By default, the component uses the Bootstrap `spinner-border` class, bu you can override this to use something else if you want.
+
+### Confirm
+Replaces the nasty JavaScript `confirm` function with something that looks nicer, and doesn't require any JSInterop.
+
+See the [sample code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ConfirmSample.razor) ([live demo](https://test.pixata.co.uk/ConfirmSample)) for an example of how to use it. You can set the pop-up to disable the entire window, or just one section of it. You can also specify if the pop-up should disappear as soon as a button is clicked, or if it should remain visible, but disabled (with a busy indicator) until you dismiss it.
+
+### Inform
+Similar to `Confirm`, but only has one button. At the moment, the pop-up id dismissed as soon as you click the button, but I intned to add the feature described above to this component as well.
+
+### DumpCollection
+OK, so this isn't striclty a container, but it's close enough to put here.
+
+I often find the need to see the contents of a collection while developing. I found myself writing code like this far too often...
+
+```html
+<ul>
+  @foreach (var t in SomeCollection) {
+    <li>(@t.Id) @t.Name</li>
+  }
+</ul>
+```
+
+...where the exact contents of the `<li>` tag varies with each usage.
+
+To make this quicker and easier, I added the `DumpCollection` component to do this. By default, the component will just call `ToString()` on each item in the collection, allowing you to do a quick dump of the contents...
+
+```html
+<DumpCollection Collection="SomeCollection" />
+```
+
+If you want to format the output differently, you can use the `Display` parameter to pass in a lambda that formats each item...
+
+```html
+<DumpCollection Collection="SomeCollection" Display="@(t => $"({t.Id})  {t.Name})" />
+```
+
+The component has two extra paramters, `UlClass` and `LiClass` that allow you to pass in CSS classes for the `<ul>` element and the `<li>` elements.
+
+## Extensions
+
+### Persistent state and caching helper
+
+>**Note:** Starting from .NET 10, there is a built-in way to do this, see [the .NET documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor/state-management/prerendered-state-persistence?view=aspnetcore-10.0) for more details.
+
+When using the Blazor web app template introduced in .NET8, you have to deal with avoiding loading the data twice, once when the code is rendered on the server, and once when is rendered again on the client.
+
+The `PersistentStateHelper` helper class in this package does that for you. Please see [this blog post](https://www.pixata.co.uk/2024/11/21/loading-data-in-a-blazor-web-app-without-multiple-database-or-api-calls/) where I describe it, and show some sample code.
+
+### TemplateHelper
+Are you fed up of writing code like this (sample from a Telerik grid, but it's the same for Microsoft's or anyone else's)...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)" >
+      <Template>
+        @{
+          TransactionView tv = context as TransactionView;
+          <div style="text-align: right">@tv.Amount.ToString("C2")</div>
+        }
+      </Template>
+    </GridColumn>
+```
+
+So am I, so I added the `TemplateHelper` to help. It contains three methods...
+
+`Text<T>` allows you to reduce the above code to...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)"
+       Template="@(MainLayout.Text<TransactionView>(tv => tv.Amount.ToString("C2"), "text-align: right"))" />
+```
+
+The method takes a `Func` that converts your entity to a `string`, which is what is displayed. There are two optional `string` parameters that allow you to set the style (as above) and/or CSS class(es).
+
+There is a similar method named `Link` which works the same, but takes a URI, and allows you to replace...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)" >
+      <Template>
+        @{
+          TransactionView tv = context as TransactionView;
+          <div style="text-align: right">
+            <a href="/transaction/@tv.Id">@tv.Amount.ToString("C2")</a>
+          </div>
+        }
+      </Template>
+    </GridColumn>
+```
+
+...with...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)"
+      Template="@(MainLayout.Link<TransactionView>(tv => tv.Amount.ToString("C2"),
+                                                                tv => $"/transaction/{tv.Id}"
+                                                               "text-align: right"))" />
+```
+
+There are also overloads for this that take `Func`s for the style, CSS and link title. For example, if you want to base your CSS on an entity property, you can do something like this...
+
+```html
+    <GridColumn Field="@nameof(TransactionView.Amount)"
+      Template="@(MainLayout.BuildLink<TransactionView>(tv => tv.Amount.ToString("C2"),
+                                                                tv => $"/transaction/{tv.Id}"
+                                                                tv => tv.Amount >= 0 ? "" : "withdrawl"
+                                                               "text-align: right"))" />
+```
+
+This will add a CSS class `withdrawl` if the transaction amount were negative. You can do similar things for the style and link title.
+
+You can see a sample of these in action on the sample project, [demo here](https://test.pixata.co.uk/TelerikGrid), [source code here](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/GridSample.razor).
+
+### TryGetQueryString()
+Documentation coming soon...
+
+## Forms
+A set of components for laying out forms. These come in two flavours, Bootstrap style, and floating label style.
+
+The [form page on the sample project]() shows examples of the Bootstrap style. A live sample of the Bootstrap style can be seen here... [live demo](https://test.pixata.co.uk/FormSample), [source code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor). You can see the full collection of components by checking the ones named `FormRowAbc` in [the Forms section of the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor/Forms).
+
+I hope to add a sample for the floating label style soon. The controls are...
+
+- `FormSingle` - a single input control with label
+- `FormDouble` - a row with two input controls and labels
+- `FormTriple` - a row with three input controls and labels
+- `FormQuad` - a row with four input controls and labels
+- `FormName` - a row with title, first name and surname input controls and labels
+
+Sample usage of these is as follows (Telerik input controls used, but you can use any input controls you like)...
+
+```xml
+<FormSingle Label="Email" Id="Email" Required="true">
+  <TelerikTextBox @bind-Value="@user.Email" Id="Email" />
+  <ValidationMessage For="@(() => user.Email)" />
+</FormSingle>
+```
+
+This looks like this...
+
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormSingle.png "FormSingle") 
+
+Note that the `Required` property merely adds a red asterisk to the label, it does not enforce any validation. You still need to do that yourself.
+
+The `FormDouble`, `FormTriple` and `FormQuad` components work in a similar way, except that the properties for setting the Ids are named   `FirstId`, `SecondId`, `ThirdId` and `FourthId`. The properties for the labels and required are named similarly.
+
+The `FormName` component is very similar to `FormTriple`, except that the controls are sized more appropriately for names. Sample usage is as follows...`
+
+```xml
+<FormName TitleLabel="Title" TitleId="Title" TitleRequired="true"
+          FirstNameLabel="First name" FirstNameId="FirstName" FirstNameRequired="true"
+          SurnameLabel="Surname" SurnameId="Surname" SurnameRequired="true">
+  <Title>
+    <TelerikTextBox @bind-Value="@user.Title" Id="Title" />
+    <ValidationMessage For="@(() => user.Title)" />
+  </Title>
+  <Salutation>
+    <div style="max-width: 300px">
+      <TelerikTextBox @bind-Value="@user.FirstName" Id="FirstName" />
+      <ValidationMessage For="@(() => user.FirstName)" />
+    </div>
+  </Salutation>
+  <Surname>
+    <div style="max-width: 300px">
+      <TelerikTextBox @bind-Value="@user.Surname" Id="Surname" />
+      <ValidationMessage For="@(() => user.Surname)" />
+    </div>
+  </Surname>
+</FormName>
+```
+
+This looks like this...
+
+![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormName.png "FormName") 
+
+## Replacing Razor code with declarative components
+
+> **Note:** Since adding these components, I have discovered that intermittently, my apps would randomly stop working without any exceptions or errors being surfaced. This doesn't happen very often, but once it happens, it can stick. For that reason, I recommend using these componets with caution. If you encounter any weird, intermittent issues, try replacing these components with the equivalent `@if`, `@switch` and `@foreach` to see if that resolves the problem.
 
 I have found some issues using some `@` statements in Razor markup. For one, Visual Studio seems to have its own ideas about how the braces should be formatted, and these are usually different from my ideas! Also, the functionality from the rather fabulous [ZenCoding ](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.ZenCoding) extension doesn't work consistently with `@` statements.
 
@@ -82,144 +290,3 @@ In the case above, you can use the `EachFunc` parameter to do the same with much
 ```
 
 **Note:** If you specify both `Each` and `EachFunc`, `Each` alone will be used.
-
-## Containers
-
-These components are intended to wrap up other parts of your page, and add functionality.
-
-### HtmlRaw
-
-Convenience component for displaying raw HTML. Instead of doing this...
-
-    @((MarkupString)_html)
-
-...where `_html` is a string variable in your code, you can now do...
-
-    <HtmlRaw Html="@_html" />
-
-...which is (for me anyway) slightly easier to remember.
-
-### Busy
-Useful when data is loading. You bind the `Data` parameter to whatever model you are using. When the page first loads, and the model is (presumably) null, a busy indicator will show. When the data has loaded, and the model is non-null, the display is automatically switched to the real content.
-
-Sample usage...
-
-```
-<Busy Data="_avreich">
-  <!-- HTML and other Blazor components go here... -->
-</Busy>
-```
-
-By default, the message "Loading..." is displayed while the data is loading, but you can override that by setting the `Message` parameter.
-
-You can also set the class for the container, in case you want to add your own styling, and set the classes for the spinner and spinner colour. By default, the component uses the Bootstrap `spinner-border` class, bu you can override this to use something else if you want.
-
-### Confirm
-Replaces the nasty JavaScript `confirm` function with something that looks nicer, and doesn't require any JSInterop.
-
-See the [sample code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ConfirmSample.razor) ([live demo](https://test.pixata.co.uk/ConfirmSample)) for an example of how to use it. You can set the pop-up to disable the entire window, or just one section of it. You can also specify if the pop-up should disappear as soon as a button is clicked, or if it should remain visible, but disabled (with a busy indicator) until you dismiss it.
-
-### Inform
-Similar to `Confirm`, but only has one button. At the moment, the pop-up id dismissed as soon as you click the button, but I intned to add the feature described above to this component as well.
-
-### DumpCollection
-OK, so this isn't striclty a container, but it's close enough to put here.
-
-I often find the need to see the contents of a collection while developing. I found myself writing code like this far too often...
-
-```html
-<ul>
-  @foreach (var t in SomeCollection) {
-    <li>(@t.Id) @t.Name</li>
-  }
-</ul>
-```
-
-...where the exact contents of the `<li>` tag varies with each usage.
-
-To make this quicker and easier, I added the `DumpCollection` component to do this...
-
-```html
-<DumpCollection Collection="SomeCollection" Display="@(t => $"({t.Id})  {t.Name})" />
-```
-
-The component has two extra paramters, `UlClass` and `LiClass` that allow you to pass in CSS classes for the `<ul>` element and the `<li>` elements.
-
-## Extensions
-
-### Persistent state and caching helper
-When using the Blazor web app template introduced in .NET8, you have to deal with avoiding loading the data twice, once when the code is rendered on the server, and once when is rendered again on the client.
-
-The `PersistentStateHelper` helper class in this package does that for you. Please see [this blog post](https://www.pixata.co.uk/2024/11/21/loading-data-in-a-blazor-web-app-without-multiple-database-or-api-calls/) where I describe it, and show some sample code.
-
-### TemplateHelper
-Are you fed up of writing code like this (sample from a Telerik grid, but it's the same for Microsoft's or anyone else's)...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)" >
-      <Template>
-        @{
-          TransactionView tv = context as TransactionView;
-          <div style="text-align: right">@tv.Amount.ToString("C2")</div>
-        }
-      </Template>
-    </GridColumn>
-```
-
-So am I, so I added the `TemplateHelper` to help. It contains three methods...
-
-`Text<T>` allows you to reduce the above code to...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)"
-       Template="@(MainLayout.Text<TransactionView>(tv => tv.Amount.ToString("C2"), "text-align: right"))" />
-```
-
-The method takes a `Func` that converts your entity to a `string`, which is what is displayed. There are two optional `string` parameters that allow you to set the style (as above) and/or CSS class(es).
-
-There is a similar method named `Link` which works the same, but takes a URI, and allows you to replace...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)" >
-      <Template>
-        @{
-          TransactionView tv = context as TransactionView;
-          <div style="text-align: right">
-            <a href="/transaction/@tv.Id">@tv.Amount.ToString("C2")</a>
-          </div>
-        }
-      </Template>
-    </GridColumn>
-```
-
-...with...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)"
-      Template="@(MainLayout.Link<TransactionView>(tv => tv.Amount.ToString("C2"),
-                                                                tv => $"/transaction/{tv.Id}"
-                                                               "text-align: right"))" />
-```
-
-There are also overloads for this that take `Func`s for the style, CSS and link title. For example, if you want to base your CSS on an entity property, you can do something like this...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)"
-      Template="@(MainLayout.BuildLink<TransactionView>(tv => tv.Amount.ToString("C2"),
-                                                                tv => $"/transaction/{tv.Id}"
-                                                                tv => tv.Amount >= 0 ? "" : "withdrawl"
-                                                               "text-align: right"))" />
-```
-
-This will add a CSS class `withdrawl` if the transaction amount were negative. You can do similar things for the style and link title.
-
-You can see a sample of these in action on the sample project, [demo here](https://test.pixata.co.uk/TelerikGrid), [source code here](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/GridSample.razor).
-
-### TryGetQueryString()
-Documentation coming soon...
-
-## Forms
-A set of components for laying out forms.
-
-## Sample project
-I have added a [Blazor web project](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Test) to the repository, and intend to use that to try out and demonstrate the components. At the moment, it's a just-out-of-the-box template project, but should hopefully be expanded to include sample usage of the components.
