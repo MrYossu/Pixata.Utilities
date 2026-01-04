@@ -1,18 +1,16 @@
-﻿using LanguageExt;
+﻿using System;
+using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using static LanguageExt.Prelude;
+using Pixata.Extensions;
 
 namespace Pixata.Email {
-  public class PixataEmailService : PixataEmailServiceInterface {
-    public PixataEmailService(SmtpSettings smtpSettings) =>
-      SmtpSettings = smtpSettings;
-
+  public class PixataEmailService(SmtpSettings smtpSettings) : PixataEmailServiceInterface {
     /// <summary>
     /// The settings for the SMTP server. You would normally pass these in to the constructor, but they are exposed as a property to allow you to override them in case you want to send emails from a different account
     /// </summary>
-    public SmtpSettings SmtpSettings { get; set; }
+    public SmtpSettings SmtpSettings { get; set; } = smtpSettings;
 
     /// <summary>
     /// Send an email from the user specified in the settings to the email passed in
@@ -20,42 +18,41 @@ namespace Pixata.Email {
     /// <param name="email">The recipient email address</param>
     /// <param name="subject">The email subject line</param>
     /// <param name="htmlMessage">An HTML string for the body of the email</param>
-    /// <returns>Unit</returns>
-    public TryAsync<Unit> SendEmailAsync(string email, string subject, string htmlMessage) =>
+    /// <returns>Task&lt;ApiResponse&lt;Yunit&gt;&gt;</returns>
+    public Task<ApiResponse<Yunit>> SendEmailAsync(string email, string subject, string htmlMessage) =>
       SendEmailAsync(new(subject, htmlMessage, email));
 
     /// <summary>
     /// Send an email from the user specified in the settings to the email passed in. Allows multiple recipients and attachments
     /// </summary>
     /// <param name="emailParameters">An EmailParameters object, which contains all the data for the email</param>
-    /// <returns>Unit</returns>
-    public TryAsync<Unit> SendEmailAsync(EmailParameters emailParameters) =>
-      TryAsync(async () => {
-        MimeMessage msg = CreateMailMessage(emailParameters);
-        using SmtpClient client = new();
-        await client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, SmtpSettings.UseSsl);
-        await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
-        await client.SendAsync(msg);
-        await client.DisconnectAsync(true);
-        return unit;
-      });
+    /// <returns>Task&lt;ApiResponse&lt;Yunit&gt;&gt;</returns>
+    public Task<ApiResponse<Yunit>> SendEmailAsync(EmailParameters emailParameters) =>
+      SendMessageAsync(CreateMailMessage(emailParameters), client => client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, SmtpSettings.UseSsl), includeExceptionType: true);
 
     /// <summary>
     /// Send an email from the user specified in the settings to the email passed in. Allows multiple recipients and attachments
     /// </summary>
     /// <param name="emailParameters">An EmailParameters object, which contains all the data for the email</param>
     /// <param name="secureSocketOptions">A member of the MailKit.Security.SecureSocketOptions</param>
-    /// <returns></returns>
-    public TryAsync<Unit> SendEmailAsync(EmailParameters emailParameters, SecureSocketOptions secureSocketOptions) =>
-      TryAsync(async () => {
-        MimeMessage msg = CreateMailMessage(emailParameters);
+    /// <returns>Task&lt;ApiResponse&lt;Yunit&gt;&gt;</returns>
+    public Task<ApiResponse<Yunit>> SendEmailAsync(EmailParameters emailParameters, SecureSocketOptions secureSocketOptions) =>
+      SendMessageAsync(CreateMailMessage(emailParameters), client => client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, secureSocketOptions), includeExceptionType: false);
+
+    private async Task<ApiResponse<Yunit>> SendMessageAsync(MimeMessage msg, Func<SmtpClient, Task> connectFunc, bool includeExceptionType = true) {
+      try {
         using SmtpClient client = new();
-        await client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, secureSocketOptions);
+        await connectFunc(client);
         await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
         await client.SendAsync(msg);
         await client.DisconnectAsync(true);
-        return unit;
-      });
+        return new ApiResponse<Yunit>(ApiResponseStates.Success);
+      }
+      catch (Exception ex) {
+        string message = includeExceptionType ? $"({ex.GetType().Name}) {ex.Message}" : ex.Message;
+        return new ApiResponse<Yunit>(ApiResponseStates.Failure, Message: message);
+      }
+    }
 
     private MimeMessage CreateMailMessage(EmailParameters parameters) {
       MimeMessage mm = new() {

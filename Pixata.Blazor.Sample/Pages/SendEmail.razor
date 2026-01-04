@@ -1,6 +1,6 @@
 ﻿@page "/SendEmail"
 @using Pixata.Email
-@inject PixataEmailService _emailService
+@inject PixataEmailService EmailService
 
 <h1>Send an email</h1>
 <p>Note that if you want to copy this code, you'll need to set up your SmtpSettings as shown on <a href="https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email">the GitHub page</a>.</p>
@@ -31,8 +31,9 @@
 
   private async Task Send() {
     Text = "Sending email...";
-    Msg = await _emailService.SendEmailAsync(new(TheContactModel.Subject, TheContactModel.Body, TheContactModel.Email, TheContactModel.Name))
-      .Match(_ => "Success", ex => $"Exception: {ex.Message}");
+    Msg = (await EmailService.SendEmailAsync(new(TheContactModel.Subject, TheContactModel.Body, TheContactModel.Email, TheContactModel.Name)))
+      .Match(_ => "Success", ex => $"Exception: {ex}");
+
     Text = "";
   }
 
