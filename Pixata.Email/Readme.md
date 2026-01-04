@@ -6,9 +6,14 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
+# Breaking change
+>As from version 2.0.0, this package does not use LanguageExt, but returns an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. In most cases, the only change you'll need to make to your code is to add brackets around the `await _emailService.SendEmailAsync(...)` line, see the usage section below.
+>
+>If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type).
+
 ## Setup
 
-First thing you need to do is add your SMTP server and "From" details to appSettings.json...
+First thing you need to do is add your SMTP server and "From" details to your application. There are a few ways to do this, the most simple of which is to use `appSettings.json`...
 
 ```json
   "Smtp": {
@@ -40,7 +45,9 @@ builder.Services.AddTransient<PixataEmailService>();
 
 This allows you to inject an instance of `PixataEmailService` into your code as usual, and it will have the settings baked in for you.
 
-If you are into interfaces, you can tell it to inject one of those instead...
+If you store your mail settings in secrets, environmental variables, etc, then you'll need to retrieve them from there and set up an instance of `SmtpSettings` from that.
+
+If you are into interfaces, you can register that instead...
 
 ```c#
 services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
@@ -58,14 +65,14 @@ _emailService.SmtpSettings = myStmpSettings;
 
 ## Usage
 
-As with most of the code I write, this service uses the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package. This allows you to handle both the happy path and sad path with ease.
+As from version 2.0.0, the service uses an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. Previous versions used LanguageExt, which has now been removed from this package.
 
->Note that I am moving away from LanguageExt, and at some point will remove it from this package. LanguageExt was far too complex for my simple use, so I intend to replace the monads I was using (mainly just `Either`) with my own simpler implementations. Hopefully, the public API will not change, so this should not break any exising code. However, please check this page before updating the package.
+>If you are upgrading from a LanguageExt version, and are using code like that shown below, then you will need to wrap the first line in brackets (as shown below). Other than that, the code should work as before.
 
 There are two overloads of the `SendEmail` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
 
 ```c#
-await _emailService.SendEmailAsync("billy@shears.com", "Hello from Jim Spriggs", htmlBody))
+(await _emailService.SendEmailAsync("billy@shears.com", "Hello from Jim Spriggs", htmlBody)))
   .Match(_ => /* code on success */, ex => /* code on failure */);
 ```
 
