@@ -18,11 +18,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Icon\mail.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <None Include="Icon\mail.png" Pack="true" PackagePath="\"/>
+    <None Include="Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MailKit" Version="4.8.0" />
