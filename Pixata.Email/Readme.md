@@ -7,9 +7,7 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
 # Breaking change
->As from version 2.0.0, this package does not use LanguageExt, but returns an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. In most cases, the only change you'll need to make to your code is to add brackets around the `await _emailService.SendEmailAsync(...)` line, see the usage section below.
->
->If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type).
+>As from version 2.0.0, this package does not use LanguageExt, but returns an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. See the comments at the bottom of this document for how this will change your code.
 
 ## Setup
 
@@ -65,10 +63,6 @@ _emailService.SmtpSettings = myStmpSettings;
 
 ## Usage
 
-As from version 2.0.0, the service uses an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. Previous versions used LanguageExt, which has now been removed from this package.
-
->If you are upgrading from a LanguageExt version, and are using code like that shown below, then you will need to wrap the first line in brackets (as shown below). Other than that, the code should work as before.
-
 There are two overloads of the `SendEmail` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
 
 ```c#
@@ -79,3 +73,27 @@ There are two overloads of the `SendEmail` method. Easiest to use is a simple on
 If you want more control over what is sent and how, the second overload takes an `EmailParameters` object. The various constructors allow you to specify more detail, as well as adding multiple recipients. You can also add attachments, which are tuples of the form `(string FileName, string MimeType, byte[] Data)`.
 
 See [the `EmailParameters` code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Email/EmailParameters.cs) for more details.
+
+## Breaking change in version 2.0.0
+
+As from version 2.0.0, the service uses an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. Previous versions used LanguageExt, which has now been removed from this package.
+
+If you are upgrading from a LanguageExt version, then you will need to change the code in the failure lambda. The LanguageExt version passed in a `System.Exception`, whereas the new version passes a `string` containing the error message. For example, you would change...
+
+```c#
+(await _emailService.SendEmailAsync("billy@shears.com", "Hello from Jim Spriggs", htmlBody)))
+  // Note that ex is an Exception, so we need to use the Message property to get the details
+  .Match(_ => /* code on success */, ex => Console.WriteLine(ex.Message));
+```
+
+...to...
+
+```c#
+(await _emailService.SendEmailAsync("billy@shears.com", "Hello from Jim Spriggs", htmlBody)))
+  // Note that we use ex directly, as it is a string, not an Exception, so we don't have a Message property
+  .Match(_ => /* code on success */, ex => Console.WriteLine(ex));
+```
+
+You will need also to make sure you wrap the first line in brackets (as shown above). This was not necessary before.
+
+If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type). However, this is not a common pattern when using this service.
