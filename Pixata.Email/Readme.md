@@ -7,7 +7,7 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
 # Breaking change
->As from version 2.0.0, this package does not use LanguageExt, but returns an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. In most cases, the only change you'll need to make to your code is to add brackets around the `await _emailService.SendEmailAsync(...)` line, see the usage section below.
+>As from version 2.0.0, this package does not use LanguageExt, but returns an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. In most cases, the only change you'll need to make to your code is to add brackets around the `await _emailService.SendEmailAsync(...)` line (if you don't have them already), see the usage section below.
 >
 >If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type).
 
@@ -67,7 +67,7 @@ _emailService.SmtpSettings = myStmpSettings;
 
 As from version 2.0.0, the service uses an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. Previous versions used LanguageExt, which has now been removed from this package.
 
->If you are upgrading from a LanguageExt version, and are using code like that shown below, then you will need to wrap the first line in brackets (as shown below). Other than that, the code should work as before.
+>If you are upgrading from a LanguageExt version, and are using code like that shown below, then you will need to make sure you wrap the first line in brackets (as shown below). Other than that, the code should work as before.
 
 There are two overloads of the `SendEmail` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
 
