@@ -58,6 +58,15 @@ public static class ApiResponseExt {
       projector(firstResult.Data!, secondResult.Data!)
     );
   }
+
+  /// <summary>
+  /// Allows you to use a method that returns ApiResponse&lt;T&gt; in a Linq query expression with methods that return Task&lt;ApiResponse&lt;T&gt;&gt;
+  /// </summary>
+  /// <typeparam name="T">The type of the generic parameter for the ApiResponse</typeparam>
+  /// <param name="ar">The ApiResponse&lt;T&gt; to be converted into a Task&lt;ApiResponse&lt;T&gt;&gt;</param>
+  /// <returns></returns>
+  public static Task<ApiResponse<T>> ToAsync<T>(this ApiResponse<T> ar) =>
+    Task.FromResult(ar);
 }
 
 public enum ApiResponseStates {
