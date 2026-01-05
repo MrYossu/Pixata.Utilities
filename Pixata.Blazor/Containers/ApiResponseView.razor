@@ -124,12 +124,12 @@
       ? _apiResponse.Data
       : default)!;
 
-  public async Task Do<TOut>(Func<Task<ApiResponse<TOut>>> action, Action<TOut> onSuccess, Action? onNotSuccess = null, bool changeStateOnNotSuccess = false) {
+  public async Task Do<TOut>(Func<Task<ApiResponse<TOut>>> action, Action<TOut> onSuccess, Action<string>? onNotSuccess = null, bool changeStateOnNotSuccess = false) {
     Message = "";
     HandleResponse(await action(), onSuccess, onNotSuccess, changeStateOnNotSuccess);
   }
 
-  public void HandleResponse<TOut>(ApiResponse<TOut> response, Action<TOut> onSuccess, Action? onNotSuccess = null, bool changeStateOnNotSuccess = false) {
+  public void HandleResponse<TOut>(ApiResponse<TOut> response, Action<TOut> onSuccess, Action<string>? onNotSuccess = null, bool changeStateOnNotSuccess = false) {
     switch (response.State) {
       case ApiResponseStates.Success:
         Message = "";
@@ -140,19 +140,19 @@
         break;
       case ApiResponseStates.HttpFailure:
         Notify(NotificationType.Error, "You don't seem to be connected. Please check your Internet connection and try again");
-        onNotSuccess?.Invoke();
+        onNotSuccess?.Invoke(response.Message);
         break;
       case ApiResponseStates.Failure:
         if (response.Message.Contains($"{HttpStatusCode.Unauthorized}") || response.Message == "HTTP error (Unauthorized) You are not authenticated") {
           // TODO AYS - How do we handle this case if changeStateOnNotSuccess is true? We don't have an ApiResponseStates value for not authenticated
           Notify(NotificationType.Error, "Your session has expired, so you need to log in again", onClick: () => NavigationManager.NavigateTo($"{NavigationManager.ToAbsoluteUri(ApiResponseViewConfig.LogInUrl)}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true));
-          onNotSuccess?.Invoke();
+          onNotSuccess?.Invoke(response.Message);
         } else {
           if (changeStateOnNotSuccess) {
             _apiResponse = new ApiResponse<T>(ApiResponseStates.Failure, Message: response.Message);
           } else {
             Notify(NotificationType.Error, response.Message);
-            onNotSuccess?.Invoke();
+            onNotSuccess?.Invoke(response.Message);
           }
         }
         break;
@@ -161,7 +161,7 @@
           _apiResponse = new ApiResponse<T>(ApiResponseStates.ServiceUnavailable);
         } else {
           Notify(NotificationType.Error, "An update is currently in progress. The average update time is under 2 minutes. Please try again soon");
-          onNotSuccess?.Invoke();
+          onNotSuccess?.Invoke(response.Message);
         }
         break;
       default:
