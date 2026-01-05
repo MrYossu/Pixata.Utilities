@@ -2,8 +2,6 @@
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Borsalino.png "Pixata")
 
-## Note: As of Jan '25, all packages have the source code updated to .NET8. The Nuget packages will be updated as I get around to releasing them. If you are still using older versions of .NET, you'll need to upgrade or stay on the older versions of these packages
-
 I seem to keep adding the same utility classes to every project I work on, resulting in (almost) identical code spread across different projects.
 
 I used to get around this by maintaining the utilities in a separate project, and referencing the DLL. However, apart from being soooo 1990s, it also has problems like VS locking the DLL, preventing you from building the utility project and so on.
@@ -13,7 +11,7 @@ So, I decided to take a leap into the modern world, and try publishing [some Nug
 These are offered as-is, with no guarantee that they will work for you. I'm still working on them, and cannot offer much in the way of support, although I'd be very happy to receive any feedback you have.
 
 ## Documentation
-I know, I really ought to document them. I probably will at some point, but haven't had time yet.
+Most of the packages have some documentation in the form of Readme files in their respective project folders. A brief expalantion of each package is below, see the project Readme files for more details.
 
 ## Pixata.Extensions
 Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is <strike>woefully empty</strike> less desolate than it used to be, but hopefully that will change over time.
@@ -21,6 +19,13 @@ Some useful utility classes and methods I've developed over the past few years. 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions).
+
+## Pixata.Email
+Given that every app I write needs to send emails, I got fed up of writing the same boilerplate code, so I wrapped it in a package for easy reuse.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email).
 
 ## Pixata.Blazor
 I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
@@ -32,19 +37,29 @@ You can find more detail on the [project page](https://github.com/MrYossu/Pixata
 ## Pixata.Blazor.Sample
 The source code for a sample web project that uses the Blazor components. You can see a [live version of this sample](https://test.pixata.co.uk/), or [browse the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Sample).
 
-## Pixata.Blazor.LanguageExtComponents
-Some Blazor components for us with the rather excellent [LanguageExt](https://github.com/louthy/language-ext/) Nuget package.
+## Pixata.TelerikComponents
+Some components for use with [Telerik UI for Blazor](https://www.telerik.com/blazor-ui).
 
-A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.LanguageExtComponents/) is available for this project.
+A [Nuget package](https://www.nuget.org/packages/Pixata.TelerikComponents/) is available for this project.
 
-See the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents) for more details.
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.TelerikComponents).
+
+## Pixata.Google
+Utility code for working with Google's APIs. I wrote an app that used Google Drive for storage, and found the code to be very complex and messy, so I wrapped it up in a clearer API for easier use. I was thinking about adding support for other Google APIs too, but had such a painful experience with Drive that I never got around to it. If you are looking to code against other Google APIs, the code here may give you a head start.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Google).
+
+## Pixata.SimilarityChooser 
+A utility that checks for similar items. Useful for when your users don't bother checking to see if the data they want already exists, and add a duplicate. The Similarity Chooser looks through your existing items and lets you know which may match.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.SimilarityChooser /) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser).
+
+## Pixata.Blazor.LanguageExtComponents and Pixata.Functional
+Please note that I am no longer maintaining these projects, as I am moving away from LanguageExt. This is no reflection on that excellent package, it's more a reflection of my lack of understanding of how to use it properly! I am leaving the code here in case it is useful to anyone else.
 
 ## Blog
 Random thoughts and notes that are sometimes useful, and sometimes related to these components can be found on [my blog](https://www.pixata.co.uk/).
-
-## Things to do
-Some of the more important issues that need addressing...
-
-* The Pixata.Blazor project should be split into two, one that doesn't rely on Telerik, and one that does. That way anyone who wants to use most of the compoents, but doesn't have a licence for Telerik still can
-* The form components in the Blazor project need a common base class pulling out, as they are all almost identical
-* Those form components also need to use the built-in Blazor form components, not the HTML form elements
