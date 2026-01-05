@@ -1,4 +1,4 @@
-﻿namespace PropertyComparables.Common.Components.Shared;
+﻿namespace Pixata.Blazor.Containers;
 
 public enum ApiResponseViewFeedbackType {
   MessageView,
