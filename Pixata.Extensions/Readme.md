@@ -20,38 +20,46 @@ Here is a brief description of the methods in the classes so far...
 `Flatten<T>()` - Enables you to flatten a hierarchical collection.
 
 ## DateExtensionMethods
-`ToPrettyString()` - Formats a date as "12th January 2021". This relies on the `OrdinalSuffix()` method in `IntExtensionMethods`. Works for both non-nullable and nullabe `DateTime` variables, returning an empty string if the value is null.
+`ToPrettyString()` - Formats a date as "12th January 2021". This relies on the `OrdinalSuffix()` method in `NumberExtensionMethods`. Works for both non-nullable and nullable `DateTime` variables, returning an empty string if the value is null.
 
-`StartOfMonth()` - Gives you a `DateTime` that represents the first second of the month containing the date you pass in.
+`StartOfWeek()` - Returns a `DateTime` (date part only, no time) representing the start of the week for the date passed as a parameter. Takes a `DayOfWeek` parameter to specify which day you consider the week to start.
 
-`EndOfMonth()` - Gives you a `DateTime` that represents the last second of the month containing the date you pass in.
+`StartOfMonth()` - Gives you a `DateTime` that represents the first day of the month at 00:00:00 for the month containing the date you pass in.
 
-`EndOfDay()` - Gives you a `DateTime` that represents the first second of the day containing the date you pass in.
+`EndOfMonth()` - Gives you a `DateTime` that represents the last millisecond of the month containing the date you pass in.
+
+`EndOfDay()` - Gives you a `DateTime` that represents the last millisecond of the day containing the date you pass in (23:59:59.999).
 
 `IsWithin()` - True if the date is within the range supplied.
 
+`DateRangeToString()` - Formats a date/time range in a human-friendly way, omitting redundant information. Overloads accept nullable and non-nullable from/to dates and an optional `showTime` boolean to include times. The formatting omits repeated parts when possible (same day, same month, same year) and produces concise strings.
+
 ## EnumHelper
-`GetValues<T>()` - Enumerate the values of an `enum`.
+`GetValues<T>()` - Enumerates the values of an `enum` and returns a list of enum entries with their integer Ids and value names as string. Names are split by camel case, eg "MyEnumValue" becomes "My enum value".
 
 ## ExceptionExtensions
-`MessageStack()` - Returns the exception messages all the way down the InnerException stack.
+`MessageStack()` - Returns the exception messages all the way down the InnerException stack. There is an overload that accepts a `separator` string; the default uses `Environment.NewLine`. `MessageStack` includes stack traces in the returned text.
 
-`Messages()` - As above, but just the messages, without the stack trace.
+`Messages()` - Similar to `MessageStack` but returns only the messages (no stack traces). An overload accepts a `separator` string; the default is `Environment.NewLine`.
 
-`InnerType()` - Returns the type of the innermost exception.
+`InnerType()` - Returns the type name of the innermost exception.
 
 ## NumberExtensionMethods
-`OrdinalSuffix()` - Returns the ordinal suffix, eg "st" for 1, 21, 31, etc, "nd" for 2, 22, etc, "rd" for 3, 23, etc and "th" for pretty much everything else. Has an optional parameter that allows you to specify if you want 1 to return "1st" (default) or just "st".
+`OrdinalSuffix()` - Returns the ordinal suffix, eg "st" for 1, 21, 31, etc, "nd" for 2, 22, etc, "rd" for 3, 23, etc and "th" for most other numbers. Has an optional parameter that controls whether the returned string includes the number itself (e.g. "1st") or only the suffix (e.g. "st").
 
-`DoubleToFraction()` - Converts a double to a 2-tuples of its improper fractional representation, eg 3.5 is converted to (7, 2), ie 7/2. Slightly modified from https://stackoverflow.com/a/32903747/706346
+`DoubleToFraction()` - Converts a double to a 2-tuple of its improper fractional representation, eg 3.5 is converted to (7, 2) meaning 7/2. Slightly modified from https://stackoverflow.com/a/32903747/706346.
 
-`DoubleToProperFraction()` - Similar to `RealToFraction()`, but returns a 3-tuple representing a proper fraction, eg 3.5 is converted to (3, 2, 1), meaning 3 1/2. Note that this method has a slight quirk, in that if you pass in a whole number, say 5, you will get (5, 0, 1) returned. technically this is correct, but it looks odd. If you are going to display this result, you would probably want to use `DoubleToProperFractionString()` instead.
+`DoubleToProperFraction()` - Returns a 3-tuple representing a proper fraction, eg 3.5 is converted to (3, 1, 2) meaning 3 1/2. Note: for whole numbers the tuple may look like (5, 0, 1).
 
-`DoubleToProperFractionString()` - Returns a cleaned string representation of `DoubleToProperFraction()`, "2/3" or "3 2/7"
+`DoubleToProperFractionString()` - Returns a cleaned string representation of `DoubleToProperFraction()`, e.g. "2/3" or "3 2/7".
 
-`ToPercentageString()` - Converts a number into the string representation of it as a percentage of a maximum (four overloads to allow for all combinations of the two parameters being `int` or `decimal`)
+`ToPercentageString()` - Converts a number into the string representation of it as a percentage of a maximum. There are overloads for combinations of `int` and `double` parameters; the method returns a rounded percentage string and accepts an optional `digits` parameter to control decimal places.
 
-`ToDurationString` - Converts a number of seconds to a string representation of the duration. For example, 125 will be converted to "2 minutes 5 seconds".
+`ToDurationString()` - Converts a number of seconds to a human-readable duration string. For example, 125 will be converted to "2 minutes 5 seconds".
+
+`S()` - Returns an empty string when the input is 1, otherwise returns "s". Useful for simple pluralisation in formatted strings (e.g. `"{n} item{n.S()}"`).
+
+`ToFileSizeString()` - Converts a byte count to a human-readable file size string (bytes, Kb, Mb, Gb, etc.) with configurable precision.
 
 ## StringExtensionMethods
 `SplitCamelCase()` - Splits a camel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums (although see below for variations of this method that work directly with enums). Takes an option `bool` parameter that specifies whether the second and subsequent words in the returned string should be lower case. Default is true.
