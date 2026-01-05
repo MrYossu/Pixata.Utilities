@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazored.FluentValidation" Version="2.3.0" />
+    <PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
