@@ -11,6 +11,45 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available fo
 ## Sample project
 I have added a [Blazor web project](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Test) to the repository, and intend to use that to try out and demonstrate the components. It doesn't contain samples for all the components yet, but I hope to add more over time.
 
+## Registering dependencies
+Some components in this package require services to be registered in the DI container. To make this easier, you can use the `AddPixataBlazor` extension method in your `Program.cs` file:
+
+```csharp
+builder.Services.AddPixataBlazor();
+```
+
+This registers the following services (all from this package)...
+- MessageBrokerInstance - Used by the `MessageBroker`, which allows you to send messages between different components without them needing to know about each other.
+- NotificationHelper - [sample page](https://test.pixata.co.uk/Notifications)
+- PasswordOptionsHelper - If you app uses ASP.NET Core Identity, then it is helpful to show the user the password requirements (it's amazing how many sites don't do this, and wait until you've submitted the information before telling you that your password isn't strng enough!). Simple inject the component into a component, 
+- PersistentStateHelper - Persists data, avoiding hitting the database twice when a page loads. Used by the [ApiResponseView](https://test.pixata.co.uk/ApiResponseViewRegular), but can be used independently. .NET 10 supports this functionality with the [<code>[PersistentState]</code> attribute](https://learn.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-10.0?view=aspnetcore-10.0#declarative-model-for-persisting-state-from-components-and-services), but this component was written around .NET 8, and is still useful for projects targetting .NET versions before 10.
+- TemplateHelper - usage can be seen on the [Telerik grid sample page](https://test.pixata.co.uk/TelerikGrid), although the helper can be used with any component that supports templating
+
+Note that you need to do this in any `Program.cs` file, so if you have a mixed rendering mode (both server-side and client-side), you'll need to call `AddPixataBlazor` in both `Program.cs` files.
+
+It is a good idea to add this line **after** your own service registrations, as it checks for duplicate registrations. Therefore, if you have already registered any of the services, you will see a message in your console...
+
+>A service of type TemplateHelper has already been registered
+
+This isn't actually a problem, but removing the duplicate registration will keep the code file a bit cleaner.
+
+## Components
+
+Some general componets that I found useful.
+
+### PageTitleWithSiteName
+This snappily-named component allows you to set the page title, and have your site name automatically appended to it. It is intended to be used instead of the built-in `PageTitle` component, and relies on you setting the site name in your app settings...
+
+```json
+  "SiteName": "My Blazor Site"
+```
+
+Then `<PageTitleWithSiteName Title="Home" />` will set the page title to "Home - My Blazor Site".
+
+### HebrewDatePicker
+
+A date picker that allows you to select Hebrew dates.
+
 ## Containers
 
 These components are intended to wrap up other parts of your page, and add functionality.
@@ -158,7 +197,7 @@ Documentation coming soon...
 ## Forms
 A set of components for laying out forms. These come in two flavours, Bootstrap style, and floating label style.
 
-The [form page on the sample project]() shows examples of the Bootstrap style. A live sample of the Bootstrap style can be seen here... [live demo](https://test.pixata.co.uk/FormSample), [source code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor). You can see the full collection of components by checking the ones named `FormRowAbc` in [the Forms section of the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor/Forms).
+The [form page on the sample project]([link text](https://test.pixata.co.uk/FormSample)) shows examples of the Bootstrap style. A live sample of the Bootstrap style can be seen here... [live demo](https://test.pixata.co.uk/FormSample), [source code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor). You can see the full collection of components by checking the ones named `FormRowAbc` in [the Forms section of the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor/Forms).
 
 I hope to add a sample for the floating label style soon. The controls are...
 
