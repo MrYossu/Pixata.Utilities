@@ -4,17 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pixata.Blazor.Containers;
-using Pixata.Blazor.Extensions;
-using Pixata.Blazor.Notifications;
 using Pixata.Blazor.Sample.Data;
 using Pixata.Email;
 
 namespace Pixata.Blazor.Sample {
-  public class Startup {
-    public Startup(IConfiguration configuration) =>
-      Configuration = configuration;
-
-    public IConfiguration Configuration { get; }
+  public class Startup(IConfiguration configuration) {
+    public IConfiguration Configuration { get; } = configuration;
 
     // This method gets called by the runtime. Use this method to add services to the container.
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -25,10 +20,9 @@ namespace Pixata.Blazor.Sample {
       services.AddTelerikBlazor();
       SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>();
       services.AddSingleton(smtpSettings);
-      services.AddTransient<PixataEmailService>();
+      services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
       services.AddHttpClient();
-      services.AddTransient<NotificationHelper>();
-      services.AddScoped(typeof(PersistentStateHelper<>));
+      services.AddPixataBlazor();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
