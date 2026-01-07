@@ -1,0 +1,40 @@
+﻿@page "/Notifications"
+@using Pixata.Blazor.Notifications
+@using Pixata.Extensions
+@inject NotificationHelper NotificationHelper
+
+<h1>Notifications</h1>
+
+<p>You can send notifications around your app using the <code>NotificationHelper</code>. This page shows a very simple (and slightly pointess) example. Click the buttons below to see it in action.</p>
+
+<button @onclick="@Hello">Say hello</button>
+<button @onclick="@Oops">Oops!</button>
+
+<p class="mt-2">Error notifications will remain in view until the user clicks on them to dismiss them. Success notifications will be removed after 5 seconds, and other types wil be removed after 15 seconds.</p>
+
+<p>You can add custom behaviour for when the user clicks on the notification. The button below shows a notification that when clicked, will show the current time and date below the button...</p>
+
+<button @onclick="@Time">Show the time</button>
+<div>@_msg</div>
+
+<p class="mt-2">As mentioned above, this page is pointlessly simple. If you only want to show a notification in the current component, you wouldn't need this helper. The main use comes if you add the <code>NotificationArea</code> component elsewhere (say in your main layout component), then any component that injects a <code>NotificationHelper</code> can send a message, and it will be shown.</p>
+
+<NotificationArea NotificationHelper="@NotificationHelper" />
+
+@code {
+
+  private void Hello() =>
+    NotificationHelper.Send(NotificationType.Info, "Hello from Pixata.Blazor!", DateTime.Now);
+
+  private void Oops() =>
+    NotificationHelper.Send(NotificationType.Error, "Oops! Something went wrong.", DateTime.Now);
+
+  private string _msg = "";
+
+  private void Time() =>
+    NotificationHelper.Send(NotificationType.Info, "Click me to see the time", DateTime.Now, () => {
+      _msg = DateTime.Now.ToPrettyString(true);
+      StateHasChanged();
+    });
+
+}
