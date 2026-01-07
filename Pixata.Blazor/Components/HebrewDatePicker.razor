@@ -5,7 +5,35 @@
 <div class="hebrew-date-picker position-relative @Class" style="@WidthStyle">
   <div class="input-group">
     <input class="form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" readonly />
-    <button class="btn" style="background-color: #e4e7eb" type="button" @onclick="ToggleCalendar"><span class="@IconsHelper.Calendar"></span></button>
+    <button class="btn" style="background-color: #e4e7eb" type="button" @onclick="ToggleCalendar">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true">
+
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+
+        <circle cx="7.5" cy="14" r="0.75"></circle>
+        <circle cx="12" cy="14" r="0.75"></circle>
+        <circle cx="16.5" cy="14" r="0.75"></circle>
+
+        <circle cx="7.5" cy="18" r="0.75"></circle>
+        <circle cx="12" cy="18" r="0.75"></circle>
+        <circle cx="16.5" cy="18" r="0.75"></circle>
+      </svg>
+    </button>
   </div>
   @if (ShowDiagnostics) {
     <div class="mt-1"><small>@Diagnostics()</small></div>
