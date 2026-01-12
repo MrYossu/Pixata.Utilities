@@ -36,6 +36,29 @@ TelerikGridFilterResults data = await args.GetData<MyType>(/* args go here */)
 
 Not a major issue, but worth noting.
 
+## LocalisationHelper
+The Telerik Blazor components supply a default text for many situations. For example, if a grid does not contain any data, then it will show the rather geeky message "No records to display". Overriding these messages with your own text is not hard, but is now even easier with the `LocalisationHelper` class in this package.
+
+Basic usage is as simple as adding the following line to any <code>Program.cs</code> file in your app..
+
+```csharp
+builder.Services.AddSingleton(typeof(ITelerikStringLocalizer), typeof(LocalisationHelper));
+```
+
+However, that will only override two of the messages (the ones that annoy me the most)...
+
+- "No records to display" in grids now shows "Sorry, nothing matched your filters. Please widen your search criteria"
+- When binding a dropdown (or any component that allows filtering) to an <code>enum</code>, the first entry in the dropdown is changed from "Select a value" to "All" which I think is more sensible. It's also shorter, which is an advantage when your values are short.
+
+However, adding your own messages, or modifying my choice of the above is easy...
+
+```csharp
+LocalisationHelper.Values["DatePicker_Open"] = "Open Sesame";
+builder.Services.AddSingleton(typeof(ITelerikStringLocalizer), typeof(LocalisationHelper));
+```
+
+As the class is static, you only need to do this once.
+
 ## Warning
 The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can get a 30-day trial version from them.
 
