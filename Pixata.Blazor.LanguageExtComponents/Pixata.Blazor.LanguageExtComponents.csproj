@@ -27,11 +27,11 @@
     <PackageReference Include="LanguageExt.CodeGen" Version="4.4.8" PrivateAssets="all" />
     <PackageReference Include="CodeGeneration.Roslyn.BuildTime" Version="0.6.1" PrivateAssets="all" />
     <DotNetCliToolReference Include="dotnet-codegen" Version="0.6.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.22" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Icon\performance systeme OS.png" Pack="true" PackagePath="\"/>
+    <None Include="Icon\performance systeme OS.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 

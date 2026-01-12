@@ -18,12 +18,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Icon\Vroum Vroum.png" Pack="true" PackagePath="\"/>
+    <None Include="Icon\Vroum Vroum.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.22" />
   </ItemGroup>
 
 </Project>
