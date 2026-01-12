@@ -6,6 +6,8 @@ This package complements the [Pixata.Blazor package](https://github.com/MrYossu/
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents/) is available for this project.
 
+>Note that as of version 12.2.0, the major and minor package versions will correspond to the version of the Telerik.Blazor package that is required. The patch version will be used for updates to this package. The build number will indicate my own internal versioning. Thus, version 12.2.0 is based on the Telerik Blazor package version 12.2.x, where x is my own nicremental build number.
+
 ## The components
 ### Form components
 These were writen to make it quicker to create forms in Blazor. They are all very much based around Bootstrap, which I was using heavily when I wrote these components. If you look at the [form page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor) on the sample web site you can see the usage.)
