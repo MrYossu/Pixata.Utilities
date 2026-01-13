@@ -59,6 +59,8 @@ builder.Services.AddSingleton(typeof(ITelerikStringLocalizer), typeof(Localisati
 
 As the class is static, you only need to do this once.
 
+You can see a list of all messages on ([Telerik's web site](https://www.telerik.com/blazor-ui/documentation/api/telerik.blazor.resources.messages)).
+
 ## Warning
 The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can get a 30-day trial version from them.
 
