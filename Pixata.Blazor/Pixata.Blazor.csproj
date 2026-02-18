@@ -32,6 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Icon\avion.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
