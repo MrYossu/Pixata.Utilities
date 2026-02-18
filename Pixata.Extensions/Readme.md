@@ -62,6 +62,22 @@ Here is a brief description of the methods in the classes so far...
 `ToFileSizeString()` - Converts a byte count to a human-readable file size string (bytes, Kb, Mb, Gb, etc.) with configurable precision.
 
 ## StringExtensionMethods
+`JoinStr()` - Does the same as string.Join, but as an extension method, so it can be chained. Sample usage...
+```csharp
+List<int> nums = [1, 2, 3];
+string result = nums.JoinStr(); // result is "1, 2, 3"
+string result = nums.JoinStr(", ", n => $"Number {n}"); // result is "Number 1, Number 2, Number 3"
+```
+
+Takes an optional separator string (default is ", ").
+
+`JoinStrAnd()` - Joins the elements of a sequence into a single string, with "and" before the last element. Takes an optional function to convert each element to a string. Defaults to the element's `ToString()` method. Sample usage...
+```csharp
+List<int> nums = [1, 2, 3];
+string result = nums.JoinStrAnd(); // result is "1, 2 and 3"
+string result = nums.JoinStrAnd(", ", n => $"Number {n}"); // result is "Number 1, Number 2 and Number 3"
+```
+
 `SplitCamelCase()` - Splits a camel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums (although see below for variations of this method that work directly with enums). Takes an option `bool` parameter that specifies whether the second and subsequent words in the returned string should be lower case. Default is true.
 
 `SplitEnumCamelCase<T>()` - Splits an enum member name using camel case as the rule. For example, if you had an `enum` named `Aminals`, and it had a member named `JimSpriggs`, then `Animals.JimSpriggs.SplitEnumCamelCase()` would return "Jim Spriggs". Takes an option `bool` parameter  as above.

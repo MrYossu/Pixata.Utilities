@@ -18,6 +18,23 @@ namespace Pixata.Extensions {
       string.Join(separator, objs.Select(o => o.ToString()));
 
     /// <summary>
+    /// Joins the elements of a sequence into a single string, with "and" before the last element.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequence.</typeparam>
+    /// <param name="source">The sequence of elements to join.</param>
+    /// <param name="selector">An optional function to convert each element to a string. Defaults to the element's ToString() method.</param>
+    /// <returns>A string containing the joined elements, with "and" before the last element.</returns>
+    public static string JoinStrAnd<T>(this IEnumerable<T> source, Func<T, string>? selector = null) {
+      List<string> items = [.. source.Select(selector ?? (x => x?.ToString() ?? ""))];
+      return items.Count switch {
+        0 => "",
+        1 => items[0],
+        2 => $"{items[0]} and {items[1]}",
+        _ => $"{items[..^1].JoinStr()} and {items[^1]}"
+      };
+    }
+
+    /// <summary>
     /// Splits a CamelCase string into "Camel Case"
     /// </summary>
     /// <param name="str">The input string</param>
