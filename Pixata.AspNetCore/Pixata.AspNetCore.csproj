@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <Company>Pixata Ltd</Company>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Product>Pixata.AspNetCore</Product>
+    <Description>A set of reusable ASP.NET Core extensions that I found useful</Description>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
+    <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore</ProjectUrl>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore</RepositoryUrl>
+    <PackageIcon>ConnectionReseau.png</PackageIcon>
+    <PackageTags>C# ASP.NET Core</PackageTags>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pixata.Extensions\Pixata.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

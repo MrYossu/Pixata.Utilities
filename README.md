@@ -27,8 +27,15 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email).
 
+## Pixata.AspNetCore
+A small, but hopefully growing collectoin of utilities that I have found useful when writing ASP.NET Core web applications. These compliment the components in Pixata.Blazor, but as they are not Blazor-specific, are kept in a separate package.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore).
+
 ## Pixata.Blazor
-I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
+Over the years since I started using Blazor, I (like many others) have developed some components that I find myself reusing regularly. This project contains those components.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for this project.
 
