@@ -179,10 +179,10 @@ jobs:
        PROJECT_FILE_PATH: Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  
        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
-    - name: Publish Pixata.Blazor.LanguageExtComponents
+    - name: Publish Pixata.AspNetCore
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
-       PROJECT_FILE_PATH: Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  
+       PROJECT_FILE_PATH: Pixata.AspNetCore/Pixata.AspNetCore.csproj  
        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
     - name: Publish Pixata.Extensions
