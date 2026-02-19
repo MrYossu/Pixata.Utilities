@@ -56,15 +56,15 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
-    # Pixata.Blazor.LanguageExtComponents
-    - name: Restore - Pixata.Blazor.LanguageExtComponents Dependencies
-      run: dotnet restore Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configfile ./nuget.config
+    # Pixata.AspNetCore
+    - name: Restore - Pixata.AspNetCore Dependencies
+      run: dotnet restore Pixata.AspNetCore/Pixata.AspNetCore.csproj --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-    
-    - name: Build - Pixata.Blazor.LanguageExtComponents.csproj
-      run: dotnet build Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configuration Release --configfile ./nuget.config
+
+    - name: Build - Pixata.AspNetCore.csproj
+      run: dotnet build Pixata.AspNetCore/Pixata.AspNetCore.csproj --configuration Release --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
