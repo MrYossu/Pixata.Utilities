@@ -24,6 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Icon\ConnectionReseau.png" Pack="true" PackagePath="\" />
+    <None Include="Readme.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
   </ItemGroup>
