@@ -9,10 +9,10 @@ As the validation extension in this package is only designed to be used in serve
 The validation extension in this package requires services to be registered in the DI container. To make this easier, you can use the `AddPixataAspNetCore` extension method in your `Program.cs` file:
 
 ```csharp
-builder.Services.AddPixataAspNetCore<ContactModelValidator>();
+builder.Services.AddPixataAspNetCore<ContactModel>();
 ```
 
-...where `ContactModelValidator` is any model, it is used here to point the framework to the assembly containing your models.
+...where `ContactModel` is any model, it is used here to point the framework to the assembly containing your models.
 
 ## ValidationEndpointFilter
 When using fluent validation in Blazor server-side, the chances of anyone bypassing your validation are small enough that they can be ignored for most cases. However, when running in client-side (WASM), validation is handled in the WASM, and the data is then sent to the server via API endpoints. This means that anyone can modify the request, or write a script to mimic it, and bypass your validation.
