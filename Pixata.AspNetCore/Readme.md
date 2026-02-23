@@ -1,6 +1,6 @@
 # Pixata.AspNetCore [![Pixata.AspNetCore Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore)](https://www.nuget.org/packages/Pixata.AspNetCore/)
 
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.AspNetCore/Icon/ConnectionReseau.png "Pixata") 
+![Pixata](Icon/ConnectionReseau.png "Pixata") 
 
 ## Important
 As the validation extension in this package is only designed to be used in server-side projects, you should reference this paclage in a server-side project. If you have a WASM project, adding a reference to this package will cause errors.

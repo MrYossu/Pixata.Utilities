@@ -9,7 +9,7 @@
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Blazor.TelerikComponents</Product>
     <Description>A set of reusable Blazor components that rely on the Blazor components produced by Telerik. This compliments the Pixata.Blazor package</Description>
-    <Copyright>Copyright 2022 Pixata Ltd</Copyright>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</RepositoryUrl>
@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Icon\mail old school.png" Pack="true" PackagePath="\" />
+    <None Include="MailOldSchool.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 

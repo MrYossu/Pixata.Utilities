@@ -12,13 +12,13 @@
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email</RepositoryUrl>
-    <Copyright>Copyright 2023 Pixata Ltd</Copyright>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# email mailkit</PackageTags>
     <PackageIcon>mail.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Icon\mail.png" Pack="true" PackagePath="\"/>
+    <None Include="mail.png" Pack="true" PackagePath="\"/>
     <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 

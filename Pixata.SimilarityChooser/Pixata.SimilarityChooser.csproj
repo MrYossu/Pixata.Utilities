@@ -12,7 +12,7 @@
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser</RepositoryUrl>
-    <Copyright>Copyright 2021 Pixata Ltd</Copyright>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# extension-methods</PackageTags>
     <PackageIcon>recherche.png</PackageIcon>
   </PropertyGroup>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Icon\recherche.png" Pack="true" PackagePath="\"/>
+    <None Include="recherche.png" Pack="true" PackagePath="\"/>
     <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 

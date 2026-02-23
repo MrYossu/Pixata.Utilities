@@ -12,13 +12,13 @@
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</RepositoryUrl>
-    <Copyright>Copyright 2023 Pixata Ltd</Copyright>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# extension-methods</PackageTags>
     <PackageIcon>Vroum Vroum.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Icon\Vroum Vroum.png" Pack="true" PackagePath="\" />
+    <None Include="VroumVroum.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 
