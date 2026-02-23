@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>2.2.0</Version>
-    <AssemblyVersion>2.2.0</AssemblyVersion>
-    <FileVersion>2.2.0</FileVersion>
+    <Version>2.2.1</Version>
+    <AssemblyVersion>2.2.1</AssemblyVersion>
+    <FileVersion>2.2.1</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Extensions</Product>
@@ -12,14 +12,14 @@
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</RepositoryUrl>
-    <Copyright>Copyright 2023 Pixata Ltd</Copyright>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# extension-methods</PackageTags>
     <PackageIcon>Vroum Vroum.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Icon\Vroum Vroum.png" Pack="true" PackagePath="\" />
-    <None Include="Readme.md" Pack="true" PackagePath="\" />
+    <None Include="VroumVroum.png" Pack="true" PackagePath="\" />
+    <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

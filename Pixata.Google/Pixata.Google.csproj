@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>2.9</Version>
-    <AssemblyVersion>2.9</AssemblyVersion>
-    <FileVersion>2.9</FileVersion>
+    <Version>2.9.1</Version>
+    <AssemblyVersion>2.9.1</AssemblyVersion>
+    <FileVersion>2.9.1</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Google</Product>
@@ -12,7 +12,7 @@
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Google</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Google</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Google</RepositoryUrl>
-    <Copyright>Copyright 2022 Pixata Ltd</Copyright>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# Google</PackageTags>
     <PackageIcon>PixataGoogle.png</PackageIcon>
   </PropertyGroup>
@@ -25,8 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Icon\PixataGoogle.png" Pack="true" PackagePath="\"/>
-    <None Include="Readme.md" Pack="true" PackagePath="\" />
+    <None Include="PixataGoogle.png" Pack="true" PackagePath="\"/>
+    <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 
 </Project>
