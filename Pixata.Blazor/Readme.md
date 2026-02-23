@@ -1,6 +1,6 @@
 # Pixata.Blazor [![Pixata.Blazor Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor)](https://www.nuget.org/packages/Pixata.Blazor/)
 
-![Pixata](Icon/avion.png "Pixata") 
+![Pixata](avion.png "Pixata") 
 
 I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
 
