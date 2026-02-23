@@ -1,6 +1,6 @@
 # Pixata.Google [![Pixata.Google Nuget package](https://img.shields.io/nuget/v/Pixata.Google)](https://www.nuget.org/packages/Pixata.Google/)
 
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Google/Icon/PixataGoogle.png "Pixata")
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Google/PixataGoogle.png "Pixata")
 
 This project contains utility code for working with Google's APIs. At the moment, it only contains one class, but I'll refer to "classes" (in the plural) below, as I will hopefully add more as time goes on.
 

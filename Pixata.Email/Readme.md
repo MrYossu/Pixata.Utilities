@@ -1,6 +1,6 @@
 ﻿# Pixata.Email [![Pixata.Email Nuget package](https://img.shields.io/nuget/v/Pixata.Email)](https://www.nuget.org/packages/Pixata.Email/)
 
-![Pixata](mail.png "Pixata") 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Email/mail.png "Pixata") 
 
 An email service for use in .NET Core projects. Backed by Mailkit, it eases the effort needed to add email facilities to your project.
 
