@@ -14,7 +14,7 @@
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</RepositoryUrl>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# extension-methods</PackageTags>
-    <PackageIcon>Vroum Vroum.png</PackageIcon>
+    <PackageIcon>VroumVroum.png</PackageIcon>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 
