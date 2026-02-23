@@ -1,6 +1,6 @@
 # Pixata.Extensions [![Pixata.Extensions Nuget package](https://img.shields.io/nuget/v/Pixata.Extensions)](https://www.nuget.org/packages/Pixata.Extensions/)
 
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Extensions/Icon/Vroum%20Vroum.png "Pixata") 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Extensions/VroumVroum.png "Pixata") 
 
 Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time.
 

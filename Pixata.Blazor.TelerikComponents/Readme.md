@@ -1,6 +1,6 @@
 ﻿# Pixata.Blazor.TelerikComponents [![Pixata.Blazor.TelerikComponents Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor.TelerikComponents)](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents/)
 
-![Pixata](MailOldSchool.png "Pixata") 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor.TelerikComponents/MailOldSchool.png "Pixata") 
 
 This package complements the [Pixata.Blazor package](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/), and adds components that rely on the Telerik components for Blazor. These were split off into their own package to enable those without a licence for Telerik to use the other components.
 
