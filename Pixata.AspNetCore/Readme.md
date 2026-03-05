@@ -5,14 +5,39 @@
 ## Important
 As the validation extension in this package is only designed to be used in server-side projects, you should reference this paclage in a server-side project. If you have a WASM project, adding a reference to this package will cause errors.
 
-## Registering dependencies
-The validation extension in this package requires services to be registered in the DI container. To make this easier, you can use the `AddPixataAspNetCore` extension method in your `Program.cs` file:
+## RequestLoggingMiddleware
+When writing API endpoints, it can be hard to debug 400 errors, which are often caused by incorrect or mismatched paths, or invalid data in the request. You often don't get much clue as to what actually happened.
 
+To help with this, I have added a piece of middleware that will log every incoming request to the app (subject to configuration choices, see below). This will log the path, the query string, and the body of the request. This can be very helpful for debugging, as it allows you to see exactly what was sent to the server.
+
+You need to register the middleware in your `Program.cs` file, as follows...
 ```csharp
-builder.Services.AddPixataAspNetCore<ContactModel>();
+builder.Services.AddRequestLogging();
 ```
 
-...where `ContactModel` is any model, it is used here to point the framework to the assembly containing your models.
+This will use the default configuration, which is to include the request body in the logging, and ignore any requests whose path starts with any of...
+
+- "_framework"
+- "_blazor"
+- "_content"
+- ".well-known"
+
+You can override either of these options as follows...
+```csharp
+builder.Services.AddRequestLogging(o => {
+  o.IgnoredPaths = ["_framework", "health"]; // Or whatever you want to ignore
+  o.LogBody = false;
+});
+```
+
+To log all requests, set `o.IgnoredPaths` to an empty array `[]`.
+
+You then need to register the middleware...
+```csharp
+app.UseRequestLogging();
+```
+
+This should be after any authentication/authorisation middleware, but before any endpoint mapping.
 
 ## ValidationEndpointFilter
 When using fluent validation in Blazor server-side, the chances of anyone bypassing your validation are small enough that they can be ignored for most cases. However, when running in client-side (WASM), validation is handled in the WASM, and the data is then sent to the server via API endpoints. This means that anyone can modify the request, or write a script to mimic it, and bypass your validation.
@@ -20,6 +45,14 @@ When using fluent validation in Blazor server-side, the chances of anyone bypass
 The obvious (and correct) solution to this is to validate your incoming models on the server before doing anything with the data. Generally, this is a bit of a pain, as it involves duplicating validation code.
 
 To avoid this, you can add the `ValidationEndpointFilter` to your API endpoints. This will run the same validation as in the client, but on the server, so if anyone tries to bypass the client-side validation, they will be stopped by the server-side validation. This allows you to protect your endpoints without adding much extra code.
+
+The validation extension requires services to be registered in the DI container. To make this easier, you can use the `AddPixataAspNetCore` extension method in your `Program.cs` file:
+
+```csharp
+builder.Services.AddPixataAspNetCore<ContactModel>();
+```
+
+...where `ContactModel` is any model, it is used here to point the framework to the assembly containing your models.
 
 Basic usage is very simple. Once you've registered the dependencies (see above), you just add the `AddEndpointFilter` extension method to any API endpoints that need validation.
 
