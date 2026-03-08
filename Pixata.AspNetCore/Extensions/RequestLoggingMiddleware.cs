@@ -19,7 +19,7 @@ public class RequestLoggingMiddleware(RequestDelegate next, IOptions<RequestLogg
         ? await ReadBodyAsync(context.Request)
         : "(not logged)";
 
-      logger.LogInformation("HTTP {Method} {Path}{QueryString}\nHeaders: {Headers}\nBody: {Body}\n", context.Request.Method, context.Request.Path, context.Request.QueryString, FormatHeaders(context.Request.Headers), body);
+      logger.LogInformation($"HTTP {{Method}} {{Path}}{{QueryString}}{Environment.NewLine}Headers: {{Headers}}{Environment.NewLine}Body: {{Body}}{Environment.NewLine}", context.Request.Method, context.Request.Path, context.Request.QueryString, FormatHeaders(context.Request.Headers), body);
 
       context.Request.Body.Position = 0;
     }
