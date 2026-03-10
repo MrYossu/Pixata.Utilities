@@ -3,21 +3,21 @@
   <label class="col-lg-2 col-form-label" for="@PropertyName1">@Caption</label>
   <div class="col-lg-10 input-group">
     <div class="input-group-prepend">
-      <span class="input-group-text">
+      <span class="input-group-text h-100">
         <i class="@Icon"></i>
       </span>
     </div>
     <input class="form-control @_invalid1" Value="@Value1" type="text" id="@PropertyName1" name="@PropertyName1" @onchange="@OnChanged1" @attributes="Attributes1" />
     <div class="input-group-append">
       @if (_showValidationMsg1) {
-        <div class="input-group-text has-error">
+        <div class="input-group-text has-error h-100">
           <ValidationMessage For="@Value1Expression" />
         </div>
       }
     </div>
     <input class="form-control @_invalid2" Value="@Value2" type="text" id="@PropertyName2" name="@PropertyName2" @onchange="@OnChanged2" @attributes="Attributes2" />
     <div class="input-group-append">
-      <div class="input-group-text has-error">
+      <div class="input-group-text has-error h-100">
         @if (_showValidationMsg2) {
           <ValidationMessage For="@Value2Expression" />
         }

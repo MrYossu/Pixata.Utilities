@@ -3,13 +3,13 @@
   <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
   <div class="col-lg-10 input-group">
     <div class="input-group-prepend">
-      <span class="input-group-text">
+      <span class="input-group-text h-100">
         <i class="@Icon"></i>
       </span>
     </div>
     <input class="form-control @_invalid" Value="@Value" type="text" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" @attributes="Attributes" />
     <div class="input-group-append">
-      <div class="input-group-text has-error">
+      <div class="input-group-text has-error h-100">
         @if (_showValidationMsg) {
           <ValidationMessage For="@ValueExpression" />
         }
