@@ -2,7 +2,7 @@
   <label class="col-lg-2 col-form-label" for="@PropertyNameTitle">@Caption</label>
   <div class="col-lg-10 input-group">
     <div class="input-group-prepend">
-      <span class="input-group-text">
+      <span class="input-group-text h-100">
         <i class="@Icon"></i>
       </span>
     </div>
@@ -10,7 +10,7 @@
     <input class="form-control @_invalid1" Value="@ValueTitle" type="text" id="@PropertyNameTitle" name="@PropertyNameTitle" @onchange="@OnChangedTitle" placeholder="Title" style="max-width: 90px"/>
     @if (_showValidationMsgTitle) {
       <div class="input-group-append">
-        <div class="input-group-text has-error">
+        <div class="input-group-text has-error h-100">
           <ValidationMessage For="@ValueTitleExpression" />
         </div>
       </div>
@@ -19,7 +19,7 @@
     <input class="form-control @_invalid2" Value="@ValueFirstName" type="text" id="@PropertyNameFirstName" name="@PropertyNameFirstName" @onchange="@OnChangedFirstName" placeholder="First name" />
     @if (_showValidationMsgFirstName) {
       <div class="input-group-append">
-        <div class="input-group-text has-error">
+        <div class="input-group-text has-error h-100">
           <ValidationMessage For="@ValueFirstNameExpression" />
         </div>
       </div>
@@ -27,7 +27,7 @@
 
     <input class="form-control @_invalid3" Value="@ValueSurname" type="text" id="@PropertyNameSurname" name="@PropertyNameSurname" @onchange="@OnChangedSurname" placeholder="Surname" />
     <div class="input-group-append">
-      <div class="input-group-text has-error">
+      <div class="input-group-text has-error h-100">
         @if (_showValidationMsgSurname) {
           <ValidationMessage For="@ValueSurnameExpression" />
         }
