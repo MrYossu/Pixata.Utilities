@@ -32,6 +32,11 @@
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if(firstRender) {
       await _apiResponseView.Do(GetData, n => _number = n);
+    } else {
+      await _apiResponseView.Do(GetData, async n => {
+        await Task.Delay(1000);
+        _number = n;
+      });
     }
   }
 
