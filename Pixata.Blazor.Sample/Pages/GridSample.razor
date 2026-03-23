@@ -35,7 +35,7 @@
     <GridColumn Field="@nameof(WeatherForecast.TemperatureF)" Template="@(_templateHelper.Text<WeatherForecast>(f => f.TemperatureF.ToString(), "text-align: right"))" Title="Temp (F)" />
     <GridColumn Field="@nameof(WeatherForecast.Rain)" Width="100px"
                 Title="Rain?"
-                FilterCellTemplate="@_lockedFilter.BuildTemplate()"
+                FilterCellTemplate="@TelerikGridBoolFilter.Filter()"
                 Template="@(_templateHelper.Text<WeatherForecast>(f => f.Rain ? "<img src='/rain.png' width='24' >" : "<img src='/sun.png' width='24' >", "text-align: center"))" />
     <GridColumn Field="@nameof(WeatherForecast.Rain)" Width="200px"
                 Title="Rain default" />
@@ -44,11 +44,9 @@
 </TelerikGrid>
 
 <TemplateHelper @ref="@_templateHelper" />
-<TelerikGridBoolFilter @ref="@_lockedFilter" />
 
 @code {
   private static TemplateHelper _templateHelper = null!;
-  TelerikGridBoolFilter _lockedFilter = null!;
 
   private List<WeatherForecast> _forecasts = new();
 
