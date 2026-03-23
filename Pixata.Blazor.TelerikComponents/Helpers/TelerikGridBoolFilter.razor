@@ -1,46 +1,64 @@
 ﻿@using Telerik.DataSource
+<div class="@Class">
+  <TelerikCheckBox Value="@_value"
+                   ValueChanged="@(async (bool? val) => await OnValueChanged(val))"
+                   Indeterminate="@(_value == null)" />
+  @if (ShowClearButton) {
+    <TelerikButton ButtonType="ButtonType.Button"
+                   Size="@ThemeConstants.Button.Size.Medium"
+                   Class="ms-2"
+                   Enabled="@(_value != null)"
+                   OnClick="@ClearFilter">
+      <svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18px" height="18px">
+        <path d="m143.5 64 168.2 168.2L288 256v160l-64 64V256L64 96V64zm236.1 100.4L448 96V64H279.3l-64-64L192 22l298 298 22-23.3z"></path>
+      </svg>
+    </TelerikButton>
+  }
+</div>
 
 @code {
 
-  public RenderFragment<FilterCellTemplateContext> BuildTemplate() =>
-    context => __builder => {
-      BoolFilterContext = context;
-      <TelerikCheckBox @bind-Value="@IsTrue"
-                       Indeterminate="@(!IsTrue.HasValue)"
-                       OnChange="@SetupFilter"
-                       Class="mt-1">
-      </TelerikCheckBox>
-      <TelerikButton ButtonType="ButtonType.Button"
-                     Class="k-clear-button-visible ml-2"
-                     Enabled="@IsTrue.HasValue"
-                     OnClick="@ClearBoolFilter">
-        X
-      </TelerikButton>
-    };
+  [Parameter]
+  public FilterCellTemplateContext Context { get; set; } = null!;
 
-  public FilterCellTemplateContext BoolFilterContext { get; set; } = null!;
-  public bool? IsTrue { get; set; }
+  [Parameter]
+  public string Class { get; set; } = "mx-auto";
 
-  public async Task ClearBoolFilter() {
-    IsTrue = null;
-    await BoolFilterContext.ClearFilterAsync();
+  [Parameter]
+  public bool ShowClearButton { get; set; }
+
+  private bool? _value;
+
+  private async Task OnValueChanged(bool? val) {
+    _value = _value == false && val == true ? null : val;
+    await ApplyFilter();
   }
 
-  public async Task SetupFilter() {
-    if (BoolFilterContext != null && !IsTrue.HasValue) {
-      await BoolFilterContext.ClearFilterAsync();
+  private async Task ApplyFilter() {
+    FilterDescriptor filter = (Context.FilterDescriptor.FilterDescriptors[0] as FilterDescriptor)!;
+    if (_value == null) {
+      await Context.ClearFilterAsync();
     } else {
-      if (BoolFilterContext?.FilterDescriptor?.FilterDescriptors != null
-          && BoolFilterContext.FilterDescriptor.FilterDescriptors.Any()
-          && BoolFilterContext.FilterDescriptor.FilterDescriptors[0] is FilterDescriptor) {
-        FilterDescriptor? filterRule = BoolFilterContext.FilterDescriptor.FilterDescriptors[0] as FilterDescriptor;
-        if (filterRule != null) {
-          filterRule.Value = IsTrue != null && IsTrue.Value;
-          filterRule.Operator = FilterOperator.IsEqualTo;
-          await BoolFilterContext.FilterAsync();
-        }
-      }
+      filter.Value = _value.Value;
+      filter.Operator = FilterOperator.IsEqualTo;
+      await Context.FilterAsync();
     }
+  }
+
+  private async Task ClearFilter() {
+    _value = null;
+    await Context.ClearFilterAsync();
+  }
+
+  public static RenderFragment<FilterCellTemplateContext> Filter(bool showClearButton = false) {
+    if (showClearButton) {
+      return context => __builder => {
+        <TelerikGridBoolFilter Context="context" ShowClearButton="true" />
+      };
+    }
+    return context => __builder => {
+      <TelerikGridBoolFilter Context="context" />
+    };
   }
 
 }
