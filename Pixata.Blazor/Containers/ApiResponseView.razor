@@ -16,7 +16,9 @@
 
 @switch (_apiResponse.State) {
   case ApiResponseStates.Loading:
-    @Loader(yunit)
+    if (!HideNonSuccess) {
+      @Loader(yunit)
+    }
     break;
 
   case ApiResponseStates.Success:
@@ -29,23 +31,31 @@
     break;
 
   case ApiResponseStates.NotFound:
-    @NotFound(yunit)
+    if (!HideNonSuccess) {
+      @NotFound(yunit)
+    }
     break;
 
   case ApiResponseStates.Failure:
-    @if (_apiResponse.Message.Contains($"{HttpStatusCode.Unauthorized}")) {
-      @RequiresLogIn(_apiResponse.Message)
-    } else {
-      @Failure(_apiResponse.Message)
+    if (!HideNonSuccess) {
+      if (_apiResponse.Message.Contains($"{HttpStatusCode.Unauthorized}")) {
+        @RequiresLogIn(_apiResponse.Message)
+      } else {
+        @Failure(_apiResponse.Message)
+      }
     }
     break;
 
   case ApiResponseStates.HttpFailure:
-    @HttpFailure(_apiResponse.Message)
+    if (!HideNonSuccess) {
+      @HttpFailure(_apiResponse.Message)
+    }
     break;
 
   case ApiResponseStates.ServiceUnavailable:
-    @ServiceUnavailable(yunit)
+    if (!HideNonSuccess) {
+      @ServiceUnavailable(yunit)
+    }
     break;
 }
 
@@ -101,6 +111,9 @@
 
   [Parameter]
   public bool ManualLoading { get; set; }
+
+  [Parameter]
+  public bool HideNonSuccess { get; set; }
 
   private bool _manualLoadingComplete;
 
