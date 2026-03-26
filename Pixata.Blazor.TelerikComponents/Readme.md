@@ -17,7 +17,7 @@ Whilst the Telerik Blazor grid does an amazing job, it has its limitations. One 
 
 I had a play with Dapper, which improved matters significantly, and then found out that I could do the same with pure EF Core, without any extra packages. I wrapped up the code into an extension method for `GridReadEventArgs`, which you can call from the `OnRead` event of the grid. In the project that motivated this code, I managed to reduce the time taken for the grid to load from over 10 seconds to around 400 milliseconds 😎.
 
-There is a [sample repo](https://github.com/MrYossu/TelerikGridWithFromSql) that shows the method in usage, and [a blog post that explain the usage](https://www.pixata.co.uk/2024/10/08/hmm-maybe-ef-core-isnt-so-bad-after-all/) (with far too many anecdotes and rambling). If you are bored, that post links to two previous posts that detail my journey to this extension method.
+There is a [sample repo](https://github.com/MrYossu/TelerikGridWithFromSql) that shows the method in usage, and [a blog post that explain the usage](https://www.pixata.co.uk/2024/10/09/using-the-ef-core-fromsqlraw-method-in-a-telerik-blazor-grid/) (with far too many anecdotes and rambling). If you are bored, that post links to two previous posts that detail my journey to this extension method.
 
 Note that as from version 2.0.0 of the package, the method allows you to query a table-valued function as well as a table or view.
 
