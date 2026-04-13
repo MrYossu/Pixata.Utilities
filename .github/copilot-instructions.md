@@ -1,4 +1,6 @@
-﻿## Code guidelines
+﻿
+
+## Code guidelines
 
 - File-scoped namespaces should always be used
 - Primary constructors should be used whenever possible
