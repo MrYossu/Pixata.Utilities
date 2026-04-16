@@ -6,7 +6,7 @@ Some useful utility classes and methods I've developed over the past few years. 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
 
-Here is a brief description of the methods in the classes so far...
+Here is a brief description of the methods in the classes so far (alphabetically by class name):
 
 ## CollectionExtensionMethods
 `ToObservableCollection<T>()` - Converts any collection that implements IEnumerable<T> into an ObservableCollection<T>. Provides a neater syntax than passing the collection to the `ObservableCollection`'s constructor.
@@ -43,6 +43,46 @@ Here is a brief description of the methods in the classes so far...
 `Messages()` - Similar to `MessageStack` but returns only the messages (no stack traces). An overload accepts a `separator` string; the default is `Environment.NewLine`.
 
 `InnerType()` - Returns the type name of the innermost exception.
+
+## MemoryCacheExtensions
+If you aren't caching your data, then I strongly recommend you watch [this short video](https://www.youtube.com/watch?v=Q49SZlxskjs) before reading on! It's by no means the only video out there, but it's short, clear and shows the benefits of caching in a very compelling way.
+
+For people developing big sites, who are probably using a distributed cache, then the .NET `HybridCache` is ideal. However, for most of us, who develop single-instance apps, this is not necessary, and can be a suboptimal choice due to the extra implicit behaviour you must understand, less obvious performance characteristics and a framework-level dependency. For most of us, the `IMemoryCache` is a better choice.
+
+The one major advantage that the hybrid cache has even for smaller apps is that it has a built-in mechanism to avoid cache stampede protection, meaning that if multiple requests come in for the same uncached item, only one of them will trigger the expensive data retrieval operation, and the others will wait for the result to be cached. If you use a memory cache, you need to implemnent this yourself, which is not hard, but adds extra noise to your code.
+
+The class here adds a `GetOrCreateSafe()` extension method to `IMemoryCache` to provide a simple way to add cache stampede protection, with no more code than you would have anyway. It is intended to replace the regular `GetOrCreate()` method. Basic usage is as follows...
+
+```csharp
+Product? product = await cache.GetOrCreateSafe($"product-{id}",
+                                               async _ => await dbContext.Products.SingleOrDefault(p => p.Id == id),
+                                               TimeSpan.FromMinutes(10));
+```
+
+In reality, you should store your cache keys in a centralised place, and not hard-code them like this, but this was kept simple to show the syntax.
+
+The lambda includes a cancellation token (which is ignored in the above example), which can be passed through if needed...
+
+```csharp
+Product? product = await cache.GetOrCreateSafe($"product-{id}",
+                                               async ct => await repository.GetByIdAsync(id, ct),
+                                               TimeSpan.FromMinutes(5));
+```
+
+Instead of caching database entities (which can be large, and are not always ideal candidates for caching), you can convert to DTos and cache those...
+
+```csharp
+ProductDto? dto = await cache.GetOrCreateSafe($"product-{id}",
+                                              async ct => {
+                                                Product entity = await repository.GetByIdAsync(id, ct);
+                                                return new ProductDto {
+                                                  Id = entity.Id,
+                                                  Name = entity.Name,
+                                                  Price = entity.Price
+                                                };
+                                              },
+                                              TimeSpan.FromMinutes(10)
+```
 
 ## NumberExtensionMethods
 `OrdinalSuffix()` - Returns the ordinal suffix, eg "st" for 1, 21, 31, etc, "nd" for 2, 22, etc, "rd" for 3, 23, etc and "th" for most other numbers. Has an optional parameter that controls whether the returned string includes the number itself (e.g. "1st") or only the suffix (e.g. "st").

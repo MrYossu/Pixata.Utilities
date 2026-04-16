@@ -15,7 +15,7 @@ public static class MemoryCacheExtensions {
 
   private static readonly ConcurrentDictionary<string, LockState> Locks = new();
 
-  public static async Task<T> GetOrCreateSafeAsync<T>(this IMemoryCache cache, string key, Func<CancellationToken, Task<T>> factory, TimeSpan? ttl = null, CancellationToken cancellationToken = default) {
+  public static async Task<T> GetOrCreateSafe<T>(this IMemoryCache cache, string key, Func<CancellationToken, Task<T>> factory, TimeSpan? ttl = null, CancellationToken cancellationToken = default) {
     if (cache.TryGetValue(key, out T cached)) {
       return cached;
     }
@@ -30,6 +30,7 @@ public static class MemoryCacheExtensions {
       }
 
       T value = await factory(cancellationToken);
+
       MemoryCacheEntryOptions options = new();
 
       if (ttl.HasValue) {
@@ -37,10 +38,11 @@ public static class MemoryCacheExtensions {
       }
 
       cache.Set(key, value, options);
+
       return value;
-    }
-    finally {
+    } finally {
       state.Semaphore.Release();
+
       if (Interlocked.Decrement(ref state.RefCount) == 0) {
         Locks.TryRemove(new KeyValuePair<string, LockState>(key, state));
         state.Semaphore.Dispose();
