@@ -69,7 +69,7 @@ Product? product = await cache.GetOrCreateSafe($"product-{id}",
                                                TimeSpan.FromMinutes(5));
 ```
 
-Instead of caching database entities (which can be large, and are not always ideal candidates for caching), you can convert to DTos and cache those...
+Instead of caching database entities (which can be large, and are not always ideal candidates for caching), you can convert to DTOs and cache those...
 
 ```csharp
 ProductDto? dto = await cache.GetOrCreateSafe($"product-{id}",
