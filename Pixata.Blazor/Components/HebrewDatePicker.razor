@@ -73,8 +73,10 @@
                 DateTime greg = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, 0, 0, 0, 0);
                 bool isToday = greg.Date == DateTime.Today;
                 bool isSelected = IsSelectedDate(greg.Date);
+                HebrewDateType hebrewDateType = GetHebrewDateType(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, greg);
+                string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
                 <div class="text-end">
-                  <button type="button" class="btn btn-sm @(isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light")" @onclick="() => SelectHebrewDay(hebDay.Value)">@hebDay.Value</button>
+                  <button type="button" class="btn btn-sm @dayClass" style="@GetDayStyle(hebrewDateType, isSelected, isToday)" @onclick="() => SelectHebrewDay(hebDay.Value)">@hebDay.Value</button>
                 </div>
               } else {
                 <div></div>
@@ -120,6 +122,9 @@
 
   [Parameter]
   public bool ShowDiagnostics { get; set; }
+
+  [Parameter]
+  public bool IncludeOtherNonWorkDays { get; set; }
 
   private readonly HebrewCalendar _hc = new();
   private int _hebrewYear;
@@ -411,6 +416,81 @@
       Value = (TValue?)(object?)newValue;
       await ValueChanged.InvokeAsync(Value);
     }
+  }
+
+  private HebrewDateType GetHebrewDateType(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
+    if (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay)) {
+      return HebrewDateType.ShabbosOrYomTov;
+    }
+    if (IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay)) {
+      return HebrewDateType.OtherNonWorkDay;
+    }
+    return HebrewDateType.None;
+  }
+
+  private bool IsYomTov(int hebrewYear, int hebrewMonth, int hebrewDay) {
+    int nissanMonth = GetNissanMonth(hebrewYear);
+    int sivanMonth = nissanMonth + 2;
+    if (hebrewMonth == nissanMonth && (hebrewDay == 15 || hebrewDay == 16 || hebrewDay == 21 || hebrewDay == 22)) {
+      return true; // Pesach (diaspora)
+    }
+    if (hebrewMonth == sivanMonth && (hebrewDay == 6 || hebrewDay == 7)) {
+      return true; // Shavuos (diaspora)
+    }
+    if (hebrewMonth != 1) {
+      return false;
+    }
+    return hebrewDay == 1   // Rosh Hashona day 1
+      || hebrewDay == 2     // Rosh Hashona day 2
+      || hebrewDay == 10    // Yom Kipur
+      || hebrewDay == 15    // Succos day 1
+      || hebrewDay == 16    // Succos day 2
+      || hebrewDay == 22    // Shemini Atzeres
+      || hebrewDay == 23;   // Simchas Torah
+  }
+
+  private bool IsOtherNonWorkDay(int hebrewYear, int hebrewMonth, int hebrewDay) {
+    int nissanMonth = GetNissanMonth(hebrewYear);
+    if (hebrewMonth == nissanMonth && hebrewDay >= 17 && hebrewDay <= 20) {
+      return true; // Chol Hamoed Pesach
+    }
+    if (hebrewMonth == 1 && hebrewDay >= 17 && hebrewDay <= 21) {
+      return true; // Chol Hamoed Succos
+    }
+    int avMonth = nissanMonth + 4;
+    if (hebrewMonth == avMonth && (hebrewDay == 9 || IsPostponedTishaBav(hebrewYear, hebrewMonth, hebrewDay))) {
+      return true; // Tisha B'av
+    }
+    int purimMonth = _hc.IsLeapYear(hebrewYear) ? 7 : 6;
+    return hebrewMonth == purimMonth && hebrewDay == 14; // Purim
+  }
+
+  private bool IsPostponedTishaBav(int hebrewYear, int hebrewMonth, int hebrewDay) {
+    if (hebrewDay != 10) {
+      return false;
+    }
+    DateTime tishaBav = _hc.ToDateTime(hebrewYear, hebrewMonth, 9, 0, 0, 0, 0);
+    return tishaBav.DayOfWeek == DayOfWeek.Saturday;
+  }
+
+  private int GetNissanMonth(int hebrewYear) =>
+    _hc.GetMonthsInYear(hebrewYear) == 13 ? 8 : 7;
+
+  private string GetDayStyle(HebrewDateType hebrewDateType, bool isSelected, bool isToday) {
+    if (isSelected || isToday) {
+      return "";
+    }
+    return hebrewDateType switch {
+      HebrewDateType.ShabbosOrYomTov => "background-color: #e4e7eb;",
+      HebrewDateType.OtherNonWorkDay => "background-color: #f1f3f5;",
+      _ => "",
+    };
+  }
+
+  private enum HebrewDateType {
+    None,
+    ShabbosOrYomTov,
+    OtherNonWorkDay,
   }
 
 }
