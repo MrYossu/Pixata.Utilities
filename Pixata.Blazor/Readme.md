@@ -54,7 +54,7 @@ It highlights Shabbos and these non-Israeli Yomim Tovim with a light grey backgr
 - Pesach (days 1, 2, 7, 8)
 - Shavuos (days 1, 2)
 - Rosh Hashona (days 1, 2)
-- Yom Kipur
+- Yom Kippur
 - Succos, including Shemini Atzeres and Simchas Torah
 
 You can also set `IncludeOtherNonWorkDays="true"` to highlight Chol Hamoed, Tisha B'av and Purim in a slightly lighter grey.
