@@ -1,6 +1,4 @@
 ﻿@typeparam TValue
-@using System.Globalization
-@using System.Linq
 
 <div class="hebrew-date-picker position-relative @Class" style="@WidthStyle">
   <div class="input-group">
@@ -49,7 +47,7 @@
             <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
           </svg>
         </button>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-1">
           <strong>@_displayHebrewMonthName</strong>
           <select class="form-select form-select-sm" style="width: 120px;" @bind="DisplayHebrewYear">
             @foreach (int y in Years) {
@@ -74,7 +72,7 @@
           <div>&#x05E9;</div>
         </div>
         @foreach (int?[] week in HebrewCalendarWeeks()) {
-          <div class="mt-1" style="display: grid; grid-template-columns: repeat(7, 1fr); direction: rtl; gap: .5rem;">
+          <div class="mt-1" style="display: grid; grid-template-columns: repeat(7, 1fr); direction: rtl; gap: .25rem;">
             @foreach (int? hebDay in week) {
               if (hebDay.HasValue) {
                 DateTime greg = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, 0, 0, 0, 0);
