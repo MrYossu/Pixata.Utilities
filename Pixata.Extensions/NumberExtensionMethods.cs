@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pixata.Extensions {
   public static class NumberExtensionMethods {
@@ -24,11 +25,11 @@ namespace Pixata.Extensions {
     /// <param name="accuracy">The accuracy of the conversion. Where value doesn't have a neat fractional representation, this determines how far we go trying to find one</param>
     /// <returns>A tuple containing the whole part, the numerator and denominator of a proper fraction converted from the decimal passed in</returns>
     public static (int, int, int) DoubleToProperFraction(this double value, double accuracy) {
-      (int n, int d) = DoubleToFraction(value, accuracy);
+      (int n, int d) = value.DoubleToFraction(accuracy);
       if (n <= d) {
         return (0, n, d);
       }
-      return (n / d, n - (n / d) * d, d);
+      return (n / d, n - n / d * d, d);
     }
 
     /// <summary>
@@ -40,7 +41,7 @@ namespace Pixata.Extensions {
     public static string DoubleToProperFractionString(this double value, double accuracy) =>
       value.DoubleToProperFraction(accuracy) switch {
         (int n1, 0, _) => $"{n1}",
-        (0, int n2, int n3) when n2 == n3 => $"1",
+        (0, int n2, int n3) when n2 == n3 => "1",
         (0, int n2, int n3) => $"{n2}/{n3}",
         (int n1, int n2, int n3) => $"{n1} {n2}/{n3}"
       };
@@ -112,13 +113,13 @@ namespace Pixata.Extensions {
     /// <param name="digits">The number of decimal digits to be included in the result, default is zero. Eg 15.ToPercentageString(100) would return "15%", 17.5.ToPercentageString(100) would return "17%" and 17.5.ToPercentageString(100, 1) would return "17.5%"</param>
     /// <returns></returns>
     public static string ToPercentageString(this int qty, int max, int digits = 0) =>
-      ToPercentageString((double)qty, (double)max, digits);
+      ((double)qty).ToPercentageString((double)max, digits);
 
     public static string ToPercentageString(this int qty, double max, int digits = 0) =>
-      ToPercentageString((double)qty, max, digits);
+      ((double)qty).ToPercentageString(max, digits);
 
     public static string ToPercentageString(this double qty, int max, int digits = 0) =>
-      ToPercentageString(qty, (double)max, digits);
+      qty.ToPercentageString((double)max, digits);
 
     public static string ToPercentageString(this double qty, double max, int digits = 0) =>
       $"{Math.Round(100 * qty / max, digits)}%";
@@ -141,9 +142,9 @@ namespace Pixata.Extensions {
       return duration.Replace("  ", " ").Trim();
     }
 
-    private static string Hours(int n) => $"{n / 3600} hour{S(n / 3600)}";
-    private static string Minutes(int n) => $"{(n / 60) % 60} minute{S((n / 60) % 60)}";
-    private static string Seconds(int n) => $"{n % 60} second{S(n % 60)}";
+    private static string Hours(int n) => $"{n / 3600} hour{(n / 3600).S()}";
+    private static string Minutes(int n) => $"{n / 60 % 60} minute{(n / 60 % 60).S()}";
+    private static string Seconds(int n) => $"{n % 60} second{(n % 60).S()}";
 
     /// <summary>
     /// Returns "" if the input is 1, otherwise returns "s". This is useful for pluralising words in a string. For example, instead of $"We have {cats.Count} cat(s)", you can use $"We have {cats.Count} cat{cats.Count.S()}", which is much easier to read.
@@ -161,8 +162,69 @@ namespace Pixata.Extensions {
     /// <returns>A formatted string of the number of bytes</returns>
     // Modified from code found at https://stackoverflow.com/a/62698159/706346
     public static string ToFileSizeString(this long bytes, int precision = 1) =>
-      bytes < 1024 
-        ? $"{bytes} byte{(bytes==1?"":"s")}" 
-        : $"{(bytes / Math.Pow(1024, (int)(Math.Log(bytes) / Math.Log(1024)))).ToString($"F{precision}")}{("KMGTPE")[(int)(Math.Log(bytes) / Math.Log(1024)) - 1]}b";
+      bytes < 1024
+        ? $"{bytes} byte{(bytes == 1 ? "" : "s")}"
+        : $"{(bytes / Math.Pow(1024, (int)(Math.Log(bytes) / Math.Log(1024)))).ToString($"F{precision}")}{"KMGTPE"[(int)(Math.Log(bytes) / Math.Log(1024)) - 1]}b";
+
+    #region Hebrew
+
+    private static readonly Dictionary<int, string> HebrewNumbers = new() {
+      { 1, "א" },
+      { 2, "ב" },
+      { 3, "ג" },
+      { 4, "ד" },
+      { 5, "ה" },
+      { 6, "ו" },
+      { 7, "ז" },
+      { 8, "ח" },
+      { 9, "ט" },
+      { 10, "י" },
+      { 20, "כ" },
+      { 30, "ל" },
+      { 40, "מ" },
+      { 50, "נ" },
+      { 60, "ס" },
+      { 70, "ע" },
+      { 80, "פ" },
+      { 90, "צ" },
+      { 15, "טו" },
+      { 16, "טז" }
+    };
+
+    /// <summary>
+    /// Converts an integer to the equivalent Hebrew numeral string. Currently only works for numbers between 1 and 100 (but watch this space)
+    /// </summary>
+    /// <param name="number"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public static string ToHebrew(this int number) {
+      switch (number) {
+        case <= 0:
+        case > 100:
+          throw new ArgumentOutOfRangeException(nameof(number), "Number must be between 1 and 100");
+        case 100:
+          return "ק׳";
+      }
+      if (HebrewNumbers.TryGetValue(number, out string? value)) {
+        if (value.Length == 1) {
+          return value + "׳";
+        }
+        return value.Insert(value.Length - 1, "״");
+      }
+      string result = "";
+      int tens = number / 10 * 10;
+      if (tens > 0) {
+        result += HebrewNumbers[tens];
+      }
+      int units = number % 10;
+      if (units > 0) {
+        result += HebrewNumbers[units];
+      }
+      return result.Length == 1
+        ? result + "׳"
+        : result.Insert(result.Length - 1, "״");
+    }
+
+    #endregion
   }
 }
