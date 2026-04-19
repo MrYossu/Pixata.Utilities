@@ -50,6 +50,15 @@ Then `<PageTitleWithSiteName Title="Home" />` will set the page title to "Home -
 
 A date picker that allows you to select Hebrew dates.
 
+It highlights Shabbos and these Yomim Tovim with a light grey background:
+- Pesach (days 1, 2, 7, 8)
+- Shavuos (days 1, 2)
+- Rosh Hashona (days 1, 2)
+- Yom Kippur
+- Succos, including Shemini Atzeres and Simchas Torah
+
+You can also set `IncludeOtherNonWorkDays="true"` to highlight Chol Hamoed, Tisha B'av and Purim in a slightly lighter grey.
+
 ## Containers
 
 These components are intended to wrap up other parts of your page, and add functionality.
