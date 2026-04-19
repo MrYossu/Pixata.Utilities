@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Pixata.Blazor.LanguageExtComponents\Pixata.Blazor.LanguageExtComponents.csproj" />
     <ProjectReference Include="..\Pixata.Blazor.TelerikComponents\Pixata.Blazor.TelerikComponents.csproj" />
     <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
     <ProjectReference Include="..\Pixata.Email\Pixata.Email.csproj" />
