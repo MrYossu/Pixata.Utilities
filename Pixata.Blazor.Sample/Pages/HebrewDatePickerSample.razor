@@ -1,0 +1,18 @@
+﻿@page "/hebrewdatepicker"
+@using Pixata.Blazor.Components
+
+<h3>Hebrew DatePicker Sample</h3>
+
+<HebrewDatePicker Value="@_upToDate"
+                  ValueChanged="@((DateTime d) => OnDateFilterChanged(d))"
+                  IncludeShabbosOrYomTov="true"
+                  IncludeOtherNonWorkDays="true"
+                  Width="160px" />
+
+@code {
+  private DateTime _upToDate = DateTime.Now;
+
+  private void OnDateFilterChanged(DateTime date) {
+    _upToDate = date;
+  }
+}
