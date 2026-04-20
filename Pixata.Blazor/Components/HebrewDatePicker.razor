@@ -91,16 +91,28 @@
         }
       </div>
       <div class="card-body p-2">
-        <div class="small text-muted hebrew-days-header">
-          <div>&#x05D0;</div>
-          <div>&#x05D1;</div>
-          <div>&#x05D2;</div>
-          <div>&#x05D3;</div>
-          <div>&#x05D4;</div>
-          <div>&#x05D5;</div>
-          <div>&#x05E9;</div>
-        </div>
-        <div class="mt-1 grid-cells">
+        @if (GregorianPrimary) {
+          <div class="small text-muted hebrew-days-header">
+            <div>SU</div>
+            <div>MO</div>
+            <div>TU</div>
+            <div>WE</div>
+            <div>TH</div>
+            <div>FR</div>
+            <div>SA</div>
+          </div>
+        } else {
+          <div class="small text-muted hebrew-days-header" style="direction: rtl;">
+            <div>&#x05D0;</div>
+            <div>&#x05D1;</div>
+            <div>&#x05D2;</div>
+            <div>&#x05D3;</div>
+            <div>&#x05D4;</div>
+            <div>&#x05D5;</div>
+            <div>&#x05E9;</div>
+          </div>
+        }
+        <div class="mt-1 grid-cells" style="@(GregorianPrimary ? "" : "direction: rtl;")">
           @if (GregorianPrimary) {
             foreach (int?[] week in GregorianCalendarWeeks()) {
               foreach (int? gregDayNum in week) {
@@ -184,7 +196,6 @@
       .hebrew-date-picker .hebrew-days-header {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        direction: rtl;
         text-align: center;
         gap: .25rem;
       }
@@ -205,7 +216,6 @@
       .hebrew-date-picker .grid-cells {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        direction: rtl;
         gap: .25rem;
       }
   </style>
