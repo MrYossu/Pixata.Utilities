@@ -19,6 +19,7 @@
                       ShabbosOrYomTovBgColour="@_shabbosOrYomTovBgColour"
                       IncludeOtherNonWorkDays="@_includeOtherNonWorkDays"
                       OtherNonWorkDayBgColour="@_otherNonWorkDayBgColour"
+                      OpenOnRight="@_openOnRight"
                       ShowDiagnostics="@_showDiagnostics" />
 
     @if (_date != default) {
@@ -92,6 +93,15 @@
           <div class="col-sm-8 col-md-9">
             <div class="form-check form-switch mb-0">
               <input class="form-check-input" type="checkbox" id="showDiagnostics" @bind="_showDiagnostics" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Open on right</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="openOnRight" @bind="_openOnRight" />
             </div>
           </div>
         </div>
@@ -176,4 +186,5 @@
   private string _shabbosOrYomTovBgColour = "#b1c1d7";
   private bool _includeOtherNonWorkDays;
   private string _otherNonWorkDayBgColour = "#d2dae3";
+  private bool _openOnRight;
 }
