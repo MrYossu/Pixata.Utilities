@@ -1,9 +1,9 @@
 ﻿@typeparam TValue
 
-<div class="hebrew-date-picker position-relative @Class" style="@WidthStyle">
+<div class="hebrew-date-picker position-relative @Class" style="@($"width: {Width}")">
   <div class="input-group">
     <input class="form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" readonly />
-    <button class="btn" style="background-color: #e4e7eb" type="button" @onclick="ToggleCalendar">
+    <button class="btn" type="button" @onclick="ToggleCalendar">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="1em"
            height="1em"
@@ -38,31 +38,60 @@
 
   @if (_calendarOpen) {
     <!-- overlay to capture outside clicks and close the popup -->
-    <div style="position: fixed; inset: 0; z-index: 2000;" @onclick="CloseCalendar"></div>
+    <div class="overlay-content" @onclick="CloseCalendar"></div>
 
-    <div class="card" style="position: fixed; z-index: 2001; width: 320px; direction: ltr;">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-sm btn-link" @onclick="PrevHebrewMonth">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-          </svg>
-        </button>
-        <div class="d-flex align-items-center gap-1">
-          <strong>@_displayHebrewMonthName</strong>
-          <select class="form-select form-select-sm" style="width: 120px;" @bind="DisplayHebrewYear">
-            @foreach (int y in Years) {
-              <option value="@y">@y</option>
-            }
-          </select>
-        </div>
-        <button type="button" class="btn btn-sm btn-link" @onclick="NextHebrewMonth">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
-          </svg>
-        </button>
+    <div class="card">
+      <div class="card-header">
+        @if (GregorianPrimary) {
+          <div class="d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-sm btn-link" @onclick="PrevGregorianMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+              </svg>
+            </button>
+            <div class="d-flex align-items-center gap-1">
+              <strong>@(new DateTime(_displayGregorianYear, _displayGregorianMonth, 1).ToString("MMMM"))</strong>
+              <select class="form-select form-select-sm" style="width: 90px;" @bind="DisplayGregorianYear">
+                @foreach (int y in GregorianYears) {
+                  <option value="@y">@y</option>
+                }
+              </select>
+            </div>
+            <button type="button" class="btn btn-sm btn-link" @onclick="NextGregorianMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
+              </svg>
+            </button>
+          </div>
+          <div class="text-center small text-muted px-2 pt-1">@HebrewMonthsLabel</div>
+        } else {
+          <div class="d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-sm btn-link" @onclick="PrevHebrewMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+              </svg>
+            </button>
+            <div class="d-flex align-items-center gap-1">
+              <strong>@_displayHebrewMonthName</strong>
+              <select class="form-select form-select-sm" style="width: 120px;" @bind="DisplayHebrewYear">
+                @foreach (int y in Years) {
+                  <option value="@y">@y</option>
+                }
+              </select>
+            </div>
+            <button type="button" class="btn btn-sm btn-link" @onclick="NextHebrewMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
+              </svg>
+            </button>
+          </div>
+          @if (ShowGregorianDates) {
+            <div class="text-center small text-muted px-2 pt-1">@GregorianMonthsLabel</div>
+          }
+        }
       </div>
       <div class="card-body p-2">
-        <div class="small text-muted" style="display: grid; grid-template-columns: repeat(7, 1fr); direction: rtl; text-align: center; gap: .25rem;">
+        <div class="small text-muted hebrew-days-header">
           <div>&#x05D0;</div>
           <div>&#x05D1;</div>
           <div>&#x05D2;</div>
@@ -71,30 +100,70 @@
           <div>&#x05D5;</div>
           <div>&#x05E9;</div>
         </div>
-        @foreach (int?[] week in HebrewCalendarWeeks()) {
-          <div class="mt-1" style="display: grid; grid-template-columns: repeat(7, 1fr); direction: rtl; gap: .25rem;">
-            @foreach (int? hebDay in week) {
-              if (hebDay.HasValue) {
-                DateTime greg = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, 0, 0, 0, 0);
-                bool isToday = greg.Date == DateTime.Today;
-                bool isSelected = IsSelectedDate(greg.Date);
-                HebrewDateType hebrewDateType = GetHebrewDateType(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, greg);
-                string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
-                <div class="text-end">
-                  <button type="button"
-                          class="btn btn-sm w-100 @dayClass"
-                          style="@GetDayStyle(hebrewDateType, isSelected, isToday)"
-                          title="@GetDayTooltip(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, greg)"
-                          @onclick="() => SelectHebrewDay(hebDay.Value)">
-                    @hebDay.Value
-                  </button>
-                </div>
-              } else {
-                <div></div>
+        <div class="mt-1 grid-cells">
+          @if (GregorianPrimary) {
+            foreach (int?[] week in GregorianCalendarWeeks()) {
+              foreach (int? gregDayNum in week) {
+                if (gregDayNum.HasValue) {
+                  DateTime greg = new DateTime(_displayGregorianYear, _displayGregorianMonth, gregDayNum.Value);
+                  int hebYear = _hc.GetYear(greg);
+                  int hebMonth = _hc.GetMonth(greg);
+                  int hebDay = _hc.GetDayOfMonth(greg);
+                  bool isToday = greg.Date == DateTime.Today;
+                  bool isSelected = IsSelectedDate(greg.Date);
+                  HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
+                  string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
+                  string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
+                  <div class="text-center">
+                    <button type="button"
+                            class="btn btn-sm w-100 @dayClass"
+                            style="@GetDayStyle(hebrewDateType, isSelected, isToday)"
+                            title="@tooltip"
+                            @onclick="() => SelectGregorianDay(gregDayNum.Value)">
+                      @if (ShowGregorianDates) {
+                        <div style="line-height: 1;">@gregDayNum.Value</div>
+                        <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{hebDay.ToHebrew()}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
+                      } else {
+                        @gregDayNum.Value
+                      }
+                    </button>
+                  </div>
+                } else {
+                  <div></div>
+                }
               }
             }
-          </div>
-        }
+          } else {
+            foreach (int?[] week in HebrewCalendarWeeks()) {
+              foreach (int? hebDay in week) {
+                if (hebDay.HasValue) {
+                  DateTime greg = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, 0, 0, 0, 0);
+                  bool isToday = greg.Date == DateTime.Today;
+                  bool isSelected = IsSelectedDate(greg.Date);
+                  HebrewDateType hebrewDateType = GetHebrewDateType(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, greg);
+                  string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
+                  string tooltip = ShowTooltips ? GetDayTooltip(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, greg) : "";
+                  <div class="text-center">
+                    <button type="button"
+                            class="btn btn-sm w-100 @dayClass"
+                            style="@GetDayStyle(hebrewDateType, isSelected, isToday)"
+                            title="@tooltip"
+                            @onclick="() => SelectHebrewDay(hebDay.Value)">
+                      @if (ShowGregorianDates) {
+                        <div style="line-height: 1;">@hebDay.Value.ToHebrew()</div>
+                        <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{greg.Day}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
+                      } else {
+                        @hebDay.Value
+                      }
+                    </button>
+                  </div>
+                } else {
+                  <div></div>
+                }
+              }
+            }
+          }
+        </div>
       </div>
       <div class="card-footer d-flex justify-content-between">
         @if (typeof(TValue) == typeof(DateTime?)) {
@@ -106,4 +175,38 @@
       </div>
     </div>
   }
+
+  <style>
+      .hebrew-date-picker .input-group .btn {
+        background-color: #e4e7eb
+      }
+
+      .hebrew-date-picker .hebrew-days-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        direction: rtl;
+        text-align: center;
+        gap: .25rem;
+      }
+
+      .hebrew-date-picker .overlay-content {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+      }
+
+      .hebrew-date-picker .card {
+        position: fixed;
+        width: 320px;
+        direction: ltr;
+        z-index: 2001;
+      }
+
+      .hebrew-date-picker .grid-cells {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        direction: rtl;
+        gap: .25rem;
+      }
+  </style>
 </div>

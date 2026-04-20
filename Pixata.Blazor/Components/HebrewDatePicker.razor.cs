@@ -26,11 +26,23 @@ public partial class HebrewDatePicker<TValue> {
   [Parameter]
   public string Width { get; set; } = "320px";
 
-  private string WidthStyle =>
-    $"width: {Width}";
-
   [Parameter]
   public bool ShowDiagnostics { get; set; }
+
+  [Parameter]
+  public bool ShowGregorianDates { get; set; }
+
+  [Parameter]
+  public bool GregorianPrimary { get; set; }
+
+  [Parameter]
+  public bool ShowSecondaryDatesInBrackets { get; set; }
+
+  [Parameter]
+  public bool ShowTooltips { get; set; }
+
+  [Parameter]
+  public DateInputDisplay InputDisplay { get; set; } = DateInputDisplay.Hebrew;
 
   [Parameter]
   public bool IncludeShabbosOrYomTov { get; set; }
@@ -55,6 +67,19 @@ public partial class HebrewDatePicker<TValue> {
   private int _displayHebrewYear;
   private int _displayHebrewMonth;
   private string _displayHebrewMonthName = "";
+  private int _displayGregorianYear;
+  private int _displayGregorianMonth;
+  private List<int> GregorianYears { get; set; } = [];
+
+  private int DisplayGregorianYear {
+    get => _displayGregorianYear;
+    set {
+      if (_displayGregorianYear == value) {
+        return;
+      }
+      _displayGregorianYear = value;
+    }
+  }
 
   private int DisplayHebrewYear {
     get => _displayHebrewYear;
@@ -69,6 +94,34 @@ public partial class HebrewDatePicker<TValue> {
       }
       BuildMonths();
       UpdateDisplayMonthName();
+    }
+  }
+
+  private string GregorianMonthsLabel {
+    get {
+      DateTime firstDay = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, 1, 0, 0, 0, 0);
+      int daysInMonth = _hc.GetDaysInMonth(_displayHebrewYear, _displayHebrewMonth);
+      DateTime lastDay = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, daysInMonth, 0, 0, 0, 0);
+      return firstDay.Month == lastDay.Month
+        ? firstDay.ToString("MMMM yyyy")
+        : $"{firstDay:MMMM yyyy} / {lastDay:MMMM yyyy}";
+    }
+  }
+
+  private string HebrewMonthsLabel {
+    get {
+      DateTime firstDay = new(_displayGregorianYear, _displayGregorianMonth, 1);
+      DateTime lastDay = new(_displayGregorianYear, _displayGregorianMonth, DateTime.DaysInMonth(_displayGregorianYear, _displayGregorianMonth));
+      int firstHebYear = _hc.GetYear(firstDay);
+      int firstHebMonth = _hc.GetMonth(firstDay);
+      int lastHebYear = _hc.GetYear(lastDay);
+      int lastHebMonth = _hc.GetMonth(lastDay);
+      string firstName = GetHebrewMonthName(firstHebYear, firstHebMonth);
+      if (firstHebMonth == lastHebMonth && firstHebYear == lastHebYear) {
+        return $"{firstName} {firstHebYear}";
+      }
+      string lastName = GetHebrewMonthName(lastHebYear, lastHebMonth);
+      return $"{firstName} {firstHebYear} / {lastName} {lastHebYear}";
     }
   }
 
@@ -100,10 +153,13 @@ public partial class HebrewDatePicker<TValue> {
     _hebrewMonth = _hc.GetMonth(sourceForDisplay);
     _displayHebrewYear = _hebrewYear;
     _displayHebrewMonth = _hebrewMonth;
+    _displayGregorianYear = sourceForDisplay.Year;
+    _displayGregorianMonth = sourceForDisplay.Month;
     BuildYearRange();
+    BuildGregorianYearRange();
     BuildMonths();
     UpdateDisplayMonthName();
-    _textValue = sourceOpt.HasValue ? FormatHebrewDate(sourceOpt.Value) : "No date selected";
+    _textValue = sourceOpt.HasValue ? FormatDisplayDate(sourceOpt.Value) : "No date selected";
   }
 
   private void BuildYearRange() {
@@ -119,6 +175,17 @@ public partial class HebrewDatePicker<TValue> {
     if (!Years.Contains(_displayHebrewYear)) {
       Years.Add(_displayHebrewYear);
       Years.Sort();
+    }
+  }
+
+  private void BuildGregorianYearRange() {
+    GregorianYears = [];
+    for (int y = MinDate.Year; y <= MaxDate.Year; y++) {
+      GregorianYears.Add(y);
+    }
+    if (!GregorianYears.Contains(_displayGregorianYear)) {
+      GregorianYears.Add(_displayGregorianYear);
+      GregorianYears.Sort();
     }
   }
 
@@ -160,6 +227,13 @@ public partial class HebrewDatePicker<TValue> {
 
   private void UpdateDisplayMonthName() =>
     _displayHebrewMonthName = Months.FirstOrDefault(m => m.Number == _displayHebrewMonth).Name ?? GetHebrewMonthName(_displayHebrewYear, _displayHebrewMonth);
+
+  private string FormatDisplayDate(DateTime gregorian) =>
+    InputDisplay switch {
+      DateInputDisplay.Gregorian => $"{gregorian:d MMM yyyy}",
+      DateInputDisplay.Both => $"{FormatHebrewDate(gregorian)} ({gregorian:d MMM yyyy})",
+      _ => FormatHebrewDate(gregorian),
+    };
 
   private string FormatHebrewDate(DateTime gregorian) {
     const char lrm = '\u200E';
@@ -203,9 +277,11 @@ public partial class HebrewDatePicker<TValue> {
       DateTime refDate = GetCurrentValue() ?? DateTime.Today;
       _displayHebrewYear = _hc.GetYear(refDate);
       _displayHebrewMonth = _hc.GetMonth(refDate);
+      _displayGregorianYear = refDate.Year;
+      _displayGregorianMonth = refDate.Month;
       BuildMonths();
       UpdateDisplayMonthName();
-      _textValue = GetCurrentValue().HasValue ? FormatHebrewDate(refDate) : "No date selected";
+      _textValue = GetCurrentValue().HasValue ? FormatDisplayDate(refDate) : "No date selected";
     }
   }
 
@@ -235,6 +311,24 @@ public partial class HebrewDatePicker<TValue> {
     UpdateDisplayMonthName();
   }
 
+  private void PrevGregorianMonth() {
+    if (_displayGregorianMonth > 1) {
+      _displayGregorianMonth -= 1;
+    } else {
+      _displayGregorianMonth = 12;
+      _displayGregorianYear -= 1;
+    }
+  }
+
+  private void NextGregorianMonth() {
+    if (_displayGregorianMonth < 12) {
+      _displayGregorianMonth += 1;
+    } else {
+      _displayGregorianMonth = 1;
+      _displayGregorianYear += 1;
+    }
+  }
+
   private List<int?[]> HebrewCalendarWeeks() {
     int daysInMonth = _hc.GetDaysInMonth(_displayHebrewYear, _displayHebrewMonth);
     List<int?> cells = [];
@@ -260,10 +354,43 @@ public partial class HebrewDatePicker<TValue> {
     return weeks;
   }
 
+  private List<int?[]> GregorianCalendarWeeks() {
+    int daysInMonth = DateTime.DaysInMonth(_displayGregorianYear, _displayGregorianMonth);
+    List<int?> cells = [];
+    DateTime firstG = new(_displayGregorianYear, _displayGregorianMonth, 1);
+    int dow = (int)firstG.DayOfWeek;
+    for (int i = 0; i < dow; i++) {
+      cells.Add(null);
+    }
+    for (int d = 1; d <= daysInMonth; d++) {
+      cells.Add(d);
+    }
+    while (cells.Count % 7 != 0) {
+      cells.Add(null);
+    }
+    List<int?[]> weeks = [];
+    for (int i = 0; i < cells.Count; i += 7) {
+      int?[] week = new int?[7];
+      for (int j = 0; j < 7; j++) {
+        week[j] = cells[i + j];
+      }
+      weeks.Add(week);
+    }
+    return weeks;
+  }
+
+  private async Task SelectGregorianDay(int gregDay) {
+    DateTime dt = new(_displayGregorianYear, _displayGregorianMonth, gregDay);
+    await SetValue(dt);
+    _textValue = FormatDisplayDate(dt);
+    InitializeFromValue();
+    _calendarOpen = false;
+  }
+
   private async Task SelectHebrewDay(int hebDay) {
     DateTime dt = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, hebDay, 0, 0, 0, 0);
     await SetValue(dt);
-    _textValue = FormatHebrewDate(dt);
+    _textValue = FormatDisplayDate(dt);
     InitializeFromValue();
     _calendarOpen = false;
   }
@@ -271,7 +398,7 @@ public partial class HebrewDatePicker<TValue> {
   private async Task SelectToday() {
     DateTime dt = DateTime.Today;
     await SetValue(dt);
-    _textValue = FormatHebrewDate(dt);
+    _textValue = FormatDisplayDate(dt);
     InitializeFromValue();
     _calendarOpen = false;
   }
@@ -390,58 +517,84 @@ public partial class HebrewDatePicker<TValue> {
       };
 
   private string GetDayTooltip(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
+    const char lrm = '\u200E';
+    string hebrewMonthName = GetHebrewMonthName(hebrewYear, hebrewMonth);
+    string hebrewDateStr = $"{lrm}{hebrewDay}{lrm} {hebrewMonthName} {lrm}{hebrewYear}";
+    string gregorianDateStr = $"{lrm}{gregorianDate:d MMMM yyyy}";
+    string holidayName = GetHolidayName(hebrewYear, hebrewMonth, hebrewDay, gregorianDate);
+    return string.IsNullOrEmpty(holidayName)
+      ? $"{hebrewDateStr}\n{gregorianDateStr}"
+      : $"{hebrewDateStr}\n{gregorianDateStr}\n{lrm}{holidayName}";
+  }
+
+  private string GetHolidayName(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
+    List<string> parts = [];
     if (IncludeShabbosOrYomTov && gregorianDate.DayOfWeek == DayOfWeek.Saturday) {
-      return "Shabbos";
+      parts.Add("Shabbos");
     }
-    int nissanMonth = GetNissanMonth(hebrewYear);
-    int sivanMonth = nissanMonth + 2;
-    int avMonth = nissanMonth + 4;
-    if (hebrewMonth == nissanMonth) {
-      if (IncludeShabbosOrYomTov) {
-        if (hebrewDay == 15) { return "First day Pesach"; }
-        if (hebrewDay == 16) { return "Second day Pesach"; }
-        if (hebrewDay == 21) { return "Seventh day Pesach"; }
-        if (hebrewDay == 22) { return "Eighth day Pesach"; }
+    if (IncludeShabbosOrYomTov) {
+      string yomTovName = GetYomTovName(hebrewYear, hebrewMonth, hebrewDay);
+      if (!string.IsNullOrEmpty(yomTovName)) {
+        parts.Add(yomTovName);
       }
-      if (IncludeOtherNonWorkDays && hebrewDay >= 17 && hebrewDay <= 20) {
-        return "Chol Hamoed Pesach";
-      }
-      return "";
-    }
-    if (hebrewMonth == sivanMonth) {
-      return IncludeShabbosOrYomTov
-        ? hebrewDay switch {
-          6 => "First day Shavuos",
-          7 => "Second day Shavuos",
-          _ => "",
-        }
-        : "";
-    }
-    if (hebrewMonth == 1) {
-      if (IncludeShabbosOrYomTov) {
-        if (hebrewDay is 1) { return "First day Rosh Hashana"; }
-        if (hebrewDay is 2) { return "Second day Rosh Hashana"; }
-        if (hebrewDay is 10) { return "Yom Kippur"; }
-        if (hebrewDay is 15) { return "First day Succos"; }
-        if (hebrewDay is 16) { return "Second day Succos"; }
-        if (hebrewDay is 22) { return "Shemini Atzeres"; }
-        if (hebrewDay is 23) { return "Simchas Torah"; }
-      }
-      if (IncludeOtherNonWorkDays && hebrewDay >= 17 && hebrewDay <= 21) {
-        return "Chol Hamoed Succos";
-      }
-      return "";
     }
     if (IncludeOtherNonWorkDays) {
-      if (hebrewMonth == avMonth && (hebrewDay == 9 || IsPostponedTishaBav(hebrewYear, hebrewMonth, hebrewDay))) {
-        return "Tisha B'Av";
-      }
-      int purimMonth = _hc.IsLeapYear(hebrewYear) ? 7 : 6;
-      if (hebrewMonth == purimMonth && hebrewDay == 14) {
-        return "Purim";
+      string otherName = GetOtherNonWorkDayName(hebrewYear, hebrewMonth, hebrewDay);
+      if (!string.IsNullOrEmpty(otherName)) {
+        parts.Add(otherName);
       }
     }
+    return string.Join(" / ", parts);
+  }
+
+  private string GetYomTovName(int hebrewYear, int hebrewMonth, int hebrewDay) {
+    int nissanMonth = GetNissanMonth(hebrewYear);
+    int sivanMonth = nissanMonth + 2;
+    if (hebrewMonth == nissanMonth) {
+      return hebrewDay switch {
+        15 => "First day Pesach",
+        16 => "Second day Pesach",
+        21 => "Seventh day Pesach",
+        22 => "Eighth day Pesach",
+        _ => "",
+      };
+    }
+    if (hebrewMonth == sivanMonth) {
+      return hebrewDay switch {
+        6 => "First day Shavuos",
+        7 => "Second day Shavuos",
+        _ => "",
+      };
+    }
+    if (hebrewMonth == 1) {
+      return hebrewDay switch {
+        1 => "First day Rosh Hashana",
+        2 => "Second day Rosh Hashana",
+        10 => "Yom Kippur",
+        15 => "First day Succos",
+        16 => "Second day Succos",
+        22 => "Shemini Atzeres",
+        23 => "Simchas Torah",
+        _ => "",
+      };
+    }
     return "";
+  }
+
+  private string GetOtherNonWorkDayName(int hebrewYear, int hebrewMonth, int hebrewDay) {
+    int nissanMonth = GetNissanMonth(hebrewYear);
+    if (hebrewMonth == nissanMonth && hebrewDay >= 17 && hebrewDay <= 20) {
+      return "Chol Hamoed Pesach";
+    }
+    if (hebrewMonth == 1 && hebrewDay >= 17 && hebrewDay <= 21) {
+      return "Chol Hamoed Succos";
+    }
+    int avMonth = nissanMonth + 4;
+    if (hebrewMonth == avMonth && (hebrewDay == 9 || IsPostponedTishaBav(hebrewYear, hebrewMonth, hebrewDay))) {
+      return "Tisha B'Av";
+    }
+    int purimMonth = _hc.IsLeapYear(hebrewYear) ? 7 : 6;
+    return hebrewMonth == purimMonth && hebrewDay == 14 ? "Purim" : "";
   }
 
   private enum HebrewDateType {
@@ -449,4 +602,10 @@ public partial class HebrewDatePicker<TValue> {
     ShabbosOrYomTov,
     OtherNonWorkDay,
   }
+}
+
+public enum DateInputDisplay {
+  Hebrew,
+  Gregorian,
+  Both,
 }
