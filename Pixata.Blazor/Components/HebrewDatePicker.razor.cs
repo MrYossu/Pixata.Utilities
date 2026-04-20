@@ -30,7 +30,7 @@ public partial class HebrewDatePicker<TValue> {
   public bool ShowDiagnostics { get; set; }
 
   [Parameter]
-  public bool ShowGregorianDates { get; set; }
+  public bool ShowSecondaryDates { get; set; }
 
   [Parameter]
   public bool GregorianPrimary { get; set; }

@@ -85,7 +85,7 @@
               </svg>
             </button>
           </div>
-          @if (ShowGregorianDates) {
+          @if (ShowSecondaryDates) {
             <div class="text-center small text-muted px-2 pt-1">@GregorianMonthsLabel</div>
           }
         }
@@ -120,7 +120,7 @@
                             style="@GetDayStyle(hebrewDateType, isSelected, isToday)"
                             title="@tooltip"
                             @onclick="() => SelectGregorianDay(gregDayNum.Value)">
-                      @if (ShowGregorianDates) {
+                      @if (ShowSecondaryDates) {
                         <div style="line-height: 1;">@gregDayNum.Value</div>
                         <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{hebDay.ToHebrew()}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
                       } else {
@@ -149,7 +149,7 @@
                             style="@GetDayStyle(hebrewDateType, isSelected, isToday)"
                             title="@tooltip"
                             @onclick="() => SelectHebrewDay(hebDay.Value)">
-                      @if (ShowGregorianDates) {
+                      @if (ShowSecondaryDates) {
                         <div style="line-height: 1;">@hebDay.Value.ToHebrew()</div>
                         <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{greg.Day}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
                       } else {

@@ -12,7 +12,7 @@
                       Width="@_width"
                       Class="@_class"
                       GregorianPrimary="@_gregorianPrimary"
-                      ShowGregorianDates="@_showGregorianDates"
+                      ShowSecondaryDates="@_showSecondaryDates"
                       InputDisplay="@_inputDisplay"
                       ShowTooltips="@_showTooltips"
                       IncludeShabbosOrYomTov="@_includeShabbosOrYomTov"
@@ -60,11 +60,11 @@
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Show Gregorian in cells</label>
+            <label class="form-label mb-0">Show secondary dates in cells</label>
           </div>
           <div class="col-sm-8 col-md-9">
             <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="showGregorianDates" @bind="_showGregorianDates" />
+              <input class="form-check-input" type="checkbox" id="showGregorianDates" @bind="_showSecondaryDates" />
             </div>
           </div>
 
@@ -168,7 +168,7 @@
   private string _width = "320px";
   private string _class = "";
   private bool _gregorianPrimary;
-  private bool _showGregorianDates;
+  private bool _showSecondaryDates;
   private DateInputDisplay _inputDisplay = DateInputDisplay.Hebrew;
   private bool _showTooltips = true;
   private bool _showDiagnostics;
