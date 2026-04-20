@@ -56,6 +56,9 @@ public partial class HebrewDatePicker<TValue> {
   [Parameter]
   public string OtherNonWorkDayBgColour { get; set; } = "#d2dae3";
 
+  [Parameter]
+  public bool OpenOnRight { get; set; }
+
   private readonly HebrewCalendar _hc = new();
   private int _hebrewYear;
   private int _hebrewMonth;
