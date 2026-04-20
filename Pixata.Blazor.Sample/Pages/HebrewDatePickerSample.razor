@@ -1,17 +1,179 @@
 ﻿@page "/hebrewdatepicker"
 @using Pixata.Blazor.Components
 
-<h3>Hebrew date picker</h3>
+<h3>Hebrew Date Picker</h3>
 
-<HebrewDatePicker Value="@_upToDate"
-                  ValueChanged="@((DateTime d) => OnDateFilterChanged(d))"
-                  IncludeShabbosOrYomTov="true"
-                  IncludeOtherNonWorkDays="true"
-                  Width="170px" />
+<div class="row g-4">
+  <div class="col-auto">
+    <HebrewDatePicker Value="@_date"
+                      ValueChanged="@((DateTime d) => _date = d)"
+                      MinDate="@_minDate"
+                      MaxDate="@_maxDate"
+                      Width="@_width"
+                      Class="@_class"
+                      GregorianPrimary="@_gregorianPrimary"
+                      ShowGregorianDates="@_showGregorianDates"
+                      InputDisplay="@_inputDisplay"
+                      ShowTooltips="@_showTooltips"
+                      IncludeShabbosOrYomTov="@_includeShabbosOrYomTov"
+                      ShabbosOrYomTovBgColour="@_shabbosOrYomTovBgColour"
+                      IncludeOtherNonWorkDays="@_includeOtherNonWorkDays"
+                      OtherNonWorkDayBgColour="@_otherNonWorkDayBgColour"
+                      ShowDiagnostics="@_showDiagnostics" />
+
+    @if (_date != default) {
+      <p class="mt-2 text-muted"><small>Selected: @_date.ToString("d MMMM yyyy")</small></p>
+    }
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <div class="card-header"><strong>Parameters</strong></div>
+      <div class="card-body">
+
+        <h6 class="text-muted text-uppercase mb-2" style="font-size: .7rem; letter-spacing: .05em;">Display</h6>
+        <div class="row g-2 mb-3 align-items-center">
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Width</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <input class="form-control form-control-sm" style="max-width: 120px;" @bind="_width" />
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Class</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <input class="form-control form-control-sm" style="max-width: 240px;" @bind="_class" placeholder="(none)" />
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Input display</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="btn-group btn-group-sm" role="group">
+              @foreach (DateInputDisplay val in Enum.GetValues<DateInputDisplay>()) {
+                <input type="radio" class="btn-check" name="inputDisplay" id="inputDisplay_@val" checked="@(_inputDisplay == val)" @onchange="() => _inputDisplay = val" />
+                <label class="btn btn-outline-secondary" for="inputDisplay_@val">@val</label>
+              }
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Show Gregorian in cells</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="showGregorianDates" @bind="_showGregorianDates" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Gregorian primary</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="gregorianPrimary" @bind="_gregorianPrimary" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Show tooltips</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="showTooltips" @bind="_showTooltips" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Show diagnostics</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="showDiagnostics" @bind="_showDiagnostics" />
+            </div>
+          </div>
+        </div>
+
+        <h6 class="text-muted text-uppercase mb-2" style="font-size: .7rem; letter-spacing: .05em;">Date Range</h6>
+        <div class="row g-2 mb-3 align-items-center">
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Min date</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <input type="date" class="form-control form-control-sm" style="max-width: 180px;" @bind="_minDate" />
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Max date</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <input type="date" class="form-control form-control-sm" style="max-width: 180px;" @bind="_maxDate" />
+          </div>
+        </div>
+
+        <h6 class="text-muted text-uppercase mb-2" style="font-size: .7rem; letter-spacing: .05em;">Shabbos &amp; Yom Tov</h6>
+        <div class="row g-2 mb-3 align-items-center">
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Highlight Shabbos / Yom Tov</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="includeShabbosOrYomTov" @bind="_includeShabbosOrYomTov" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Shabbos / Yom Tov colour</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="d-flex align-items-center gap-2">
+              <input type="color" class="form-control form-control-color form-control-sm" @bind="_shabbosOrYomTovBgColour" disabled="@(!_includeShabbosOrYomTov)" />
+              <code class="small">@_shabbosOrYomTovBgColour</code>
+              <button class="btn btn-outline-secondary btn-sm" @onclick='() => _shabbosOrYomTovBgColour = "#b1c1d7"'>Reset</button>
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Highlight other non-work days</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="includeOtherNonWorkDays" @bind="_includeOtherNonWorkDays" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Other non-work day colour</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="d-flex align-items-center gap-2">
+              <input type="color" class="form-control form-control-color form-control-sm" @bind="_otherNonWorkDayBgColour" disabled="@(!_includeOtherNonWorkDays)" />
+              <code class="small">@_otherNonWorkDayBgColour</code>
+              <button class="btn btn-outline-secondary btn-sm" @onclick='() => _otherNonWorkDayBgColour = "#d2dae3"'>Reset</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
 
 @code {
-  private DateTime _upToDate = DateTime.Now;
-
-  private void OnDateFilterChanged(DateTime date) =>
-    _upToDate = date;
+  private DateTime _date = DateTime.Today;
+  private DateTime _minDate = new(1584, 1, 1);
+  private DateTime _maxDate = new(2238, 9, 29);
+  private string _width = "320px";
+  private string _class = "";
+  private bool _gregorianPrimary;
+  private bool _showGregorianDates;
+  private DateInputDisplay _inputDisplay = DateInputDisplay.Hebrew;
+  private bool _showTooltips = true;
+  private bool _showDiagnostics;
+  private bool _includeShabbosOrYomTov;
+  private string _shabbosOrYomTovBgColour = "#b1c1d7";
+  private bool _includeOtherNonWorkDays;
+  private string _otherNonWorkDayBgColour = "#d2dae3";
 }
