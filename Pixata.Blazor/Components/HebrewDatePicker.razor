@@ -122,7 +122,7 @@
                             @onclick="() => SelectGregorianDay(gregDayNum.Value)">
                       @if (ShowSecondaryDates) {
                         <div style="line-height: 1;">@gregDayNum.Value</div>
-                        <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{hebDay.ToHebrew()}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
+                        <div style="line-height: 1; font-size: .75em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{hebDay.ToHebrew()}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
                       } else {
                         @gregDayNum.Value
                       }
@@ -150,10 +150,10 @@
                             title="@tooltip"
                             @onclick="() => SelectHebrewDay(hebDay.Value)">
                       @if (ShowSecondaryDates) {
-                        <div style="line-height: 1;">@hebDay.Value.ToHebrew()</div>
+                        <div style="line-height: 1; font-size: 1.1em;">@hebDay.Value.ToHebrew()</div>
                         <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{greg.Day}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
                       } else {
-                        @hebDay.Value
+                        @hebDay.Value.ToHebrew()
                       }
                     </button>
                   </div>
