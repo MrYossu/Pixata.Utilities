@@ -3,7 +3,69 @@
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore/ConnectionReseau.png "Pixata") 
 
 ## Important
-As the validation extension in this package is only designed to be used in server-side projects, you should reference this paclage in a server-side project. If you have a WASM project, adding a reference to this package will cause errors.
+As the validation extension in this package is only designed to be used in server-side projects, you should reference this package in a server-side project. If you have a WASM project, adding a reference to this package will cause errors.
+
+## DocumentTemplateHelper
+I often find myuself generating documents, either for conversion to PDF, or for emailing. This has always been a painful process, so I decided that a helper was needed. This class contains two methods, one for generating HTML from a Blazor component, and another for generating a PDF from a Blazor component.
+
+First you need to register a Microsoft dependency and the Pixata template helper in `Program.cs`...
+
+```csharp
+builder.Services.AddScoped<HtmlRenderer>();
+builder.Services.AddScoped<DocumentTemplateHelper>();
+```
+
+Then, you create a Blazor component that will be the template for the document you wish to generate. It needs to accept two parameters as follows...
+
+```xml
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <!-- Any links you need -->
+  </head>
+  <body>
+    <div>
+      <h2><img src="@BaseUrl/images/logo.png" width="70" height="70" /> Thank you for contacting us</h2>
+      <div>Your message has been received, and we'll get back to you as soon as possible.</div>
+      <div>
+        <h3>Your message</h3>
+        <HtmlRaw Html="@(Model.Message.Replace("\n", "<br/>"))" />
+      </div>
+      <h3>The Fab Ferret Emporium team</h3>
+    </div>
+  </body>
+</html>
+```
+
+```csharp
+@code {
+
+  [Parameter]
+  public string BaseUrl { get; set; } = "";
+
+  [Parameter]
+  public ContactModel Model { get; set; } = null!;
+
+}
+```
+
+The `BaseUrl` parameter is populated by the template helper, and allows you to pull in images from your web site, as you can see above. The `Model` parameter is the model that you want to use to populate the template, and can be any class.
+
+With that in place, you can inject a `DocumentTemplateHelper` into your code, and use it as follows...
+
+```csharp
+// Generate HTML for use as an email body...
+ContactModel model = new ContactModel { Name = "Billy Shears", Email = "billy@shears.co.uk" };
+string html = await documentTemplateHelper
+  .CreateHtmlFromTemplate<EmailFromContactPageTemplate>((nameof(EmailFromContactPageTemplate.Model), model));
+
+// Generate PDF for attaching to an email...
+InvoiceModel model = new InvoiceModel { /* set properties */ };
+byte[] bytes = await documentTemplateHelper
+  .CreatePdfFromTemplate<InvoiceTemplate>((nameof(InvoiceTemplate.Model), model));
+```
 
 ## RequestLoggingMiddleware
 When writing API endpoints, it can be hard to debug 400 errors, which are often caused by incorrect or mismatched paths, or invalid data in the request. You often don't get much clue as to what actually happened.
