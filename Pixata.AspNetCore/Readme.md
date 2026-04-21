@@ -24,6 +24,14 @@ builder.Services.AddScoped<HtmlRenderer>();
 builder.Services.AddScoped<DocumentTemplateHelper>();
 ```
 
+If you haven't already got it, then you will also need to add the following line...
+
+```csharp
+builder.Services.AddHttpContextAccessor();
+```
+
+Note that you need this even if you use the `AddPixataAspNetCore` method.
+
 Then, you create a Blazor component that will be the template for the document you wish to generate. It needs to accept two parameters as follows...
 
 ```xml
