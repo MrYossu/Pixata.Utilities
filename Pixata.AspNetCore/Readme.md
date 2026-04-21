@@ -5,10 +5,19 @@
 ## Important
 As the validation extension in this package is only designed to be used in server-side projects, you should reference this package in a server-side project. If you have a WASM project, adding a reference to this package will cause errors.
 
+## Registering services
+The code in this package requires certain dependencies to be registered in the DI container. In order to make this easier, there is an extension method to add them all. In `Program.cs` add this line...
+
+```csharp
+builder.Services.AddPixataAspNetCore<ContactModel>();
+```
+
+...where `ContactModel` is any type in your project. If you are using the validation filter (see below), then it is used here to point the framework to the assembly containing your models.
+
 ## DocumentTemplateHelper
 I often find myuself generating documents, either for conversion to PDF, or for emailing. This has always been a painful process, so I decided that a helper was needed. This class contains two methods, one for generating HTML from a Blazor component, and another for generating a PDF from a Blazor component.
 
-First you need to register a Microsoft dependency and the Pixata template helper in `Program.cs`...
+If you didn't register the services as explained above, then you need to register a Microsoft dependency and the Pixata template helper in `Program.cs`...
 
 ```csharp
 builder.Services.AddScoped<HtmlRenderer>();
@@ -108,7 +117,7 @@ The obvious (and correct) solution to this is to validate your incoming models o
 
 To avoid this, you can add the `ValidationEndpointFilter` to your API endpoints. This will run the same validation as in the client, but on the server, so if anyone tries to bypass the client-side validation, they will be stopped by the server-side validation. This allows you to protect your endpoints without adding much extra code.
 
-The validation extension requires services to be registered in the DI container. To make this easier, you can use the `AddPixataAspNetCore` extension method in your `Program.cs` file:
+As explained above, the validation extension requires services to be registered in the DI container. To make this easier, you can use the `AddPixataAspNetCore` extension method in your `Program.cs` file:
 
 ```csharp
 builder.Services.AddPixataAspNetCore<ContactModel>();
