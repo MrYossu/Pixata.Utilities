@@ -50,6 +50,5 @@ public class Startup(IConfiguration configuration) {
     // As this sample does not use authentication, the following line is not actually needed, but is included here to show how to set up the link to your log-in page
     ApiResponseViewConfig.LogInUrl = "LogIn";
     SitePageTitle.SiteName = "Pixata.Blazor sample";
-    SitePageTitle.Separator = "::";
   }
 }

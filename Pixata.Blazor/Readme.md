@@ -37,14 +37,32 @@ This isn't actually a problem, but removing the duplicate registration will keep
 
 Some general componets that I found useful.
 
-### PageTitleWithSiteName
-This snappily-named component allows you to set the page title, and have your site name automatically appended to it. It is intended to be used instead of the built-in `PageTitle` component, and relies on you setting the site name in your app settings...
+### SitePageTitle
+This is intended to be used instead of the built-in `PageTitle` component, and allows you to include your site name in the page title.
 
-```json
-  "SiteName": "My Blazor Site"
+You need to set your site name in `Program.cs` as follows...
+
+```csharp
+SitePageTitle.SiteName = "Fred's Chippie";
 ```
 
-Then `<PageTitleWithSiteName Title="Home" />` will set the page title to "Home - My Blazor Site".
+Then `<SitePageTitle Title="Home" />` will set the page title to "Home - Fred's Chippie".
+
+You can change the separator as follows...
+
+```csharp
+SitePageTitle.Separator = "::";
+```
+
+...which will render the title as "Home :: Fred's Chippie".
+
+You can also swap the order of the page title and site name as follows...
+
+```csharp
+SitePageTitle.SiteNameAtEnd = false;
+```
+
+...which will render the title as "Fred's Chippie :: Home".
 
 ### HebrewDatePicker
 
