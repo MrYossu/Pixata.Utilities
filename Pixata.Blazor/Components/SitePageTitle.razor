@@ -1,0 +1,19 @@
+<PageTitle>@FullTitle</PageTitle>
+
+@code {
+
+  [Parameter]
+  public string Title { get; set; } = "";
+
+  public static string SiteName = "";
+  public static string Separator = "|";
+  public static bool SiteNameAtEnd = true;
+
+  private string FullTitle =>
+    string.IsNullOrWhiteSpace(SiteName)
+      ? $"{Title}"
+      : SiteNameAtEnd
+        ? $"{Title} {Separator} {SiteName}"
+        : $"{SiteName} {Separator} {Title}";
+
+}

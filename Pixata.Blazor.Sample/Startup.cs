@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pixata.Blazor.Components;
 using Pixata.Blazor.Containers;
 using Pixata.Blazor.Sample.Data;
 using Pixata.Email;
@@ -48,5 +49,7 @@ public class Startup(IConfiguration configuration) {
 
     // As this sample does not use authentication, the following line is not actually needed, but is included here to show how to set up the link to your log-in page
     ApiResponseViewConfig.LogInUrl = "LogIn";
+    SitePageTitle.SiteName = "Pixata.Blazor sample";
+    SitePageTitle.Separator = "::";
   }
 }
