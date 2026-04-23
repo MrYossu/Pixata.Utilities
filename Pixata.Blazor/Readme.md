@@ -2,11 +2,13 @@
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor/avion.png "Pixata") 
 
-I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
+Like many developers, I find myself writing the same Blazor components over and over again. I have gathered some of those components together in one place, and am making them available for anyone else who might find them useful.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for thiese components.
+
+I sometimes waffle on about these components [in my blog](https://www.pixata.co.uk/tag/blazor/). No-one reads it, but it satisifes my deeply buried desire to be a writer. If you read the blog, you'll realize why the desire is still deeply buried!
 
 There is a [complimentary package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents), which contains additional components for those who have a subscription to Telerik.
-
-A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for this project.
 
 ## Sample project
 I have added a [Blazor web project](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Test) to the repository, and intend to use that to try out and demonstrate the components. It doesn't contain samples for all the components yet, but I hope to add more over time.
