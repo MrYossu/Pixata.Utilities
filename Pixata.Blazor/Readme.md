@@ -66,6 +66,8 @@ SitePageTitle.SiteNameAtEnd = false;
 
 ...which will render the title as "Fred's Chippie :: Home".
 
+**Remember** that if you are working on a mixed-mode app, you will need to do this in both `Program.cs` files.
+
 ### HebrewDatePicker
 
 A date picker that allows you to select Hebrew dates.
