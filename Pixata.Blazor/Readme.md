@@ -38,7 +38,7 @@ This isn't actually a problem, but removing the duplicate registration will keep
 Some general componets that I found useful.
 
 ### SitePageTitle
-This is intended to be used instead of the built-in `PageTitle` component, and allows you to include your site name in the page title.
+This is intended to be a drop-in replacement for the built-in `PageTitle` component that allows you to include your site name in the page title, without having to do this on every page.
 
 You need to set your site name in `Program.cs` as follows...
 
@@ -46,7 +46,7 @@ You need to set your site name in `Program.cs` as follows...
 SitePageTitle.SiteName = "Fred's Chippie";
 ```
 
-Then `<SitePageTitle Title="Home" />` will set the page title to "Home - Fred's Chippie".
+Then `<SitePageTitle>Home</SitePageTitle>` will set the page title to "Home - Fred's Chippie".
 
 You can change the separator as follows...
 

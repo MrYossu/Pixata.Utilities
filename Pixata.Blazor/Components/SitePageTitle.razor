@@ -1,19 +1,20 @@
-<PageTitle>@FullTitle</PageTitle>
+@if (string.IsNullOrWhiteSpace(SiteName)) {
+  @ChildContent
+} else {
+  if (SiteNameAtEnd) {
+    <PageTitle>@ChildContent @Separator @SiteName</PageTitle>
+  } else {
+    <PageTitle>@SiteName @Separator @ChildContent</PageTitle>
+  }
+}
 
 @code {
 
   [Parameter]
-  public string Title { get; set; } = "";
+  public RenderFragment ChildContent { get; set; }
 
   public static string SiteName = "";
   public static string Separator = "|";
   public static bool SiteNameAtEnd = true;
-
-  private string FullTitle =>
-    string.IsNullOrWhiteSpace(SiteName)
-      ? $"{Title}"
-      : SiteNameAtEnd
-        ? $"{Title} {Separator} {SiteName}"
-        : $"{SiteName} {Separator} {Title}";
 
 }
