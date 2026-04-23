@@ -215,7 +215,7 @@ jobs:
         PROJECT_FILE_PATH: Pixata.Google/Pixata.Google.csproj  
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
-  # *** Publish Pixata.Blazor.Sample ***
+  # Publish Pixata.Blazor.Sample
     - name: Rename _app_offline.htm to app_offline.htm to stop the site
       shell: python
       run: |
