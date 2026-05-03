@@ -68,6 +68,22 @@ SitePageTitle.SiteNameAtEnd = false;
 
 **Remember** that if you are working on a mixed-mode app, you will need to do this in both `Program.cs` files.
 
+### IdentityInspector
+Useful for debugging sites that use ASP.NET Core Identity. It displays the current user's claims and policies. As Identity allows you to query the claims, you don't need any configuration for this to work, but it does not allow you to list policies, only to check if a named exists. Therefore, it needs to know what policies (if any) you want to check. Usage assumes that your policy names are stored as `const`s in a class. For example, your class might loook like this...
+
+```csharp
+public class PoliciesHelper {
+  public const string Initials = nameof(Initials);
+  public const string FullName = nameof(FullName);
+}
+```
+
+You just pass in the type...
+
+```xml
+<IdentityInspector PoliciesType="@typeof(PoliciesHelper)" />
+```
+
 ### HebrewDatePicker
 
 A date picker that allows you to select Hebrew dates.
