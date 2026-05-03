@@ -1,0 +1,485 @@
+@using System.Reflection
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAuthorizationService AuthorizationService
+
+<div class="claims-panel">
+  <header class="panel-header">
+    <div class="panel-title">
+      <span class="panel-icon">🔐</span>
+      <div>
+        <h1>Identity inspector</h1>
+        <p class="panel-subtitle">Claims &amp; authorisation policies</p>
+      </div>
+    </div>
+    @if (_user is not null) {
+      <div class="user-badge">
+        <span class="user-avatar">@GetInitials()</span>
+        <div>
+          <div class="user-name">@(_user.Identity?.Name ?? "Unknown")</div>
+          <div class="user-auth">@(_user.Identity?.IsAuthenticated == true ? "Authenticated" : "Not Authenticated")</div>
+        </div>
+      </div>
+    }
+  </header>
+
+  @if (_isLoading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span>Loading identity data…</span>
+    </div>
+  } else if (_user is null || _user.Identity?.IsAuthenticated != true) {
+    <div class="empty-state">
+      <span class="empty-icon">👤</span>
+      <p>No authenticated user found.</p>
+    </div>
+  } else {
+    <div class="panels-grid mt-2">
+
+      <section class="card me-1">
+        <div class="card-header">
+          <h2>Claims</h2>
+          <span class="badge">@_claims.Count</span>
+        </div>
+        @if (_claims.Count == 0) {
+          <div class="empty-state small">No claims found.</div>
+        } else {
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Value</th>
+                  <th>Issuer</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach (Claim claim in _claims) {
+                  <tr>
+                    <td><code class="claim-type">@FormatClaimType(claim.Type)</code></td>
+                    <td><span class="claim-value">@claim.Value</span></td>
+                    <td><span class="claim-issuer">@claim.Issuer</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section class="card ms-1">
+        <div class="card-header">
+          <h2>Policies</h2>
+          <span class="badge">@_policyResults.Count</span>
+        </div>
+        @if (!_policyResults.Any()) {
+          <div class="empty-state small">
+            <p>No policies configured.</p>
+            <p class="hint">Pass policy names via the <code>PolicyNames</code> parameter.</p>
+          </div>
+        } else {
+          <div class="policy-list">
+            @foreach (KeyValuePair<string, bool?> policy in _policyResults) {
+              <div class="policy-row @GetPolicyClass(policy.Value)">
+                <span class="policy-name">@policy.Key</span>
+                <span class="policy-status">
+                  @if (policy.Value is null) {
+                    <span class="status-unknown">⚠ Unknown</span>
+                  } else if (policy.Value == true) {
+                    <span class="status-pass">✓ Granted</span>
+                  } else {
+                    <span class="status-fail">✗ Denied</span>
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+    </div>
+  }
+</div>
+
+<style>
+    .claims-panel {
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+        color: #1a1a2e;
+    }
+
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2rem 2.5rem;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+        border-radius: 16px 16px 0 0;
+        color: white;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .panel-icon {
+        font-size: 2.5rem;
+        filter: drop-shadow(0 0 12px rgba(229,57,53,0.6));
+    }
+
+    .panel-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+    }
+
+    .panel-subtitle {
+        margin: 0.2rem 0 0;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.55);
+        font-style: italic;
+        font-family: 'Courier New', monospace;
+    }
+
+    .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e53935, #e91e63);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: white;
+        flex-shrink: 0;
+        font-family: 'Courier New', monospace;
+    }
+
+    .user-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .user-auth {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.5);
+        font-family: 'Courier New', monospace;
+    }
+
+    .panels-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        background: #f0f2f8;
+        border-radius: 0 0 16px 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(15,52,96,0.12);
+    }
+
+    @@media (max-width: 768px) {
+        .panels-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+        background: #ffffff;
+        padding: 1.75rem;
+        border-right: 1px solid #e8eaf0;
+    }
+
+    .card:last-child { border-right: none; }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f2f8;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #0f3460;
+        font-family: 'Courier New', monospace;
+    }
+
+    .badge {
+        background: #0f3460;
+        color: white;
+        border-radius: 20px;
+        padding: 0.2rem 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+    }
+
+    thead th {
+        text-align: left;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #8892a4;
+        padding: 0.5rem 0.6rem;
+        border-bottom: 1px solid #e8eaf0;
+        font-family: 'Courier New', monospace;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #f5f6fa;
+        transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody tr:hover { background: #f8f9fd; }
+
+    td {
+        padding: 0.55rem 0.6rem;
+        vertical-align: top;
+    }
+
+    code.claim-type {
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem;
+        background: #eef1f8;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        color: #0f3460;
+        word-break: break-all;
+    }
+
+    .claim-value {
+        color: #1a1a2e;
+        word-break: break-all;
+    }
+
+    .claim-issuer {
+        color: #8892a4;
+        font-size: 0.78rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .policy-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .policy-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.7rem 1rem;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        transition: transform 0.1s;
+    }
+
+    .policy-row:hover { transform: translateX(2px); }
+
+    .policy-row.pass {
+        background: #f0faf4;
+        border-color: #c3e6cb;
+    }
+
+    .policy-row.fail {
+        background: #fff5f5;
+        border-color: #f5c6cb;
+    }
+
+    .policy-row.unknown {
+        background: #fffbf0;
+        border-color: #ffeaa7;
+    }
+
+    .policy-name {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: #1a1a2e;
+        font-weight: 600;
+    }
+
+    .status-pass {
+        color: #1e7e34;
+        font-weight: 700;
+        font-size: 0.8rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .status-fail {
+        color: #c0392b;
+        font-weight: 700;
+        font-size: 0.8rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .status-unknown {
+        color: #d68910;
+        font-weight: 700;
+        font-size: 0.8rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .loading-state {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 3rem;
+        background: white;
+        border-radius: 0 0 16px 16px;
+        color: #8892a4;
+        font-style: italic;
+    }
+
+    .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e8eaf0;
+        border-top-color: #0f3460;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        flex-shrink: 0;
+    }
+
+    @@keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        color: #8892a4;
+        font-style: italic;
+        background: white;
+        border-radius: 0 0 16px 16px;
+    }
+
+    .empty-state.small {
+        padding: 1.5rem;
+        border-radius: 8px;
+        background: #f8f9fd;
+    }
+
+    .empty-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+    .hint {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        color: #aab4c4;
+    }
+
+    .hint code {
+        font-family: 'Courier New', monospace;
+        background: #eef1f8;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+    }
+</style>
+
+@code {
+
+  /// <summary>
+  /// The list of policy names to evaluate against the current user.
+  /// ASP.NET Core does not expose a way to enumerate all registered policies at runtime,
+  /// so policy names must be supplied explicitly.
+  /// </summary>
+  [Parameter]
+  public Type? PoliciesType { get; set; }
+
+  private ClaimsPrincipal? _user;
+  private List<Claim> _claims = [];
+  private Dictionary<string, bool?> _policyResults = [];
+  private bool _isLoading = true;
+
+  protected override async Task OnInitializedAsync() {
+    AuthenticationState authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    _user = authState.User;
+
+    if (_user.Identity?.IsAuthenticated == true) {
+      _claims = [.. _user.Claims];
+      await EvaluatePoliciesAsync();
+    }
+
+    _isLoading = false;
+  }
+
+  private async Task EvaluatePoliciesAsync() {
+    _policyResults = [];
+
+    List<string> policyNames = [];
+
+    if (PoliciesType is not null) {
+      policyNames = [..
+        PoliciesType
+          .GetFields(BindingFlags.Public | BindingFlags.Static)
+          .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
+          .Select(f => (string)f.GetRawConstantValue()!)
+      ];
+    }
+
+    foreach (string policyName in policyNames) {
+      try {
+        AuthorizationResult result = await AuthorizationService.AuthorizeAsync(_user!, policyName);
+        _policyResults[policyName] = result.Succeeded;
+      } catch (Exception) {
+        _policyResults[policyName] = null;
+      }
+    }
+  }
+
+  private string FormatClaimType(string claimType) {
+    // Shorten well-known long URIs for readability
+    string[] segments = claimType.Split('/', '#', ':');
+    return segments.Length > 1 ? segments[^1] : claimType;
+  }
+
+  private string GetInitials() {
+    string name = _user?.Identity?.Name ?? string.Empty;
+    string[] parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    return parts.Length switch {
+      0 => "?",
+      1 => parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant(),
+      _ => $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
+    };
+  }
+
+  private string GetPolicyClass(bool? result) => result switch {
+    true => "pass",
+    false => "fail",
+    null => "unknown"
+  };
+
+}
