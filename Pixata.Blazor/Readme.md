@@ -69,7 +69,16 @@ SitePageTitle.SiteNameAtEnd = false;
 **Remember** that if you are working on a mixed-mode app, you will need to do this in both `Program.cs` files.
 
 ### IdentityInspector
-Useful for debugging sites that use ASP.NET Core Identity. It displays the current user's claims and policies. As Identity allows you to query the claims, you don't need any configuration for this to work, but it does not allow you to list policies, only to check if a named exists. Therefore, it needs to know what policies (if any) you want to check. Usage assumes that your policy names are stored as `const`s in a class. For example, your class might loook like this...
+Useful for debugging sites that use ASP.NET Core Identity. It displays the current user's claims and policies. As Identity allows you to query the claims, you don't need any configuration for this to work, but it does not allow you to list policies, only to check if a named exists. Therefore, it needs to know what policies (if any) you want to check.
+
+There are two ways of specifying the policies to be checked...
+
+You can pass a hard-coded list of policy names as follows...
+```xml
+<IdentityInspector Policies='["Initials", "FullName"]' />
+```
+
+I don't like hard-coded strings, and so keep things like policy names as constants in a helper class. For example, your class might loook like this...
 
 ```csharp
 public class PoliciesHelper {
@@ -78,11 +87,13 @@ public class PoliciesHelper {
 }
 ```
 
-You just pass in the type...
+In this case, you can just pass in the type...
 
 ```xml
 <IdentityInspector PoliciesType="@typeof(PoliciesHelper)" />
 ```
+
+If both parameters are set, then `PoliciesType` will be used, and `Policies` will be ignored.
 
 ### HebrewDatePicker
 

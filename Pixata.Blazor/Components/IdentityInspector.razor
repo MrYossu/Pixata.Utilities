@@ -114,6 +114,13 @@
   [Parameter]
   public Type? PoliciesType { get; set; }
 
+  /// <summary>
+  /// An explicit list of policy names to evaluate against the current user.
+  /// If <see cref="PoliciesType"/> is also set, it takes precedence over this parameter.
+  /// </summary>
+  [Parameter]
+  public List<string> Policies { get; set; } = [];
+
   private ClaimsPrincipal? _user;
   private List<Claim> _claims = [];
   private Dictionary<string, bool?> _policyResults = [];
@@ -143,6 +150,8 @@
           .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
           .Select(f => (string)f.GetRawConstantValue()!)
       ];
+    } else if (Policies.Count > 0) {
+      policyNames = Policies;
     }
 
     foreach (string policyName in policyNames) {
