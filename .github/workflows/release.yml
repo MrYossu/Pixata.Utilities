@@ -75,12 +75,14 @@ jobs:
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+        TELERIK_LICENSE: ${{ secrets.TELERIK_LICENSE }}
 
     - name: Build - Pixata.Blazor.Sample
       run: dotnet build Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configuration Release --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+        TELERIK_LICENSE: ${{ secrets.TELERIK_LICENSE }}
     
     # Pixata.Extensions
     - name: Restore - Pixata.Extensions Dependencies
