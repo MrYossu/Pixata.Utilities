@@ -229,6 +229,8 @@ jobs:
 
     - name: Publish Pixata.Blazor.Sample
       run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net8.0 --output Pixata.Blazor.Sample.Publish
+      env:
+        TELERIK_LICENSE: ${{ secrets.TELERIK_LICENSE }}
 
     - name: Deploy Pixata.Blazor.Sample
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
