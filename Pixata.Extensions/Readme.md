@@ -166,3 +166,6 @@ string result = nums.JoinStrAnd(", ", n => $"Number {n}"); // result is "Number 
 `ToTitleCase` - Replaces the first character of each word with upper case e.g. This is an example - This Is An Example. If the parameter is null, an empty string is returned
 
 `Sanitise` - Sanitises a string to be safe for use as a file name. Invalid characters are replaced, and sequences of invalid characters are condensed.
+
+## ObjectExtensionMethods
+`Clone()` - Returns a shallow clone of an object. Uses reflection, but despite all the myths about this being slow, doing 10 million clones only took about 300ms longer than a reflection-free (and way more complex) version, so I went for simplicity.
