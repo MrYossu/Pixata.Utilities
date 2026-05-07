@@ -180,5 +180,24 @@ namespace Pixata.Extensions {
 
       return sanitisedName;
     }
+
+    /// <summary>
+    /// Checks if the format of a UK postcode is valid. Note that this does not check if the postcode actually exists
+    /// </summary>
+    /// <param name="postcode">The postcode to validate</param>
+    /// <returns>True if the postcode is valid, false otherwise</returns>
+    public static bool UkPostcodeValid(string postcode) =>
+      !string.IsNullOrWhiteSpace(postcode) && Regex.IsMatch(postcode.Replace(" ", "").ToUpper(), "^([A-Z]{1,2}[0-9][A-Z0-9]?|[A-Z]{1,2}[0-9][0-9]|[A-Z]{1,2}[0-9]|[A-Z]{1,2}[0-9][A-Z])[0-9][A-Z]{2}$");
+
+    /// <summary>
+    /// Formats a UK postcode to be upper case, and with a space between the major and minor parts
+    /// </summary>
+    /// <param name="postcode">The postcode to format</param>
+    /// <returns>The formatted postcode, or the original input if the format is invalid for a UK postcode</returns>
+    public static string FormatUkPostcode(string postcode) =>
+      !UkPostcodeValid(postcode)
+        ? postcode
+        : postcode.Replace(" ", "").ToUpper().Insert(postcode.Replace(" ", "").Length - 3, " ");
+
   }
 }
