@@ -186,7 +186,7 @@ namespace Pixata.Extensions {
     /// </summary>
     /// <param name="postcode">The postcode to validate</param>
     /// <returns>True if the postcode is valid, false otherwise</returns>
-    public static bool UkPostcodeValid(string postcode) =>
+    public static bool UkPostcodeValid(this string postcode) =>
       !string.IsNullOrWhiteSpace(postcode) && Regex.IsMatch(postcode.Replace(" ", "").ToUpper(), "^([A-Z]{1,2}[0-9][A-Z0-9]?|[A-Z]{1,2}[0-9][0-9]|[A-Z]{1,2}[0-9]|[A-Z]{1,2}[0-9][A-Z])[0-9][A-Z]{2}$");
 
     /// <summary>
@@ -194,8 +194,8 @@ namespace Pixata.Extensions {
     /// </summary>
     /// <param name="postcode">The postcode to format</param>
     /// <returns>The formatted postcode, or the original input if the format is invalid for a UK postcode</returns>
-    public static string FormatUkPostcode(string postcode) =>
-      !UkPostcodeValid(postcode)
+    public static string FormatUkPostcode(this string postcode) =>
+      !postcode.UkPostcodeValid()
         ? postcode
         : postcode.Replace(" ", "").ToUpper().Insert(postcode.Replace(" ", "").Length - 3, " ");
 
