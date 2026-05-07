@@ -39,6 +39,61 @@ This isn't actually a problem, but removing the duplicate registration will keep
 
 Some general componets that I found useful.
 
+### CommonComponentBase
+As I found myself writing the same helper methods to support common tasks in components, I decided to create a base class that all my components could inherit from. This was a balance between providing what is most likely to be needed and not stuffing absolutely everything into a God class. The eventual choice reflects my own needs, but I hope that it will be useful to others as well.
+
+The class injects instances of `AuthenticationStateProvider`, `NavigationManager` and `TemplateHelper` so you don't need to do this yourself.
+
+As every app I write uses Identity, there are certain basic auth-related tasks that come up over and over again, specifically related to checking if a user is authed, and getting their claims. Therefore I added the following methods (all async)...
+
+- `IsAuthed()` - True if the user is authenticated, false if not
+- `Task<bool> HasClaim(string claim)` - True if the user has the claim, false if the user is not authenticated or does not have the claim
+- `Task<string> GetClaim(string claim)` - Gets the value of a claim of the current user. If the user is not authenticated or does not have the claim, returns an empty string
+- `Task<string> GetEmail()` - Gets the email address of the current user. If the user is not authenticated, returns an empty string
+
+>**Note:** The examples below use a TelerikGrid, merely because that's where I use this helper the most. However, it can be used with any component that allows you to specify a template.
+
+The class also includes some methods to help with templates. For example, without these methods, create custom content for a grid cell in a `TelerikGrid` would look something like this...
+
+```xml
+<GridColumn Field="@nameof(InvestorOverview.Name)">
+  <Template>
+    <a href="@($"{RouteHelper.InvestorDetails}{(context as InvestorOverview).Id}")" class="inv-text">@((context as InvestorOverview).Name)</a>
+  </Template>
+</GridColumn>
+```
+
+With the helpers it can be shortened to just...
+
+```xml
+<GridColumn Field="@nameof(InvestorOverview.Name)" 
+            Template="@(TemplateHelper.Uri<InvestorOverview>(i => i.Name, i => $"{RouteHelper.InvestorDetails}{i.Id}", cssClass: "inv-text"))" />
+```
+
+This creates a link. There is a `Text()` method that does the same thing (without the second paramter) that returns plain text.
+
+Both methods allow you to specify CSS classes and/or styles as either hard-coded strings or as `<Func<T, string>>` that creates the text. In the example above, the investor's name will take the `inv-text` class. If you don't want to add any CSS classes or styles, just pass in an empty string to allow the compiler to distingiush which overload is intended.
+
+If you are doing this multiple times, say for many columns in a grid as above, then it's worth setting defaults. You can do this in the component's `OnInitialized` method as follows...
+```csharp
+  DefaultCssClass = "inv-text";
+```
+
+This class will be applied automatically, unless you override it. There are options to set default styles, as well as `Func`s for both class and style.
+
+To make life even easier, there is a `ToText()` method, which you can use to set up the link `Func` once. Again, in `OnInitialized` you can do something like this...
+
+```csharp
+  ToText = i => $"{RouteHelper.InvestorDetails}{i.Id}";
+```
+
+Then your template becomes even simpler...
+
+```xml
+<GridColumn Field="@nameof(InvestorOverview.Name)" 
+            Template="@(TemplateHelper.Uri<InvestorOverview>(i => i.Name))" />
+```
+
 ### SitePageTitle
 This is intended to be a drop-in replacement for the built-in `PageTitle` component that allows you to include your site name in the page title, without having to do this on every page.
 
