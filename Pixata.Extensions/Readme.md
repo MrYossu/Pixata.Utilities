@@ -167,5 +167,9 @@ string result = nums.JoinStrAnd(", ", n => $"Number {n}"); // result is "Number 
 
 `Sanitise` - Sanitises a string to be safe for use as a file name. Invalid characters are replaced, and sequences of invalid characters are condensed.
 
+`UkPostcodeValid` -Checks if the string has the format of a valid UK postcode.
+
+`FormatUkPostcode` - Formats a string as a UK postcode, ie upper case, and with a space between the major and minor parts. If the string is not in a valid postcode format, it is returned unchanged.
+
 ## ObjectExtensionMethods
 `Clone()` - Returns a shallow clone of an object. Uses reflection, but despite all the myths about this being slow, doing 10 million clones only took about 300ms longer than a reflection-free (and way more complex) version, so I went for simplicity.
