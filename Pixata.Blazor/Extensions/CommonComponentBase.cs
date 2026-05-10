@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Pixata.Blazor.Extensions;
 
@@ -9,6 +12,53 @@ public class CommonComponentBase<T> : ComponentBase where T : class {
 
   [Inject]
   public TemplateHelper TemplateHelper { get; set; } = null!;
+
+  #region Authentication and claims
+
+  [Inject]
+  public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+
+  private ClaimsPrincipal _user;
+
+  /// <summary>
+  /// Determines whether the current user is authenticated.
+  /// </summary>
+  /// <returns>True if the user is authenticated, false if not</returns>
+  public async Task<bool> IsAuthed() {
+    _user ??= (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+    return _user.Identity!.IsAuthenticated;
+  }
+
+  /// <summary>
+  /// Check if the user has a specific claim
+  /// </summary>
+  /// <param name="claim">The name of the claim to check</param>
+  /// <returns>True if the user has the claim, false if the user is not authenticated or does not have the claim</returns>
+  public async Task<bool> HasClaim(string claim) {
+    _user ??= (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+    return _user.HasClaim(c => c.Type == claim);
+  }
+
+  /// <summary>
+  /// Gets the value of a claim of the current user. If the user is not authenticated or does not have the claim, returns an empty string
+  /// </summary>
+  /// <param name="claim">The name of the claim to retrieve</param>
+  /// <returns>The value of the claim, or an empty string if the claim is not found</returns>
+  public async Task<string> GetClaim(string claim) {
+    _user ??= (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+    return _user.FindFirst(claim)?.Value ?? string.Empty;
+  }
+
+  /// <summary>
+  /// Gets the email address of the current user
+  /// </summary>
+  /// <returns>The email address of the current user, or an empty string if the user is not authenticated</returns>
+  public async Task<string> GetEmail() {
+    _user ??= (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+    return _user.Identity!.Name ?? "";
+  }
+
+  #endregion
 
   /// <summary>
   /// If set, this is the default style(s) to be applied to links and text

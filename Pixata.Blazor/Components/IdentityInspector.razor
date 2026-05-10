@@ -1,0 +1,189 @@
+@using System.Reflection
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAuthorizationService AuthorizationService
+
+<div class="claims-panel">
+  <header class="panel-header">
+    <div class="panel-title">
+      <span class="panel-icon">🔐</span>
+      <div>
+        <h1>Identity inspector</h1>
+        <p class="panel-subtitle">Claims &amp; authorisation policies</p>
+      </div>
+    </div>
+    @if (_user is not null) {
+      <div class="user-badge">
+        <span class="user-avatar">@GetInitials()</span>
+        <div>
+          <div class="user-name">@(_user.Identity?.Name ?? "Unknown")</div>
+          <div class="user-auth">@(_user.Identity?.IsAuthenticated == true ? "Authenticated" : "Not Authenticated")</div>
+        </div>
+      </div>
+    }
+  </header>
+
+  @if (_isLoading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span>Loading identity data…</span>
+    </div>
+  } else if (_user is null || _user.Identity?.IsAuthenticated != true) {
+    <div class="empty-state">
+      <span class="empty-icon">👤</span>
+      <p>No authenticated user found.</p>
+    </div>
+  } else {
+    <div class="panels-grid mt-2">
+
+      <section class="card me-1">
+        <div class="card-header">
+          <h2>Claims</h2>
+          <span class="badge">@_claims.Count</span>
+        </div>
+        @if (_claims.Count == 0) {
+          <div class="empty-state small">No claims found.</div>
+        } else {
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Value</th>
+                  <th>Issuer</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach (Claim claim in _claims) {
+                  <tr>
+                    <td><code class="claim-type">@FormatClaimType(claim.Type)</code></td>
+                    <td><span class="claim-value">@claim.Value</span></td>
+                    <td><span class="claim-issuer">@claim.Issuer</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section class="card ms-1">
+        <div class="card-header">
+          <h2>Policies</h2>
+          <span class="badge">@_policyResults.Count</span>
+        </div>
+        @if (!_policyResults.Any()) {
+          <div class="empty-state small">
+            <p>No policies configured.</p>
+            <p class="hint">Pass policy names via the <code>PolicyNames</code> parameter.</p>
+          </div>
+        } else {
+          <div class="policy-list">
+            @foreach (KeyValuePair<string, bool?> policy in _policyResults) {
+              <div class="policy-row @GetPolicyClass(policy.Value)">
+                <span class="policy-name">@policy.Key</span>
+                <span class="policy-status">
+                  @if (policy.Value is null) {
+                    <span class="status-unknown">⚠ Unknown</span>
+                  } else if (policy.Value == true) {
+                    <span class="status-pass">✓ Granted</span>
+                  } else {
+                    <span class="status-fail">✗ Denied</span>
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+    </div>
+  }
+</div>
+
+@code {
+
+  /// <summary>
+  /// The list of policy names to evaluate against the current user.
+  /// ASP.NET Core does not expose a way to enumerate all registered policies at runtime,
+  /// so policy names must be supplied explicitly.
+  /// </summary>
+  [Parameter]
+  public Type? PoliciesType { get; set; }
+
+  /// <summary>
+  /// An explicit list of policy names to evaluate against the current user.
+  /// If <see cref="PoliciesType"/> is also set, it takes precedence over this parameter.
+  /// </summary>
+  [Parameter]
+  public List<string> Policies { get; set; } = [];
+
+  private ClaimsPrincipal? _user;
+  private List<Claim> _claims = [];
+  private Dictionary<string, bool?> _policyResults = [];
+  private bool _isLoading = true;
+
+  protected override async Task OnInitializedAsync() {
+    AuthenticationState authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    _user = authState.User;
+
+    if (_user.Identity?.IsAuthenticated == true) {
+      _claims = [.. _user.Claims];
+      await EvaluatePoliciesAsync();
+    }
+
+    _isLoading = false;
+  }
+
+  private async Task EvaluatePoliciesAsync() {
+    _policyResults = [];
+
+    List<string> policyNames = [];
+
+    if (PoliciesType is not null) {
+      policyNames = [..
+        PoliciesType
+          .GetFields(BindingFlags.Public | BindingFlags.Static)
+          .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
+          .Select(f => (string)f.GetRawConstantValue()!)
+      ];
+    } else if (Policies.Count > 0) {
+      policyNames = Policies;
+    }
+
+    foreach (string policyName in policyNames) {
+      try {
+        AuthorizationResult result = await AuthorizationService.AuthorizeAsync(_user!, policyName);
+        _policyResults[policyName] = result.Succeeded;
+      } catch (Exception) {
+        _policyResults[policyName] = null;
+      }
+    }
+  }
+
+  private string FormatClaimType(string claimType) {
+    // Shorten well-known long URIs for readability
+    string[] segments = claimType.Split('/', '#', ':');
+    return segments.Length > 1 ? segments[^1] : claimType;
+  }
+
+  private string GetInitials() {
+    string name = _user?.Identity?.Name ?? string.Empty;
+    string[] parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    return parts.Length switch {
+      0 => "?",
+      1 => parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant(),
+      _ => $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
+    };
+  }
+
+  private string GetPolicyClass(bool? result) => result switch {
+    true => "pass",
+    false => "fail",
+    null => "unknown"
+  };
+
+}

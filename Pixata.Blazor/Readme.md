@@ -2,11 +2,13 @@
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor/avion.png "Pixata") 
 
-I have [blogged about some Blazor components I've been writing](https://www.pixata.co.uk/tag/blazor/). This project contains the source for those components.
+Like many developers, I find myself writing the same Blazor components over and over again. I have gathered some of those components together in one place, and am making them available for anyone else who might find them useful.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for thiese components.
+
+I sometimes waffle on about these components [in my blog](https://www.pixata.co.uk/tag/blazor/). No-one reads it, but it satisifes my deeply buried desire to be a writer. If you read the blog, you'll realize why the desire is still deeply buried!
 
 There is a [complimentary package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents), which contains additional components for those who have a subscription to Telerik.
-
-A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for this project.
 
 ## Sample project
 I have added a [Blazor web project](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Test) to the repository, and intend to use that to try out and demonstrate the components. It doesn't contain samples for all the components yet, but I hope to add more over time.
@@ -37,14 +39,116 @@ This isn't actually a problem, but removing the duplicate registration will keep
 
 Some general componets that I found useful.
 
-### PageTitleWithSiteName
-This snappily-named component allows you to set the page title, and have your site name automatically appended to it. It is intended to be used instead of the built-in `PageTitle` component, and relies on you setting the site name in your app settings...
+### CommonComponentBase
+As I found myself writing the same helper methods to support common tasks in components, I decided to create a base class that all my components could inherit from. This was a balance between providing what is most likely to be needed and not stuffing absolutely everything into a God class. The eventual choice reflects my own needs, but I hope that it will be useful to others as well.
 
-```json
-  "SiteName": "My Blazor Site"
+The class injects instances of `AuthenticationStateProvider`, `NavigationManager` and `TemplateHelper` so you don't need to do this yourself.
+
+As every app I write uses Identity, there are certain basic auth-related tasks that come up over and over again, specifically related to checking if a user is authed, and getting their claims. Therefore I added the following methods (all async)...
+
+- `IsAuthed()` - True if the user is authenticated, false if not
+- `Task<bool> HasClaim(string claim)` - True if the user has the claim, false if the user is not authenticated or does not have the claim
+- `Task<string> GetClaim(string claim)` - Gets the value of a claim of the current user. If the user is not authenticated or does not have the claim, returns an empty string
+- `Task<string> GetEmail()` - Gets the email address of the current user. If the user is not authenticated, returns an empty string
+
+>**Note:** The examples below use a TelerikGrid, merely because that's where I use this helper the most. However, it can be used with any component that allows you to specify a template.
+
+The class also includes some methods to help with templates. For example, without these methods, create custom content for a grid cell in a `TelerikGrid` would look something like this...
+
+```xml
+<GridColumn Field="@nameof(InvestorOverview.Name)">
+  <Template>
+    <a href="@($"{RouteHelper.InvestorDetails}{(context as InvestorOverview).Id}")" class="inv-text">@((context as InvestorOverview).Name)</a>
+  </Template>
+</GridColumn>
 ```
 
-Then `<PageTitleWithSiteName Title="Home" />` will set the page title to "Home - My Blazor Site".
+With the helpers it can be shortened to just...
+
+```xml
+<GridColumn Field="@nameof(InvestorOverview.Name)" 
+            Template="@(TemplateHelper.Uri<InvestorOverview>(i => i.Name, i => $"{RouteHelper.InvestorDetails}{i.Id}", cssClass: "inv-text"))" />
+```
+
+This creates a link. There is a `Text()` method that does the same thing (without the second paramter) that returns plain text.
+
+Both methods allow you to specify CSS classes and/or styles as either hard-coded strings or as `<Func<T, string>>` that creates the text. In the example above, the investor's name will take the `inv-text` class. If you don't want to add any CSS classes or styles, just pass in an empty string to allow the compiler to distingiush which overload is intended.
+
+If you are doing this multiple times, say for many columns in a grid as above, then it's worth setting defaults. You can do this in the component's `OnInitialized` method as follows...
+```csharp
+  DefaultCssClass = "inv-text";
+```
+
+This class will be applied automatically, unless you override it. There are options to set default styles, as well as `Func`s for both class and style.
+
+To make life even easier, there is a `ToText()` method, which you can use to set up the link `Func` once. Again, in `OnInitialized` you can do something like this...
+
+```csharp
+  ToText = i => $"{RouteHelper.InvestorDetails}{i.Id}";
+```
+
+Then your template becomes even simpler...
+
+```xml
+<GridColumn Field="@nameof(InvestorOverview.Name)" 
+            Template="@(TemplateHelper.Uri<InvestorOverview>(i => i.Name))" />
+```
+
+### SitePageTitle
+This is intended to be a drop-in replacement for the built-in `PageTitle` component that allows you to include your site name in the page title, without having to do this on every page.
+
+You need to set your site name in `Program.cs` as follows...
+
+```csharp
+SitePageTitle.SiteName = "Fred's Chippie";
+```
+
+Then `<SitePageTitle>Home</SitePageTitle>` will set the page title to "Home - Fred's Chippie".
+
+You can change the separator as follows...
+
+```csharp
+SitePageTitle.Separator = "::";
+```
+
+...which will render the title as "Home :: Fred's Chippie".
+
+You can also swap the order of the page title and site name as follows...
+
+```csharp
+SitePageTitle.SiteNameAtEnd = false;
+```
+
+...which will render the title as "Fred's Chippie :: Home".
+
+**Remember** that if you are working on a mixed-mode app, you will need to do this in both `Program.cs` files.
+
+### IdentityInspector
+Useful for debugging sites that use ASP.NET Core Identity. It displays the current user's claims and policies. As Identity allows you to query the claims, you don't need any configuration for this to work, but it does not allow you to list policies, only to check if a named exists. Therefore, it needs to know what policies (if any) you want to check.
+
+There are two ways of specifying the policies to be checked...
+
+You can pass a hard-coded list of policy names as follows...
+```xml
+<IdentityInspector Policies='["Initials", "FullName"]' />
+```
+
+I don't like hard-coded strings, and so keep things like policy names as constants in a helper class. For example, your class might loook like this...
+
+```csharp
+public class PoliciesHelper {
+  public const string Initials = nameof(Initials);
+  public const string FullName = nameof(FullName);
+}
+```
+
+In this case, you can just pass in the type...
+
+```xml
+<IdentityInspector PoliciesType="@typeof(PoliciesHelper)" />
+```
+
+If both parameters are set, then `PoliciesType` will be used, and `Policies` will be ignored.
 
 ### HebrewDatePicker
 

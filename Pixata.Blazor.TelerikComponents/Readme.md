@@ -6,11 +6,9 @@ This package complements the [Pixata.Blazor package](https://github.com/MrYossu/
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents/) is available for this project.
 
->Note that as of version 12.2.0, the major and minor package versions will correspond to the version of the Telerik.Blazor package that is required. The patch version will be used for updates to this package. The build number will indicate my own internal versioning. Thus, version 12.2.0 is based on the Telerik Blazor package version 12.2.x, where x is my own nicremental build number.
+>Note that as of version 12.2.0, the major and minor package versions will correspond to the version of the Telerik.Blazor package that is required. The patch version will be used for updates to this package. The build number will indicate my own internal versioning. Thus, version 12.2.0 is based on the Telerik Blazor package version 12.2.x, where x is my own incremental build number.
 
 ## The components
-### Form components
-These were writen to make it quicker to create forms in Blazor. They are all very much based around Bootstrap, which I was using heavily when I wrote these components. If you look at the [form page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor) on the sample web site you can see the usage.)
 
 ### Extension method to improve the performance of the Telerik Blazor grid
 Whilst the Telerik Blazor grid does an amazing job, it has its limitations. One of these is the way it computes aggregates. For large tables, this can be slow.
@@ -36,6 +34,20 @@ TelerikGridFilterResults data = await args.GetData<MyType>(/* args go here */)
 
 Not a major issue, but worth noting.
 
+## TelerikGridBoolFilter
+Whilst row filtering on Telerik grids is, in general, pretty brilliant, the one thing that lets it down (in my opinion anyway, feel free to disagree) is the way the controls on `bool` columns are handled. By default, a `bool` column's row filters will show a dropdown for the value, and a button to clear the filter. Apart from the fact that this takes up far more space than the column needs, the button is superfluous, as the dropdown has an "(All)" entry, which isn't even selected by default. Also, the dropdown values are "is true" and "is false", which is not the way the average user thinks.
+
+So, I decided something neater was required. The `TelerikGridBoolFilter` component is an easy way to filter `bool` columns. Usage is very simple...
+
+```xml
+<GridColumn Field="@nameof(WeatherForecast.Rain)"
+            Width="100px"
+            Title="Rain?"
+            FilterCellTemplate="@TelerikGridBoolFilter.Filter()" />
+```
+
+This is based on the standard Blazor sample page that shows weather forecasts, to which I added a `bool` property called `Rain`. The column header now just shows a checkbox, which by default is in the indeterminate state, meaning show all, but can be checked or unchecked to filter the column.
+
 ## LocalisationHelper
 The Telerik Blazor components supply a default text for many situations. For example, if a grid does not contain any data, then it will show the rather geeky message "No records to display". Overriding these messages with your own text is not hard, but is now even easier with the `LocalisationHelper` class in this package.
 
@@ -60,6 +72,9 @@ builder.Services.AddSingleton(typeof(ITelerikStringLocalizer), typeof(Localisati
 As the class is static, you only need to do this once.
 
 You can see a list of all messages on ([Telerik's web site](https://www.telerik.com/blazor-ui/documentation/api/telerik.blazor.resources.messages)).
+
+### Form components
+These were writen to make it quicker to create forms in Blazor. They are all very much based around Bootstrap, which I was using heavily when I wrote these components. If you look at the [form page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor) on the sample web site you can see the usage.)
 
 ## Warning
 The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can get a 30-day trial version from them.
