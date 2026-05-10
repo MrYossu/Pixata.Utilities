@@ -31,6 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Pixata.Extensions\Pixata.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Icon\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
