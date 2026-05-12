@@ -20,6 +20,9 @@
                              ShabbosOrYomTovBgColour="@_shabbosOrYomTovBgColour"
                              IncludeOtherNonWorkDays="@_includeOtherNonWorkDays"
                              OtherNonWorkDayBgColour="@_otherNonWorkDayBgColour"
+                             IncludeBankHolidays="@_includeBankHolidays"
+                             BankHolidayBgColour="@_bankHolidayBgColour"
+                             ClashPriority="@_clashPriority"
                              OpenOnRight="@_openOnRight"
                              ShowDiagnostics="@_showDiagnostics" />
 
@@ -169,6 +172,41 @@
           </div>
         </div>
 
+        <h6 class="text-muted text-uppercase mb-2" style="font-size: .7rem; letter-spacing: .05em;">Bank Holidays</h6>
+        <div class="row g-2 mb-3 align-items-center">
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Highlight bank holidays</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="includeBankHolidays" @bind="_includeBankHolidays" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Bank holiday colour</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="d-flex align-items-center gap-2">
+              <input type="color" class="form-control form-control-color form-control-sm" @bind="_bankHolidayBgColour" disabled="@(!_includeBankHolidays)" />
+              <code class="small">@_bankHolidayBgColour</code>
+              <button class="btn btn-outline-secondary btn-sm" @onclick='() => _bankHolidayBgColour = "#d4edda"'>Reset</button>
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Clash priority</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="btn-group btn-group-sm" role="group">
+              @foreach (BankHolidayClashPriority val in Enum.GetValues<BankHolidayClashPriority>()) {
+                <input type="radio" class="btn-check" name="clashPriority" id="clashPriority_@val" checked="@(_clashPriority == val)" @onchange="() => _clashPriority = val" />
+                <label class="btn btn-outline-secondary" for="clashPriority_@val">@val</label>
+              }
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -202,6 +240,9 @@
                                  ShabbosOrYomTovBgColour="@_shabbosOrYomTovBgColour"
                                  IncludeOtherNonWorkDays="@_includeOtherNonWorkDays"
                                  OtherNonWorkDayBgColour="@_otherNonWorkDayBgColour"
+                                 IncludeBankHolidays="@_includeBankHolidays"
+                                 BankHolidayBgColour="@_bankHolidayBgColour"
+                                 ClashPriority="@_clashPriority"
                                  OpenOnRight="@_openOnRight"
                                  ShowDiagnostics="@_showDiagnostics" />
       </div>
@@ -224,6 +265,9 @@
   private string _shabbosOrYomTovBgColour = "#b1c1d7";
   private bool _includeOtherNonWorkDays;
   private string _otherNonWorkDayBgColour = "#d2dae3";
+  private bool _includeBankHolidays;
+  private string _bankHolidayBgColour = "#d4edda";
+  private BankHolidayClashPriority _clashPriority = BankHolidayClashPriority.HebrewFirst;
   private bool _openOnRight;
   private bool _showWindow;
 }

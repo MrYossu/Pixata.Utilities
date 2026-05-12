@@ -57,6 +57,15 @@ public partial class HebrewDatePicker<TValue> {
   public string OtherNonWorkDayBgColour { get; set; } = "#d2dae3";
 
   [Parameter]
+  public bool IncludeBankHolidays { get; set; }
+
+  [Parameter]
+  public string BankHolidayBgColour { get; set; } = "#d4edda";
+
+  [Parameter]
+  public BankHolidayClashPriority ClashPriority { get; set; } = BankHolidayClashPriority.HebrewFirst;
+
+  [Parameter]
   public bool OpenOnRight { get; set; }
 
   private readonly HebrewCalendar _hc = new();
@@ -454,12 +463,25 @@ public partial class HebrewDatePicker<TValue> {
   }
 
   private HebrewDateType GetHebrewDateType(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
-    if (IncludeShabbosOrYomTov && (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay))) {
+    bool isShabbosOrYomTov = IncludeShabbosOrYomTov && (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay));
+    bool isOtherNonWorkDay = IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay);
+    bool isBankHoliday = IncludeBankHolidays && IsBankHoliday(gregorianDate);
+    if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst) {
+      if (isBankHoliday) {
+        return HebrewDateType.BankHoliday;
+      }
+      if (isShabbosOrYomTov) {
+        return HebrewDateType.ShabbosOrYomTov;
+      }
+      return isOtherNonWorkDay ? HebrewDateType.OtherNonWorkDay : HebrewDateType.None;
+    }
+    if (isShabbosOrYomTov) {
       return HebrewDateType.ShabbosOrYomTov;
     }
-    return IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay)
-      ? HebrewDateType.OtherNonWorkDay
-      : HebrewDateType.None;
+    if (isOtherNonWorkDay) {
+      return HebrewDateType.OtherNonWorkDay;
+    }
+    return isBankHoliday ? HebrewDateType.BankHoliday : HebrewDateType.None;
   }
 
   private bool IsYomTov(int hebrewYear, int hebrewMonth, int hebrewDay) {
@@ -510,12 +532,123 @@ public partial class HebrewDatePicker<TValue> {
   private int GetNissanMonth(int hebrewYear) =>
     _hc.GetMonthsInYear(hebrewYear) == 13 ? 8 : 7;
 
+  private bool IsBankHoliday(DateTime date) =>
+    GetBankHolidayName(date) != "";
+
+  private static string GetBankHolidayName(DateTime date) {
+    int year = date.Year;
+    DateTime newYearsDay = MondaySubstitute(new DateTime(year, 1, 1));
+    if (date == newYearsDay) {
+      return "New Year's Day";
+    }
+    (DateTime goodFriday, DateTime easterMonday) = GetEasterDates(year);
+    if (date == goodFriday) {
+      return "Good Friday";
+    }
+    if (date == easterMonday) {
+      return "Easter Monday";
+    }
+    DateTime earlyMay = EarlyMayBankHoliday(year);
+    if (date == earlyMay) {
+      return "Early May Bank Holiday";
+    }
+    DateTime springBankHoliday = SpringBankHoliday(year);
+    if (date == springBankHoliday) {
+      return "Spring Bank Holiday";
+    }
+    DateTime summerBankHoliday = SummerBankHoliday(year);
+    if (date == summerBankHoliday) {
+      return "Summer Bank Holiday";
+    }
+    DateTime christmasDay = MondayOrTuesdaySubstitute(new DateTime(year, 12, 25));
+    if (date == christmasDay) {
+      return "Christmas Day";
+    }
+    DateTime boxingDay = MondayOrTuesdaySubstitute(new DateTime(year, 12, 26));
+    if (date == boxingDay) {
+      return "Boxing Day";
+    }
+    return "";
+  }
+
+  private static DateTime MondaySubstitute(DateTime date) =>
+    date.DayOfWeek switch {
+      DayOfWeek.Saturday => date.AddDays(2),
+      DayOfWeek.Sunday => date.AddDays(1),
+      _ => date,
+    };
+
+  private static DateTime MondayOrTuesdaySubstitute(DateTime date) {
+    // Used for Christmas/Boxing Day pair so they don't clash
+    if (date.DayOfWeek == DayOfWeek.Saturday) {
+      return date.AddDays(2);
+    }
+    if (date.DayOfWeek == DayOfWeek.Sunday) {
+      // If Christmas is Sunday, Boxing Day (Monday) takes that slot; Christmas moves to Tuesday
+      DateTime christmas = new(date.Year, 12, 25);
+      DateTime boxing = new(date.Year, 12, 26);
+      if (christmas.DayOfWeek == DayOfWeek.Sunday) {
+        return date == christmas ? christmas.AddDays(2) : boxing.AddDays(1);
+      }
+      return date.AddDays(1);
+    }
+    return date;
+  }
+
+  private static (DateTime GoodFriday, DateTime EasterMonday) GetEasterDates(int year) {
+    // Anonymous Gregorian algorithm
+    int a = year % 19;
+    int b = year / 100;
+    int c = year % 100;
+    int d = b / 4;
+    int e = b % 4;
+    int f = (b + 8) / 25;
+    int g = (b - f + 1) / 3;
+    int h = (19 * a + b - d - g + 15) % 30;
+    int i = c / 4;
+    int k = c % 4;
+    int l = (32 + 2 * e + 2 * i - h - k) % 7;
+    int m = (a + 11 * h + 22 * l) / 451;
+    int month = (h + l - 7 * m + 114) / 31;
+    int day = ((h + l - 7 * m + 114) % 31) + 1;
+    DateTime easterSunday = new(year, month, day);
+    return (easterSunday.AddDays(-2), easterSunday.AddDays(1));
+  }
+
+  private static DateTime EarlyMayBankHoliday(int year) {
+    // First Monday in May (VE Day exception years handled separately if needed)
+    DateTime d = new(year, 5, 1);
+    while (d.DayOfWeek != DayOfWeek.Monday) {
+      d = d.AddDays(1);
+    }
+    return d;
+  }
+
+  private static DateTime SpringBankHoliday(int year) {
+    // Last Monday in May
+    DateTime d = new(year, 5, 31);
+    while (d.DayOfWeek != DayOfWeek.Monday) {
+      d = d.AddDays(-1);
+    }
+    return d;
+  }
+
+  private static DateTime SummerBankHoliday(int year) {
+    // Last Monday in August
+    DateTime d = new(year, 8, 31);
+    while (d.DayOfWeek != DayOfWeek.Monday) {
+      d = d.AddDays(-1);
+    }
+    return d;
+  }
+
   private string GetDayStyle(HebrewDateType hebrewDateType, bool isSelected, bool isToday) =>
     isSelected || isToday
       ? ""
       : hebrewDateType switch {
         HebrewDateType.ShabbosOrYomTov => $"background-color: {ShabbosOrYomTovBgColour};",
         HebrewDateType.OtherNonWorkDay => $"background-color: {OtherNonWorkDayBgColour};",
+        HebrewDateType.BankHoliday => $"background-color: {BankHolidayBgColour};",
         _ => "",
       };
 
@@ -531,23 +664,31 @@ public partial class HebrewDatePicker<TValue> {
   }
 
   private string GetHolidayName(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
-    List<string> parts = [];
+    List<string> hebrewParts = [];
     if (IncludeShabbosOrYomTov && gregorianDate.DayOfWeek == DayOfWeek.Saturday) {
-      parts.Add("Shabbos");
+      hebrewParts.Add("Shabbos");
     }
     if (IncludeShabbosOrYomTov) {
       string yomTovName = GetYomTovName(hebrewYear, hebrewMonth, hebrewDay);
       if (!string.IsNullOrEmpty(yomTovName)) {
-        parts.Add(yomTovName);
+        hebrewParts.Add(yomTovName);
       }
     }
     if (IncludeOtherNonWorkDays) {
       string otherName = GetOtherNonWorkDayName(hebrewYear, hebrewMonth, hebrewDay);
       if (!string.IsNullOrEmpty(otherName)) {
-        parts.Add(otherName);
+        hebrewParts.Add(otherName);
       }
     }
-    return string.Join(" / ", parts);
+    string bankHolidayName = IncludeBankHolidays ? GetBankHolidayName(gregorianDate) : "";
+    if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst && !string.IsNullOrEmpty(bankHolidayName)) {
+      List<string> parts = [bankHolidayName, ..hebrewParts];
+      return string.Join(" / ", parts);
+    }
+    if (!string.IsNullOrEmpty(bankHolidayName)) {
+      hebrewParts.Add(bankHolidayName);
+    }
+    return string.Join(" / ", hebrewParts);
   }
 
   private string GetYomTovName(int hebrewYear, int hebrewMonth, int hebrewDay) {
@@ -604,6 +745,7 @@ public partial class HebrewDatePicker<TValue> {
     None,
     ShabbosOrYomTov,
     OtherNonWorkDay,
+    BankHoliday,
   }
 }
 
@@ -611,4 +753,9 @@ public enum DateInputDisplay {
   Hebrew,
   Gregorian,
   Both,
+}
+
+public enum BankHolidayClashPriority {
+  HebrewFirst,
+  BankHolidayFirst,
 }
