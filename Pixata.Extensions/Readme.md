@@ -173,3 +173,5 @@ string result = nums.JoinStrAnd(", ", n => $"Number {n}"); // result is "Number 
 
 ## ObjectExtensionMethods
 `Clone()` - Returns a shallow clone of an object. Uses reflection, but despite all the myths about this being slow, doing 10 million clones only took about 300ms longer than a reflection-free (and way more complex) version, so I went for simplicity.
+
+`DumpProperties` - Dumps the names and values of all simple properties of an object to a string for debugging purposes. Simple properties are enums, string, decimal, DateTime, DateOnly, TimeOnly, TimeSpan, and Guid. Properties that cannot be read or are in the optional ignoredProperties list are skipped.
