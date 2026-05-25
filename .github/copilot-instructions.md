@@ -1,11 +1,14 @@
 ﻿## Code guidelines
 
+The guidelines here apply to all C# code, whether in `.cs` files or in @code blocks in `.razor` files.
+
 - File-scoped namespaces should always be used.
 - Primary constructors should be used whenever possible.
 - Opening braces should be on the end of the line, not on a new line.
 - Code should be indented with 2 spaces, not tabs.
 - Always use explicit variable types instead of `var` where possible.
 - Use target-typed `new()` expressions where possible.
+- Always initialise parameters; use `= null!` for non-nullable reference types that will be set by DI or the framework.
 - Use expression-bodied members for single-line methods and properties.
 - Always use braces in `if` statements and the like, even for single-line code blocks.
 - Use collection initialisers (eg `[]`) instead of `new List<>()`.
@@ -16,3 +19,4 @@
 - Do not add an interface unless it is needed, eg for the services that are implemented multiple times. Helpers and services that are only ever implemented once do not need an interface.
 - Async methods should not have 'Async' at the end of their names.
 - Always use UK spelling for variable names, method names, etc. For example, "colour" not "color", "sanitise" not "sanitize".
+- Titles should only have a capital letter on the first word, eg "Terms and conditions" not "Terms And Conditions"
