@@ -1,0 +1,32 @@
+@namespace Pixata.Blazor.Auditing.Components
+
+<div class="property-row @(IsChanged ? "property-changed" : "")">
+  <span class="property-name">@PropertyName</span>
+  @if (IsChanged) {
+    <span class="property-badge">🟡</span>
+    <div class="property-values">
+      <span class="old-value">@OldValue</span>
+      <span class="arrow">→</span>
+      <span class="new-value">@NewValue</span>
+    </div>
+  } else {
+    <span class="property-value">@Value</span>
+  }
+</div>
+
+@code {
+  [Parameter]
+  public string PropertyName { get; set; } = "";
+
+  [Parameter]
+  public string? Value { get; set; }
+
+  [Parameter]
+  public bool IsChanged { get; set; }
+
+  [Parameter]
+  public string? OldValue { get; set; }
+
+  [Parameter]
+  public string? NewValue { get; set; }
+}

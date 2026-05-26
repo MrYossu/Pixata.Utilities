@@ -16,4 +16,12 @@ public class AuditService(DbContext context) : AuditServiceInterface {
       .Distinct()
       .OrderBy(t => t)
       .ToListAsync();
+
+  public async Task<List<string>> GetDistinctEntityIds(string entityType) =>
+    await context.Set<Audit>()
+      .Where(a => a.EntityType == entityType)
+      .Select(a => a.EntityId)
+      .Distinct()
+      .OrderBy(id => id)
+      .ToListAsync();
 }

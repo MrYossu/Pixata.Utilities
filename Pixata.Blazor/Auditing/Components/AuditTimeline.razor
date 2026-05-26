@@ -1,0 +1,68 @@
+@using Pixata.AspNetCore.Auditing.Models
+@using Pixata.Blazor.Auditing.Models
+@namespace Pixata.Blazor.Auditing.Components
+
+<div class="audit-timeline">
+  @if (Entries.Count == 0) {
+    <div class="empty-state">
+      <span>📋</span>
+      <p>No audit entries found.</p>
+    </div>
+  } else {
+    @foreach (AuditEntryViewModel entry in Entries) {
+      <div class="timeline-entry">
+        <div class="timeline-header">
+          <span class="operation-icon">@GetOperationIcon(entry.Operation)</span>
+          <span class="operation-label">@entry.Operation</span>
+          <span class="timestamp">@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+          <span class="user">by @entry.ChangedBy</span>
+        </div>
+        <div class="timeline-body">
+          @if (_expandedEntries.Contains(entry.Id)) {
+            <button class="toggle-btn" @onclick="() => ToggleEntry(entry.Id)">▼ Hide properties</button>
+            <div class="properties-list">
+              @{
+                HashSet<string> changedPropertyNames = entry.ChangedProperties.Select(change => change.PropertyName).ToHashSet();
+              }
+              @foreach (KeyValuePair<string, object?> property in entry.Properties) {
+                @if (changedPropertyNames.Contains(property.Key)) {
+                  PropertyChange change = entry.ChangedProperties.First(changedProperty => changedProperty.PropertyName == property.Key);
+                  <EntityPropertyDiff PropertyName="@property.Key" IsChanged="true" OldValue="@change.OldValue" NewValue="@change.NewValue" />
+                } else {
+                  <EntityPropertyDiff PropertyName="@property.Key" Value="@(property.Value?.ToString())" />
+                }
+              }
+            </div>
+          } else {
+            <button class="toggle-btn" @onclick="() => ToggleEntry(entry.Id)">▶ Show properties (@entry.Properties.Count)</button>
+            @if (entry.ChangedProperties.Count > 0) {
+              <div class="changed-summary">
+                <span class="property-badge">🟡</span> @entry.ChangedProperties.Count changed: @string.Join(", ", entry.ChangedProperties.Select(change => change.PropertyName))
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
+
+@code {
+  [Parameter]
+  public List<AuditEntryViewModel> Entries { get; set; } = [];
+
+  private HashSet<long> _expandedEntries = [];
+
+  private void ToggleEntry(long entryId) {
+    if (!_expandedEntries.Remove(entryId)) {
+      _expandedEntries.Add(entryId);
+    }
+  }
+
+  private static string GetOperationIcon(AuditOperation operation) => operation switch {
+    AuditOperation.Created => "➕",
+    AuditOperation.Updated => "✏️",
+    AuditOperation.Deleted => "🗑️",
+    _ => "❓"
+  };
+}

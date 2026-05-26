@@ -1,0 +1,464 @@
+@using Microsoft.EntityFrameworkCore
+@using Pixata.AspNetCore.Auditing.Models
+@using Pixata.Blazor.Auditing.Models
+@using Pixata.Blazor.Auditing.Services
+@namespace Pixata.Blazor.Auditing.Components
+@typeparam TContext where TContext : DbContext
+@inject AuditViewerService AuditViewerService
+
+<div class="audit-viewer">
+  <h2>Audit viewer</h2>
+
+  @if (_selectedEntityId is not null && _selectedEntityType is not null) {
+    <div class="audit-history-view">
+      <button class="back-btn" @onclick="BackToEntityList">← Back to entity list</button>
+      <h3>Audit history for @_selectedEntityType.ShortName #@_selectedEntityId</h3>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label>From:</label>
+          <input type="date" @bind="_filterFromDate" />
+        </div>
+        <div class="filter-group">
+          <label>To:</label>
+          <input type="date" @bind="_filterToDate" />
+        </div>
+        <div class="filter-group">
+          <label>User:</label>
+          <input type="text" @bind="_filterUser" placeholder="Filter by user..." />
+        </div>
+        <div class="filter-group">
+          <label>Operation:</label>
+          <select @bind="_filterOperation">
+            <option value="">All</option>
+            <option value="@AuditOperation.Created">Created</option>
+            <option value="@AuditOperation.Updated">Updated</option>
+            <option value="@AuditOperation.Deleted">Deleted</option>
+          </select>
+        </div>
+        <button class="filter-btn" @onclick="ApplyFilters">Apply filters</button>
+      </div>
+
+      @if (_isLoadingHistory) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <span>Loading audit history…</span>
+        </div>
+      } else {
+        <AuditTimeline Entries="_auditEntries" />
+      }
+    </div>
+  } else {
+    <div class="entity-list-view">
+      <div class="entity-type-selector">
+        <label>Entity type:</label>
+        <select @bind="_selectedEntityTypeName" @bind:after="OnEntityTypeChanged">
+          <option value="">— Select entity type —</option>
+          @foreach (EntityTypeMetadata entityType in _entityTypes) {
+            <option value="@entityType.FullName">@entityType.ShortName</option>
+          }
+        </select>
+      </div>
+
+      @if (_isLoadingEntityTypes) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <span>Loading entity types…</span>
+        </div>
+      } else if (!string.IsNullOrWhiteSpace(_selectedEntityTypeName)) {
+        <div class="entity-search">
+          <input type="text" @bind="_searchTerm" @bind:after="LoadAuditedEntities" placeholder="Search by entity ID..." />
+        </div>
+
+        @if (_isLoadingEntities) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <span>Loading entities…</span>
+          </div>
+        } else if (_auditedEntityIds.Count == 0) {
+          <div class="empty-state">
+            <span>📋</span>
+            <p>No audited entities found for this type.</p>
+          </div>
+        } else {
+          <table class="entity-table">
+            <thead>
+              <tr>
+                <th>Entity ID</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach (string entityId in _pagedEntityIds) {
+                <tr>
+                  <td>@entityId</td>
+                  <td>
+                    <button class="view-btn" @onclick="() => ViewAuditHistory(entityId)">View history</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          @if (_totalPages > 1) {
+            <div class="pagination">
+              <button disabled="@(_currentPage <= 1)" @onclick="PreviousPage">← Previous</button>
+              <span>Page @_currentPage of @_totalPages</span>
+              <button disabled="@(_currentPage >= _totalPages)" @onclick="NextPage">Next →</button>
+            </div>
+          }
+        }
+      }
+    </div>
+  }
+</div>
+
+<style>
+  .audit-viewer {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .audit-viewer h2 {
+    margin-bottom: 1rem;
+  }
+  .entity-type-selector {
+    margin-bottom: 1rem;
+  }
+  .entity-type-selector label {
+    font-weight: 600;
+    margin-right: 0.5rem;
+  }
+  .entity-type-selector select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 200px;
+  }
+  .entity-search {
+    margin-bottom: 1rem;
+  }
+  .entity-search input {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 300px;
+  }
+  .entity-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+  .entity-table th, .entity-table td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .entity-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+  }
+  .entity-table tr:hover {
+    background: #f9f9f9;
+  }
+  .view-btn, .back-btn, .filter-btn {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid #0078d4;
+    background: #0078d4;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .view-btn:hover, .back-btn:hover, .filter-btn:hover {
+    background: #006abc;
+  }
+  .back-btn {
+    margin-bottom: 1rem;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #f5f5f5;
+    border-radius: 6px;
+  }
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .filter-group label {
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .filter-group input, .filter-group select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .pagination button {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .pagination button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .loading-state {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    color: #666;
+  }
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-top-color: #0078d4;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @@keyframes spin { to { transform: rotate(360deg); } }
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #888;
+  }
+  .empty-state span {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .audit-timeline {
+    margin-top: 1rem;
+  }
+  .timeline-entry {
+    border-left: 3px solid #0078d4;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+  }
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  .operation-icon {
+    font-size: 1.1rem;
+  }
+  .operation-label {
+    font-weight: 600;
+  }
+  .timestamp {
+    color: #666;
+    font-size: 0.85rem;
+  }
+  .user {
+    color: #888;
+    font-size: 0.85rem;
+  }
+  .toggle-btn {
+    background: none;
+    border: none;
+    color: #0078d4;
+    cursor: pointer;
+    padding: 0.2rem 0;
+    font-size: 0.85rem;
+  }
+  .toggle-btn:hover {
+    text-decoration: underline;
+  }
+  .changed-summary {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.3rem;
+  }
+  .properties-list {
+    margin-top: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 0.5rem;
+  }
+  .property-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .property-row:last-child {
+    border-bottom: none;
+  }
+  .property-changed {
+    background: #fff8e1;
+  }
+  .property-name {
+    font-weight: 600;
+    min-width: 150px;
+  }
+  .property-badge {
+    font-size: 0.75rem;
+  }
+  .property-value {
+    color: #333;
+  }
+  .property-values {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .old-value {
+    color: #c62828;
+    text-decoration: line-through;
+  }
+  .arrow {
+    color: #888;
+  }
+  .new-value {
+    color: #2e7d32;
+    font-weight: 600;
+  }
+</style>
+
+@code {
+  private List<EntityTypeMetadata> _entityTypes = [];
+  private string? _selectedEntityTypeName;
+  private EntityTypeMetadata? _selectedEntityType;
+  private string? _selectedEntityId;
+  private string _searchTerm = "";
+  private bool _isLoadingEntityTypes;
+  private bool _isLoadingEntities;
+  private bool _isLoadingHistory;
+  private List<string> _auditedEntityIds = [];
+  private List<AuditEntryViewModel> _auditEntries = [];
+  private int _currentPage = 1;
+  private int _pageSize = 20;
+  private int _totalPages = 1;
+  private DateTime? _filterFromDate;
+  private DateTime? _filterToDate;
+  private string? _filterUser;
+  private AuditOperation? _filterOperation;
+
+  private List<string> _pagedEntityIds =>
+    _auditedEntityIds
+      .Skip((_currentPage - 1) * _pageSize)
+      .Take(_pageSize)
+      .ToList();
+
+  protected override async Task OnInitializedAsync() {
+    _isLoadingEntityTypes = true;
+    _entityTypes = AuditViewerService.GetEntityTypesFromContext(typeof(TContext));
+
+    List<EntityTypeMetadata> auditedTypes = await AuditViewerService.GetEntityTypes();
+    HashSet<string> existingNames = _entityTypes.Select(entityType => entityType.FullName).ToHashSet();
+    foreach (EntityTypeMetadata auditedType in auditedTypes) {
+      if (!existingNames.Contains(auditedType.FullName)) {
+        _entityTypes.Add(auditedType);
+      }
+    }
+
+    _entityTypes = _entityTypes.OrderBy(entityType => entityType.ShortName).ToList();
+    _isLoadingEntityTypes = false;
+  }
+
+  private async Task OnEntityTypeChanged() {
+    _selectedEntityType = _entityTypes.FirstOrDefault(entityType => entityType.FullName == _selectedEntityTypeName);
+    _selectedEntityId = null;
+    _auditedEntityIds = [];
+    _auditEntries = [];
+    _currentPage = 1;
+    _totalPages = 1;
+
+    if (_selectedEntityType is not null) {
+      await LoadAuditedEntities();
+    }
+  }
+
+  private async Task LoadAuditedEntities() {
+    if (_selectedEntityType is null) {
+      return;
+    }
+
+    _isLoadingEntities = true;
+    StateHasChanged();
+
+    _auditedEntityIds = await AuditViewerService.GetDistinctEntityIds(_selectedEntityType.FullName);
+
+    if (!string.IsNullOrWhiteSpace(_searchTerm)) {
+      _auditedEntityIds = _auditedEntityIds.Where(entityId => entityId.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    _totalPages = Math.Max(1, (int)Math.Ceiling(_auditedEntityIds.Count / (double)_pageSize));
+    if (_currentPage > _totalPages) {
+      _currentPage = 1;
+    }
+
+    _isLoadingEntities = false;
+    StateHasChanged();
+  }
+
+  private async Task ViewAuditHistory(string entityId) {
+    _selectedEntityId = entityId;
+    await LoadAuditHistory();
+  }
+
+  private async Task LoadAuditHistory() {
+    if (_selectedEntityType is null || _selectedEntityId is null) {
+      return;
+    }
+
+    _isLoadingHistory = true;
+    StateHasChanged();
+
+    _auditEntries = await AuditViewerService.GetAuditHistory(
+      _selectedEntityType.FullName,
+      _selectedEntityId,
+      _filterFromDate,
+      _filterToDate,
+      _filterUser,
+      _filterOperation);
+
+    _isLoadingHistory = false;
+    StateHasChanged();
+  }
+
+  private async Task ApplyFilters() =>
+    await LoadAuditHistory();
+
+  private void BackToEntityList() {
+    _selectedEntityId = null;
+    _auditEntries = [];
+    _filterFromDate = null;
+    _filterToDate = null;
+    _filterUser = null;
+    _filterOperation = null;
+  }
+
+  private async Task PreviousPage() {
+    if (_currentPage > 1) {
+      _currentPage--;
+      await LoadAuditedEntities();
+    }
+  }
+
+  private async Task NextPage() {
+    if (_currentPage < _totalPages) {
+      _currentPage++;
+      await LoadAuditedEntities();
+    }
+  }
+}
