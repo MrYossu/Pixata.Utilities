@@ -175,3 +175,93 @@ app.MapPost("/contact-api", async (GeneralServiceInterface service, ContactModel
 ```
 
 This is not a common scenario, but is included for those odd cases.
+
+## Auditing
+This package includes a comprehensive entity auditing system that automatically captures all entity changes via an EF Core `SaveChangesInterceptor`. It stores full snapshots and property-level diffs for every create, update, and delete operation.
+
+### Setup
+
+**1. Register auditing services in `Program.cs`:**
+
+```csharp
+builder.Services.AddAuditing();
+```
+
+**2. Add the interceptor to your DbContext registration:**
+
+```csharp
+builder.Services.AddDbContext<MyDbContext>((serviceProvider, options) =>
+  options.UseSqlServer(connectionString)
+         .AddAuditingInterceptor(serviceProvider));
+```
+
+**3. Add the `Audit` DbSet to your DbContext:**
+
+```csharp
+using Pixata.AspNetCore.Auditing.Models;
+
+public class MyDbContext : DbContext {
+  public DbSet<Audit> Audits { get; set; }
+  // ... other DbSets
+}
+```
+
+**4. Create and run an EF Core migration:**
+
+```sh
+dotnet ef migrations add AddAuditing
+dotnet ef database update
+```
+
+### Data model
+
+Each audit entry stores:
+- **EntityType** — fully qualified type name
+- **EntityId** — JSON-serialised primary key (handles composite keys)
+- **Operation** — Created, Updated, or Deleted
+- **ChangedBy** — username from Identity or custom identifier
+- **ChangedAt** — UTC timestamp
+- **FullSnapshot** — complete JSON of the entity at that point in time
+- **ChangedProperties** — JSON of changed properties only (null for Create/Delete), stored as `{ "PropertyName": [oldValue, newValue] }`
+
+### Opting out of auditing
+
+Entities can opt out of auditing by applying the `[NoAudit]` attribute:
+
+```csharp
+using Pixata.AspNetCore.Auditing.Attributes;
+
+[NoAudit]
+public class SensitiveEntity {
+  // This entity will not be audited
+}
+```
+
+### Custom user identification
+
+By default, the auditing system identifies users via `HttpContext.User.Identity.Name`, falling back to `"System"` if no user is available. You can override this by injecting `AuditUserContextInterface` and setting the `UserIdentifier` property:
+
+```csharp
+public class SprocketController(AuditUserContextInterface auditContext) : ControllerBase {
+  [AllowAnonymous]
+  public async Task<IActionResult> NotifyFromSprocket() {
+    auditContext.UserIdentifier = "SprocketNotificationEndpoint";
+    // Any changes saved in this request will use this identifier
+  }
+}
+```
+
+### Blazor audit viewer
+
+The `Pixata.Blazor` package includes an `AuditViewer` component that provides a UI for browsing audit history. To use it, add this to a Blazor page:
+
+```razor
+@page "/audit-viewer"
+<AuditViewer TContext="MyDbContext" />
+```
+
+The viewer provides:
+- Entity type selector (discovers `DbSet<T>` properties via reflection)
+- Searchable/pageable entity grid
+- Timeline view showing property changes with diff highlighting
+- Filters for date range, user, and operation type
