@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pixata.AspNetCore.Auditing.Extensions;
 using Pixata.Blazor.Components;
 using Pixata.Blazor.Containers;
 using Pixata.Blazor.Sample.Data;
@@ -25,6 +27,10 @@ public class Startup(IConfiguration configuration) {
     services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
     services.AddHttpClient();
     services.AddPixataBlazor();
+    services.AddAuditing();
+    services.AddDbContext<SampleDbContext>((serviceProvider, options) =>
+      options.UseInMemoryDatabase("SampleAuditDb")
+             .AddAuditingInterceptor(serviceProvider));
   }
 
   // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
