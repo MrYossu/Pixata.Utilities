@@ -27,7 +27,7 @@ public class Startup(IConfiguration configuration) {
     services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
     services.AddHttpClient();
     services.AddPixataBlazor();
-    services.AddAuditing();
+    services.AddAuditing<SampleDbContext>();
     services.AddDbContext<SampleDbContext>((serviceProvider, options) =>
       options.UseInMemoryDatabase("SampleAuditDb")
              .AddAuditingInterceptor(serviceProvider));

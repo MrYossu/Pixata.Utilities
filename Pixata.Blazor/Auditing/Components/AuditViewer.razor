@@ -1,3 +1,5 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.EntityFrameworkCore
 @using Pixata.AspNetCore.Auditing.Models
 @using Pixata.Blazor.Auditing.Models
@@ -5,6 +7,8 @@
 @namespace Pixata.Blazor.Auditing.Components
 @typeparam TContext where TContext : DbContext
 @inject AuditViewerService AuditViewerService
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
 <div class="audit-viewer">
   <h2>Audit viewer</h2>
@@ -373,6 +377,60 @@
 
     _entityTypes = _entityTypes.OrderBy(entityType => entityType.ShortName).ToList();
     _isLoadingEntityTypes = false;
+
+    ReadQueryString();
+    NavigationManager.LocationChanged += OnLocationChanged;
+
+    if (_selectedEntityType is not null) {
+      await LoadAuditedEntities();
+      if (_selectedEntityId is not null) {
+        await LoadAuditHistory();
+      }
+    }
+  }
+
+  private void ReadQueryString() {
+    Uri uri = new(NavigationManager.Uri);
+    Dictionary<string, Microsoft.Extensions.Primitives.StringValues> query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+    if (query.TryGetValue("entityType", out Microsoft.Extensions.Primitives.StringValues entityTypeValue) && !string.IsNullOrWhiteSpace(entityTypeValue)) {
+      _selectedEntityTypeName = entityTypeValue;
+      _selectedEntityType = _entityTypes.FirstOrDefault(et => et.FullName == _selectedEntityTypeName);
+    }
+
+    if (query.TryGetValue("entityId", out Microsoft.Extensions.Primitives.StringValues entityIdValue) && !string.IsNullOrWhiteSpace(entityIdValue)) {
+      _selectedEntityId = entityIdValue;
+    }
+
+    if (query.TryGetValue("page", out Microsoft.Extensions.Primitives.StringValues pageValue) && int.TryParse(pageValue, out int parsedPage) && parsedPage >= 1) {
+      _currentPage = parsedPage;
+    }
+  }
+
+  private void UpdateQueryString() {
+    Dictionary<string, object?> parameters = new() {
+      ["entityType"] = _selectedEntityTypeName,
+      ["entityId"] = _selectedEntityId,
+      ["page"] = _currentPage > 1 ? _currentPage : null
+    };
+
+    string uri = NavigationManager.GetUriWithQueryParameters(parameters);
+    NavigationManager.NavigateTo(uri, replace: true);
+  }
+
+  private async void OnLocationChanged(object? sender, LocationChangedEventArgs args) {
+    ReadQueryString();
+    if (_selectedEntityType is not null) {
+      await LoadAuditedEntities();
+      if (_selectedEntityId is not null) {
+        await LoadAuditHistory();
+      }
+    }
+    await InvokeAsync(StateHasChanged);
+  }
+
+  public void Dispose() {
+    NavigationManager.LocationChanged -= OnLocationChanged;
   }
 
   private async Task OnEntityTypeChanged() {
@@ -386,6 +444,8 @@
     if (_selectedEntityType is not null) {
       await LoadAuditedEntities();
     }
+
+    UpdateQueryString();
   }
 
   private async Task LoadAuditedEntities() {
@@ -413,6 +473,7 @@
 
   private async Task ViewAuditHistory(string entityId) {
     _selectedEntityId = entityId;
+    UpdateQueryString();
     await LoadAuditHistory();
   }
 
@@ -446,11 +507,13 @@
     _filterToDate = null;
     _filterUser = null;
     _filterOperation = null;
+    UpdateQueryString();
   }
 
   private async Task PreviousPage() {
     if (_currentPage > 1) {
       _currentPage--;
+      UpdateQueryString();
       await LoadAuditedEntities();
     }
   }
@@ -458,6 +521,7 @@
   private async Task NextPage() {
     if (_currentPage < _totalPages) {
       _currentPage++;
+      UpdateQueryString();
       await LoadAuditedEntities();
     }
   }

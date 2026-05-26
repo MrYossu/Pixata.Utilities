@@ -184,7 +184,7 @@ This package includes a comprehensive entity auditing system that automatically 
 **1. Register auditing services in `Program.cs`:**
 
 ```csharp
-builder.Services.AddAuditing();
+builder.Services.AddAuditing<MyDbContext>();
 ```
 
 **2. Add the interceptor to your DbContext registration:**
@@ -265,3 +265,17 @@ The viewer provides:
 - Searchable/pageable entity grid
 - Timeline view showing property changes with diff highlighting
 - Filters for date range, user, and operation type
+- URL querystring integration — refreshing the page preserves your current view
+
+### Retention policy
+
+By default, audit entries are retained forever. You can configure automatic cleanup by specifying a retention period:
+
+```csharp
+builder.Services.AddAuditing<MyDbContext>(options => {
+  options.RetentionPeriod = TimeSpan.FromDays(90); // Delete entries older than 90 days
+  options.CleanupInterval = TimeSpan.FromHours(6); // Check every 6 hours (default: daily)
+});
+```
+
+When a retention period is set, a background service runs periodically and deletes audit entries older than the configured period.
