@@ -1,6 +1,8 @@
 ﻿using System;
+using Pixata.AspNetCore.Auditing.Attributes;
 
 namespace Pixata.Blazor.Sample.Models {
+  [NoAudit]
   public class Person {
     public int Id { get; set; }
     public string Title { get; set; }

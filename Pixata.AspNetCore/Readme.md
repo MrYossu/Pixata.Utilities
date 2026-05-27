@@ -14,6 +14,16 @@ builder.Services.AddPixataAspNetCore<ContactModel>();
 
 ...where `ContactModel` is any type in your project. If you are using the validation filter (see below), then it is used here to point the framework to the assembly containing your models.
 
+## Auditing entities
+When investigating bug reports from customers, I often find that the issue is nothing to do with my code, it's that they have changed something in the database, and I need to find out what they changed, and when.
+
+Adding auditing manually can be done, but means you end up writing the same intrusive code in every app. To combat this, I have added some auditing functionality to this repo. This consist of two parts...
+
+- An EF Core interceptor that adds audit entries for every change to entities in your `DbContext`
+- A Blazor component that allows you to browse the audit information easily.
+
+See the [AuditViewer readme](../Pixata.Blazor/AuditViewer.md) for more information.
+
 ## DocumentTemplateHelper
 I often find myuself generating documents, either for conversion to PDF, or for emailing. This has always been a painful process, so I decided that a helper was needed. This class contains two methods, one for generating HTML from a Blazor component, and another for generating a PDF from a Blazor component.
 
