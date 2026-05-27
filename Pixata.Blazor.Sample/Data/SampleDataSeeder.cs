@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using Pixata.AspNetCore.Auditing.Models;
 using Pixata.Blazor.Sample.Models;

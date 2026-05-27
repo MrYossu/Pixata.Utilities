@@ -1,13 +1,11 @@
-@using Microsoft.AspNetCore.Components
+@namespace Pixata.Blazor.Auditing.Components
+@typeparam TContext where TContext : Microsoft.EntityFrameworkCore.DbContext
+@inject AuditViewerService AuditViewerService
+@inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.EntityFrameworkCore
 @using Pixata.AspNetCore.Auditing.Models
 @using Pixata.Blazor.Auditing.Models
 @using Pixata.Blazor.Auditing.Services
-@namespace Pixata.Blazor.Auditing.Components
-@typeparam TContext where TContext : DbContext
-@inject AuditViewerService AuditViewerService
-@inject NavigationManager NavigationManager
 @implements IDisposable
 
 <div class="audit-viewer">
@@ -338,7 +336,9 @@
 </style>
 
 @code {
-  [Parameter] public string? DefaultEntityType { get; set; }
+
+  [Parameter]
+  public string? DefaultEntityType { get; set; }
 
   private List<EntityTypeMetadata> _entityTypes = [];
   private string? _selectedEntityTypeName;
@@ -351,7 +351,7 @@
   private List<string> _auditedEntityIds = [];
   private List<AuditEntryViewModel> _auditEntries = [];
   private int _currentPage = 1;
-  private int _pageSize = 20;
+  private readonly int _pageSize = 20;
   private int _totalPages = 1;
   private DateTime? _filterFromDate;
   private DateTime? _filterToDate;
@@ -438,9 +438,8 @@
     await InvokeAsync(StateHasChanged);
   }
 
-  public void Dispose() {
+  public void Dispose() =>
     NavigationManager.LocationChanged -= OnLocationChanged;
-  }
 
   private async Task OnEntityTypeChanged() {
     _selectedEntityType = _entityTypes.FirstOrDefault(entityType => entityType.FullName == _selectedEntityTypeName);
@@ -537,4 +536,5 @@
       await LoadAuditedEntities();
     }
   }
+
 }
