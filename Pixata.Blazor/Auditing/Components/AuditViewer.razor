@@ -50,7 +50,9 @@
                        ShowOnlyChanged="_showOnlyChanged"
                        ShowOnlyChangedChanged="OnShowOnlyChangedChanged"
                        HorizontalView="_horizontalView"
-                       HorizontalViewChanged="OnHorizontalViewChanged" />
+                       HorizontalViewChanged="OnHorizontalViewChanged"
+                       SelectedProperties="_selectedProperties"
+                       SelectedPropertiesChanged="OnSelectedPropertiesChanged" />
       }
     </div>
   } else {
@@ -120,7 +122,6 @@
   .audit-viewer {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0 auto;
-    overflow: hidden;
     max-width: 100%;
   }
   .audit-viewer h2 {
@@ -439,13 +440,21 @@
     position: absolute;
     top: 100%;
     left: 0;
-    z-index: 10;
+    z-index: 12;
     background: white;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     min-width: 220px;
     margin-top: 0.25rem;
+  }
+  .audit-property-dropdown-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 11;
   }
   .audit-property-dropdown-actions {
     display: flex;
@@ -493,6 +502,7 @@
   private bool _defaultHorizontalView = true;
   private bool _showOnlyChanged;
   private bool _horizontalView = true;
+  private HashSet<string>? _selectedProperties;
 
   private List<EntityTypeMetadata> _entityTypes = [];
   private string? _selectedEntityTypeName;
@@ -579,15 +589,26 @@
       _horizontalView = viewValue == "horizontal";
       _defaultHorizontalView = _horizontalView;
     }
+
+    if (query.TryGetValue("props", out Microsoft.Extensions.Primitives.StringValues propsValue) && !string.IsNullOrWhiteSpace(propsValue)) {
+      _selectedProperties = propsValue.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+    }
   }
 
   private void UpdateQueryString() {
+    string? propsParam = null;
+    if (_selectedProperties is not null && _selectedProperties.Count > 0) {
+      // Only include in querystring if not all properties are selected
+      propsParam = string.Join(",", _selectedProperties.OrderBy(p => p));
+    }
+
     Dictionary<string, object?> parameters = new() {
       ["entityType"] = _selectedEntityTypeName,
       ["entityId"] = _selectedEntityId,
       ["page"] = _currentPage > 1 ? _currentPage : null,
       ["changedOnly"] = _showOnlyChanged ? "true" : null,
-      ["view"] = _horizontalView != DefaultHorizontalView ? (_horizontalView ? "horizontal" : "vertical") : null
+      ["view"] = _horizontalView != DefaultHorizontalView ? (_horizontalView ? "horizontal" : "vertical") : null,
+      ["props"] = propsParam
     };
 
     string uri = NavigationManager.GetUriWithQueryParameters(parameters);
@@ -616,6 +637,11 @@
   private void OnHorizontalViewChanged(bool value) {
     _horizontalView = value;
     _defaultHorizontalView = value;
+    UpdateQueryString();
+  }
+
+  private void OnSelectedPropertiesChanged(HashSet<string> value) {
+    _selectedProperties = value;
     UpdateQueryString();
   }
 
@@ -692,6 +718,7 @@
   private void BackToEntityList() {
     _selectedEntityId = null;
     _auditEntries = [];
+    _selectedProperties = null;
     _filterFromDate = null;
     _filterToDate = null;
     _filterUser = null;

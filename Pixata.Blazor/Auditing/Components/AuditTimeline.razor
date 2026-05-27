@@ -19,6 +19,7 @@
           Properties (@_selectedProperties.Count/@GetAllPropertyNames().Count) ▾
         </button>
         @if (_propertyDropdownOpen) {
+          <div class="audit-property-dropdown-backdrop" @onclick="ClosePropertyDropdown"></div>
           <div class="audit-property-dropdown">
             <div class="audit-property-dropdown-actions">
               <button @onclick="SelectAllProperties">Check all</button>
@@ -161,10 +162,17 @@
   [Parameter]
   public EventCallback<bool> HorizontalViewChanged { get; set; }
 
+  [Parameter]
+  public HashSet<string>? SelectedProperties { get; set; }
+
+  [Parameter]
+  public EventCallback<HashSet<string>> SelectedPropertiesChanged { get; set; }
+
   private HashSet<long> _expandedEntries = [];
   private HashSet<string> _selectedProperties = [];
   private bool _propertyDropdownOpen;
   private bool _initialized;
+  private bool _propertiesInitialized;
 
   protected override void OnParametersSet() {
     if (!_initialized) {
@@ -176,18 +184,18 @@
 
   private void SyncSelectedProperties() {
     HashSet<string> allProperties = GetAllPropertyNames().ToHashSet();
-    if (_selectedProperties.Count == 0 && allProperties.Count > 0) {
-      _selectedProperties = allProperties;
-    } else {
-      // Add any new properties that appeared
-      foreach (string prop in allProperties) {
-        if (!_selectedProperties.Contains(prop)) {
-          _selectedProperties.Add(prop);
-        }
-      }
-      // Remove properties that no longer exist
-      _selectedProperties.IntersectWith(allProperties);
+    if (allProperties.Count == 0) {
+      return;
     }
+    if (!_propertiesInitialized) {
+      // First time: use parent-supplied selection or select all
+      _selectedProperties = SelectedProperties is not null && SelectedProperties.Count > 0
+        ? new HashSet<string>(SelectedProperties.Where(p => allProperties.Contains(p)))
+        : new HashSet<string>(allProperties);
+      _propertiesInitialized = true;
+    }
+    // Remove properties that no longer exist in the data
+    _selectedProperties.IntersectWith(allProperties);
   }
 
   private async Task OnShowOnlyChangedToggled(ChangeEventArgs e) {
@@ -209,18 +217,26 @@
   private void TogglePropertyDropdown() =>
     _propertyDropdownOpen = !_propertyDropdownOpen;
 
-  private void SelectAllProperties() =>
+  private void ClosePropertyDropdown() =>
+    _propertyDropdownOpen = false;
+
+  private async Task SelectAllProperties() {
     _selectedProperties = GetAllPropertyNames().ToHashSet();
+    await SelectedPropertiesChanged.InvokeAsync(_selectedProperties);
+  }
 
-  private void DeselectAllProperties() =>
+  private async Task DeselectAllProperties() {
     _selectedProperties.Clear();
+    await SelectedPropertiesChanged.InvokeAsync(_selectedProperties);
+  }
 
-  private void ToggleProperty(string propertyName, ChangeEventArgs e) {
+  private async Task ToggleProperty(string propertyName, ChangeEventArgs e) {
     if (e.Value is true) {
       _selectedProperties.Add(propertyName);
     } else {
       _selectedProperties.Remove(propertyName);
     }
+    await SelectedPropertiesChanged.InvokeAsync(_selectedProperties);
   }
 
   private int GetVisiblePropertyCount(AuditEntryViewModel entry) {
@@ -240,7 +256,11 @@
         names.Add(key);
       }
     }
-    return names.OrderBy(n => n).ToList();
+    // Put "Id" (primary key) first, then sort the rest alphabetically
+    return names
+      .OrderBy(n => n.Equals("Id", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+      .ThenBy(n => n)
+      .ToList();
   }
 
   private HashSet<string> GetChangedPropertyNames() {
