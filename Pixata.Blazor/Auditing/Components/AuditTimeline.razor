@@ -40,30 +40,33 @@
             </tr>
           </thead>
           <tbody>
+            @{
+              HashSet<string> changedPropertyNames = GetChangedPropertyNames();
+            }
             @foreach (string propertyName in GetAllPropertyNames()) {
-              bool anyChanged = Entries.Any(e => e.ChangedProperties.Any(c => c.PropertyName == propertyName));
+              bool anyChanged = changedPropertyNames.Contains(propertyName);
               @if (!_showOnlyChanged || anyChanged) {
                 <tr>
                   <td class="audit-horizontal-property-col property-name">@propertyName</td>
                   @foreach (AuditEntryViewModel entry in Entries) {
                     PropertyChange? change = entry.ChangedProperties.FirstOrDefault(c => c.PropertyName == propertyName);
                     bool isCreated = entry.Operation == AuditOperation.Created;
-                    bool showThisProperty = !_showOnlyChanged || change is not null;
-                    @if (showThisProperty) {
-                      @if (change is not null) {
-                        <td class="property-changed">
-                          @if (isCreated) {
-                            <span class="new-value">@change.NewValue</span>
-                          } else {
-                            <span class="old-value">@change.OldValue</span>
-                            <span class="arrow">→</span>
-                            <span class="new-value">@change.NewValue</span>
-                          }
-                        </td>
-                      } else {
-                        entry.Properties.TryGetValue(propertyName, out object? val);
-                        <td>@val</td>
-                      }
+                    @if (change is not null) {
+                      <td class="property-changed">
+                        @if (isCreated) {
+                          <span class="new-value">@change.NewValue</span>
+                        } else {
+                          <span class="old-value">@change.OldValue</span>
+                          <span class="arrow">→</span>
+                          <span class="new-value">@change.NewValue</span>
+                        }
+                      </td>
+                    } else if (isCreated && _showOnlyChanged && anyChanged) {
+                      entry.Properties.TryGetValue(propertyName, out object? val);
+                      <td>@val</td>
+                    } else if (!_showOnlyChanged) {
+                      entry.Properties.TryGetValue(propertyName, out object? val);
+                      <td>@val</td>
                     } else {
                       <td></td>
                     }
@@ -122,9 +125,20 @@
   [Parameter]
   public List<AuditEntryViewModel> Entries { get; set; } = [];
 
+  [Parameter]
+  public bool DefaultHorizontalView { get; set; } = true;
+
   private HashSet<long> _expandedEntries = [];
   private bool _showOnlyChanged;
   private bool _horizontalView;
+  private bool _initialized;
+
+  protected override void OnParametersSet() {
+    if (!_initialized) {
+      _horizontalView = DefaultHorizontalView;
+      _initialized = true;
+    }
+  }
 
   private void ToggleEntry(long entryId) {
     if (!_expandedEntries.Remove(entryId)) {
@@ -147,6 +161,19 @@
       }
     }
     return names.OrderBy(n => n).ToList();
+  }
+
+  private HashSet<string> GetChangedPropertyNames() {
+    HashSet<string> names = [];
+    foreach (AuditEntryViewModel entry in Entries) {
+      if (entry.Operation == AuditOperation.Created) {
+        continue;
+      }
+      foreach (PropertyChange change in entry.ChangedProperties) {
+        names.Add(change.PropertyName);
+      }
+    }
+    return names;
   }
 
   private static string GetOperationIcon(AuditOperation operation) => operation switch {

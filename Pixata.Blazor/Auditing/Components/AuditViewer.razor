@@ -45,7 +45,7 @@
           <span>Loading audit history…</span>
         </div>
       } else {
-        <AuditTimeline Entries="_auditEntries" />
+        <AuditTimeline Entries="_auditEntries" DefaultHorizontalView="_defaultHorizontalView" />
       }
     </div>
   } else {
@@ -115,6 +115,7 @@
   .audit-viewer {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0 auto;
+    overflow: hidden;
   }
   .audit-viewer h2 {
     margin-bottom: 1rem;
@@ -379,12 +380,12 @@
   .audit-horizontal-scroll {
     overflow-x: auto;
     max-width: 100%;
+    width: 100%;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
   }
   .audit-horizontal-table {
     border-collapse: collapse;
-    min-width: 100%;
     white-space: nowrap;
   }
   .audit-horizontal-table th,
@@ -419,6 +420,11 @@
   [Parameter]
   public string? DefaultEntityType { get; set; }
 
+  [Parameter]
+  public bool DefaultHorizontalView { get; set; } = true;
+
+  private bool _defaultHorizontalView = true;
+
   private List<EntityTypeMetadata> _entityTypes = [];
   private string? _selectedEntityTypeName;
   private EntityTypeMetadata? _selectedEntityType;
@@ -444,6 +450,7 @@
       .ToList();
 
   protected override async Task OnInitializedAsync() {
+    _defaultHorizontalView = DefaultHorizontalView;
     _isLoadingEntityTypes = true;
     _entityTypes = AuditViewerService.GetEntityTypesFromContext(typeof(TContext));
 
