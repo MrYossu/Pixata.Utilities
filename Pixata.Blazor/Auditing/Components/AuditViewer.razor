@@ -512,6 +512,7 @@
   private bool _isLoadingEntityTypes;
   private bool _isLoadingEntities;
   private bool _isLoadingHistory;
+  private bool _suppressLocationChanged;
   private List<string> _auditedEntityIds = [];
   private List<AuditEntryViewModel> _auditEntries = [];
   private int _currentPage = 1;
@@ -616,6 +617,10 @@
   }
 
   private async void OnLocationChanged(object? sender, LocationChangedEventArgs args) {
+    if (_suppressLocationChanged) {
+      _suppressLocationChanged = false;
+      return;
+    }
     ReadQueryString();
     if (_selectedEntityType is not null) {
       await LoadAuditedEntities();
@@ -631,17 +636,20 @@
 
   private void OnShowOnlyChangedChanged(bool value) {
     _showOnlyChanged = value;
+    _suppressLocationChanged = true;
     UpdateQueryString();
   }
 
   private void OnHorizontalViewChanged(bool value) {
     _horizontalView = value;
     _defaultHorizontalView = value;
+    _suppressLocationChanged = true;
     UpdateQueryString();
   }
 
   private void OnSelectedPropertiesChanged(HashSet<string> value) {
     _selectedProperties = value;
+    _suppressLocationChanged = true;
     UpdateQueryString();
   }
 
