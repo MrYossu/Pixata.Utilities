@@ -9,40 +9,111 @@
       <p>No audit entries found.</p>
     </div>
   } else {
-    @foreach (AuditEntryViewModel entry in Entries) {
-      <div class="timeline-entry">
-        <div class="timeline-header">
-          <span class="operation-icon">@GetOperationIcon(entry.Operation)</span>
-          <span class="operation-label">@entry.Operation</span>
-          <span class="timestamp">@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
-          <span class="user">by @entry.ChangedBy</span>
-        </div>
-        <div class="timeline-body">
-          @if (_expandedEntries.Contains(entry.Id)) {
-            <button class="toggle-btn" @onclick="() => ToggleEntry(entry.Id)">▼ Hide properties</button>
-            <div class="properties-list">
-              @{
-                HashSet<string> changedPropertyNames = entry.ChangedProperties.Select(change => change.PropertyName).ToHashSet();
-              }
-              @foreach (KeyValuePair<string, object?> property in entry.Properties) {
-                @if (changedPropertyNames.Contains(property.Key)) {
-                  PropertyChange change = entry.ChangedProperties.First(changedProperty => changedProperty.PropertyName == property.Key);
-                  <EntityPropertyDiff PropertyName="@property.Key" IsChanged="true" OldValue="@change.OldValue" NewValue="@change.NewValue" />
-                } else {
-                  <EntityPropertyDiff PropertyName="@property.Key" Value="@(property.Value?.ToString())" />
-                }
-              }
-            </div>
-          } else {
-            <button class="toggle-btn" @onclick="() => ToggleEntry(entry.Id)">▶ Show properties (@entry.Properties.Count)</button>
-            @if (entry.ChangedProperties.Count > 0) {
-              <div class="changed-summary">
-                <span class="property-badge">🟡</span> @entry.ChangedProperties.Count changed: @string.Join(", ", entry.ChangedProperties.Select(change => change.PropertyName))
-              </div>
-            }
-          }
-        </div>
+    <div class="audit-timeline-controls">
+      <label class="audit-toggle-label">
+        <input type="checkbox" @bind="_showOnlyChanged" />
+        Show only changed properties
+      </label>
+      <div class="audit-view-toggle">
+        <span class="audit-view-toggle-label">View:</span>
+        <button class="audit-view-toggle-btn @(_horizontalView ? "" : "active")" @onclick="() => _horizontalView = false">Vertical</button>
+        <button class="audit-view-toggle-btn @(_horizontalView ? "active" : "")" @onclick="() => _horizontalView = true">Horizontal</button>
       </div>
+    </div>
+
+    @if (_horizontalView) {
+      <div class="audit-horizontal-scroll">
+        <table class="audit-horizontal-table">
+          <thead>
+            <tr>
+              <th class="audit-horizontal-property-col">Property</th>
+              @foreach (AuditEntryViewModel entry in Entries) {
+                <th>
+                  <span class="operation-icon">@GetOperationIcon(entry.Operation)</span>
+                  @entry.Operation
+                  <br />
+                  <span class="timestamp">@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                  <br />
+                  <span class="user">by @entry.ChangedBy</span>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @foreach (string propertyName in GetAllPropertyNames()) {
+              bool anyChanged = Entries.Any(e => e.ChangedProperties.Any(c => c.PropertyName == propertyName));
+              @if (!_showOnlyChanged || anyChanged) {
+                <tr>
+                  <td class="audit-horizontal-property-col property-name">@propertyName</td>
+                  @foreach (AuditEntryViewModel entry in Entries) {
+                    PropertyChange? change = entry.ChangedProperties.FirstOrDefault(c => c.PropertyName == propertyName);
+                    bool isCreated = entry.Operation == AuditOperation.Created;
+                    bool showThisProperty = !_showOnlyChanged || change is not null;
+                    @if (showThisProperty) {
+                      @if (change is not null) {
+                        <td class="property-changed">
+                          @if (isCreated) {
+                            <span class="new-value">@change.NewValue</span>
+                          } else {
+                            <span class="old-value">@change.OldValue</span>
+                            <span class="arrow">→</span>
+                            <span class="new-value">@change.NewValue</span>
+                          }
+                        </td>
+                      } else {
+                        entry.Properties.TryGetValue(propertyName, out object? val);
+                        <td>@val</td>
+                      }
+                    } else {
+                      <td></td>
+                    }
+                  }
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    } else {
+      @foreach (AuditEntryViewModel entry in Entries) {
+        <div class="timeline-entry">
+          <div class="timeline-header">
+            <span class="operation-icon">@GetOperationIcon(entry.Operation)</span>
+            <span class="operation-label">@entry.Operation</span>
+            <span class="timestamp">@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+            <span class="user">by @entry.ChangedBy</span>
+          </div>
+          <div class="timeline-body">
+            @if (_expandedEntries.Contains(entry.Id)) {
+              <button class="toggle-btn" @onclick="() => ToggleEntry(entry.Id)">▼ Hide properties</button>
+              <div class="properties-list">
+                @{
+                  HashSet<string> changedPropertyNames = entry.ChangedProperties.Select(change => change.PropertyName).ToHashSet();
+                  bool isCreatedEntry = entry.Operation == AuditOperation.Created;
+                }
+                @foreach (KeyValuePair<string, object?> property in entry.Properties) {
+                  bool isChanged = changedPropertyNames.Contains(property.Key);
+                  @if (!_showOnlyChanged || isChanged || isCreatedEntry) {
+                    @if (isChanged) {
+                      PropertyChange change = entry.ChangedProperties.First(changedProperty => changedProperty.PropertyName == property.Key);
+                      <EntityPropertyDiff PropertyName="@property.Key" IsChanged="true" OldValue="@change.OldValue" NewValue="@change.NewValue" />
+                    } else {
+                      <EntityPropertyDiff PropertyName="@property.Key" Value="@(property.Value?.ToString())" />
+                    }
+                  }
+                }
+              </div>
+            } else {
+              <button class="toggle-btn" @onclick="() => ToggleEntry(entry.Id)">▶ Show properties (@GetVisiblePropertyCount(entry))</button>
+              @if (entry.ChangedProperties.Count > 0) {
+                <div class="changed-summary">
+                  <span class="property-badge">🟡</span> @entry.ChangedProperties.Count changed: @string.Join(", ", entry.ChangedProperties.Select(change => change.PropertyName))
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
     }
   }
 </div>
@@ -52,11 +123,30 @@
   public List<AuditEntryViewModel> Entries { get; set; } = [];
 
   private HashSet<long> _expandedEntries = [];
+  private bool _showOnlyChanged;
+  private bool _horizontalView;
 
   private void ToggleEntry(long entryId) {
     if (!_expandedEntries.Remove(entryId)) {
       _expandedEntries.Add(entryId);
     }
+  }
+
+  private int GetVisiblePropertyCount(AuditEntryViewModel entry) {
+    if (!_showOnlyChanged || entry.Operation == AuditOperation.Created) {
+      return entry.Properties.Count;
+    }
+    return entry.ChangedProperties.Count;
+  }
+
+  private List<string> GetAllPropertyNames() {
+    HashSet<string> names = [];
+    foreach (AuditEntryViewModel entry in Entries) {
+      foreach (string key in entry.Properties.Keys) {
+        names.Add(key);
+      }
+    }
+    return names.OrderBy(n => n).ToList();
   }
 
   private static string GetOperationIcon(AuditOperation operation) => operation switch {
