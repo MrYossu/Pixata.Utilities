@@ -43,6 +43,33 @@ public static class SampleDataSeeder {
         ChangedAt = new DateTime(2026, 3, 12, 10, 15, 0),
         FullSnapshot = JsonSerializer.Serialize(new { Id = 1, Title = "Mr", FirstName = "Jim", Surname = "Smith", Email = "jim.smith@example.com", DateOfBirth = "1985-03-15", EmailConfirmed = true, NumberOfDependents = 2 }),
         ChangedProperties = JsonSerializer.Serialize(new { NumberOfDependents = new[] { "0", "2" } })
+      },
+      new Audit {
+        EntityType = personType,
+        EntityId = "1",
+        Operation = AuditOperation.Updated,
+        ChangedBy = "editor",
+        ChangedAt = new DateTime(2026, 4, 7, 10, 15, 0),
+        FullSnapshot = JsonSerializer.Serialize(new { Id = 1, Title = "Mr", FirstName = "Jim", Surname = "Smith", Email = "jim.smith@example.com", DateOfBirth = "1985-03-15", EmailConfirmed = true, NumberOfDependents = 3 }),
+        ChangedProperties = JsonSerializer.Serialize(new { NumberOfDependents = new[] { "2", "3" } })
+      },
+      new Audit {
+        EntityType = personType,
+        EntityId = "1",
+        Operation = AuditOperation.Updated,
+        ChangedBy = "editor",
+        ChangedAt = new DateTime(2026, 4, 12, 10, 15, 0),
+        FullSnapshot = JsonSerializer.Serialize(new { Id = 1, Title = "Mr", FirstName = "James", Surname = "Smith", Email = "jim.smith@example.com", DateOfBirth = "1985-03-15", EmailConfirmed = true, NumberOfDependents = 3 }),
+        ChangedProperties = JsonSerializer.Serialize(new { FirstName = new[] { "Jim", "James is a very nice chapo with a long name that has lots of typos as my keyboard is very sensitive" } })
+      },
+      new Audit {
+        EntityType = personType,
+        EntityId = "1",
+        Operation = AuditOperation.Updated,
+        ChangedBy = "editor",
+        ChangedAt = new DateTime(2026, 4, 12, 14, 15, 0),
+        FullSnapshot = JsonSerializer.Serialize(new { Id = 1, Title = "Mr", FirstName = "James", Surname = "Smith", Email = "jim.smith@example.com", DateOfBirth = "1985-03-15", EmailConfirmed = true, NumberOfDependents = 3 }),
+        ChangedProperties = JsonSerializer.Serialize(new { FirstName = new[] { "James is a very nice chapo with a long name that has lots of typos as my keyboard is very sensitive", "James is a very nice chap with a long name that has lots of typos as my keyboard is very sensitive" } })
       }
     );
 
