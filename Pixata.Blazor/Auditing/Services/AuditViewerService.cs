@@ -14,10 +14,13 @@ namespace Pixata.Blazor.Auditing.Services;
 public class AuditViewerService(AuditServiceInterface auditService) {
   public async Task<List<EntityTypeMetadata>> GetEntityTypes() {
     List<string> entityTypes = await auditService.GetAllAuditedEntityTypes();
-    return entityTypes.Select(entityType => new EntityTypeMetadata {
-      FullName = entityType,
-      ShortName = entityType.Contains('.') ? entityType[(entityType.LastIndexOf('.') + 1)..] : entityType
-    }).ToList();
+    string auditTypeName = typeof(Audit).FullName ?? typeof(Audit).Name;
+    return entityTypes
+      .Where(entityType => entityType != auditTypeName)
+      .Select(entityType => new EntityTypeMetadata {
+        FullName = entityType,
+        ShortName = entityType.Contains('.') ? entityType[(entityType.LastIndexOf('.') + 1)..] : entityType
+      }).ToList();
   }
 
   public async Task<List<string>> GetDistinctEntityIds(string entityType) =>
@@ -56,6 +59,9 @@ public class AuditViewerService(AuditServiceInterface auditService) {
       Type propertyType = property.PropertyType;
       if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(DbSet<>)) {
         Type entityType = propertyType.GetGenericArguments()[0];
+        if (entityType == typeof(Audit)) {
+          continue;
+        }
         result.Add(new EntityTypeMetadata {
           FullName = entityType.FullName ?? entityType.Name,
           ShortName = entityType.Name

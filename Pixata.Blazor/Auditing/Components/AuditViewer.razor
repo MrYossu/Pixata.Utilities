@@ -55,7 +55,6 @@
       <div class="entity-type-selector">
         <label>Entity type:</label>
         <select @bind="_selectedEntityTypeName" @bind:after="OnEntityTypeChanged">
-          <option value="">— Select entity type —</option>
           @foreach (EntityTypeMetadata entityType in _entityTypes) {
             <option value="@entityType.FullName">@entityType.ShortName</option>
           }
@@ -95,7 +94,7 @@
                 <tr>
                   <td>@entityId</td>
                   <td>
-                    <button class="view-btn" @onclick="() => ViewAuditHistory(entityId)">View history</button>
+                    <a class="view-btn" href="@GetEntityHistoryUrl(entityId)">View history</a>
                   </td>
                 </tr>
               }
@@ -170,6 +169,8 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-block;
   }
   .view-btn:hover, .back-btn:hover, .filter-btn:hover {
     background: #006abc;
@@ -337,6 +338,8 @@
 </style>
 
 @code {
+  [Parameter] public string? DefaultEntityType { get; set; }
+
   private List<EntityTypeMetadata> _entityTypes = [];
   private string? _selectedEntityTypeName;
   private EntityTypeMetadata? _selectedEntityType;
@@ -378,6 +381,14 @@
 
     ReadQueryString();
     NavigationManager.LocationChanged += OnLocationChanged;
+
+    if (_selectedEntityType is null && _entityTypes.Count > 0) {
+      EntityTypeMetadata? defaultType = !string.IsNullOrWhiteSpace(DefaultEntityType)
+        ? _entityTypes.FirstOrDefault(et => et.ShortName == DefaultEntityType || et.FullName == DefaultEntityType)
+        : null;
+      _selectedEntityType = defaultType ?? _entityTypes[0];
+      _selectedEntityTypeName = _selectedEntityType.FullName;
+    }
 
     if (_selectedEntityType is not null) {
       await LoadAuditedEntities();
@@ -469,10 +480,13 @@
     StateHasChanged();
   }
 
-  private async Task ViewAuditHistory(string entityId) {
-    _selectedEntityId = entityId;
-    UpdateQueryString();
-    await LoadAuditHistory();
+  private string GetEntityHistoryUrl(string entityId) {
+    Dictionary<string, object?> parameters = new() {
+      ["entityType"] = _selectedEntityTypeName,
+      ["entityId"] = entityId,
+      ["page"] = null
+    };
+    return NavigationManager.GetUriWithQueryParameters(parameters);
   }
 
   private async Task LoadAuditHistory() {

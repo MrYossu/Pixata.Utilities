@@ -53,6 +53,11 @@ public class Startup(IConfiguration configuration) {
       endpoints.MapFallbackToPage("/_Host");
     });
 
+    using (IServiceScope scope = app.ApplicationServices.CreateScope()) {
+      SampleDbContext db = scope.ServiceProvider.GetRequiredService<SampleDbContext>();
+      SampleDataSeeder.Seed(db);
+    }
+
     // As this sample does not use authentication, the following line is not actually needed, but is included here to show how to set up the link to your log-in page
     ApiResponseViewConfig.LogInUrl = "LogIn";
     SitePageTitle.SiteName = "Pixata.Blazor sample";
