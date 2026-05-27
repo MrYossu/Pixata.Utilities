@@ -14,6 +14,27 @@
         <input type="checkbox" checked="@ShowOnlyChanged" @onchange="OnShowOnlyChangedToggled" />
         Show only changed properties
       </label>
+      <div class="audit-property-filter">
+        <button class="audit-property-filter-btn" @onclick="TogglePropertyDropdown">
+          Properties (@_selectedProperties.Count/@GetAllPropertyNames().Count) ▾
+        </button>
+        @if (_propertyDropdownOpen) {
+          <div class="audit-property-dropdown">
+            <div class="audit-property-dropdown-actions">
+              <button @onclick="SelectAllProperties">Check all</button>
+              <button @onclick="DeselectAllProperties">Uncheck all</button>
+            </div>
+            <div class="audit-property-dropdown-list">
+              @foreach (string propertyName in GetAllPropertyNames()) {
+                <label class="audit-property-dropdown-item">
+                  <input type="checkbox" checked="@_selectedProperties.Contains(propertyName)" @onchange="e => ToggleProperty(propertyName, e)" />
+                  @propertyName
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
       <div class="audit-view-toggle">
         <span class="audit-view-toggle-label">View:</span>
         <button class="audit-view-toggle-btn @(HorizontalView ? "" : "active")" @onclick="() => SetView(false)">Vertical</button>
@@ -45,7 +66,7 @@
             }
             @foreach (string propertyName in GetAllPropertyNames()) {
               bool anyChanged = changedPropertyNames.Contains(propertyName);
-              @if (!ShowOnlyChanged || anyChanged) {
+              @if ((!ShowOnlyChanged || anyChanged) && _selectedProperties.Contains(propertyName)) {
                 <tr>
                   <td class="audit-horizontal-property-col property-name">@propertyName</td>
                   @foreach (AuditEntryViewModel entry in Entries) {
@@ -96,7 +117,7 @@
                 }
                 @foreach (KeyValuePair<string, object?> property in entry.Properties) {
                   bool isChanged = changedPropertyNames.Contains(property.Key);
-                  @if (!ShowOnlyChanged || isChanged || isCreatedEntry) {
+                  @if (_selectedProperties.Contains(property.Key) && (!ShowOnlyChanged || isChanged || isCreatedEntry)) {
                     @if (isChanged) {
                       PropertyChange change = entry.ChangedProperties.First(changedProperty => changedProperty.PropertyName == property.Key);
                       <EntityPropertyDiff PropertyName="@property.Key" IsChanged="true" OldValue="@change.OldValue" NewValue="@change.NewValue" />
@@ -141,12 +162,31 @@
   public EventCallback<bool> HorizontalViewChanged { get; set; }
 
   private HashSet<long> _expandedEntries = [];
+  private HashSet<string> _selectedProperties = [];
+  private bool _propertyDropdownOpen;
   private bool _initialized;
 
   protected override void OnParametersSet() {
     if (!_initialized) {
       HorizontalView = DefaultHorizontalView;
       _initialized = true;
+    }
+    SyncSelectedProperties();
+  }
+
+  private void SyncSelectedProperties() {
+    HashSet<string> allProperties = GetAllPropertyNames().ToHashSet();
+    if (_selectedProperties.Count == 0 && allProperties.Count > 0) {
+      _selectedProperties = allProperties;
+    } else {
+      // Add any new properties that appeared
+      foreach (string prop in allProperties) {
+        if (!_selectedProperties.Contains(prop)) {
+          _selectedProperties.Add(prop);
+        }
+      }
+      // Remove properties that no longer exist
+      _selectedProperties.IntersectWith(allProperties);
     }
   }
 
@@ -166,11 +206,31 @@
     }
   }
 
-  private int GetVisiblePropertyCount(AuditEntryViewModel entry) {
-    if (!ShowOnlyChanged || entry.Operation == AuditOperation.Created) {
-      return entry.Properties.Count;
+  private void TogglePropertyDropdown() =>
+    _propertyDropdownOpen = !_propertyDropdownOpen;
+
+  private void SelectAllProperties() =>
+    _selectedProperties = GetAllPropertyNames().ToHashSet();
+
+  private void DeselectAllProperties() =>
+    _selectedProperties.Clear();
+
+  private void ToggleProperty(string propertyName, ChangeEventArgs e) {
+    if (e.Value is true) {
+      _selectedProperties.Add(propertyName);
+    } else {
+      _selectedProperties.Remove(propertyName);
     }
-    return entry.ChangedProperties.Count;
+  }
+
+  private int GetVisiblePropertyCount(AuditEntryViewModel entry) {
+    int count;
+    if (!ShowOnlyChanged || entry.Operation == AuditOperation.Created) {
+      count = entry.Properties.Count(p => _selectedProperties.Contains(p.Key));
+    } else {
+      count = entry.ChangedProperties.Count(c => _selectedProperties.Contains(c.PropertyName));
+    }
+    return count;
   }
 
   private List<string> GetAllPropertyNames() {
