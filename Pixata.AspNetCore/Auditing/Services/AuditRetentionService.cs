@@ -11,14 +11,13 @@ public class AuditRetentionService(IServiceScopeFactory scopeFactory, AuditReten
     if (!options.RetentionPeriod.HasValue) {
       return;
     }
-
     while (!stoppingToken.IsCancellationRequested) {
       try {
         await CleanupOldAuditEntries(stoppingToken);
-      } catch (Exception ex) {
+      }
+      catch (Exception ex) {
         logger.LogError(ex, "Error cleaning up old audit entries");
       }
-
       await Task.Delay(options.CleanupInterval, stoppingToken);
     }
   }
@@ -31,9 +30,8 @@ public class AuditRetentionService(IServiceScopeFactory scopeFactory, AuditReten
     int deleted = await context.Set<Audit>()
       .Where(a => a.ChangedAt < cutoff)
       .ExecuteDeleteAsync(stoppingToken);
-
     if (deleted > 0) {
-      logger.LogInformation("Deleted {Count} audit entries older than {Cutoff}", deleted, cutoff);
+      logger.LogInformation($"Deleted {deleted} audit entries older than {cutoff}");
     }
   }
 }

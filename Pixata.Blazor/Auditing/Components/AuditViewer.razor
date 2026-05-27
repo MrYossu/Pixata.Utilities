@@ -11,8 +11,6 @@
 @implements IDisposable
 
 <div class="audit-viewer">
-  <h2>Audit viewer</h2>
-
   @if (_selectedEntityId is not null && _selectedEntityType is not null) {
     <div class="audit-history-view">
       <button class="back-btn" @onclick="BackToEntityList">← Back to entity list</button>
