@@ -45,7 +45,12 @@
           <span>Loading audit history…</span>
         </div>
       } else {
-        <AuditTimeline Entries="_auditEntries" DefaultHorizontalView="_defaultHorizontalView" />
+        <AuditTimeline Entries="_auditEntries"
+                       DefaultHorizontalView="_defaultHorizontalView"
+                       ShowOnlyChanged="_showOnlyChanged"
+                       ShowOnlyChangedChanged="OnShowOnlyChangedChanged"
+                       HorizontalView="_horizontalView"
+                       HorizontalViewChanged="OnHorizontalViewChanged" />
       }
     </div>
   } else {
@@ -116,6 +121,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0 auto;
     overflow: hidden;
+    max-width: 100%;
   }
   .audit-viewer h2 {
     margin-bottom: 1rem;
@@ -379,8 +385,8 @@
   }
   .audit-horizontal-scroll {
     overflow-x: auto;
-    max-width: 100%;
-    width: 100%;
+    width: 0;
+    min-width: 100%;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
   }
@@ -424,6 +430,8 @@
   public bool DefaultHorizontalView { get; set; } = true;
 
   private bool _defaultHorizontalView = true;
+  private bool _showOnlyChanged;
+  private bool _horizontalView = true;
 
   private List<EntityTypeMetadata> _entityTypes = [];
   private string? _selectedEntityTypeName;
@@ -451,6 +459,7 @@
 
   protected override async Task OnInitializedAsync() {
     _defaultHorizontalView = DefaultHorizontalView;
+    _horizontalView = DefaultHorizontalView;
     _isLoadingEntityTypes = true;
     _entityTypes = AuditViewerService.GetEntityTypesFromContext(typeof(TContext));
 
@@ -500,13 +509,24 @@
     if (query.TryGetValue("page", out Microsoft.Extensions.Primitives.StringValues pageValue) && int.TryParse(pageValue, out int parsedPage) && parsedPage >= 1) {
       _currentPage = parsedPage;
     }
+
+    if (query.TryGetValue("changedOnly", out Microsoft.Extensions.Primitives.StringValues changedOnlyValue)) {
+      _showOnlyChanged = changedOnlyValue == "true";
+    }
+
+    if (query.TryGetValue("view", out Microsoft.Extensions.Primitives.StringValues viewValue)) {
+      _horizontalView = viewValue == "horizontal";
+      _defaultHorizontalView = _horizontalView;
+    }
   }
 
   private void UpdateQueryString() {
     Dictionary<string, object?> parameters = new() {
       ["entityType"] = _selectedEntityTypeName,
       ["entityId"] = _selectedEntityId,
-      ["page"] = _currentPage > 1 ? _currentPage : null
+      ["page"] = _currentPage > 1 ? _currentPage : null,
+      ["changedOnly"] = _showOnlyChanged ? "true" : null,
+      ["view"] = _horizontalView != DefaultHorizontalView ? (_horizontalView ? "horizontal" : "vertical") : null
     };
 
     string uri = NavigationManager.GetUriWithQueryParameters(parameters);
@@ -526,6 +546,17 @@
 
   public void Dispose() =>
     NavigationManager.LocationChanged -= OnLocationChanged;
+
+  private void OnShowOnlyChangedChanged(bool value) {
+    _showOnlyChanged = value;
+    UpdateQueryString();
+  }
+
+  private void OnHorizontalViewChanged(bool value) {
+    _horizontalView = value;
+    _defaultHorizontalView = value;
+    UpdateQueryString();
+  }
 
   private async Task OnEntityTypeChanged() {
     _selectedEntityType = _entityTypes.FirstOrDefault(entityType => entityType.FullName == _selectedEntityTypeName);
