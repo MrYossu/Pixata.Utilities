@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Pixata.AspNetCore.Auditing.Attributes;
 using Pixata.AspNetCore.Auditing.Models;
 using Pixata.AspNetCore.Auditing.Services;
 using Pixata.Blazor.Auditing.Models;
@@ -60,6 +61,9 @@ public class AuditViewerService(AuditServiceInterface auditService) {
       if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(DbSet<>)) {
         Type entityType = propertyType.GetGenericArguments()[0];
         if (entityType == typeof(Audit)) {
+          continue;
+        }
+        if (entityType.GetCustomAttribute<NoAuditAttribute>() is not null) {
           continue;
         }
         result.Add(new EntityTypeMetadata {
