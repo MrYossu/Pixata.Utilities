@@ -3,9 +3,11 @@
 @inject AuditViewerService AuditViewerService
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.Routing
+@using Pixata.AspNetCore.Auditing.Attributes
 @using Pixata.AspNetCore.Auditing.Models
 @using Pixata.Blazor.Auditing.Models
 @using Pixata.Blazor.Auditing.Services
+@using System.Reflection
 @implements IDisposable
 
 <div class="audit-viewer">
@@ -539,7 +541,12 @@
     HashSet<string> existingNames = _entityTypes.Select(entityType => entityType.FullName).ToHashSet();
     foreach (EntityTypeMetadata auditedType in auditedTypes) {
       if (!existingNames.Contains(auditedType.FullName)) {
-        _entityTypes.Add(auditedType);
+        Type? resolvedType = AppDomain.CurrentDomain.GetAssemblies()
+          .SelectMany(assembly => assembly.GetTypes())
+          .FirstOrDefault(type => type.FullName == auditedType.FullName);
+        if (resolvedType?.GetCustomAttribute<NoAuditAttribute>() is null) {
+          _entityTypes.Add(auditedType);
+        }
       }
     }
 
