@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Pixata.AspNetCore.Auditing.Models;
 using Pixata.Blazor.Sample.Models;
+using Pixata.Extensions.Auditing.Models;
 
 namespace Pixata.Blazor.Sample.Data;
 
