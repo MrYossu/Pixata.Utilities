@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using Pixata.Blazor.Auditing.Services;
 using Pixata.Blazor.Extensions;
 using Pixata.Blazor.Notifications;
 
@@ -13,7 +12,6 @@ public static class ServiceCollectionExtensions {
     List<Type> types = [
       typeof(MessageBrokerInstance),
       typeof(NotificationHelper),
-      typeof(AuditViewerService),
       typeof(PasswordOptionsHelper),
       typeof(PersistentStateHelper<>),
       typeof(TemplateHelper),

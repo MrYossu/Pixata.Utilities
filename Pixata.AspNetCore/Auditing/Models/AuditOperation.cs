@@ -1,7 +1,2 @@
-namespace Pixata.AspNetCore.Auditing.Models;
-
-public enum AuditOperation {
-  Created = 1,
-  Updated = 2,
-  Deleted = 3
-}
+// AuditOperation has been moved to Pixata.Extensions.Auditing.Models.
+// This file is retained as a placeholder; the global alias is declared in GlobalAuditingUsings.cs.

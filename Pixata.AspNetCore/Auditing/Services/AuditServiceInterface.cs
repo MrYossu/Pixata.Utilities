@@ -1,9 +1,2 @@
-using Pixata.AspNetCore.Auditing.Models;
-
-namespace Pixata.AspNetCore.Auditing.Services;
-
-public interface AuditServiceInterface {
-  Task<List<Audit>> GetAuditHistory(string entityType, string entityId);
-  Task<List<string>> GetAllAuditedEntityTypes();
-  Task<List<string>> GetDistinctEntityIds(string entityType);
-}
+// AuditServiceInterface has been moved to Pixata.Extensions.Auditing.Services.
+// This file is retained as a placeholder; the global alias is declared in GlobalAuditingUsings.cs.

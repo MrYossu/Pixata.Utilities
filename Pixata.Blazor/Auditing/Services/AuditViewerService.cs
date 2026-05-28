@@ -5,23 +5,28 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Pixata.AspNetCore.Auditing.Attributes;
-using Pixata.AspNetCore.Auditing.Models;
-using Pixata.AspNetCore.Auditing.Services;
-using Pixata.Blazor.Auditing.Models;
+using Pixata.Extensions.Auditing.Attributes;
+using Pixata.Extensions.Auditing.Models;
+using Pixata.Extensions.Auditing.Services;
 
 namespace Pixata.Blazor.Auditing.Services;
 
-public class AuditViewerService(AuditServiceInterface auditService) {
+public class AuditViewerService(AuditServiceInterface auditService, DbContext context) : AuditViewerServiceInterface {
   public async Task<List<EntityTypeMetadata>> GetEntityTypes() {
-    List<string> entityTypes = await auditService.GetAllAuditedEntityTypes();
+    List<EntityTypeMetadata> contextTypes = GetEntityTypesFromContext(context.GetType());
+    List<string> auditedEntityTypes = await auditService.GetAllAuditedEntityTypes();
+
+    HashSet<string> existingNames = contextTypes.Select(et => et.FullName).ToHashSet();
     string auditTypeName = typeof(Audit).FullName ?? typeof(Audit).Name;
-    return entityTypes
-      .Where(entityType => entityType != auditTypeName)
-      .Select(entityType => new EntityTypeMetadata {
-        FullName = entityType,
-        ShortName = entityType.Contains('.') ? entityType[(entityType.LastIndexOf('.') + 1)..] : entityType
-      }).ToList();
+
+    foreach (string entityType in auditedEntityTypes) {
+      if (entityType != auditTypeName && !existingNames.Contains(entityType)) {
+        string shortName = entityType.Contains('.') ? entityType[(entityType.LastIndexOf('.') + 1)..] : entityType;
+        contextTypes.Add(new EntityTypeMetadata { FullName = entityType, ShortName = shortName });
+      }
+    }
+
+    return contextTypes.OrderBy(et => et.ShortName).ToList();
   }
 
   public async Task<List<string>> GetDistinctEntityIds(string entityType) =>
@@ -73,7 +78,7 @@ public class AuditViewerService(AuditServiceInterface auditService) {
       }
     }
 
-    return result.OrderBy(entityType => entityType.ShortName).ToList();
+    return result.OrderBy(et => et.ShortName).ToList();
   }
 
   private static AuditEntryViewModel MapToViewModel(Audit audit) {

@@ -1,12 +1,10 @@
 @page "/AuditViewerSample"
 @using Pixata.Blazor.Auditing.Components
-@using Pixata.Blazor.Sample.Data
 
 <h3>Audit Viewer</h3>
 
 <p>This page demonstrates the <code>AuditViewer</code> component, which provides a UI for browsing the audit history of your entities.</p>
 
-<p>The viewer discovers all <code>DbSet&lt;T&gt;</code> properties on your <code>DbContext</code> via reflection, and allows you to select an entity type, search for specific entity IDs, and view a timeline of all changes with property-level diffs.</p>
+<p>See the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/AuditViewer.md">readme file</a> for instructions on configuring and using the viewer</p>
 
-<AuditViewer TContext="SampleDbContext" 
-             DefaultEntityType="Person" />
+<AuditViewer DefaultEntityType="Person" />

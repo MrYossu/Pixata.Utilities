@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Pixata.AspNetCore.Auditing.Models;
+using Pixata.Extensions.Auditing.Models;
+using Pixata.Extensions.Auditing.Services;
 
 namespace Pixata.AspNetCore.Auditing.Services;
 

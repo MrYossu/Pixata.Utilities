@@ -1,12 +1,2 @@
-namespace Pixata.AspNetCore.Auditing.Models;
-
-public class Audit {
-  public long Id { get; set; }
-  public string EntityType { get; set; } = "";
-  public string EntityId { get; set; } = "";
-  public AuditOperation Operation { get; set; }
-  public string ChangedBy { get; set; } = "";
-  public DateTime ChangedAt { get; set; }
-  public string FullSnapshot { get; set; } = "";
-  public string? ChangedProperties { get; set; }
-}
+// Audit and AuditOperation have been moved to Pixata.Extensions.Auditing.Models.
+// This file is retained as a global alias so existing code in this project continues to compile.

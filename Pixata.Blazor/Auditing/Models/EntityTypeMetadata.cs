@@ -1,6 +1,2 @@
-namespace Pixata.Blazor.Auditing.Models;
-
-public class EntityTypeMetadata {
-  public string FullName { get; set; } = "";
-  public string ShortName { get; set; } = "";
-}
+// EntityTypeMetadata has been moved to Pixata.Extensions.Auditing.Models.
+// This file is retained as a placeholder; the global alias is declared in GlobalAuditingUsings.cs.
