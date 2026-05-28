@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Pixata.AspNetCore.Auditing.Attributes;
-using Pixata.AspNetCore.Auditing.Models;
 using Pixata.AspNetCore.Auditing.Services;
+using Pixata.Extensions.Auditing.Attributes;
+using Pixata.Extensions.Auditing.Models;
 
 namespace Pixata.AspNetCore.Auditing.Interceptors;
 

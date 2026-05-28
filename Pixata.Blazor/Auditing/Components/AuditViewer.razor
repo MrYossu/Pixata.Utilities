@@ -1,10 +1,9 @@
 @namespace Pixata.Blazor.Auditing.Components
-@typeparam TContext where TContext : Microsoft.EntityFrameworkCore.DbContext
-@inject AuditViewerService AuditViewerService
+@inject AuditViewerServiceInterface AuditViewerService
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.Routing
-@using Pixata.AspNetCore.Auditing.Models
-@using Pixata.Blazor.Auditing.Models
+@using Pixata.Extensions.Auditing.Models
+@using Pixata.Extensions.Auditing.Services
 @using Pixata.Blazor.Auditing.Services
 @implements IDisposable
 
@@ -533,17 +532,7 @@
     _defaultHorizontalView = DefaultHorizontalView;
     _horizontalView = DefaultHorizontalView;
     _isLoadingEntityTypes = true;
-    _entityTypes = AuditViewerService.GetEntityTypesFromContext(typeof(TContext));
-
-    List<EntityTypeMetadata> auditedTypes = await AuditViewerService.GetEntityTypes();
-    HashSet<string> existingNames = _entityTypes.Select(entityType => entityType.FullName).ToHashSet();
-    foreach (EntityTypeMetadata auditedType in auditedTypes) {
-      if (!existingNames.Contains(auditedType.FullName)) {
-        _entityTypes.Add(auditedType);
-      }
-    }
-
-    _entityTypes = _entityTypes.OrderBy(entityType => entityType.ShortName).ToList();
+    _entityTypes = await AuditViewerService.GetEntityTypes();
     _isLoadingEntityTypes = false;
 
     ReadQueryString();

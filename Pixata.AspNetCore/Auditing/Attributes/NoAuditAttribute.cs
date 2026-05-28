@@ -1,4 +1,2 @@
-namespace Pixata.AspNetCore.Auditing.Attributes;
-
-[AttributeUsage(AttributeTargets.Class)]
-public class NoAuditAttribute : Attribute;
+// NoAuditAttribute has been moved to Pixata.Extensions.Auditing.Attributes.
+// This file is retained as a placeholder; the global alias is declared in GlobalAuditingUsings.cs.

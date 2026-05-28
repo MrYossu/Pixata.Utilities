@@ -40,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Pixata.AspNetCore\Pixata.AspNetCore.csproj" />
     <ProjectReference Include="..\Pixata.Extensions\Pixata.Extensions.csproj" />
   </ItemGroup>
 

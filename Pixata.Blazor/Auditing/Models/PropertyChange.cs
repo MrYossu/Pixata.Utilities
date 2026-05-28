@@ -1,7 +1,2 @@
-namespace Pixata.Blazor.Auditing.Models;
-
-public class PropertyChange {
-  public string PropertyName { get; set; } = "";
-  public string? OldValue { get; set; }
-  public string? NewValue { get; set; }
-}
+// PropertyChange has been moved to Pixata.Extensions.Auditing.Models.
+// This file is retained as a placeholder; the global alias is declared in GlobalAuditingUsings.cs.
