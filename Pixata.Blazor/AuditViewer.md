@@ -2,7 +2,7 @@
 
 In order to ease the pain of auditing database changes, I have added features to the repo to make this easier.
 
-To configure auditing, you need to add a reference to both the `Pixata.AspNetCore` packkkage (version >= 1.4.0) and the `Pixata.Blazor` package (version >= 2.24.0).
+To configure auditing, you need to add a reference to both the `Pixata.AspNetCore` packkkage (version >= 1.5.0) and the `Pixata.Blazor` package (version >= 2.24.0).
 
 ## Configuring auditing
 Then add the following to your `DbContext`...
