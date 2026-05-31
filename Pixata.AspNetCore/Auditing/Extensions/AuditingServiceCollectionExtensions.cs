@@ -15,7 +15,7 @@ public static class AuditingServiceCollectionExtensions {
     services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     services.AddScoped<AuditUserContextInterface, AuditUserContext>();
     services.AddScoped<DbContext>(sp => sp.GetRequiredService<TContext>());
-    services.AddScoped<Pixata.Extensions.Auditing.Services.AuditServiceInterface, AuditService>();
+    services.AddScoped<AuditServiceInterface, AuditService>();
     services.AddScoped<AuditingInterceptor>();
 
     AuditRetentionOptions retentionOptions = new();

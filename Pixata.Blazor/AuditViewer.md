@@ -21,7 +21,6 @@ In your `Program.cs` file (server project if you have a mixed-mode app), add aud
 
 ```csharp
 builder.Services.AddAuditing<AppDbContext>();
-builder.Services.AddPixataAuditViewer();
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) => {
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
     // Any other options you normally use
