@@ -109,7 +109,7 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
   private static string? SerialiseChangedProperties(EntityEntry entry) {
     Dictionary<string, object?[]> changed = new();
     foreach (PropertyEntry property in entry.Properties) {
-      if (property.IsModified) {
+      if (property.IsModified && !Equals(property.OriginalValue, property.CurrentValue)) {
         changed[property.Metadata.Name] = [property.OriginalValue, property.CurrentValue];
       }
     }
