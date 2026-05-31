@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Pixata.Extensions.Auditing.Models;
 using Pixata.Extensions.Auditing.Services;
@@ -25,4 +29,19 @@ public class AuditService(DbContext context) : AuditServiceInterface {
       .Distinct()
       .OrderBy(id => id)
       .ToListAsync();
+
+  public async Task<List<Audit>> GetAuditsByEntityTypes(IEnumerable<string> entityTypes, DateTime? fromDate, DateTime? toDate, string? user) {
+    List<string> types = entityTypes.ToList();
+    IQueryable<Audit> query = context.Set<Audit>().Where(a => types.Contains(a.EntityType));
+    if (fromDate.HasValue) {
+      query = query.Where(a => a.ChangedAt >= fromDate.Value);
+    }
+    if (toDate.HasValue) {
+      query = query.Where(a => a.ChangedAt <= toDate.Value);
+    }
+    if (!string.IsNullOrWhiteSpace(user)) {
+      query = query.Where(a => a.ChangedBy == user);
+    }
+    return await query.OrderByDescending(a => a.ChangedAt).ToListAsync();
+  }
 }
