@@ -65,6 +65,10 @@
           @if (_entityTypeDropdownOpen) {
             <div class="entity-type-dropdown-backdrop" @onclick="CloseEntityTypeDropdown"></div>
             <div class="entity-type-dropdown-menu">
+              <div class="entity-type-dropdown-actions">
+                <button @onclick="CheckAllEntityTypes">Check all</button>
+                <button @onclick="UncheckAllEntityTypes">Uncheck all</button>
+              </div>
               <div class="entity-type-dropdown-item entity-type-all-item @(_showAllView ? "selected" : "")" @onclick="SelectAllView">
                 All
               </div>
@@ -125,6 +129,7 @@
                   <th>Date</th>
                   <th>User</th>
                   <th>Changes</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,10 +147,13 @@
                         <button class="toggle-btn" @onclick="() => ToggleAllViewEntry(entry.Id)">▶ Show properties (@GetAllViewPropertyCount(entry))</button>
                       }
                     </td>
+                    <td>
+                      <a class="view-btn" href="@GetAllViewEntityHistoryUrl(entry)">View history</a>
+                    </td>
                   </tr>
                   @if (_expandedAllViewEntries.Contains(entry.Id)) {
                     <tr class="all-audit-expanded-row">
-                      <td colspan="6">
+                      <td colspan="7">
                         <div class="properties-list">
                           @if (entry.Operation == AuditOperation.Created) {
                             @foreach (KeyValuePair<string, object?> prop in entry.Properties) {
@@ -310,6 +318,23 @@
   .entity-type-all-item {
     font-weight: 600;
     border-bottom: 1px solid #e0e0e0;
+  }
+  .entity-type-dropdown-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .entity-type-dropdown-actions button {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .entity-type-dropdown-actions button:hover {
+    background: #f0f0f0;
   }
   .entity-search {
     margin-bottom: 1rem;
@@ -895,6 +920,22 @@
     UpdateQueryString();
   }
 
+  private void CheckAllEntityTypes() {
+    _checkedEntityTypes = _entityTypes.Select(et => et.FullName).ToHashSet();
+    _allViewCurrentPage = 1;
+    RecalcAllViewPages();
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+  }
+
+  private void UncheckAllEntityTypes() {
+    _checkedEntityTypes.Clear();
+    _allViewCurrentPage = 1;
+    RecalcAllViewPages();
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+  }
+
   private void ToggleEntityTypeDropdown() =>
     _entityTypeDropdownOpen = !_entityTypeDropdownOpen;
 
@@ -1036,6 +1077,16 @@
     return NavigationManager.GetUriWithQueryParameters(parameters);
   }
 
+  private string GetAllViewEntityHistoryUrl(AuditEntryViewModel entry) {
+    Dictionary<string, object?> parameters = new() {
+      ["allView"] = null,
+      ["entityType"] = entry.EntityType,
+      ["entityId"] = entry.EntityId,
+      ["page"] = null
+    };
+    return NavigationManager.GetUriWithQueryParameters(parameters);
+  }
+
   private async Task LoadAuditHistory() {
     if (_selectedEntityType is null || _selectedEntityId is null) {
       return;
@@ -1086,8 +1137,18 @@
     }
   }
 
-  private string GetEntityTypeSelectorLabel() =>
-    _showAllView ? "All" : (_selectedEntityType?.ShortName ?? "Select…");
+  private string GetEntityTypeSelectorLabel() {
+    if (!_showAllView) {
+      return _selectedEntityType?.ShortName ?? "Select…";
+    }
+    if (_checkedEntityTypes.Count == 0) {
+      return "None";
+    }
+    if (_checkedEntityTypes.Count == _entityTypes.Count) {
+      return "All";
+    }
+    return string.Join(", ", _entityTypes.Where(et => _checkedEntityTypes.Contains(et.FullName)).Select(et => et.ShortName));
+  }
 
   private string GetEntityShortName(string fullName) =>
     _entityTypes.FirstOrDefault(et => et.FullName == fullName)?.ShortName ?? fullName;
