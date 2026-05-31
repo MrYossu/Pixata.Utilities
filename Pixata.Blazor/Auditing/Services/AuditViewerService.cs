@@ -81,6 +81,11 @@ public class AuditViewerService(AuditServiceInterface auditService, DbContext co
     return result.OrderBy(et => et.ShortName).ToList();
   }
 
+  public async Task<List<AuditEntryViewModel>> GetAllAuditEntries(IEnumerable<string> entityTypes, DateTime? fromDate, DateTime? toDate, string? user) {
+    List<Audit> audits = await auditService.GetAuditsByEntityTypes(entityTypes, fromDate, toDate, user);
+    return audits.Select(MapToViewModel).ToList();
+  }
+
   private static AuditEntryViewModel MapToViewModel(Audit audit) {
     Dictionary<string, object?> properties = [];
     if (!string.IsNullOrWhiteSpace(audit.FullSnapshot)) {
@@ -112,6 +117,8 @@ public class AuditViewerService(AuditServiceInterface auditService, DbContext co
 
     return new AuditEntryViewModel {
       Id = audit.Id,
+      EntityType = audit.EntityType,
+      EntityId = audit.EntityId,
       Operation = audit.Operation,
       ChangedBy = audit.ChangedBy,
       ChangedAt = audit.ChangedAt,

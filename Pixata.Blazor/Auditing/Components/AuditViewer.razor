@@ -58,17 +58,144 @@
     <div class="entity-list-view">
       <div class="entity-type-selector">
         <label>Entity type:</label>
-        <select @bind="_selectedEntityTypeName" @bind:after="OnEntityTypeChanged">
-          @foreach (EntityTypeMetadata entityType in _entityTypes) {
-            <option value="@entityType.FullName">@entityType.ShortName</option>
+        <div class="entity-type-dropdown">
+          <button class="entity-type-dropdown-btn" @onclick="ToggleEntityTypeDropdown">
+            @GetEntityTypeSelectorLabel() ▾
+          </button>
+          @if (_entityTypeDropdownOpen) {
+            <div class="entity-type-dropdown-backdrop" @onclick="CloseEntityTypeDropdown"></div>
+            <div class="entity-type-dropdown-menu">
+              <div class="entity-type-dropdown-actions">
+                <button @onclick="CheckAllEntityTypes">Check all</button>
+                <button @onclick="UncheckAllEntityTypes">Uncheck all</button>
+              </div>
+              <div class="entity-type-dropdown-item entity-type-all-item @(_showAllView ? "selected" : "")" @onclick="SelectAllView">
+                All
+              </div>
+              @foreach (EntityTypeMetadata entityType in _entityTypes) {
+                <label class="entity-type-dropdown-item @(!_showAllView && _selectedEntityTypeName == entityType.FullName ? "selected" : "")">
+                  <input type="checkbox"
+                         checked="@_checkedEntityTypes.Contains(entityType.FullName)"
+                         @onchange="e => ToggleEntityTypeCheck(entityType.FullName, e)"
+                         @onclick:stopPropagation />
+                  <span @onclick="() => SelectSpecificEntityType(entityType)" @onclick:stopPropagation>@entityType.ShortName</span>
+                </label>
+              }
+            </div>
           }
-        </select>
+        </div>
       </div>
 
       @if (_isLoadingEntityTypes) {
         <div class="loading-state">
           <div class="spinner"></div>
           <span>Loading entity types…</span>
+        </div>
+      } else if (_showAllView) {
+        <div class="all-audit-view">
+          <div class="filters">
+            <div class="filter-group">
+              <label>From:</label>
+              <input type="date" @bind="_allViewFilterFrom" />
+            </div>
+            <div class="filter-group">
+              <label>To:</label>
+              <input type="date" @bind="_allViewFilterTo" />
+            </div>
+            <div class="filter-group">
+              <label>User:</label>
+              <input type="text" @bind="_allViewFilterUser" placeholder="Filter by user..." />
+            </div>
+            <button class="filter-btn" @onclick="ApplyAllViewFilters">Apply filters</button>
+          </div>
+
+          @if (_isLoadingAllEntries) {
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <span>Loading audit entries…</span>
+            </div>
+          } else if (_filteredAllViewEntries.Count == 0) {
+            <div class="empty-state">
+              <span>📋</span>
+              <p>No audit entries found.</p>
+            </div>
+          } else {
+            <table class="entity-table all-audit-table">
+              <thead>
+                <tr>
+                  <th>Entity Type</th>
+                  <th>ID</th>
+                  <th>Operation</th>
+                  <th>Date</th>
+                  <th>User</th>
+                  <th>Changes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach (AuditEntryViewModel entry in _pagedAllViewEntries) {
+                  <tr>
+                    <td>@GetEntityShortName(entry.EntityType)</td>
+                    <td>@entry.EntityId</td>
+                    <td><span class="operation-icon">@GetOperationIcon(entry.Operation)</span> @entry.Operation</td>
+                    <td>@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@entry.ChangedBy</td>
+                    <td>
+                      @if (_expandedAllViewEntries.Contains(entry.Id)) {
+                        <button class="toggle-btn" @onclick="() => ToggleAllViewEntry(entry.Id)">▼ Hide properties</button>
+                      } else {
+                        <button class="toggle-btn" @onclick="() => ToggleAllViewEntry(entry.Id)">▶ Show properties (@GetAllViewPropertyCount(entry))</button>
+                      }
+                    </td>
+                    <td>
+                      <a class="view-btn" href="@GetAllViewEntityHistoryUrl(entry)">View history</a>
+                    </td>
+                  </tr>
+                  @if (_expandedAllViewEntries.Contains(entry.Id)) {
+                    <tr class="all-audit-expanded-row">
+                      <td colspan="7">
+                        <div class="properties-list">
+                          @if (entry.Operation == AuditOperation.Created) {
+                            @foreach (KeyValuePair<string, object?> prop in entry.Properties) {
+                              <div class="property-row">
+                                <span class="property-name">@prop.Key</span>
+                                <span class="property-value">@prop.Value</span>
+                              </div>
+                            }
+                          } else if (entry.ChangedProperties.Count > 0) {
+                            @foreach (PropertyChange change in entry.ChangedProperties) {
+                              <div class="property-row property-changed">
+                                <span class="property-name">@change.PropertyName</span>
+                                <div class="property-values">
+                                  <span class="old-value">@change.OldValue</span>
+                                  <span class="arrow">→</span>
+                                  <span class="new-value">@change.NewValue</span>
+                                </div>
+                              </div>
+                            }
+                          } else {
+                            @foreach (KeyValuePair<string, object?> prop in entry.Properties) {
+                              <div class="property-row">
+                                <span class="property-name">@prop.Key</span>
+                                <span class="property-value">@prop.Value</span>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+            @if (_allViewTotalPages > 1) {
+              <div class="pagination">
+                <button disabled="@(_allViewCurrentPage <= 1)" @onclick="AllViewPreviousPage">← Previous</button>
+                <span>Page @_allViewCurrentPage of @_allViewTotalPages</span>
+                <button disabled="@(_allViewCurrentPage >= _allViewTotalPages)" @onclick="AllViewNextPage">Next →</button>
+              </div>
+            }
+          }
         </div>
       } else if (!string.IsNullOrWhiteSpace(_selectedEntityTypeName)) {
         <div class="entity-search">
@@ -128,16 +255,86 @@
   }
   .entity-type-selector {
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   .entity-type-selector label {
     font-weight: 600;
-    margin-right: 0.5rem;
   }
-  .entity-type-selector select {
+  .entity-type-dropdown {
+    position: relative;
+  }
+  .entity-type-dropdown-btn {
     padding: 0.4rem 0.6rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     min-width: 200px;
+    background: white;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+  .entity-type-dropdown-btn:hover {
+    background: #f0f0f0;
+  }
+  .entity-type-dropdown-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 11;
+  }
+  .entity-type-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 12;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    margin-top: 0.25rem;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .entity-type-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .entity-type-dropdown-item:hover {
+    background: #f5f5f5;
+  }
+  .entity-type-dropdown-item.selected {
+    background: #e8f0fe;
+    font-weight: 600;
+  }
+  .entity-type-all-item {
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .entity-type-dropdown-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .entity-type-dropdown-actions button {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .entity-type-dropdown-actions button:hover {
+    background: #f0f0f0;
   }
   .entity-search {
     margin-bottom: 1rem;
@@ -164,6 +361,13 @@
   }
   .entity-table tr:hover {
     background: #f9f9f9;
+  }
+  .all-audit-table td {
+    vertical-align: top;
+  }
+  .all-audit-expanded-row td {
+    background: #fafafa;
+    padding: 0.5rem 0.75rem;
   }
   .view-btn, .back-btn, .filter-btn {
     padding: 0.3rem 0.7rem;
@@ -522,9 +726,33 @@
   private string? _filterUser;
   private AuditOperation? _filterOperation;
 
+  // All-view state
+  private bool _showAllView = true;
+  private HashSet<string> _checkedEntityTypes = [];
+  private bool _entityTypeDropdownOpen;
+  private List<AuditEntryViewModel> _allViewEntries = [];
+  private bool _isLoadingAllEntries;
+  private DateTime? _allViewFilterFrom;
+  private DateTime? _allViewFilterTo;
+  private string? _allViewFilterUser;
+  private HashSet<long> _expandedAllViewEntries = [];
+  private int _allViewCurrentPage = 1;
+  private int _allViewTotalPages = 1;
+
   private List<string> _pagedEntityIds =>
     _auditedEntityIds
       .Skip((_currentPage - 1) * _pageSize)
+      .Take(_pageSize)
+      .ToList();
+
+  private List<AuditEntryViewModel> _filteredAllViewEntries =>
+    _checkedEntityTypes.Count == 0 || _checkedEntityTypes.Count == _entityTypes.Count
+      ? _allViewEntries
+      : _allViewEntries.Where(e => _checkedEntityTypes.Contains(e.EntityType)).ToList();
+
+  private List<AuditEntryViewModel> _pagedAllViewEntries =>
+    _filteredAllViewEntries
+      .Skip((_allViewCurrentPage - 1) * _pageSize)
       .Take(_pageSize)
       .ToList();
 
@@ -535,21 +763,33 @@
     _entityTypes = await AuditViewerService.GetEntityTypes();
     _isLoadingEntityTypes = false;
 
+    // Default: all entity types checked
+    _checkedEntityTypes = _entityTypes.Select(et => et.FullName).ToHashSet();
+
+    // Default: show All view unless DefaultEntityType is specified
+    if (!string.IsNullOrWhiteSpace(DefaultEntityType)) {
+      _showAllView = false;
+    }
+
     ReadQueryString();
     NavigationManager.LocationChanged += OnLocationChanged;
 
-    if (_selectedEntityType is null && _entityTypes.Count > 0) {
-      EntityTypeMetadata? defaultType = !string.IsNullOrWhiteSpace(DefaultEntityType)
-        ? _entityTypes.FirstOrDefault(et => et.ShortName == DefaultEntityType || et.FullName == DefaultEntityType)
-        : null;
-      _selectedEntityType = defaultType ?? _entityTypes[0];
-      _selectedEntityTypeName = _selectedEntityType.FullName;
-    }
+    if (_showAllView) {
+      await LoadAllViewEntries();
+    } else {
+      if (_selectedEntityType is null && _entityTypes.Count > 0) {
+        EntityTypeMetadata? defaultType = !string.IsNullOrWhiteSpace(DefaultEntityType)
+          ? _entityTypes.FirstOrDefault(et => et.ShortName == DefaultEntityType || et.FullName == DefaultEntityType)
+          : null;
+        _selectedEntityType = defaultType ?? _entityTypes[0];
+        _selectedEntityTypeName = _selectedEntityType.FullName;
+      }
 
-    if (_selectedEntityType is not null) {
-      await LoadAuditedEntities();
-      if (_selectedEntityId is not null) {
-        await LoadAuditHistory();
+      if (_selectedEntityType is not null) {
+        await LoadAuditedEntities();
+        if (_selectedEntityId is not null) {
+          await LoadAuditHistory();
+        }
       }
     }
   }
@@ -557,6 +797,16 @@
   private void ReadQueryString() {
     Uri uri = new(NavigationManager.Uri);
     Dictionary<string, Microsoft.Extensions.Primitives.StringValues> query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+    if (query.TryGetValue("allView", out Microsoft.Extensions.Primitives.StringValues allViewValue)) {
+      _showAllView = allViewValue != "false";
+    } else if (query.ContainsKey("entityType") && !string.IsNullOrWhiteSpace(query["entityType"])) {
+      _showAllView = false;
+    }
+
+    if (query.TryGetValue("checkedTypes", out Microsoft.Extensions.Primitives.StringValues checkedTypesValue) && !string.IsNullOrWhiteSpace(checkedTypesValue)) {
+      _checkedEntityTypes = checkedTypesValue.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+    }
 
     if (query.TryGetValue("entityType", out Microsoft.Extensions.Primitives.StringValues entityTypeValue) && !string.IsNullOrWhiteSpace(entityTypeValue)) {
       _selectedEntityTypeName = entityTypeValue;
@@ -583,22 +833,48 @@
     if (query.TryGetValue("props", out Microsoft.Extensions.Primitives.StringValues propsValue) && !string.IsNullOrWhiteSpace(propsValue)) {
       _selectedProperties = propsValue.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
     }
+
+    if (query.TryGetValue("allFrom", out Microsoft.Extensions.Primitives.StringValues allFromValue) && DateTime.TryParse(allFromValue, out DateTime parsedAllFrom)) {
+      _allViewFilterFrom = parsedAllFrom;
+    }
+
+    if (query.TryGetValue("allTo", out Microsoft.Extensions.Primitives.StringValues allToValue) && DateTime.TryParse(allToValue, out DateTime parsedAllTo)) {
+      _allViewFilterTo = parsedAllTo;
+    }
+
+    if (query.TryGetValue("allUser", out Microsoft.Extensions.Primitives.StringValues allUserValue) && !string.IsNullOrWhiteSpace(allUserValue)) {
+      _allViewFilterUser = allUserValue;
+    }
+
+    if (query.TryGetValue("allPage", out Microsoft.Extensions.Primitives.StringValues allPageValue) && int.TryParse(allPageValue, out int parsedAllPage) && parsedAllPage >= 1) {
+      _allViewCurrentPage = parsedAllPage;
+    }
   }
 
   private void UpdateQueryString() {
     string? propsParam = null;
     if (_selectedProperties is not null && _selectedProperties.Count > 0) {
-      // Only include in querystring if not all properties are selected
       propsParam = string.Join(",", _selectedProperties.OrderBy(p => p));
     }
 
+    string? checkedTypesParam = null;
+    if (_checkedEntityTypes.Count > 0 && _checkedEntityTypes.Count < _entityTypes.Count) {
+      checkedTypesParam = string.Join(",", _checkedEntityTypes.OrderBy(t => t));
+    }
+
     Dictionary<string, object?> parameters = new() {
-      ["entityType"] = _selectedEntityTypeName,
+      ["allView"] = _showAllView ? "true" : null,
+      ["checkedTypes"] = checkedTypesParam,
+      ["entityType"] = !_showAllView ? _selectedEntityTypeName : null,
       ["entityId"] = _selectedEntityId,
-      ["page"] = _currentPage > 1 ? _currentPage : null,
+      ["page"] = !_showAllView && _currentPage > 1 ? _currentPage : null,
       ["changedOnly"] = _showOnlyChanged ? "true" : null,
       ["view"] = _horizontalView != DefaultHorizontalView ? (_horizontalView ? "horizontal" : "vertical") : null,
-      ["props"] = propsParam
+      ["props"] = propsParam,
+      ["allFrom"] = _allViewFilterFrom.HasValue ? _allViewFilterFrom.Value.ToString("yyyy-MM-dd") : null,
+      ["allTo"] = _allViewFilterTo.HasValue ? _allViewFilterTo.Value.ToString("yyyy-MM-dd") : null,
+      ["allUser"] = !string.IsNullOrWhiteSpace(_allViewFilterUser) ? _allViewFilterUser : null,
+      ["allPage"] = _showAllView && _allViewCurrentPage > 1 ? _allViewCurrentPage : null
     };
 
     string uri = NavigationManager.GetUriWithQueryParameters(parameters);
@@ -611,7 +887,9 @@
       return;
     }
     ReadQueryString();
-    if (_selectedEntityType is not null) {
+    if (_showAllView) {
+      await LoadAllViewEntries();
+    } else if (_selectedEntityType is not null) {
       await LoadAuditedEntities();
       if (_selectedEntityId is not null) {
         await LoadAuditHistory();
@@ -642,6 +920,65 @@
     UpdateQueryString();
   }
 
+  private void CheckAllEntityTypes() {
+    _checkedEntityTypes = _entityTypes.Select(et => et.FullName).ToHashSet();
+    _allViewCurrentPage = 1;
+    RecalcAllViewPages();
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+  }
+
+  private void UncheckAllEntityTypes() {
+    _checkedEntityTypes.Clear();
+    _allViewCurrentPage = 1;
+    RecalcAllViewPages();
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+  }
+
+  private void ToggleEntityTypeDropdown() =>
+    _entityTypeDropdownOpen = !_entityTypeDropdownOpen;
+
+  private void CloseEntityTypeDropdown() =>
+    _entityTypeDropdownOpen = false;
+
+  private async Task SelectAllView() {
+    _showAllView = true;
+    _selectedEntityType = null;
+    _selectedEntityTypeName = null;
+    _selectedEntityId = null;
+    _entityTypeDropdownOpen = false;
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+    await LoadAllViewEntries();
+  }
+
+  private async Task SelectSpecificEntityType(EntityTypeMetadata entityType) {
+    _showAllView = false;
+    _selectedEntityType = entityType;
+    _selectedEntityTypeName = entityType.FullName;
+    _selectedEntityId = null;
+    _auditedEntityIds = [];
+    _currentPage = 1;
+    _totalPages = 1;
+    _entityTypeDropdownOpen = false;
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+    await LoadAuditedEntities();
+  }
+
+  private void ToggleEntityTypeCheck(string fullName, ChangeEventArgs e) {
+    if (e.Value is true) {
+      _checkedEntityTypes.Add(fullName);
+    } else {
+      _checkedEntityTypes.Remove(fullName);
+    }
+    _allViewCurrentPage = 1;
+    RecalcAllViewPages();
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+  }
+
   private async Task OnEntityTypeChanged() {
     _selectedEntityType = _entityTypes.FirstOrDefault(entityType => entityType.FullName == _selectedEntityTypeName);
     _selectedEntityId = null;
@@ -655,6 +992,56 @@
     }
 
     UpdateQueryString();
+  }
+
+  private async Task LoadAllViewEntries() {
+    _isLoadingAllEntries = true;
+    StateHasChanged();
+
+    IEnumerable<string> typesToLoad = _entityTypes.Select(et => et.FullName);
+    _allViewEntries = await AuditViewerService.GetAllAuditEntries(typesToLoad, _allViewFilterFrom, _allViewFilterTo, _allViewFilterUser);
+
+    RecalcAllViewPages();
+
+    _isLoadingAllEntries = false;
+    StateHasChanged();
+  }
+
+  private void RecalcAllViewPages() {
+    int count = _filteredAllViewEntries.Count;
+    _allViewTotalPages = Math.Max(1, (int)Math.Ceiling(count / (double)_pageSize));
+    if (_allViewCurrentPage > _allViewTotalPages) {
+      _allViewCurrentPage = 1;
+    }
+  }
+
+  private async Task ApplyAllViewFilters() {
+    _allViewCurrentPage = 1;
+    _suppressLocationChanged = true;
+    UpdateQueryString();
+    await LoadAllViewEntries();
+  }
+
+  private void ToggleAllViewEntry(long entryId) {
+    if (!_expandedAllViewEntries.Remove(entryId)) {
+      _expandedAllViewEntries.Add(entryId);
+    }
+  }
+
+  private void AllViewPreviousPage() {
+    if (_allViewCurrentPage > 1) {
+      _allViewCurrentPage--;
+      _suppressLocationChanged = true;
+      UpdateQueryString();
+    }
+  }
+
+  private void AllViewNextPage() {
+    if (_allViewCurrentPage < _allViewTotalPages) {
+      _allViewCurrentPage++;
+      _suppressLocationChanged = true;
+      UpdateQueryString();
+    }
   }
 
   private async Task LoadAuditedEntities() {
@@ -682,8 +1069,19 @@
 
   private string GetEntityHistoryUrl(string entityId) {
     Dictionary<string, object?> parameters = new() {
+      ["allView"] = null,
       ["entityType"] = _selectedEntityTypeName,
       ["entityId"] = entityId,
+      ["page"] = null
+    };
+    return NavigationManager.GetUriWithQueryParameters(parameters);
+  }
+
+  private string GetAllViewEntityHistoryUrl(AuditEntryViewModel entry) {
+    Dictionary<string, object?> parameters = new() {
+      ["allView"] = null,
+      ["entityType"] = entry.EntityType,
+      ["entityId"] = entry.EntityId,
       ["page"] = null
     };
     return NavigationManager.GetUriWithQueryParameters(parameters);
@@ -738,5 +1136,33 @@
       await LoadAuditedEntities();
     }
   }
+
+  private string GetEntityTypeSelectorLabel() {
+    if (!_showAllView) {
+      return _selectedEntityType?.ShortName ?? "Select…";
+    }
+    if (_checkedEntityTypes.Count == 0) {
+      return "None";
+    }
+    if (_checkedEntityTypes.Count == _entityTypes.Count) {
+      return "All";
+    }
+    return string.Join(", ", _entityTypes.Where(et => _checkedEntityTypes.Contains(et.FullName)).Select(et => et.ShortName));
+  }
+
+  private string GetEntityShortName(string fullName) =>
+    _entityTypes.FirstOrDefault(et => et.FullName == fullName)?.ShortName ?? fullName;
+
+  private int GetAllViewPropertyCount(AuditEntryViewModel entry) =>
+    entry.Operation == AuditOperation.Created || entry.ChangedProperties.Count == 0
+      ? entry.Properties.Count
+      : entry.ChangedProperties.Count;
+
+  private static string GetOperationIcon(AuditOperation operation) => operation switch {
+    AuditOperation.Created => "➕",
+    AuditOperation.Updated => "✏️",
+    AuditOperation.Deleted => "🗑️",
+    _ => "❓"
+  };
 
 }

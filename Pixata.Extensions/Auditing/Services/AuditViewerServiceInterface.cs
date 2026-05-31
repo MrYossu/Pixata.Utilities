@@ -10,4 +10,5 @@ public interface AuditViewerServiceInterface {
   Task<List<string>> GetDistinctEntityIds(string entityType);
   Task<List<AuditEntryViewModel>> GetAuditHistory(string entityType, string entityId);
   Task<List<AuditEntryViewModel>> GetAuditHistory(string entityType, string entityId, DateTime? fromDate, DateTime? toDate, string? user, AuditOperation? operation);
+  Task<List<AuditEntryViewModel>> GetAllAuditEntries(IEnumerable<string> entityTypes, DateTime? fromDate, DateTime? toDate, string? user);
 }
