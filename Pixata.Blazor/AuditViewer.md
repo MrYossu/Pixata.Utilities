@@ -2,7 +2,11 @@
 
 In order to ease the pain of auditing database changes, I have added features to the repo to make this easier.
 
-To configure auditing, you need to add a reference to both the `Pixata.AspNetCore` packkkage (version >= 1.5.0) and the `Pixata.Blazor` package (version >= 2.24.0).
+To configure auditing, you need to add a reference to the following packages...
+
+- `Pixata.AspNetCore` version >= 1.5.0
+- `Pixata.Blazor` package version >= 2.24.0
+- `Pixata.Extensions` package version >= 2.7.0
 
 ## Configuring auditing
 Then add the following to your `DbContext`...
@@ -11,7 +15,7 @@ Then add the following to your `DbContext`...
 public virtual DbSet<Audit> Audits { get; set; } = null!;
 ```
 
-You'll need a `using` for `Pixata.AspNetCore.Auditing.Models`. Add a migration and update your database to create the audit table.
+You'll need a `using` for `Pixata.Extensions.Auditing.Models`. Add a migration and update your database to create the audit table.
 
 In your `Program.cs` file (server project if you have a mixed-mode app), add auditing, and a call to `AddAuditingInterceptor` as follows...
 
