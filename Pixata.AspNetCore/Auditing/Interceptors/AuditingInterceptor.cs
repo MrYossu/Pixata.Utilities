@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Pixata.AspNetCore.Auditing.Services;
-using Pixata.Extensions.Auditing.Attributes;
-using Pixata.Extensions.Auditing.Models;
 
 namespace Pixata.AspNetCore.Auditing.Interceptors;
 
@@ -14,6 +12,10 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
     WriteIndented = false,
     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
   };
+
+  private record PendingAddedAudit(EntityEntry Entry, string EntityTypeName, string ChangedBy, DateTime ChangedAt);
+
+  private readonly List<PendingAddedAudit> _pendingAddedAudits = [];
 
   public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
     DbContextEventData eventData,
@@ -36,9 +38,16 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
     foreach (EntityEntry entry in entries) {
       Type entityType = entry.Entity.GetType();
       string entityTypeName = entityType.FullName ?? entityType.Name;
+
+      if (entry.State == EntityState.Added) {
+        // Defer audit creation for Added entities: the database-generated ID is not yet
+        // available at this point. The real ID will be resolved after SaveChanges completes.
+        _pendingAddedAudits.Add(new PendingAddedAudit(entry, entityTypeName, changedBy, changedAt));
+        continue;
+      }
+
       string entityId = GetPrimaryKeyValue(entry);
       AuditOperation operation = entry.State switch {
-        EntityState.Added => AuditOperation.Created,
         EntityState.Modified => AuditOperation.Updated,
         EntityState.Deleted => AuditOperation.Deleted,
         _ => throw new ArgumentOutOfRangeException()
@@ -63,6 +72,45 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
     }
 
     return base.SavingChangesAsync(eventData, result, cancellationToken);
+  }
+
+  public override async ValueTask<int> SavedChangesAsync(
+    SaveChangesCompletedEventData eventData,
+    int result,
+    CancellationToken cancellationToken = default) {
+    if (_pendingAddedAudits.Count > 0 && eventData.Context is not null) {
+      DbContext context = eventData.Context;
+
+      foreach (PendingAddedAudit pending in _pendingAddedAudits) {
+        // The database has now assigned the real ID, so we can read it from the entry.
+        string entityId = GetPrimaryKeyValue(pending.Entry);
+        string fullSnapshot = SerialiseEntity(pending.Entry);
+
+        Audit audit = new() {
+          EntityType = pending.EntityTypeName,
+          EntityId = entityId,
+          Operation = AuditOperation.Created,
+          ChangedBy = pending.ChangedBy,
+          ChangedAt = pending.ChangedAt,
+          FullSnapshot = fullSnapshot,
+          ChangedProperties = null
+        };
+
+        context.Set<Audit>().Add(audit);
+      }
+
+      _pendingAddedAudits.Clear();
+      await context.SaveChangesAsync(cancellationToken);
+    }
+
+    return await base.SavedChangesAsync(eventData, result, cancellationToken);
+  }
+
+  public override Task SaveChangesFailedAsync(
+    DbContextErrorEventData eventData,
+    CancellationToken cancellationToken = default) {
+    _pendingAddedAudits.Clear();
+    return base.SaveChangesFailedAsync(eventData, cancellationToken);
   }
 
   private string GetChangedBy() {
