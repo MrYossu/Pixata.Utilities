@@ -106,17 +106,25 @@ To view audit information, you can add the `AuditViewer` component to any BNlazo
 <AuditViewer />
 ```
 
-When you navigate to a page containing this component, you will see a dropdown containing the names of all entities that are being audited...
+When you navigate to a page containing this component, you will see a dropdown containing the names of all entities that are being audited. By default "All" is selected, meaning that you see all entities...
 
-![Audit viewer list](Icon/AuditViewer1.png)
-
-You can change the type of entity being displayed from the dropdown, and can search for a specific entity by typing its Id in the tetxbox.
-
-Click the blue button to see audit entries for the entity...
-
-![Audit viewer details](Icon/AuditViewer2.png)
+![Audit viewer list](Icon/01AuditViewer.png)
 
 The filters at the top allow you to narrow down the results.
+
+The dropdown allows you to select multiple entities...
+
+![Audit viewer list](Icon/02AuditViewer.png)
+
+>Note that if you click on an entity in the dropdown, it will select just that one, and the display will only show the Id. I intend to change this, as it's less than useful, but for now, you just need to remember to click All after selecting your desired entities.
+
+You can click the "Show properties (n)" link to see what changed in that audit entry...
+
+![Audit viewer list](Icon/03AuditViewer.png)
+
+Click the blue button to see all audit entries for the entity...
+
+![Audit viewer details](Icon/AuditViewer2.png)
 
 The "Show only changed properties" checkbox will only show properties that were changed at some point...
 

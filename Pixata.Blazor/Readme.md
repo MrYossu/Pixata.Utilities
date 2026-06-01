@@ -47,7 +47,7 @@ Adding auditing manually can be done, but means you end up writing the same intr
 - An EF Core interceptor that adds audit entries for every change to entities in your `DbContext`
 - A Blazor component that allows you to browse the audit information easily.
 
-See the [AuditViewer readme](AuditViewer.md) for more information.
+See the [AuditViewer readme](Icon/AuditViewer.md) for more information.
 
 ### CommonComponentBase
 As I found myself writing the same helper methods to support common tasks in components, I decided to create a base class that all my components could inherit from. This was a balance between providing what is most likely to be needed and not stuffing absolutely everything into a God class. The eventual choice reflects my own needs, but I hope that it will be useful to others as well.

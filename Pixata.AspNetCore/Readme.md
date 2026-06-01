@@ -22,7 +22,7 @@ Adding auditing manually can be done, but means you end up writing the same intr
 - An EF Core interceptor that adds audit entries for every change to entities in your `DbContext`
 - A Blazor component that allows you to browse the audit information easily.
 
-See the [AuditViewer readme](../Pixata.Blazor/AuditViewer.md) for more information.
+See the [AuditViewer readme](../Pixata.Blazor/Icon/AuditViewer.md) for more information.
 
 ## DocumentTemplateHelper
 I often find myuself generating documents, either for conversion to PDF, or for emailing. This has always been a painful process, so I decided that a helper was needed. This class contains two methods, one for generating HTML from a Blazor component, and another for generating a PDF from a Blazor component.
