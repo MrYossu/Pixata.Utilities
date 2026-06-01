@@ -15,7 +15,7 @@
   public PopUpDisplayOptions PopUpDisplayOption { get; set; } = PopUpDisplayOptions.Container;
 
   [Parameter]
-  public string Caption { get; set; }
+  public string Caption { get; set; } = "";
 
   [Parameter]
   public string OkText { get; set; } = "OK";
@@ -24,10 +24,10 @@
   public int ZIndex { get; set; } = 2147483647;
 
   [Parameter]
-  public RenderFragment ChildContent { get; set; }
+  public RenderFragment ChildContent { get; set; } = null!;
 
   private string _displayStyle = "none";
-  private string _position;
+  private string _position = "";
 
   protected override void OnParametersSet() =>
     _position = PopUpDisplayOption == PopUpDisplayOptions.Container ? "absolute" : "fixed";

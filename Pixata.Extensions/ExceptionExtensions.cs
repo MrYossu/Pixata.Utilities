@@ -18,8 +18,8 @@ namespace Pixata.Extensions {
     /// <returns></returns>
     public static string MessageStack(this Exception ex, string separator) {
       string msg = $"{ex.Message}{separator}{ex.StackTrace}{separator}";
-      Exception innerException = ex.InnerException;
-      while (innerException != null) {
+      Exception? innerException = ex.InnerException;
+      while (innerException is not null) {
         msg += $"{separator}{innerException.Message}{separator}{innerException.StackTrace}";
         innerException = innerException.InnerException;
       }
@@ -42,8 +42,8 @@ namespace Pixata.Extensions {
     /// <returns></returns>
     public static string Messages(this Exception ex, string separator) {
       string msg = $"{ex.Message}{separator}";
-      Exception innerException = ex.InnerException;
-      while (innerException != null) {
+      Exception? innerException = ex.InnerException;
+      while (innerException is not null) {
         msg += $"{separator}{innerException.Message}{separator}";
         innerException = innerException.InnerException;
       }
@@ -58,8 +58,8 @@ namespace Pixata.Extensions {
     /// <returns>The type of the innermost exception</returns>
     public static string InnerType(this Exception ex) {
       string type = ex.GetType().ToString();
-      Exception innerException = ex.InnerException;
-      while (innerException != null) {
+      Exception? innerException = ex.InnerException;
+      while (innerException is not null) {
         type = innerException.GetType().ToString();
         innerException = innerException.InnerException;
       }

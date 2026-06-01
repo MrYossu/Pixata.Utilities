@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Pixata.AspNetCore.Auditing.Services;
+using Pixata.Extensions.Auditing.Attributes;
+using Pixata.Extensions.Auditing.Models;
 
 namespace Pixata.AspNetCore.Auditing.Interceptors;
 
@@ -17,10 +19,7 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
 
   private readonly List<PendingAddedAudit> _pendingAddedAudits = [];
 
-  public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
-    DbContextEventData eventData,
-    InterceptionResult<int> result,
-    CancellationToken cancellationToken = default) {
+  public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default) {
     if (eventData.Context is null) {
       return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
@@ -74,10 +73,7 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
     return base.SavingChangesAsync(eventData, result, cancellationToken);
   }
 
-  public override async ValueTask<int> SavedChangesAsync(
-    SaveChangesCompletedEventData eventData,
-    int result,
-    CancellationToken cancellationToken = default) {
+  public override async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = default) {
     if (_pendingAddedAudits.Count > 0 && eventData.Context is not null) {
       DbContext context = eventData.Context;
 
@@ -106,9 +102,7 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
     return await base.SavedChangesAsync(eventData, result, cancellationToken);
   }
 
-  public override Task SaveChangesFailedAsync(
-    DbContextErrorEventData eventData,
-    CancellationToken cancellationToken = default) {
+  public override Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default) {
     _pendingAddedAudits.Clear();
     return base.SaveChangesFailedAsync(eventData, cancellationToken);
   }

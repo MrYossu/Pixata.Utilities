@@ -1,4 +1,4 @@
-﻿@if (Data == null) {
+﻿@if (Data is null) {
   <div class="@ContainerClass">
     <p><span class="@SpinnerClass" aria-hidden="true" style="color: @SpinnerColour;"></span> @Message</p>
   </div>
@@ -17,16 +17,16 @@
   /// The data on which to await the loading
   /// </summary>
   [Parameter]
-  public object Data { get; set; }
+  public object? Data { get; set; }
 
   [Parameter]
-  public RenderFragment ChildContent { get; set; }
+  public RenderFragment ChildContent { get; set; } = null!;
 
   /// <summary>
   /// This helps with styling the busy indicator. You may wish to center it using the 'text-center' Bootstrap class
   /// </summary>
   [Parameter]
-  public string ContainerClass { get; set; }
+  public string ContainerClass { get; set; } = "";
 
   /// <summary>
   /// Change the default Bootstrap spinner to something else, e.g. a Font Awesome class

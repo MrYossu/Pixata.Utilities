@@ -16,6 +16,7 @@
     <PackageIcon>avion.png</PackageIcon>
     <PackageTags>C# Blazor</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   
   <ItemGroup>

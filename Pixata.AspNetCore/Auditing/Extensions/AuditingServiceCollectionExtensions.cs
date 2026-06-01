@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Pixata.AspNetCore.Auditing.Interceptors;
 using Pixata.AspNetCore.Auditing.Services;
+using Pixata.Extensions.Auditing.Services;
 
 namespace Pixata.AspNetCore.Auditing.Extensions;
 

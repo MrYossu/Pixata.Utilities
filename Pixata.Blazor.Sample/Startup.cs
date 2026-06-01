@@ -23,7 +23,7 @@ public class Startup(IConfiguration configuration) {
     services.AddServerSideBlazor();
     services.AddSingleton<WeatherForecastService>();
     services.AddTelerikBlazor();
-    SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>();
+    SmtpSettings smtpSettings = Configuration.GetSection("Smtp").Get<SmtpSettings>()!;
     services.AddSingleton(smtpSettings);
     services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
     services.AddHttpClient();

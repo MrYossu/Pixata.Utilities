@@ -6,11 +6,11 @@
   public bool Expanded { get; set; }
 
   [Parameter]
-  public RenderFragment ChildContent { get; set; }
+  public RenderFragment ChildContent { get; set; } = null!;
 
   private const string DisplayNone = "none";
   private const string DisplayBlock = "block";
-  private string _display;
+  private string _display = DisplayNone;
 
   protected override void OnInitialized() => 
     _display = Expanded ? DisplayBlock : DisplayNone;

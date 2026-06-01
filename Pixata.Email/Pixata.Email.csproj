@@ -16,6 +16,7 @@
     <PackageTags>C# email mailkit</PackageTags>
     <PackageIcon>mail.png</PackageIcon>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

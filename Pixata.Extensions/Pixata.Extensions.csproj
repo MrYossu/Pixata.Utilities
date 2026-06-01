@@ -16,6 +16,7 @@
     <PackageTags>C# extension-methods</PackageTags>
     <PackageIcon>VroumVroum.png</PackageIcon>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

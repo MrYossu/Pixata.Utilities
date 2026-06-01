@@ -16,6 +16,7 @@
     <PackageIcon>MailOldSchool.png</PackageIcon>
     <PackageTags>C# Blazor Telerik</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

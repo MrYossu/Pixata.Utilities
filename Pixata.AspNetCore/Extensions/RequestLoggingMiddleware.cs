@@ -5,7 +5,7 @@ using Pixata.Extensions;
 
 namespace Pixata.AspNetCore.Extensions;
 
-public class RequestLoggingMiddleware(RequestDelegate next, IOptions<RequestLoggingOptions> options, ILogger<RequestLoggingMiddleware> logger = null) {
+public class RequestLoggingMiddleware(RequestDelegate next, IOptions<RequestLoggingOptions> options, ILogger<RequestLoggingMiddleware>? logger = null) {
   private readonly RequestLoggingOptions _options = options.Value;
 
   public async Task InvokeAsync(HttpContext context) {

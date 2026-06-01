@@ -10,7 +10,7 @@ public interface SwitchInterface {
 
 public class Switch<T> : ComponentBase, SwitchInterface {
   [Parameter]
-  public T Variable { get; set; }
+  public T Variable { get; set; } = default!;
 
   [Parameter]
   public RenderFragment ChildContent { get; set; } = null!;
@@ -39,7 +39,7 @@ public class Case<T> : ComponentBase {
   private Switch<T> Parent { get; set; } = null!;
 
   [Parameter]
-  public T Equals { get; set; }
+  public T Equals { get; set; } = default!;
 
   [Parameter]
   public RenderFragment ChildContent { get; set; } = null!;

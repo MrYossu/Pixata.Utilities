@@ -18,7 +18,7 @@ public class CommonComponentBase<T> : ComponentBase where T : class {
   [Inject]
   public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
-  private ClaimsPrincipal _user;
+  private ClaimsPrincipal _user = null!;
 
   /// <summary>
   /// Determines whether the current user is authenticated.

@@ -1,5 +1,4 @@
 ﻿@page "/ConfirmSample"
-@using Pixata.Blazor.Containers
 <h3>ConfirmSample</h3>
 
 <p>Use this when you want to confirm some operation.</p>
@@ -44,9 +43,9 @@
 </style>
 
 @code {
-  private Confirm _confirmContainer;
-  private Confirm _confirmWindow;
-  private string _msg;
+  private Confirm _confirmContainer = null!;
+  private Confirm _confirmWindow = null!;
+  private string _msg = "";
 
   private void FormatYourHardDrive() =>
     _confirmContainer.Display("Are you sure you want to format your hard drive?");

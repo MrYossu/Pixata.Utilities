@@ -16,6 +16,7 @@
     <PackageTags>C# Google</PackageTags>
     <PackageIcon>PixataGoogle.png</PackageIcon>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

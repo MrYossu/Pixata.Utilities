@@ -11,15 +11,16 @@
   /// </summary>
   [Parameter]
   public bool IfTrue { get; set; }
+
   /// <summary>
   /// The elements to display if IfTrue is true
   /// </summary>
   [Parameter]
-  public RenderFragment If { get; set; }
+  public RenderFragment If { get; set; } = null!;
   /// <summary>
   /// The elements to display if IfTrue is false
   /// </summary>
   [Parameter]
-  public RenderFragment Else { get; set; }
+  public RenderFragment Else { get; set; } = null!;
 
 }

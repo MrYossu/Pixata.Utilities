@@ -11,7 +11,7 @@
     Link(convert, uri, style, classCss, title);
 
   [Obsolete("This method is being replaced by Link and will be removed in a future version")]
-  public RenderFragment<object> BuildLink<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
+  public RenderFragment<object> BuildLink<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string>? styleFunc = null, Func<T, string>? cssFunc = null, Func<T, string>? titleFunc = null) where T : class =>
     Link(convert, uri, styleFunc, cssFunc, titleFunc);
 
   #endregion
@@ -21,7 +21,7 @@
       <div class="@classCss" style="@style">@(new MarkupString(convert(context as T)))</div>
     };
 
-  public RenderFragment<object> Text<T>(Func<T, string> convert, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
+  public RenderFragment<object> Text<T>(Func<T, string> convert, Func<T, string>? styleFunc = null, Func<T, string>? cssFunc = null, Func<T, string>? titleFunc = null) where T : class =>
     context => __builder => {
       <div class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))" style="@(styleFunc is null ? "" : styleFunc(context as T))" title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</div>
     };
@@ -34,7 +34,7 @@
       <a href="@uri(context as T)" style="@($"display: block; width: 100%; {style}")" class="@classCss" title="@title">@(new MarkupString(convert(context as T)))</a>
     };
 
-  public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string> styleFunc = null, Func<T, string> cssFunc = null, Func<T, string> titleFunc = null) where T : class =>
+  public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string>? styleFunc = null, Func<T, string>? cssFunc = null, Func<T, string>? titleFunc = null) where T : class =>
     context => __builder => {
       <a href="@uri(context as T)" 
          class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))"
