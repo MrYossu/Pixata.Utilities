@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>12.3.5</Version>
-    <AssemblyVersion>12.3.5</AssemblyVersion>
-    <FileVersion>12.3.5</FileVersion>
+    <Version>12.3.6</Version>
+    <AssemblyVersion>12.3.6</AssemblyVersion>
+    <FileVersion>12.3.6</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Blazor.TelerikComponents</Product>

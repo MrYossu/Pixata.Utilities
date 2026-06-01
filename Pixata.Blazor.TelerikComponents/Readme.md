@@ -19,6 +19,16 @@ There is a [sample repo](https://github.com/MrYossu/TelerikGridWithFromSql) that
 
 Note that as from version 2.0.0 of the package, the method allows you to query a table-valued function as well as a table or view.
 
+#### Filtering DateTime values by date only
+When using row filtering, the Telerik grid will, by default, filter `DateTime` values by their full value, including the time. This is often not what you want, as users will typically want to filter by date only. To make this easier, the extension method allows you to specify that a particular `DateTime` column should be filtered by date only. For example...
+
+```csharp
+private Task LoadData(GridReadEventArgs args) {
+  TelerikFilterHelper.RemoveTime(args, nameof(MyEntity.DateCreated), nameof(MyEntity.DateDeleted));
+  // Call the extension method as before
+}
+```
+
 #### Breaking change
 As of version 2.0.0, the generic parameter has been removed from `TelerikGridFilterResults` (as it wasn't needed), so you will need to update your code if you capture this as an explicit type. For example, change this:
 
