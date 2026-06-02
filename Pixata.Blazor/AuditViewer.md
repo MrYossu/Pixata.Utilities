@@ -100,7 +100,7 @@ builder.Services.AddAuditing<AppDbContext>(options => {
 If you configure a policy, then a background service will run at the configured interval and delete any audit records that are older than the retention period.
 
 ## Using the audit viewer
-To view audit information, you can add the `AuditViewer` component to any BNlazor component...
+To view audit information, you can add the `AuditViewer` component to any Blazor component...
 
 ```xml
 <AuditViewer />
