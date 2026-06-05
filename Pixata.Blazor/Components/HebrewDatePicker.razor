@@ -123,9 +123,9 @@
                 bool isToday = greg.Date == DateTime.Today;
                 bool isSelected = IsSelectedDate(greg.Date);
                 HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
-                string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
+                string dayClass = (isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light") + (cell.IsCurrentMonth ? " current-month" : " ");
                 string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
-                string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "border: 1px solid #dee2e6;" : "opacity: 0.4;");
+                string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "" : "opacity: 0.4;");
                 <div class="text-center">
                   <button type="button"
                           class="btn btn-sm w-100 @dayClass"
@@ -152,9 +152,9 @@
                 bool isToday = greg.Date == DateTime.Today;
                 bool isSelected = IsSelectedDate(greg.Date);
                 HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
-                string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
+                string dayClass = (isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light") + (cell.IsCurrentMonth ? " current-month" : " ");
                 string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
-                string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "border: 1px solid #dee2e6;" : "opacity: 0.4;");
+                string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "" : "opacity: 0.4;");
                 <div class="text-center">
                   <button type="button"
                           class="btn btn-sm w-100 @dayClass"
@@ -214,6 +214,10 @@
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: .25rem;
+      }
+
+      .hebrew-date-picker .current-month {
+        border: 1px solid #dee2e6;
       }
   </style>
 </div>
