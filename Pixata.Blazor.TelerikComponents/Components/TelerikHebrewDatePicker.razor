@@ -115,64 +115,61 @@
         }
         <div class="mt-1 grid-cells" style="@(GregorianPrimary ? "" : "direction: rtl;")">
           @if (GregorianPrimary) {
-            foreach (int?[] week in GregorianCalendarWeeks()) {
-              foreach (int? gregDayNum in week) {
-                if (gregDayNum.HasValue) {
-                  DateTime greg = new DateTime(_displayGregorianYear, _displayGregorianMonth, gregDayNum.Value);
-                  int hebYear = _hc.GetYear(greg);
-                  int hebMonth = _hc.GetMonth(greg);
-                  int hebDay = _hc.GetDayOfMonth(greg);
-                  bool isToday = greg.Date == DateTime.Today;
-                  bool isSelected = IsSelectedDate(greg.Date);
-                  HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
-                  string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
-                  string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
-                  <div class="text-center">
-                    <button type="button"
-                            class="btn btn-sm w-100 @dayClass"
-                            style="@GetDayStyle(hebrewDateType, isSelected, isToday)"
-                            title="@tooltip"
-                            @onclick="() => SelectGregorianDay(gregDayNum.Value)">
-                      @if (ShowSecondaryDates) {
-                        <div style="line-height: 1;">@gregDayNum.Value</div>
-                        <div style="line-height: 1; font-size: .75em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{hebDay.ToHebrew()}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
-                      } else {
-                        @gregDayNum.Value
-                      }
-                    </button>
-                  </div>
-                } else {
-                  <div></div>
-                }
+            foreach (CalendarCell[] week in GregorianCalendarWeeks()) {
+              foreach (CalendarCell cell in week) {
+                DateTime greg = cell.GregorianDate;
+                int hebYear = cell.HebrewYear;
+                int hebMonth = cell.HebrewMonth;
+                int hebDay = _hc.GetDayOfMonth(greg);
+                bool isToday = greg.Date == DateTime.Today;
+                bool isSelected = IsSelectedDate(greg.Date);
+                HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
+                string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
+                string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
+                string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "border: 1px solid #dee2e6;" : "opacity: 0.4;");
+                <div class="text-center">
+                  <button type="button"
+                          class="btn btn-sm w-100 @dayClass"
+                          style="@dayStyle"
+                          title="@tooltip"
+                          @onclick="() => SelectGregorianDay(greg)">
+                    @if (ShowSecondaryDates) {
+                      <div style="line-height: 1;">@cell.Day</div>
+                      <div style="line-height: 1; font-size: .75em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{hebDay.ToHebrew()}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
+                    } else {
+                      @cell.Day
+                    }
+                  </button>
+                </div>
               }
             }
           } else {
-            foreach (int?[] week in HebrewCalendarWeeks()) {
-              foreach (int? hebDay in week) {
-                if (hebDay.HasValue) {
-                  DateTime greg = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, 0, 0, 0, 0);
-                  bool isToday = greg.Date == DateTime.Today;
-                  bool isSelected = IsSelectedDate(greg.Date);
-                  HebrewDateType hebrewDateType = GetHebrewDateType(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, greg);
-                  string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
-                  string tooltip = ShowTooltips ? GetDayTooltip(_displayHebrewYear, _displayHebrewMonth, hebDay.Value, greg) : "";
-                  <div class="text-center">
-                    <button type="button"
-                            class="btn btn-sm w-100 @dayClass"
-                            style="@GetDayStyle(hebrewDateType, isSelected, isToday)"
-                            title="@tooltip"
-                            @onclick="() => SelectHebrewDay(hebDay.Value)">
-                      @if (ShowSecondaryDates) {
-                        <div style="line-height: 1; font-size: 1.1em;">@hebDay.Value.ToHebrew()</div>
-                        <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{greg.Day}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
-                      } else {
-                        @hebDay.Value.ToHebrew()
-                      }
-                    </button>
-                  </div>
-                } else {
-                  <div></div>
-                }
+            foreach (CalendarCell[] week in HebrewCalendarWeeks()) {
+              foreach (CalendarCell cell in week) {
+                DateTime greg = cell.GregorianDate;
+                int hebYear = cell.HebrewYear;
+                int hebMonth = cell.HebrewMonth;
+                int hebDay = cell.Day;
+                bool isToday = greg.Date == DateTime.Today;
+                bool isSelected = IsSelectedDate(greg.Date);
+                HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
+                string dayClass = isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary" : "btn-light";
+                string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
+                string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "border: 1px solid #dee2e6;" : "opacity: 0.4;");
+                <div class="text-center">
+                  <button type="button"
+                          class="btn btn-sm w-100 @dayClass"
+                          style="@dayStyle"
+                          title="@tooltip"
+                          @onclick="() => SelectHebrewDay(greg)">
+                    @if (ShowSecondaryDates) {
+                      <div style="line-height: 1; font-size: 1.1em;">@hebDay.ToHebrew()</div>
+                      <div style="line-height: 1; font-size: .65em; opacity: .75;">@($"{(ShowSecondaryDatesInBrackets ? "(" : "")}{greg.Day}{(ShowSecondaryDatesInBrackets ? ")" : "")}")</div>
+                    } else {
+                      @hebDay.ToHebrew()
+                    }
+                  </button>
+                </div>
               }
             }
           }

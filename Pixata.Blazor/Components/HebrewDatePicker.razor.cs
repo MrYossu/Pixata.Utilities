@@ -48,7 +48,7 @@ public partial class HebrewDatePicker<TValue> {
   public bool IncludeShabbosOrYomTov { get; set; }
 
   [Parameter]
-  public string ShabbosOrYomTovBgColour { get; set; }= "#b1c1d7";
+  public string ShabbosOrYomTovBgColour { get; set; } = "#b1c1d7";
 
   [Parameter]
   public bool IncludeOtherNonWorkDays { get; set; }
@@ -494,7 +494,7 @@ public partial class HebrewDatePicker<TValue> {
   private HebrewDateType GetHebrewDateType(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
     bool isShabbosOrYomTov = IncludeShabbosOrYomTov && (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay));
     bool isOtherNonWorkDay = IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay);
-    bool isBankHoliday = IncludeBankHolidays && IsBankHoliday(gregorianDate);
+    bool isBankHoliday = IncludeBankHolidays && HebrewDatePicker<TValue>.IsBankHoliday(gregorianDate);
     if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst) {
       if (isBankHoliday) {
         return HebrewDateType.BankHoliday;
@@ -561,7 +561,7 @@ public partial class HebrewDatePicker<TValue> {
   private int GetNissanMonth(int hebrewYear) =>
     _hc.GetMonthsInYear(hebrewYear) == 13 ? 8 : 7;
 
-  private bool IsBankHoliday(DateTime date) =>
+  private static bool IsBankHoliday(DateTime date) =>
     GetBankHolidayName(date) != "";
 
   private static string GetBankHolidayName(DateTime date) {
