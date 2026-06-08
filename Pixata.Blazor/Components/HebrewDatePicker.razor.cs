@@ -48,7 +48,7 @@ public partial class HebrewDatePicker<TValue> {
   public bool IncludeShabbosOrYomTov { get; set; }
 
   [Parameter]
-  public string ShabbosOrYomTovBgColour { get; set; }= "#b1c1d7";
+  public string ShabbosOrYomTovBgColour { get; set; } = "#b1c1d7";
 
   [Parameter]
   public bool IncludeOtherNonWorkDays { get; set; }
@@ -341,23 +341,37 @@ public partial class HebrewDatePicker<TValue> {
     }
   }
 
-  private List<int?[]> HebrewCalendarWeeks() {
+  private List<CalendarCell[]> HebrewCalendarWeeks() {
+    DateTime firstDayOfMonth = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, 1, 0, 0, 0, 0);
     int daysInMonth = _hc.GetDaysInMonth(_displayHebrewYear, _displayHebrewMonth);
-    List<int?> cells = [];
-    DateTime firstG = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, 1, 0, 0, 0, 0);
-    int dow = (int)firstG.DayOfWeek; // Sunday=0
-    for (int i = 0; i < dow; i++) {
-      cells.Add(null);
+    DateTime lastDayOfMonth = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, daysInMonth, 0, 0, 0, 0);
+    int dow = (int)firstDayOfMonth.DayOfWeek; // Sunday=0
+    List<CalendarCell> cells = [];
+    // Add days from previous month
+    for (int i = dow - 1; i >= 0; i--) {
+      DateTime prevDay = firstDayOfMonth.AddDays(-i - 1);
+      int hebYear = _hc.GetYear(prevDay);
+      int hebMonth = _hc.GetMonth(prevDay);
+      int hebDay = _hc.GetDayOfMonth(prevDay);
+      cells.Add(new CalendarCell(hebDay, false, prevDay, hebYear, hebMonth));
     }
+    // Add days from current month
     for (int d = 1; d <= daysInMonth; d++) {
-      cells.Add(d);
+      DateTime currentDay = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, d, 0, 0, 0, 0);
+      cells.Add(new CalendarCell(d, true, currentDay, _displayHebrewYear, _displayHebrewMonth));
     }
-    while (cells.Count % 7 != 0) {
-      cells.Add(null);
+    // Add days from next month
+    int remainingCells = (7 - (cells.Count % 7)) % 7;
+    for (int i = 0; i < remainingCells; i++) {
+      DateTime nextDay = lastDayOfMonth.AddDays(i + 1);
+      int hebYear = _hc.GetYear(nextDay);
+      int hebMonth = _hc.GetMonth(nextDay);
+      int hebDay = _hc.GetDayOfMonth(nextDay);
+      cells.Add(new CalendarCell(hebDay, false, nextDay, hebYear, hebMonth));
     }
-    List<int?[]> weeks = [];
+    List<CalendarCell[]> weeks = [];
     for (int i = 0; i < cells.Count; i += 7) {
-      int?[] week = new int?[7];
+      CalendarCell[] week = new CalendarCell[7];
       for (int j = 0; j < 7; j++) {
         week[j] = cells[i + j];
       }
@@ -366,23 +380,40 @@ public partial class HebrewDatePicker<TValue> {
     return weeks;
   }
 
-  private List<int?[]> GregorianCalendarWeeks() {
+  private List<CalendarCell[]> GregorianCalendarWeeks() {
+    DateTime firstDayOfMonth = new(_displayGregorianYear, _displayGregorianMonth, 1);
     int daysInMonth = DateTime.DaysInMonth(_displayGregorianYear, _displayGregorianMonth);
-    List<int?> cells = [];
-    DateTime firstG = new(_displayGregorianYear, _displayGregorianMonth, 1);
-    int dow = (int)firstG.DayOfWeek;
-    for (int i = 0; i < dow; i++) {
-      cells.Add(null);
+    DateTime lastDayOfMonth = new(_displayGregorianYear, _displayGregorianMonth, daysInMonth);
+    int dow = (int)firstDayOfMonth.DayOfWeek;
+    List<CalendarCell> cells = [];
+    // Add days from previous month
+    for (int i = dow - 1; i >= 0; i--) {
+      DateTime prevDay = firstDayOfMonth.AddDays(-i - 1);
+      int hebYear = _hc.GetYear(prevDay);
+      int hebMonth = _hc.GetMonth(prevDay);
+      int hebDay = _hc.GetDayOfMonth(prevDay);
+      cells.Add(new CalendarCell(prevDay.Day, false, prevDay, hebYear, hebMonth));
     }
+    // Add days from current month
     for (int d = 1; d <= daysInMonth; d++) {
-      cells.Add(d);
+      DateTime currentDay = new(_displayGregorianYear, _displayGregorianMonth, d);
+      int hebYear = _hc.GetYear(currentDay);
+      int hebMonth = _hc.GetMonth(currentDay);
+      int hebDay = _hc.GetDayOfMonth(currentDay);
+      cells.Add(new CalendarCell(d, true, currentDay, hebYear, hebMonth));
     }
-    while (cells.Count % 7 != 0) {
-      cells.Add(null);
+    // Add days from next month
+    int remainingCells = (7 - (cells.Count % 7)) % 7;
+    for (int i = 0; i < remainingCells; i++) {
+      DateTime nextDay = lastDayOfMonth.AddDays(i + 1);
+      int hebYear = _hc.GetYear(nextDay);
+      int hebMonth = _hc.GetMonth(nextDay);
+      int hebDay = _hc.GetDayOfMonth(nextDay);
+      cells.Add(new CalendarCell(nextDay.Day, false, nextDay, hebYear, hebMonth));
     }
-    List<int?[]> weeks = [];
+    List<CalendarCell[]> weeks = [];
     for (int i = 0; i < cells.Count; i += 7) {
-      int?[] week = new int?[7];
+      CalendarCell[] week = new CalendarCell[7];
       for (int j = 0; j < 7; j++) {
         week[j] = cells[i + j];
       }
@@ -391,18 +422,16 @@ public partial class HebrewDatePicker<TValue> {
     return weeks;
   }
 
-  private async Task SelectGregorianDay(int gregDay) {
-    DateTime dt = new(_displayGregorianYear, _displayGregorianMonth, gregDay);
-    await SetValue(dt);
-    _textValue = FormatDisplayDate(dt);
+  private async Task SelectGregorianDay(DateTime date) {
+    await SetValue(date);
+    _textValue = FormatDisplayDate(date);
     InitializeFromValue();
     _calendarOpen = false;
   }
 
-  private async Task SelectHebrewDay(int hebDay) {
-    DateTime dt = _hc.ToDateTime(_displayHebrewYear, _displayHebrewMonth, hebDay, 0, 0, 0, 0);
-    await SetValue(dt);
-    _textValue = FormatDisplayDate(dt);
+  private async Task SelectHebrewDay(DateTime date) {
+    await SetValue(date);
+    _textValue = FormatDisplayDate(date);
     InitializeFromValue();
     _calendarOpen = false;
   }
@@ -465,7 +494,7 @@ public partial class HebrewDatePicker<TValue> {
   private HebrewDateType GetHebrewDateType(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
     bool isShabbosOrYomTov = IncludeShabbosOrYomTov && (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay));
     bool isOtherNonWorkDay = IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay);
-    bool isBankHoliday = IncludeBankHolidays && IsBankHoliday(gregorianDate);
+    bool isBankHoliday = IncludeBankHolidays && HebrewDatePicker<TValue>.IsBankHoliday(gregorianDate);
     if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst) {
       if (isBankHoliday) {
         return HebrewDateType.BankHoliday;
@@ -532,7 +561,7 @@ public partial class HebrewDatePicker<TValue> {
   private int GetNissanMonth(int hebrewYear) =>
     _hc.GetMonthsInYear(hebrewYear) == 13 ? 8 : 7;
 
-  private bool IsBankHoliday(DateTime date) =>
+  private static bool IsBankHoliday(DateTime date) =>
     GetBankHolidayName(date) != "";
 
   private static string GetBankHolidayName(DateTime date) {
@@ -747,6 +776,8 @@ public partial class HebrewDatePicker<TValue> {
     OtherNonWorkDay,
     BankHoliday,
   }
+
+  private record CalendarCell(int Day, bool IsCurrentMonth, DateTime GregorianDate, int HebrewYear, int HebrewMonth);
 }
 
 public enum DateInputDisplay {
