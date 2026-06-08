@@ -182,6 +182,14 @@ namespace Pixata.Extensions {
     }
 
     /// <summary>
+    /// Converts a string to a URL-friendly format by removing diacritics, converting to lower case, replacing spaces with hyphens, and removing any remaining non-alphanumeric characters (except for hyphens). For example, "This is an example!" would become "this-is-an-example". Note that this method does not handle all possible edge cases for URL formatting, but it should work for most common cases. Also note that it does not handle reserved URL characters, so if the input string contains characters that are reserved in URLs (such as '?', '&', etc.), they will be removed rather than encoded.
+    /// </summary>
+    /// <param name="value">The string to convert to a URL-friendly format</param>
+    /// <returns>A URL-friendly version of the input string</returns>
+    public static string ToUrlString(this string value) =>
+      Regex.Replace(Regex.Replace(value.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD), @"[^\u0000-\u007F]", "").Replace(' ', '-'), @"[^a-z0-9\-]", "");
+
+    /// <summary>
     /// Checks if the format of a UK postcode is valid. Note that this does not check if the postcode actually exists
     /// </summary>
     /// <param name="postcode">The postcode to validate</param>
