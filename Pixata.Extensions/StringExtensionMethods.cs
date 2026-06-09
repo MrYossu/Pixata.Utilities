@@ -187,7 +187,7 @@ namespace Pixata.Extensions {
     /// <param name="value">The string to convert to a URL-friendly format</param>
     /// <returns>A URL-friendly version of the input string</returns>
     public static string ToUrlString(this string value) =>
-      Regex.Replace(Regex.Replace(value.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD), @"[^\u0000-\u007F]", "").Replace(' ', '-'), @"[^a-z0-9\-]", "");
+      Regex.Replace(Regex.Replace(value.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD), @"[^\u0000-\u007F]", "").Replace(' ', '-'), @"[^a-z0-9\-]", "").Replace("--", "-");
 
     /// <summary>
     /// Checks if the format of a UK postcode is valid. Note that this does not check if the postcode actually exists
