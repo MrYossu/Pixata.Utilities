@@ -12,7 +12,7 @@ public static class ObjectExtensionMethods {
   /// <param name="bytes">The byte array to be encoded.</param>
   /// <param name="type">The MIME type of the data. Defaults to "jpeg".</param>
   /// <returns>A Base64-encoded string representing the input byte array.</returns>
-  public static string Base64Encode(byte[] bytes, string type = "jpeg") =>
+  public static string Base64Encode(this byte[] bytes, string type = "jpeg") =>
     $"data:image/{type};base64,{Convert.ToBase64String(bytes)}";
 
   /// <summary>
