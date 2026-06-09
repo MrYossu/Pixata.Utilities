@@ -172,6 +172,8 @@ string result = nums.JoinStrAnd(", ", n => $"Number {n}"); // result is "Number 
 `FormatUkPostcode` - Formats a string as a UK postcode, ie upper case, and with a space between the major and minor parts. If the string is not in a valid postcode format, it is returned unchanged.
 
 ## ObjectExtensionMethods
+`Base64Encode()` - Encodes a byte array to a base64-encoded string, suitable for using an embedded images in HTML. Assumes a jpg image, but this can be overriden by supplying a different `mimeType` parameter, eg "png".
+
 `Clone()` - Returns a shallow clone of an object. Uses reflection, but despite all the myths about this being slow, doing 10 million clones only took about 300ms longer than a reflection-free (and way more complex) version, so I went for simplicity.
 
 `DumpProperties` - Dumps the names and values of all simple properties of an object to a string for debugging purposes. Simple properties are enums, string, decimal, DateTime, DateOnly, TimeOnly, TimeSpan, and Guid. Properties that cannot be read or are in the optional ignoredProperties list are skipped.
