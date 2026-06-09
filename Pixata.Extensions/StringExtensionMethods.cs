@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -225,6 +226,33 @@ namespace Pixata.Extensions {
         }
       }
       return addEllipses ? input[..maxLength] + "..." : input[..maxLength];
+    }
+
+    /// <summary>
+    /// Converts a plain text string to HTML by splitting it into paragraphs, surrounded by &lt;p&gt; tags.
+    /// </summary>
+    /// <param name="text">The plain text string to convert to HTML.</param>
+    /// <returns>The HTML representation of the input string.</returns>
+    public static string ToHtml(this string text) {
+      if (string.IsNullOrWhiteSpace(text)) {
+        return "";
+      }
+      string[] paragraphs = Regex.Split(text, @"(?:\r\n|\r|\n){2,}");
+      StringBuilder html = new();
+      foreach (string paragraph in paragraphs) {
+        string trimmed = paragraph.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed)) {
+          continue;
+        }
+        html.Append("<p>");
+        html.Append(
+          WebUtility.HtmlEncode(trimmed)
+            .Replace("\r\n", "<br />")
+            .Replace("\n", "<br />")
+            .Replace("\r", "<br />"));
+        html.AppendLine("</p>");
+      }
+      return html.ToString();
     }
   }
 }

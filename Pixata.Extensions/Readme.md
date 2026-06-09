@@ -173,6 +173,8 @@ string result = nums.JoinStrAnd(", ", n => $"Number {n}"); // result is "Number 
 
 `TruncateAtWordBoundary` - Truncates a string to a specified maximum length, ensuring that it does not cut off in the middle of a word. If truncation occurs, an optional suffix (e.g. "...") can be appended to indicate that the string has been shortened. By default, ellipses ("...") are added, but this can be supressed by supplying `false` as a parameter.
 
+`ToHtml` - Converts a string to a format suitable for display in HTML by adding <p></p> tags around paragraphs. Paragraphs are defined as blocks of text separated by one or more blank lines.
+
 ## ObjectExtensionMethods
 `Base64Encode()` - Encodes a byte array to a base64-encoded string, suitable for using an embedded images in HTML. Assumes a jpg image, but this can be overriden by supplying a different `mimeType` parameter, eg "png".
 
