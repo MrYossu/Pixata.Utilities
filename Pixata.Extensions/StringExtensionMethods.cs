@@ -207,5 +207,24 @@ namespace Pixata.Extensions {
         ? postcode
         : postcode.Replace(" ", "").ToUpper().Insert(postcode.Replace(" ", "").Length - 3, " ");
 
+    /// <summary>
+    /// Truncates a string to a specified maximum length, ensuring that it does not cut off in the middle of a word. If the string is truncated, it will be cut at the last whitespace character before the maximum length. If there are no whitespace characters before the maximum length, the string will be truncated at the maximum length regardless of word boundaries. If the input string is null or empty, or if its length is less than or equal to the specified maximum length, it will be returned unchanged.
+    /// </summary>
+    /// <param name="input">The string to truncate</param>
+    /// <param name="maxLength">The maximum length of the truncated string</param>
+    /// <param name="addEllipses">Whether to add ellipses ("...") to the end of the truncated string</param>
+    /// <returns>The truncated string</returns>
+    public static string TruncateAtWordBoundary(this string input, int maxLength, bool addEllipses=true) {
+      if (string.IsNullOrEmpty(input) || input.Length <= maxLength) {
+        return input;
+      }
+      int endIndex = maxLength;
+      for (int i = endIndex; i >= 0; i--) {
+        if (char.IsWhiteSpace(input[i])) {
+          return addEllipses ? input[..i].TrimEnd() + "..." : input[..i].TrimEnd();
+        }
+      }
+      return addEllipses ? input[..maxLength] + "..." : input[..maxLength];
+    }
   }
 }
