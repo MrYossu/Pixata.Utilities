@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -182,6 +183,14 @@ namespace Pixata.Extensions {
     }
 
     /// <summary>
+    /// Converts a string to a URL-friendly format by removing diacritics, converting to lower case, replacing spaces with hyphens, and removing any remaining non-alphanumeric characters (except for hyphens). For example, "This is an example!" would become "this-is-an-example". Note that this method does not handle all possible edge cases for URL formatting, but it should work for most common cases. Also note that it does not handle reserved URL characters, so if the input string contains characters that are reserved in URLs (such as '?', '&', etc.), they will be removed rather than encoded.
+    /// </summary>
+    /// <param name="value">The string to convert to a URL-friendly format</param>
+    /// <returns>A URL-friendly version of the input string</returns>
+    public static string ToUrlString(this string value) =>
+      Regex.Replace(Regex.Replace(value.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD), @"[^\u0000-\u007F]", "").Replace(' ', '-'), @"[^a-z0-9\-]", "").Replace("--", "-");
+
+    /// <summary>
     /// Checks if the format of a UK postcode is valid. Note that this does not check if the postcode actually exists
     /// </summary>
     /// <param name="postcode">The postcode to validate</param>
@@ -199,5 +208,51 @@ namespace Pixata.Extensions {
         ? postcode
         : postcode.Replace(" ", "").ToUpper().Insert(postcode.Replace(" ", "").Length - 3, " ");
 
+    /// <summary>
+    /// Truncates a string to a specified maximum length, ensuring that it does not cut off in the middle of a word. If the string is truncated, it will be cut at the last whitespace character before the maximum length. If there are no whitespace characters before the maximum length, the string will be truncated at the maximum length regardless of word boundaries. If the input string is null or empty, or if its length is less than or equal to the specified maximum length, it will be returned unchanged.
+    /// </summary>
+    /// <param name="input">The string to truncate</param>
+    /// <param name="maxLength">The maximum length of the truncated string</param>
+    /// <param name="addEllipses">Whether to add ellipses ("...") to the end of the truncated string</param>
+    /// <returns>The truncated string</returns>
+    public static string TruncateAtWordBoundary(this string input, int maxLength, bool addEllipses=true) {
+      if (string.IsNullOrEmpty(input) || input.Length <= maxLength) {
+        return input;
+      }
+      int endIndex = maxLength;
+      for (int i = endIndex; i >= 0; i--) {
+        if (char.IsWhiteSpace(input[i])) {
+          return addEllipses ? input[..i].TrimEnd() + "..." : input[..i].TrimEnd();
+        }
+      }
+      return addEllipses ? input[..maxLength] + "..." : input[..maxLength];
+    }
+
+    /// <summary>
+    /// Converts a plain text string to HTML by splitting it into paragraphs, surrounded by &lt;p&gt; tags.
+    /// </summary>
+    /// <param name="text">The plain text string to convert to HTML.</param>
+    /// <returns>The HTML representation of the input string.</returns>
+    public static string ToHtml(this string text) {
+      if (string.IsNullOrWhiteSpace(text)) {
+        return "";
+      }
+      string[] paragraphs = Regex.Split(text, @"(?:\r\n|\r|\n){2,}");
+      StringBuilder html = new();
+      foreach (string paragraph in paragraphs) {
+        string trimmed = paragraph.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed)) {
+          continue;
+        }
+        html.Append("<p>");
+        html.Append(
+          WebUtility.HtmlEncode(trimmed)
+            .Replace("\r\n", "<br />")
+            .Replace("\n", "<br />")
+            .Replace("\r", "<br />"));
+        html.AppendLine("</p>");
+      }
+      return html.ToString();
+    }
   }
 }

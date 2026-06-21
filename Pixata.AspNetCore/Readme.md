@@ -14,6 +14,12 @@ builder.Services.AddPixataAspNetCore<ContactModel>();
 
 ...where `ContactModel` is any type in your project. If you are using the validation filter (see below), then it is used here to point the framework to the assembly containing your models.
 
+If you want to use the route dump feature (see below) then you'll also need to the following...
+
+```csharp
+app.MapPixataAspNetCoreApiEndpoints();
+```
+
 ## Auditing entities
 When investigating bug reports from customers, I often find that the issue is nothing to do with my code, it's that they have changed something in the database, and I need to find out what they changed, and when.
 
@@ -23,6 +29,21 @@ Adding auditing manually can be done, but means you end up writing the same intr
 - A Blazor component that allows you to browse the audit information easily.
 
 See the [AuditViewer readme](../Pixata.Blazor/Icon/AuditViewer.md) for more information.
+
+## Route dumping
+When writing API endpoints, it can be hard to keep track of all the routes you have defined, and what they are. To help with this, I have added a feature that will dump all the routes in your app to the console when the app starts.
+
+All you need to do is call `MapPixataAspNetCoreApiEndpoints()` as shown above, and then navigate to `/dump-routes`.
+
+By default, it ignores routes that start with any of `"/_blazor"`, `"/_framework"` or `"/_content"`, as these are not usually of interest. You can override this by passing an array of routes to ignore...
+
+```csharp
+app.MapPixataAspNetCoreApiEndpoints(["/_blazor", "/_framework", "/_content", "/hello"]);
+```
+
+Note that you need to include the default ones if you want to ignore them. If you pass in an empty array, then all routes will be dumped.
+
+Also note that any routes that **start with** any of the specified routes will be ignored. So if you specify `"/hello"`, then `"/hello-world"` will also be ignored.
 
 ## DocumentTemplateHelper
 I often find myuself generating documents, either for conversion to PDF, or for emailing. This has always been a painful process, so I decided that a helper was needed. This class contains two methods, one for generating HTML from a Blazor component, and another for generating a PDF from a Blazor component.

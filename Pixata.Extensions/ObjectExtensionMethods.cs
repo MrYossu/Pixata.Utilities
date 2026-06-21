@@ -7,6 +7,15 @@ namespace Pixata.Extensions;
 
 public static class ObjectExtensionMethods {
   /// <summary>
+  /// Base64-encodes a byte[]. Useful when you want to embed an image in a web page, rather than linking to an external image file.
+  /// </summary>
+  /// <param name="bytes">The byte array to be encoded.</param>
+  /// <param name="type">The MIME type of the data. Defaults to "jpeg".</param>
+  /// <returns>A Base64-encoded string representing the input byte array.</returns>
+  public static string Base64Encode(this byte[] bytes, string type = "jpeg") =>
+    $"data:image/{type};base64,{Convert.ToBase64String(bytes)}";
+
+  /// <summary>
   /// Returns a shallow clone of an object
   /// </summary>
   /// <typeparam name="T">The type of the object to be cloned</typeparam>
