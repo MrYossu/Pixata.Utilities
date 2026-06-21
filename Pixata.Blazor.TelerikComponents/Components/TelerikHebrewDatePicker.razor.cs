@@ -495,7 +495,7 @@ public partial class TelerikHebrewDatePicker<TValue> {
   private HebrewDateType GetHebrewDateType(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
     bool isShabbosOrYomTov = IncludeShabbosOrYomTov && (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay));
     bool isOtherNonWorkDay = IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay);
-    bool isBankHoliday = IncludeBankHolidays && TelerikHebrewDatePicker<TValue>.IsBankHoliday(gregorianDate);
+    bool isBankHoliday = IncludeBankHolidays && IsBankHoliday(gregorianDate);
     if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst) {
       if (isBankHoliday) {
         return HebrewDateType.BankHoliday;
