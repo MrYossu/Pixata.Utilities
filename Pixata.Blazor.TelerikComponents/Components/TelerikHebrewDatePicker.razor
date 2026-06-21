@@ -2,7 +2,7 @@
 
 <div class="hebrew-date-picker position-relative @Class" style="@($"width: {Width}")">
   <div class="input-group">
-    <input class="form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" @onfocus="ToggleCalendar" readonly />
+    <input class="form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" @onfocus="OpenOnFocusInput" readonly />
     <button class="btn" type="button" @onclick="ToggleCalendar">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="1em"

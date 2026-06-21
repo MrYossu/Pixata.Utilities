@@ -68,6 +68,9 @@ public partial class HebrewDatePicker<TValue> {
   [Parameter]
   public bool OpenOnRight { get; set; }
 
+  [Parameter]
+  public bool OpenOnFocus { get; set; }
+
   private readonly HebrewCalendar _hc = new();
   private int _hebrewYear;
   private int _hebrewMonth;
@@ -294,6 +297,12 @@ public partial class HebrewDatePicker<TValue> {
       BuildMonths();
       UpdateDisplayMonthName();
       _textValue = GetCurrentValue().HasValue ? FormatDisplayDate(refDate) : "No date selected";
+    }
+  }
+
+  private void OpenOnFocusInput() {
+    if (OpenOnFocus) {
+      _calendarOpen = true;
     }
   }
 
@@ -711,7 +720,7 @@ public partial class HebrewDatePicker<TValue> {
     }
     string bankHolidayName = IncludeBankHolidays ? GetBankHolidayName(gregorianDate) : "";
     if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst && !string.IsNullOrEmpty(bankHolidayName)) {
-      List<string> parts = [bankHolidayName, ..hebrewParts];
+      List<string> parts = [bankHolidayName, .. hebrewParts];
       return string.Join(" / ", parts);
     }
     if (!string.IsNullOrEmpty(bankHolidayName)) {
