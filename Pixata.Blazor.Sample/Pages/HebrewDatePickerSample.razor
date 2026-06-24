@@ -25,6 +25,7 @@
                       BankHolidayBgColour="@_bankHolidayBgColour"
                       ClashPriority="@_clashPriority"
                       OpenOnRight="@_openOnRight"
+                      OpenOnFocus="@_openOnFocus"
                       ShowDiagnostics="@_showDiagnostics" />
 
     @if (_date != default) {
@@ -107,6 +108,15 @@
           <div class="col-sm-8 col-md-9">
             <div class="form-check form-switch mb-0">
               <input class="form-check-input" type="checkbox" id="openOnRight" @bind="_openOnRight" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Open on focus</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="openOnFocus" @bind="_openOnFocus" />
             </div>
           </div>
         </div>
@@ -236,4 +246,5 @@
   private string _bankHolidayBgColour = "#d4edda";
   private BankHolidayClashPriority _clashPriority = BankHolidayClashPriority.HebrewFirst;
   private bool _openOnRight;
+  private bool _openOnFocus = true;
 }

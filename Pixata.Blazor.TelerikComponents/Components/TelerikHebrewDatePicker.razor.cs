@@ -69,6 +69,9 @@ public partial class TelerikHebrewDatePicker<TValue> {
   [Parameter]
   public bool OpenOnRight { get; set; }
 
+  [Parameter]
+  public bool OpenOnFocus { get; set; }
+
   private readonly HebrewCalendar _hc = new();
   private int _hebrewYear;
   private int _hebrewMonth;
@@ -300,6 +303,13 @@ public partial class TelerikHebrewDatePicker<TValue> {
     }
   }
 
+  private async Task OpenOnFocusInput() {
+    if (OpenOnFocus) {
+      _calendarOpen = true;
+      await AnimationContainer.ShowAsync();
+    }
+  }
+
   private void PrevHebrewMonth() {
     if (_displayHebrewMonth > 1) {
       _displayHebrewMonth -= 1;
@@ -495,7 +505,7 @@ public partial class TelerikHebrewDatePicker<TValue> {
   private HebrewDateType GetHebrewDateType(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
     bool isShabbosOrYomTov = IncludeShabbosOrYomTov && (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay));
     bool isOtherNonWorkDay = IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay);
-    bool isBankHoliday = IncludeBankHolidays && TelerikHebrewDatePicker<TValue>.IsBankHoliday(gregorianDate);
+    bool isBankHoliday = IncludeBankHolidays && IsBankHoliday(gregorianDate);
     if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst) {
       if (isBankHoliday) {
         return HebrewDateType.BankHoliday;

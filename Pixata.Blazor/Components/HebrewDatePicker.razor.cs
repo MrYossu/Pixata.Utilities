@@ -68,6 +68,9 @@ public partial class HebrewDatePicker<TValue> {
   [Parameter]
   public bool OpenOnRight { get; set; }
 
+  [Parameter]
+  public bool OpenOnFocus { get; set; }
+
   private readonly HebrewCalendar _hc = new();
   private int _hebrewYear;
   private int _hebrewMonth;
@@ -297,6 +300,12 @@ public partial class HebrewDatePicker<TValue> {
     }
   }
 
+  private void OpenOnFocusInput() {
+    if (OpenOnFocus) {
+      _calendarOpen = true;
+    }
+  }
+
   private void CloseCalendar() =>
     _calendarOpen = false;
 
@@ -494,7 +503,7 @@ public partial class HebrewDatePicker<TValue> {
   private HebrewDateType GetHebrewDateType(int hebrewYear, int hebrewMonth, int hebrewDay, DateTime gregorianDate) {
     bool isShabbosOrYomTov = IncludeShabbosOrYomTov && (gregorianDate.DayOfWeek == DayOfWeek.Saturday || IsYomTov(hebrewYear, hebrewMonth, hebrewDay));
     bool isOtherNonWorkDay = IncludeOtherNonWorkDays && IsOtherNonWorkDay(hebrewYear, hebrewMonth, hebrewDay);
-    bool isBankHoliday = IncludeBankHolidays && HebrewDatePicker<TValue>.IsBankHoliday(gregorianDate);
+    bool isBankHoliday = IncludeBankHolidays && IsBankHoliday(gregorianDate);
     if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst) {
       if (isBankHoliday) {
         return HebrewDateType.BankHoliday;
@@ -711,7 +720,7 @@ public partial class HebrewDatePicker<TValue> {
     }
     string bankHolidayName = IncludeBankHolidays ? GetBankHolidayName(gregorianDate) : "";
     if (ClashPriority == BankHolidayClashPriority.BankHolidayFirst && !string.IsNullOrEmpty(bankHolidayName)) {
-      List<string> parts = [bankHolidayName, ..hebrewParts];
+      List<string> parts = [bankHolidayName, .. hebrewParts];
       return string.Join(" / ", parts);
     }
     if (!string.IsNullOrEmpty(bankHolidayName)) {
