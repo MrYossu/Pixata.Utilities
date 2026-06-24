@@ -2,7 +2,7 @@
 <div class="@Class">
   <TelerikCheckBox Value="@_value"
                    ValueChanged="@(async (bool? val) => await OnValueChanged(val))"
-                   Indeterminate="@(_value == null)" />
+                   Indeterminate="true" />
   @if (ShowClearButton) {
     <TelerikButton ButtonType="ButtonType.Button"
                    Size="@ThemeConstants.Button.Size.Medium"
@@ -30,7 +30,11 @@
   private bool? _value;
 
   private async Task OnValueChanged(bool? val) {
-    _value = _value == false && val == true ? null : val;
+    _value = _value switch {
+      true => false,
+      false => null,
+      null => true
+    };
     await ApplyFilter();
   }
 
