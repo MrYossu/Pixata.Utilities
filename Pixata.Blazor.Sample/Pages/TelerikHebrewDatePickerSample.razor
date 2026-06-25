@@ -25,6 +25,7 @@
                              ClashPriority="@_clashPriority"
                              OpenOnRight="@_openOnRight"
                              OpenOnFocus="@_openOnFocus"
+                             AnimationType="@_animationType"
                              ShowDiagnostics="@_showDiagnostics" />
 
     @if (_date != default) {
@@ -118,6 +119,18 @@
           <div class="col-sm-8 col-md-9">
             <div class="form-check form-switch mb-0">
               <input class="form-check-input" type="checkbox" id="openOnFocus" @bind="_openOnFocus" />
+            </div>
+          </div>
+
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-0">Animation type (@_animationType.ToString())</label>
+          </div>
+          <div class="col-sm-8 col-md-9">
+            <div class="btn-group btn-group-sm" role="group">
+              @foreach (AnimationType val in Enum.GetValues<AnimationType>()) {
+                <input type="radio" class="btn-check" name="animationType" id="animationType_@val" checked="@(_animationType == val)" @onchange="() => _animationType = val" />
+                <label class="btn btn-outline-secondary" for="animationType_@val">@val</label>
+              }
             </div>
           </div>
         </div>
@@ -255,6 +268,7 @@
                                  ClashPriority="@_clashPriority"
                                  OpenOnRight="@_openOnRight"
                                  OpenOnFocus="@_openOnFocus"
+                                 AnimationType="@_animationType"
                                  ShowDiagnostics="@_showDiagnostics" />
       </div>
     </WindowContent>
@@ -282,4 +296,5 @@
   private bool _openOnRight;
   private bool _openOnFocus = true;
   private bool _showWindow;
+  private AnimationType _animationType = AnimationType.SlideDown;
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Telerik.Blazor;
 using Telerik.Blazor.Components;
 
 namespace Pixata.Blazor.TelerikComponents.Components;
@@ -71,6 +72,9 @@ public partial class TelerikHebrewDatePicker<TValue> {
 
   [Parameter]
   public bool OpenOnFocus { get; set; }
+
+  [Parameter]
+  public AnimationType AnimationType { get; set; } = AnimationType.SlideDown;
 
   private readonly HebrewCalendar _hc = new();
   private int _hebrewYear;
