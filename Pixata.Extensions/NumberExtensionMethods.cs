@@ -172,8 +172,8 @@ namespace Pixata.Extensions {
     /// </summary>
     /// <param name="ids">The list of existing IDs. May be empty</param>
     /// <returns>-1 if the input is empty, otherwise a new negative integer ID that is lower than any in the list</returns>
-    public static int NewId(this int[] ids) =>
-      ids.Length > 0
+    public static int NewId(this IEnumerable<int> ids) =>
+      ids.Any()
         ? Math.Min(-1, ids.Min() - 1)
         : -1;
 
