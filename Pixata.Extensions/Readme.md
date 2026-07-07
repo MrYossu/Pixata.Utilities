@@ -19,6 +19,25 @@ Here is a brief description of the methods in the classes so far (alphabetically
 
 `Flatten<T>()` - Enables you to flatten a hierarchical collection.
 
+`Synchronise()` Synchronises a collection of entities with a collection of DTOs by updating existing entities, removing entities that are no longer present in the DTO collection, and adding new entities.
+
+This is useful when converting a DTO containing a collection navigation property into an EF Core entity, avoiding the need to write repetitive code to handle collection additions, updates, and removals.
+
+Example usage: Suppose an entity has a collection of `Note` entities and you want to update the notes from a DTO:
+
+```csharp
+myEntity.Notes.Synchronise(dto.Notes,
+  note => note.Id,         // How to get the key of the entity
+  note => note.Id,         // How to get the key of the DTO (probably the same as above)
+  note => note.Id <= 0,    // How to determine if the DTO is new
+  dto => new Note {        // How to create a new entity from the DTO
+    Text = dto.Text
+  },
+  (note, dto) => {         // How to update an existing entity from the DTO
+    note.Text = dto.Text;
+  });
+  ```
+
 ## DateExtensionMethods
 `ToPrettyString()` - Formats a date as "12th January 2021". This relies on the `OrdinalSuffix()` method in `NumberExtensionMethods`. Works for both non-nullable and nullable `DateTime` variables, returning an empty string if the value is null.
 
