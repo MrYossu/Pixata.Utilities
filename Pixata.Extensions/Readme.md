@@ -151,6 +151,8 @@ ProductDto? dto = await cache.GetOrCreateSafe($"product-{id}",
 
 `ToFileSizeString()` - Converts a byte count to a human-readable file size string (bytes, Kb, Mb, Gb, etc.) with configurable precision.
 
+`NewId()` - Returns a new negative integer ID that is not in the list of IDs passed in. This is useful for generating temporary IDs for new items that have not yet been saved to a database and therefore don't have a real ID yet.
+
 ## StringExtensionMethods
 `JoinStr()` - Does the same as string.Join, but as an extension method, so it can be chained. Sample usage...
 ```csharp

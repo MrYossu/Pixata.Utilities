@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pixata.Extensions {
   public static class NumberExtensionMethods {
@@ -165,6 +166,16 @@ namespace Pixata.Extensions {
       bytes < 1024
         ? $"{bytes} byte{(bytes == 1 ? "" : "s")}"
         : $"{(bytes / Math.Pow(1024, (int)(Math.Log(bytes) / Math.Log(1024)))).ToString($"F{precision}")}{"KMGTPE"[(int)(Math.Log(bytes) / Math.Log(1024)) - 1]}b";
+
+    /// <summary>
+    /// Returns a new negative integer ID that is not in the list of IDs passed in. This is useful for generating temporary IDs for new items that have not yet been saved to a database and therefore don't have a real ID yet.
+    /// </summary>
+    /// <param name="ids">The list of existing IDs. May be empty</param>
+    /// <returns>-1 if the input is empty, otherwise a new negative integer ID that is lower than any in the list</returns>
+    public static int NewId(this int[] ids) =>
+      ids.Length > 0
+        ? Math.Min(-1, ids.Min() - 1)
+        : -1;
 
     #region Hebrew
 
