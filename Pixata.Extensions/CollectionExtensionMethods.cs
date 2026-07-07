@@ -140,49 +140,5 @@ namespace Pixata.Extensions {
         entities.Add(create(dto));
       }
     }
-
-    private static void Jim() {
-      MyObject obj = new MyObject {
-        Notes = [
-          new Note { Id = 1, Text = "Note 1" },
-          new Note { Id = 2, Text = "Note 2" }
-        ]
-      };
-
-      MyObjectDto dto = new MyObjectDto {
-        Notes = [
-          new NoteDto { Id = 1, Text = "Note 1" },
-          new NoteDto { Id = 2, Text = "Note 2" }
-        ]
-      };
-
-      obj.Notes.Synchronise(dto.Notes,
-        note => note.Id,
-        note => note.Id,
-        note => note.Id <= 0,
-        dto => new Note { 
-          Text = dto.Text 
-        }, 
-        (note, dto) => { 
-          note.Text = dto.Text; 
-        });
-    }
-
-    private class MyObject {
-      public List<Note> Notes { get; set; } = [];
-    }
-
-    private class Note {
-      public int Id { get; set; }
-      public string Text { get; set; } = "";
-    }
-    private class MyObjectDto {
-      public List<NoteDto> Notes { get; set; } = [];
-    }
-
-    private class NoteDto {
-      public int Id { get; set; }
-      public string Text { get; set; } = "";
-    }
   }
 }
