@@ -1,6 +1,7 @@
 ﻿@page "/TelerikGrid"
 @using Pixata.Extensions
 @using Pixata.Blazor.Extensions
+@using Pixata.Blazor.TelerikComponents.Components
 @using Pixata.Blazor.TelerikComponents.Helpers
 @using Pixata.Blazor.Sample.Data
 @inject WeatherForecastService _service
@@ -27,7 +28,7 @@
 
 <p>See the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/GridSample.razor">source code for this page</a> for the code that produces the grid below, or the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Extensions/TemplateHelper.razor">TemplateHelper source code</a> for the method definitions and comments</p>
 
-<TelerikGrid Data="_forecasts"
+<TelerikGridWithSettings Data="_forecasts"
              FilterMode="GridFilterMode.FilterRow">
   <GridColumns>
     <GridColumn Field="@nameof(WeatherForecast.Date)" Template="@(_templateHelper.Link<WeatherForecast>(f => f.Date.ToPrettyString(), f => $"/Day?temp={f.TemperatureC}", f => f.TemperatureC < 20 ? "text-align: right; color: blue" : "text-align: right;color: red", titleFunc: f => f.Summary))" />
@@ -41,7 +42,7 @@
                 Title="Rain default" />
     <GridColumn Field="@nameof(WeatherForecast.Summary)" />
   </GridColumns>
-</TelerikGrid>
+</TelerikGridWithSettings>
 
 <TemplateHelper @ref="@_templateHelper" />
 
