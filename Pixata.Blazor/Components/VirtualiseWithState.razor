@@ -10,7 +10,8 @@
 <div @ref="_scrollContainer"
      style="@($"height:{Height};overflow-y:auto")">
 
-  <Virtualize TItem="TItem"
+  <Virtualize @ref="_virtualize"
+              TItem="TItem"
               Items="Items"
               ItemsProvider="ItemsProvider"
               ItemContent="ItemContent"
@@ -51,6 +52,7 @@
   [Parameter]
   public string Height { get; set; } = "600px";
 
+  private Virtualize<TItem>? _virtualize;
   private ElementReference _scrollContainer;
   private IJSObjectReference? _module;
   private DotNetObjectReference<VirtualiseWithState<TItem>>? _dotNetReference;
@@ -86,6 +88,12 @@
       return;
     }
     await ScrollState.Save(StorageKey, scrollTop);
+  }
+
+  public async Task RefreshDataAsync() {
+    if (_virtualize is not null) {
+      await _virtualize.RefreshDataAsync();
+    }
   }
 
   public async ValueTask DisposeAsync() {
