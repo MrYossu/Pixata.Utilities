@@ -1,25 +1,23 @@
-﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using Telerik.Blazor.Components;
-using Telerik.DataSource;
 
 namespace Pixata.Blazor.TelerikComponents.Components;
 
 public class TelerikGridWithSettings<TItem> : TelerikGrid<TItem> {
-  // Parameter to control where state is persisted
-  public enum StatePersistenceMode {
-    None,
-    LocalStorage,
-    QueryString
-  }
+  [Inject]
+  public ILocalStorageService LocalStorage { get; set; } = null!;
 
-  public StatePersistenceMode PersistenceMode { get; set; } = StatePersistenceMode.None;
+  [Parameter]
+  public string StorageKey { get; set; } = "";
 
   // Allow user to provide their own event handlers. This requires them to remember NOT to set the OnStateInit and OnStateChanged parameters, as that would override our internal handlers
-  public EventCallback<GridStateEventArgs<TItem>> OnStateInitUser { get; set; }
-  public EventCallback<GridStateEventArgs<TItem>> OnStateChangedUser { get; set; }
+  public EventCallback<GridStateEventArgs<TItem>> OnStateInitPre { get; set; }
+  public EventCallback<GridStateEventArgs<TItem>> OnStateInitPost { get; set; }
+  public EventCallback<GridStateEventArgs<TItem>> OnStateChangedPre { get; set; }
+  public EventCallback<GridStateEventArgs<TItem>> OnStateChangedPost { get; set; }
 
   protected override void OnInitialized() {
     OnStateInit = EventCallback.Factory.Create<GridStateEventArgs<TItem>>(this, HandleOnStateInit);
@@ -28,37 +26,42 @@ public class TelerikGridWithSettings<TItem> : TelerikGrid<TItem> {
   }
 
   private async Task HandleOnStateInit(GridStateEventArgs<TItem> args) {
-    // Load state from local storage or query string if needed
-    if (PersistenceMode == StatePersistenceMode.LocalStorage) {
-      // TODO: Load state from local storage and apply to args.GridState
-    } else if (PersistenceMode == StatePersistenceMode.QueryString) {
-      // TODO: Load state from query string and apply to args.GridState
+    if (OnStateInitPre.HasDelegate) {
+      await OnStateInitPre.InvokeAsync(args);
     }
-    // Call user-supplied handler if set
-    if (OnStateInitUser.HasDelegate) {
-      await OnStateInitUser.InvokeAsync(args);
+    if (!string.IsNullOrWhiteSpace(StorageKey)) {
+      try {
+        GridState<TItem>? state = await LocalStorage.GetItemAsync<GridState<TItem>>(StorageKey);
+        if (state is not null) {
+          args.GridState = state;
+        }
+      }
+      catch (Exception ex) {
+        // No, we don't normally swallow exceptions, but as JS calls cannot be issued during pre-rendering, the local storage code will raise an exception. We can safely ignore it, as the grid state should be restored during the interactive rendering
+      }
+    }
+    if (OnStateInitPost.HasDelegate) {
+      await OnStateInitPost.InvokeAsync(args);
     }
   }
 
   private async Task HandleOnStateChanged(GridStateEventArgs<TItem> args) {
-    // Save state to local storage or query string if needed
-    if (PersistenceMode == StatePersistenceMode.LocalStorage) {
-      // TODO: Save args.GridState to local storage
-    } else if (PersistenceMode == StatePersistenceMode.QueryString) {
-      // TODO: Save args.GridState to query string
+    if (OnStateChangedPre.HasDelegate) {
+      await OnStateChangedPre.InvokeAsync(args);
     }
-    if (args.GridState.FilterDescriptors.Any()) {
-      Console.WriteLine("State changed - filters:");
-      foreach (CompositeFilterDescriptor cfd in args.GridState.FilterDescriptors.Cast<CompositeFilterDescriptor>()) {
-        Console.WriteLine($"Logical Operator: {cfd.LogicalOperator}");
-        foreach (FilterDescriptor fd in cfd.FilterDescriptors.Cast<FilterDescriptor>()) {
-          Console.WriteLine($"Field: {fd.Member}, Operator: {fd.Operator}, Value: {fd.Value}");
+    if (!string.IsNullOrWhiteSpace(StorageKey)) {
+      GridState<TItem>? state = GetState();
+      try {
+        if (state is not null) {
+          await LocalStorage.SetItemAsync(StorageKey, state);
         }
       }
+      catch (Exception ex) {
+        // See the comments above about why we swallow this exception
+      }
     }
-    // Call user-supplied handler if set
-    if (OnStateChangedUser.HasDelegate) {
-      await OnStateChangedUser.InvokeAsync(args);
+    if (OnStateChangedPost.HasDelegate) {
+      await OnStateChangedPost.InvokeAsync(args);
     }
   }
 }
