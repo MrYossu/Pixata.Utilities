@@ -42,6 +42,13 @@ Some general componets that I found useful.
 
 ### VirtualiseWithState
 
+I recently discovered the `<Virtualize>` component, which allows you to load data as it's needed, and have full flexibility over the display. This gives you the power and convenience of the virtualisation feature in the telerik Blazor grid, but without your page looking too grid-like.
+
+As with the grid, it's often desirable to save the state of the component, so that if the user navigates away and back, their previous state will be restored. That can all be done manually, but why bother when we can write a component to do it for us?
+
+The `<VirtualiseWithState>` component is a wrapper around the `<Virtualize>` component that automatically saves and restores the state. You can see it in action below (ignore the uninspiring design, I'm a software engineer, not a UI designer!). If you scroll down the list, then navigate to another page and come back, your previous scroll position will be restored.
+
+See the the [live demo](https://test.pixata.co.uk/VirtualiseWithStateSample) for how it looks, and the [source for that page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/VirtualiseWithStateSample.razor) to see the code required.
 
 ### AuditViewer
 When investigating bug reports from customers, I often find that the issue is nothing to do with my code, it's that they have changed something in the database, and I need to find out what they changed, and when.

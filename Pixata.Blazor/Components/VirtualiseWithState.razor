@@ -75,7 +75,6 @@
       await _module!.InvokeVoidAsync("restore", _scrollContainer, scrollTop);
       double current = await _module.InvokeAsync<double>("getScrollTop", _scrollContainer);
       if (Math.Abs(current - scrollTop) < 2) {
-        Console.WriteLine($"Scroll restored after {i + 1} attempts");
         return;
       }
     }
