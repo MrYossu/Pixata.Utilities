@@ -6,7 +6,6 @@ namespace Pixata.Blazor.Sample.Models {
     public string Title { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string Surname { get; set; } = "";
-
     public string FullName =>
       Title + " " + FirstName + " " + Surname;
     public string Email { get; set; } = "";

@@ -1,0 +1,40 @@
+﻿@page "/VirtualiseWithState"
+@using Pixata.Blazor.Components
+@using Pixata.Blazor.Sample.Models
+@using Pixata.Extensions
+
+<SitePageTitle>Virtualise with state</SitePageTitle>
+
+<h3>Virtualise with state</h3>
+
+<p>I recently discovered the <a href="https://learn.microsoft.com/en-us/aspnet/core/blazor/components/virtualization?view=aspnetcore-10.0" target="_blank"><code>&lt;Virtualize&gt;</code> component</a>, which allows you to load data as it's needed, and have full flexibility over the display. This gives you the power and convenience of the virtualisation feature in the telerik Blazor grid, but without your page looking too grid-like.</p>
+
+<p>As with the grid, it's often desirable to save the state of the component, so that if the user navigates away and back, their previous state will be restored. That can all be done manually, but why bother when we can write a component to do it for us?</p>
+
+<p>The <code>&lt;VirtualiseWithState&gt;</code> component is a wrapper around the <code>&lt;Virtualize&gt;</code> component that automatically saves and restores the state. You can see it in action below (ignore the uninspiring design, I'm a software engineer, not a UI designer!). If you scroll down the list, then navigate to another page and come back, your previous scroll position will be restored.</p>
+
+<VirtualiseWithState TItem="PersonDto"
+                     StateKey="VirtualiseWithStateSample"
+                     ItemsProvider="LoadRows"
+                     ItemSize="80"
+                     Height="calc(100vh - 350px)">
+
+  <ItemContent Context="person">
+    <div class="d-flex mb-2 border">
+      <div class="fs-1 text-primary text-center p-2"><span class="fa fa-user-circle" aria-hidden="true"></span></div>
+      <div class="d-flex flex-column">
+        <div class="fw-bold text-success">@person.Fullname</div>
+        <div>@person.DateOfBirth.ToPrettyString()</div>
+        <div>@person.Email</div>
+        <div>@person.Phone</div>
+      </div>
+    </div>
+  </ItemContent>
+
+</VirtualiseWithState>
+
+@code {
+
+  private async ValueTask<ItemsProviderResult<PersonDto>> LoadRows(ItemsProviderRequest request) =>
+    new(PersonDto.People.Skip(request.StartIndex).Take(request.Count), PersonDto.People.Length);
+}

@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.22" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.22" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.22" />

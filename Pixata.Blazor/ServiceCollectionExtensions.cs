@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions {
       typeof(NotificationHelper),
       typeof(PasswordOptionsHelper),
       typeof(PersistentStateHelper<>),
+      typeof(ScrollStateService),
       typeof(TemplateHelper),
     ];
 
