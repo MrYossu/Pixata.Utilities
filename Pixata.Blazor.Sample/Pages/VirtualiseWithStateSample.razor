@@ -14,7 +14,7 @@
 <p>The <code>&lt;VirtualiseWithState&gt;</code> component is a wrapper around the <code>&lt;Virtualize&gt;</code> component that automatically saves and restores the state. You can see it in action below (ignore the uninspiring design, I'm a software engineer, not a UI designer!). If you scroll down the list, then navigate to another page and come back, your previous scroll position will be restored.</p>
 
 <VirtualiseWithState TItem="PersonDto"
-                     StateKey="VirtualiseWithStateSample"
+                     StorageKey="VirtualiseWithStateSample"
                      ItemsProvider="LoadRows"
                      ItemSize="100"
                      Height="calc(100vh - 350px)">

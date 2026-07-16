@@ -25,7 +25,7 @@
 @code {
 
   [Parameter]
-  public string StateKey { get; set; } = null!;
+  public string StorageKey { get; set; } = null!;
 
   [Parameter]
   public ICollection<TItem>? Items { get; set; }
@@ -63,7 +63,7 @@
     _module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/Components/VirtualiseWithState.razor.js");
     _dotNetReference = DotNetObjectReference.Create(this);
     await _module.InvokeVoidAsync("initialise", _scrollContainer, _dotNetReference);
-    double? scrollTop = await ScrollState.Get(StateKey);
+    double? scrollTop = await ScrollState.Get(StorageKey);
     if (scrollTop.HasValue) {
       await RestoreScrollPosition(scrollTop.Value);
     }
@@ -85,7 +85,7 @@
     if (_disposed) {
       return;
     }
-    await ScrollState.Save(StateKey, scrollTop);
+    await ScrollState.Save(StorageKey, scrollTop);
   }
 
   public async ValueTask DisposeAsync() {

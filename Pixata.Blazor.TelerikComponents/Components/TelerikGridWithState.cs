@@ -6,7 +6,7 @@ using Telerik.Blazor.Components;
 
 namespace Pixata.Blazor.TelerikComponents.Components;
 
-public class TelerikGridWithSettings<TItem> : TelerikGrid<TItem> {
+public class TelerikGridWithState<TItem> : TelerikGrid<TItem> {
   [Inject]
   public ILocalStorageService LocalStorage { get; set; } = null!;
 

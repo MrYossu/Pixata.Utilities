@@ -19,7 +19,7 @@
 <p>In the unlikely event that you need to handle <code>OnStateInit</code> or <code>OnStateChanged</code> events, you can do so by using the <code>OnStateInitPre</code>, <code>OnStateInitPost</code>, <code>OnStateChangedPre</code>, and <code>OnStateChangedPost</code> event handlers. These allow you to run your own code before or after the component's state handling.</p>
 
 <div style="height: calc(100vh - 440px)">
-  <TelerikGridWithSettings Data="@PersonDto.People"
+  <TelerikGridWithState Data="@PersonDto.People"
                            Height="100%"
                            RowHeight="40"
                            PageSize="50"
@@ -35,5 +35,5 @@
       <TextGridColumn Field="@nameof(PersonDto.Email)" />
       <TextGridColumn Field="@nameof(PersonDto.Phone)" />
     </GridColumns>
-  </TelerikGridWithSettings>
+  </TelerikGridWithState>
 </div>
