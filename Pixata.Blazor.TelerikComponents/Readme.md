@@ -10,10 +10,10 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents
 
 ## The components
 
-## TelerikGrid with automactic save and restore of state
-Saving and restoring state is a very useful feature, as it allows the grid to return to its previous state when the user left the page. Handling this manually is not major, bnut painful.
+## TelerikGrid with automatic save and restore of state
+Saving and restoring state is a very useful feature, as it allows the grid to return to its previous state when the user left the page. Handling this manually is not major, but painful.
 
-I wrote the `TelerikGridWithSettings` component as almost drop-in replacement for the standard `TelerikGrid`, but preserves the grid state in local storage. If you use virtualisation, then the current skip and take will also be restored.
+I wrote the `TelerikGridWithState` component as almost drop-in replacement for the standard `TelerikGrid`, but preserves the grid state in local storage. If you use virtualisation, then the current skip and take will also be restored.
 
 All you need to do is set a value for the `StorageKey` parameter and you're done. 
 
