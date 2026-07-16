@@ -4,7 +4,9 @@
 @using Pixata.Blazor.TelerikComponents.Components
 @using Pixata.Blazor.TelerikComponents.Helpers
 @using Pixata.Blazor.Sample.Data
-@inject WeatherForecastService _service
+@inject WeatherForecastService Service
+
+<SitePageTitle>Telerik grid</SitePageTitle>
 
 <h3>Telerik grid</h3>
 
@@ -52,6 +54,6 @@
   private List<WeatherForecast> _forecasts = new();
 
   protected override async Task OnInitializedAsync() =>
-    _forecasts = (await _service.GetForecastAsync(DateTime.Today)).ToList();
+    _forecasts = (await Service.GetForecastAsync(DateTime.Today)).ToList();
 
 }
