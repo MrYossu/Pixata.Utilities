@@ -14,9 +14,13 @@ public class TelerikGridWithSettings<TItem> : TelerikGrid<TItem> {
   public string StorageKey { get; set; } = "";
 
   // Allow user to provide their own event handlers. This requires them to remember NOT to set the OnStateInit and OnStateChanged parameters, as that would override our internal handlers
+  [Parameter]
   public EventCallback<GridStateEventArgs<TItem>> OnStateInitPre { get; set; }
+  [Parameter]
   public EventCallback<GridStateEventArgs<TItem>> OnStateInitPost { get; set; }
+  [Parameter]
   public EventCallback<GridStateEventArgs<TItem>> OnStateChangedPre { get; set; }
+  [Parameter]
   public EventCallback<GridStateEventArgs<TItem>> OnStateChangedPost { get; set; }
 
   protected override void OnInitialized() {
