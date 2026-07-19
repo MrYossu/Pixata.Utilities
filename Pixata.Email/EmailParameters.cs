@@ -36,14 +36,14 @@ namespace Pixata.Email {
       Subject = subject;
       Body = body;
       Recipients = recipientEmails.Select(MailboxAddress.Parse).ToList();
-      ReplyTo = default;
+      ReplyTo = null;
     }
 
     private void SetProperties(string subject, string body, string recipientEmail, string recipientName = "") {
       Subject = subject;
       Body = body;
       Recipients = new List<MailboxAddress> { new(recipientName, recipientEmail) };
-      ReplyTo = default;
+      ReplyTo = null;
     }
 
     /// <summary>
@@ -70,11 +70,6 @@ namespace Pixata.Email {
     /// Gets or sets the email address to which replies should be sent for this message
     /// </summary>
     public MailboxAddress? ReplyTo { get; set; }
-
-    /// <summary>
-    /// Gets a value indicating whether the <c>ReplyTo</c> address has been explicitly set
-    /// </summary>
-    public bool IsReplyToSet => ReplyTo != default;
 
     /// <summary>
     /// Gets or sets the collection of file attachments for the email
