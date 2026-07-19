@@ -1,0 +1,112 @@
+@typeparam TItem
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Pixata.Blazor.Extensions
+@implements IAsyncDisposable
+
+@inject IJSRuntime Js
+@inject ScrollStateService ScrollState
+
+<div @ref="_scrollContainer"
+     style="@($"height:{Height};overflow-y:auto")">
+
+  <Virtualize @ref="_virtualize"
+              TItem="TItem"
+              Items="Items"
+              ItemsProvider="ItemsProvider"
+              ItemContent="ItemContent"
+              Placeholder="Placeholder"
+              EmptyContent="EmptyContent"
+              ItemSize="ItemSize"
+              OverscanCount="OverscanCount">
+  </Virtualize>
+
+</div>
+
+@code {
+
+  [Parameter]
+  public string StorageKey { get; set; } = null!;
+
+  [Parameter]
+  public ICollection<TItem>? Items { get; set; }
+
+  [Parameter]
+  public ItemsProviderDelegate<TItem>? ItemsProvider { get; set; }
+
+  [Parameter]
+  public RenderFragment<TItem>? ItemContent { get; set; }
+
+  [Parameter]
+  public RenderFragment<PlaceholderContext>? Placeholder { get; set; }
+
+  [Parameter]
+  public RenderFragment? EmptyContent { get; set; }
+
+  [Parameter]
+  public float ItemSize { get; set; } = 50;
+
+  [Parameter]
+  public int OverscanCount { get; set; } = 3;
+
+  [Parameter]
+  public string Height { get; set; } = "100%";
+
+  private Virtualize<TItem>? _virtualize;
+  private ElementReference _scrollContainer;
+  private IJSObjectReference? _module;
+  private DotNetObjectReference<VirtualiseWithState<TItem>>? _dotNetReference;
+  private bool _disposed;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (!firstRender) {
+      return;
+    }
+    _module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/Components/VirtualiseWithState.razor.js");
+    _dotNetReference = DotNetObjectReference.Create(this);
+    await _module.InvokeVoidAsync("initialise", _scrollContainer, _dotNetReference);
+    double? scrollTop = await ScrollState.Get(StorageKey);
+    if (scrollTop.HasValue) {
+      await RestoreScrollPosition(scrollTop.Value);
+    }
+  }
+
+  private async Task RestoreScrollPosition(double scrollTop) {
+    for (int i = 0; i < 10; i++) {
+      await Task.Delay(100);
+      await _module!.InvokeVoidAsync("restore", _scrollContainer, scrollTop);
+      double current = await _module.InvokeAsync<double>("getScrollTop", _scrollContainer);
+      if (Math.Abs(current - scrollTop) < 2) {
+        return;
+      }
+    }
+  }
+
+  [JSInvokable]
+  public async Task ScrollChanged(double scrollTop) {
+    if (_disposed) {
+      return;
+    }
+    await ScrollState.Save(StorageKey, scrollTop);
+  }
+
+  public async Task RefreshDataAsync() {
+    if (_virtualize is not null) {
+      await _virtualize.RefreshDataAsync();
+    }
+  }
+
+  public async ValueTask DisposeAsync() {
+    _disposed = true;
+    try {
+      if (_module != null) {
+        await _module.InvokeVoidAsync("dispose", _scrollContainer);
+        await _module.DisposeAsync();
+      }
+    }
+    catch (JSDisconnectedException) {
+    }
+    _dotNetReference?.Dispose();
+  }
+
+}

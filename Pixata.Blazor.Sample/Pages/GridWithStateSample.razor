@@ -1,0 +1,39 @@
+﻿@page "/TelerikGridWithState"
+@using Pixata.Blazor.Components
+@using Pixata.Blazor.TelerikComponents.Components
+@using Pixata.Blazor.TelerikComponents.Helpers
+@using Pixata.Blazor.Sample.Models
+
+<SitePageTitle>Telerik grid with state</SitePageTitle>
+
+<h3>Telerik grid with state</h3>
+
+<p>One of the pain points (for me at least) with the otherwise fab Telerik grid, is that if you are showing a master list of items, each of which is linkable to a details page, then when you come back to the master list, your sorting and filtering has gone, and you're back where you started.</p>
+
+<p>In order to reduce this pain, I created the <code>TelerikGridWithSettings</code> component, which is an almost drop-in replacement for the standard <code>TelerikGrid</code>, but preserves the grid state in local storage.</p>
+
+<p>Basic usage is very simple, all you need to do is supply a value for the <code>StorageKey</code> parameter, and use the grid as normal. Whenever state is changed, or the component loads, local storage is used to preserve the previous state.</p>
+
+<p>The sample below uses a simple array of <code>Person</code> objects (pulled from <a href="https://randomuser.me/api">https://randomuser.me/api</a>) as the data source. Try setting some filters and/or sort, leaving this page and coming back. You should find that your settings are restored. If you use virtualisation, then the current skip and take will also be restored.</p>
+
+<p>In the unlikely event that you need to handle <code>OnStateInit</code> or <code>OnStateChanged</code> events, you can do so by using the <code>OnStateInitPre</code>, <code>OnStateInitPost</code>, <code>OnStateChangedPre</code>, and <code>OnStateChangedPost</code> event handlers. These allow you to run your own code before or after the component's state handling.</p>
+
+<div style="height: calc(100vh - 440px)">
+  <TelerikGridWithState Data="@PersonDto.People"
+                           Height="100%"
+                           RowHeight="40"
+                           PageSize="50"
+                           ScrollMode="@GridScrollMode.Virtual"
+                           FilterMode="GridFilterMode.FilterRow"
+                           Sortable="true"
+                           StorageKey="TelerikGridWithState">
+    <GridColumns>
+      <TextGridColumn Field="@nameof(PersonDto.Title)" />
+      <TextGridColumn Field="@nameof(PersonDto.FirstName)" />
+      <TextGridColumn Field="@nameof(PersonDto.Surname)" />
+      <DateGridColumn Field="@nameof(PersonDto.DateOfBirth)" />
+      <TextGridColumn Field="@nameof(PersonDto.Email)" />
+      <TextGridColumn Field="@nameof(PersonDto.Phone)" />
+    </GridColumns>
+  </TelerikGridWithState>
+</div>

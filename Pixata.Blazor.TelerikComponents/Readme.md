@@ -10,6 +10,15 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents
 
 ## The components
 
+## TelerikGrid with automatic save and restore of state
+Saving and restoring state is a very useful feature, as it allows the grid to return to its previous state when the user left the page. Handling this manually is not major, but painful.
+
+I wrote the `TelerikGridWithState` component as almost drop-in replacement for the standard `TelerikGrid`, but preserves the grid state in local storage. If you use virtualisation, then the current skip and take will also be restored.
+
+All you need to do is set a value for the `StorageKey` parameter and you're done. 
+
+In the unlikely event that you need to handle `OnStateInit` or `OnStateChanged` events, you can do so by using the `OnStateInitPre`, `OnStateInitPost`, `OnStateChangedPre`, and `OnStateChangedPost` event handlers. These allow you to run your own code before or after the component's state handling.
+
 ### Extension method to improve the performance of the Telerik Blazor grid
 Whilst the Telerik Blazor grid does an amazing job, it has its limitations. One of these is the way it computes aggregates. For large tables, this can be slow.
 

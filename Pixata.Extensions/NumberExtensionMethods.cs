@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pixata.Extensions {
   public static class NumberExtensionMethods {
@@ -7,7 +8,7 @@ namespace Pixata.Extensions {
     /// Returns the ordinal suffix for a number, eg "st" for 1, "nd" for 2, "rd" for 3 and so on. Useful for formatting dates
     /// </summary>
     /// <param name="n">An integer</param>
-    /// <param name="includeNumber">If true (9)default) then includes the number in the return value, eg "9th". If false, returns just the ordinal suffix, eg "th"</param>
+    /// <param name="includeNumber">If true (default) then includes the number in the return value, eg "9th". If false, returns just the ordinal suffix, eg "th"</param>
     /// <returns>The ordinal suffix for the integer, optionally with the integer itself</returns>
     public static string OrdinalSuffix(this int n, bool includeNumber = true) =>
       (includeNumber ? n : "") + n switch {
@@ -165,6 +166,16 @@ namespace Pixata.Extensions {
       bytes < 1024
         ? $"{bytes} byte{(bytes == 1 ? "" : "s")}"
         : $"{(bytes / Math.Pow(1024, (int)(Math.Log(bytes) / Math.Log(1024)))).ToString($"F{precision}")}{"KMGTPE"[(int)(Math.Log(bytes) / Math.Log(1024)) - 1]}b";
+
+    /// <summary>
+    /// Returns a new negative integer ID that is not in the list of IDs passed in. This is useful for generating temporary IDs for new items that have not yet been saved to a database and therefore don't have a real ID yet.
+    /// </summary>
+    /// <param name="ids">The list of existing IDs. May be empty</param>
+    /// <returns>-1 if the input is empty, otherwise a new negative integer ID that is lower than any in the list</returns>
+    public static int NewId(this IEnumerable<int> ids) =>
+      ids.Any()
+        ? Math.Min(-1, ids.Min() - 1)
+        : -1;
 
     #region Hebrew
 

@@ -19,6 +19,25 @@ Here is a brief description of the methods in the classes so far (alphabetically
 
 `Flatten<T>()` - Enables you to flatten a hierarchical collection.
 
+`Synchronise()` Synchronises a collection of entities with a collection of DTOs by updating existing entities, removing entities that are no longer present in the DTO collection, and adding new entities.
+
+This is useful when converting a DTO containing a collection navigation property into an EF Core entity, avoiding the need to write repetitive code to handle collection additions, updates, and removals.
+
+Example usage: Suppose an entity has a collection of `Note` entities and you want to update the notes from a DTO:
+
+```csharp
+myEntity.Notes.Synchronise(dto.Notes,
+  note => note.Id,         // How to get the key of the entity
+  note => note.Id,         // How to get the key of the DTO (probably the same as above)
+  note => note.Id <= 0,    // How to determine if the DTO is new
+  dto => new Note {        // How to create a new entity from the DTO
+    Text = dto.Text
+  },
+  (note, dto) => {         // How to update an existing entity from the DTO
+    note.Text = dto.Text;
+  });
+  ```
+
 ## DateExtensionMethods
 `ToPrettyString()` - Formats a date as "12th January 2021". This relies on the `OrdinalSuffix()` method in `NumberExtensionMethods`. Works for both non-nullable and nullable `DateTime` variables, returning an empty string if the value is null.
 
@@ -131,6 +150,8 @@ ProductDto? dto = await cache.GetOrCreateSafe($"product-{id}",
 `S()` - Returns an empty string when the input is 1, otherwise returns "s". Useful for simple pluralisation in formatted strings (e.g. `"{n} item{n.S()}"`).
 
 `ToFileSizeString()` - Converts a byte count to a human-readable file size string (bytes, Kb, Mb, Gb, etc.) with configurable precision.
+
+`NewId()` - Returns a new negative integer ID that is not in the list of IDs passed in. This is useful for generating temporary IDs for new items that have not yet been saved to a database and therefore don't have a real ID yet.
 
 ## StringExtensionMethods
 `JoinStr()` - Does the same as string.Join, but as an extension method, so it can be chained. Sample usage...

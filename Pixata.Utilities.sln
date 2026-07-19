@@ -25,10 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		.github\copilot-instructions.md = .github\copilot-instructions.md
-		.github\workflows\master.yml = .github\workflows\master.yml
-		.github\workflows\release.yml = .github\workflows\release.yml
 		LICENSE.md = LICENSE.md
+		.github\workflows\master.yml = .github\workflows\master.yml
 		README.md = README.md
+		.github\workflows\release.yml = .github\workflows\release.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.AspNetCore", "Pixata.AspNetCore\Pixata.AspNetCore.csproj", "{945D4774-EFFE-4914-A9F9-7FE17B2CB247}"
