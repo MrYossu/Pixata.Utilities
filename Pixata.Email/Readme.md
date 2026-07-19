@@ -1,12 +1,13 @@
 ﻿# Pixata.Email [![Pixata.Email Nuget package](https://img.shields.io/nuget/v/Pixata.Email)](https://www.nuget.org/packages/Pixata.Email/)
 
-![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Email/mail.png "Pixata") 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Email/mail.png "Pixata")
 
 An email service for use in .NET Core projects. Backed by Mailkit, it eases the effort needed to add email facilities to your project.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
 # Breaking change
+
 >As from version 2.0.0, this package does not use LanguageExt, but returns an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. See the comments at the bottom of this document for how this will change your code.
 
 ## Setup
@@ -21,7 +22,8 @@ First thing you need to do is add your SMTP server and "From" details to your ap
     "UserName": "your.username",
     "Password": "your.password",
     "FromEmail": "jim@spriggs.com",
-    "FromName": "Jim Spriggs"
+    "FromName": "Jim Spriggs",
+    "ReplyTo": "jim@spriggs.com" // Optional
   }
 ```
 
@@ -52,6 +54,7 @@ services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
 ```
 
 ### Allowing multiple email servers or accounts
+
 >Note that this feature is only available from v1.2.4 onwards
 
 If you need to be able to send emails from multiple servers or accounts, you can set up a default `SmtpSettings` as above, and then when you want to send from a different server or account, just change the `SmtpSettings` property on the service to use the appropriate settings...
