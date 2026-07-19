@@ -4,9 +4,6 @@ using MimeKit;
 
 namespace Pixata.Email {
   public class EmailParameters {
-    // This is used to detect whether the ReplyTo property has been explicitly set. We assume that "jim" is not a tol-level domain!
-    private const string Jim = "jim@jim.jim";
-
     /// <summary>
     /// Create a new EmailParameters object
     /// </summary>
@@ -39,14 +36,14 @@ namespace Pixata.Email {
       Subject = subject;
       Body = body;
       Recipients = recipientEmails.Select(MailboxAddress.Parse).ToList();
-      ReplyTo = MailboxAddress.Parse(Jim);
+      ReplyTo = default;
     }
 
     private void SetProperties(string subject, string body, string recipientEmail, string recipientName = "") {
       Subject = subject;
       Body = body;
       Recipients = new List<MailboxAddress> { new(recipientName, recipientEmail) };
-      ReplyTo = MailboxAddress.Parse(Jim);
+      ReplyTo = default;
     }
 
     /// <summary>
@@ -72,12 +69,12 @@ namespace Pixata.Email {
     /// <summary>
     /// Gets or sets the email address to which replies should be sent for this message
     /// </summary>
-    public MailboxAddress ReplyTo { get; set; }
+    public MailboxAddress? ReplyTo { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether the <c>ReplyTo</c> address has been explicitly set
     /// </summary>
-    public bool IsReplyToSet => ReplyTo.Address != Jim;
+    public bool IsReplyToSet => ReplyTo != default;
 
     /// <summary>
     /// Gets or sets the collection of file attachments for the email

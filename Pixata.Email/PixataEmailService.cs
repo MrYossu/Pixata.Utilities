@@ -61,7 +61,7 @@ namespace Pixata.Email {
       mm.From.Add(parameters.From ?? new MailboxAddress(SmtpSettings.FromName, SmtpSettings.FromEmail));
       parameters.Recipients.ForEach(r => mm.To.Add(r));
       if (parameters.IsReplyToSet) {
-        mm.ReplyTo.Add(parameters.ReplyTo);
+        mm.ReplyTo.Add(parameters.ReplyTo!);
       }
       BodyBuilder builder = new() {
         HtmlBody = parameters.Body
