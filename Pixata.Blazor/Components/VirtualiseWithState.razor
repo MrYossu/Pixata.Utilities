@@ -3,7 +3,6 @@
 @using Microsoft.JSInterop
 @using Pixata.Blazor.Extensions
 @implements IAsyncDisposable
-
 @inject IJSRuntime Js
 @inject ScrollStateService ScrollState
 
@@ -90,7 +89,17 @@
     await ScrollState.Save(StorageKey, scrollTop);
   }
 
-  public async Task RefreshDataAsync() {
+  public async Task RefreshData() {
+    if (_virtualize is not null) {
+      await _virtualize.RefreshDataAsync();
+    }
+  }
+
+  public async Task Reset() {
+    await ScrollState.Remove(StorageKey);
+    if (_module is not null && _scrollContainer.Context is not null) {
+      await _module.InvokeVoidAsync("restore", _scrollContainer, 0);
+    }
     if (_virtualize is not null) {
       await _virtualize.RefreshDataAsync();
     }
