@@ -36,9 +36,15 @@
     }
     break;
 
+  case ApiResponseStates.Unauthorised:
+    if (!HideNonSuccess) {
+      @RequiresLogIn(_apiResponse.Message)
+    }
+    break;
+
   case ApiResponseStates.Failure:
     if (!HideNonSuccess) {
-      if (_apiResponse.Message.Contains($"{HttpStatusCode.Unauthorized}")) {
+      if (IsUnauthorised(_apiResponse.State, _apiResponse.Message)) {
         @RequiresLogIn(_apiResponse.Message)
       } else {
         @Failure(_apiResponse.Message)
@@ -124,7 +130,7 @@
   protected override async Task OnInitializedAsync() {
     _arvSuccessStyle = ManualLoading && !_manualLoadingComplete ? "position: absolute; left: 1000000px" : "";
     _apiResponse = await StateHelper.Get(LoadApiResponse, Key);
-    if (_apiResponse.Message.Contains("Unauthorized")) {
+    if (IsUnauthorised(_apiResponse.State, _apiResponse.Message)) {
       NavigationManager.NavigateTo($"{ApiResponseViewConfig.LogInUrl}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
     }
   }
@@ -167,11 +173,14 @@
         Notify(NotificationType.Error, "You don't seem to be connected. Please check your Internet connection and try again");
         onNotSuccess?.Invoke(response.Message);
         break;
+      case ApiResponseStates.Unauthorised:
+        HandleUnauthorised(response.Message, onNotSuccess, changeStateOnNotSuccess);
+        break;
       case ApiResponseStates.Failure:
-        if (response.Message.Contains($"{HttpStatusCode.Unauthorized}") || response.Message == "HTTP error (Unauthorized) You are not authenticated") {
-          // TODO AYS - How do we handle this case if changeStateOnNotSuccess is true? We don't have an ApiResponseStates value for not authenticated
-          Notify(NotificationType.Error, "Your session has expired, so you need to log in again", onClick: () => NavigationManager.NavigateTo($"{NavigationManager.ToAbsoluteUri(ApiResponseViewConfig.LogInUrl)}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true));
-          onNotSuccess?.Invoke(response.Message);
+        // The state is the reliable signal, but older server code may still report this as a Failure whose message
+        // mentions Unauthorized, so we check for that too
+        if (IsUnauthorised(response.State, response.Message)) {
+          HandleUnauthorised(response.Message, onNotSuccess, changeStateOnNotSuccess);
         } else {
           if (changeStateOnNotSuccess) {
             _apiResponse = new ApiResponse<T>(ApiResponseStates.Failure, Message: response.Message);
@@ -179,6 +188,14 @@
             Notify(NotificationType.Error, response.Message);
             onNotSuccess?.Invoke(response.Message);
           }
+        }
+        break;
+      case ApiResponseStates.NotFound:
+        if (changeStateOnNotSuccess) {
+          _apiResponse = new ApiResponse<T>(ApiResponseStates.NotFound);
+        } else {
+          Notify(NotificationType.Error, string.IsNullOrWhiteSpace(response.Message) ? "Sorry, we couldn't find that" : response.Message);
+          onNotSuccess?.Invoke(response.Message);
         }
         break;
       case ApiResponseStates.ServiceUnavailable:
@@ -193,6 +210,24 @@
         throw new ArgumentException($"Unexpected state: {response.State}");
     }
   }
+
+  /// <summary>
+  /// Determines whether a response represents an unauthenticated user. Prefer the Unauthorised state, but fall back to
+  /// inspecting the message so that servers which have not yet been updated still behave correctly
+  /// </summary>
+  private static bool IsUnauthorised(ApiResponseStates state, string message) =>
+    state == ApiResponseStates.Unauthorised || message.Contains($"{HttpStatusCode.Unauthorized}");
+
+  private void HandleUnauthorised(string message, Action<string>? onNotSuccess, bool changeStateOnNotSuccess) {
+    if (changeStateOnNotSuccess) {
+      _apiResponse = new ApiResponse<T>(ApiResponseStates.Unauthorised, Message: message);
+    }
+    Notify(NotificationType.Error, "Your session has expired, so you need to log in again", onClick: NavigateToLogIn);
+    onNotSuccess?.Invoke(message);
+  }
+
+  private void NavigateToLogIn() =>
+    NavigationManager.NavigateTo($"{NavigationManager.ToAbsoluteUri(ApiResponseViewConfig.LogInUrl)}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
 
   public void Notify(NotificationType type, string message, DateTime? dateTime = null, Action? onClick = null) {
     if (FeedbackType == ApiResponseViewFeedbackType.Notifications) {

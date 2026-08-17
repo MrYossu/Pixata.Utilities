@@ -1,5 +1,7 @@
 ﻿using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Pixata.Extensions;
 
 namespace Pixata.AspNetCore.Extensions;
@@ -32,8 +34,12 @@ public class ValidationEndpointFilter(Func<ValidationFailure, string>? format = 
         }
       }
       catch (Exception ex) {
-        // TODO AYS - Get a logger from the service provider (if one has been registered) and log this
-        Console.WriteLine($"Validator invocation failed: {ex.Message}");
+        ILogger<ValidationEndpointFilter>? logger = services.GetService<ILogger<ValidationEndpointFilter>>();
+        if (logger is null) {
+          Console.WriteLine($"Validator invocation failed for {t.Name}: {ex.Message}");
+        } else {
+          logger.LogError(ex, "Validator invocation failed for {ArgumentType}", t.Name);
+        }
       }
     }
     return await next(context).ConfigureAwait(false);

@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Version>2.3.0</Version>
-    <AssemblyVersion>2.3.0</AssemblyVersion>
-    <FileVersion>2.3.0</FileVersion>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Version>2.4.0</Version>
+    <AssemblyVersion>2.4.0</AssemblyVersion>
+    <FileVersion>2.4.0</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Email</Product>

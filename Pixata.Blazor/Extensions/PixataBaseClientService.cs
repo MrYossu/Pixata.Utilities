@@ -50,13 +50,21 @@ public class PixataBaseClientService {
       if (response.StatusCode == HttpStatusCode.ServiceUnavailable) {
         return new ApiResponse<T>(ApiResponseStates.ServiceUnavailable);
       }
+      if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden) {
+        return new ApiResponse<T>(ApiResponseStates.Unauthorised);
+      }
+      if (response.StatusCode == HttpStatusCode.NotFound) {
+        return new ApiResponse<T>(ApiResponseStates.NotFound);
+      }
       if (!response.IsSuccessStatusCode) {
         return new ApiResponse<T>(ApiResponseStates.Failure, Message: $"HTTP error ({response.StatusCode}) {await response.Content.ReadAsStringAsync()}");
       }
       ApiResponse<T> apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(await response.Content.ReadAsStringAsync(), _jsonSerializerOptions)!;
+      // Preserve whatever state the server sent. Previously anything that wasn't Success was flattened to Failure,
+      // which meant a server returning NotFound or Unauthorised in the body lost that distinction
       return apiResponse.State == ApiResponseStates.Success
         ? new ApiResponse<T>(ApiResponseStates.Success, apiResponse.Data)
-        : new ApiResponse<T>(ApiResponseStates.Failure, Message: apiResponse.Message);
+        : new ApiResponse<T>(apiResponse.State, Message: apiResponse.Message);
     } catch (HttpRequestException ex) {
       return new ApiResponse<T>(ApiResponseStates.HttpFailure, Message: ex.Message);
     } catch (Exception ex) {

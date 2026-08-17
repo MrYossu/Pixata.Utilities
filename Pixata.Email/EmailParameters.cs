@@ -47,24 +47,25 @@ namespace Pixata.Email {
     }
 
     /// <summary>
-    /// The email address of the sender, represented as a MailboxAddress object (from the MimeKit library)
+    /// The email address of the sender, represented as a MailboxAddress object (from the MimeKit library). When this is
+    /// null, the FromName and FromEmail from the SmtpSettings are used instead
     /// </summary>
-    public MailboxAddress From { get; set; }
+    public MailboxAddress? From { get; set; }
 
     /// <summary>
     /// Gets or sets the subject line of the message
     /// </summary>
-    public string Subject { get; set; }
+    public string Subject { get; set; } = "";
 
     /// <summary>
     /// Gets or sets the main content of the message. This is assumed to be HTML
     /// </summary>
-    public string Body { get; set; }
+    public string Body { get; set; } = "";
 
     /// <summary>
     /// Gets or sets the list of recipient email addresses for the message. Each address is represented as a MailboxAddress object (from the MimeKit library)
     /// </summary>
-    public List<MailboxAddress> Recipients { get; set; }
+    public List<MailboxAddress> Recipients { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the email address to which replies should be sent for this message
