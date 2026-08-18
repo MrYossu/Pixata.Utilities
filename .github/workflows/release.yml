@@ -227,10 +227,9 @@ jobs:
 
           # Debugging...
           print("Current directory:", ftp.pwd())
-          print("Directory contents:")
+          print("Files:")
           ftp.retrlines('LIST')
           
-          ftp.rename('_app_offline.htm', 'app_offline.htm')
           ftp.quit()
 
     - name: Publish Pixata.Blazor.Sample
