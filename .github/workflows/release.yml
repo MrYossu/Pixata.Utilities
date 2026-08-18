@@ -224,6 +224,12 @@ jobs:
         import ftplib
         with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+
+          # Debugging...
+          print("Current directory:", ftp.pwd())
+          print("Directory contents:")
+          ftp.retrlines('LIST')
+          
           ftp.rename('_app_offline.htm', 'app_offline.htm')
           ftp.quit()
 
