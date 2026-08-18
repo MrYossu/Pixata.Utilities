@@ -2,8 +2,8 @@
 
 <div class="hebrew-date-picker position-relative @Class" style="@($"width: {Width}")">
   <div class="input-group">
-    <input class="form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" @onfocus="OpenOnFocusInput" readonly />
-    <button class="btn" type="button" @onclick="ToggleCalendar">
+    <input class="form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" @onfocus="OpenOnFocusInput" @onclick="OpenOnFocusInput" readonly />
+    <button class="btn" type="button" aria-label="Show calendar" aria-expanded="@_calendarOpen" @onclick="ToggleCalendar">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="1em"
            height="1em"
@@ -40,11 +40,11 @@
     <!-- overlay to capture outside clicks and close the popup -->
     <div class="overlay-content" @onclick="CloseCalendar"></div>
 
-    <div class="card" style="@($"{(OpenOnRight ? "right: 0;" : "left: 0;")}")">
+    <div class="card @(OpenOnRight ? "open-right" : "open-left")" role="dialog" aria-modal="true" aria-label="Choose a date">
       <div class="card-header">
         @if (GregorianPrimary) {
           <div class="d-flex justify-content-between align-items-center">
-            <button type="button" class="btn btn-sm btn-link" @onclick="PrevGregorianMonth">
+            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Previous month" @onclick="PrevGregorianMonth">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
               </svg>
@@ -57,7 +57,7 @@
                 }
               </select>
             </div>
-            <button type="button" class="btn btn-sm btn-link" @onclick="NextGregorianMonth">
+            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Next month" @onclick="NextGregorianMonth">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
               </svg>
@@ -66,7 +66,7 @@
           <div class="text-center small text-muted px-2 pt-1">@HebrewMonthsLabel</div>
         } else {
           <div class="d-flex justify-content-between align-items-center">
-            <button type="button" class="btn btn-sm btn-link" @onclick="PrevHebrewMonth">
+            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Previous month" @onclick="PrevHebrewMonth">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
               </svg>
@@ -79,7 +79,7 @@
                 }
               </select>
             </div>
-            <button type="button" class="btn btn-sm btn-link" @onclick="NextHebrewMonth">
+            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Next month" @onclick="NextHebrewMonth">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
               </svg>
@@ -128,9 +128,12 @@
                 string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "" : "opacity: 0.4;");
                 <div class="text-center">
                   <button type="button"
-                          class="btn btn-sm w-100 @dayClass"
+                          class="btn btn-sm w-100 day-cell @dayClass"
                           style="@dayStyle"
                           title="@tooltip"
+                          aria-label="@(string.IsNullOrEmpty(tooltip) ? null : tooltip)"
+                          aria-current="@(isToday ? "date" : null)"
+                          aria-pressed="@isSelected"
                           @onclick="() => SelectGregorianDay(greg)">
                     @if (ShowSecondaryDates) {
                       <div style="line-height: 1;">@cell.Day</div>
@@ -157,9 +160,12 @@
                 string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "" : "opacity: 0.4;");
                 <div class="text-center">
                   <button type="button"
-                          class="btn btn-sm w-100 @dayClass"
+                          class="btn btn-sm w-100 day-cell @dayClass"
                           style="@dayStyle"
                           title="@tooltip"
+                          aria-label="@(string.IsNullOrEmpty(tooltip) ? null : tooltip)"
+                          aria-current="@(isToday ? "date" : null)"
+                          aria-pressed="@isSelected"
                           @onclick="() => SelectHebrewDay(greg)">
                     @if (ShowSecondaryDates) {
                       <div style="line-height: 1; font-size: 1.1em;">@hebDay.ToHebrew()</div>
@@ -174,20 +180,32 @@
           }
         </div>
       </div>
-      <div class="card-footer d-flex justify-content-between">
+      <div class="card-footer d-flex justify-content-between align-items-center">
         @if (typeof(TValue) == typeof(DateTime?)) {
           <button type="button" class="btn btn-sm btn-link" style="text-decoration: none" @onclick="ClearSelection">Clear</button>
         } else {
           <div></div>
         }
         <button type="button" class="btn btn-sm btn-link" style="text-decoration: none" @onclick="SelectToday">Today</button>
+        <!-- On phones the popup is a sheet over the page, so it needs a visible way out. Larger screens close it by clicking away. -->
+        <button type="button" class="btn btn-sm btn-link close-btn" style="text-decoration: none" @onclick="CloseCalendar">Close</button>
       </div>
     </div>
   }
 
   <style>
+      /* The Width parameter sets the picker's width, but it must never push its container wider than the screen */
+      .hebrew-date-picker {
+        max-width: 100%;
+      }
+
       .hebrew-date-picker .input-group .btn {
         background-color: #e4e7eb
+      }
+
+      /* The input is readonly and opens the calendar, so it shouldn't look like somewhere to type */
+      .hebrew-date-picker .input-group .form-control {
+        cursor: pointer;
       }
 
       .hebrew-date-picker .hebrew-days-header {
@@ -201,13 +219,26 @@
         position: fixed;
         inset: 0;
         z-index: 2000;
+        /* Stops a swipe on the backdrop scrolling the page behind the popup */
+        touch-action: none;
       }
 
       .hebrew-date-picker .card {
         position: absolute;
         width: 320px;
+        max-width: calc(100vw - 1rem);
         direction: ltr;
         z-index: 2001;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      .hebrew-date-picker .card.open-left {
+        left: 0;
+      }
+
+      .hebrew-date-picker .card.open-right {
+        right: 0;
       }
 
       .hebrew-date-picker .grid-cells {
@@ -218,6 +249,148 @@
 
       .hebrew-date-picker .current-month {
         border: 1px solid #dee2e6;
+      }
+
+      /* Tapping a day shouldn't leave the grey flash some mobile browsers add */
+      .hebrew-date-picker .card .btn {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .hebrew-date-picker .day-cell {
+        min-height: 2.25rem;
+      }
+
+      .hebrew-date-picker .nav-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+      }
+
+      /* Only needed when the calendar covers the page as a sheet, see the media queries below */
+      .hebrew-date-picker .close-btn {
+        display: none;
+      }
+
+      /* Keeps the month controls and buttons in view when a small screen makes the popup scroll.
+         Has no effect on larger screens, where the popup is never taller than its content. */
+      .hebrew-date-picker .card-header,
+      .hebrew-date-picker .card-footer {
+        position: sticky;
+        z-index: 1;
+        /* An opaque colour under Bootstrap's semi-transparent cap, so content can't show through */
+        background-color: var(--bs-card-bg, #fff);
+        background-image: linear-gradient(var(--bs-card-cap-bg, rgba(0, 0, 0, .03)), var(--bs-card-cap-bg, rgba(0, 0, 0, .03)));
+      }
+
+      .hebrew-date-picker .card-header {
+        top: 0;
+      }
+
+      .hebrew-date-picker .card-footer {
+        bottom: 0;
+      }
+
+      /* Phones: show the calendar as a sheet anchored to the bottom of the screen, rather than a
+         320px popup hanging off whatever corner of the layout the input happens to sit in. */
+      @@media (max-width: 575.98px) {
+        .hebrew-date-picker .overlay-content {
+          background-color: rgba(0, 0, 0, .4);
+        }
+
+        .hebrew-date-picker .card,
+        .hebrew-date-picker .card.open-left,
+        .hebrew-date-picker .card.open-right {
+          position: fixed;
+          top: auto;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          width: auto;
+          max-width: none;
+          max-height: 85vh;
+          max-height: 85dvh;
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+          padding-bottom: env(safe-area-inset-bottom);
+          animation: hebrew-date-picker-slide-up .18s ease-out;
+        }
+
+        /* On a wide phone, full width cells look stretched, so cap the grid and centre it */
+        .hebrew-date-picker .hebrew-days-header,
+        .hebrew-date-picker .grid-cells {
+          max-width: 26rem;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        /* Finger sized targets */
+        .hebrew-date-picker .day-cell {
+          min-height: 2.75rem;
+          font-size: 1rem;
+        }
+
+        .hebrew-date-picker .nav-btn {
+          min-width: 2.75rem;
+          min-height: 2.75rem;
+        }
+
+        .hebrew-date-picker .card-header .form-select,
+        .hebrew-date-picker .card-footer .btn {
+          min-height: 2.75rem;
+        }
+
+        .hebrew-date-picker .close-btn {
+          display: inline-block;
+        }
+      }
+
+      /* Landscape phones have room across but not down, so centre the sheet and let it scroll */
+      @@media (max-height: 500px) and (orientation: landscape) {
+        .hebrew-date-picker .overlay-content {
+          background-color: rgba(0, 0, 0, .4);
+        }
+
+        .hebrew-date-picker .card,
+        .hebrew-date-picker .card.open-left,
+        .hebrew-date-picker .card.open-right {
+          position: fixed;
+          top: .5rem;
+          right: auto;
+          bottom: .5rem;
+          left: 50%;
+          transform: translateX(-50%);
+          width: min(20rem, calc(100vw - 1rem));
+          max-width: none;
+          max-height: none;
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          padding-bottom: env(safe-area-inset-bottom);
+          animation: none;
+        }
+
+        .hebrew-date-picker .close-btn {
+          display: inline-block;
+        }
+      }
+
+      @@keyframes hebrew-date-picker-slide-up {
+        from {
+          transform: translateY(100%);
+        }
+
+        to {
+          transform: translateY(0);
+        }
+      }
+
+      @@media (prefers-reduced-motion: reduce) {
+        .hebrew-date-picker .card {
+          animation: none;
+        }
       }
   </style>
 </div>
