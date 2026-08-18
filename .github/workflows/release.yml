@@ -224,9 +224,9 @@ jobs:
         import ftplib
         with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-              print("Current directory:", ftp.pwd())
-              print("Files:")
-              ftp.retrlines('LIST')
+          print("Current directory:", ftp.pwd())
+          print("Files:")
+          ftp.retrlines('LIST')
     - name: Publish Pixata.Blazor.Sample
       run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net8.0 --output Pixata.Blazor.Sample.Publish
       env:
