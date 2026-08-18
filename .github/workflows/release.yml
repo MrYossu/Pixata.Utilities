@@ -224,7 +224,12 @@ jobs:
         import ftplib
         with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-          ftp.rename('_app_offline.htm', 'app_offline.htm')
+
+          # Debugging...
+          print("Current directory:", ftp.pwd())
+          print("Files:")
+          ftp.retrlines('LIST')
+          
           ftp.quit()
 
     - name: Publish Pixata.Blazor.Sample
