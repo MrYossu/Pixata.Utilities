@@ -1,6 +1,6 @@
 # Release
 name: release 
-  
+
 on:  
   workflow_dispatch:
   push:  
@@ -27,7 +27,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:  
         dotnet-version: '8.0'
-    
+
 # ***************** BUILDS **************** #
 
     # Pixata.Blazor
@@ -36,7 +36,7 @@ jobs:
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-    
+
     - name: Build - Pixata.Blazor.csproj
       run: dotnet build Pixata.Blazor/Pixata.Blazor.csproj  --configuration Release --configfile ./nuget.config
       env:
@@ -49,7 +49,7 @@ jobs:
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-    
+
     - name: Build - Pixata.Blazor.TelerikComponents.csproj
       run: dotnet build Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configuration Release --configfile ./nuget.config
       env:
@@ -83,7 +83,7 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
         TELERIK_LICENSE: ${{ secrets.TELERIK_LICENSE }}
-    
+
     # Pixata.Extensions
     - name: Restore - Pixata.Extensions Dependencies
       run: dotnet restore Pixata.Extensions/Pixata.Extensions.csproj --configfile ./nuget.config
@@ -103,7 +103,7 @@ jobs:
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-    
+
     - name: Build - Pixata.Email.csproj
       run: dotnet build Pixata.Email/Pixata.Email.csproj  --configuration Release --configfile ./nuget.config
       env:
@@ -166,7 +166,7 @@ jobs:
 
     - name: Run Tests
       run: dotnet test --verbosity normal 
-    
+
 # ***************** PUBLISHING **************** #
 
     - name: Publish Pixata.Blazor
@@ -224,14 +224,8 @@ jobs:
         import ftplib
         with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-
-          # Debugging...
-          print("Current directory:", ftp.pwd())
-          print("Files:")
-          ftp.retrlines('LIST')
-          
+          ftp.rename('_app_offline.htm', 'app_offline.htm')
           ftp.quit()
-
     - name: Publish Pixata.Blazor.Sample
       run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net8.0 --output Pixata.Blazor.Sample.Publish
       env:
