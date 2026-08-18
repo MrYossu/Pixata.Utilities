@@ -224,9 +224,8 @@ jobs:
         import ftplib
         with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
-          print("Current directory:", ftp.pwd())
-          print("Files:")
-          ftp.retrlines('LIST')
+          ftp.rename('_app_offline.htm', 'app_offline.htm')
+          ftp.quit()
     - name: Publish Pixata.Blazor.Sample
       run: dotnet publish Pixata.Blazor.Sample\Pixata.Blazor.Sample.csproj --framework net8.0 --output Pixata.Blazor.Sample.Publish
       env:
@@ -246,4 +245,5 @@ jobs:
         import ftplib
         with ftplib.FTP('${{ secrets.PIXATATESTFTPSERVER }}') as ftp:
           ftp.login('${{ secrets.PIXATATESTFTPUSER }}', '${{ secrets.PIXATATESTFTPPASSWORD }}')
+          ftp.rename('app_offline.htm', '_app_offline.htm')
           ftp.quit()
