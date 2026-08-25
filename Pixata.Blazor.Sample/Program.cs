@@ -1,5 +1,4 @@
-using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +30,6 @@ builder.Services.AddPixataAuditViewer();
 builder.Services.AddDbContext<SampleDbContext>((serviceProvider, options) =>
   options.UseInMemoryDatabase("SampleAuditDb")
     .AddAuditingInterceptor(serviceProvider));
-builder.Services.AddBlazoredLocalStorage();
 
 WebApplication app = builder.Build();
 
