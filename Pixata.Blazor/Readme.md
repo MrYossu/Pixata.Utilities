@@ -1,4 +1,4 @@
-# Pixata.Blazor [![Pixata.Blazor Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor)](https://www.nuget.org/packages/Pixata.Blazor/)
+﻿# Pixata.Blazor [![Pixata.Blazor Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor)](https://www.nuget.org/packages/Pixata.Blazor/)
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor/avion.png "Pixata") 
 
@@ -27,6 +27,8 @@ This registers the following services (all from this package)...
 - PersistentStateHelper - Persists data, avoiding hitting the database twice when a page loads. Used by the [ApiResponseView](https://test.pixata.co.uk/ApiResponseViewRegular), but can be used independently. .NET 10 supports this functionality with the [<code>[PersistentState]</code> attribute](https://learn.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-10.0?view=aspnetcore-10.0#declarative-model-for-persisting-state-from-components-and-services), but this component was written around .NET 8, and is still useful for projects targetting .NET versions before 10.
 - TemplateHelper - usage can be seen on the [Telerik grid sample page](https://test.pixata.co.uk/TelerikGrid), although the helper can be used with any component that supports templating
 - ScrollStateService - Needed by the `VirtualiseWithState` component
+
+It also registers [Blazored.LocalStorage](https://github.com/Blazored/LocalStorage), which `ScrollStateService` needs. This package has always referenced Blazored.LocalStorage, but until v2.34.0 it left you to register it, so unless you knew to add `builder.Services.AddBlazoredLocalStorage()` yourself, your app fell over at startup when the container was validated. If you have already registered it (with your own options, for example), your registration is left alone.
 
 Note that you need to do this in any `Program.cs` file, so if you have a mixed rendering mode (both server-side and client-side), you'll need to call `AddPixataBlazor` in both `Program.cs` files.
 
