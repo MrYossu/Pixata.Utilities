@@ -1,14 +1,14 @@
 ﻿@typeparam TEnum
 
-<div class="form-group row">
-  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
-  <div class="col-lg-10 input-group">
-    <div class="input-group-prepend">
-      <span class="input-group-text h-100">
+<div class="pixata-form-group pixata-row">
+  <label for="@PropertyName" class="pixata-col-2 pixata-col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="pixata-col-10 pixata-input-group">
+    <div class="pixata-input-group-prepend">
+      <span class="pixata-input-group-text pixata-h-100">
         <i class="@Icon"></i>
       </span>
     </div>
-    <select class="form-control" name="@PropertyName" id="@PropertyName" @bind="Value">
+    <select class="pixata-form-control" name="@PropertyName" id="@PropertyName" @bind="Value">
 
       @foreach (TEnum enumValue in EnumValues) {
         if (ChildContent == default) {

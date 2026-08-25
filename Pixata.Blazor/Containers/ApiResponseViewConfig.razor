@@ -19,7 +19,7 @@
                                                        </div>;
 
   public static RenderFragment<string> RequiresLogIn = _ =>
-    @<div class="p-3">
+    @<div class="pixata-p-3">
       <h3>Your session has expired, and you need to log in again</h3>
       <div>If you are not redirected within 5 seconds, please <a href="@LogInUrl">click here</a></div>
     </div>;
@@ -29,7 +29,7 @@
                                                             <div>You don't seem to be connected. Please check your Internet connection and try refreshing this page</div>
                                                           </div>;
 
-  public static RenderFragment<Yunit> ServiceUnavailable = _ => @<div class="p-3 text-center">
+  public static RenderFragment<Yunit> ServiceUnavailable = _ => @<div class="pixata-p-3 pixata-text-center">
                                                                   <h2 class="">We're sorry for the inconvenience, an update is currently in progress</h2>
                                                                   <br>
                                                                   <svg id="svg" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200" viewBox="0, 0, 400,400">

@@ -2,7 +2,7 @@
   <div id="confirmOverlay" style="display: @_displayStyle; position: @_position; z-index: @ZIndex">
     <div id="confirmOverlayContent">
       <div style="margin-bottom: 1rem"><HtmlRaw Html="@Caption" /></div>
-      <button type="button" class="btn btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button> <button type="button" class="btn btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon"></i>@YesText</button>
+      <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button> <button type="button" class="pixata-btn pixata-btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon"></i>@YesText</button>
     </div>
   </div>
 
@@ -27,7 +27,7 @@
   public int ZIndex { get; set; } = 2147483647;
 
   [Parameter]
-  public string SpinnerClass { get; set; } = "spinner-border spinner-border-sm";
+  public string SpinnerClass { get; set; } = "pixata-spinner pixata-spinner-sm";
 
   [Parameter]
   public RenderFragment ChildContent { get; set; } = null!;

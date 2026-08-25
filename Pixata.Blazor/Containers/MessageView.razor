@@ -1,11 +1,11 @@
 @if (!string.IsNullOrEmpty(Message)) {
   string statusMessageClass = Error ? "danger" : "success";
-  <div class="d-flex justify-content-between alert alert-@statusMessageClass @Class" role="alert">
+  <div class="pixata-d-flex pixata-justify-content-between pixata-alert pixata-alert-@statusMessageClass @Class" role="alert">
     <HtmlRaw Html="@Message" />
     <If Condition="@ShowCloseButton">
       <Then>
         <div>
-          <button class="ms-2 border border-dark" @onclick="Close">X</button>
+          <button class="pixata-ms-2 pixata-border pixata-border-dark" @onclick="Close">X</button>
         </div>
       </Then>
     </If>

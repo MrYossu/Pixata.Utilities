@@ -1,9 +1,9 @@
 @if (Data == null) {
   <div style="position: relative; min-height: @MinHeight;">
-    <div class="loader-container@(Horizontal ? " d-flex align-items-center gap-2" : "")">
-      <div class="loader@(!string.IsNullOrWhiteSpace(CssClass) ? $"-{CssClass}" : "") @(!Horizontal ? "m-auto" : "")"></div>
+    <div class="loader-container@(Horizontal ? " pixata-d-flex pixata-align-items-center pixata-gap-2" : "")">
+      <div class="loader@(!string.IsNullOrWhiteSpace(CssClass) ? $"-{CssClass}" : "") @(!Horizontal ? "pixata-m-auto" : "")"></div>
       @if (!string.IsNullOrWhiteSpace(Text)) {
-        <div class="@(!Horizontal ? "mt-4 " : "")text-center" style="font-size: @TextSize; color: @TextColour;">@Text</div>
+        <div class="@(!Horizontal ? "pixata-mt-4 " : "")pixata-text-center" style="font-size: @TextSize; color: @TextColour;">@Text</div>
       }
     </div>
   </div>
