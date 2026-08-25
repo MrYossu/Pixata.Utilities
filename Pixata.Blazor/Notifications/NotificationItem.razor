@@ -1,5 +1,5 @@
-<div class="dd-item position-relative">
-  <div class="d-flex gap-3" @onclick="OpenFromNotification">
+<div class="dd-item pixata-position-relative">
+  <div class="pixata-d-flex pixata-gap-3" @onclick="OpenFromNotification">
     <div class="notif-icon d-grid-center" style="background: #@NotificationHelper.GetIcon(Type).Item2;">
       <i class="@NotificationHelper.GetIcon(Type).Item1 @(Type == NotificationType.General ? "tilt" : "")"></i>
     </div>
@@ -8,7 +8,7 @@
       <small class="time">@Time.ToPrettyString(true)</small>
     </div>
   </div>
-  <div class="dismiss" @onclick="@DismissIt"><button class="btn btn-close" /></div>
+  <div class="dismiss" @onclick="@DismissIt"><button class="pixata-btn pixata-btn-close" /></div>
 </div>
 
 @code {

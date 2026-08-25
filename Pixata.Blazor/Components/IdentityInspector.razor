@@ -37,15 +37,15 @@
       <p>No authenticated user found.</p>
     </div>
   } else {
-    <div class="panels-grid mt-2">
+    <div class="panels-grid pixata-mt-2">
 
-      <section class="card me-1">
-        <div class="card-header">
+      <section class="pixata-card pixata-me-1">
+        <div class="pixata-card-header">
           <h2>Claims</h2>
-          <span class="badge">@_claims.Count</span>
+          <span class="pixata-badge">@_claims.Count</span>
         </div>
         @if (_claims.Count == 0) {
-          <div class="empty-state small">No claims found.</div>
+          <div class="empty-state pixata-small">No claims found.</div>
         } else {
           <div class="table-wrapper">
             <table>
@@ -70,13 +70,13 @@
         }
       </section>
 
-      <section class="card ms-1">
-        <div class="card-header">
+      <section class="pixata-card pixata-ms-1">
+        <div class="pixata-card-header">
           <h2>Policies</h2>
-          <span class="badge">@_policyResults.Count</span>
+          <span class="pixata-badge">@_policyResults.Count</span>
         </div>
         @if (!_policyResults.Any()) {
-          <div class="empty-state small">
+          <div class="empty-state pixata-small">
             <p>No policies configured.</p>
             <p class="hint">Pass policy names via the <code>PolicyNames</code> parameter.</p>
           </div>

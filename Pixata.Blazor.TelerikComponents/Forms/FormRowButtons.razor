@@ -1,5 +1,5 @@
 ﻿@inject NavigationManager _navManager
-<div class="row justify-content-md-center">
+<div class="pixata-row pixata-justify-content-center-md">
   @if (!string.IsNullOrWhiteSpace(CancelUrl)) {
     <TelerikButton ButtonType="ButtonType.Button" OnClick="@(() => _navManager.NavigateTo(CancelUrl))" Class="@cancelClass">@CancelCaption</TelerikButton>
   }
@@ -15,7 +15,7 @@
   public string SubmitClass { get; set; } = "";
 
   private string submitClass =>
-    $"ml-2 {SubmitClass}";
+    $"pixata-ml-2 {SubmitClass}";
 
   [Parameter]
   public bool ShowCancel { get; set; } = true;
@@ -27,7 +27,7 @@
   public string CancelClass { get; set; } = "";
 
   private string cancelClass =>
-    $"mr-2 {CancelClass}";
+    $"pixata-mr-2 {CancelClass}";
 
   [Parameter]
   public string CancelUrl { get; set; } = "";

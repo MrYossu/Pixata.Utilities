@@ -1,0 +1,628 @@
+/*
+  Pixata.Blazor styles
+
+  The components in this package used to rely on the host app having Bootstrap loaded, for a fairly small set of layout, form,
+  button and utility classes. This file provides those styles, so the components look right on their own.
+
+  The sizes and colours match Bootstrap 4.3.1 (MIT licensed, https://github.com/twbs/bootstrap), which is what the components
+  were written against, so they look the same as they always did. Every class is prefixed with "pixata-", so nothing here can
+  clash with your own CSS, whether or not you use Bootstrap.
+
+  To fit the components to your own theme, override the custom properties below, either on :root or on any container...
+
+    :root {
+      --pixata-primary: #6f42c1;
+      --pixata-border-radius: 0;
+    }
+*/
+
+:root {
+  --pixata-font-size: 1rem;
+  --pixata-line-height: 1.5;
+  --pixata-color: #212529;
+  --pixata-muted-color: #6c757d;
+  --pixata-primary: #007bff;
+  --pixata-primary-hover: #0069d9;
+  --pixata-primary-color: #fff;
+  --pixata-secondary: #6c757d;
+  --pixata-secondary-hover: #5a6268;
+  --pixata-secondary-color: #fff;
+  --pixata-light: #f8f9fa;
+  --pixata-light-hover: #e2e6ea;
+  --pixata-light-color: #212529;
+  --pixata-danger: #dc3545;
+  --pixata-input-color: #495057;
+  --pixata-input-bg: #fff;
+  --pixata-input-disabled-bg: #e9ecef;
+  --pixata-border-color: #ced4da;
+  --pixata-addon-bg: #e9ecef;
+  --pixata-card-border-color: rgba(0, 0, 0, .125);
+  --pixata-card-cap-bg: rgba(0, 0, 0, .03);
+  --pixata-card-bg: #fff;
+  --pixata-alert-danger-color: #721c24;
+  --pixata-alert-danger-bg: #f8d7da;
+  --pixata-alert-danger-border: #f5c6cb;
+  --pixata-alert-success-color: #155724;
+  --pixata-alert-success-bg: #d4edda;
+  --pixata-alert-success-border: #c3e6cb;
+  --pixata-border-radius: .25rem;
+  --pixata-gutter: 15px;
+  --pixata-spacer: 1rem;
+  --pixata-focus-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+  --pixata-transition: .15s ease-in-out;
+}
+
+/*
+  Bootstrap sets box-sizing on every element in its reboot. We only set it on our own, so that adding this stylesheet
+  doesn't change the rest of your page. Without it, the padding on the columns pushes them past 100% and they wrap
+*/
+[class*="pixata-"],
+[class*="pixata-"]::before,
+[class*="pixata-"]::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Layout ---------- */
+
+.pixata-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: calc(var(--pixata-gutter) * -1);
+  margin-left: calc(var(--pixata-gutter) * -1);
+}
+
+.pixata-col-1,
+.pixata-col-2,
+.pixata-col-10 {
+  position: relative;
+  width: 100%;
+  padding-right: var(--pixata-gutter);
+  padding-left: var(--pixata-gutter);
+}
+
+/* The columns stack on small screens and sit side by side from large up, as the Bootstrap col-lg-* classes did */
+@media (min-width: 992px) {
+  .pixata-col-1 {
+    flex: 0 0 8.333333%;
+    max-width: 8.333333%;
+  }
+
+  .pixata-col-2 {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+  }
+
+  .pixata-col-10 {
+    flex: 0 0 83.333333%;
+    max-width: 83.333333%;
+  }
+}
+
+/* ---------- Forms ---------- */
+
+.pixata-form-group {
+  margin-bottom: var(--pixata-spacer);
+}
+
+.pixata-col-form-label {
+  padding-top: calc(.375rem + 1px);
+  padding-bottom: calc(.375rem + 1px);
+  margin-bottom: 0;
+  font-size: inherit;
+  line-height: var(--pixata-line-height);
+}
+
+.pixata-form-control {
+  font-family: inherit;
+  display: block;
+  width: 100%;
+  padding: .375rem .75rem;
+  font-size: var(--pixata-font-size);
+  font-weight: 400;
+  line-height: var(--pixata-line-height);
+  color: var(--pixata-input-color);
+  background-color: var(--pixata-input-bg);
+  background-clip: padding-box;
+  border: 1px solid var(--pixata-border-color);
+  border-radius: var(--pixata-border-radius);
+  transition: border-color var(--pixata-transition), box-shadow var(--pixata-transition);
+}
+
+.pixata-form-control:focus {
+  color: var(--pixata-input-color);
+  background-color: var(--pixata-input-bg);
+  border-color: var(--pixata-primary);
+  outline: 0;
+  box-shadow: var(--pixata-focus-shadow);
+}
+
+.pixata-form-control:disabled,
+.pixata-form-control[readonly] {
+  background-color: var(--pixata-input-disabled-bg);
+}
+
+.pixata-form-select {
+  font-family: inherit;
+  display: inline-block;
+  width: 100%;
+  padding: .375rem 1.75rem .375rem .75rem;
+  font-size: var(--pixata-font-size);
+  font-weight: 400;
+  line-height: var(--pixata-line-height);
+  color: var(--pixata-input-color);
+  vertical-align: middle;
+  background: var(--pixata-input-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px;
+  border: 1px solid var(--pixata-border-color);
+  border-radius: var(--pixata-border-radius);
+  appearance: none;
+}
+
+.pixata-form-select:focus {
+  border-color: var(--pixata-primary);
+  outline: 0;
+  box-shadow: var(--pixata-focus-shadow);
+}
+
+.pixata-form-select-sm {
+  height: calc(1.5em + .5rem + 2px);
+  padding-top: .25rem;
+  padding-bottom: .25rem;
+  padding-left: .5rem;
+  font-size: .875rem;
+}
+
+/* The input and its prepended/appended bits sit on one line, with only the outer corners rounded */
+.pixata-input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+}
+
+.pixata-input-group > .pixata-form-control,
+.pixata-input-group > .pixata-form-select {
+  position: relative;
+  flex: 1 1 auto;
+  width: 1%;
+  margin-bottom: 0;
+}
+
+.pixata-input-group-prepend,
+.pixata-input-group-append {
+  display: flex;
+}
+
+.pixata-input-group-prepend {
+  margin-right: -1px;
+}
+
+.pixata-input-group-append {
+  margin-left: -1px;
+}
+
+.pixata-input-group-text {
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  padding: .375rem .75rem;
+  margin-bottom: 0;
+  font-size: var(--pixata-font-size);
+  font-weight: 400;
+  line-height: var(--pixata-line-height);
+  color: var(--pixata-input-color);
+  text-align: center;
+  white-space: nowrap;
+  background-color: var(--pixata-addon-bg);
+  border: 1px solid var(--pixata-border-color);
+  border-radius: var(--pixata-border-radius);
+}
+
+/* Only the outer corners of the group are rounded, so the parts look like one control */
+.pixata-input-group-prepend > * {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.pixata-input-group-append > * {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.pixata-input-group > .pixata-form-control:not(:first-child),
+.pixata-input-group > .pixata-form-select:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.pixata-input-group > .pixata-form-control:not(:last-child),
+.pixata-input-group > .pixata-form-select:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Added to an input when its field fails validation, and to the cell that holds the validation message */
+.pixata-invalid {
+  border-color: var(--pixata-danger);
+}
+
+.pixata-invalid:focus {
+  border-color: var(--pixata-danger);
+  box-shadow: 0 0 0 .2rem rgba(220, 53, 69, .25);
+}
+
+.pixata-has-error {
+  color: var(--pixata-danger);
+}
+
+/* ---------- Buttons ---------- */
+
+.pixata-btn {
+  font-family: inherit;
+  display: inline-block;
+  font-weight: 400;
+  color: var(--pixata-color);
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: .375rem .75rem;
+  font-size: var(--pixata-font-size);
+  line-height: var(--pixata-line-height);
+  border-radius: var(--pixata-border-radius);
+  transition: color var(--pixata-transition), background-color var(--pixata-transition), border-color var(--pixata-transition), box-shadow var(--pixata-transition);
+}
+
+.pixata-btn:focus {
+  outline: 0;
+  box-shadow: var(--pixata-focus-shadow);
+}
+
+.pixata-btn:disabled {
+  opacity: .65;
+  cursor: default;
+}
+
+.pixata-btn-sm {
+  padding: .25rem .5rem;
+  font-size: .875rem;
+  line-height: 1.5;
+  border-radius: .2rem;
+}
+
+.pixata-btn-primary {
+  color: var(--pixata-primary-color);
+  background-color: var(--pixata-primary);
+  border-color: var(--pixata-primary);
+}
+
+.pixata-btn-primary:hover:not(:disabled) {
+  background-color: var(--pixata-primary-hover);
+  border-color: var(--pixata-primary-hover);
+}
+
+.pixata-btn-secondary {
+  color: var(--pixata-secondary-color);
+  background-color: var(--pixata-secondary);
+  border-color: var(--pixata-secondary);
+}
+
+.pixata-btn-secondary:hover:not(:disabled) {
+  background-color: var(--pixata-secondary-hover);
+  border-color: var(--pixata-secondary-hover);
+}
+
+.pixata-btn-light {
+  color: var(--pixata-light-color);
+  background-color: var(--pixata-light);
+  border-color: var(--pixata-light);
+}
+
+.pixata-btn-light:hover:not(:disabled) {
+  background-color: var(--pixata-light-hover);
+  border-color: var(--pixata-light-hover);
+}
+
+.pixata-btn-outline-secondary {
+  color: var(--pixata-secondary);
+  border-color: var(--pixata-secondary);
+}
+
+.pixata-btn-outline-secondary:hover:not(:disabled) {
+  color: var(--pixata-secondary-color);
+  background-color: var(--pixata-secondary);
+}
+
+.pixata-btn-link {
+  font-weight: 400;
+  color: var(--pixata-primary);
+  text-decoration: none;
+  background-color: transparent;
+  border: 0;
+}
+
+.pixata-btn-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+/* A close button, drawn rather than relying on an icon font */
+.pixata-btn-close {
+  box-sizing: content-box;
+  width: 1em;
+  height: 1em;
+  padding: .25em;
+  color: #000;
+  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+  border: 0;
+  border-radius: var(--pixata-border-radius);
+  opacity: .5;
+  cursor: pointer;
+}
+
+.pixata-btn-close:hover {
+  opacity: .75;
+}
+
+/* ---------- Cards ---------- */
+
+.pixata-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: var(--pixata-card-bg);
+  background-clip: border-box;
+  border: 1px solid var(--pixata-card-border-color);
+  border-radius: var(--pixata-border-radius);
+}
+
+.pixata-card-header {
+  padding: .75rem 1.25rem;
+  margin-bottom: 0;
+  background-color: var(--pixata-card-cap-bg);
+  border-bottom: 1px solid var(--pixata-card-border-color);
+}
+
+.pixata-card-body {
+  flex: 1 1 auto;
+  padding: 1.25rem;
+}
+
+.pixata-card-footer {
+  padding: .75rem 1.25rem;
+  background-color: var(--pixata-card-cap-bg);
+  border-top: 1px solid var(--pixata-card-border-color);
+}
+
+/* ---------- Alerts and badges ---------- */
+
+.pixata-alert {
+  position: relative;
+  padding: .75rem 1.25rem;
+  margin-bottom: var(--pixata-spacer);
+  border: 1px solid transparent;
+  border-radius: var(--pixata-border-radius);
+}
+
+.pixata-alert-danger {
+  color: var(--pixata-alert-danger-color);
+  background-color: var(--pixata-alert-danger-bg);
+  border-color: var(--pixata-alert-danger-border);
+}
+
+.pixata-alert-success {
+  color: var(--pixata-alert-success-color);
+  background-color: var(--pixata-alert-success-bg);
+  border-color: var(--pixata-alert-success-border);
+}
+
+.pixata-badge {
+  display: inline-block;
+  padding: .25em .4em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: var(--pixata-border-radius);
+}
+
+/* ---------- Spinner ---------- */
+
+.pixata-spinner {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: text-bottom;
+  border: .25em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: pixata-spin .75s linear infinite;
+}
+
+.pixata-spinner-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: .2em;
+}
+
+@keyframes pixata-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-spinner {
+    animation-duration: 1.5s;
+  }
+
+  .pixata-btn,
+  .pixata-form-control,
+  .pixata-form-select {
+    transition: none;
+  }
+}
+
+/* ---------- Utilities ---------- */
+
+.pixata-d-flex {
+  display: flex;
+}
+
+.pixata-flex-wrap {
+  flex-wrap: wrap;
+}
+
+.pixata-flex-fill {
+  flex: 1 1 auto;
+}
+
+.pixata-align-items-center {
+  align-items: center;
+}
+
+.pixata-justify-content-between {
+  justify-content: space-between;
+}
+
+.pixata-justify-content-center {
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .pixata-justify-content-center-md {
+    justify-content: center;
+  }
+}
+
+.pixata-position-relative {
+  position: relative;
+}
+
+.pixata-h-100 {
+  height: 100%;
+}
+
+.pixata-w-100 {
+  width: 100%;
+}
+
+.pixata-text-center {
+  text-align: center;
+}
+
+.pixata-text-danger {
+  color: var(--pixata-danger);
+}
+
+.pixata-text-muted {
+  color: var(--pixata-muted-color);
+}
+
+.pixata-text-white {
+  color: #fff;
+}
+
+.pixata-small {
+  font-size: 80%;
+  font-weight: 400;
+}
+
+.pixata-border {
+  border: 1px solid var(--pixata-border-color);
+}
+
+.pixata-border-dark {
+  border-color: #343a40;
+}
+
+.pixata-gap-1 {
+  gap: .25rem;
+}
+
+.pixata-gap-2 {
+  gap: .5rem;
+}
+
+.pixata-gap-3 {
+  gap: 1rem;
+}
+
+.pixata-p-2 {
+  padding: .5rem;
+}
+
+.pixata-p-3 {
+  padding: 1rem;
+}
+
+.pixata-px-2 {
+  padding-right: .5rem;
+  padding-left: .5rem;
+}
+
+.pixata-pt-1 {
+  padding-top: .25rem;
+}
+
+.pixata-pl-2 {
+  padding-left: .5rem;
+}
+
+.pixata-mt-1 {
+  margin-top: .25rem;
+}
+
+.pixata-mt-2 {
+  margin-top: .5rem;
+}
+
+.pixata-mt-3 {
+  margin-top: 1rem;
+}
+
+.pixata-mt-4 {
+  margin-top: 1.5rem;
+}
+
+.pixata-m-3 {
+  margin: 1rem;
+}
+
+.pixata-m-auto {
+  margin: auto;
+}
+
+.pixata-me-1 {
+  margin-right: .25rem;
+}
+
+.pixata-mr-2 {
+  margin-right: .5rem;
+}
+
+.pixata-ml-2 {
+  margin-left: .5rem;
+}
+
+.pixata-mx-auto {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.pixata-ms-1 {
+  margin-left: .25rem;
+}
+
+.pixata-ms-2 {
+  margin-left: .5rem;
+}
+
+.pixata-bg-white {
+  background-color: #fff;
+}

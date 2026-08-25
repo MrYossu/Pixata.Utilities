@@ -6,7 +6,7 @@
   @if (ShowClearButton) {
     <TelerikButton ButtonType="ButtonType.Button"
                    Size="@ThemeConstants.Button.Size.Medium"
-                   Class="ms-2"
+                   Class="pixata-ms-2"
                    Enabled="@(_value != null)"
                    OnClick="@ClearFilter">
       <svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18px" height="18px">
@@ -22,7 +22,7 @@
   public FilterCellTemplateContext Context { get; set; } = null!;
 
   [Parameter]
-  public string Class { get; set; } = "mx-auto";
+  public string Class { get; set; } = "pixata-mx-auto";
 
   [Parameter]
   public bool ShowClearButton { get; set; }

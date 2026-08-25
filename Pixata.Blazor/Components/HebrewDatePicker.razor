@@ -1,9 +1,9 @@
 ﻿@typeparam TValue
 
-<div class="hebrew-date-picker position-relative @Class" style="@($"width: {Width}")">
-  <div class="input-group">
-    <input class="form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" @onfocus="OpenOnFocusInput" @onclick="OpenOnFocusInput" readonly />
-    <button class="btn" type="button" aria-label="Show calendar" aria-expanded="@_calendarOpen" @onclick="ToggleCalendar">
+<div class="hebrew-date-picker pixata-position-relative @Class" style="@($"width: {Width}")">
+  <div class="pixata-input-group">
+    <input class="pixata-form-control" placeholder="dd/MM/yyyy or d MMM yyyy" value="@_textValue" @onfocus="OpenOnFocusInput" @onclick="OpenOnFocusInput" readonly />
+    <button class="pixata-btn" type="button" aria-label="Show calendar" aria-expanded="@_calendarOpen" @onclick="ToggleCalendar">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="1em"
            height="1em"
@@ -33,66 +33,66 @@
     </button>
   </div>
   @if (ShowDiagnostics) {
-    <div class="mt-1"><small>@Diagnostics()</small></div>
+    <div class="pixata-mt-1"><small>@Diagnostics()</small></div>
   }
 
   @if (_calendarOpen) {
     <!-- overlay to capture outside clicks and close the popup -->
     <div class="overlay-content" @onclick="CloseCalendar"></div>
 
-    <div class="card @(OpenOnRight ? "open-right" : "open-left")" role="dialog" aria-modal="true" aria-label="Choose a date">
-      <div class="card-header">
+    <div class="pixata-card @(OpenOnRight ? "open-right" : "open-left")" role="dialog" aria-modal="true" aria-label="Choose a date">
+      <div class="pixata-card-header">
         @if (GregorianPrimary) {
-          <div class="d-flex justify-content-between align-items-center">
-            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Previous month" @onclick="PrevGregorianMonth">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+          <div class="pixata-d-flex pixata-justify-content-between pixata-align-items-center">
+            <button type="button" class="pixata-btn pixata-btn-sm pixata-btn-link nav-btn" aria-label="Previous month" @onclick="PrevGregorianMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
               </svg>
             </button>
-            <div class="d-flex align-items-center gap-1">
+            <div class="pixata-d-flex pixata-align-items-center pixata-gap-1">
               <strong>@(new DateTime(_displayGregorianYear, _displayGregorianMonth, 1).ToString("MMMM"))</strong>
-              <select class="form-select form-select-sm" style="width: 90px;" @bind="DisplayGregorianYear">
+              <select class="pixata-form-select pixata-form-select-sm" style="width: 90px;" @bind="DisplayGregorianYear">
                 @foreach (int y in GregorianYears) {
                   <option value="@y">@y</option>
                 }
               </select>
             </div>
-            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Next month" @onclick="NextGregorianMonth">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+            <button type="button" class="pixata-btn pixata-btn-sm pixata-btn-link nav-btn" aria-label="Next month" @onclick="NextGregorianMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
               </svg>
             </button>
           </div>
-          <div class="text-center small text-muted px-2 pt-1">@HebrewMonthsLabel</div>
+          <div class="pixata-text-center pixata-small pixata-text-muted pixata-px-2 pixata-pt-1">@HebrewMonthsLabel</div>
         } else {
-          <div class="d-flex justify-content-between align-items-center">
-            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Previous month" @onclick="PrevHebrewMonth">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+          <div class="pixata-d-flex pixata-justify-content-between pixata-align-items-center">
+            <button type="button" class="pixata-btn pixata-btn-sm pixata-btn-link nav-btn" aria-label="Previous month" @onclick="PrevHebrewMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
               </svg>
             </button>
-            <div class="d-flex align-items-center gap-1">
+            <div class="pixata-d-flex pixata-align-items-center pixata-gap-1">
               <strong>@_displayHebrewMonthName</strong>
-              <select class="form-select form-select-sm" style="width: 120px;" @bind="DisplayHebrewYear">
+              <select class="pixata-form-select pixata-form-select-sm" style="width: 120px;" @bind="DisplayHebrewYear">
                 @foreach (int y in Years) {
                   <option value="@y">@y</option>
                 }
               </select>
             </div>
-            <button type="button" class="btn btn-sm btn-link nav-btn" aria-label="Next month" @onclick="NextHebrewMonth">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+            <button type="button" class="pixata-btn pixata-btn-sm pixata-btn-link nav-btn" aria-label="Next month" @onclick="NextHebrewMonth">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
               </svg>
             </button>
           </div>
           @if (ShowSecondaryDates) {
-            <div class="text-center small text-muted px-2 pt-1">@GregorianMonthsLabel</div>
+            <div class="pixata-text-center pixata-small pixata-text-muted pixata-px-2 pixata-pt-1">@GregorianMonthsLabel</div>
           }
         }
       </div>
-      <div class="card-body p-2">
+      <div class="pixata-card-body pixata-p-2">
         @if (GregorianPrimary) {
-          <div class="small text-muted hebrew-days-header">
+          <div class="pixata-small pixata-text-muted hebrew-days-header">
             <div>SU</div>
             <div>MO</div>
             <div>TU</div>
@@ -102,7 +102,7 @@
             <div>SA</div>
           </div>
         } else {
-          <div class="small text-muted hebrew-days-header" style="direction: rtl;">
+          <div class="pixata-small pixata-text-muted hebrew-days-header" style="direction: rtl;">
             <div>&#x05D0;</div>
             <div>&#x05D1;</div>
             <div>&#x05D2;</div>
@@ -112,7 +112,7 @@
             <div>&#x05E9;</div>
           </div>
         }
-        <div class="mt-1 grid-cells" style="@(GregorianPrimary ? "" : "direction: rtl;")">
+        <div class="pixata-mt-1 grid-cells" style="@(GregorianPrimary ? "" : "direction: rtl;")">
           @if (GregorianPrimary) {
             foreach (CalendarCell[] week in GregorianCalendarWeeks()) {
               foreach (CalendarCell cell in week) {
@@ -123,12 +123,12 @@
                 bool isToday = greg.Date == DateTime.Today;
                 bool isSelected = IsSelectedDate(greg.Date);
                 HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
-                string dayClass = (isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary today" : "btn-light") + (cell.IsCurrentMonth ? " current-month" : " ");
+                string dayClass = (isSelected ? "pixata-btn-primary pixata-text-white" : isToday ? "pixata-btn-outline-secondary today" : "pixata-btn-light") + (cell.IsCurrentMonth ? " current-month" : " ");
                 string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
                 string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "" : "opacity: 0.4;");
-                <div class="text-center">
+                <div class="pixata-text-center">
                   <button type="button"
-                          class="btn btn-sm w-100 day-cell @dayClass"
+                          class="pixata-btn pixata-btn-sm pixata-w-100 day-cell @dayClass"
                           style="@dayStyle"
                           title="@tooltip"
                           aria-label="@(string.IsNullOrEmpty(tooltip) ? null : tooltip)"
@@ -155,12 +155,12 @@
                 bool isToday = greg.Date == DateTime.Today;
                 bool isSelected = IsSelectedDate(greg.Date);
                 HebrewDateType hebrewDateType = GetHebrewDateType(hebYear, hebMonth, hebDay, greg);
-                string dayClass = (isSelected ? "btn-primary text-white" : isToday ? "btn-outline-secondary today" : "btn-light") + (cell.IsCurrentMonth ? " current-month" : " ");
+                string dayClass = (isSelected ? "pixata-btn-primary pixata-text-white" : isToday ? "pixata-btn-outline-secondary today" : "pixata-btn-light") + (cell.IsCurrentMonth ? " current-month" : " ");
                 string tooltip = ShowTooltips ? GetDayTooltip(hebYear, hebMonth, hebDay, greg) : "";
                 string dayStyle = GetDayStyle(hebrewDateType, isSelected, isToday) + (cell.IsCurrentMonth ? "" : "opacity: 0.4;");
-                <div class="text-center">
+                <div class="pixata-text-center">
                   <button type="button"
-                          class="btn btn-sm w-100 day-cell @dayClass"
+                          class="pixata-btn pixata-btn-sm pixata-w-100 day-cell @dayClass"
                           style="@dayStyle"
                           title="@tooltip"
                           aria-label="@(string.IsNullOrEmpty(tooltip) ? null : tooltip)"
@@ -180,15 +180,15 @@
           }
         </div>
       </div>
-      <div class="card-footer d-flex justify-content-between align-items-center">
+      <div class="pixata-card-footer pixata-d-flex pixata-justify-content-between pixata-align-items-center">
         @if (typeof(TValue) == typeof(DateTime?)) {
-          <button type="button" class="btn btn-sm btn-link" style="text-decoration: none" @onclick="ClearSelection">Clear</button>
+          <button type="button" class="pixata-btn pixata-btn-sm pixata-btn-link" style="text-decoration: none" @onclick="ClearSelection">Clear</button>
         } else {
           <div></div>
         }
-        <button type="button" class="btn btn-sm btn-link" style="text-decoration: none" @onclick="SelectToday">Today</button>
+        <button type="button" class="pixata-btn pixata-btn-sm pixata-btn-link" style="text-decoration: none" @onclick="SelectToday">Today</button>
         <!-- On phones the popup is a sheet over the page, so it needs a visible way out. Larger screens close it by clicking away. -->
-        <button type="button" class="btn btn-sm btn-link close-btn" style="text-decoration: none" @onclick="CloseCalendar">Close</button>
+        <button type="button" class="pixata-btn pixata-btn-sm pixata-btn-link close-btn" style="text-decoration: none" @onclick="CloseCalendar">Close</button>
       </div>
     </div>
   }
@@ -199,12 +199,12 @@
         max-width: 100%;
       }
 
-      .hebrew-date-picker .input-group .btn {
+      .hebrew-date-picker .pixata-input-group .pixata-btn {
         background-color: #e4e7eb
       }
 
       /* The input is readonly and opens the calendar, so it shouldn't look like somewhere to type */
-      .hebrew-date-picker .input-group .form-control {
+      .hebrew-date-picker .pixata-input-group .pixata-form-control {
         cursor: pointer;
       }
 
@@ -223,7 +223,7 @@
         touch-action: none;
       }
 
-      .hebrew-date-picker .card {
+      .hebrew-date-picker .pixata-card {
         position: absolute;
         width: 320px;
         max-width: calc(100vw - 1rem);
@@ -233,11 +233,11 @@
         user-select: none;
       }
 
-      .hebrew-date-picker .card.open-left {
+      .hebrew-date-picker .pixata-card.open-left {
         left: 0;
       }
 
-      .hebrew-date-picker .card.open-right {
+      .hebrew-date-picker .pixata-card.open-right {
         right: 0;
       }
 
@@ -252,7 +252,7 @@
       }
 
       /* Tapping a day shouldn't leave the grey flash some mobile browsers add */
-      .hebrew-date-picker .card .btn {
+      .hebrew-date-picker .pixata-card .pixata-btn {
         -webkit-tap-highlight-color: transparent;
       }
 
@@ -275,8 +275,8 @@
 
       /* Keeps the month controls and buttons in view when a small screen makes the popup scroll.
          Has no effect on larger screens, where the popup is never taller than its content. */
-      .hebrew-date-picker .card-header,
-      .hebrew-date-picker .card-footer {
+      .hebrew-date-picker .pixata-card-header,
+      .hebrew-date-picker .pixata-card-footer {
         position: sticky;
         z-index: 1;
         /* An opaque colour under Bootstrap's semi-transparent cap, so content can't show through */
@@ -284,11 +284,11 @@
         background-image: linear-gradient(var(--bs-card-cap-bg, rgba(0, 0, 0, .03)), var(--bs-card-cap-bg, rgba(0, 0, 0, .03)));
       }
 
-      .hebrew-date-picker .card-header {
+      .hebrew-date-picker .pixata-card-header {
         top: 0;
       }
 
-      .hebrew-date-picker .card-footer {
+      .hebrew-date-picker .pixata-card-footer {
         bottom: 0;
       }
 
@@ -299,9 +299,9 @@
           background-color: rgba(0, 0, 0, .4);
         }
 
-        .hebrew-date-picker .card,
-        .hebrew-date-picker .card.open-left,
-        .hebrew-date-picker .card.open-right {
+        .hebrew-date-picker .pixata-card,
+        .hebrew-date-picker .pixata-card.open-left,
+        .hebrew-date-picker .pixata-card.open-right {
           position: fixed;
           top: auto;
           right: 0;
@@ -338,8 +338,8 @@
           min-height: 2.75rem;
         }
 
-        .hebrew-date-picker .card-header .form-select,
-        .hebrew-date-picker .card-footer .btn {
+        .hebrew-date-picker .pixata-card-header .pixata-form-select,
+        .hebrew-date-picker .pixata-card-footer .pixata-btn {
           min-height: 2.75rem;
         }
 
@@ -354,9 +354,9 @@
           background-color: rgba(0, 0, 0, .4);
         }
 
-        .hebrew-date-picker .card,
-        .hebrew-date-picker .card.open-left,
-        .hebrew-date-picker .card.open-right {
+        .hebrew-date-picker .pixata-card,
+        .hebrew-date-picker .pixata-card.open-left,
+        .hebrew-date-picker .pixata-card.open-right {
           position: fixed;
           top: .5rem;
           right: auto;
@@ -388,7 +388,7 @@
       }
 
       @@media (prefers-reduced-motion: reduce) {
-        .hebrew-date-picker .card {
+        .hebrew-date-picker .pixata-card {
           animation: none;
         }
       }

@@ -93,7 +93,15 @@ As the class is static, you only need to do this once.
 You can see a list of all messages on ([Telerik's web site](https://www.telerik.com/blazor-ui/documentation/api/telerik.blazor.resources.messages)).
 
 ### Form components
-These were writen to make it quicker to create forms in Blazor. They are all very much based around Bootstrap, which I was using heavily when I wrote these components. If you look at the [form page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor) on the sample web site you can see the usage.)
+These were writen to make it quicker to create forms in Blazor. They follow the same layout as the ones in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor), which was originally built with Bootstrap's grid and form classes. As of v12.3.17 they no longer need Bootstrap, but they do need the stylesheet that comes with Pixata.Blazor, so add this to your `_Host.cshtml`, `App.razor` or `index.html`...
+
+```html
+<link rel="stylesheet" href="_content/Pixata.Blazor/pixata.css" />
+```
+
+See [the styling section of the Pixata.Blazor readme](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor#styling) for what's in it and how to fit it to your own theme.
+
+If you look at the [form page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor) on the sample web site you can see the usage.)
 
 ## Warning
 The package relies on the Telerik.Blazor Nuget package. If you don't have a subscription with Telerik, you can get a 30-day trial version from them.

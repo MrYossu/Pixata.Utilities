@@ -96,17 +96,17 @@
   }
 }
 
-.card {
+.pixata-card {
   background: #ffffff;
   padding: 1.75rem;
   border-right: 1px solid #e8eaf0;
 }
 
-  .card:last-child {
+  .pixata-card:last-child {
     border-right: none;
   }
 
-.card-header {
+.pixata-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -115,7 +115,7 @@
   border-bottom: 2px solid #f0f2f8;
 }
 
-  .card-header h2 {
+  .pixata-card-header h2 {
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
@@ -125,7 +125,7 @@
     font-family: 'Courier New', monospace;
   }
 
-.badge {
+.pixata-badge {
   background: #0f3460;
   color: white;
   border-radius: 20px;
@@ -294,7 +294,7 @@ code.claim-type {
   border-radius: 0 0 16px 16px;
 }
 
-  .empty-state.small {
+  .empty-state.pixata-small {
     padding: 1.5rem;
     border-radius: 8px;
     background: #f8f9fd;

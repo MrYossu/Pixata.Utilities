@@ -1,16 +1,16 @@
 ﻿
-<div class="form-group row">
-  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
-  <div class="col-lg-10 input-group">
-    <div class="input-group-prepend">
-      <span class="input-group-text h-100">
+<div class="pixata-form-group pixata-row">
+  <label for="@PropertyName" class="pixata-col-2 pixata-col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="pixata-col-10 pixata-input-group">
+    <div class="pixata-input-group-prepend">
+      <span class="pixata-input-group-text pixata-h-100">
         <i class="@Icon"></i>
       </span>
     </div>
     @if (Checked) {
-      <input type="checkbox" class="form-control col-1 @Class" checked="checked" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
+      <input type="checkbox" class="pixata-form-control pixata-col-1 @Class" checked="checked" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
     } else {
-      <input type="checkbox" class="form-control col-1 @Class" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
+      <input type="checkbox" class="pixata-form-control pixata-col-1 @Class" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
     }
   </div>
 </div>
