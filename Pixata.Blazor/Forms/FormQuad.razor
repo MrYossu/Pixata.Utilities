@@ -1,31 +1,31 @@
-<div class="quad-element d-flex flex-wrap gap-col-3">
-  <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+<div class="quad-element pixata-d-flex pixata-flex-wrap gap-col-3">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (FirstRequired) {
-      <label for="@FirstId">@FirstLabel <span class="text-danger">*</span></label>
+      <label for="@FirstId">@FirstLabel <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@FirstId">@FirstLabel</label>
     }
     @First
   </div>
-  <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (SecondRequired) {
-      <label for="@SecondId">@SecondLabel <span class="text-danger">*</span></label>
+      <label for="@SecondId">@SecondLabel <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@SecondId">@SecondLabel</label>
     }
     @Second
   </div>
-  <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (ThirdRequired) {
-      <label for="@ThirdId">@ThirdLabel <span class="text-danger">*</span></label>
+      <label for="@ThirdId">@ThirdLabel <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@ThirdId">@ThirdLabel</label>
     }
     @Third
   </div>
-  <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (FourthRequired) {
-      <label for="@FourthId">@FourthLabel <span class="text-danger">*</span></label>
+      <label for="@FourthId">@FourthLabel <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@FourthId">@FourthLabel</label>
     }
@@ -107,7 +107,7 @@
   [Parameter]
   public bool FourthRequired { get; set; }
   /// <summary>
-  /// Specifies if the element should have the mt-3 class added
+  /// Specifies if the element should have the pixata-mt-3 class added (a 1rem top margin)
   /// </summary>
   [Parameter]
   public bool MarginTop { get; set; } = true;

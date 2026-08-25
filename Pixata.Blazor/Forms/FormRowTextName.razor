@@ -1,33 +1,33 @@
-﻿<div class="form-group row">
-  <label class="col-lg-2 col-form-label" for="@PropertyNameTitle">@Caption</label>
-  <div class="col-lg-10 input-group">
-    <div class="input-group-prepend">
-      <span class="input-group-text h-100">
+﻿<div class="pixata-form-group pixata-row">
+  <label class="pixata-col-2 pixata-col-form-label" for="@PropertyNameTitle">@Caption</label>
+  <div class="pixata-col-10 pixata-input-group">
+    <div class="pixata-input-group-prepend">
+      <span class="pixata-input-group-text pixata-h-100">
         <i class="@Icon"></i>
       </span>
     </div>
 
-    <input class="form-control @_invalid1" Value="@ValueTitle" type="text" id="@PropertyNameTitle" name="@PropertyNameTitle" @onchange="@OnChangedTitle" placeholder="Title" style="max-width: 90px"/>
+    <input class="pixata-form-control @_invalid1" Value="@ValueTitle" type="text" id="@PropertyNameTitle" name="@PropertyNameTitle" @onchange="@OnChangedTitle" placeholder="Title" style="max-width: 90px"/>
     @if (_showValidationMsgTitle) {
-      <div class="input-group-append">
-        <div class="input-group-text has-error h-100">
+      <div class="pixata-input-group-append">
+        <div class="pixata-input-group-text pixata-has-error pixata-h-100">
           <ValidationMessage For="@ValueTitleExpression" />
         </div>
       </div>
     }
 
-    <input class="form-control @_invalid2" Value="@ValueFirstName" type="text" id="@PropertyNameFirstName" name="@PropertyNameFirstName" @onchange="@OnChangedFirstName" placeholder="First name" />
+    <input class="pixata-form-control @_invalid2" Value="@ValueFirstName" type="text" id="@PropertyNameFirstName" name="@PropertyNameFirstName" @onchange="@OnChangedFirstName" placeholder="First name" />
     @if (_showValidationMsgFirstName) {
-      <div class="input-group-append">
-        <div class="input-group-text has-error h-100">
+      <div class="pixata-input-group-append">
+        <div class="pixata-input-group-text pixata-has-error pixata-h-100">
           <ValidationMessage For="@ValueFirstNameExpression" />
         </div>
       </div>
     }
 
-    <input class="form-control @_invalid3" Value="@ValueSurname" type="text" id="@PropertyNameSurname" name="@PropertyNameSurname" @onchange="@OnChangedSurname" placeholder="Surname" />
-    <div class="input-group-append">
-      <div class="input-group-text has-error h-100">
+    <input class="pixata-form-control @_invalid3" Value="@ValueSurname" type="text" id="@PropertyNameSurname" name="@PropertyNameSurname" @onchange="@OnChangedSurname" placeholder="Surname" />
+    <div class="pixata-input-group-append">
+      <div class="pixata-input-group-text pixata-has-error pixata-h-100">
         @if (_showValidationMsgSurname) {
           <ValidationMessage For="@ValueSurnameExpression" />
         }
@@ -98,13 +98,13 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifierTitle = CascadedEditContext.Field(PropertyNameTitle);
     _showValidationMsgTitle = CascadedEditContext.GetValidationMessages(identifierTitle).Any();
-    _invalid1 = _showValidationMsgTitle ? "invalid" : "";
+    _invalid1 = _showValidationMsgTitle ? "pixata-invalid" : "";
     FieldIdentifier identifierFirstName = CascadedEditContext.Field(PropertyNameFirstName);
     _showValidationMsgFirstName = CascadedEditContext.GetValidationMessages(identifierFirstName).Any();
-    _invalid2 = _showValidationMsgFirstName ? "invalid" : "";
+    _invalid2 = _showValidationMsgFirstName ? "pixata-invalid" : "";
     FieldIdentifier identifierSurname = CascadedEditContext.Field(PropertyNameSurname);
     _showValidationMsgSurname = CascadedEditContext.GetValidationMessages(identifierSurname).Any();
-    _invalid3 = _showValidationMsgSurname ? "invalid" : "";
+    _invalid3 = _showValidationMsgSurname ? "pixata-invalid" : "";
   }
 
   private async Task OnChangedTitle(ChangeEventArgs cea) =>

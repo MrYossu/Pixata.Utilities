@@ -1,23 +1,23 @@
-﻿<div class="d-flex flex-wrap gap-col-3">
-  <div class="@(MarginTop ? "mt-3 " : "")flex-fill" style="max-width: 100px;">
+﻿<div class="pixata-d-flex pixata-flex-wrap gap-col-3">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill" style="max-width: 100px;">
     @if (TitleRequired) {
-      <label for="@TitleId">@TitleLabel <span class="text-danger">*</span></label>
+      <label for="@TitleId">@TitleLabel <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@TitleId">@TitleLabel</label>
     }
     @Title
   </div>
-  <div class="@(MarginTop ? "mt-3 " : "")flex-fill">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill">
     @if (SalutationRequired) {
-      <label for="@SalutationId">@SalutationLabel <span class="text-danger">*</span></label>
+      <label for="@SalutationId">@SalutationLabel <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@SalutationId">@SalutationLabel</label>
     }
     @Salutation
   </div>
-  <div class="@(MarginTop ? "mt-3 " : "")flex-fill">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill">
     @if (SurnameRequired) {
-      <label for="@SurnameId">@SurnameLabel <span class="text-danger">*</span></label>
+      <label for="@SurnameId">@SurnameLabel <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@SurnameId">@SurnameLabel</label>
     }
@@ -80,7 +80,7 @@
   [Parameter]
   public bool SurnameRequired { get; set; }
   /// <summary>
-  /// Specifies if the element should have the mt-3 class added
+  /// Specifies if the element should have the pixata-mt-3 class added (a 1rem top margin)
   /// </summary>
   [Parameter]
   public bool MarginTop { get; set; } = true;

@@ -1,8 +1,8 @@
-﻿<div class="form-group row">
-  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
-  <div class="col-lg-10 input-group">
-    <div class="input-group-prepend">
-      <span class="input-group-text">
+﻿<div class="pixata-form-group pixata-row">
+  <label for="@PropertyName" class="pixata-col-2 pixata-col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="pixata-col-10 pixata-input-group">
+    <div class="pixata-input-group-prepend">
+      <span class="pixata-input-group-text">
         <i class="far fa-@Icon"></i>
       </span>
     </div>
@@ -22,8 +22,8 @@
                          ValueChanged="@(async (DateTime? d) => await OnChanged(d))" />
     }
     @if (_showValidationMsg) {
-      <div class="input-group-append">
-        <div class="input-group-text has-error">
+      <div class="pixata-input-group-append">
+        <div class="pixata-input-group-text pixata-has-error">
           <ValidationMessage For="@ValueExpression" />
         </div>
       </div>
@@ -60,7 +60,7 @@
   private bool _showValidationMsg;
 
   private string _css =>
-    "form-control " + _invalid;
+    "pixata-form-control " + _invalid;
 
   private string _invalid = "";
 
@@ -72,7 +72,7 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
-    _invalid = _showValidationMsg ? "invalid" : "";
+    _invalid = _showValidationMsg ? "pixata-invalid" : "";
   }
 
   async Task OnChanged(DateTime? cea) {

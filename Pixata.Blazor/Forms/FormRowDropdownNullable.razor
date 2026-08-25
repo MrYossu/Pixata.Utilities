@@ -1,13 +1,13 @@
 ﻿
-<div class="form-group row">
-  <label for="@PropertyName" class="col-lg-2 col-form-label">@(Caption ?? PropertyName)</label>
-  <div class="col-lg-10 input-group">
-    <div class="input-group-prepend">
-      <span class="input-group-text h-100">
+<div class="pixata-form-group pixata-row">
+  <label for="@PropertyName" class="pixata-col-2 pixata-col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="pixata-col-10 pixata-input-group">
+    <div class="pixata-input-group-prepend">
+      <span class="pixata-input-group-text pixata-h-100">
         <i class="@Icon"></i>
       </span>
     </div>
-    <select class="form-control @_invalid" name="@PropertyName" id="@PropertyName" @onchange="@OnChanged">
+    <select class="pixata-form-control @_invalid" name="@PropertyName" id="@PropertyName" @onchange="@OnChanged">
       @foreach ((int? val, string name) v in Values) {
         <!-- TODO AYS - This will only set the value when the control is loaded. If the selection is changed, the parent will not be informed of the change. Need to work out how to do two-way binding -->
         if (v.val == Value) {
@@ -17,8 +17,8 @@
         }
       }
     </select>
-    <div class="input-group-append">
-      <div class="input-group-text has-error h-100">
+    <div class="pixata-input-group-append">
+      <div class="pixata-input-group-text pixata-has-error pixata-h-100">
         @if (_showValidationMsg) {
           <ValidationMessage For="@ValueExpression" />
         }
@@ -74,7 +74,7 @@
   private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
-    _invalid = _showValidationMsg ? "invalid" : "";
+    _invalid = _showValidationMsg ? "pixata-invalid" : "";
   }
 
 }

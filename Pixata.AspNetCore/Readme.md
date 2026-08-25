@@ -1,4 +1,4 @@
-# Pixata.AspNetCore [![Pixata.AspNetCore Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore)](https://www.nuget.org/packages/Pixata.AspNetCore/)
+﻿# Pixata.AspNetCore [![Pixata.AspNetCore Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore)](https://www.nuget.org/packages/Pixata.AspNetCore/)
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore/ConnectionReseau.png "Pixata") 
 
@@ -13,6 +13,33 @@ builder.Services.AddPixataAspNetCore<ContactModel>();
 ```
 
 ...where `ContactModel` is any type in your project. If you are using the validation filter (see below), then it is used here to point the framework to the assembly containing your models.
+
+This registers everything in the package. If you only want some of it, you can say so...
+
+```csharp
+builder.Services.AddPixataAspNetCore<ContactModel>(o => {
+  o.RegisterPdfConverter = false;
+  o.RegisterDocumentTemplateHelper = false;
+});
+```
+
+The options are...
+
+| Option | Default | What it registers |
+| --- | --- | --- |
+| `RegisterPdfConverter` | `true` | The wkhtmltopdf `IConverter` used by `DocumentTemplateHelper` to generate PDFs. Set this to `false` if your app generates PDFs some other way (QuestPDF, for example), and you don't want the native wkhtmltopdf library anywhere near your app |
+| `RegisterDocumentTemplateHelper` | `true` | `DocumentTemplateHelper`, along with the `HtmlRenderer` and `IHttpContextAccessor` that it needs |
+| `RegisterValidation` | `true` | Your FluentValidation validators (from the assembly containing the type you pass in) and the `ValidationEndpointFilter` |
+
+The converter is registered as a factory, so wkhtmltopdf isn't loaded until something actually asks for it. Prior to v1.9.0 it was constructed while services were being registered, which meant that every app referencing this package loaded the native library at startup, even if it never generated a PDF.
+
+As `DocumentTemplateHelper` takes an `IConverter`, setting `RegisterPdfConverter` to `false` whilst leaving `RegisterDocumentTemplateHelper` set to `true` will throw an exception when you register the services, unless you have registered an `IConverter` of your own first. This is deliberate, as it's a lot easier to fix than the error you'd otherwise get when something tries to resolve the helper.
+
+If you don't use the validation filter, there is a non-generic overload, which registers everything apart from the validation services...
+
+```csharp
+builder.Services.AddPixataAspNetCore(o => o.RegisterPdfConverter = false);
+```
 
 If you want to use the route dump feature (see below) then you'll also need to the following...
 
@@ -61,7 +88,7 @@ If you haven't already got it, then you will also need to add the following line
 builder.Services.AddHttpContextAccessor();
 ```
 
-Note that you need this even if you use the `AddPixataAspNetCore` method.
+Note that you only need this if you registered the services yourself. As of v1.9.0, `AddPixataAspNetCore` registers the `IHttpContextAccessor` for you.
 
 Then, you create a Blazor component that will be the template for the document you wish to generate. It needs to accept two parameters as follows...
 
@@ -118,29 +145,53 @@ byte[] bytes = await documentTemplateHelper
 ## RequestLoggingMiddleware
 When writing API endpoints, it can be hard to debug 400 errors, which are often caused by incorrect or mismatched paths, or invalid data in the request. You often don't get much clue as to what actually happened.
 
-To help with this, I have added a piece of middleware that will log every incoming request to the app (subject to configuration choices, see below). This will log the path, the query string, and the body of the request. This can be very helpful for debugging, as it allows you to see exactly what was sent to the server.
+To help with this, I have added a piece of middleware that will log every incoming request to the app (subject to configuration choices, see below). This will log the path, the query string, the headers and the body of the request. This can be very helpful for debugging, as it allows you to see exactly what was sent to the server.
 
 You need to register the middleware in your `Program.cs` file, as follows...
 ```csharp
 builder.Services.AddRequestLogging();
 ```
 
-This will use the default configuration, which is to include the request body in the logging, and ignore any requests whose path starts with any of...
+This will use the default configuration, which is to include the request headers and body in the logging, and ignore any requests whose path starts with any of...
 
 - "_framework"
 - "_blazor"
 - "_content"
 - ".well-known"
 
-You can override either of these options as follows...
+### Redaction
+Logging whole requests is only useful if you can leave the logging on, and you can't do that if the log fills up with authentication cookies and passwords. Anyone who can read your logs would then be able to impersonate your users.
+
+Since v1.9.0, the middleware redacts anything that looks sensitive before it writes to the log...
+
+- **Headers** - the value of any header listed in `RedactedHeaders` is replaced. By default that's `Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, `X-Api-Key`, `Api-Key`, `X-Auth-Token`, `X-Access-Token`, `X-CSRF-Token`, `X-XSRF-Token` and `RequestVerificationToken`
+- **Query string parameters, form fields and JSON properties** - the value of anything whose name is listed in `RedactedFields` is replaced. By default that covers the usual suspects (`password`, `newPassword`, `token`, `accessToken`, `refreshToken`, `secret`, `clientSecret`, `apiKey`, `cardNumber`, `cvv` and friends). JSON is redacted at any depth, including inside arrays
+- **Bodies of unexpected content types** aren't logged at all. Only the content types listed in `LoggedBodyContentTypes` (JSON, XML, plain text and form data) are written to the log, so a file upload no longer ends up as several megabytes of binary in your log file
+- **Long bodies are truncated** to `MaxBodyLength` characters (4096 by default). Only that much of the body is read, so a large upload isn't pulled into memory just to be thrown away
+
+Matching of header and field names is case-insensitive.
+
+If the body claims to be JSON but doesn't parse (which is often exactly the sort of thing you're trying to debug), it's logged as it came in, but with anything that looks like a sensitive property redacted.
+
+Redaction is a safety net, not a guarantee. If your app posts sensitive data in a field with a name I haven't thought of, add it to `RedactedFields`.
+
+### Options
+You can override any of the options as follows...
 ```csharp
 builder.Services.AddRequestLogging(o => {
   o.IgnoredPaths = ["_framework", "health"]; // Or whatever you want to ignore
   o.LogBody = false;
+  o.LogHeaders = false;
+  o.RedactedHeaders.Add("X-My-Custom-Auth-Header");
+  o.RedactedFields.Add("mothersMaidenName");
+  o.MaxBodyLength = 1024;
+  o.RedactionPlaceholder = "***";
 });
 ```
 
 To log all requests, set `o.IgnoredPaths` to an empty array `[]`.
+
+The defaults are exposed as `RequestLoggingOptions.DefaultRedactedHeaders` and `RequestLoggingOptions.DefaultRedactedFields`, so you can build your own list from them if you'd rather replace the sets than add to them. Bear in mind that if you do replace them, anything you leave out is no longer redacted.
 
 You then need to register the middleware...
 ```csharp

@@ -189,7 +189,7 @@
               </tbody>
             </table>
             @if (_allViewTotalPages > 1) {
-              <div class="pagination">
+              <div class="audit-pagination">
                 <button disabled="@(_allViewCurrentPage <= 1)" @onclick="AllViewPreviousPage">← Previous</button>
                 <span>Page @_allViewCurrentPage of @_allViewTotalPages</span>
                 <button disabled="@(_allViewCurrentPage >= _allViewTotalPages)" @onclick="AllViewNextPage">Next →</button>
@@ -232,7 +232,7 @@
             </tbody>
           </table>
           @if (_totalPages > 1) {
-            <div class="pagination">
+            <div class="audit-pagination">
               <button disabled="@(_currentPage <= 1)" @onclick="PreviousPage">← Previous</button>
               <span>Page @_currentPage of @_totalPages</span>
               <button disabled="@(_currentPage >= _totalPages)" @onclick="NextPage">Next →</button>
@@ -409,20 +409,20 @@
     border: 1px solid #ccc;
     border-radius: 4px;
   }
-  .pagination {
+  .audit-pagination {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.5rem;
   }
-  .pagination button {
+  .audit-pagination button {
     padding: 0.3rem 0.6rem;
     border: 1px solid #ccc;
     background: white;
     border-radius: 4px;
     cursor: pointer;
   }
-  .pagination button:disabled {
+  .audit-pagination button:disabled {
     opacity: 0.5;
     cursor: default;
   }

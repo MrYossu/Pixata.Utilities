@@ -1,10 +1,10 @@
 ﻿@if (IsContainer) {
-  <div class="d-flex @Id">
-    <div class="@(MarginTop ? "mt-3 " : "")flex-fill position-relative">
+  <div class="pixata-d-flex @Id">
+    <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
       @if (Required) {
-        <label for="@Id" class="w-100">@Label <span class="text-danger">*</span></label>
+        <label for="@Id" class="pixata-w-100">@Label <span class="pixata-text-danger">*</span></label>
       } else {
-        <label for="@Id" class="w-100">@Label</label>
+        <label for="@Id" class="pixata-w-100">@Label</label>
       }
       @ChildContent
     </div>
@@ -25,9 +25,9 @@
     }
   </style>
 } else {
-  <div class="mt-3 position-relative">
+  <div class="pixata-mt-3 pixata-position-relative">
     @if (Required) {
-      <label for="@Id">@Label <span class="text-danger">*</span></label>
+      <label for="@Id">@Label <span class="pixata-text-danger">*</span></label>
     } else {
       <label for="@Id">@Label</label>
     }
@@ -58,7 +58,7 @@
   [Parameter]
   public bool Required { get; set; }
   /// <summary>
-  /// Specifies if the element should have the mt-3 class added
+  /// Specifies if the element should have the pixata-mt-3 class added (a 1rem top margin)
   /// </summary>
   [Parameter]
   public bool MarginTop { get; set; } = true;
