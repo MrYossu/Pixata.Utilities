@@ -51,6 +51,13 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.TelerikComponents/) is a
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.TelerikComponents).
 
+## Pixata.AspNetCore.Telerik
+The server-side companion to Pixata.Blazor.TelerikComponents, holding the helpers that talk to a database and so need EF Core and SQL Server. Keeping them here means the component package stays usable client-side.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Telerik/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Telerik).
+
 ## Pixata.Google
 Utility code for working with Google's APIs. I wrote an app that used Google Drive for storage, and found the code to be very complex and messy, so I wrapped it up in a clearer API for easier use. I was thinking about adding support for other Google APIs too, but had such a painful experience with Drive that I never got around to it. If you are looking to code against other Google APIs, the code here may give you a head start.
 
