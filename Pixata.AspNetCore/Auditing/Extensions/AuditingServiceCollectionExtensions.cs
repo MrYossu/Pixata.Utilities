@@ -29,4 +29,18 @@ public static class AuditingServiceCollectionExtensions {
 
     return services;
   }
+
+  /// <summary>
+  /// Registers the server-side <see cref="AuditViewerService"/> as <see cref="AuditViewerServiceInterface"/>,
+  /// which is what <c>MapAuditApi()</c> and the server-side audit viewer resolve.
+  /// Call this in the server project's DI setup alongside <c>AddAuditing&lt;TContext&gt;()</c>.
+  /// </summary>
+  /// <remarks>
+  /// WASM clients should call <c>AddAuditViewerHttpService()</c> from Pixata.Blazor instead, which talks to
+  /// the API rather than to a DbContext.
+  /// </remarks>
+  public static IServiceCollection AddPixataAuditViewer(this IServiceCollection services) {
+    services.AddScoped<AuditViewerServiceInterface, AuditViewerService>();
+    return services;
+  }
 }
