@@ -54,6 +54,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.AspNetCore.Telerik
+    - name: Restore - Pixata.AspNetCore.Telerik Dependencies
+      run: dotnet restore Pixata.AspNetCore.Telerik/Pixata.AspNetCore.Telerik.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Telerik.csproj
+      run: dotnet build Pixata.AspNetCore.Telerik/Pixata.AspNetCore.Telerik.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.Blazor.LanguageExtComponents
     - name: Restore - Pixata.Blazor.LanguageExtComponents Dependencies
       run: dotnet restore Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configfile ./nuget.config
@@ -161,8 +174,14 @@ jobs:
 # ***************** TESTS **************** #
 
 # IMPORTANT - ALL PROJECTS SHOULD BE RESTORED (and built) BEFORE USING dotnet tests
+# The credentials are here too, as this runs against the whole solution. If any project hasn't been
+# restored above, NuGet asks the Telerik feed about its packages, and an unauthenticated feed answers
+# 401 rather than 404, which is a hard NU1301 failure rather than a skipped source.
     - name: Run Tests
-      run: dotnet test --verbosity normal 
+      run: dotnet test --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
 # ***************** PUBLISHING **************** #
 
