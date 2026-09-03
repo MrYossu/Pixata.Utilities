@@ -138,7 +138,9 @@
 
   protected override async Task OnInitializedAsync() {
     _arvSuccessStyle = ManualLoading && !_manualLoadingComplete ? "position: absolute; left: 1000000px" : "";
-    _apiResponse = await StateHelper.Get(LoadApiResponse, Key);
+    // Only a successful response is worth persisting. Persisting anything else hands a transient prerender failure to
+    // the client as the answer, so the user sees the server's bad minute instead of the client simply trying again
+    _apiResponse = await StateHelper.Get(LoadApiResponse, Key, response => response.State == ApiResponseStates.Success);
     if (IsUnauthorised(_apiResponse.State, _apiResponse.Message)) {
       NavigationManager.NavigateTo($"{ApiResponseViewConfig.LogInUrl}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
     }
