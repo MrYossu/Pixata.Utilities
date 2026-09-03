@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace Pixata.Extensions {
   public static class CollectionExtensionMethods {
@@ -19,9 +18,12 @@ namespace Pixata.Extensions {
       collection != null ? new ObservableCollection<T>(collection) : new ObservableCollection<T>();
 
     /// <summary>
-    ///     Asynchronously converts an IEnumerable<T> to an ObservableCollection<T>
+    ///     Asynchronously converts an IQueryable<T> to an ObservableCollection<T>
     /// </summary>
     /// <remarks>
+    ///     If the query's provider supports async enumeration (EF Core's does), the results are streamed
+    ///     asynchronously. Providers that don't (eg the in-memory one behind <see cref="Queryable.AsQueryable{T}" />)
+    ///     are enumerated synchronously, as there is no I/O to await.
     ///     Multiple active operations on the same context instance are not supported.  Use 'await' to ensure
     ///     that any asynchronous operations have completed before calling another method on this context.
     /// </remarks>
@@ -41,12 +43,49 @@ namespace Pixata.Extensions {
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="collection" /> is <see langword="null" />.
     /// </exception>
-    public static async Task<ObservableCollection<T>> ToObservableCollectionAsync<T>([NotNull] this IQueryable<T> collection, CancellationToken cancellationToken = default) {
-    List<T> list = new();
-      await foreach (var element in collection.AsAsyncEnumerable().WithCancellation(cancellationToken)) {
-        list.Add(element);
+    public static Task<ObservableCollection<T>> ToObservableCollectionAsync<T>([NotNull] this IQueryable<T> collection, CancellationToken cancellationToken = default) {
+      if (collection == null) {
+        throw new ArgumentNullException(nameof(collection));
       }
-      return list.ToObservableCollection();
+      return collection is IAsyncEnumerable<T> asyncCollection
+        ? asyncCollection.ToObservableCollectionAsync(cancellationToken)
+        : Task.FromResult(collection.ToObservableCollection());
+    }
+
+    /// <summary>
+    ///     Asynchronously converts an IAsyncEnumerable<T> to an ObservableCollection<T>
+    /// </summary>
+    /// <typeparam name="T">
+    ///     The type of the elements of <paramref name="collection" />.
+    /// </typeparam>
+    /// <param name="collection">
+    ///     An <see cref="IAsyncEnumerable{T}" /> from which the ObservableCollection is created
+    /// </param>
+    /// <param name="cancellationToken">
+    ///     A <see cref="CancellationToken" /> to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    ///     A task that represents the asynchronous operation.
+    ///     The task result contains a <see cref="ObservableCollection{T}" /> that contains elements from the input sequence.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="collection" /> is <see langword="null" />.
+    /// </exception>
+    public static Task<ObservableCollection<T>> ToObservableCollectionAsync<T>([NotNull] this IAsyncEnumerable<T> collection, CancellationToken cancellationToken = default) {
+      // The null check lives out here so that it throws when the method is called, rather than when the
+      // returned task is awaited, matching the IQueryable overload above
+      if (collection == null) {
+        throw new ArgumentNullException(nameof(collection));
+      }
+      return Enumerate(collection, cancellationToken);
+
+      static async Task<ObservableCollection<T>> Enumerate(IAsyncEnumerable<T> source, CancellationToken cancellationToken) {
+        List<T> list = new();
+        await foreach (T element in source.WithCancellation(cancellationToken)) {
+          list.Add(element);
+        }
+        return list.ToObservableCollection();
+      }
     }
 
     /// <summary>

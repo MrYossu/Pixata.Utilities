@@ -41,6 +41,10 @@ Add the following to your `Program.cs`...
 builder.Services.AddPixataAuditViewer();
 ```
 
+>**Moved.** As of Pixata.Blazor v4.0.0, `AddPixataAuditViewer()` and the `AuditViewerService` it registers live in the **Pixata.AspNetCore** package rather than Pixata.Blazor. The service needs a `DbContext`, so keeping it in the Blazor package forced EF Core into every client-side app that used any component from it. If you call this method, add `using Pixata.AspNetCore.Auditing.Extensions;` (you will already have Pixata.AspNetCore referenced, as that is where `AddAuditing<TContext>()` comes from). The method and its behaviour are otherwise unchanged.
+>
+>Nothing changes for the client side. The Blazor `AuditViewer` component only ever talked to `AuditViewerServiceInterface`, which stays in Pixata.Extensions.
+
 #### Mixed-mode apps
 In the server project's `Program.cs`, add the following...
 
@@ -60,7 +64,7 @@ app.MapAuditApi("/api/audit")
 Then, in the client project's `Program.cs`, add the following...
 
 ```csharp
-builder.Services.AddPixataAuditViewerHttp(builder.HostEnvironment.BaseAddress + "api/audit/");
+builder.Services.AddAuditViewerHttpService(builder.HostEnvironment.BaseAddress + "api/audit/");
 ```
 
 ...where the route matches the one you used in the server project.

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Telerik.Blazor.Components;
 using Telerik.DataSource;
 
-namespace Pixata.Blazor.TelerikComponents.Helpers;
+namespace Pixata.AspNetCore.Telerik.Helpers;
 
 public static class TelerikGridHelper {
   public static Task<TelerikGridFilterResults> GetData<T>(this GridReadEventArgs args, DbContext context, string tableName, string defaultColumnForSort, ListSortDirection defaultSort = ListSortDirection.Ascending, SqlParameter[]? functionParameters = null) where T : class =>
