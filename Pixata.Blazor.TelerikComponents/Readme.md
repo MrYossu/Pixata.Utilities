@@ -19,6 +19,15 @@ All you need to do is set a value for the `StorageKey` parameter and you're done
 
 In the unlikely event that you need to handle `OnStateInit` or `OnStateChanged` events, you can do so by using the `OnStateInitPre`, `OnStateInitPost`, `OnStateChangedPre`, and `OnStateChangedPost` event handlers. These allow you to run your own code before or after the component's state handling.
 
+### Repairing restored filters
+Before version 12.3.18, restoring a saved state could bring the page down. Telerik serialises `FilterDescriptor.Value` as a bare JSON value, and doesn't serialise `MemberType` at all. On the way back, the value is therefore given the narrowest CLR type that will hold it, rather than the type of the member being filtered. An `enum` or an `int` comes back as a `short`, a `double` comes back as a `decimal`, and a `Guid` or a `TimeSpan` comes back as a `string`.
+
+As the Telerik filter editors cast the value to the member's own type, rendering the filter cell for a restored filter threw an exception (eg `Unable to cast object of type 'System.Int16' to type 'System.Int32'`), which killed the circuit and left the page stuck on its loading indicator. The confusing part was that this only happened for users who had previously filtered that grid, as local storage is per browser and per origin. The same page would work perfectly well locally, or for a colleague on a different machine, which makes it look like an environment or network problem rather than a bug.
+
+The component now repairs the state as it loads it, converting each filter value back to the type of the member it filters, and restoring the `MemberType` that was lost. Filters on members that no longer exist on `TItem` (eg a column renamed or removed since the state was saved) are dropped, as they would throw when the grid reads its data.
+
+If you handle grid state yourself, the same repair is available as `TelerikGridStateHelper.RepairFilterDescriptors(state)`.
+
 ### Extension method to improve the performance of the Telerik Blazor grid
 Whilst the Telerik Blazor grid does an amazing job, it has its limitations. One of these is the way it computes aggregates. For large tables, this can be slow.
 
