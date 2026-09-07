@@ -56,6 +56,9 @@ public class PixataBaseClientService {
       if (response.StatusCode == HttpStatusCode.NotFound) {
         return new ApiResponse<T>(ApiResponseStates.NotFound);
       }
+      if (response.StatusCode == HttpStatusCode.Conflict) {
+        return new ApiResponse<T>(ApiResponseStates.Conflict, Message: await ReadMessage<T>(response));
+      }
       if (!response.IsSuccessStatusCode) {
         return new ApiResponse<T>(ApiResponseStates.Failure, Message: $"HTTP error ({response.StatusCode}) {await response.Content.ReadAsStringAsync()}");
       }
@@ -69,6 +72,20 @@ public class PixataBaseClientService {
       return new ApiResponse<T>(ApiResponseStates.HttpFailure, Message: ex.Message);
     } catch (Exception ex) {
       return new ApiResponse<T>(ApiResponseStates.Failure, Message: ex.Message);
+    }
+  }
+
+  /// <summary>
+  /// Reads the message from an unsuccessful response. The body may be a serialised ApiResponse, in which case we want its
+  /// Message, or plain text, in which case we use the body as it stands
+  /// </summary>
+  private async Task<string> ReadMessage<T>(HttpResponseMessage response) {
+    string body = await response.Content.ReadAsStringAsync();
+    try {
+      string? message = JsonSerializer.Deserialize<ApiResponse<T>>(body, _jsonSerializerOptions)?.Message;
+      return string.IsNullOrWhiteSpace(message) ? body : message!;
+    } catch (JsonException) {
+      return body;
     }
   }
 

@@ -306,6 +306,8 @@ When using the Blazor web app template introduced in .NET8, you have to deal wit
 
 The `PersistentStateHelper` helper class in this package does that for you. Please see [this blog post](https://www.pixata.co.uk/2024/11/21/loading-data-in-a-blazor-web-app-without-multiple-database-or-api-calls/) where I describe it, and show some sample code.
 
+`Get` also takes an optional `persistWhen` predicate, which says whether the data that was loaded is worth persisting. If you don't pass one, the data is persisted as long as it isn't null. This is useful if the data may represent a failure (as an `ApiResponse<T>` does), as persisting that would hand a transient server-side failure to the client as if it were the answer, rather than letting the client simply load the data again.
+
 ### TemplateHelper
 Are you fed up of writing code like this (sample from a Telerik grid, but it's the same for Microsoft's or anyone else's)...
 

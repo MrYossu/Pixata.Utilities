@@ -9,7 +9,7 @@ using Pixata.Extensions.Auditing.Attributes;
 using Pixata.Extensions.Auditing.Models;
 using Pixata.Extensions.Auditing.Services;
 
-namespace Pixata.Blazor.Auditing.Services;
+namespace Pixata.AspNetCore.Auditing.Services;
 
 public class AuditViewerService(AuditServiceInterface auditService, DbContext context) : AuditViewerServiceInterface {
   public async Task<List<EntityTypeMetadata>> GetEntityTypes() {

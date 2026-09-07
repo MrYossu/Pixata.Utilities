@@ -11,7 +11,7 @@ Here is a brief description of the methods in the classes so far (alphabetically
 ## CollectionExtensionMethods
 `ToObservableCollection<T>()` - Converts any collection that implements IEnumerable<T> into an ObservableCollection<T>. Provides a neater syntax than passing the collection to the `ObservableCollection`'s constructor.
 
-`ToObservableCollectionAsync<T>()` - An async version of `ToObservableCollection()`.
+`ToObservableCollectionAsync<T>()` - An async version of `ToObservableCollection()`, with overloads for `IQueryable<T>` and `IAsyncEnumerable<T>`. Queries whose provider supports async enumeration (eg EF Core) are streamed asynchronously, others are enumerated synchronously. This package does not reference EF Core, so it can be used client-side (eg Blazor WASM) without dragging EF Core in.
 
 `RemoveWhere<T>()` - Removes items from an ObservableCollection based on a predicate. Mimics the `List<T>.RemoveAll()` method that doesn't exist for ObservableCollections
 
