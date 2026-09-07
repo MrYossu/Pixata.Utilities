@@ -1,8 +1,10 @@
 # Pixata.AspNetCore.Telerik [![Pixata.AspNetCore.Telerik Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore.Telerik)](https://www.nuget.org/packages/Pixata.AspNetCore.Telerik/)
 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore.Telerik/CorbeilePleine.png "Pixata")
+
 The server-side companion to the [Pixata.Blazor.TelerikComponents package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents).
 
-This package exists so that `Pixata.Blazor.TelerikComponents` doesn't have to. The grid data helper below talks to a database, so it needs EF Core, `Microsoft.EntityFrameworkCore.SqlServer` and `Microsoft.Data.SqlClient`. Those used to sit in the component package, which meant every client-side app that wanted a Telerik date picker also downloaded a SQL Server driver it could never use. The helper now lives here, and the component package is free of them.
+This package exists so that `Pixata.Blazor.TelerikComponents` doesn't need to have server-only code, which woujld prevent it from being used in WASM apps. The grid data helper below talks to a database, so it needs EF Core, `Microsoft.EntityFrameworkCore.SqlServer` and `Microsoft.Data.SqlClient`. Those used to sit in the component package, which meant every client-side app that wanted a Telerik date picker also downloaded a SQL Server driver it could never use. The helper now lives here, and the component package is free of them.
 
 Install this one in your **server** project, and `Pixata.Blazor.TelerikComponents` wherever your components live.
 
