@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
+using Pixata.Blazor.TelerikComponents.Helpers;
 using Telerik.Blazor.Components;
 
 namespace Pixata.Blazor.TelerikComponents.Components;
@@ -37,6 +38,9 @@ public class TelerikGridWithState<TItem> : TelerikGrid<TItem> {
       try {
         GridState<TItem>? state = await LocalStorage.GetItemAsync<GridState<TItem>>(StorageKey);
         if (state is not null) {
+          // Filter values and their member types don't survive the round trip through JSON, so they have to be put back
+          // before the state is used, otherwise the grid will fall over when it renders the filter cells
+          TelerikGridStateHelper.RepairFilterDescriptors(state);
           args.GridState = state;
         }
       }

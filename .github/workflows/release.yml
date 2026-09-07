@@ -56,6 +56,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.AspNetCore.Telerik
+    - name: Restore - Pixata.AspNetCore.Telerik Dependencies
+      run: dotnet restore Pixata.AspNetCore.Telerik/Pixata.AspNetCore.Telerik.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Telerik.csproj
+      run: dotnet build Pixata.AspNetCore.Telerik/Pixata.AspNetCore.Telerik.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.AspNetCore
     - name: Restore - Pixata.AspNetCore Dependencies
       run: dotnet restore Pixata.AspNetCore/Pixata.AspNetCore.csproj --configfile ./nuget.config
@@ -164,8 +177,14 @@ jobs:
 
 # ***************** TESTS **************** #
 
+# The credentials are here too, as this runs against the whole solution. If any project hasn't been
+# restored above, NuGet asks the Telerik feed about its packages, and an unauthenticated feed answers
+# 401 rather than 404, which is a hard NU1301 failure rather than a skipped source.
     - name: Run Tests
-      run: dotnet test --verbosity normal 
+      run: dotnet test --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
 # ***************** PUBLISHING **************** #
 
@@ -182,10 +201,16 @@ jobs:
        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
     - name: Publish Pixata.AspNetCore
-      uses: alirezanet/publish-nuget@v3.0.4  
-      with:   
-       PROJECT_FILE_PATH: Pixata.AspNetCore/Pixata.AspNetCore.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+      uses: alirezanet/publish-nuget@v3.0.4
+      with:
+       PROJECT_FILE_PATH: Pixata.AspNetCore/Pixata.AspNetCore.csproj
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+    - name: Publish Pixata.AspNetCore.Telerik
+      uses: alirezanet/publish-nuget@v3.0.4
+      with:
+       PROJECT_FILE_PATH: Pixata.AspNetCore.Telerik/Pixata.AspNetCore.Telerik.csproj
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
     - name: Publish Pixata.Extensions
       uses: alirezanet/publish-nuget@v3.0.4  

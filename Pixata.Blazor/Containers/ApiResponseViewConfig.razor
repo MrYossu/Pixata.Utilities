@@ -48,4 +48,9 @@
                                                                   <h3>Please refresh the page</h3>
                                                                 </div>;
 
+  public static RenderFragment<string> Conflict = message => @<div>
+                                                         <h2>That clashes with something else</h2>
+                                                         <div>@(string.IsNullOrWhiteSpace(message) ? "Sorry, that clashes with something that already exists. Please check what you entered and try again" : message)</div>
+                                                       </div>;
+
 }

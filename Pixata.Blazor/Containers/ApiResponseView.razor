@@ -63,6 +63,12 @@
       @ServiceUnavailable(yunit)
     }
     break;
+
+  case ApiResponseStates.Conflict:
+    if (!HideNonSuccess) {
+      @Conflict(_apiResponse.Message)
+    }
+    break;
 }
 
 @if (FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Bottom) {
@@ -107,6 +113,9 @@
   public RenderFragment<Yunit> ServiceUnavailable { get; set; } = ApiResponseViewConfig.ServiceUnavailable;
 
   [Parameter]
+  public RenderFragment<string> Conflict { get; set; } = ApiResponseViewConfig.Conflict;
+
+  [Parameter]
   public ApiResponseViewMessagePositions MessagePosition { get; set; } = ApiResponseViewConfig.MessagePosition;
 
   [Parameter]
@@ -129,7 +138,9 @@
 
   protected override async Task OnInitializedAsync() {
     _arvSuccessStyle = ManualLoading && !_manualLoadingComplete ? "position: absolute; left: 1000000px" : "";
-    _apiResponse = await StateHelper.Get(LoadApiResponse, Key);
+    // Only a successful response is worth persisting. Persisting anything else hands a transient prerender failure to
+    // the client as the answer, so the user sees the server's bad minute instead of the client simply trying again
+    _apiResponse = await StateHelper.Get(LoadApiResponse, Key, response => response.State == ApiResponseStates.Success);
     if (IsUnauthorised(_apiResponse.State, _apiResponse.Message)) {
       NavigationManager.NavigateTo($"{ApiResponseViewConfig.LogInUrl}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
     }
@@ -203,6 +214,14 @@
           _apiResponse = new ApiResponse<T>(ApiResponseStates.ServiceUnavailable);
         } else {
           Notify(NotificationType.Error, "An update is currently in progress. The average update time is under 2 minutes. Please try again soon");
+          onNotSuccess?.Invoke(response.Message);
+        }
+        break;
+      case ApiResponseStates.Conflict:
+        if (changeStateOnNotSuccess) {
+          _apiResponse = new ApiResponse<T>(ApiResponseStates.Conflict, Message: response.Message);
+        } else {
+          Notify(NotificationType.Error, string.IsNullOrWhiteSpace(response.Message) ? "Sorry, that clashes with something that already exists" : response.Message);
           onNotSuccess?.Invoke(response.Message);
         }
         break;

@@ -78,5 +78,6 @@ public enum ApiResponseStates {
   ServiceUnavailable,
   // Note that new members must be appended to the end of this enum. The values are serialised as integers when an
   // ApiResponse is sent over the wire, so inserting a member in the middle would change the meaning of existing values
-  Unauthorised
+  Unauthorised,
+  Conflict
 }
