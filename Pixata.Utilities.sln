@@ -24,6 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		CLAUDE.md = CLAUDE.md
 		.github\copilot-instructions.md = .github\copilot-instructions.md
 		LICENSE.md = LICENSE.md
 		.github\workflows\master.yml = .github\workflows\master.yml
