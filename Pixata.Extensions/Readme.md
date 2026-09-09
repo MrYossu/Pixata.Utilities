@@ -1,204 +1,32 @@
-# Pixata.Extensions [![Pixata.Extensions Nuget package](https://img.shields.io/nuget/v/Pixata.Extensions)](https://www.nuget.org/packages/Pixata.Extensions/)
+ï»¿# Pixata.Extensions [![Pixata.Extensions Nuget package](https://img.shields.io/nuget/v/Pixata.Extensions)](https://www.nuget.org/packages/Pixata.Extensions/)
 
-![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Extensions/VroumVroum.png "Pixata") 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Extensions/VroumVroum.png "Pixata")
 
-Some useful utility classes and methods I've developed over the past few years. I have only put in a few so far, and the test project is woefully empty, but hopefully that will change over time.
+Some useful utility classes and methods I've developed over the past few years.
+
+This is the shared kernel of the Pixata packages. It has no dependency on EF Core, ASP.NET Core or anything else that would stop you referencing it from a Blazor WASM app, so the types that both halves of a client/server feature need are kept here.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
 
-Here is a brief description of the methods in the classes so far (alphabetically by class name):
-
-## CollectionExtensionMethods
-`ToObservableCollection<T>()` - Converts any collection that implements IEnumerable<T> into an ObservableCollection<T>. Provides a neater syntax than passing the collection to the `ObservableCollection`'s constructor.
-
-`ToObservableCollectionAsync<T>()` - An async version of `ToObservableCollection()`, with overloads for `IQueryable<T>` and `IAsyncEnumerable<T>`. Queries whose provider supports async enumeration (eg EF Core) are streamed asynchronously, others are enumerated synchronously. This package does not reference EF Core, so it can be used client-side (eg Blazor WASM) without dragging EF Core in.
-
-`RemoveWhere<T>()` - Removes items from an ObservableCollection based on a predicate. Mimics the `List<T>.RemoveAll()` method that doesn't exist for ObservableCollections
-
-`ForEach<T>()` - Allows you to use `ForEach` on any collection that implements IEnumerable<T>, as opposed to the similarly named method built in to the .NET framework that requires you to cast the collection to a `List<T>` first.
-
-`Flatten<T>()` - Enables you to flatten a hierarchical collection.
-
-`Synchronise()` Synchronises a collection of entities with a collection of DTOs by updating existing entities, removing entities that are no longer present in the DTO collection, and adding new entities.
-
-This is useful when converting a DTO containing a collection navigation property into an EF Core entity, avoiding the need to write repetitive code to handle collection additions, updates, and removals.
-
-Example usage: Suppose an entity has a collection of `Note` entities and you want to update the notes from a DTO:
-
-```csharp
-myEntity.Notes.Synchronise(dto.Notes,
-  note => note.Id,         // How to get the key of the entity
-  note => note.Id,         // How to get the key of the DTO (probably the same as above)
-  note => note.Id <= 0,    // How to determine if the DTO is new
-  dto => new Note {        // How to create a new entity from the DTO
-    Text = dto.Text
-  },
-  (note, dto) => {         // How to update an existing entity from the DTO
-    note.Text = dto.Text;
-  });
-  ```
-
-## DateExtensionMethods
-`ToPrettyString()` - Formats a date as "12th January 2021". This relies on the `OrdinalSuffix()` method in `NumberExtensionMethods`. Works for both non-nullable and nullable `DateTime` variables, returning an empty string if the value is null.
-
-`StartOfWeek()` - Returns a `DateTime` (date part only, no time) representing the start of the week for the date passed as a parameter. Takes a `DayOfWeek` parameter to specify which day you consider the week to start.
-
-`StartOfMonth()` - Gives you a `DateTime` that represents the first day of the month at 00:00:00 for the month containing the date you pass in.
-
-`EndOfMonth()` - Gives you a `DateTime` that represents the last millisecond of the month containing the date you pass in.
-
-`EndOfDay()` - Gives you a `DateTime` that represents the last millisecond of the day containing the date you pass in (23:59:59.999).
-
-`IsWithin()` - True if the date is within the range supplied.
-
-`DateRangeToString()` - Formats a date/time range in a human-friendly way, omitting redundant information. Overloads accept nullable and non-nullable from/to dates and an optional `showTime` boolean to include times. The formatting omits repeated parts when possible (same day, same month, same year) and produces concise strings.
-
-## EnumHelper
-`GetValues<T>()` - Enumerates the values of an `enum` and returns a list of enum entries with their integer Ids and value names as string. Names are split by camel case, eg "MyEnumValue" becomes "My enum value".
-
-## ExceptionExtensions
-`MessageStack()` - Returns the exception messages all the way down the InnerException stack. There is an overload that accepts a `separator` string; the default uses `Environment.NewLine`. `MessageStack` includes stack traces in the returned text.
-
-`Messages()` - Similar to `MessageStack` but returns only the messages (no stack traces). An overload accepts a `separator` string; the default is `Environment.NewLine`.
-
-`InnerType()` - Returns the type name of the innermost exception.
-
-## MemoryCacheExtensions
-If you aren't caching your data, then I strongly recommend you watch [this short video](https://www.youtube.com/watch?v=Q49SZlxskjs) before reading on! It's by no means the only video out there, but it's short, clear and shows the benefits of caching in a very compelling way.
-
-For people developing big sites, who are probably using a distributed cache, then the .NET `HybridCache` is ideal. However, for most of us, who develop single-instance apps, this is not necessary, and can be a suboptimal choice due to the extra implicit behaviour you must understand, less obvious performance characteristics and a framework-level dependency. For most of us, the `IMemoryCache` is a better choice.
-
-The one major advantage that the hybrid cache has even for smaller apps is that it has a built-in mechanism to avoid cache stampede protection, meaning that if multiple requests come in for the same uncached item, only one of them will trigger the expensive data retrieval operation, and the others will wait for the result to be cached. If you use a memory cache, you need to implement this yourself, which is not hard, but adds extra noise to your code.
-
-The class here adds a `GetOrCreateSafe()` extension method to `IMemoryCache` to provide a simple way to add cache stampede protection, with no more code than you would have anyway. It is intended to replace the regular `GetOrCreate()` method. Basic usage is as follows...
-
-```csharp
-Product? product = await cache.GetOrCreateSafe($"product-{id}",
-                                               async _ => await dbContext.Products.SingleOrDefault(p => p.Id == id),
-                                               TimeSpan.FromMinutes(10));
-```
-
-**Important:** See the note below about caching entities
-
-In reality, you should store your cache keys in a centralised place, and not hard-code them like this, but this was kept simple to show the syntax.
-
-The lambda includes a cancellation token (which is ignored in the above example), which can be passed through if needed...
-
-```csharp
-Product? product = await cache.GetOrCreateSafe($"product-{id}",
-                                               async ct => await repository.GetByIdAsync(id, ct),
-                                               TimeSpan.FromMinutes(5));
-```
-
-### Avoiding tracking exceptions
-
-Suppose your products were associated with categories, and as the categories do not change very often, you decide to cache them. The cached categories will be associated with the database context from which they were pulled. If, on a subsequent request, you want to associate a product with a category, you would use one of the cached ones, and then scratch your head when EF threw an exception about a duplicate Id. 
-
-The way to avoid this is to check the Ids of the categories you need, then pass those to a method that attaches the categories you need to the current context...
-
-```csharp
-  private async Task<List<Category>> GetTrackedCategories(List<int> ids) {
-    List<Category> cached = await GetCachedCategories();
-    List<Category> tracked = [];
-    foreach (Category category in cached.Where(l => ids.Contains(l.Id))) {
-      Category? existing = _context.Categories.Local.FindEntry(category.Id)?.Entity;
-      if (existing is not null) {
-        tracked.Add(existing);
-      } else {
-        _context.Attach(category);
-        tracked.Add(category);
-      }
-    }
-    return tracked;
-  }
-
-  private async Task<List<Category>> GetCachedCategories() =>
-    await memoryCache.GetOrCreateSafe(CacheKeysHelper.Categories, async ct =>
-      await _context.Categories.ToListAsync(cancellationToken: ct));
-```
-
-This is all a bit nasty, but I haven't found a better way to do it yet.
-
-Instead of caching database entities (which can be large, and are not always ideal candidates for caching, see note above), you can convert to DTOs and cache those...
-
-```csharp
-ProductDto? dto = await cache.GetOrCreateSafe($"product-{id}",
-                                              async ct => {
-                                                Product entity = await repository.GetByIdAsync(id, ct);
-                                                return new ProductDto {
-                                                  Id = entity.Id,
-                                                  Name = entity.Name,
-                                                  Price = entity.Price
-                                                };
-                                              },
-                                              TimeSpan.FromMinutes(10)
-```
-
-## NumberExtensionMethods
-`OrdinalSuffix()` - Returns the ordinal suffix, eg "st" for 1, 21, 31, etc, "nd" for 2, 22, etc, "rd" for 3, 23, etc and "th" for most other numbers. Has an optional parameter that controls whether the returned string includes the number itself (e.g. "1st") or only the suffix (e.g. "st").
-
-`DoubleToFraction()` - Converts a double to a 2-tuple of its improper fractional representation, eg 3.5 is converted to (7, 2) meaning 7/2. Slightly modified from https://stackoverflow.com/a/32903747/706346.
-
-`DoubleToProperFraction()` - Returns a 3-tuple representing a proper fraction, eg 3.5 is converted to (3, 1, 2) meaning 3 1/2. Note: for whole numbers the tuple may look like (5, 0, 1).
-
-`DoubleToProperFractionString()` - Returns a cleaned string representation of `DoubleToProperFraction()`, e.g. "2/3" or "3 2/7".
-
-`ToPercentageString()` - Converts a number into the string representation of it as a percentage of a maximum. There are overloads for combinations of `int` and `double` parameters; the method returns a rounded percentage string and accepts an optional `digits` parameter to control decimal places.
-
-`ToDurationString()` - Converts a number of seconds to a human-readable duration string. For example, 125 will be converted to "2 minutes 5 seconds".
-
-`S()` - Returns an empty string when the input is 1, otherwise returns "s". Useful for simple pluralisation in formatted strings (e.g. `"{n} item{n.S()}"`).
-
-`ToFileSizeString()` - Converts a byte count to a human-readable file size string (bytes, Kb, Mb, Gb, etc.) with configurable precision.
-
-`NewId()` - Returns a new negative integer ID that is not in the list of IDs passed in. This is useful for generating temporary IDs for new items that have not yet been saved to a database and therefore don't have a real ID yet.
-
-## StringExtensionMethods
-`JoinStr()` - Does the same as string.Join, but as an extension method, so it can be chained. Sample usage...
-```csharp
-List<int> nums = [1, 2, 3];
-string result = nums.JoinStr(); // result is "1, 2, 3"
-string result = nums.JoinStr(", ", n => $"Number {n}"); // result is "Number 1, Number 2, Number 3"
-```
-
-Takes an optional separator string (default is ", ").
-
-`JoinStrAnd()` - Joins the elements of a sequence into a single string, with "and" before the last element. Takes an optional function to convert each element to a string. Defaults to the element's `ToString()` method. Sample usage...
-```csharp
-List<int> nums = [1, 2, 3];
-string result = nums.JoinStrAnd(); // result is "1, 2 and 3"
-string result = nums.JoinStrAnd(", ", n => $"Number {n}"); // result is "Number 1, Number 2 and Number 3"
-```
-
-`SplitCamelCase()` - Splits a camel case string into separate words, eg "ThisIsMyString" gets converted into "This Is My String". Very useful for working with enums (although see below for variations of this method that work directly with enums). Takes an option `bool` parameter that specifies whether the second and subsequent words in the returned string should be lower case. Default is true.
-
-`SplitEnumCamelCase<T>()` - Splits an enum member name using camel case as the rule. For example, if you had an `enum` named `Aminals`, and it had a member named `JimSpriggs`, then `Animals.JimSpriggs.SplitEnumCamelCase()` would return "Jim Spriggs". Takes an option `bool` parameter  as above.
-
-`SplitEnumValueCamelCase<T>()` - Splits an enum member value (assumed to be an int) using camel case as the rule. Using the same `enum` as in the previous comment, if `JimSpriggs` had a value of 2, then `2.SplitEnumValueCamelCase<Animals>()` would return "Jim Spriggs". Takes an option `bool` parameter  as above.
-
-`FirstLine()` - Returns the first line of a multi-line string. Useful for getting the first line of someone's address
-
-`LastLine()` - Returns the last line of a multi-line string. Useful for getting the last line of someone's address
-
-`OtherLines()` - Returns all but the first line of a multi-line string. Useful for getting the second and subsequent line(s) of someone's address
-
-`RemoveDiacritics()` - Removes diacritics (such as ð, â and ý) from letters, replacing them with their (hopefully) nearest Latin equivalents. Note that for boring technical reasons, the returned string was lowercase in earlier versions of this package. Starting with version 1.27.0, case is preserved.
-
-`ToTitleCase` - Replaces the first character of each word with upper case e.g. This is an example - This Is An Example. If the parameter is null, an empty string is returned
-
-`Sanitise` - Sanitises a string to be safe for use as a file name. Invalid characters are replaced, and sequences of invalid characters are condensed.
-
-`UkPostcodeValid` -Checks if the string has the format of a valid UK postcode.
-
-`FormatUkPostcode` - Formats a string as a UK postcode, ie upper case, and with a space between the major and minor parts. If the string is not in a valid postcode format, it is returned unchanged.
-
-`TruncateAtWordBoundary` - Truncates a string to a specified maximum length, ensuring that it does not cut off in the middle of a word. If truncation occurs, an optional suffix (e.g. "...") can be appended to indicate that the string has been shortened. By default, ellipses ("...") are added, but this can be supressed by supplying `false` as a parameter.
-
-`ToHtml` - Converts a string to a format suitable for display in HTML by adding <p></p> tags around paragraphs. Paragraphs are defined as blocks of text separated by one or more blank lines.
-
-## ObjectExtensionMethods
-`Base64Encode()` - Encodes a byte array to a base64-encoded string, suitable for using an embedded images in HTML. Assumes a jpg image, but this can be overriden by supplying a different `mimeType` parameter, eg "png".
-
-`Clone()` - Returns a shallow clone of an object. Uses reflection, but despite all the myths about this being slow, doing 10 million clones only took about 300ms longer than a reflection-free (and way more complex) version, so I went for simplicity.
-
-`DumpProperties` - Dumps the names and values of all simple properties of an object to a string for debugging purposes. Simple properties are enums, string, decimal, DateTime, DateOnly, TimeOnly, TimeSpan, and Guid. Properties that cannot be read or are in the optional ignoredProperties list are skipped.
+## Documentation
+
+The documentation is split over the following pages...
+
+| Page | What's in it |
+| --- | --- |
+| [API responses](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.ApiResponse.md) | `ApiResponse<T>`, the result type used across these packages instead of exceptions, its states, and how to compose calls that return one. Also `Yunit`, which stands in for `void` |
+| [String extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Strings.md) | Joining collections into strings, splitting camel case, working with multi-line strings, cleaning up strings and UK postcodes |
+| [Number extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Numbers.md) | Ordinal suffixes, percentages, durations, file sizes, pluralisation, Hebrew numerals and fractions |
+| [Date extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Dates.md) | Pretty date formatting, start and end of week, month and day, and human-friendly date ranges |
+| [Collection extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Collections.md) | Observable collections, `ForEach`, `Flatten`, and synchronising a collection of entities with a collection of DTOs |
+| [Object extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Objects.md) | Base64 encoding, shallow cloning and dumping an object's properties for debugging |
+| [Exception extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Exceptions.md) | Flattening the `InnerException` stack into readable text |
+| [Enum helpers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Enums.md) | Listing the members of an `enum` with display-friendly names |
+| [Caching](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Caching.md) | `GetOrCreateSafe()`, which adds cache stampede protection to `IMemoryCache`, and the trouble with caching EF Core entities |
+| [Shared models](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md) | The auditing models, the encryption DTOs and `UploadFileDto`, which are shared between the client-side and server-side packages |
+
+## Related packages
+
+- [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor) - Blazor components, including one that renders an `ApiResponse<T>`
+- [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore) - server-side helpers, auditing and payload encryption
+- [Pixata.Email](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email) - a MailKit wrapper that returns an `ApiResponse<Yunit>`

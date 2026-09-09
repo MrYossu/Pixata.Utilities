@@ -66,7 +66,7 @@ _emailService.SmtpSettings = myStmpSettings;
 
 ## Usage
 
-There are two overloads of the `SendEmail` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
+There are three overloads of the `SendEmailAsync` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
 
 ```c#
 (await _emailService.SendEmailAsync("billy@shears.com", "Hello from Jim Spriggs", htmlBody)))
@@ -76,6 +76,16 @@ There are two overloads of the `SendEmail` method. Easiest to use is a simple on
 If you want more control over what is sent and how, the second overload takes an `EmailParameters` object. The various constructors allow you to specify more detail, as well as adding multiple recipients. You can also add attachments, which are tuples of the form `(string FileName, string MimeType, byte[] Data)`.
 
 See [the `EmailParameters` code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Email/EmailParameters.cs) for more details.
+
+The third overload takes an `EmailParameters` and a MailKit `SecureSocketOptions`, for servers that need something other than the plain `UseSsl` flag from your settings...
+
+```c#
+await _emailService.SendEmailAsync(emailParameters, SecureSocketOptions.StartTls);
+```
+
+The other two overloads connect using `SmtpSettings.UseSsl`, so you only need this one if your server wants STARTTLS, or wants the connection left unencrypted.
+
+All three return an `ApiResponse<Yunit>`, so the failure message is the exception's message. The two overloads that use `UseSsl` prefix it with the exception type (eg `"(AuthenticationException) Authentication failed"`), as that is usually the useful part when a send fails.
 
 ## Breaking change in version 2.0.0
 
@@ -99,4 +109,4 @@ If you are upgrading from a LanguageExt version, then you will need to change th
 
 You will need also to make sure you wrap the first line in brackets (as shown above). This was not necessary before.
 
-If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type). However, this is not a common pattern when using this service.
+If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type). However, this is not a common pattern when using this service.

@@ -1,32 +1,56 @@
 ﻿# Pixata.Blazor [![Pixata.Blazor Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor)](https://www.nuget.org/packages/Pixata.Blazor/)
 
-![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor/avion.png "Pixata") 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor/avion.png "Pixata")
 
 Like many developers, I find myself writing the same Blazor components over and over again. I have gathered some of those components together in one place, and am making them available for anyone else who might find them useful.
 
-A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for thiese components.
+A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
-I sometimes waffle on about these components [in my blog](https://www.pixata.co.uk/tag/blazor/). No-one reads it, but it satisifes my deeply buried desire to be a writer. If you read the blog, you'll realize why the desire is still deeply buried!
+I sometimes waffle on about these components [in my blog](https://www.pixata.co.uk/tag/blazor/). No-one reads it, but it satisfies my deeply buried desire to be a writer. If you read the blog, you'll realize why the desire is still deeply buried!
 
-There is a [complimentary package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents), which contains additional components for those who have a subscription to Telerik.
+There is a [complementary package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents), which contains additional components for those who have a subscription to Telerik.
 
 ## Sample project
-I have added a [Blazor web project](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Test) to the repository, and intend to use that to try out and demonstrate the components. It doesn't contain samples for all the components yet, but I hope to add more over time.
+
+I have added a [Blazor web project](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Sample) to the repository, and use that to try out and demonstrate the components. It doesn't contain samples for all the components yet, but I hope to add more over time. It is deployed at [test.pixata.co.uk](https://test.pixata.co.uk).
+
+## Documentation
+
+The documentation is split over the following pages...
+
+| Page | What's in it |
+| --- | --- |
+| [Styling](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Styling.md) | The stylesheet the components ship with, how to fit it to your own theme, and what changed when the Bootstrap dependency was dropped |
+| [Components](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Components.md) | `VirtualiseWithState`, `SitePageTitle`, `IdentityInspector`, `HebrewDatePicker`, `ListOrGridChooser` and the `CommonComponentBase` base class |
+| [Containers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Containers.md) | `HtmlRaw`, `Busy`, `Loader`, `Confirm`, `Inform`, `MessageView`, `Expander` and `DumpCollection` |
+| [ApiResponseView](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ApiResponseView.md) | The container that renders an `ApiResponse<T>`, handling loading, errors and expired sessions for you |
+| [Forms](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Forms.md) | The form layout components and the complete `FormRowXxx` rows |
+| [Notifications](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md) | Toast-style notifications, and how to have API errors reported through them |
+| [Audit viewer](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.AuditViewer.md) | The component for browsing the audit trail recorded by Pixata.AspNetCore |
+| [Helpers and services](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Helpers.md) | `PersistentStateHelper`, `TemplateHelper`, `MessageBroker`, `PasswordOptionsHelper`, `ScrollStateService`, `PixataBaseClientService` and `TryGetQueryString()` |
+| [Payload encryption](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Encryption.md) | Client-side setup for encrypting API traffic between a WASM app and an ASP.NET Core server |
+| [Declarative control flow](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ControlFlow.md) | `If`, `Switch` and `ForEach`, which replace the Razor `@if`, `@switch` and `@foreach` statements |
 
 ## Registering dependencies
-Some components in this package require services to be registered in the DI container. To make this easier, you can use the `AddPixataBlazor` extension method in your `Program.cs` file:
+
+Some components in this package require services to be registered in the DI container. To make this easier, you can use the `AddPixataBlazor` extension method in your `Program.cs` file...
 
 ```csharp
 builder.Services.AddPixataBlazor();
 ```
 
 This registers the following services (all from this package)...
-- MessageBrokerInstance - Used by the `MessageBroker`, which allows you to send messages between different components without them needing to know about each other.
-- NotificationHelper - [sample page](https://test.pixata.co.uk/Notifications)
-- PasswordOptionsHelper - If you app uses ASP.NET Core Identity, then it is helpful to show the user the password requirements (it's amazing how many sites don't do this, and wait until you've submitted the information before telling you that your password isn't strng enough!). Simple inject the component into a component, 
-- PersistentStateHelper - Persists data, avoiding hitting the database twice when a page loads. Used by the [ApiResponseView](https://test.pixata.co.uk/ApiResponseViewRegular), but can be used independently. .NET 10 supports this functionality with the [<code>[PersistentState]</code> attribute](https://learn.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-10.0?view=aspnetcore-10.0#declarative-model-for-persisting-state-from-components-and-services), but this component was written around .NET 8, and is still useful for projects targetting .NET versions before 10.
-- TemplateHelper - usage can be seen on the [Telerik grid sample page](https://test.pixata.co.uk/TelerikGrid), although the helper can be used with any component that supports templating
-- ScrollStateService - Needed by the `VirtualiseWithState` component
+
+| Service | What needs it |
+| --- | --- |
+| `MessageBrokerInstance` | The [`MessageBroker`](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Helpers.md#messagebroker), which lets components send messages to each other without knowing about each other |
+| `NotificationHelper` | The [notifications](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md) ([sample page](https://test.pixata.co.uk/Notifications)) |
+| `PasswordOptionsHelper` | Showing the user your Identity password requirements |
+| `PersistentStateHelper<T>` | Avoiding hitting the database twice when a page loads. Used by the [`ApiResponseView`](https://test.pixata.co.uk/ApiResponseViewRegular), but can be used independently |
+| `ScrollStateService` | The `VirtualiseWithState` component |
+| `TemplateHelper` | Building templates for grids and other templated components ([sample page](https://test.pixata.co.uk/TelerikGrid)) |
+
+>`PersistentStateHelper<T>` does the same job as the [`[PersistentState]` attribute](https://learn.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-10.0?view=aspnetcore-10.0#declarative-model-for-persisting-state-from-components-and-services) added in .NET 10. This one was written around .NET 8, and is still useful for projects targetting .NET versions before 10.
 
 It also registers [Blazored.LocalStorage](https://github.com/Blazored/LocalStorage), which `ScrollStateService` needs. This package has always referenced Blazored.LocalStorage, but until v2.34.0 it left you to register it, so unless you knew to add `builder.Services.AddBlazoredLocalStorage()` yourself, your app fell over at startup when the container was validated. If you have already registered it (with your own options, for example), your registration is left alone.
 
@@ -38,539 +62,14 @@ It is a good idea to add this line **after** your own service registrations, as 
 
 This isn't actually a problem, but removing the duplicate registration will keep the code file a bit cleaner.
 
-## Styling
-The components used to expect the host app to have Bootstrap loaded, as they used a handful of its layout, form, button and utility classes. That was fine when I wrote them (I used Bootstrap in every app), but it meant that this package quietly depended on something it doesn't reference, and that apps which use a different CSS framework (or none) got components that looked broken. Worse, the classes it used (`form-group`, `input-group-prepend`, `pl-2`) were Bootstrap 4 ones that were removed in Bootstrap 5, so even Bootstrap apps were only half getting what they should.
+The audit viewer and the payload encryption have their own registration methods, as most apps don't want them. See the pages listed above.
 
-As of v3.0.0, the package brings its own styles. Add this line to your `App.razor` (or `_Host.cshtml`, or `index.html`, depending on your project type)...
+## Styling
+
+Don't forget to add the stylesheet, or the components will render unstyled...
 
 ```html
 <link rel="stylesheet" href="_content/Pixata.Blazor/pixata.css" />
 ```
 
-...and you no longer need Bootstrap for these components. If you do use Bootstrap (or Tailwind, or anything else), you can carry on doing so. Every class in the file is prefixed with `pixata-`, so nothing in it can clash with your own styles.
-
-The sizes and colours are copied from Bootstrap 4.3.1 (MIT licensed), which is what the components were written against, so they look the same as they always did.
-
-### Making them fit your theme
-The stylesheet is written in terms of CSS custom properties, so you can restyle the components without having to fight the specificity of individual rules. Override whichever ones you want in your own CSS, after the link above...
-
-```css
-:root {
-  --pixata-primary: #6f42c1;
-  --pixata-primary-hover: #59359a;
-  --pixata-border-radius: 0;
-  --pixata-danger: #b02a37;
-}
-```
-
-The full list is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter.
-
-### If you were styling the components yourself
-The class names in the rendered markup have changed, so if you had CSS of your own targetting them, you'll need to update your selectors. The mapping is a simple one...
-
-| Was | Now |
-| --- | --- |
-| `row`, `col-lg-2`, `col-lg-10`, `col-1` | `pixata-row`, `pixata-col-2`, `pixata-col-10`, `pixata-col-1` |
-| `form-group`, `form-control`, `col-form-label` | `pixata-form-group`, `pixata-form-control`, `pixata-col-form-label` |
-| `input-group`, `input-group-prepend`, `input-group-append`, `input-group-text` | the same names, prefixed with `pixata-` |
-| `btn`, `btn-primary`, `btn-secondary`, `btn-sm`, `btn-link`, `btn-close` | the same names, prefixed with `pixata-` |
-| `card`, `card-header`, `card-body`, `card-footer`, `alert`, `badge` | the same names, prefixed with `pixata-` |
-| Utilities (`d-flex`, `h-100`, `mt-3`, `text-danger`, and so on) | the same names, prefixed with `pixata-` |
-| `invalid` (added to a form row's input when validation fails) | `pixata-invalid`, which now comes with a red border of its own |
-
-The `SpinnerClass` parameters on `Busy`, `Confirm` and `LoadingOption` now default to `pixata-spinner pixata-spinner-sm` rather than the Bootstrap `spinner-border spinner-border-sm`. If you were passing your own value (a Font Awesome class, for example), nothing changes.
-
-## Components
-
-Some general componets that I found useful.
-
-### VirtualiseWithState
-
-I recently discovered the `<Virtualize>` component, which allows you to load data as it's needed, and have full flexibility over the display. This gives you the power and convenience of the virtualisation feature in the telerik Blazor grid, but without your page looking too grid-like.
-
-As with the grid, it's often desirable to save the state of the component, so that if the user navigates away and back, their previous state will be restored. That can all be done manually, but why bother when we can write a component to do it for us?
-
-The `<VirtualiseWithState>` component is a wrapper around the `<Virtualize>` component that automatically saves and restores the state. You can see it in action below (ignore the uninspiring design, I'm a software engineer, not a UI designer!). If you scroll down the list, then navigate to another page and come back, your previous scroll position will be restored.
-
-See the the [live demo](https://test.pixata.co.uk/VirtualiseWithStateSample) for how it looks, and the [source for that page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/VirtualiseWithStateSample.razor) to see the code required.
-
-### AuditViewer
-When investigating bug reports from customers, I often find that the issue is nothing to do with my code, it's that they have changed something in the database, and I need to find out what they changed, and when.
-
-Adding auditing manually can be done, but means you end up writing the same intrusive code in every app. To combat this, I have added some auditing functionality to this repo. This consist of two parts...
-
-- An EF Core interceptor that adds audit entries for every change to entities in your `DbContext`
-- A Blazor component that allows you to browse the audit information easily.
-
-See the [AuditViewer readme](Icon/AuditViewer.md) for more information.
-
-### CommonComponentBase
-As I found myself writing the same helper methods to support common tasks in components, I decided to create a base class that all my components could inherit from. This was a balance between providing what is most likely to be needed and not stuffing absolutely everything into a God class. The eventual choice reflects my own needs, but I hope that it will be useful to others as well.
-
-The class injects instances of `AuthenticationStateProvider`, `NavigationManager` and `TemplateHelper` so you don't need to do this yourself.
-
-As every app I write uses Identity, there are certain basic auth-related tasks that come up over and over again, specifically related to checking if a user is authed, and getting their claims. Therefore I added the following methods (all async)...
-
-- `IsAuthed()` - True if the user is authenticated, false if not
-- `Task<bool> HasClaim(string claim)` - True if the user has the claim, false if the user is not authenticated or does not have the claim
-- `Task<string> GetClaim(string claim)` - Gets the value of a claim of the current user. If the user is not authenticated or does not have the claim, returns an empty string
-- `Task<string> GetEmail()` - Gets the email address of the current user. If the user is not authenticated, returns an empty string
-
->**Note:** The examples below use a TelerikGrid, merely because that's where I use this helper the most. However, it can be used with any component that allows you to specify a template.
-
-The class also includes some methods to help with templates. For example, without these methods, create custom content for a grid cell in a `TelerikGrid` would look something like this...
-
-```xml
-<GridColumn Field="@nameof(InvestorOverview.Name)">
-  <Template>
-    <a href="@($"{RouteHelper.InvestorDetails}{(context as InvestorOverview).Id}")" class="inv-text">@((context as InvestorOverview).Name)</a>
-  </Template>
-</GridColumn>
-```
-
-With the helpers it can be shortened to just...
-
-```xml
-<GridColumn Field="@nameof(InvestorOverview.Name)" 
-            Template="@(TemplateHelper.Uri<InvestorOverview>(i => i.Name, i => $"{RouteHelper.InvestorDetails}{i.Id}", cssClass: "inv-text"))" />
-```
-
-This creates a link. There is a `Text()` method that does the same thing (without the second paramter) that returns plain text.
-
-Both methods allow you to specify CSS classes and/or styles as either hard-coded strings or as `<Func<T, string>>` that creates the text. In the example above, the investor's name will take the `inv-text` class. If you don't want to add any CSS classes or styles, just pass in an empty string to allow the compiler to distingiush which overload is intended.
-
-If you are doing this multiple times, say for many columns in a grid as above, then it's worth setting defaults. You can do this in the component's `OnInitialized` method as follows...
-```csharp
-  DefaultCssClass = "inv-text";
-```
-
-This class will be applied automatically, unless you override it. There are options to set default styles, as well as `Func`s for both class and style.
-
-To make life even easier, there is a `ToText()` method, which you can use to set up the link `Func` once. Again, in `OnInitialized` you can do something like this...
-
-```csharp
-  ToText = i => $"{RouteHelper.InvestorDetails}{i.Id}";
-```
-
-Then your template becomes even simpler...
-
-```xml
-<GridColumn Field="@nameof(InvestorOverview.Name)" 
-            Template="@(TemplateHelper.Uri<InvestorOverview>(i => i.Name))" />
-```
-
-### SitePageTitle
-This is intended to be a drop-in replacement for the built-in `PageTitle` component that allows you to include your site name in the page title, without having to do this on every page.
-
-You need to set your site name in `Program.cs` as follows...
-
-```csharp
-SitePageTitle.SiteName = "Fred's Chippie";
-```
-
-Then `<SitePageTitle>Home</SitePageTitle>` will set the page title to "Home - Fred's Chippie".
-
-You can change the separator as follows...
-
-```csharp
-SitePageTitle.Separator = "::";
-```
-
-...which will render the title as "Home :: Fred's Chippie".
-
-You can also swap the order of the page title and site name as follows...
-
-```csharp
-SitePageTitle.SiteNameAtEnd = false;
-```
-
-...which will render the title as "Fred's Chippie :: Home".
-
-**Remember** that if you are working on a mixed-mode app, you will need to do this in both `Program.cs` files.
-
-### IdentityInspector
-Useful for debugging sites that use ASP.NET Core Identity. It displays the current user's claims and policies. As Identity allows you to query the claims, you don't need any configuration for this to work, but it does not allow you to list policies, only to check if a named exists. Therefore, it needs to know what policies (if any) you want to check.
-
-There are two ways of specifying the policies to be checked...
-
-You can pass a hard-coded list of policy names as follows...
-```xml
-<IdentityInspector Policies='["Initials", "FullName"]' />
-```
-
-I don't like hard-coded strings, and so keep things like policy names as constants in a helper class. For example, your class might loook like this...
-
-```csharp
-public class PoliciesHelper {
-  public const string Initials = nameof(Initials);
-  public const string FullName = nameof(FullName);
-}
-```
-
-In this case, you can just pass in the type...
-
-```xml
-<IdentityInspector PoliciesType="@typeof(PoliciesHelper)" />
-```
-
-If both parameters are set, then `PoliciesType` will be used, and `Policies` will be ignored.
-
-### HebrewDatePicker
-
-A date picker that allows you to select Hebrew dates.
-
-It highlights Shabbos and these Yomim Tovim with a light grey background:
-- Pesach (days 1, 2, 7, 8)
-- Shavuos (days 1, 2)
-- Rosh Hashona (days 1, 2)
-- Yom Kippur
-- Succos, including Shemini Atzeres and Simchas Torah
-
-You can also set `IncludeOtherNonWorkDays="true"` to highlight Chol Hamoed, Tisha B'av and Purim in a slightly lighter grey.
-
-## Containers
-
-These components are intended to wrap up other parts of your page, and add functionality.
-
-### HtmlRaw
-
-Convenience component for displaying raw HTML. Instead of doing this...
-
-    @((MarkupString)_html)
-
-...where `_html` is a string variable in your code, you can now do...
-
-    <HtmlRaw Html="@_html" />
-
-...which is (for me anyway) slightly easier to remember.
-
-### Busy
-Useful when data is loading. You bind the `Data` parameter to whatever model you are using. When the page first loads, and the model is (presumably) null, a busy indicator will show. When the data has loaded, and the model is non-null, the display is automatically switched to the real content.
-
-Sample usage...
-
-```
-<Busy Data="_avreich">
-  <!-- HTML and other Blazor components go here... -->
-</Busy>
-```
-
-By default, the message "Loading..." is displayed while the data is loading, but you can override that by setting the `Message` parameter.
-
-You can also set the class for the container, in case you want to add your own styling, and set the classes for the spinner and spinner colour. By default, the component uses the `pixata-spinner` class from this package's stylesheet (see [Styling](#styling)), but you can override this to use something else if you want.
-
-### Confirm
-Replaces the nasty JavaScript `confirm` function with something that looks nicer, and doesn't require any JSInterop.
-
-See the [sample code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ConfirmSample.razor) ([live demo](https://test.pixata.co.uk/ConfirmSample)) for an example of how to use it. You can set the pop-up to disable the entire window, or just one section of it. You can also specify if the pop-up should disappear as soon as a button is clicked, or if it should remain visible, but disabled (with a busy indicator) until you dismiss it.
-
-### Inform
-Similar to `Confirm`, but only has one button. At the moment, the pop-up id dismissed as soon as you click the button, but I intned to add the feature described above to this component as well.
-
-### DumpCollection
-OK, so this isn't striclty a container, but it's close enough to put here.
-
-I often find the need to see the contents of a collection while developing. I found myself writing code like this far too often...
-
-```html
-<ul>
-  @foreach (var t in SomeCollection) {
-    <li>(@t.Id) @t.Name</li>
-  }
-</ul>
-```
-
-...where the exact contents of the `<li>` tag varies with each usage.
-
-To make this quicker and easier, I added the `DumpCollection` component to do this. By default, the component will just call `ToString()` on each item in the collection, allowing you to do a quick dump of the contents...
-
-```html
-<DumpCollection Collection="SomeCollection" />
-```
-
-If you want to format the output differently, you can use the `Display` parameter to pass in a lambda that formats each item...
-
-```html
-<DumpCollection Collection="SomeCollection" Display="@(t => $"({t.Id})  {t.Name})" />
-```
-
-The component has two extra paramters, `UlClass` and `LiClass` that allow you to pass in CSS classes for the `<ul>` element and the `<li>` elements.
-
-## Payload Encryption
-
-This package includes client-side support for transparent ECDH + AES-256-GCM payload encryption between Blazor WASM and an ASP.NET Core server. All HTTP request and response bodies are encrypted so that data appears as binary blobs in the browser's Network tab.
-
-The encryption uses the browser's SubtleCrypto API via JS interop, so it only works for components running in **WebAssembly** — not server-side rendering. This is by design: when code runs server-side, API calls go directly from server to server and never appear in the browser's Network tab, so there is nothing to hide.
-
-For a full explanation of how the encryption works, server-side setup, and important .NET 10 caveats, see the [encryption section in the Pixata.AspNetCore readme](../Pixata.AspNetCore/Readme.md#payload-encryption-ecdh--aes-256-gcm).
-
-### Client setup
-
-The `crypto-interop.js` file is included as a static web asset in this package and is loaded automatically via `IJSRuntime` when the encryption initialises. No manual `<script>` tag is needed in either `index.html` or `App.razor`.
-
-#### Pure WASM app (standalone or ASP.NET Core hosted)
-
-This is the pattern where your WASM project has an `index.html` in `wwwroot` and a single `Program.cs`. Register the encrypted HTTP client in `Program.cs`:
-
-```csharp
-using Pixata.Blazor.Encryption;
-
-builder.Services.AddEncryptedHttpClient<IMyService, MyHttpService>(
-    options => options.SiteId = "my-unique-site-id",
-    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
-```
-
-Or use the shorthand:
-
-```csharp
-builder.Services.AddEncryptedHttpClient<IMyService, MyHttpService>(
-    "my-unique-site-id",
-    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
-```
-
-If you are using the ASP.NET Core hosted pattern (where a server project hosts the WASM app), the server project's `Program.cs` will already have `app.UseBlazorFrameworkFiles()` and `app.MapFallbackToFile("index.html")`. The encryption server-side setup (see the [Pixata.AspNetCore readme](../Pixata.AspNetCore/Readme.md#payload-encryption-ecdh--aes-256-gcm)) goes in that same server `Program.cs`.
-
-#### Hybrid Blazor Web App (.NET 8+)
-
-This is the pattern where you have a server project (with `App.razor` instead of `index.html`) and a separate `.Client` project for WebAssembly components. There are two `Program.cs` files.
-
-Register the encrypted HTTP client in the **client project's** `Program.cs` only:
-
-```csharp
-using Pixata.Blazor.Encryption;
-
-builder.Services.AddEncryptedHttpClient<IMyService, MyHttpService>(
-    options => options.SiteId = "my-unique-site-id",
-    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
-```
-
-`builder.HostEnvironment.BaseAddress` resolves to the origin the WASM app was served from, so it works correctly in all environments (localhost during development, your production domain after deployment) without any URL changes.
-
-Do **not** register the encrypted HTTP client in the server project's `Program.cs`. The encryption relies on the browser's SubtleCrypto API and will not work in server-side rendering. Components that need encrypted API calls should use `@rendermode InteractiveWebAssembly` (or `InteractiveAuto`, which falls back to WebAssembly after the WASM runtime is downloaded).
-
-The encryption server-side setup (`AddEncryptionServer`, `UseEncryptionMiddleware`, `MapEncryptionHandshake`) goes in the **server project's** `Program.cs` as described in the [Pixata.AspNetCore readme](../Pixata.AspNetCore/Readme.md#payload-encryption-ecdh--aes-256-gcm).
-
-### What gets registered
-
-The `SiteId` **must match** the value used on the server.
-
-`AddEncryptedHttpClient` registers:
-- `SubtleCryptoEncryptor` as the `IPayloadEncryptor` (handles JS interop with the browser's SubtleCrypto API)
-- `EncryptingHandler` as a `DelegatingHandler` on the `HttpClient` (transparently encrypts/decrypts request and response bodies)
-- A separate `"EncryptionHandshake"` named `HttpClient` for the initial key exchange
-
-Your service class (`MyHttpService` in the examples above) uses `HttpClient` as normal — it never sees any encryption. The `EncryptingHandler` performs the ECDH handshake on the first API call and encrypts/decrypts all traffic after that.
-
-## Extensions
-
-### Persistent state and caching helper
-
->**Note:** Starting from .NET 10, there is a built-in way to do this, see [the .NET documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor/state-management/prerendered-state-persistence?view=aspnetcore-10.0) for more details.
-
-When using the Blazor web app template introduced in .NET8, you have to deal with avoiding loading the data twice, once when the code is rendered on the server, and once when is rendered again on the client.
-
-The `PersistentStateHelper` helper class in this package does that for you. Please see [this blog post](https://www.pixata.co.uk/2024/11/21/loading-data-in-a-blazor-web-app-without-multiple-database-or-api-calls/) where I describe it, and show some sample code.
-
-`Get` also takes an optional `persistWhen` predicate, which says whether the data that was loaded is worth persisting. If you don't pass one, the data is persisted as long as it isn't null. This is useful if the data may represent a failure (as an `ApiResponse<T>` does), as persisting that would hand a transient server-side failure to the client as if it were the answer, rather than letting the client simply load the data again.
-
-### TemplateHelper
-Are you fed up of writing code like this (sample from a Telerik grid, but it's the same for Microsoft's or anyone else's)...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)" >
-      <Template>
-        @{
-          TransactionView tv = context as TransactionView;
-          <div style="text-align: right">@tv.Amount.ToString("C2")</div>
-        }
-      </Template>
-    </GridColumn>
-```
-
-So am I, so I added the `TemplateHelper` to help. It contains three methods...
-
-`Text<T>` allows you to reduce the above code to...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)"
-       Template="@(MainLayout.Text<TransactionView>(tv => tv.Amount.ToString("C2"), "text-align: right"))" />
-```
-
-The method takes a `Func` that converts your entity to a `string`, which is what is displayed. There are two optional `string` parameters that allow you to set the style (as above) and/or CSS class(es).
-
-There is a similar method named `Link` which works the same, but takes a URI, and allows you to replace...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)" >
-      <Template>
-        @{
-          TransactionView tv = context as TransactionView;
-          <div style="text-align: right">
-            <a href="/transaction/@tv.Id">@tv.Amount.ToString("C2")</a>
-          </div>
-        }
-      </Template>
-    </GridColumn>
-```
-
-...with...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)"
-      Template="@(MainLayout.Link<TransactionView>(tv => tv.Amount.ToString("C2"),
-                                                                tv => $"/transaction/{tv.Id}"
-                                                               "text-align: right"))" />
-```
-
-There are also overloads for this that take `Func`s for the style, CSS and link title. For example, if you want to base your CSS on an entity property, you can do something like this...
-
-```html
-    <GridColumn Field="@nameof(TransactionView.Amount)"
-      Template="@(MainLayout.BuildLink<TransactionView>(tv => tv.Amount.ToString("C2"),
-                                                                tv => $"/transaction/{tv.Id}"
-                                                                tv => tv.Amount >= 0 ? "" : "withdrawl"
-                                                               "text-align: right"))" />
-```
-
-This will add a CSS class `withdrawl` if the transaction amount were negative. You can do similar things for the style and link title.
-
-You can see a sample of these in action on the sample project, [demo here](https://test.pixata.co.uk/TelerikGrid), [source code here](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/GridSample.razor).
-
-### TryGetQueryString()
-Documentation coming soon...
-
-## Forms
-A set of components for laying out forms. These come in two flavours, the classic label-beside-the-input style (which was originally built with Bootstrap's grid, but no longer needs Bootstrap - see [Styling](#styling)), and floating label style.
-
-The [form page on the sample project]([link text](https://test.pixata.co.uk/FormSample)) shows examples of the first style. A live sample of it can be seen here... [live demo](https://test.pixata.co.uk/FormSample), [source code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/FormSample.razor). You can see the full collection of components by checking the ones named `FormRowAbc` in [the Forms section of the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor/Forms).
-
-I hope to add a sample for the floating label style soon. The controls are...
-
-- `FormSingle` - a single input control with label
-- `FormDouble` - a row with two input controls and labels
-- `FormTriple` - a row with three input controls and labels
-- `FormQuad` - a row with four input controls and labels
-- `FormName` - a row with title, first name and surname input controls and labels
-
-Sample usage of these is as follows (Telerik input controls used, but you can use any input controls you like)...
-
-```xml
-<FormSingle Label="Email" Id="Email" Required="true">
-  <TelerikTextBox @bind-Value="@user.Email" Id="Email" />
-  <ValidationMessage For="@(() => user.Email)" />
-</FormSingle>
-```
-
-This looks like this...
-
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormSingle.png "FormSingle") 
-
-Note that the `Required` property merely adds a red asterisk to the label, it does not enforce any validation. You still need to do that yourself.
-
-The `FormDouble`, `FormTriple` and `FormQuad` components work in a similar way, except that the properties for setting the Ids are named   `FirstId`, `SecondId`, `ThirdId` and `FourthId`. The properties for the labels and required are named similarly.
-
-The `FormName` component is very similar to `FormTriple`, except that the controls are sized more appropriately for names. Sample usage is as follows...`
-
-```xml
-<FormName TitleLabel="Title" TitleId="Title" TitleRequired="true"
-          FirstNameLabel="First name" FirstNameId="FirstName" FirstNameRequired="true"
-          SurnameLabel="Surname" SurnameId="Surname" SurnameRequired="true">
-  <Title>
-    <TelerikTextBox @bind-Value="@user.Title" Id="Title" />
-    <ValidationMessage For="@(() => user.Title)" />
-  </Title>
-  <Salutation>
-    <div style="max-width: 300px">
-      <TelerikTextBox @bind-Value="@user.FirstName" Id="FirstName" />
-      <ValidationMessage For="@(() => user.FirstName)" />
-    </div>
-  </Salutation>
-  <Surname>
-    <div style="max-width: 300px">
-      <TelerikTextBox @bind-Value="@user.Surname" Id="Surname" />
-      <ValidationMessage For="@(() => user.Surname)" />
-    </div>
-  </Surname>
-</FormName>
-```
-
-This looks like this...
-
-![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormName.png "FormName") 
-
-## Replacing Razor code with declarative components
-
-> **Note:** Since adding these components, I have discovered that intermittently, my apps would randomly stop working without any exceptions or errors being surfaced. This doesn't happen very often, but once it happens, it can stick. For that reason, I recommend using these componets with caution. If you encounter any weird, intermittent issues, try replacing these components with the equivalent `@if`, `@switch` and `@foreach` to see if that resolves the problem.
-
-I have found some issues using some `@` statements in Razor markup. For one, Visual Studio seems to have its own ideas about how the braces should be formatted, and these are usually different from my ideas! Also, the functionality from the rather fabulous [ZenCoding ](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.ZenCoding) extension doesn't work consistently with `@` statements.
-
-For this reason, I have added some components to replace these statements with Blazor components.
-
-### If
-
-The `If` component replaces the Razor `@if` statement. Usage is pretty simple. Assume `_n` is an `int` variable...
-
-```xml
-<If Condition="@(_n > 10)">
-  <Then>
-    <p>Number is greater than 10</p>
-  </Then>
-  <ElseIf Condition="@(_n == 5)">
-    <p>Number is 5</p>
-  </ElseIf>
-  <ElseIf Condition="@(_n > 5)">
-    <p>Number is greater than 5</p>
-  </ElseIf>
-  <Else>
-    <p>Number is 5 or less</p>
-  </Else>
-</If>
-```
-
-The `ElseIf` and `Else` components are optional, and you can have as many `ElseIf` components as you like. The `Condition` parameter is a `bool` that determines if the content is displayed.
-
-**Note:** This package also contains a deprecated `Conditional` component, which is a more basic version of the above. Apart from the fact that "if", "then" and "else" are keywords familiar to generations of programmers, `Conditonal` only allows for the "if" clause, and an optional "else". By contrast, `If` allows for as many "else if" clauses as you like.
-
-### Switch
-
-The `Switch` component replaces the Razor `@switch` statement. Assume the same `int` variable as above...
-
-```xml
-<Switch Variable="@_n">
-  <Case Equals="1">
-    <p>n is one</p>
-  </Case>
-  <Case Equals="2">
-    <p>n is two</p>
-  </Case>
-  <Default>
-    <p>n is not one or two</p>
-  </Default>
-</Switch>
-```
-
-### ForEach
-
-The `ForEach` component allows you to replace usages of `@foreach` with a component...
-
-```xml
-<ul>
-  <ForEach Collection="@Enumerable.Range(0, 3)">
-    <Each Context="n">
-      <li>@n</li>
-    </Each>
-  </ForEach>
-</ul>
-```
-
-The `Collection` parameter can be any `IEnumerable<T>`. The `Context` parameter on `Each` supplies an item from the collection.
-
-In the case above, you can use the `EachFunc` parameter to do the same with much less code...
-
-```xml
-<ul>
-  <ForEach Collection="@Enumerable.Range(0, 3)" EachFunc="@(n => $"<li>{n}</li>")" />
-</ul>
-```
-
-**Note:** If you specify both `Each` and `EachFunc`, `Each` alone will be used.
+See [Styling](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Styling.md) for what's in it, and how to fit it to your own theme.
