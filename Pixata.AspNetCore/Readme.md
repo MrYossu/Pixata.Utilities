@@ -1,18 +1,39 @@
 ﻿# Pixata.AspNetCore [![Pixata.AspNetCore Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore)](https://www.nuget.org/packages/Pixata.AspNetCore/)
 
-![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore/ConnectionReseau.png "Pixata") 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore/ConnectionReseau.png "Pixata")
+
+Server-side helpers for ASP.NET Core apps - entity auditing, payload encryption, request logging, endpoint validation, document generation and route dumping.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
 
 ## Important
-As the validation extension in this package is only designed to be used in server-side projects, you should reference this package in a server-side project. If you have a WASM project, adding a reference to this package will cause errors.
+
+Everything in this package is designed to be used server-side, and it references EF Core and other server-only libraries. Reference it from a server-side project. If you add it to a WASM project, you will get errors.
+
+The client-side halves of the features that have one live in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor), and the types that both ends share live in [Pixata.Extensions](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions).
+
+## Documentation
+
+The documentation is split over the following pages...
+
+| Page | What's in it |
+| --- | --- |
+| [Auditing entities](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Auditing.md) | The EF Core interceptor that records every entity change, how to set it up, opting entities out, identifying the user, serving the trail to the viewer, and retention policies |
+| [Payload encryption](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Encryption.md) | ECDH + AES-256-GCM encryption of request and response bodies, the server-side setup, and the .NET 10 caveats |
+| [Request logging middleware](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.RequestLogging.md) | Logging incoming requests to help debug API calls, with redaction of anything that looks sensitive |
+| [Validation endpoint filter](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Validation.md) | Running your FluentValidation validators on the server, so a WASM client can't bypass them |
+| [Generating documents and PDFs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md) | `DocumentTemplateHelper`, which renders a Blazor component to HTML or to a PDF |
+| [Route dumping](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.RouteDumping.md) | An endpoint that lists every route in your app |
 
 ## Registering services
+
 The code in this package requires certain dependencies to be registered in the DI container. In order to make this easier, there is an extension method to add them all. In `Program.cs` add this line...
 
 ```csharp
 builder.Services.AddPixataAspNetCore<ContactModel>();
 ```
 
-...where `ContactModel` is any type in your project. If you are using the validation filter (see below), then it is used here to point the framework to the assembly containing your models.
+...where `ContactModel` is any type in your project. If you are using the validation filter, then it is used here to point the framework to the assembly containing your models.
 
 This registers everything in the package. If you only want some of it, you can say so...
 
@@ -41,435 +62,10 @@ If you don't use the validation filter, there is a non-generic overload, which r
 builder.Services.AddPixataAspNetCore(o => o.RegisterPdfConverter = false);
 ```
 
-If you want to use the route dump feature (see below) then you'll also need to the following...
+Note that `AddPixataAspNetCore` does not register the auditing, encryption or request logging services. Those have their own registration methods, as most apps only want some of them. See the pages listed above.
+
+If you want to use the [route dump feature](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.RouteDumping.md) then you'll also need the following...
 
 ```csharp
 app.MapPixataAspNetCoreApiEndpoints();
 ```
-
-## Auditing entities
-When investigating bug reports from customers, I often find that the issue is nothing to do with my code, it's that they have changed something in the database, and I need to find out what they changed, and when.
-
-Adding auditing manually can be done, but means you end up writing the same intrusive code in every app. To combat this, I have added some auditing functionality to this repo. This consist of two parts...
-
-- An EF Core interceptor that adds audit entries for every change to entities in your `DbContext`
-- A Blazor component that allows you to browse the audit information easily.
-
-See the [AuditViewer readme](../Pixata.Blazor/Icon/AuditViewer.md) for more information.
-
-## Route dumping
-When writing API endpoints, it can be hard to keep track of all the routes you have defined, and what they are. To help with this, I have added a feature that will dump all the routes in your app to the console when the app starts.
-
-All you need to do is call `MapPixataAspNetCoreApiEndpoints()` as shown above, and then navigate to `/dump-routes`.
-
-By default, it ignores routes that start with any of `"/_blazor"`, `"/_framework"` or `"/_content"`, as these are not usually of interest. You can override this by passing an array of routes to ignore...
-
-```csharp
-app.MapPixataAspNetCoreApiEndpoints(["/_blazor", "/_framework", "/_content", "/hello"]);
-```
-
-Note that you need to include the default ones if you want to ignore them. If you pass in an empty array, then all routes will be dumped.
-
-Also note that any routes that **start with** any of the specified routes will be ignored. So if you specify `"/hello"`, then `"/hello-world"` will also be ignored.
-
-## DocumentTemplateHelper
-I often find myuself generating documents, either for conversion to PDF, or for emailing. This has always been a painful process, so I decided that a helper was needed. This class contains two methods, one for generating HTML from a Blazor component, and another for generating a PDF from a Blazor component.
-
-If you didn't register the services as explained above, then you need to register a Microsoft dependency and the Pixata template helper in `Program.cs`...
-
-```csharp
-builder.Services.AddScoped<HtmlRenderer>();
-builder.Services.AddScoped<DocumentTemplateHelper>();
-```
-
-If you haven't already got it, then you will also need to add the following line...
-
-```csharp
-builder.Services.AddHttpContextAccessor();
-```
-
-Note that you only need this if you registered the services yourself. As of v1.9.0, `AddPixataAspNetCore` registers the `IHttpContextAccessor` for you.
-
-Then, you create a Blazor component that will be the template for the document you wish to generate. It needs to accept two parameters as follows...
-
-```xml
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title></title>
-    <!-- Any links you need -->
-  </head>
-  <body>
-    <div>
-      <h2><img src="@BaseUrl/images/logo.png" width="70" height="70" /> Thank you for contacting us</h2>
-      <div>Your message has been received, and we'll get back to you as soon as possible.</div>
-      <div>
-        <h3>Your message</h3>
-        <HtmlRaw Html="@(Model.Message.Replace("\n", "<br/>"))" />
-      </div>
-      <h3>The Fab Ferret Emporium team</h3>
-    </div>
-  </body>
-</html>
-```
-
-```csharp
-@code {
-
-  [Parameter]
-  public string BaseUrl { get; set; } = "";
-
-  [Parameter]
-  public ContactModel Model { get; set; } = null!;
-
-}
-```
-
-The `BaseUrl` parameter is populated by the template helper, and allows you to pull in images from your web site, as you can see above. The `Model` parameter is the model that you want to use to populate the template, and can be any class.
-
-With that in place, you can inject a `DocumentTemplateHelper` into your code, and use it as follows...
-
-```csharp
-// Generate HTML for use as an email body...
-ContactModel model = new ContactModel { Name = "Billy Shears", Email = "billy@shears.co.uk" };
-string html = await documentTemplateHelper
-  .CreateHtmlFromTemplate<EmailFromContactPageTemplate>((nameof(EmailFromContactPageTemplate.Model), model));
-
-// Generate PDF for attaching to an email...
-InvoiceModel model = new InvoiceModel { /* set properties */ };
-byte[] bytes = await documentTemplateHelper
-  .CreatePdfFromTemplate<InvoiceTemplate>((nameof(InvoiceTemplate.Model), model));
-```
-
-## RequestLoggingMiddleware
-When writing API endpoints, it can be hard to debug 400 errors, which are often caused by incorrect or mismatched paths, or invalid data in the request. You often don't get much clue as to what actually happened.
-
-To help with this, I have added a piece of middleware that will log every incoming request to the app (subject to configuration choices, see below). This will log the path, the query string, the headers and the body of the request. This can be very helpful for debugging, as it allows you to see exactly what was sent to the server.
-
-You need to register the middleware in your `Program.cs` file, as follows...
-```csharp
-builder.Services.AddRequestLogging();
-```
-
-This will use the default configuration, which is to include the request headers and body in the logging, and ignore any requests whose path starts with any of...
-
-- "_framework"
-- "_blazor"
-- "_content"
-- ".well-known"
-
-### Redaction
-Logging whole requests is only useful if you can leave the logging on, and you can't do that if the log fills up with authentication cookies and passwords. Anyone who can read your logs would then be able to impersonate your users.
-
-Since v1.9.0, the middleware redacts anything that looks sensitive before it writes to the log...
-
-- **Headers** - the value of any header listed in `RedactedHeaders` is replaced. By default that's `Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, `X-Api-Key`, `Api-Key`, `X-Auth-Token`, `X-Access-Token`, `X-CSRF-Token`, `X-XSRF-Token` and `RequestVerificationToken`
-- **Query string parameters, form fields and JSON properties** - the value of anything whose name is listed in `RedactedFields` is replaced. By default that covers the usual suspects (`password`, `newPassword`, `token`, `accessToken`, `refreshToken`, `secret`, `clientSecret`, `apiKey`, `cardNumber`, `cvv` and friends). JSON is redacted at any depth, including inside arrays
-- **Bodies of unexpected content types** aren't logged at all. Only the content types listed in `LoggedBodyContentTypes` (JSON, XML, plain text and form data) are written to the log, so a file upload no longer ends up as several megabytes of binary in your log file
-- **Long bodies are truncated** to `MaxBodyLength` characters (4096 by default). Only that much of the body is read, so a large upload isn't pulled into memory just to be thrown away
-
-Matching of header and field names is case-insensitive.
-
-If the body claims to be JSON but doesn't parse (which is often exactly the sort of thing you're trying to debug), it's logged as it came in, but with anything that looks like a sensitive property redacted.
-
-Redaction is a safety net, not a guarantee. If your app posts sensitive data in a field with a name I haven't thought of, add it to `RedactedFields`.
-
-### Options
-You can override any of the options as follows...
-```csharp
-builder.Services.AddRequestLogging(o => {
-  o.IgnoredPaths = ["_framework", "health"]; // Or whatever you want to ignore
-  o.LogBody = false;
-  o.LogHeaders = false;
-  o.RedactedHeaders.Add("X-My-Custom-Auth-Header");
-  o.RedactedFields.Add("mothersMaidenName");
-  o.MaxBodyLength = 1024;
-  o.RedactionPlaceholder = "***";
-});
-```
-
-To log all requests, set `o.IgnoredPaths` to an empty array `[]`.
-
-The defaults are exposed as `RequestLoggingOptions.DefaultRedactedHeaders` and `RequestLoggingOptions.DefaultRedactedFields`, so you can build your own list from them if you'd rather replace the sets than add to them. Bear in mind that if you do replace them, anything you leave out is no longer redacted.
-
-You then need to register the middleware...
-```csharp
-app.UseRequestLogging();
-```
-
-This should be after any authentication/authorisation middleware, but before any endpoint mapping.
-
-## ValidationEndpointFilter
-When using fluent validation in Blazor server-side, the chances of anyone bypassing your validation are small enough that they can be ignored for most cases. However, when running in client-side (WASM), validation is handled in the WASM, and the data is then sent to the server via API endpoints. This means that anyone can modify the request, or write a script to mimic it, and bypass your validation.
-
-The obvious (and correct) solution to this is to validate your incoming models on the server before doing anything with the data. Generally, this is a bit of a pain, as it involves duplicating validation code.
-
-To avoid this, you can add the `ValidationEndpointFilter` to your API endpoints. This will run the same validation as in the client, but on the server, so if anyone tries to bypass the client-side validation, they will be stopped by the server-side validation. This allows you to protect your endpoints without adding much extra code.
-
-As explained above, the validation extension requires services to be registered in the DI container. To make this easier, you can use the `AddPixataAspNetCore` extension method in your `Program.cs` file:
-
-```csharp
-builder.Services.AddPixataAspNetCore<ContactModel>();
-```
-
-...where `ContactModel` is any model, it is used here to point the framework to the assembly containing your models.
-
-Basic usage is very simple. Once you've registered the dependencies (see above), you just add the `AddEndpointFilter` extension method to any API endpoints that need validation.
-
-You change...
-
-```csharp
-app.MapPost("/contact-api", async (GeneralServiceInterface service, ContactModel model) =>
-  await service.Contact(model));
-```
-
-...to...
-
-```csharp
-app.MapPost("/contact-api", async (GeneralServiceInterface service, ContactModel model) =>
-  await service.Contact(model))
-    .AddValidationEndpointFilter();
-```
-
-When the endpoint is hit, the appropriate validator will be found and applied to the incoming model.
-
-If there were any validation errors, then the filter will return an `ApiResponse` with a `State` of `ApiResponseStates.Failure` and a `Message` containing a formatted string of the validation errors. By default, the errors are formatted as a comma-delimited string of the form `$"{e.PropertyName}: {e.ErrorMessage}"`, which would produce something like... `"Validation errors - Name: Required, Email: Invalid"`. This can be overriden as explained below.
-
-The filter has two optional parameters.
-
-You can pass in a `Func<ValidationFailure, string>` to format the validation errors. For example, if you wanted to include the error code in the message, you could do something like this...
-
-
-```csharp
-app.MapPost(RoutesHelper.ApiContact, async (GeneralServiceInterface service, ContactModel model) =>
-  await service.Contact(model))
-    .AddEndpointFilter(new ValidationEndpointFilter(err => $"({err.ErrorCode}) {err.ErrorMessage} for {err.PropertyName}"));
-```
-
-This would produce a message of the form `"Validation errors - (NotEmptyValidator) Required for Name, (EmailValidator) Invalid for Email"`.
-
-By default, the filter will pick up any a validator for any class in the assembly you specified when registering (with the `AddValidatorsFromAssemblyContaining` method, see above). You may wish to restrict this further, and specify that only classes within a certain namepsace should be validated. You can do this as follows...
-
-```csharp
-app.MapPost("/contact-api", async (GeneralServiceInterface service, ContactModel model) =>
-  await service.Contact(model)).AddEndpointFilter(new ValidationEndpointFilter(nameSpace: typeof(ContactModel).Namespace);
-```
-
-This is not a common scenario, but is included for those odd cases.
-
-## Auditing
-This package includes a comprehensive entity auditing system that automatically captures all entity changes via an EF Core `SaveChangesInterceptor`. It stores full snapshots and property-level diffs for every create, update, and delete operation.
-
-### Setup
-
-**1. Register auditing services in `Program.cs`:**
-
-```csharp
-builder.Services.AddAuditing<MyDbContext>();
-```
-
-**2. Add the interceptor to your DbContext registration:**
-
-```csharp
-builder.Services.AddDbContext<MyDbContext>((serviceProvider, options) =>
-  options.UseSqlServer(connectionString)
-         .AddAuditingInterceptor(serviceProvider));
-```
-
-**3. Add the `Audit` DbSet to your DbContext:**
-
-```csharp
-using Pixata.AspNetCore.Auditing.Models;
-
-public class MyDbContext : DbContext {
-  public DbSet<Audit> Audits { get; set; }
-  // ... other DbSets
-}
-```
-
-**4. Create and run an EF Core migration:**
-
-```sh
-dotnet ef migrations add AddAuditing
-dotnet ef database update
-```
-
-### Data model
-
-Each audit entry stores:
-- **EntityType** — fully qualified type name
-- **EntityId** — JSON-serialised primary key (handles composite keys)
-- **Operation** — Created, Updated, or Deleted
-- **ChangedBy** — username from Identity or custom identifier
-- **ChangedAt** — UTC timestamp
-- **FullSnapshot** — complete JSON of the entity at that point in time
-- **ChangedProperties** — JSON of changed properties only (null for Create/Delete), stored as `{ "PropertyName": [oldValue, newValue] }`
-
-### Opting out of auditing
-
-Entities can opt out of auditing by applying the `[NoAudit]` attribute:
-
-```csharp
-using Pixata.AspNetCore.Auditing.Attributes;
-
-[NoAudit]
-public class SensitiveEntity {
-  // This entity will not be audited
-}
-```
-
-### Custom user identification
-
-By default, the auditing system identifies users via `HttpContext.User.Identity.Name`, falling back to `"System"` if no user is available. You can override this by injecting `AuditUserContextInterface` and setting the `UserIdentifier` property:
-
-```csharp
-public class SprocketController(AuditUserContextInterface auditContext) : ControllerBase {
-  [AllowAnonymous]
-  public async Task<IActionResult> NotifyFromSprocket() {
-    auditContext.UserIdentifier = "SprocketNotificationEndpoint";
-    // Any changes saved in this request will use this identifier
-  }
-}
-```
-
-### Blazor audit viewer
-
-The `Pixata.Blazor` package includes an `AuditViewer` component that provides a UI for browsing audit history. To use it, add this to a Blazor page:
-
-```razor
-@page "/audit-viewer"
-<AuditViewer TContext="MyDbContext" />
-```
-
-The viewer provides:
-- Entity type selector (discovers `DbSet<T>` properties via reflection)
-- Searchable/pageable entity grid
-- Timeline view showing property changes with diff highlighting
-- Filters for date range, user, and operation type
-- URL querystring integration — refreshing the page preserves your current view
-
-### Retention policy
-
-By default, audit entries are retained forever. You can configure automatic cleanup by specifying a retention period:
-
-```csharp
-builder.Services.AddAuditing<MyDbContext>(options => {
-  options.RetentionPeriod = TimeSpan.FromDays(90); // Delete entries older than 90 days
-  options.CleanupInterval = TimeSpan.FromHours(6); // Check every 6 hours (default: daily)
-});
-```
-
-When a retention period is set, a background service runs periodically and deletes audit entries older than the configured period.
-
-## Payload Encryption (ECDH + AES-256-GCM)
-
-This package (together with `Pixata.Blazor` and `Pixata.Extensions`) provides transparent encryption of all HTTP request and response bodies between a Blazor WASM client and an ASP.NET Core server. The data in the browser's Network tab appears as binary blobs instead of readable JSON.
-
-This is **obfuscation**, not a replacement for TLS. It prevents casual inspection of API traffic by the app's own users (e.g. reading prices, internal IDs, or other business data from the Network tab). A sufficiently motivated attacker who controls the browser can still intercept data by modifying the JS interop module or setting breakpoints.
-
-### How it works
-
-1. On the first API call, the Blazor client generates an ephemeral ECDH P-256 key pair (via the browser's SubtleCrypto API) and sends its public key to a handshake endpoint on the server.
-2. The server generates its own ECDH key pair (via .NET `ECDiffieHellman`), derives a shared secret, then uses HKDF-SHA256 to produce an AES-256 session key. It returns its public key and a session ID.
-3. The client derives the same AES-256 key using SubtleCrypto.
-4. All subsequent requests and responses are encrypted with AES-256-GCM. The wire format is `[12-byte nonce][ciphertext][16-byte auth tag]` sent as `application/octet-stream`.
-
-Each session gets a unique key pair. Each deployment can use a different site ID, so even with identical ECDH outputs, different sites derive different keys.
-
-### Server setup (this package)
-
-**1. Register encryption services in `Program.cs`:**
-
-```csharp
-using Pixata.AspNetCore.Encryption;
-
-builder.Services.AddEncryptionServer(options =>
-    options.SiteId = "my-unique-site-id");
-```
-
-Or use the shorthand:
-
-```csharp
-builder.Services.AddEncryptionServer("my-unique-site-id");
-```
-
-**2. Add middleware and endpoints (order matters):**
-
-```csharp
-app.UseStaticFiles();
-app.UseEncryptionMiddleware();
-app.MapEncryptionHandshake();
-// If you're using .NET 10, see the note below
-
-// Your API endpoints go here
-app.MapMyEndpoints();
-```
-
-The encryption middleware must come **before** your API endpoints but **after** `UseStaticFiles()`. The handshake endpoint is mapped at `/api/encryption/handshake` by default.
-
-### Client setup (Pixata.Blazor)
-
-See the [encryption section in the Pixata.Blazor readme](../Pixata.Blazor/Readme.md#payload-encryption) for client-side setup instructions.
-
-### .NET 10: POST/PUT endpoint caveat
-
-In .NET 10, the `RequestDelegateFactory` checks `Content-Type` before the middleware has a chance to decrypt the body and restore `application/json`. This means that POST and PUT endpoints using automatic body binding (e.g. `(ProductDto product)` as a parameter) will return **415 Unsupported Media Type**.
-
-The fix is to use `HttpContext` and read the body manually:
-
-```csharp
-// Instead of this (breaks with encryption middleware):
-app.MapPost("/api/products", async (ProductDto product, ProductServiceInterface service) =>
-  Results.Ok(await service.Create(product)));
-
-// Do this:
-app.MapPost("/api/products", async (HttpContext context, ProductServiceInterface service) => {
-  ProductDto? product = await context.Request.ReadFromJsonAsync<ProductDto>();
-  if (product is null) {
-    return Results.BadRequest();
-  }
-  ProductDto created = await service.Create(product);
-  return Results.Created($"/api/products/{created.Id}", created);
-});
-```
-
-GET and DELETE endpoints (which have no request body) are unaffected.
-
-### .NET 10: Static web asset fingerprinting
-
-.NET 10 adds fingerprint hashes to static web asset filenames (e.g. `crypto-interop.a1b2c3d4e5.js`). Blazor's `IJSRuntime` imports the original path, so the JS module used by the encryption won't load.
-
-Add this middleware **before** `UseStaticFiles()` to strip the fingerprints:
-
-```csharp
-app.UseRclFingerprintFallback();
-app.UseStaticFiles();
-```
-
-This is included in `Pixata.AspNetCore.Encryption` as an extension method. It only affects paths under `/_content/` and only strips fingerprint-shaped segments, so it won't interfere with other static files.
-
-### Configuration options
-
-All options have sensible defaults. The full set:
-
-| Option | Default | Description |
-| --- | --- | --- |
-| `SiteId` | `"default"` | Per-deployment identifier used in HKDF key derivation |
-| `HandshakePath` | `"/api/encryption/handshake"` | Path for the key exchange endpoint |
-| `SessionHeader` | `"X-Encryption-Session"` | Header name carrying the session ID |
-| `EncryptedContentType` | `"application/octet-stream"` | Content-Type used for encrypted payloads |
-
-The `SiteId` **must match** between server and client. All other options must also match if you change them from defaults.
-
-### Session key storage
-
-Session keys are stored in an in-memory `ConcurrentDictionary`. In a multi-instance deployment, you will need sticky sessions or a distributed cache to ensure a client always hits the server that holds its session key.
-
-### Packages involved
-
-| Package | What it contributes |
-| --- | --- |
-| `Pixata.Extensions` | `EncryptionOptions`, `HandshakeRequest`, `HandshakeResponse` (shared between client and server) |
-| `Pixata.Blazor` | `SubtleCryptoEncryptor` (JS interop), `EncryptingHandler` (DelegatingHandler), `AddEncryptedHttpClient` extension, `crypto-interop.js` |
-| `Pixata.AspNetCore` | `EncryptionMiddleware`, `HandshakeEndpoint`, `AesGcmEncryptor`, `SessionKeyStore`, `AddEncryptionServer`/`UseEncryptionMiddleware`/`MapEncryptionHandshake`/`UseRclFingerprintFallback` extensions |
