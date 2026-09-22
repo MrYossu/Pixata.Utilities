@@ -16,6 +16,9 @@
 
   #endregion
 
+  public RenderFragment<object> Text<T>(Func<T, string> convert) where T : class =>
+    Text(convert, style: "");
+
   public RenderFragment<object> Text<T>(Func<T, string> convert, string style = "", string classCss = "") where T : class =>
     context => __builder => {
       <div class="@classCss" style="@style">@(new MarkupString(convert(context as T)))</div>
@@ -23,23 +26,24 @@
 
   public RenderFragment<object> Text<T>(Func<T, string> convert, Func<T, string>? styleFunc = null, Func<T, string>? cssFunc = null, Func<T, string>? titleFunc = null) where T : class =>
     context => __builder => {
-      <div class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))" style="@(styleFunc is null ? "" : styleFunc(context as T))" title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</div>
+      <div class="@(cssFunc is null ? "" : cssFunc(context as T))" style="@(styleFunc is null ? "" : styleFunc(context as T))" title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</div>
     };
+
+  public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri) where T : class =>
+    Link(convert, uri, style: "");
 
   public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri, string style = "", string classCss = "", string title = "") where T : class =>
     context => __builder => {
-      if (string.IsNullOrWhiteSpace(title)) {
-        title = context.ToString();
-      }
-      <a href="@uri(context as T)" style="@($"display: block; width: 100%; {style}")" class="@classCss" title="@title">@(new MarkupString(convert(context as T)))</a>
+      string linkTitle = string.IsNullOrWhiteSpace(title) ? context.ToString() : title;
+      <a href="@uri(context as T)" style="@($"display: block; width: 100%; {style}")" class="@classCss" title="@linkTitle">@(new MarkupString(convert(context as T)))</a>
     };
 
   public RenderFragment<object> Link<T>(Func<T, string> convert, Func<T, string> uri, Func<T, string>? styleFunc = null, Func<T, string>? cssFunc = null, Func<T, string>? titleFunc = null) where T : class =>
     context => __builder => {
       <a href="@uri(context as T)" 
-         class="@(cssFunc is null ? context.ToString() : cssFunc(context as T))"
+         class="@(cssFunc is null ? "" : cssFunc(context as T))"
          style=@($"display: block; width: 100%; {(styleFunc is null ? "" : styleFunc(context as T))}")
-         title="@(titleFunc is null ? "" : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</a>
+         title="@(titleFunc is null ? context.ToString() : titleFunc(context as T))">@(new MarkupString(convert(context as T)))</a>
     };
 
 }

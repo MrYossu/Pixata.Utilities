@@ -155,7 +155,7 @@ So am I, so I added the `TemplateHelper` to help. Inject it (or inherit [`Common
             Template="@(TemplateHelper.Text<TransactionView>(tv => tv.Amount.ToString("C2"), "text-align: right"))" />
 ```
 
-The method takes a `Func` that converts your entity to a `string`, which is what is displayed. There are two optional `string` parameters that allow you to set the style (as above) and/or CSS class(es).
+The method takes a `Func` that converts your entity to a `string`, which is what is displayed. There are two optional `string` parameters that allow you to set the style (as above) and/or CSS class(es). A hard-coded style is used above, but this is optional. You can also use a `Func` to base the style or CSS class on the item being rendered, see below.
 
 `Link<T>()` works the same way, but also takes a `Func` for the URI, and renders the text as a link. It replaces...
 
@@ -191,8 +191,10 @@ Both `Text<T>()` and `Link<T>()` have an overload that takes `Func<T, string>` f
                                                              cssFunc: tv => tv.Amount >= 0 ? "" : "withdrawal"))" />
 ```
 
-This adds the CSS class `withdrawal` when the transaction amount is negative. You can do similar things for the style and the link title.
+This adds the CSS class `withdrawal` when the transaction amount is negative. You can do similar things for the style and the link title. Any of the `Func`s you leave out give an empty value, except for the link title, which defaults to the `ToString()` of the item being rendered, the same as the string overload does.
 
-`BuildLink<T>()` is the same as that last overload of `Link<T>()`, and `BuildTemplate<T>()` and `BuildTemplateLink<T>()` are the older names for `Text<T>()` and `Link<T>()`. They are all still there, so existing code keeps working.
+The string overload of `Link<T>()` also takes an optional `title`, which becomes the link's tooltip. If you don't pass one (or, in the `Func` overload, a `titleFunc`), each link gets the `ToString()` of the item it is rendering.
+
+`BuildLink<T>()` is the same as that last overload of `Link<T>()`, and `BuildTemplate<T>()` and `BuildTemplateLink<T>()` are the older names for `Text<T>()` and `Link<T>()`. They are all still there, so existing code keeps working, but will be removed at some point, so please convert your code to use the newer methods.
 
 You can see a sample of these in action on the sample project, [demo here](https://test.pixata.co.uk/TelerikGrid), [source code here](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/GridSample.razor).
