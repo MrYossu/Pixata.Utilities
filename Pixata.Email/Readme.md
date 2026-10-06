@@ -6,7 +6,9 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
-# Breaking change
+# Breaking changes
+
+>**Version 3.0.0** changes how the connection to the SMTP server is secured. `SmtpSettings` has a new `SocketOptions` property (a MailKit `SecureSocketOptions`), and `UseSsl` is now a `bool?` marked `[Obsolete]`. If you set neither, the service uses implicit TLS on port 465 and *required* STARTTLS on any other port, where it used to try implicit TLS everywhere (which failed on port 587). See [securing the connection](#securing-the-connection) below.
 
 >As from version 2.0.0, this package does not use LanguageExt, but returns an `ApiResponse` from the [Pixata.Extensions package](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions) to indicate success or failure. See the comments at the bottom of this document for how this will change your code.
 
@@ -18,7 +20,7 @@ First thing you need to do is add your SMTP server and "From" details to your ap
   "Smtp": {
     "Server": "your.smtp.server",
     "Port": 999,
-    "UseSsl": "true",
+    "SocketOptions": "StartTls", // Optional, see below
     "UserName": "your.username",
     "Password": "your.password",
     "FromEmail": "jim@spriggs.com",
@@ -28,6 +30,19 @@ First thing you need to do is add your SMTP server and "From" details to your ap
 ```
 
 Unless your name is Jim Spriggs, you'll need to change these to you own name and server settings!
+
+### Securing the connection
+
+`SocketOptions` takes any member of MailKit's `SecureSocketOptions` enum (`None`, `Auto`, `SslOnConnect`, `StartTls` or `StartTlsWhenAvailable`). If you leave it out, the service picks one from the port...
+
+| Port | Default |
+| --- | --- |
+| 465 | `SslOnConnect` (implicit TLS) |
+| Anything else (eg 587, the standard submission port used by Microsoft 365, Gmail and most other providers) | `StartTls` (required, so a man in the middle can't strip the encryption and see your credentials) |
+
+If you need an unencrypted connection (a local test server such as Papercut or smtp4dev, for example), set `"SocketOptions": "None"` explicitly.
+
+Prior to version 3.0.0, the connection was controlled by a `UseSsl` flag, which MailKit maps to `SslOnConnect` (true) or `StartTlsWhenAvailable` (false). That meant `true` failed with a handshake error on port 587, and `false` only used STARTTLS if the server offered it. `UseSsl` still works, but is marked `[Obsolete]`, and is ignored if you set `SocketOptions`. If you read `UseSsl` in your own code, note that it is now a `bool?`, and is null unless you set it.
 
 Then add the following lines...
 
@@ -75,17 +90,27 @@ There are three overloads of the `SendEmailAsync` method. Easiest to use is a si
 
 If you want more control over what is sent and how, the second overload takes an `EmailParameters` object. The various constructors allow you to specify more detail, as well as adding multiple recipients. You can also add attachments, which are tuples of the form `(string FileName, string MimeType, byte[] Data)`.
 
+To copy the email to other people, add them to `Cc` or `Bcc` (both `List<MailboxAddress>`, empty by default), or use the `AddCc` and `AddBcc` methods, which parse the addresses the same way as the constructors do...
+
+```c#
+EmailParameters parameters = new EmailParameters("Your invoice", htmlBody, "billy@shears.com", "Billy Shears")
+  .AddCc("accounts@shears.com")
+  .AddBcc("jim@spriggs.com"); // Send me a copy
+```
+
+BCC recipients get the email, but don't appear in the headers that the other recipients see. CC and BCC were added in version 3.0.0.
+
 See [the `EmailParameters` code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Email/EmailParameters.cs) for more details.
 
-The third overload takes an `EmailParameters` and a MailKit `SecureSocketOptions`, for servers that need something other than the plain `UseSsl` flag from your settings...
+The third overload takes an `EmailParameters` and a MailKit `SecureSocketOptions`, which overrides the one from your settings for this email only...
 
 ```c#
 await _emailService.SendEmailAsync(emailParameters, SecureSocketOptions.StartTls);
 ```
 
-The other two overloads connect using `SmtpSettings.UseSsl`, so you only need this one if your server wants STARTTLS, or wants the connection left unencrypted.
+The other two overloads connect using the socket options from your settings (see [securing the connection](#securing-the-connection)), so you rarely need this one.
 
-All three return an `ApiResponse<Yunit>`, so the failure message is the exception's message. The two overloads that use `UseSsl` prefix it with the exception type (eg `"(AuthenticationException) Authentication failed"`), as that is usually the useful part when a send fails.
+All three return an `ApiResponse<Yunit>`, so the failure message is the exception's message. The two overloads that use your settings prefix it with the exception type (eg `"(AuthenticationException) Authentication failed"`), as that is usually the useful part when a send fails.
 
 ## Breaking change in version 2.0.0
 
@@ -109,4 +134,4 @@ If you are upgrading from a LanguageExt version, then you will need to change th
 
 You will need also to make sure you wrap the first line in brackets (as shown above). This was not necessary before.
 
-If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type). However, this is not a common pattern when using this service.
+If your code captures the return value from `SendEmailAsync` in a local variable, then you will need to add a `using` statement for `Pixata.Email` and change the type of the variable from `TryAsync<Unit>` to `ApiResponse<Yunit>` (unless you use `var` in which case the compiler will correctly infer the return type). However, this is not a common pattern when using this service.

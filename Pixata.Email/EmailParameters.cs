@@ -68,6 +68,36 @@ namespace Pixata.Email {
     public List<MailboxAddress> Recipients { get; set; } = [];
 
     /// <summary>
+    /// Gets or sets the list of addresses that receive a copy of the message (CC). Each address is represented as a MailboxAddress object (from the MimeKit library)
+    /// </summary>
+    public List<MailboxAddress> Cc { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of addresses that receive a blind copy of the message (BCC). These are not shown to the other recipients
+    /// </summary>
+    public List<MailboxAddress> Bcc { get; set; } = [];
+
+    /// <summary>
+    /// Adds one or more CC addresses, parsed the same way as the recipient addresses passed to the constructor
+    /// </summary>
+    /// <param name="emails">The email addresses to copy the message to</param>
+    /// <returns>This object, so calls can be chained</returns>
+    public EmailParameters AddCc(params string[] emails) {
+      Cc.AddRange(emails.Select(MailboxAddress.Parse));
+      return this;
+    }
+
+    /// <summary>
+    /// Adds one or more BCC addresses, parsed the same way as the recipient addresses passed to the constructor
+    /// </summary>
+    /// <param name="emails">The email addresses to blind copy the message to</param>
+    /// <returns>This object, so calls can be chained</returns>
+    public EmailParameters AddBcc(params string[] emails) {
+      Bcc.AddRange(emails.Select(MailboxAddress.Parse));
+      return this;
+    }
+
+    /// <summary>
     /// Gets or sets the email address to which replies should be sent for this message
     /// </summary>
     public MailboxAddress? ReplyTo { get; set; }
