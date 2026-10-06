@@ -67,6 +67,32 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.AspNetCore.Pdf.Telerik
+    - name: Restore - Pixata.AspNetCore.Pdf.Telerik Dependencies
+      run: dotnet restore Pixata.AspNetCore.Pdf.Telerik/Pixata.AspNetCore.Pdf.Telerik.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Pdf.Telerik.csproj
+      run: dotnet build Pixata.AspNetCore.Pdf.Telerik/Pixata.AspNetCore.Pdf.Telerik.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    # Pixata.AspNetCore.Pdf.WkHtmlToPdf
+    - name: Restore - Pixata.AspNetCore.Pdf.WkHtmlToPdf Dependencies
+      run: dotnet restore Pixata.AspNetCore.Pdf.WkHtmlToPdf/Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj
+      run: dotnet build Pixata.AspNetCore.Pdf.WkHtmlToPdf/Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.Blazor.LanguageExtComponents
     - name: Restore - Pixata.Blazor.LanguageExtComponents Dependencies
       run: dotnet restore Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configfile ./nuget.config
