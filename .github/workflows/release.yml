@@ -69,6 +69,33 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.AspNetCore.Pdf.Telerik
+    - name: Restore - Pixata.AspNetCore.Pdf.Telerik Dependencies
+      run: dotnet restore Pixata.AspNetCore.Pdf.Telerik/Pixata.AspNetCore.Pdf.Telerik.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Pdf.Telerik.csproj
+      run: dotnet build Pixata.AspNetCore.Pdf.Telerik/Pixata.AspNetCore.Pdf.Telerik.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+        TELERIK_LICENSE: ${{ secrets.TELERIK_LICENSE }}
+
+    # Pixata.AspNetCore.Pdf.WkHtmlToPdf
+    - name: Restore - Pixata.AspNetCore.Pdf.WkHtmlToPdf Dependencies
+      run: dotnet restore Pixata.AspNetCore.Pdf.WkHtmlToPdf/Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj
+      run: dotnet build Pixata.AspNetCore.Pdf.WkHtmlToPdf/Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.AspNetCore
     - name: Restore - Pixata.AspNetCore Dependencies
       run: dotnet restore Pixata.AspNetCore/Pixata.AspNetCore.csproj --configfile ./nuget.config
@@ -204,6 +231,18 @@ jobs:
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.AspNetCore/Pixata.AspNetCore.csproj
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+    - name: Publish Pixata.AspNetCore.Pdf.Telerik
+      uses: alirezanet/publish-nuget@v3.0.4
+      with:
+       PROJECT_FILE_PATH: Pixata.AspNetCore.Pdf.Telerik/Pixata.AspNetCore.Pdf.Telerik.csproj
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+    - name: Publish Pixata.AspNetCore.Pdf.WkHtmlToPdf
+      uses: alirezanet/publish-nuget@v3.0.4
+      with:
+       PROJECT_FILE_PATH: Pixata.AspNetCore.Pdf.WkHtmlToPdf/Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj
        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
     - name: Publish Pixata.AspNetCore.Telerik

@@ -116,3 +116,15 @@ The current view is kept in the query string, so refreshing the page (or sending
 | --- | --- | --- |
 | `DefaultEntityType` | | The entity type to show when the page first loads. If it isn't set, the viewer shows the first entity type alphabetically |
 | `DefaultHorizontalView` | `true` | Whether the entries start off side-by-side rather than down the page |
+| `TimeZone` | `TimeZoneInfo.Utc` | The time zone the change times are shown in. Audit times are stored in UTC, so without this, a UK user sees times an hour out for half the year. The date filters are treated as being in this zone too |
+| `DateFormat` | `"yyyy-MM-dd HH:mm:ss"` | The format used to show the change times |
+| `TimeZoneLabel` | `"UTC"`, or the zone's ID | Shown in the date column header (eg "Date (UK time)") and as a tooltip on the timeline, so the reader knows which zone they're looking at |
+
+For example, to show UK times...
+
+```xml
+<AuditViewer TimeZone="@TimeZoneInfo.FindSystemTimeZoneById("Europe/London")"
+             TimeZoneLabel="UK time" />
+```
+
+`TimeZone`, `DateFormat` and `TimeZoneLabel` were added in v4.5.0. Properties that were left out of the audit trail with `[NoAudit]` (see the [auditing documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Auditing.md)) are shown as "(hidden)".
