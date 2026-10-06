@@ -45,6 +45,9 @@
         </div>
       } else {
         <AuditTimeline Entries="_auditEntries"
+                       TimeZone="TimeZone"
+                       DateFormat="@DateFormat"
+                       TimeZoneLabel="@ZoneLabel"
                        DefaultHorizontalView="_defaultHorizontalView"
                        ShowOnlyChanged="_showOnlyChanged"
                        ShowOnlyChangedChanged="OnShowOnlyChangedChanged"
@@ -126,7 +129,7 @@
                   <th>Entity Type</th>
                   <th>ID</th>
                   <th>Operation</th>
-                  <th>Date</th>
+                  <th>Date (@ZoneLabel)</th>
                   <th>User</th>
                   <th>Changes</th>
                   <th>Actions</th>
@@ -138,7 +141,7 @@
                     <td>@GetEntityShortName(entry.EntityType)</td>
                     <td>@entry.EntityId</td>
                     <td><span class="operation-icon">@GetOperationIcon(entry.Operation)</span> @entry.Operation</td>
-                    <td>@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@FormatChangedAt(entry.ChangedAt)</td>
                     <td>@entry.ChangedBy</td>
                     <td>
                       @if (_expandedAllViewEntries.Contains(entry.Id)) {
@@ -702,6 +705,39 @@
   [Parameter]
   public bool DefaultHorizontalView { get; set; } = true;
 
+  /// <summary>
+  /// The time zone the change times are shown in, and the date filters are entered in. Audit times are stored in UTC, which is the default
+  /// </summary>
+  [Parameter]
+  public TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Utc;
+
+  /// <summary>
+  /// The format used to show the change times
+  /// </summary>
+  [Parameter]
+  public string DateFormat { get; set; } = "yyyy-MM-dd HH:mm:ss";
+
+  /// <summary>
+  /// The name of the time zone shown next to the times, eg "UK time". Defaults to "UTC" or the time zone's ID
+  /// </summary>
+  [Parameter]
+  public string? TimeZoneLabel { get; set; }
+
+  private string ZoneLabel =>
+    TimeZoneLabel ?? (TimeZone == TimeZoneInfo.Utc ? "UTC" : TimeZone.Id);
+
+  private string FormatChangedAt(DateTime changedAt) =>
+    TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(changedAt, DateTimeKind.Utc), TimeZone).ToString(DateFormat);
+
+  // The filter dates are entered in the display time zone, but the audit times are stored in UTC
+  private DateTime? FilterDateToUtc(DateTime? date) {
+    if (date is null || TimeZone == TimeZoneInfo.Utc) {
+      return date;
+    }
+    DateTime unspecified = DateTime.SpecifyKind(date.Value, DateTimeKind.Unspecified);
+    return TimeZone.IsInvalidTime(unspecified) ? date : TimeZoneInfo.ConvertTimeToUtc(unspecified, TimeZone);
+  }
+
   private bool _defaultHorizontalView = true;
   private bool _showOnlyChanged;
   private bool _horizontalView = true;
@@ -999,7 +1035,7 @@
     StateHasChanged();
 
     IEnumerable<string> typesToLoad = _entityTypes.Select(et => et.FullName);
-    _allViewEntries = await AuditViewerService.GetAllAuditEntries(typesToLoad, _allViewFilterFrom, _allViewFilterTo, _allViewFilterUser);
+    _allViewEntries = await AuditViewerService.GetAllAuditEntries(typesToLoad, FilterDateToUtc(_allViewFilterFrom), FilterDateToUtc(_allViewFilterTo), _allViewFilterUser);
 
     RecalcAllViewPages();
 
@@ -1098,8 +1134,8 @@
     _auditEntries = await AuditViewerService.GetAuditHistory(
       _selectedEntityType.FullName,
       _selectedEntityId,
-      _filterFromDate,
-      _filterToDate,
+      FilterDateToUtc(_filterFromDate),
+      FilterDateToUtc(_filterToDate),
       _filterUser,
       _filterOperation);
 

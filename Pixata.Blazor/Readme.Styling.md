@@ -27,7 +27,7 @@ The stylesheet is written in terms of CSS custom properties, so you can restyle 
 }
 ```
 
-The full list is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter.
+The full list (including `--pixata-label-font-size`, `--pixata-label-font-weight` and `--pixata-label-color` for the form labels) is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter.
 
 ## If you were styling the components yourself
 

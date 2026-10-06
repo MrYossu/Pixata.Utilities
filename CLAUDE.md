@@ -33,7 +33,9 @@ Test projects are MSTest (`Pixata.Extensions.Tests`, `Pixata.Blazor.Tests`); the
 ```
 Pixata.Extensions          — no project deps; the shared kernel
   ├── Pixata.Blazor        — Razor components (client-safe)
-  ├── Pixata.AspNetCore    — server-side (EF Core, wkhtmltopdf, FluentValidation)
+  ├── Pixata.AspNetCore    — server-side (EF Core, FluentValidation); no PDF engine since v2.0.0
+  │     ├── Pixata.AspNetCore.Pdf.Telerik     — PdfConverterInterface via Telerik Document Processing
+  │     └── Pixata.AspNetCore.Pdf.WkHtmlToPdf — obsolete wkhtmltopdf converter, kept for one release
   ├── Pixata.Email         — MailKit wrapper
   └── Pixata.SimilarityChooser
 
@@ -45,7 +47,7 @@ Pixata.Blazor.Sample             — consumes the packages via ProjectReference;
 
 The recurring architectural rule is **the client/server split**: anything that needs EF Core, SQL Server, or `HttpContext` must not land in a package a WASM project references. That is why `Pixata.AspNetCore.Telerik` exists (server half of the Telerik grid helpers), why the audit viewer's server service lives in `Pixata.AspNetCore` while its components live in `Pixata.Blazor`, and why `Pixata.Extensions` deliberately has no EF Core dependency. When adding something, decide which side it belongs on before choosing a project.
 
-Multi-targeting: the actively maintained packages target `net8.0;net10.0` with per-TFM `PackageReference` blocks (8.0.x vs 10.0.0). `Pixata.Blazor.TelerikComponents`, `Pixata.Google` and `Pixata.SimilarityChooser` are still `net8.0` only. Adding a dependency to a multi-targeted project means adding it to *both* conditional `ItemGroup`s.
+Multi-targeting: the actively maintained packages target `net8.0;net10.0` with per-TFM `PackageReference` blocks (8.0.x vs 10.0.0). `Pixata.Google` and `Pixata.SimilarityChooser` are still `net8.0` only. The Telerik packages reference Telerik.UI.for.Blazor 15.x, which is on nuget.org, so they restore without the Telerik feed. Adding a dependency to a multi-targeted project means adding it to *both* conditional `ItemGroup`s.
 
 ## Cross-cutting features (each spans several packages)
 
@@ -56,7 +58,7 @@ Multi-targeting: the actively maintained packages target `net8.0;net10.0` with p
 
 ## DI registration convention
 
-Each package exposes one `AddPixataXxx()` extension. `AddPixataBlazor()` checks for already-registered services and logs rather than double-registering. `AddPixataAspNetCore<T>()` takes a `PixataAspNetCoreOptions` action so callers can opt out of parts they don't want (the wkhtmltopdf converter is registered as a *factory* so the native library isn't loaded at startup), and throws a clear registration-time exception when an opted-out dependency is still needed. Follow that pattern — fail loudly at registration, not at resolve time — when adding registrations.
+Each package exposes one `AddPixataXxx()` extension. `AddPixataBlazor()` checks for already-registered services and logs rather than double-registering. `AddPixataAspNetCore<T>()` takes a `PixataAspNetCoreOptions` action so callers can opt out of parts they don't want; PDF converters are registered separately (`AddPixataTelerikPdf()`), and `DocumentTemplateHelper` takes the converter as an optional dependency, throwing a clear exception when a PDF is asked for without one. Follow that pattern — fail loudly at registration, not at resolve time — when adding registrations.
 
 ## Release process
 

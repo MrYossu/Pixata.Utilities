@@ -53,7 +53,7 @@
                   <span class="operation-icon">@GetOperationIcon(entry.Operation)</span>
                   @entry.Operation
                   <br />
-                  <span class="timestamp">@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                  <span class="timestamp" title="@(TimeZoneLabel ?? (TimeZone == TimeZoneInfo.Utc ? "UTC" : TimeZone.Id))">@FormatChangedAt(entry.ChangedAt)</span>
                   <br />
                   <span class="user">by @entry.ChangedBy</span>
                 </th>
@@ -104,7 +104,7 @@
           <div class="timeline-header">
             <span class="operation-icon">@GetOperationIcon(entry.Operation)</span>
             <span class="operation-label">@entry.Operation</span>
-            <span class="timestamp">@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+            <span class="timestamp" title="@(TimeZoneLabel ?? (TimeZone == TimeZoneInfo.Utc ? "UTC" : TimeZone.Id))">@FormatChangedAt(entry.ChangedAt)</span>
             <span class="user">by @entry.ChangedBy</span>
           </div>
           <div class="timeline-body">
@@ -148,6 +148,18 @@
 
   [Parameter]
   public bool DefaultHorizontalView { get; set; } = true;
+
+  [Parameter]
+  public TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Utc;
+
+  [Parameter]
+  public string DateFormat { get; set; } = "yyyy-MM-dd HH:mm:ss";
+
+  [Parameter]
+  public string? TimeZoneLabel { get; set; }
+
+  private string FormatChangedAt(DateTime changedAt) =>
+    TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(changedAt, DateTimeKind.Utc), TimeZone).ToString(DateFormat);
 
   [Parameter]
   public bool ShowOnlyChanged { get; set; }
