@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <Company>Pixata Ltd</Company>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Product>Pixata.AspNetCore.Pdf.WkHtmlToPdf</Product>
+    <Description>Obsolete wkhtmltopdf PDF converter for Pixata.AspNetCore's DocumentTemplateHelper. Use Pixata.AspNetCore.Pdf.Telerik instead</Description>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
+    <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</ProjectUrl>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</RepositoryUrl>
+    <PackageIcon>ConnectionReseau.png</PackageIcon>
+    <PackageTags>C# ASP.NET Core PDF</PackageTags>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="ConnectionReseau.png" Pack="true" PackagePath="\" />
+    <None Include="Readme.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Haukcode.WkHtmlToPdfDotNet" Version="1.5.95" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pixata.AspNetCore\Pixata.AspNetCore.csproj" />
+  </ItemGroup>
+
+</Project>
