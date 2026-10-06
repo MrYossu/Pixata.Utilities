@@ -12,18 +12,23 @@ public static class AuditingServiceCollectionExtensions {
   public static IServiceCollection AddAuditing<TContext>(this IServiceCollection services) where TContext : DbContext =>
     AddAuditing<TContext>(services, null);
 
-  public static IServiceCollection AddAuditing<TContext>(this IServiceCollection services, Action<AuditRetentionOptions>? configureRetention) where TContext : DbContext {
+  /// <summary>
+  /// Registers the auditing services. Use <paramref name="configure"/> to set a retention period, leave properties out of the audit trail,
+  /// or turn off the transaction used when saving added entities
+  /// </summary>
+  public static IServiceCollection AddAuditing<TContext>(this IServiceCollection services, Action<AuditingOptions>? configure) where TContext : DbContext {
     services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     services.AddScoped<AuditUserContextInterface, AuditUserContext>();
     services.AddScoped<DbContext>(sp => sp.GetRequiredService<TContext>());
     services.AddScoped<AuditServiceInterface, AuditService>();
     services.AddScoped<AuditingInterceptor>();
 
-    AuditRetentionOptions retentionOptions = new();
-    configureRetention?.Invoke(retentionOptions);
-    services.AddSingleton(retentionOptions);
+    AuditingOptions options = new();
+    configure?.Invoke(options);
+    services.AddSingleton(options);
+    services.AddSingleton<AuditRetentionOptions>(options);
 
-    if (retentionOptions.RetentionPeriod.HasValue) {
+    if (options.RetentionPeriod.HasValue) {
       services.AddHostedService<AuditRetentionService>();
     }
 
