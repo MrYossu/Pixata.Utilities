@@ -8,7 +8,7 @@
         <div class="message">
           <div>@notif.Message</div>
         </div>
-        <div class="dismiss" @onclick="@(() => Dismiss(notif))"><button class="pixata-btn pixata-btn-close" /></div>
+        <div class="dismiss" @onclick="@(() => Dismiss(notif))" @onclick:stopPropagation="true"><button class="pixata-btn pixata-btn-close" /></div>
       </div>
     </div>
   }

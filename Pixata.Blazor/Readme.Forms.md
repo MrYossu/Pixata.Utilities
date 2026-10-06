@@ -37,7 +37,7 @@ The `FormName` component is very similar to `FormTriple`, except that the contro
 
 ```xml
 <FormName TitleLabel="Title" TitleId="Title" TitleRequired="true"
-          FirstNameLabel="First name" FirstNameId="FirstName" FirstNameRequired="true"
+          SalutationLabel="First name" SalutationId="FirstName" SalutationRequired="true"
           SurnameLabel="Surname" SurnameId="Surname" SurnameRequired="true">
   <Title>
     <TelerikTextBox @bind-Value="@user.Title" Id="Title" />
@@ -61,6 +61,22 @@ The `FormName` component is very similar to `FormTriple`, except that the contro
 This looks like this...
 
 ![FormName](https://github.com/MrYossu/Pixata.Utilities/raw/master/Pixata.Blazor/Icon/FormName.png "FormName")
+
+### Styling the layout components
+
+As of v4.5.0, the layout components' styles live in [pixata.css](Readme.Styling.md), rather than in `<style>` blocks rendered by each component. This means a long form no longer puts a copy of the same rules in the page for every field, and the components work with a Content Security Policy that doesn't allow inline styles. The `Id` is now only used for the label's `for` attribute, so `FormSingle IsContainer` no longer needs one, and ids that aren't valid CSS class names no longer break anything.
+
+The classes are...
+
+| Class | Where |
+| --- | --- |
+| `pixata-form-label` | Every label. Restyle labels with the `--pixata-label-font-size`, `--pixata-label-font-weight` and `--pixata-label-color` custom properties, or your own rules for the class |
+| `pixata-form-container` | `FormSingle` with `IsContainer`, and `FormDouble` with `ShowSecond="false"`. Half width, or full width when the container is less than 430px wide |
+| `pixata-form-double`, `pixata-form-triple`, `pixata-form-quad`, `pixata-form-name` | The row in each multi-field component. The fields wrap onto separate lines when there isn't room for them side by side, so they stack on a phone |
+| `pixata-form-name-title` | The title field in `FormName`, which is at most 100px wide |
+| `pixata-gap-col-3` | The 1rem gap between fields |
+
+Before v4.5.0, the rows used the unprefixed classes `double-element`, `triple-element`, `quad-element` and `gap-col-3`. These are still added to the markup for now, so selectors of your own that target them still work, but they no longer have any styles of their own, and will be removed in a future version. Note that `gap-col-3` used to be defined by any form on the page, so if you used it in your own markup, define it yourself or switch to `pixata-gap-col-3`.
 
 ## Complete form rows
 

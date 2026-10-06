@@ -50,6 +50,9 @@
   --pixata-spacer: 1rem;
   --pixata-focus-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
   --pixata-transition: .15s ease-in-out;
+  --pixata-label-font-size: inherit;
+  --pixata-label-font-weight: inherit;
+  --pixata-label-color: inherit;
 }
 
 /*
@@ -625,4 +628,57 @@
 
 .pixata-bg-white {
   background-color: #fff;
+}
+
+/* Form layout components (FormSingle, FormDouble, FormTriple, FormQuad and FormName) */
+
+.pixata-form-label {
+  font-size: var(--pixata-label-font-size);
+  font-weight: var(--pixata-label-font-weight);
+  color: var(--pixata-label-color);
+}
+
+.pixata-gap-col-3 {
+  column-gap: 1rem;
+}
+
+/* FormSingle IsContainer, and FormDouble when ShowSecond is false: half width, or full width when the container is narrow */
+.pixata-form-container {
+  container-type: inline-size;
+}
+
+.pixata-form-container > div {
+  max-width: calc(50% - .5rem);
+}
+
+@container (max-width: 429px) {
+  .pixata-form-container > div {
+    max-width: unset;
+  }
+}
+
+/* No fixed widths, so the fields wrap onto separate lines when there isn't room for them side by side (eg on a phone) */
+.pixata-form-double > div {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.pixata-form-triple > div {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.pixata-form-quad > div {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.pixata-form-name > div {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.pixata-form-name > .pixata-form-name-title {
+  flex: 0 1 100px;
+  max-width: 100px;
 }
