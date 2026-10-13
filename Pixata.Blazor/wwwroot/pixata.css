@@ -3479,6 +3479,13 @@
   border-bottom-width: 0;
 }
 
+/* With PersistContent, a minimised window keeps its content and footer, but hides them (the footer is display: flex, which
+   would otherwise beat the hidden attribute) */
+.pixata-blazor-window-content[hidden],
+.pixata-blazor-window-footer[hidden] {
+  display: none;
+}
+
 .pixata-blazor-dialog-title,
 .pixata-blazor-window-title {
   flex: 1 1 auto;
