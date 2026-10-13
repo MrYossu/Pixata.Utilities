@@ -704,6 +704,7 @@
   --pixata-blazor-font-size-sm: .75rem;
   --pixata-blazor-font-size-lg: 1rem;
   --pixata-blazor-line-height: 1.4285714286;
+  --pixata-blazor-line-height-lg: 1.5;
   --pixata-blazor-text-color: #3d3d3d;
   --pixata-blazor-subtle-color: #666;
   --pixata-blazor-surface-bg: #fff;
@@ -920,6 +921,8 @@
 
 .pixata-blazor-button-lg {
   padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2);
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: var(--pixata-blazor-line-height-lg);
 }
 
 /* An icon-only button is square */
@@ -1160,6 +1163,11 @@
   line-height: var(--pixata-blazor-line-height);
   vertical-align: middle;
   transition: border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-input-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: var(--pixata-blazor-line-height-lg);
 }
 
 .pixata-blazor-input:hover {
