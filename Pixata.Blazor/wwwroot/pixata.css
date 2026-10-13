@@ -1435,6 +1435,202 @@
 
 /* ========== PixataSwitch ========== */
 
+/*
+  pixata-blazor-switch is the button, plus a size (-sm, -md, -lg), -on or -off, and -readonly when it can't be changed. Inside
+  it are the track (pixata-blazor-switch-track, holding the -label-on and -label-off text) and the thumb
+  (pixata-blazor-switch-thumb, inside pixata-blazor-switch-thumb-wrap). The Width parameter sets --pixata-blazor-switch-width
+*/
+:root {
+  --pixata-blazor-switch-width-sm: 52px;
+  --pixata-blazor-switch-height-sm: 26px;
+  --pixata-blazor-switch-label-inset-sm: 4px;
+  --pixata-blazor-switch-width-md: 60px;
+  --pixata-blazor-switch-height-md: 30px;
+  --pixata-blazor-switch-label-inset-md: 6px;
+  --pixata-blazor-switch-width-lg: 68px;
+  --pixata-blazor-switch-height-lg: 34px;
+  --pixata-blazor-switch-label-inset-lg: 8px;
+  --pixata-blazor-switch-label-font-size: 10px;
+  --pixata-blazor-switch-off-track-bg: #fff;
+  --pixata-blazor-switch-off-track-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-switch-off-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-switch-on-track-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-switch-on-track-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-switch-on-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-switch-thumb-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-switch-thumb-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-switch-off-focus-outline: 2px solid color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-switch-on-focus-outline: 2px solid color-mix(in srgb, var(--pixata-blazor-primary) 25%, transparent);
+  --pixata-blazor-switch-on-transition: .3s cubic-bezier(.68, -.55, .265, 1.55);
+  --pixata-blazor-switch-off-transition: .25s cubic-bezier(0, 0, .58, 1);
+}
+
+.pixata-blazor-switch {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-md);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-md);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-md);
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  width: var(--pixata-blazor-switch-width);
+  height: var(--pixata-blazor-switch-height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-switch-label-font-size);
+  line-height: 1;
+  vertical-align: middle;
+  outline: 0;
+  cursor: pointer;
+  user-select: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Lets a sideways swipe reach the switch, rather than being taken as a scroll */
+  touch-action: pan-y;
+}
+
+/* The sizes only set the custom properties, so the Width parameter (an inline --pixata-blazor-switch-width) wins */
+.pixata-blazor-switch-sm {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-sm);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-sm);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-sm);
+}
+
+.pixata-blazor-switch-lg {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-lg);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-lg);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-lg);
+}
+
+.pixata-blazor-switch-readonly {
+  cursor: default;
+}
+
+.pixata-blazor-switch-track {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  width: 100%;
+  height: 100%;
+  border-width: 1px;
+  border-style: solid;
+  outline: 0;
+  transition: background-color .15s ease-out, border-color .15s ease-out, color .15s ease-out;
+}
+
+.pixata-blazor-switch-label-on,
+.pixata-blazor-switch-label-off {
+  position: absolute;
+  top: 50%;
+  display: inline;
+  overflow: hidden;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  transition: color var(--pixata-blazor-switch-off-transition);
+}
+
+.pixata-blazor-switch-label-on {
+  inset-inline-start: var(--pixata-blazor-switch-label-inset);
+}
+
+.pixata-blazor-switch-label-off {
+  inset-inline-end: var(--pixata-blazor-switch-label-inset);
+}
+
+/* A zero-size box whose centre the thumb sits on, which slides from one end of the track to the other */
+.pixata-blazor-switch-thumb-wrap {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  inset-inline-start: calc(var(--pixata-blazor-switch-height) / 2);
+  transition: left var(--pixata-blazor-switch-off-transition), right var(--pixata-blazor-switch-off-transition);
+}
+
+.pixata-blazor-switch-on .pixata-blazor-switch-thumb-wrap {
+  inset-inline-start: calc(100% - var(--pixata-blazor-switch-height) / 2);
+  transition: left var(--pixata-blazor-switch-on-transition), right var(--pixata-blazor-switch-on-transition);
+}
+
+.pixata-blazor-switch-thumb {
+  box-sizing: border-box;
+  position: absolute;
+  display: block;
+  width: var(--pixata-blazor-switch-height);
+  height: var(--pixata-blazor-switch-height);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--pixata-blazor-switch-thumb-border-color);
+  background-color: var(--pixata-blazor-switch-thumb-bg);
+  transform: translate(-50%, -50%);
+  transition: background-color .15s ease-out, border-color .15s ease-out;
+}
+
+.pixata-blazor-switch:dir(rtl) .pixata-blazor-switch-thumb {
+  transform: translate(50%, -50%);
+}
+
+.pixata-blazor-switch-off .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-switch-off-track-border-color);
+  background-color: var(--pixata-blazor-switch-off-track-bg);
+  color: var(--pixata-blazor-switch-off-color);
+}
+
+.pixata-blazor-switch-off .pixata-blazor-switch-label-on,
+.pixata-blazor-switch-on .pixata-blazor-switch-label-off {
+  color: transparent;
+}
+
+.pixata-blazor-switch-on .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-switch-on-track-border-color);
+  background-color: var(--pixata-blazor-switch-on-track-bg);
+  color: var(--pixata-blazor-switch-on-color);
+}
+
+.pixata-blazor-switch-off:focus-visible .pixata-blazor-switch-track {
+  outline: var(--pixata-blazor-switch-off-focus-outline);
+}
+
+.pixata-blazor-switch-on:focus-visible .pixata-blazor-switch-track {
+  outline: var(--pixata-blazor-switch-on-focus-outline);
+}
+
+.pixata-blazor-switch.pixata-blazor-invalid .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-error);
+}
+
+/* On a touch screen, the area you can tap is at least --pixata-blazor-touch-target high */
+@media (pointer: coarse) {
+  .pixata-blazor-switch::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: max(100%, var(--pixata-blazor-touch-target));
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-switch-track,
+  .pixata-blazor-switch-label-on,
+  .pixata-blazor-switch-label-off,
+  .pixata-blazor-switch-thumb-wrap,
+  .pixata-blazor-switch-on .pixata-blazor-switch-thumb-wrap,
+  .pixata-blazor-switch-thumb {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataSwitch ========== */
 
 /* ========== PixataChart ========== */

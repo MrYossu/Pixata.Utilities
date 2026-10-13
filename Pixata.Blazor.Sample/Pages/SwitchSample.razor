@@ -1,0 +1,148 @@
+@page "/SwitchSample"
+@using Pixata.Blazor.Components
+@using Pixata.Blazor.Sample.Models
+
+<h3>Switch</h3>
+
+<p><code>PixataSwitch</code> is a toggle switch for <code>bool</code> and <code>bool?</code> values. Each example below shows it next to the equivalent Telerik switch, set up the same way. Tab to a switch and press Space or Enter to toggle it, and on a touch screen you can tap it or swipe it sideways.</p>
+
+<ComponentComparison Title="Basic use">
+  <Description>
+    <p>Two-way binding with <code>@@bind-Value</code>, and the <code>OnChange</code> event. The <code>label</code> points at the switch's <code>Id</code>.</p>
+  </Description>
+  <Pixata>
+    <label for="pixata-notifications">Notifications</label>
+    <PixataSwitch Id="pixata-notifications" @bind-Value="_pixataNotifications" OnChange="@((object v) => _pixataLog = $"OnChange: {v}")" />
+    <p class="mt-2">Value: <strong>@_pixataNotifications</strong><br />@_pixataLog</p>
+  </Pixata>
+  <Telerik>
+    <label for="telerik-notifications">Notifications</label>
+    <TelerikSwitch Id="telerik-notifications" @bind-Value="_telerikNotifications" OnChange="@((object v) => _telerikLog = $"OnChange: {v}")" />
+    <p class="mt-2">Value: <strong>@_telerikNotifications</strong><br />@_telerikLog</p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Nullable values">
+  <Description>
+    <p>Bound to a <code>bool?</code>. A null value is shown as off; the first toggle sets it to true.</p>
+  </Description>
+  <Pixata>
+    <PixataSwitch @bind-Value="_pixataNullable" AriaLabel="Nullable switch" />
+    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => _pixataNullable = null">Set to null</button>
+    <p class="mt-2">Value: <strong>@(_pixataNullable?.ToString() ?? "null")</strong></p>
+  </Pixata>
+  <Telerik>
+    <TelerikSwitch @bind-Value="_telerikNullable" AriaLabel="Nullable switch" />
+    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => _telerikNullable = null">Set to null</button>
+    <p class="mt-2">Value: <strong>@(_telerikNullable?.ToString() ?? "null")</strong></p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Labels and width">
+  <Description>
+    <p><code>OnLabel</code> and <code>OffLabel</code> set the text in the track, and <code>Width</code> makes room for longer labels.</p>
+  </Description>
+  <Pixata>
+    <PixataSwitch @bind-Value="_pixataLabels" OnLabel="Yes" OffLabel="No" AriaLabel="Yes or no" />
+    <PixataSwitch @bind-Value="_pixataLabels" OnLabel="Enabled" OffLabel="Disabled" Width="100px" AriaLabel="Enabled or disabled" Class="ms-3" />
+  </Pixata>
+  <Telerik>
+    <TelerikSwitch @bind-Value="_telerikLabels" OnLabel="Yes" OffLabel="No" AriaLabel="Yes or no" />
+    <TelerikSwitch @bind-Value="_telerikLabels" OnLabel="Enabled" OffLabel="Disabled" Width="100px" AriaLabel="Enabled or disabled" Class="ms-3" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Sizes">
+  <Description>
+    <p><code>Size</code> is <code>sm</code>, <code>md</code> (the default) or <code>lg</code>.</p>
+  </Description>
+  <Pixata>
+    <PixataSwitch @bind-Value="_pixataSizes" Size="@PixataThemeConstants.Size.Small" AriaLabel="Small" />
+    <PixataSwitch @bind-Value="_pixataSizes" Size="@PixataThemeConstants.Size.Medium" AriaLabel="Medium" Class="ms-3" />
+    <PixataSwitch @bind-Value="_pixataSizes" Size="@PixataThemeConstants.Size.Large" AriaLabel="Large" Class="ms-3" />
+  </Pixata>
+  <Telerik>
+    <TelerikSwitch @bind-Value="_telerikSizes" Size="@ThemeConstants.Switch.Size.Small" AriaLabel="Small" />
+    <TelerikSwitch @bind-Value="_telerikSizes" Size="@ThemeConstants.Switch.Size.Medium" AriaLabel="Medium" Class="ms-3" />
+    <TelerikSwitch @bind-Value="_telerikSizes" Size="@ThemeConstants.Switch.Size.Large" AriaLabel="Large" Class="ms-3" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Roundness">
+  <Description>
+    <p><code>TrackRounded</code> and <code>ThumbRounded</code> set the roundness of the track and the thumb separately. <code>PixataSwitch</code> also has <code>Rounded</code>, which sets both at once.</p>
+  </Description>
+  <Pixata>
+    <PixataSwitch @bind-Value="_pixataRounded" TrackRounded="@PixataThemeConstants.Rounded.Medium" ThumbRounded="@PixataThemeConstants.Rounded.Medium" AriaLabel="Medium" />
+    <PixataSwitch @bind-Value="_pixataRounded" TrackRounded="@PixataThemeConstants.Rounded.Small" ThumbRounded="@PixataThemeConstants.Rounded.None" AriaLabel="Small track, square thumb" Class="ms-3" />
+    <PixataSwitch @bind-Value="_pixataRounded" Rounded="@PixataThemeConstants.Rounded.None" AriaLabel="Square" Class="ms-3" />
+  </Pixata>
+  <Telerik>
+    <TelerikSwitch @bind-Value="_telerikRounded" TrackRounded="@ThemeConstants.Switch.TrackRounded.Medium" ThumbRounded="@ThemeConstants.Switch.ThumbRounded.Medium" AriaLabel="Medium" />
+    <TelerikSwitch @bind-Value="_telerikRounded" TrackRounded="@ThemeConstants.Switch.TrackRounded.Small" ThumbRounded="@ThemeConstants.Switch.ThumbRounded.None" AriaLabel="Small track, square thumb" Class="ms-3" />
+    <TelerikSwitch @bind-Value="_telerikRounded" TrackRounded="@ThemeConstants.Switch.TrackRounded.None" ThumbRounded="@ThemeConstants.Switch.ThumbRounded.None" AriaLabel="Square" Class="ms-3" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Disabled and read-only">
+  <Description>
+    <p>A disabled switch is greyed out and can't be focused. A read-only one (<code>PixataSwitch</code> only) looks normal and can be focused, but can't be changed.</p>
+  </Description>
+  <Pixata>
+    <PixataSwitch Value="true" Enabled="false" AriaLabel="Disabled" />
+    <PixataSwitch Value="true" ReadOnly="true" AriaLabel="Read-only" Class="ms-3" />
+  </Pixata>
+  <Telerik>
+    <TelerikSwitch Value="true" Enabled="false" AriaLabel="Disabled" />
+    <p class="mt-2"><em>The Telerik switch has no read-only mode.</em></p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Inside an EditForm">
+  <Description>
+    <p>The switch takes part in validation. Click Submit without accepting the terms to see the invalid state.</p>
+  </Description>
+  <Pixata>
+    <EditForm Model="_pixataModel" OnValidSubmit="@(() => _pixataSubmitted = "Submitted")">
+      <DataAnnotationsValidator />
+      <div>
+        <label for="pixata-terms">I accept the terms and conditions</label>
+        <PixataSwitch Id="pixata-terms" @bind-Value="_pixataModel.AcceptTerms" />
+      </div>
+      <ValidationMessage For="() => _pixataModel.AcceptTerms" />
+      <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+      <span class="ms-2">@_pixataSubmitted</span>
+    </EditForm>
+  </Pixata>
+  <Telerik>
+    <EditForm Model="_telerikModel" OnValidSubmit="@(() => _telerikSubmitted = "Submitted")">
+      <DataAnnotationsValidator />
+      <div>
+        <label for="telerik-terms">I accept the terms and conditions</label>
+        <TelerikSwitch Id="telerik-terms" @bind-Value="_telerikModel.AcceptTerms" />
+      </div>
+      <ValidationMessage For="() => _telerikModel.AcceptTerms" />
+      <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+      <span class="ms-2">@_telerikSubmitted</span>
+    </EditForm>
+  </Telerik>
+</ComponentComparison>
+
+@code {
+  private bool _pixataNotifications;
+  private bool _telerikNotifications;
+  private string _pixataLog = "";
+  private string _telerikLog = "";
+  private bool? _pixataNullable;
+  private bool? _telerikNullable;
+  private bool _pixataLabels = true;
+  private bool _telerikLabels = true;
+  private bool _pixataSizes = true;
+  private bool _telerikSizes = true;
+  private bool _pixataRounded = true;
+  private bool _telerikRounded = true;
+  private readonly SwitchSampleModel _pixataModel = new();
+  private readonly SwitchSampleModel _telerikModel = new();
+  private string _pixataSubmitted = "";
+  private string _telerikSubmitted = "";
+}

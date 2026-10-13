@@ -1,0 +1,33 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+@inherits PixataInputBase<TValue>
+
+@*
+  A toggle switch for a bool or bool? value. It is a button with role="switch", so Space and Enter toggle it without any
+  script, and it can be tapped, clicked or swiped. A null value is shown as off
+*@
+<button type="button"
+        role="switch"
+        id="@Id"
+        class="@CssClass"
+        style="@Style"
+        tabindex="@TabIndex"
+        disabled="@(!Enabled)"
+        aria-checked="@(IsOn ? "true" : "false")"
+        aria-readonly="@(ReadOnly ? "true" : null)"
+        aria-invalid="@(IsInvalid ? "true" : null)"
+        aria-label="@AriaLabel"
+        aria-labelledby="@AriaLabelledBy"
+        aria-describedby="@AriaDescribedBy"
+        @onclick="HandleClick"
+        @onpointerdown="HandlePointerDown"
+        @onpointerup="HandlePointerUp"
+        @attributes="AdditionalAttributes">
+  <span class="@PixataCss.Classes("pixata-blazor-switch-track", PixataCss.Rounded(TrackRounded ?? Rounded))">
+    <span class="pixata-blazor-switch-label-on" aria-hidden="true">@OnLabel</span>
+    <span class="pixata-blazor-switch-label-off" aria-hidden="true">@OffLabel</span>
+  </span>
+  <span class="pixata-blazor-switch-thumb-wrap">
+    <span class="@PixataCss.Classes("pixata-blazor-switch-thumb", PixataCss.Rounded(ThumbRounded ?? Rounded))"></span>
+  </span>
+</button>
