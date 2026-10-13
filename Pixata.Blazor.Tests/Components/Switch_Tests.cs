@@ -111,7 +111,7 @@ public class Switch_Tests {
       .Add(c => c.ValueChanged, (bool v) => values.Add(v)));
     cut.Find("button").PointerDown(new PointerEventArgs { ClientX = 10 });
     cut.Find("button").PointerUp(new PointerEventArgs { ClientX = 50 });
-    cut.Find("button").Click();
+    cut.Find("button").Click(new MouseEventArgs { Detail = 1 });
     CollectionAssert.AreEqual(new[] { true }, values);
     Assert.AreEqual("true", cut.Find("button").GetAttribute("aria-checked"));
   }
@@ -165,7 +165,21 @@ public class Switch_Tests {
     // A touch screen may not send a click after a swipe, so the next tap must still work
     cut.Find("button").PointerDown(new PointerEventArgs { ClientX = 20 });
     cut.Find("button").PointerUp(new PointerEventArgs { ClientX = 20 });
-    cut.Find("button").Click();
+    cut.Find("button").Click(new MouseEventArgs { Detail = 1 });
+    CollectionAssert.AreEqual(new[] { true, false }, values);
+  }
+
+  [TestMethod]
+  public void SwipeWithoutAClick_DoesNotSwallowTheNextKeyPress() {
+    using BunitContext context = PixataTestContext.Create();
+    List<bool> values = [];
+    IRenderedComponent<PixataSwitch<bool>> cut = context.Render<PixataSwitch<bool>>(p => p
+      .Add(c => c.Value, false)
+      .Add(c => c.ValueChanged, (bool v) => values.Add(v)));
+    cut.Find("button").PointerDown(new PointerEventArgs { ClientX = 10 });
+    cut.Find("button").PointerUp(new PointerEventArgs { ClientX = 50 });
+    // Space or Enter on the focused switch (or a click on its label) is a click with a detail of 0, and no pointer down
+    cut.Find("button").Click(new MouseEventArgs { Detail = 0 });
     CollectionAssert.AreEqual(new[] { true, false }, values);
   }
 

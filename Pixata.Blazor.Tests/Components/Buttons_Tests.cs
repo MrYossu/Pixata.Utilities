@@ -438,4 +438,39 @@ public class Buttons_Tests {
     cut.Find(".pixata-blazor-splitbutton-arrow").Click();
     StringAssert.Contains(cut.Find(".pixata-blazor-popup").GetAttribute("style"), "width:300px");
   }
+
+  #region The shared popup
+
+  [TestMethod]
+  public void Popup_ClosedBeforeTheScriptAttachedIt_IsDetachedAndAttachedAgainWhenReopened() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    JSRuntimeInvocationHandler<int> attach = module.Setup<int>("attachPopup", _ => true);
+    IRenderedComponent<PixataPopup> cut = context.Render<PixataPopup>(p => p.Add(c => c.Visible, true));
+    // Closed (eg by a double click) while the script is still attaching it
+    cut.Render(p => p.Add(c => c.Visible, false));
+    attach.SetResult(7);
+    cut.WaitForAssertion(() => Assert.IsTrue(module.Invocations["detachPopup"].Any(i => Equals(i.Arguments[0], 7)), "The stale attachment is removed"));
+    // Opened again, so the new popup element must be attached, rather than the old handle repositioned
+    attach.SetResult(8);
+    cut.Render(p => p.Add(c => c.Visible, true));
+    cut.WaitForAssertion(() => Assert.AreEqual(2, module.Invocations["attachPopup"].Count));
+    cut.Render(p => p.Add(c => c.Visible, false));
+    cut.WaitForAssertion(() => Assert.IsTrue(module.Invocations["detachPopup"].Any(i => Equals(i.Arguments[0], 8))));
+  }
+
+  [TestMethod]
+  public void Popup_RenderedAgainWhileAttaching_IsOnlyAttachedOnce() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    JSRuntimeInvocationHandler<int> attach = module.Setup<int>("attachPopup", _ => true);
+    IRenderedComponent<PixataPopup> cut = context.Render<PixataPopup>(p => p.Add(c => c.Visible, true));
+    cut.Render(p => p.Add(c => c.Class, "again"));
+    cut.Render(p => p.Add(c => c.Class, "and again"));
+    attach.SetResult(7);
+    cut.WaitForAssertion(() => Assert.AreEqual(1, module.Invocations["attachPopup"].Count));
+    Assert.IsFalse(module.Invocations["detachPopup"].Any());
+  }
+
+  #endregion
 }

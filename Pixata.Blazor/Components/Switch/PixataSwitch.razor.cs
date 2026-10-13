@@ -111,9 +111,11 @@ public partial class PixataSwitch<TValue> {
   }
 
   private async Task HandleClick(MouseEventArgs args) {
-    if (_ignoreNextClick) {
-      // The click that follows a swipe, which has already set the value
-      _ignoreNextClick = false;
+    bool afterSwipe = _ignoreNextClick;
+    _ignoreNextClick = false;
+    // The click that follows a swipe, which has already set the value, comes from the pointer. A click from the keyboard or
+    // a label has a detail of 0, and always toggles, even after a swipe on a touch screen that wasn't followed by a click
+    if (afterSwipe && args.Detail > 0) {
       return;
     }
     await SetOn(!IsOn);

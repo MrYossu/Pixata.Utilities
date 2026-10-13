@@ -81,6 +81,7 @@
   private ElementReference _element;
   private DotNetObjectReference<PixataPopup>? _dotNetReference;
   private int _handle;
+  private bool _attaching;
   private bool _disposed;
 
   private string? Style {
@@ -101,9 +102,12 @@
     string.IsNullOrWhiteSpace(value) ? "" : $"{property}:{value};";
 
   protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (_attaching) {
+      // Attach() checks again what it should do once the script has answered
+      return;
+    }
     if (Visible && _handle == 0) {
-      _dotNetReference ??= DotNetObjectReference.Create(this);
-      _handle = await PixataJs.Invoke(Js, "attachPopup", 0, AnchorElement, _element, _dotNetReference, new { matchAnchorWidth = MatchAnchorWidth, align = Align });
+      await Attach();
     } else if (Visible) {
       await PixataJs.InvokeVoid(Js, "repositionPopup", _handle);
     } else if (_handle != 0) {
@@ -122,6 +126,31 @@
   public async Task HandleOutsideClick() {
     if (!_disposed && Visible) {
       await OnOutsideClick.InvokeAsync();
+    }
+  }
+
+  /// <summary>
+  /// Hands the popup to the script. The popup may be rendered again, hidden, or hidden and shown again (as a new element)
+  /// before the script answers, so this only keeps the result if it is still for the popup on the page, and otherwise
+  /// detaches it again, rather than leaving its document listeners behind
+  /// </summary>
+  private async Task Attach() {
+    _attaching = true;
+    try {
+      while (Visible && !_disposed) {
+        ElementReference element = _element;
+        _dotNetReference ??= DotNetObjectReference.Create(this);
+        int handle = await PixataJs.Invoke(Js, "attachPopup", 0, AnchorElement, element, _dotNetReference, new { matchAnchorWidth = MatchAnchorWidth, align = Align });
+        if (Visible && !_disposed && element.Id == _element.Id) {
+          _handle = handle;
+          return;
+        }
+        if (handle != 0) {
+          await PixataJs.InvokeVoid(Js, "detachPopup", handle);
+        }
+      }
+    } finally {
+      _attaching = false;
     }
   }
 
