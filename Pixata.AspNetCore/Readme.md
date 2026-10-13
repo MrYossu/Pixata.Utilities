@@ -2,7 +2,7 @@
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore/ConnectionReseau.png "Pixata")
 
-Server-side helpers for ASP.NET Core apps - entity auditing, payload encryption, request logging, endpoint validation, document generation and route dumping.
+Server-side helpers for ASP.NET Core apps - entity auditing, payload encryption, request logging, endpoint validation, document generation, receiving file uploads and route dumping.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
 
@@ -30,6 +30,7 @@ The documentation is split over the following pages...
 | [Validation endpoint filter](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Validation.md) | Running your FluentValidation validators on the server, so a WASM client can't bypass them |
 | [Generating documents and PDFs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md) | `DocumentTemplateHelper`, which renders a Blazor component to HTML or (with a PDF converter package) to a PDF |
 | [Route dumping](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.RouteDumping.md) | An endpoint that lists every route in your app |
+| [Receiving uploads](#receiving-uploads) | Saving files posted to an endpoint (eg by the Pixata.Blazor `PixataUpload` component), including chunked uploads, below |
 
 ## Registering services
 
@@ -72,3 +73,57 @@ If you want to use the [route dump feature](https://github.com/MrYossu/Pixata.Ut
 ```csharp
 app.MapPixataAspNetCoreApiEndpoints();
 ```
+
+## Receiving uploads
+
+`ReceiveUpload()` is an extension method on `HttpRequest` that saves the files posted to an endpoint. It was written for the Pixata.Blazor [`PixataUpload` component](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.FileUpload.md), but works with any form post. It needs no registration...
+
+```csharp
+string uploadFolder = Path.Combine(builder.Environment.ContentRootPath, "Uploads");
+
+app.MapPost(RoutesHelper.UploadSave, async (HttpRequest request) => {
+  UploadReceiveResult result = await request.ReceiveUpload(uploadFolder, o => {
+    o.AllowedExtensions = [".pdf", ".docx"];
+    o.MaxFileSize = 20 * 1024 * 1024;
+  });
+  return result.Success ? Results.Ok(result.Files.Select(f => f.FileName)) : Results.BadRequest(result.Error);
+});
+```
+
+It saves each file in the `files` form field to the folder (creating it if need be), and...
+
+- **Sanitises the file names**, removing any folders and characters the file system won't accept, so a request can't write outside the folder. `UploadRequestExtensions.Sanitise()` is public, if you want to do the same elsewhere.
+- **Checks the extension and size again**, as the browser's checks can be bypassed. A rejected file isn't saved, and `Error` says why.
+- **Writes each file under a temporary name first**, and renames it when it's complete, so nobody sees a half-written file, and two requests saving files with the same name don't trip over each other.
+- **Puts chunked uploads back together.** If the request has a `chunkMetadata` field (the JSON that `PixataUpload` sends with each chunk), the chunk is written to a `.part` file at its offset, and the file gets its real name when the last chunk arrives. A chunk sent twice overwrites itself rather than being added twice. `Files` is empty until the last chunk, and `Complete` is true once the file is saved.
+
+Return a 2xx response when `Success` is true (for every chunk, not just the last), and a 400 otherwise, so the component shows the file as uploaded or failed.
+
+The options are...
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `SaveField` | `files` | The form field that holds the file (or chunk) |
+| `MetadataField` | `chunkMetadata` | The form field that holds a chunk's JSON metadata |
+| `AllowedExtensions` | empty | The extensions accepted (the dot is optional, and case is ignored). Empty accepts any |
+| `MaxFileSize`, `MinFileSize` | null | The largest and smallest files accepted, in bytes. Null means no limit (other than the server's limit on request size) |
+| `Overwrite` | `true` | When false, a file with the same name as one already there is saved as eg `report (1).pdf` |
+| `FileName` | null | A `Func<string, string>` that chooses the name to save under, given the uploaded name (eg to add a GUID). Its result is sanitised too |
+
+The result has `Success`, `Complete`, `Error`, `Chunk` (the chunk's metadata, for a chunked upload) and `Files`, each of which is a `ReceivedFile` with the `FileName` it was saved under, the `OriginalFileName`, the full `Path`, the `Size` and the `ContentType`.
+
+To delete files when the user removes them, point the component's `RemoveUrl` at an endpoint that calls `RemoveUploads()`. It deletes the files named in the `files` field from the folder (again, sanitising the names), and returns the names it deleted...
+
+```csharp
+app.MapPost(RoutesHelper.UploadRemove, async (HttpRequest request) =>
+  Results.Ok(await request.RemoveUploads(uploadFolder)));
+```
+
+A chunked upload that is cancelled, or abandoned when the user closes the page, leaves a `.part` file behind. Call `UploadRequestExtensions.DeleteAbandonedChunks(uploadFolder, TimeSpan.FromHours(1))` now and then (eg from a background service) to delete the ones that haven't been written to for a while.
+
+A few things to bear in mind...
+
+- Don't save uploads under `wwwroot`, unless you want anyone to be able to download them.
+- Your endpoint is a normal endpoint, so protect it with `RequireAuthorization()` as you would any other. The browser sends its cookies with the upload.
+- Kestrel limits a request to about 30 MB by default. Either upload in chunks (which keeps every request small), or raise the limit for the endpoint with `[RequestSizeLimit]` or `.WithMetadata(new RequestSizeLimitAttribute(...))`.
+- `ReceiveUpload()` reads the form itself, so the endpoint doesn't bind any form parameters, and isn't subject to ASP.NET Core's antiforgery check. If your endpoint also binds `IFormFile` or `[FromForm]` parameters and you use `app.UseAntiforgery()`, either send the antiforgery token as a header from `OnUpload`, or call `.DisableAntiforgery()` on the endpoint.

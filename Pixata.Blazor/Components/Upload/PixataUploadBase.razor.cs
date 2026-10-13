@@ -33,7 +33,7 @@ public abstract partial class PixataUploadBase<TFileInfo> : ComponentBase, IAsyn
   private IJSRuntime JS { get; set; } = null!;
 
   /// <summary>
-  /// When false, the component is greyed out, and files can't be picked or dropped. Default true
+  /// When false, the buttons are disabled, and files can't be picked or dropped. The file list can still be read. Default true
   /// </summary>
   [Parameter]
   public bool Enabled { get; set; } = true;
