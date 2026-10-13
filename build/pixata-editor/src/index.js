@@ -156,6 +156,7 @@ class EditorInstance {
     this.lastState = null;
     this.valueTimer = 0;
     this.stateTimer = 0;
+    this.opening = null;
     this.destroyed = false;
   }
 
@@ -435,6 +436,10 @@ class EditorInstance {
       }
     };
     this.mutationObserver = new MutationObserver(() => {
+      // Opening a drop-down adds its popup, so this is also where a tool that was asked to open one is seen to have done so
+      if (this.opening && this.opening.tool.getAttribute("aria-expanded") === "true") {
+        this.opening = null;
+      }
       observeItems();
       this.updateTabStops();
       scheduleMeasure();
@@ -483,8 +488,31 @@ class EditorInstance {
 
   toolbarKeyDown(e) {
     const tool = this.toolElement(e.target);
+    if (!tool) {
+      return;
+    }
     // A tool whose drop-down is open uses the keys itself
-    if (!tool || tool.getAttribute("aria-expanded") === "true") {
+    if (tool.getAttribute("aria-expanded") === "true") {
+      this.opening = null;
+      return;
+    }
+    // So does one that has just been asked to open it. .NET opens the drop-down, so (in Blazor Server especially) it only
+    // shows as open a moment later, and keys pressed in that moment are meant for it, not for the toolbar
+    if (this.opening && this.opening.tool === tool && performance.now() < this.opening.until) {
+      if (e.key === "Escape" || e.key === "Tab" || e.key === "Enter" || e.key === " ") {
+        // These close it again
+        this.opening = null;
+      }
+      return;
+    }
+    this.opening = null;
+    const opens = e.key === "Enter" || e.key === " " || e.key === "ArrowDown" || (e.key === "ArrowUp" && tool.getAttribute("aria-haspopup") === "listbox");
+    if (opens && tool.getAttribute("aria-expanded") === "false") {
+      this.opening = { tool, until: performance.now() + 1000 };
+      return;
+    }
+    // Text fields and lists in custom tools use the arrow keys, Home and End themselves
+    if (e.key !== "Escape" && tool.matches("input:not([type=button], [type=checkbox], [type=radio], [type=submit], [type=reset], [type=image]), textarea, select")) {
       return;
     }
     const tools = this.focusableTools();
