@@ -46,7 +46,7 @@ Using any other type throws an `InvalidOperationException` when the switch is re
 | Input | What it does |
 | --- | --- |
 | Click or tap | Toggles the value |
-| Swipe right or left | Turns it on or off. The switch takes sideways swipes, so they don't scroll the page |
+| Swipe right or left | Turns it on or off (the other way round in a right-to-left page, where on is at the left). The switch takes sideways swipes, so they don't scroll the page |
 | Tab | Moves focus to and from the switch |
 | Space or Enter | Toggles the value |
 

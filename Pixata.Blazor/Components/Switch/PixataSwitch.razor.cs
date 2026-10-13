@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 
 namespace Pixata.Blazor.Components;
 
@@ -14,6 +15,9 @@ public partial class PixataSwitch<TValue> {
   private const double SwipeDistance = 10;
 
   private static readonly bool IsSupportedType = typeof(TValue) == typeof(bool) || typeof(TValue) == typeof(bool?);
+
+  [Inject]
+  private IJSRuntime Js { get; set; } = null!;
 
   /// <summary>
   /// The text shown in the track when the switch is on. Defaults to "On"
@@ -82,6 +86,8 @@ public partial class PixataSwitch<TValue> {
   [Parameter]
   public EventCallback<object> OnChange { get; set; }
 
+  private ElementReference _element;
+  private ElementReference _thumb;
   private double? _pointerDownX;
   private bool _ignoreNextClick;
 
@@ -138,7 +144,21 @@ public partial class PixataSwitch<TValue> {
       return;
     }
     _ignoreNextClick = true;
-    await SetOn(distance > 0);
+    await SetOn(distance > 0 == await OnIsToTheRight());
+  }
+
+  /// <summary>
+  /// Whether the switch is on at its right-hand end, so a swipe to the right turns it on. In a right-to-left page it is the
+  /// other way round. The switch can't tell which from here, so it looks at which end the thumb is at
+  /// </summary>
+  private async Task<bool> OnIsToTheRight() {
+    PixataSwitchBox? box = await PixataJs.Invoke<PixataSwitchBox?>(Js, "getBoundingRect", null, _element);
+    PixataSwitchBox? thumb = await PixataJs.Invoke<PixataSwitchBox?>(Js, "getBoundingRect", null, _thumb);
+    if (box is null || thumb is null || box.Width <= 0) {
+      return true;
+    }
+    bool thumbAtRight = thumb.Left + thumb.Width / 2 > box.Left + box.Width / 2;
+    return thumbAtRight == IsOn;
   }
 
   private async Task SetOn(bool on) {
@@ -149,4 +169,12 @@ public partial class PixataSwitch<TValue> {
       await OnChange.InvokeAsync(on);
     }
   }
+}
+
+/// <summary>
+/// Where an element is on the screen, as the browser reports it
+/// </summary>
+internal sealed class PixataSwitchBox {
+  public double Left { get; set; }
+  public double Width { get; set; }
 }

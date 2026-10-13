@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -138,6 +139,25 @@ public class Switch_Tests {
     cut.Find("button").PointerDown(new PointerEventArgs { ClientX = 10 });
     cut.Find("button").PointerUp(new PointerEventArgs { ClientX = 50 });
     Assert.AreEqual(0, values.Count);
+  }
+
+  [TestMethod]
+  [DataRow(10.0, 50.0, false, DisplayName = "Swipe right")]
+  [DataRow(50.0, 10.0, true, DisplayName = "Swipe left")]
+  public void RightToLeft_SwipeLeftTurnsItOn(double from, double to, bool expected) {
+    using BunitContext context = PixataTestContext.Create();
+    List<bool> values = [];
+    IRenderedComponent<PixataSwitch<bool>> cut = context.Render<PixataSwitch<bool>>(p => p
+      .Add(c => c.Value, false)
+      .Add(c => c.ValueChanged, (bool v) => values.Add(v)));
+    // In a right-to-left page, the thumb of a switch that is off is at its right-hand end
+    string thumb = cut.Find(".pixata-blazor-switch-thumb").GetAttribute("blazor:elementReference")!;
+    BunitJSModuleInterop module = context.JSInterop.SetupModule("./_content/Pixata.Blazor/pixata-blazor.js");
+    module.Setup<PixataSwitchBox?>("getBoundingRect", i => ((ElementReference)i.Arguments[0]!).Id == thumb).SetResult(new() { Left = 30, Width = 30 });
+    module.Setup<PixataSwitchBox?>("getBoundingRect", i => ((ElementReference)i.Arguments[0]!).Id != thumb).SetResult(new() { Left = 0, Width = 60 });
+    cut.Find("button").PointerDown(new PointerEventArgs { ClientX = from });
+    cut.Find("button").PointerUp(new PointerEventArgs { ClientX = to });
+    CollectionAssert.AreEqual(expected ? new[] { true } : Array.Empty<bool>(), values);
   }
 
   [TestMethod]
