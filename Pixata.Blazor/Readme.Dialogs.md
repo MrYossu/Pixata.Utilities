@@ -154,7 +154,9 @@ The dialogs are shown by a `PixataDialogHost`, which you add once to your layout
 
 The host must be somewhere that is rendered interactively, and in the same DI scope as the code that shows the dialogs. In a Blazor Server or WASM app, or a Blazor Web App with global interactivity, the layout is fine. If your layout is rendered statically and only some pages are interactive, put the host in those pages (or in an interactive component they share) instead.
 
-If a dialog is requested when there's no host, `PixataDialogFactory` throws an `InvalidOperationException` saying so, rather than leaving your code waiting for an answer that will never come.
+If a dialog is requested when there's no host, `PixataDialogFactory` throws an `InvalidOperationException` saying so, rather than leaving your code waiting for an answer that will never come. If the host goes while a dialog is waiting for an answer (eg because the circuit has ended), the dialog counts as cancelled: `AlertAsync` completes, `ConfirmAsync` returns `false` and `PromptAsync` returns `null`.
+
+Show the dialogs in response to something the user does (eg in a button's click handler), or from `OnAfterRenderAsync`, rather than while a component is initialising (in `OnInitialized(Async)` or `OnParametersSet(Async)`). A host in the layout is created after the page inside it, so on the first page the user visits it doesn't exist yet at that point, and while a page is being prerendered there is nobody to answer anyway.
 
 ### Showing them
 
