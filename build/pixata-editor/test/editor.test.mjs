@@ -12,6 +12,7 @@ const { sanitiseHtml, schema, docFromHtml, docToHtml, safeUrl } = await import("
 const { commands, linkInfo } = await import("../src/commands.js");
 const { cleanPastedHtml } = await import("../src/paste.js");
 const { formatHtml } = await import("../src/format.js");
+const { create, setValue, flush, destroy } = await import("../src/index.js");
 const { EditorState, TextSelection } = await import("prosemirror-state");
 const { history } = await import("prosemirror-history");
 
@@ -238,4 +239,25 @@ test("insertHtml inserts at the cursor", () => {
 test("cleanFormatting removes marks and alignment but keeps links", () => {
   const { html } = run(stateFor("<p style=\"text-align: center\"><strong><a href=\"/x\">ab</a></strong><em>c</em></p>"), "cleanFormatting");
   assert.equal(html, "<p><a href=\"/x\">ab</a>c</p>");
+});
+
+// The editor
+
+// Creates an editor in div mode, with a stand-in for the .NET object that records the calls made to it
+async function createEditor(value) {
+  const calls = [];
+  const dotNet = { invokeMethodAsync: (name, ...args) => { calls.push([name, ...args]); return Promise.resolve(); } };
+  const host = document.createElement("div");
+  const mount = host.appendChild(document.createElement("div"));
+  document.body.appendChild(host);
+  const id = await create(host, mount, null, dotNet, { editMode: "div", debounceDelay: 0 }, value);
+  return { id, valueChanges: () => calls.filter(c => c[0] === "OnEditorValueChanged").map(c => c[1]) };
+}
+
+test("a value set from .NET isn't reported back as a change, even when the editor writes it differently", async () => {
+  const { id, valueChanges } = await createEditor("<p>start</p>");
+  setValue(id, "<p><b>bold</b> text</p>");
+  flush(id);
+  destroy(id);
+  assert.deepEqual(valueChanges(), []);
 });

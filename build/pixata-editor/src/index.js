@@ -206,8 +206,15 @@ class EditorInstance {
         this.view.focus();
       }
     };
+    // Pointer events in the iframe don't reach the page, so pass each pointerdown on as one on the iframe element. Without
+    // this, clicking in the document wouldn't close an open drop-down or menu, in the toolbar or elsewhere on the page
+    this.onFramePointerDown = e => {
+      const init = { bubbles: true, cancelable: true, composed: true, button: e.button, buttons: e.buttons, pointerId: e.pointerId, pointerType: e.pointerType };
+      frame.dispatchEvent(typeof PointerEvent === "function" ? new PointerEvent("pointerdown", init) : new Event("pointerdown", init));
+    };
     this.frameWindow.addEventListener("focus", this.onFrameFocus);
     body.parentElement.addEventListener("mousedown", this.onFrameMouseDown);
+    body.ownerDocument.addEventListener("pointerdown", this.onFramePointerDown, true);
     this.frameBody = body;
   }
 
@@ -307,7 +314,9 @@ class EditorInstance {
     }
     clearTimeout(this.valueTimer);
     this.view.updateState(this.createState(value));
-    this.lastValue = value;
+    // What the editor emits for this value (eg <b> becomes <strong>), as in init(), so that just focusing and leaving the
+    // editor doesn't report a change the user didn't make
+    this.lastValue = docToHtml(this.view.state.doc);
     this.reportState();
   }
 
@@ -575,6 +584,7 @@ class EditorInstance {
       try {
         this.frameWindow.removeEventListener("focus", this.onFrameFocus);
         this.frameBody.parentElement.removeEventListener("mousedown", this.onFrameMouseDown);
+        this.frameBody.ownerDocument.removeEventListener("pointerdown", this.onFramePointerDown, true);
       } catch {
         // The iframe has already gone
       }
