@@ -38,7 +38,7 @@ internal static partial class PixataChartFormatter {
         result.Append(template, position, template.Length - position);
         break;
       }
-      int end = template.IndexOf('#', start + 2);
+      int end = ClosingHash(template, start + 2);
       if (end < 0) {
         result.Append(template, position, template.Length - position);
         break;
@@ -48,6 +48,27 @@ internal static partial class PixataChartFormatter {
       position = end + 1;
     }
     return result.ToString();
+  }
+
+  /// <summary>
+  /// The position of the <c>#</c> that ends a placeholder, skipping any inside quotes (as in <c>format('{0:#,##0}', value)</c>),
+  /// or -1 if there isn't one
+  /// </summary>
+  private static int ClosingHash(string template, int from) {
+    char? quote = null;
+    for (int i = from; i < template.Length; i++) {
+      char c = template[i];
+      if (quote is not null) {
+        if (c == quote) {
+          quote = null;
+        }
+      } else if (c is '\'' or '"') {
+        quote = c;
+      } else if (c == '#') {
+        return i;
+      }
+    }
+    return -1;
   }
 
   private static string Evaluate(string expression, Func<string, object?> resolve) {

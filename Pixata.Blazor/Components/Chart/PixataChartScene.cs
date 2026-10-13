@@ -153,6 +153,8 @@ internal sealed record PixataChartLegendEntry(int SeriesIndex, int? PointIndex, 
 internal static class PixataChartPalette {
   public static readonly string[] Defaults = ["#ff6358", "#ffd246", "#78d237", "#28b4c8", "#2d73f5", "#aa46be"];
 
+  private static readonly char[] UnsafeCharacters = [';', ':', '{', '}', '<', '>', '"', '\'', '\\', '@'];
+
   /// <summary>
   /// The CSS colour of the nth series (or pie segment), which hosts can change with the --pixata-blazor-chart-series-*
   /// custom properties
@@ -162,6 +164,15 @@ internal static class PixataChartPalette {
 
   public static string Hex(int index) =>
     Defaults[index % Defaults.Length];
+
+  /// <summary>
+  /// The colour if it is safe to put in a style attribute, or null. Colours can come from the data (a series'
+  /// <c>ColorField</c>), so anything that could end the declaration and add others, or load something, is refused
+  /// </summary>
+  public static string? Safe(string? colour) =>
+    string.IsNullOrWhiteSpace(colour) || colour.IndexOfAny(UnsafeCharacters) >= 0 || colour.Contains("url(", StringComparison.OrdinalIgnoreCase)
+      ? null
+      : colour.Trim();
 
   /// <summary>
   /// Whether dark text reads better than white on <paramref name="colour"/>. Colours that can't be parsed (named colours,

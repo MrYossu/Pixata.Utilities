@@ -20,11 +20,17 @@ public class PixataChartCategoryAxes : ComponentBase {
 /// <see cref="PixataChartValueAxis"/> inside it
 /// </summary>
 public class PixataChartValueAxes : ComponentBase {
+  [CascadingParameter]
+  private PixataChart? Chart { get; set; }
+
   [Parameter]
   public RenderFragment? ChildContent { get; set; }
 
-  protected override void BuildRenderTree(RenderTreeBuilder builder) =>
+  protected override void BuildRenderTree(RenderTreeBuilder builder) {
+    // The axes are given their parameters in the order they are declared, straight after this
+    Chart?.BeginDeclaringValueAxes();
     builder.AddContent(0, ChildContent);
+  }
 }
 
 /// <summary>
@@ -139,6 +145,11 @@ public class PixataChartValueAxis : PixataChartAxisBase {
 
   internal override void Detach() =>
     Chart?.RemoveValueAxis(this);
+
+  protected override void OnParametersSet() {
+    Chart?.ValueAxisDeclared(this);
+    base.OnParametersSet();
+  }
 }
 
 /// <summary>
