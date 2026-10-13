@@ -252,6 +252,7 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
   private readonly List<Row> _rows = [];
   private readonly List<int> _itemRows = [];
   private readonly Dictionary<int, List<TItem>> _pages = [];
+  private readonly Dictionary<int, (int Version, Task<List<TItem>?> Read)> _pageReads = [];
   private int _total;
   private Virtualize<Row>? _virtualize;
   private int _readVersion;
@@ -263,7 +264,7 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
 
   private bool _scrollPending;
   private Func<ElementReference>? _pendingFocus;
-  private readonly List<(Func<ElementReference> Element, string Text)> _pendingTexts = [];
+  private readonly List<(Func<ElementReference> Element, string Text, string Expected)> _pendingTexts = [];
   private string _typeAhead = "";
   private DateTime _typeAheadTime;
 
@@ -584,6 +585,7 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
     try {
       if (RemoteVirtual) {
         _pages.Clear();
+        _pageReads.Clear();
         _total = 0;
         _items.Clear();
         _rows.Clear();
@@ -613,23 +615,46 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
   }
 
   /// <summary>
-  /// Fetches one page of data with <see cref="OnRead"/> when virtually scrolling
+  /// Fetches one page of data with <see cref="OnRead"/> when virtually scrolling. A page that is already being read isn't read
+  /// again; the caller waits for that read instead
   /// </summary>
-  private async Task<List<TItem>?> LoadPage(int page, int version) {
-    if (_pages.TryGetValue(page, out List<TItem>? items)) {
-      return items;
+  /// <returns>The page's items, or null if the data was refreshed (eg the filter changed) since <paramref name="version"/></returns>
+  private Task<List<TItem>?> LoadPage(int page, int version) {
+    if (version != _readVersion) {
+      return Task.FromResult<List<TItem>?>(null);
     }
+    if (_pages.TryGetValue(page, out List<TItem>? items)) {
+      return Task.FromResult<List<TItem>?>(items);
+    }
+    if (_pageReads.TryGetValue(page, out (int Version, Task<List<TItem>?> Read) reading) && reading.Version == version) {
+      return reading.Read;
+    }
+    Task<List<TItem>?> read = ReadPage(page, version);
+    if (!read.IsCompleted) {
+      _pageReads[page] = (version, read);
+    }
+    return read;
+  }
+
+  private async Task<List<TItem>?> ReadPage(int page, int version) {
     PixataDropDownReadEventArgs args = new() {
       Filter = FilterText,
       FilterOperator = FilterOperator,
       Skip = page * PageSizeValue,
       Take = PageSizeValue
     };
-    await OnRead.InvokeAsync(args);
+    try {
+      await OnRead.InvokeAsync(args);
+    }
+    finally {
+      if (_pageReads.TryGetValue(page, out (int Version, Task<List<TItem>?> Read) reading) && reading.Version == version) {
+        _pageReads.Remove(page);
+      }
+    }
     if (version != _readVersion) {
       return null;
     }
-    items = args.Data?.Cast<TItem>().ToList() ?? [];
+    List<TItem> items = args.Data?.Cast<TItem>().ToList() ?? [];
     _pages[page] = items;
     _total = Math.Max(args.Total, page * PageSizeValue + items.Count);
     return items;
@@ -644,6 +669,10 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
     int end = request.StartIndex + Math.Max(1, request.Count);
     List<Row> rows = [];
     for (int page = request.StartIndex / size; page <= (end - 1) / size; page++) {
+      if (request.CancellationToken.IsCancellationRequested) {
+        // The list has scrolled on and asked for other rows, so don't read pages that are no longer wanted (the result is ignored)
+        return new([], _total);
+      }
       List<TItem>? items = await LoadPage(page, version);
       if (items is null) {
         return new([], _total);
@@ -687,6 +716,10 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
         return;
       }
       await RefreshData();
+      if (token.IsCancellationRequested) {
+        // The filter changed again while this read was running, so the newer read sets the focus
+        return;
+      }
     } else {
       Rebuild();
     }
@@ -781,10 +814,12 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
   /// <summary>
   /// Writes the text of a text box the user types into, after the next render. Those text boxes only render text set by code,
   /// not what the user typed, as in Blazor Server a render that arrives after the user has typed more would put back the older
-  /// text. That means rendering alone won't put back text that was rendered before, so it is written by script as well
+  /// text. That means rendering alone won't put back text that was rendered before, so it is written by script as well. For the
+  /// same reason, the script only writes it if the text box still holds <paramref name="expected"/> (the text the component last
+  /// knew it held), so it doesn't throw away what the user has typed since
   /// </summary>
-  private protected void WriteTextAfterRender(Func<ElementReference> element, string text) =>
-    _pendingTexts.Add((element, text));
+  private protected void WriteTextAfterRender(Func<ElementReference> element, string text, string expected) =>
+    _pendingTexts.Add((element, text, expected));
 
   private protected void SetFocusedPosition(int position) {
     FocusedPosition = OptionCount == 0 ? -1 : Math.Clamp(position, 0, OptionCount - 1);
@@ -945,10 +980,10 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
       await PixataDropDownJs.InvokeVoid(Js, "focusElement", focus());
     }
     if (_pendingTexts.Count > 0) {
-      List<(Func<ElementReference> Element, string Text)> texts = [.. _pendingTexts];
+      List<(Func<ElementReference> Element, string Text, string Expected)> texts = [.. _pendingTexts];
       _pendingTexts.Clear();
-      foreach ((Func<ElementReference> element, string text) in texts) {
-        await PixataDropDownJs.InvokeVoid(Js, "setValue", element(), text);
+      foreach ((Func<ElementReference> element, string text, string expected) in texts) {
+        await PixataDropDownJs.InvokeVoid(Js, "setValue", element(), text, expected);
       }
     }
     if (_scrollPending && IsOpen && FocusedPosition >= 0) {

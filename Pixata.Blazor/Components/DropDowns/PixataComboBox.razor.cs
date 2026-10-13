@@ -70,7 +70,7 @@ public partial class PixataComboBox<TItem, TValue> {
   /// </summary>
   private void SetText(string text) {
     if (text != _text) {
-      WriteTextAfterRender(() => _input, text);
+      WriteTextAfterRender(() => _input, text, _text);
     }
     _text = text;
     _shownText = text;

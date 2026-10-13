@@ -121,6 +121,10 @@ public partial class PixataDropDownList<TItem, TValue> {
         await SelectRelative(1);
         break;
       case "ArrowUp":
+        if (DefaultText is not null && !HasSelectedItem) {
+          // The default text is already shown, and it is at the top of the list
+          break;
+        }
         if (SelectedIndex == 0 && DefaultText is not null) {
           await SetValueWithoutItem(default!);
         } else {

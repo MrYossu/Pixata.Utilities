@@ -150,6 +150,26 @@ public class DropDowns_Tests {
   }
 
   [TestMethod]
+  public async Task DropDownList_ArrowUpOnTheDefaultText_StaysThere() {
+    using BunitContext context = PixataTestContext.Create();
+    string? value = null;
+    int changes = 0;
+    IRenderedComponent<PixataDropDownList<string, string>> cut = RenderFruit(context, p => p
+      .Add(c => c.DefaultText, "Pick one")
+      .Add(c => c.ValueChanged, (string v) => {
+        value = v;
+        changes++;
+      }));
+    IElement element = cut.Find(".pixata-blazor-dropdownlist");
+    // The default text is at the top of the list, so there is nothing above it to move to
+    await element.KeyDownAsync(DropDownTestData.Key("ArrowUp"));
+    Assert.AreEqual(0, changes);
+    Assert.AreEqual("Pick one", cut.Find(".pixata-blazor-input-value-text").TextContent);
+    await element.KeyDownAsync(DropDownTestData.Key("ArrowDown"));
+    Assert.AreEqual("Apple", value);
+  }
+
+  [TestMethod]
   public async Task DropDownList_ArrowUpFromTheFirstItem_GoesBackToTheDefaultText() {
     using BunitContext context = PixataTestContext.Create();
     string? value = "Apple";
@@ -506,6 +526,38 @@ public class DropDowns_Tests {
   }
 
   [TestMethod]
+  public async Task DropDownList_VirtualScrollingWithOnRead_ReadsEachPageOnce() {
+    using BunitContext context = PixataTestContext.Create();
+    List<string> items = Enumerable.Range(1, 1000).Select(i => $"Item {i}").ToList();
+    List<int> reads = [];
+    TaskCompletionSource slowReads = new();
+    string? value = null;
+    IRenderedComponent<PixataDropDownList<string, string>> cut = context.Render<PixataDropDownList<string, string>>(p => p
+      .Add(c => c.ScrollMode, PixataDropDownScrollMode.Virtual)
+      .Add(c => c.PageSize, 25)
+      .Add(c => c.ValueChanged, (string v) => value = v)
+      .Add(c => c.OnRead, async (PixataDropDownReadEventArgs e) => {
+        reads.Add(e.Skip);
+        if (e.Skip > 0) {
+          // Every page but the first takes a while, so the next request for it arrives while it is still being read
+          await slowReads.Task;
+        }
+        e.Data = items.Skip(e.Skip).Take(e.Take).ToList();
+        e.Total = items.Count;
+      }));
+    await cut.Find(".pixata-blazor-dropdownlist").ClickAsync(new());
+    await cut.Find(".pixata-blazor-dropdownlist").KeyDownAsync(DropDownTestData.Key("End"));
+    // Enter needs the last page, which is still being read when Enter is pressed again
+    Task first = cut.Find(".pixata-blazor-dropdownlist").KeyDownAsync(DropDownTestData.Key("Enter"));
+    Task second = cut.Find(".pixata-blazor-dropdownlist").KeyDownAsync(DropDownTestData.Key("Enter"));
+    slowReads.SetResult();
+    await Task.WhenAll(first, second);
+    Assert.AreEqual("Item 1000", value);
+    Assert.AreEqual(1, reads.Count(r => r == 975));
+    Assert.AreEqual(reads.Count, reads.Distinct().Count(), $"Pages read more than once: {string.Join(", ", reads)}");
+  }
+
+  [TestMethod]
   public void DropDownList_ValueMapper_FindsTheTextOfAnItemNotYetRead() {
     using BunitContext context = PixataTestContext.Create();
     List<string> items = Enumerable.Range(1, 1000).Select(i => $"Item {i}").ToList();
@@ -530,6 +582,16 @@ public class DropDowns_Tests {
     await cut.Find(".pixata-blazor-dropdownlist").KeyDownAsync(DropDownTestData.Key("ArrowDown"));
     string? active = cut.Find(".pixata-blazor-dropdownlist").GetAttribute("aria-activedescendant");
     Assert.AreEqual(ids[1], active);
+  }
+
+  [TestMethod]
+  public async Task DropDowns_ScrollingList_IsNotATabStop() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataDropDownList<string, string>> cut = RenderFruit(context);
+    await cut.Find(".pixata-blazor-dropdownlist").ClickAsync(new());
+    // Some browsers make scrolling elements Tab stops, which would take the focus into the list (and lose it when the list
+    // closes) rather than out of the component
+    Assert.AreEqual("-1", cut.Find(".pixata-blazor-dropdown-content").GetAttribute("tabindex"));
   }
 
   [TestMethod]

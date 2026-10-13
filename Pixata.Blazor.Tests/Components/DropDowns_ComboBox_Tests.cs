@@ -150,6 +150,52 @@ public class DropDowns_ComboBox_Tests {
   }
 
   [TestMethod]
+  public async Task ComboBox_TextWrittenByScript_SaysWhatTheTextBoxShouldStillHold() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataComboBox<DropDownTestData.Country, int>> cut = RenderCountries(context, p => p.Add(c => c.Value, 1));
+    await cut.Find("input").InputAsync(new ChangeEventArgs { Value = "Ja" });
+    await cut.Find("input").KeyDownAsync(DropDownTestData.Key("Escape"));
+    await cut.Find("input").KeyDownAsync(DropDownTestData.Key("Escape"));
+    // The text is put back by script, but only if the text box still holds what the user typed, so that anything they have
+    // typed since (which is on its way to the component) isn't lost
+    JSRuntimeInvocation write = context.JSInterop.Invocations.Last(i => i.Identifier == "setValue");
+    Assert.AreEqual("France", write.Arguments[1]);
+    Assert.AreEqual("Ja", write.Arguments[2]);
+  }
+
+  [TestMethod]
+  public async Task ComboBox_FilterReadThatFinishesLate_DoesNotMoveTheFocus() {
+    using BunitContext context = PixataTestContext.Create();
+    Dictionary<string, TaskCompletionSource> pending = [];
+    IRenderedComponent<PixataComboBox<DropDownTestData.Country, int>> cut = context.Render<PixataComboBox<DropDownTestData.Country, int>>(p => p
+      .Add(c => c.TextField, nameof(DropDownTestData.Country.Name))
+      .Add(c => c.ValueField, nameof(DropDownTestData.Country.Id))
+      .Add(c => c.Filterable, true)
+      .Add(c => c.FilterOperator, PixataStringFilterOperator.Contains)
+      .Add(c => c.DebounceDelay, 0)
+      .Add(c => c.OnRead, async (PixataDropDownReadEventArgs e) => {
+        if (e.Filter != "") {
+          TaskCompletionSource read = new();
+          pending[e.Filter] = read;
+          await read.Task;
+        }
+        e.Data = DropDownTestData.Countries.Where(country => e.FilterOperator.Matches(country.Name, e.Filter)).ToList();
+      }));
+    Task typedA = cut.Find("input").InputAsync(new ChangeEventArgs { Value = "a" });
+    Task typedAn = cut.Find("input").InputAsync(new ChangeEventArgs { Value = "an" });
+    // The read for "an" finishes first, and the user moves down its list
+    pending["an"].SetResult();
+    await typedAn;
+    CollectionAssert.AreEqual(new[] { "France", "Japan", "Germany" }, DropDownTestData.Options(cut).ToList());
+    await cut.Find("input").KeyDownAsync(DropDownTestData.Key("ArrowDown"));
+    Assert.AreEqual("Japan", DropDownTestData.Focused(cut));
+    // Then the out-of-date read for "a" finishes, which mustn't put the focus back on the first item
+    await cut.InvokeAsync(() => pending["a"].SetResult());
+    await typedA;
+    Assert.AreEqual("Japan", DropDownTestData.Focused(cut));
+  }
+
+  [TestMethod]
   public async Task ComboBox_ArrowKeysWhenClosed_ChangeTheValue() {
     using BunitContext context = PixataTestContext.Create();
     int value = 1;

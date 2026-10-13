@@ -334,4 +334,21 @@ public class DropDowns_MultiSelect_Tests {
       }));
     CollectionAssert.AreEqual(new[] { "France", "Kenya" }, Tags(cut));
   }
+
+  [TestMethod]
+  public async Task MultiSelect_ClearingTheTextAfterChoosing_SaysWhatTheTextBoxShouldStillHold() {
+    using BunitContext context = PixataTestContext.Create();
+    List<int> value = [];
+    IRenderedComponent<PixataMultiSelect<DropDownTestData.Country, int>> cut = RenderCountries(context, p => p
+      .Add(c => c.Filterable, true)
+      .Add(c => c.ValueChanged, (List<int> v) => value = v));
+    await cut.Find("input").InputAsync(new ChangeEventArgs { Value = "ja" });
+    await cut.Find("input").KeyDownAsync(DropDownTestData.Key("Enter"));
+    CollectionAssert.AreEqual(new[] { 2 }, value);
+    // The text box is cleared by script, but only if it still holds "ja": if the user has already started typing the next
+    // item, that text is on its way to the component and mustn't be lost
+    JSRuntimeInvocation write = context.JSInterop.Invocations.Last(i => i.Identifier == "setValue");
+    Assert.AreEqual("", write.Arguments[1]);
+    Assert.AreEqual("ja", write.Arguments[2]);
+  }
 }
