@@ -134,7 +134,7 @@
 
 <ComponentComparison Title="Sanitising">
   <Description>
-    <p>The value below contains a script, an <code>onclick</code> handler, a <code>javascript:</code> link and an iframe. <code>PixataEditor</code> sanitises HTML when it is given a value and when it emits one, so none of them reach the page or the bound value. Edit the text to see the value it emits.</p>
+    <p>The value below contains a script, an <code>onclick</code> handler, a <code>javascript:</code> link and an iframe. <code>PixataEditor</code> sanitises HTML when it is given a value and when it emits one, so none of them reach the page. The bound value only changes when the editor emits a new one, so edit the text to see the sanitised value.</p>
     <pre class="editor-sample-value">@UnsafeHtml</pre>
   </Description>
   <Pixata>

@@ -214,7 +214,7 @@ public partial class PixataEditor : PixataInputBase<string>, IAsyncDisposable {
     readOnly = ReadOnly || !Enabled,
     placeholder = Placeholder ?? "",
     debounceDelay = DebounceDelay,
-    id = Id,
+    id = ContentId,
     ariaLabel = DocumentLabel,
     ariaLabelledBy = AriaLabelledBy,
     ariaDescribedBy = AriaDescribedBy,
