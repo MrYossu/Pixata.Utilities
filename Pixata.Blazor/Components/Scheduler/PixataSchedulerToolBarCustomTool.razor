@@ -1,0 +1,16 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@inherits PixataSchedulerToolBarToolBase<TItem>
+
+@* Your own content in the toolbar *@
+<span class="@PixataCss.Classes("pixata-blazor-scheduler-custom-tool", Class)">@ChildContent</span>
+
+@code {
+
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  [Parameter]
+  public string? Class { get; set; }
+
+}

@@ -1447,4 +1447,1163 @@
 
 /* ========== PixataScheduler ========== */
 
+:root {
+  --pixata-blazor-scheduler-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-scheduler-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-scheduler-head-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-scheduler-nonwork-bg: var(--pixata-blazor-base-bg);
+  --pixata-blazor-scheduler-selected-slot-bg: color-mix(in srgb, var(--pixata-blazor-primary) 12%, transparent);
+  --pixata-blazor-scheduler-today-color: var(--pixata-blazor-primary);
+  --pixata-blazor-scheduler-event-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-scheduler-event-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-scheduler-event-selected-overlay: rgba(0, 0, 0, .14);
+  --pixata-blazor-scheduler-slot-height: 2.375rem;
+  --pixata-blazor-scheduler-side-width: 4.5rem;
+  --pixata-blazor-scheduler-column-min-width: 3.5rem;
+  --pixata-blazor-scheduler-event-gutter: .875rem;
+  --pixata-blazor-scheduler-bar-height: 1.5rem;
+  --pixata-blazor-scheduler-bar-gap: 2px;
+  --pixata-blazor-scheduler-month-day-height: 6rem;
+  --pixata-blazor-scheduler-month-date-height: 1.75rem;
+  --pixata-blazor-scheduler-month-column-min-width: 2.75rem;
+  --pixata-blazor-scheduler-timeline-column-width: 6.25rem;
+  --pixata-blazor-scheduler-timeline-lane-height: 4.5rem;
+  --pixata-blazor-scheduler-dialog-width: 40rem;
+}
+
+.pixata-blazor-scheduler {
+  --pixata-blazor-scheduler-bar-pitch: calc(var(--pixata-blazor-scheduler-bar-height) + var(--pixata-blazor-scheduler-bar-gap));
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--pixata-blazor-scheduler-border-color);
+  background-color: var(--pixata-blazor-scheduler-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-scheduler *,
+.pixata-blazor-scheduler *::before,
+.pixata-blazor-scheduler *::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Toolbar and footer ---------- */
+
+.pixata-blazor-scheduler-toolbar {
+  container: pixata-blazor-scheduler-toolbar / inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  flex-shrink: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+.pixata-blazor-scheduler-navigation,
+.pixata-blazor-scheduler-calendar-tool,
+.pixata-blazor-scheduler-views,
+.pixata-blazor-scheduler-custom-tool {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pixata-blazor-scheduler-toolbar-spacer {
+  flex: 1 1 0;
+}
+
+.pixata-blazor-scheduler-navigation .pixata-blazor-icon:dir(rtl),
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-continues .pixata-blazor-icon:dir(rtl) {
+  transform: scaleX(-1);
+}
+
+.pixata-blazor-scheduler-calendar-popup-content {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-calendar-popup-content .pixata-blazor-input {
+  width: auto;
+}
+
+/* The view switcher: a pill of buttons, or a drop-down list when the toolbar is narrow */
+.pixata-blazor-scheduler-views-buttons,
+.pixata-blazor-scheduler-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 2px;
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--pixata-blazor-base-bg), currentColor 6%);
+}
+
+.pixata-blazor-scheduler-view-button,
+.pixata-blazor-scheduler-segmented-button {
+  margin: 0;
+  padding: 3px calc(var(--pixata-blazor-spacing) * 3);
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-view-button:hover,
+.pixata-blazor-scheduler-segmented-button:hover {
+  background-color: color-mix(in srgb, var(--pixata-blazor-surface-bg) 50%, transparent);
+}
+
+.pixata-blazor-scheduler-view-button.pixata-blazor-selected,
+.pixata-blazor-scheduler-segmented-button.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-surface-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+}
+
+.pixata-blazor-scheduler-view-button:focus-visible,
+.pixata-blazor-scheduler-segmented-button:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-scheduler-views-select-wrapper {
+  position: relative;
+  display: none;
+  align-items: center;
+}
+
+.pixata-blazor-scheduler-views-select {
+  margin: 0;
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 7) var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-base-bg);
+  color: var(--pixata-blazor-base-color);
+  font: inherit;
+  appearance: none;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-views-select:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-scheduler-views-select-icon {
+  position: absolute;
+  inset-inline-end: calc(var(--pixata-blazor-spacing) * 2);
+  pointer-events: none;
+}
+
+@container pixata-blazor-scheduler-toolbar (max-width: 64rem) {
+  .pixata-blazor-scheduler-views-buttons {
+    display: none;
+  }
+
+  .pixata-blazor-scheduler-views-select-wrapper {
+    display: inline-flex;
+  }
+}
+
+@container pixata-blazor-scheduler-toolbar (max-width: 30rem) {
+  .pixata-blazor-scheduler-tool-text {
+    display: none;
+  }
+}
+
+.pixata-blazor-scheduler-footer {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-top: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+/* ---------- The views ---------- */
+
+.pixata-blazor-scheduler-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  outline: none;
+  overscroll-behavior: contain;
+}
+
+.pixata-blazor-scheduler-content:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-primary) 50%, transparent);
+}
+
+.pixata-blazor-scheduler-grid {
+  position: relative;
+  min-width: 100%;
+}
+
+.pixata-blazor-scheduler-time-grid {
+  width: max(100%, calc(var(--pixata-blazor-scheduler-side-width) + var(--pixata-blazor-scheduler-column-count) * var(--pixata-blazor-scheduler-column-min-width)));
+}
+
+.pixata-blazor-scheduler-month-grid {
+  width: max(100%, calc(var(--pixata-blazor-scheduler-column-count) * var(--pixata-blazor-scheduler-month-column-min-width)));
+}
+
+.pixata-blazor-scheduler-timeline-grid {
+  width: max(100%, calc(var(--pixata-blazor-scheduler-side-width) + var(--pixata-blazor-scheduler-column-count) * var(--pixata-blazor-scheduler-timeline-column-width)));
+}
+
+.pixata-blazor-scheduler-head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background-color: var(--pixata-blazor-scheduler-head-bg);
+}
+
+.pixata-blazor-scheduler-row {
+  display: flex;
+  min-width: 0;
+}
+
+.pixata-blazor-scheduler-cells {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  grid-template-columns: repeat(var(--pixata-blazor-scheduler-column-count), minmax(0, 1fr));
+}
+
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-cells {
+  grid-template-columns: repeat(var(--pixata-blazor-scheduler-column-count), minmax(0, 1fr));
+}
+
+.pixata-blazor-scheduler-side-cell {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 2;
+  flex: 0 0 var(--pixata-blazor-scheduler-side-width);
+  width: var(--pixata-blazor-scheduler-side-width);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  background-color: var(--pixata-blazor-scheduler-head-bg);
+  font-size: var(--pixata-blazor-font-size-sm);
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.pixata-blazor-scheduler-head .pixata-blazor-scheduler-side-cell {
+  z-index: 5;
+}
+
+.pixata-blazor-scheduler-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  text-align: center;
+  overflow: hidden;
+}
+
+.pixata-blazor-scheduler-group-cell {
+  padding-block: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-group-text {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 1.5);
+}
+
+.pixata-blazor-scheduler-group-swatch {
+  flex: none;
+  width: .75rem;
+  height: .75rem;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+}
+
+.pixata-blazor-scheduler-group-band {
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+  padding: calc(var(--pixata-blazor-spacing) * 1.5) calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  background-color: var(--pixata-blazor-base-bg);
+  font-weight: 600;
+}
+
+.pixata-blazor-scheduler-group-band-item {
+  position: sticky;
+  inset-inline-start: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-date-link,
+.pixata-blazor-scheduler-date-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: var(--pixata-blazor-line-height);
+}
+
+.pixata-blazor-scheduler-date-link {
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-date-link:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-scheduler-date-link:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-scheduler-day-name {
+  color: var(--pixata-blazor-subtle-color);
+}
+
+.pixata-blazor-scheduler-today .pixata-blazor-scheduler-day-name,
+.pixata-blazor-scheduler-today > .pixata-blazor-scheduler-date-link,
+.pixata-blazor-scheduler-today > .pixata-blazor-scheduler-date-text,
+.pixata-blazor-scheduler-today .pixata-blazor-scheduler-month-day-header,
+.pixata-blazor-scheduler-today .pixata-blazor-scheduler-agenda-day-number {
+  color: var(--pixata-blazor-scheduler-today-color);
+}
+
+/* Slots: the cells that can be selected, double-clicked and dropped on */
+.pixata-blazor-scheduler-slot {
+  position: relative;
+  min-width: 0;
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  overflow: hidden;
+  cursor: default;
+}
+
+.pixata-blazor-scheduler-slot.pixata-blazor-scheduler-nonwork {
+  background-color: var(--pixata-blazor-scheduler-nonwork-bg);
+}
+
+.pixata-blazor-scheduler-slot.pixata-blazor-selected,
+.pixata-blazor-scheduler-slot.pixata-blazor-scheduler-drop-target {
+  background-color: var(--pixata-blazor-scheduler-selected-slot-bg);
+}
+
+/* Appointments are drawn over the slots, in a layer that lets clicks through to the slots between them */
+.pixata-blazor-scheduler-event-layer,
+.pixata-blazor-scheduler-bar-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The day, multi-day and week views */
+.pixata-blazor-scheduler-time-grid .pixata-blazor-scheduler-date-cell {
+  padding: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-scheduler-all-day-row .pixata-blazor-scheduler-cells {
+  min-height: max(var(--pixata-blazor-scheduler-slot-height), calc((var(--pixata-blazor-scheduler-bar-rows) + 1) * var(--pixata-blazor-scheduler-bar-pitch)));
+}
+
+.pixata-blazor-scheduler-all-day-row .pixata-blazor-scheduler-slot {
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+.pixata-blazor-scheduler-all-day-row {
+  --pixata-blazor-scheduler-bar-top: var(--pixata-blazor-scheduler-bar-gap);
+}
+
+.pixata-blazor-scheduler-times {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.pixata-blazor-scheduler-time-cell {
+  height: calc(var(--pixata-blazor-scheduler-span) * var(--pixata-blazor-scheduler-slot-height));
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-times .pixata-blazor-scheduler-time-cell:last-child {
+  border-bottom: 0;
+}
+
+.pixata-blazor-scheduler-time-body .pixata-blazor-scheduler-cells {
+  align-items: start;
+}
+
+.pixata-blazor-scheduler-day-column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pixata-blazor-scheduler-day-column .pixata-blazor-scheduler-slot {
+  flex: none;
+  height: var(--pixata-blazor-scheduler-slot-height);
+  border-bottom-style: dotted;
+}
+
+.pixata-blazor-scheduler-day-column .pixata-blazor-scheduler-slot.pixata-blazor-scheduler-slot-end {
+  border-bottom-style: solid;
+}
+
+.pixata-blazor-scheduler-scroll-mark {
+  position: absolute;
+  top: calc(var(--pixata-blazor-scheduler-span) * var(--pixata-blazor-scheduler-slot-height));
+  width: 0;
+  height: 0;
+}
+
+/* The month view */
+.pixata-blazor-scheduler-month-grid .pixata-blazor-scheduler-date-cell {
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-day-name-short {
+  display: none;
+}
+
+.pixata-blazor-scheduler-month-week .pixata-blazor-scheduler-cells {
+  --pixata-blazor-scheduler-bar-top: var(--pixata-blazor-scheduler-month-date-height);
+  min-height: max(var(--pixata-blazor-scheduler-month-day-height),
+    calc(var(--pixata-blazor-scheduler-month-date-height) + var(--pixata-blazor-scheduler-items-per-slot) * var(--pixata-blazor-scheduler-bar-pitch) + 1.25rem));
+}
+
+.pixata-blazor-scheduler-month-day {
+  padding: 0 calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-month-day-header {
+  display: flex;
+  align-items: center;
+  height: var(--pixata-blazor-scheduler-month-date-height);
+}
+
+.pixata-blazor-scheduler-month-day-header .pixata-blazor-scheduler-date-link,
+.pixata-blazor-scheduler-month-day-header .pixata-blazor-scheduler-date-text {
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * -2);
+  padding-block: 0;
+}
+
+.pixata-blazor-scheduler-other-month .pixata-blazor-scheduler-month-day-header {
+  color: var(--pixata-blazor-subtle-color);
+}
+
+.pixata-blazor-scheduler-more {
+  position: absolute;
+  inset-inline: 2px;
+  bottom: 2px;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius);
+  background: none;
+  color: var(--pixata-blazor-primary);
+  font: inherit;
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-more:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+/* The timeline view */
+/* A day spans many columns, so its date (and group) is kept in view as the timeline scrolls (clip, unlike hidden, lets it stick) */
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-date-cell,
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-group-cell {
+  align-items: flex-start;
+  overflow: clip;
+}
+
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-date-cell > *,
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-group-cell > * {
+  position: sticky;
+  inset-inline-start: calc(var(--pixata-blazor-scheduler-side-width) + var(--pixata-blazor-spacing));
+}
+
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-time-cell {
+  height: auto;
+  padding: calc(var(--pixata-blazor-spacing) * 2) var(--pixata-blazor-spacing);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+.pixata-blazor-scheduler-timeline-lane .pixata-blazor-scheduler-cells {
+  --pixata-blazor-scheduler-bar-top: calc(var(--pixata-blazor-spacing) * 1.5);
+  min-height: max(var(--pixata-blazor-scheduler-timeline-lane-height), calc(var(--pixata-blazor-scheduler-bar-rows) * var(--pixata-blazor-scheduler-bar-pitch) + 1.5rem));
+}
+
+.pixata-blazor-scheduler-timeline-lane .pixata-blazor-scheduler-slot {
+  border-inline-end-style: dotted;
+}
+
+.pixata-blazor-scheduler-timeline-lane .pixata-blazor-scheduler-slot.pixata-blazor-scheduler-slot-end {
+  border-inline-end-style: solid;
+}
+
+.pixata-blazor-scheduler-lane-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--pixata-blazor-spacing);
+}
+
+/* The agenda view */
+.pixata-blazor-scheduler-agenda-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.pixata-blazor-scheduler-agenda-table th,
+.pixata-blazor-scheduler-agenda-table td {
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  font-weight: 400;
+  text-align: start;
+  vertical-align: top;
+}
+
+.pixata-blazor-scheduler-agenda-table th:last-child,
+.pixata-blazor-scheduler-agenda-table td:last-child {
+  border-inline-end: 0;
+}
+
+.pixata-blazor-scheduler-agenda-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--pixata-blazor-scheduler-head-bg);
+  font-size: var(--pixata-blazor-font-size-sm);
+  text-align: center;
+}
+
+.pixata-blazor-scheduler-agenda-date-cell,
+.pixata-blazor-scheduler-agenda-group-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-agenda-day-number {
+  display: inline-block;
+  margin-inline-end: calc(var(--pixata-blazor-spacing) * 2);
+  font-size: 2.25rem;
+  line-height: 1;
+  vertical-align: top;
+}
+
+.pixata-blazor-scheduler-agenda-day-details {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: top;
+}
+
+.pixata-blazor-scheduler-agenda-month {
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-scheduler-agenda-time-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-agenda-empty {
+  color: var(--pixata-blazor-subtle-color);
+}
+
+/* ---------- Appointments ---------- */
+
+.pixata-blazor-scheduler-event {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-scheduler-event-bg);
+  color: var(--pixata-blazor-scheduler-event-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.3333;
+  text-align: start;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.pixata-blazor-scheduler-event.pixata-blazor-selected {
+  background-image: linear-gradient(var(--pixata-blazor-scheduler-event-selected-overlay), var(--pixata-blazor-scheduler-event-selected-overlay));
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .16);
+}
+
+.pixata-blazor-scheduler-event:focus-visible {
+  box-shadow: 0 0 0 2px var(--pixata-blazor-scheduler-bg), 0 0 0 4px var(--pixata-blazor-scheduler-event-bg);
+}
+
+.pixata-blazor-scheduler-event-read-only {
+  cursor: default;
+}
+
+.pixata-blazor-scheduler-event-content {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  overflow: hidden;
+}
+
+.pixata-blazor-scheduler-event-title,
+.pixata-blazor-scheduler-event-time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-scheduler-event-time {
+  font-size: var(--pixata-blazor-font-size-sm);
+  opacity: .9;
+}
+
+.pixata-blazor-scheduler-event-icon,
+.pixata-blazor-scheduler-event-continues {
+  display: inline-flex;
+  align-self: center;
+  flex: none;
+  padding-inline: 2px;
+}
+
+.pixata-blazor-scheduler-event-delete {
+  display: none;
+  align-self: center;
+  flex: none;
+  margin: 0 2px;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-event-delete:hover {
+  background-color: rgba(255, 255, 255, .25);
+}
+
+.pixata-blazor-scheduler-event:hover .pixata-blazor-scheduler-event-delete,
+.pixata-blazor-scheduler-event.pixata-blazor-selected .pixata-blazor-scheduler-event-delete,
+.pixata-blazor-scheduler-event:focus-visible .pixata-blazor-scheduler-event-delete {
+  display: inline-flex;
+}
+
+/* A box in a time column: --pixata-blazor-scheduler-event-top and -height are set on it, and it takes its lane's share of
+   the column's width, leaving a gutter to click on the slots */
+.pixata-blazor-scheduler-event-vertical {
+  top: var(--pixata-blazor-scheduler-event-top);
+  height: var(--pixata-blazor-scheduler-event-height);
+  min-height: 1.25rem;
+  inset-inline-start: calc((100% - var(--pixata-blazor-scheduler-event-gutter)) * var(--pixata-blazor-scheduler-event-lane) / var(--pixata-blazor-scheduler-event-lanes));
+  width: calc((100% - var(--pixata-blazor-scheduler-event-gutter)) / var(--pixata-blazor-scheduler-event-lanes) - 2px);
+  flex-direction: row;
+}
+
+/* Short boxes show their title on one line, and no time */
+.pixata-blazor-scheduler-event-vertical {
+  container-type: size;
+}
+
+@container (max-height: 2.5rem) {
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-title {
+    white-space: nowrap;
+  }
+
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-time {
+    display: none;
+  }
+}
+
+@container (max-width: 4.5rem) {
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-time {
+    display: none;
+  }
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-icon,
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-delete {
+  align-self: flex-start;
+  margin-top: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-continues {
+  position: absolute;
+  inset-inline: 0;
+  justify-content: center;
+  padding: 0;
+  pointer-events: none;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-continues-before {
+  top: 0;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-continues-after {
+  bottom: 0;
+}
+
+/* A bar: --pixata-blazor-scheduler-event-start, -width and -row are set on it */
+.pixata-blazor-scheduler-event-horizontal {
+  top: calc(var(--pixata-blazor-scheduler-bar-top, 0px) + var(--pixata-blazor-scheduler-event-row) * var(--pixata-blazor-scheduler-bar-pitch));
+  height: var(--pixata-blazor-scheduler-bar-height);
+  inset-inline-start: calc(var(--pixata-blazor-scheduler-event-start) + 1px);
+  width: calc(var(--pixata-blazor-scheduler-event-width) - 3px);
+  align-items: center;
+  container-type: inline-size;
+}
+
+/* Narrow bars (eg the month view on a phone) keep their room for the title */
+@container (max-width: 4.5rem) {
+  .pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-icon {
+    display: none;
+  }
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-content {
+  padding-block: 0;
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-continues-before {
+  padding-inline-end: 0;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-continues-before + .pixata-blazor-scheduler-event-content {
+  padding-inline-start: 2px;
+}
+
+/* A row of the agenda */
+.pixata-blazor-scheduler-event-agenda {
+  position: static;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  margin: calc(var(--pixata-blazor-spacing) * -1);
+  padding: var(--pixata-blazor-spacing);
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.pixata-blazor-scheduler-event-agenda .pixata-blazor-scheduler-event-content {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0 calc(var(--pixata-blazor-spacing) * 2);
+  padding: 0;
+}
+
+.pixata-blazor-scheduler-event-agenda:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-scheduler-event-agenda.pixata-blazor-selected {
+  background-image: none;
+  background-color: var(--pixata-blazor-scheduler-selected-slot-bg);
+  box-shadow: none;
+}
+
+.pixata-blazor-scheduler-event-agenda .pixata-blazor-scheduler-event-icon {
+  order: -1;
+}
+
+.pixata-blazor-scheduler-event-agenda .pixata-blazor-scheduler-event-delete:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-scheduler-event-swatch {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  background-color: var(--pixata-blazor-scheduler-event-bg);
+}
+
+/* Resize handles, shown when the pointer is over an appointment that can be changed */
+.pixata-blazor-scheduler-resize-handle {
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+}
+
+.pixata-blazor-scheduler-resize-handle::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--pixata-blazor-scheduler-bg);
+  border-radius: 9999px;
+  background-color: var(--pixata-blazor-scheduler-event-bg);
+}
+
+.pixata-blazor-scheduler-event:hover .pixata-blazor-scheduler-resize-handle,
+.pixata-blazor-scheduler-event.pixata-blazor-selected .pixata-blazor-scheduler-resize-handle {
+  visibility: visible;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle {
+  inset-inline: 0;
+  height: .5rem;
+  cursor: ns-resize;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle::before {
+  inset-inline-start: calc(50% - 4px);
+  top: calc(50% - 4px);
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle-start {
+  top: 0;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle-end {
+  bottom: 0;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle {
+  inset-block: 0;
+  width: .5rem;
+  cursor: ew-resize;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle::before {
+  top: calc(50% - 4px);
+  inset-inline-start: calc(50% - 4px);
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle-start {
+  inset-inline-start: 0;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle-end {
+  inset-inline-end: 0;
+}
+
+/* A selected appointment that can be moved takes over touch gestures, so it can be dragged with a finger */
+.pixata-blazor-scheduler-event.pixata-blazor-selected[data-pixata-draggable="true"] {
+  touch-action: none;
+}
+
+.pixata-blazor-scheduler-dragging {
+  z-index: 6;
+  opacity: .8;
+  box-shadow: var(--pixata-blazor-popup-shadow);
+  cursor: grabbing;
+}
+
+.pixata-blazor-scheduler-drag-active,
+.pixata-blazor-scheduler-drag-active * {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- Dialogs ---------- */
+
+.pixata-blazor-scheduler-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--pixata-blazor-overlay-z-index);
+  background-color: var(--pixata-blazor-overlay-bg);
+}
+
+.pixata-blazor-scheduler-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 1);
+  display: flex;
+  flex-direction: column;
+  width: min(var(--pixata-blazor-scheduler-dialog-width), calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: var(--pixata-blazor-border-radius-lg);
+  background-color: var(--pixata-blazor-surface-bg);
+  color: var(--pixata-blazor-text-color);
+  box-shadow: var(--pixata-blazor-window-shadow);
+  font-size: var(--pixata-blazor-font-size);
+}
+
+.pixata-blazor-scheduler-prompt-overlay {
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 2);
+}
+
+.pixata-blazor-scheduler-prompt {
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 3);
+  width: min(28rem, calc(100vw - 2rem));
+}
+
+.pixata-blazor-scheduler-dialog-titlebar {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 3) calc(var(--pixata-blazor-spacing) * 4);
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-scheduler-dialog-title {
+  flex: 1 1 auto;
+  font-size: var(--pixata-blazor-font-size-lg);
+  font-weight: 600;
+}
+
+.pixata-blazor-scheduler-edit-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pixata-blazor-scheduler-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 4);
+  overflow: auto;
+}
+
+.pixata-blazor-scheduler-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 4);
+  border-top: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-scheduler-dialog-spacer {
+  flex: 1 1 auto;
+}
+
+.pixata-blazor-scheduler-focus-sentinel {
+  position: fixed;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+/* The built-in edit form */
+.pixata-blazor-scheduler-form {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-scheduler-form-field {
+  display: grid;
+  grid-template-columns: minmax(5rem, 22%) minmax(0, 1fr);
+  align-items: start;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-scheduler-form-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--pixata-blazor-spacing);
+  padding-top: calc(var(--pixata-blazor-spacing) + 1px);
+  text-align: end;
+}
+
+.pixata-blazor-scheduler-form-value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+}
+
+.pixata-blazor-scheduler-form .validation-message {
+  color: var(--pixata-blazor-error);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-scheduler-checkbox-label,
+.pixata-blazor-scheduler-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 1.5);
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-checkbox,
+.pixata-blazor-scheduler-radio-label input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--pixata-blazor-primary);
+}
+
+.pixata-blazor-scheduler-textarea .pixata-blazor-input-inner {
+  min-height: 4.5rem;
+  white-space: pre-wrap;
+  resize: vertical;
+}
+
+.pixata-blazor-scheduler-select {
+  width: auto;
+  max-width: 100%;
+}
+
+.pixata-blazor-scheduler-select .pixata-blazor-input-inner {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-number-input {
+  width: 5rem;
+}
+
+/* The recurrence editor */
+.pixata-blazor-scheduler-recurrence-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-scheduler-recurrence-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-recurrence-label {
+  min-width: 6rem;
+}
+
+.pixata-blazor-scheduler-recurrence-options {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-recurrence-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-recurrence-option > .pixata-blazor-input:not(.pixata-blazor-scheduler-number-input):not(.pixata-blazor-scheduler-select) {
+  width: auto;
+}
+
+.pixata-blazor-scheduler-recurrence-summary {
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+/* ---------- Phones and touch screens ---------- */
+
+@media (max-width: 600px) {
+  .pixata-blazor-scheduler {
+    --pixata-blazor-scheduler-side-width: 3.5rem;
+    --pixata-blazor-scheduler-column-min-width: 3rem;
+  }
+
+  .pixata-blazor-scheduler-day-name-long {
+    display: none;
+  }
+
+  .pixata-blazor-scheduler-day-name-short {
+    display: inline;
+  }
+
+  .pixata-blazor-scheduler-agenda-day-details {
+    display: flex;
+  }
+
+  .pixata-blazor-scheduler-agenda-day-number {
+    font-size: 1.75rem;
+  }
+
+  .pixata-blazor-scheduler-dialog {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    max-height: 100dvh;
+    transform: none;
+    border-radius: var(--pixata-blazor-border-radius-lg) var(--pixata-blazor-border-radius-lg) 0 0;
+  }
+
+  .pixata-blazor-scheduler-form-field {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--pixata-blazor-spacing);
+  }
+
+  .pixata-blazor-scheduler-form-label {
+    justify-content: flex-start;
+    padding-top: 0;
+    text-align: start;
+  }
+}
+
+@media (pointer: coarse) {
+  .pixata-blazor-scheduler-view-button,
+  .pixata-blazor-scheduler-segmented-button,
+  .pixata-blazor-scheduler-views-select {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle {
+    height: 1rem;
+  }
+
+  .pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle {
+    width: 1rem;
+  }
+
+  .pixata-blazor-scheduler-event:hover:not(.pixata-blazor-selected) .pixata-blazor-scheduler-resize-handle {
+    visibility: hidden;
+  }
+
+  .pixata-blazor-scheduler-event-delete {
+    padding: var(--pixata-blazor-spacing);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-scheduler-view-button,
+  .pixata-blazor-scheduler-segmented-button {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataScheduler ========== */
