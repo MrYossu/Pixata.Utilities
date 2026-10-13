@@ -13,7 +13,7 @@
   <button @ref="_button"
           type="button"
           id="@_id"
-          class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-editor-dropdown", _open ? "pixata-blazor-focus" : null, PixataCss.Disabled(Enabled), Tool.Class)"
+          class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-editor-dropdown", $"pixata-blazor-editor-tool-{PixataEditor.Kebab(Tool.CommandName)}", _open ? "pixata-blazor-focus" : null, PixataCss.Disabled(Enabled), Tool.Class)"
           style="@(string.IsNullOrWhiteSpace(Tool.Width) ? null : $"width: {Tool.Width};")"
           title="@Tool.Title"
           role="combobox"

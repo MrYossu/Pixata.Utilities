@@ -1415,6 +1415,783 @@
 
 /* ========== PixataEditor ========== */
 
+/*
+  PixataEditor. The rules whose selectors mention pixata-blazor-editor-document style the content being edited. In iframe
+  mode the editor copies them (and the custom properties they use) into the iframe, so the content looks the same in both
+  modes, and page styles stay out of the iframe. Restyle the content by adding rules that mention that class too
+*/
+
+:root {
+  --pixata-blazor-editor-bg: var(--pixata-blazor-input-bg);
+  --pixata-blazor-editor-toolbar-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-editor-content-padding: .5rem .75rem;
+  --pixata-blazor-editor-link-color: #0058e9;
+  --pixata-blazor-editor-table-border-color: #c6c6c6;
+  --pixata-blazor-editor-selected-cell-bg: rgba(0, 88, 233, .12);
+  --pixata-blazor-editor-selected-node-outline: 2px solid #8cb2f7;
+  --pixata-blazor-editor-code-bg: #f5f5f5;
+  --pixata-blazor-editor-quote-border-color: #d6d6d6;
+  --pixata-blazor-editor-dialog-width: 400px;
+}
+
+.pixata-blazor-editor {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 6rem;
+  border: 1px solid var(--pixata-blazor-input-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-editor-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  transition: border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-editor:focus-within {
+  border-color: var(--pixata-blazor-input-focus-border-color);
+  box-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-editor.pixata-blazor-invalid,
+.pixata-blazor-editor.pixata-blazor-invalid:focus-within {
+  border-color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-editor.pixata-blazor-invalid:focus-within {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-error) 25%, transparent);
+}
+
+/* The editor stays readable (and scrollable) when disabled */
+.pixata-blazor-editor.pixata-blazor-disabled {
+  pointer-events: none;
+}
+
+.pixata-blazor-editor.pixata-blazor-disabled .pixata-blazor-editor-content {
+  pointer-events: auto;
+}
+
+/* ---------- Toolbar ---------- */
+
+.pixata-blazor-editor-toolbar {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+  background-color: var(--pixata-blazor-editor-toolbar-bg);
+}
+
+/* With Adaptive, the toolbar stays on one line and the tools that don't fit go into the overflow menu */
+.pixata-blazor-editor-toolbar-adaptive {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.pixata-blazor-editor-toolbar-item {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  max-width: 100%;
+}
+
+/* Tools in the overflow menu stay in the toolbar, out of sight, so their widths can still be measured */
+.pixata-blazor-editor-toolbar-item-hidden,
+.pixata-blazor-editor-toolbar-overflow-hidden {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-toolbar-overflow {
+  display: inline-flex;
+  flex: none;
+  margin-inline-start: auto;
+}
+
+.pixata-blazor-editor-tool .pixata-blazor-icon {
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-overflow-tools {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  max-width: min(22rem, calc(100vw - 1rem));
+  max-height: min(20rem, calc(100vh - 6rem));
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  overflow: auto;
+}
+
+/* The format, font and size drop-downs */
+.pixata-blazor-editor-dropdown-wrapper,
+.pixata-blazor-editor-colour-wrapper,
+.pixata-blazor-editor-table-wrapper {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.pixata-blazor-input.pixata-blazor-editor-dropdown {
+  width: 10rem;
+  max-width: 100%;
+  cursor: pointer;
+  text-align: start;
+}
+
+.pixata-blazor-editor-dropdown.pixata-blazor-editor-tool-font-size {
+  width: 8rem;
+}
+
+.pixata-blazor-editor-dropdown:focus-visible {
+  outline: none;
+  border-color: var(--pixata-blazor-input-focus-border-color);
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-editor-dropdown:disabled {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  cursor: default;
+}
+
+.pixata-blazor-editor-dropdown .pixata-blazor-input-inner {
+  display: block;
+  align-self: center;
+}
+
+.pixata-blazor-editor-dropdown-popup .pixata-blazor-popup-content {
+  --pixata-blazor-popup-max-height: 16rem;
+}
+
+.pixata-blazor-editor-format-preview {
+  display: block;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pixata-blazor-editor-format-h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h3 {
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h4 {
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h5 {
+  font-size: .95em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h6 {
+  font-size: .85em;
+  font-weight: 700;
+}
+
+/* The colour pickers */
+.pixata-blazor-editor-colour-tool {
+  gap: 0;
+  padding-inline-end: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-editor-colour-icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1px;
+}
+
+.pixata-blazor-editor-colour-icon .pixata-blazor-icon {
+  width: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) - 3px);
+  height: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) - 3px);
+}
+
+.pixata-blazor-editor-colour-bar {
+  display: block;
+  height: 3px;
+  border-radius: 1px;
+}
+
+.pixata-blazor-editor-colour-bar.pixata-blazor-editor-colour-none {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-editor-colour-caret .pixata-blazor-icon {
+  width: .75rem;
+  height: .75rem;
+}
+
+.pixata-blazor-editor-palette {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-editor-palette-clear {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: var(--pixata-blazor-spacing);
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-blazor-editor-palette-clear:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-editor-palette-clear.pixata-blazor-focus {
+  box-shadow: var(--pixata-blazor-focus-ring);
+}
+
+.pixata-blazor-editor-colour-swatch {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+}
+
+.pixata-blazor-editor-colour-swatch.pixata-blazor-editor-colour-none {
+  border: 1px solid var(--pixata-blazor-border-alt-color);
+  background: linear-gradient(to top right, transparent calc(50% - 1px), var(--pixata-blazor-error) calc(50% - 1px), var(--pixata-blazor-error) calc(50% + 1px), transparent calc(50% + 1px));
+}
+
+.pixata-blazor-editor-palette-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pixata-blazor-editor-palette-row {
+  display: flex;
+  gap: 1px;
+}
+
+.pixata-blazor-editor-palette-cell {
+  box-sizing: border-box;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  cursor: pointer;
+}
+
+.pixata-blazor-editor-palette-cell:hover,
+.pixata-blazor-editor-palette-cell.pixata-blazor-focus {
+  position: relative;
+  outline: 2px solid var(--pixata-blazor-text-color);
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 1px #fff;
+  z-index: 1;
+}
+
+.pixata-blazor-editor-palette-cell.pixata-blazor-selected {
+  box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px rgba(0, 0, 0, .5);
+}
+
+/* The Insert table grid */
+.pixata-blazor-editor-table-picker {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-editor-table-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pixata-blazor-editor-table-row {
+  display: flex;
+  gap: 2px;
+}
+
+.pixata-blazor-editor-table-cell {
+  box-sizing: border-box;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--pixata-blazor-border-alt-color);
+  background-color: var(--pixata-blazor-surface-bg);
+  cursor: pointer;
+}
+
+.pixata-blazor-editor-table-cell.pixata-blazor-selected {
+  border-color: var(--pixata-blazor-primary);
+  background-color: var(--pixata-blazor-primary-subtle);
+}
+
+.pixata-blazor-editor-table-size {
+  color: var(--pixata-blazor-subtle-color);
+  text-align: center;
+}
+
+/* ---------- Content area ---------- */
+
+.pixata-blazor-editor-content {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pixata-blazor-editor-iframe {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background-color: var(--pixata-blazor-editor-bg);
+  color-scheme: normal;
+}
+
+.pixata-blazor-editor-mount {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Until the editor loads in the browser, the content is shown read-only in its place */
+.pixata-blazor-editor-loading {
+  visibility: hidden;
+}
+
+.pixata-blazor-editor-prerender {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+}
+
+/* ---------- Content ---------- */
+
+.pixata-blazor-editor-document {
+  box-sizing: border-box;
+  position: relative;
+  min-height: 100%;
+  margin: 0;
+  padding: var(--pixata-blazor-editor-content-padding);
+  outline: none;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
+  -webkit-font-variant-ligatures: none;
+}
+
+.pixata-blazor-editor-document.pixata-blazor-editor-prerender {
+  white-space: normal;
+}
+
+.pixata-blazor-editor-document > :first-child {
+  margin-top: 0;
+}
+
+.pixata-blazor-editor-document > :last-child {
+  margin-bottom: 0;
+}
+
+.pixata-blazor-editor-document p {
+  margin: 0 0 1em;
+}
+
+.pixata-blazor-editor-document h1,
+.pixata-blazor-editor-document h2,
+.pixata-blazor-editor-document h3,
+.pixata-blazor-editor-document h4,
+.pixata-blazor-editor-document h5,
+.pixata-blazor-editor-document h6 {
+  margin: 0 0 .5em;
+  line-height: 1.2;
+}
+
+.pixata-blazor-editor-document a {
+  color: var(--pixata-blazor-editor-link-color);
+  text-decoration: underline;
+}
+
+.pixata-blazor-editor-document img {
+  max-width: 100%;
+  height: auto;
+}
+
+.pixata-blazor-editor-document ul,
+.pixata-blazor-editor-document ol {
+  margin: 0 0 1em;
+  padding-inline-start: 2em;
+}
+
+.pixata-blazor-editor-document li > p {
+  margin: 0;
+}
+
+.pixata-blazor-editor-document blockquote {
+  margin: 0 0 1em;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--pixata-blazor-editor-quote-border-color);
+}
+
+.pixata-blazor-editor-document pre {
+  margin: 0 0 1em;
+  padding: .5em;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  background-color: var(--pixata-blazor-editor-code-bg);
+  white-space: pre-wrap;
+}
+
+.pixata-blazor-editor-document code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: .9em;
+}
+
+.pixata-blazor-editor-document hr {
+  margin: 1em 0;
+  border: 0;
+  border-top: 1px solid var(--pixata-blazor-editor-table-border-color);
+}
+
+.pixata-blazor-editor-document table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  table-layout: fixed;
+  overflow: hidden;
+}
+
+.pixata-blazor-editor-document td,
+.pixata-blazor-editor-document th {
+  box-sizing: border-box;
+  position: relative;
+  min-width: 1em;
+  padding: .25em .5em;
+  border: 1px solid var(--pixata-blazor-editor-table-border-color);
+  vertical-align: top;
+}
+
+.pixata-blazor-editor-document th {
+  font-weight: 700;
+  text-align: start;
+}
+
+.pixata-blazor-editor-document td > p,
+.pixata-blazor-editor-document th > p {
+  margin: 0;
+}
+
+.pixata-blazor-editor-document .tableWrapper {
+  overflow-x: auto;
+}
+
+.pixata-blazor-editor-document .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-color: var(--pixata-blazor-editor-selected-cell-bg);
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background-color: var(--pixata-blazor-editor-link-color);
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document .ProseMirror-selectednode {
+  outline: var(--pixata-blazor-editor-selected-node-outline);
+}
+
+.pixata-blazor-editor-document li.ProseMirror-selectednode {
+  outline: none;
+}
+
+.pixata-blazor-editor-document li.ProseMirror-selectednode::after {
+  content: "";
+  position: absolute;
+  inset: -2px -2px -2px -32px;
+  border: var(--pixata-blazor-editor-selected-node-outline);
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document img.ProseMirror-separator {
+  display: inline !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+.pixata-blazor-editor-document.ProseMirror-hideselection *::selection {
+  background: transparent;
+}
+
+.pixata-blazor-editor-document.ProseMirror-hideselection *::-moz-selection {
+  background: transparent;
+}
+
+.pixata-blazor-editor-document.ProseMirror-hideselection {
+  caret-color: transparent;
+}
+
+.pixata-blazor-editor-document [draggable][contenteditable=false] {
+  user-select: text;
+}
+
+.pixata-blazor-editor-document .ProseMirror-gapcursor {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document .ProseMirror-gapcursor::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -2px;
+  width: 20px;
+  border-top: 1px solid currentColor;
+  animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes ProseMirror-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.pixata-blazor-editor-document.ProseMirror-focused .ProseMirror-gapcursor {
+  display: block;
+}
+
+.pixata-blazor-editor-document .pixata-blazor-editor-placeholder::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  color: var(--pixata-blazor-placeholder-color);
+  pointer-events: none;
+}
+
+/* ---------- Dialogs (insert link, insert image, view HTML) ---------- */
+
+.pixata-blazor-editor-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--pixata-blazor-overlay-z-index);
+  background-color: var(--pixata-blazor-overlay-bg);
+}
+
+.pixata-blazor-editor-dialog {
+  box-sizing: border-box;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 1);
+  display: flex;
+  flex-direction: column;
+  width: var(--pixata-blazor-editor-dialog-width);
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-surface-bg);
+  color: var(--pixata-blazor-text-color);
+  box-shadow: var(--pixata-blazor-window-shadow);
+  transform: translate(-50%, -50%);
+  text-align: start;
+}
+
+.pixata-blazor-editor-dialog-html {
+  --pixata-blazor-editor-dialog-width: 640px;
+}
+
+.pixata-blazor-editor-dialog-titlebar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 4);
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-editor-dialog-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--pixata-blazor-font-size-lg);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-editor-dialog-form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  margin: 0;
+}
+
+.pixata-blazor-editor-dialog-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 4);
+  overflow: auto;
+}
+
+.pixata-blazor-editor-dialog-field {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+}
+
+.pixata-blazor-editor-dialog-label {
+  font-weight: 500;
+}
+
+.pixata-blazor-editor-dialog-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-editor-dialog-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  cursor: pointer;
+}
+
+.pixata-blazor-editor-dialog-checkbox input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--pixata-blazor-primary);
+}
+
+.pixata-blazor-editor-dialog-error {
+  color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-editor-html-source {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 18rem;
+  height: 50vh;
+  margin: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border: 1px solid var(--pixata-blazor-input-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-input-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.5;
+  resize: vertical;
+  white-space: pre;
+  overflow: auto;
+}
+
+.pixata-blazor-editor-html-source:focus {
+  outline: none;
+  border-color: var(--pixata-blazor-input-focus-border-color);
+  box-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-editor-dialog-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 4);
+  border-top: 1px solid var(--pixata-blazor-border-color);
+}
+
+/* ---------- Touch screens and small screens ---------- */
+
+@media (pointer: coarse) {
+  .pixata-blazor-input.pixata-blazor-editor-dropdown {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-editor-palette-cell {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .pixata-blazor-editor-palette-clear {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-editor-table-cell {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pixata-blazor-editor-dialog {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+  }
+
+  .pixata-blazor-editor-dialog-row {
+    flex-direction: column;
+  }
+
+  .pixata-blazor-editor-palette-cell {
+    width: min(1.75rem, calc((100vw - 3rem) / var(--pixata-blazor-editor-palette-columns, 10) - 1px));
+    height: min(1.75rem, calc((100vw - 3rem) / var(--pixata-blazor-editor-palette-columns, 10) - 1px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-editor {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataEditor ========== */
 
 /* ========== PixataFileSelect and PixataUpload ========== */

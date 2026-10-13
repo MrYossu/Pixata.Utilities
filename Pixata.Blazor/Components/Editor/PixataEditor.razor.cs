@@ -434,7 +434,7 @@ public partial class PixataEditor : PixataInputBase<string>, IAsyncDisposable {
       _ => null
     };
 
-  private static string Kebab(string name) =>
+  internal static string Kebab(string name) =>
     string.Concat(name.Select((c, i) => char.IsUpper(c) ? $"{(i > 0 ? "-" : "")}{char.ToLowerInvariant(c)}" : c.ToString()));
 
   private async Task ClickButton(PixataEditorButtonTool button, bool overflow) {

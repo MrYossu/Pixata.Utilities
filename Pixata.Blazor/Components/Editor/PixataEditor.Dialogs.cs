@@ -92,8 +92,8 @@ public partial class PixataEditor {
     _focusEditor = true;
   }
 
-  private void FieldInput(Action<string> set, ChangeEventArgs e) {
-    set(e.Value?.ToString() ?? "");
+  private void FieldInput(Action<string> set, string? value) {
+    set(value ?? "");
     _dialogError = null;
   }
 

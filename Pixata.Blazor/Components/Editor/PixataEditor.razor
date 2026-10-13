@@ -76,7 +76,7 @@
     @if (_dialog != EditorDialog.None) {
       <div class="pixata-blazor-editor-dialog-overlay"></div>
       <div @ref="_dialogElement"
-           class="pixata-blazor-editor-dialog"
+           class="@PixataCss.Classes("pixata-blazor-editor-dialog", $"pixata-blazor-editor-dialog-{_dialog.ToString().ToLowerInvariant()}")"
            style="@DialogStyle"
            role="dialog"
            aria-modal="true"
@@ -211,8 +211,9 @@
                inputmode="@inputMode"
                autocomplete="off"
                aria-describedby="@(_dialogError is null ? null : DialogErrorId)"
-               value="@get()"
-               @oninput="e => FieldInput(set, e)" />
+               @bind:get="get()"
+               @bind:set="v => FieldInput(set, v)"
+               @bind:event="oninput" />
       </span>
     </div>
   };

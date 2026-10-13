@@ -14,7 +14,7 @@
   <button @ref="_button"
           type="button"
           id="@_id"
-          class="@PixataCss.Classes(PixataCss.Button(null, null, null, null), "pixata-blazor-editor-tool", "pixata-blazor-editor-colour-tool", _open ? "pixata-blazor-selected" : null, Tool.Class)"
+          class="@PixataCss.Classes(PixataCss.Button(null, null, null, null), "pixata-blazor-editor-tool", "pixata-blazor-editor-colour-tool", $"pixata-blazor-editor-tool-{PixataEditor.Kebab(Tool.CommandName)}", _open ? "pixata-blazor-selected" : null, Tool.Class)"
           title="@Tool.Title"
           role="combobox"
           aria-label="@Tool.Title"
