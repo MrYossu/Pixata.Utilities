@@ -59,7 +59,8 @@ Namespace `Pixata.Extensions.Grid`...
 
 | Type | What it is |
 | --- | --- |
-| `GridRequest` | `Page` (1-based) and `PageSize` (zero means no paging) |
+| `GridRequest` | `Page` (1-based), `PageSize` (zero means no paging) and `Sorts`, a list of `GridSortDescriptor`s in priority order |
+| `GridSortDescriptor` | `Member` (the field, such as "Address.City") and `SortDirection` (a `ListSortDirection`). It isn't called `SortDescriptor`, so it doesn't clash with Telerik's |
 | `GridResult<T>` | `Data` (the requested page of items) and `Total` (the number of items before paging) |
-| `GridQueryExtensions` | `ToGridResult(request)` on an `IQueryable<T>` or `IEnumerable<T>`, which applies the request. It only uses standard LINQ, so on an EF Core query it is translated to SQL |
-| `FieldAccessor` | Reads a field from an object given its path as a string, such as "Address.City", returning null if anything along the path is null. `Getter<T>(field)` returns a compiled function, cached per type and path. `Member()` and `FieldType()` describe what's at the end of the path. A path that doesn't match public properties or fields (it is case sensitive) throws an `ArgumentException` |
+| `GridQueryExtensions` | `ToGridResult(request)` on an `IQueryable<T>` or `IEnumerable<T>`, which sorts, counts and pages. `ApplySorts(sorts)` does just the sorting. These only use standard LINQ, so on an EF Core query they are translated to SQL |
+| `FieldAccessor` | Reads a field from an object given its path as a string, such as "Address.City", returning null if anything along the path is null. `Getter<T>(field)` returns a compiled function, cached per type and path. `Lambda(type, field)` builds the equivalent expression (such as `item => item.Address.City`) for use in a query, checking for nulls along the way. `Member()` and `FieldType()` describe what's at the end of the path. A path that doesn't match public properties or fields (it is case sensitive) throws an `ArgumentException` |

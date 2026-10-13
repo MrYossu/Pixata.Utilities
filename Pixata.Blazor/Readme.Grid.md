@@ -49,6 +49,8 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `Pageable` | `bool` | Splits the rows into pages, with a pager. See [paging](#paging) |
 | `PageSize` | `int` | The number of rows on a page. Defaults to 10. Can be two-way bound |
 | `Page` | `int` | The current page, starting from 1. Can be two-way bound |
+| `Sortable` | `bool` | Lets the user sort by clicking a column header. See [sorting](#sorting) |
+| `SortMode` | `PixataGridSortMode` | `Single` (the default) or `Multiple` |
 
 ## Column parameters
 
@@ -62,6 +64,7 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `TextAlign` | `PixataGridTextAlign?` | `Left`, `Center` or `Right`, for the data cells. The header isn't affected, so use `HeaderClass` if you want that aligned too |
 | `Class` | `string` | A CSS class for the column's data cells |
 | `HeaderClass` | `string` | A CSS class for the column's header cell |
+| `Sortable` | `bool` | Set to `false` to stop the user sorting by this column. Defaults to `true`, but only matters if the grid is `Sortable` |
 
 If you don't set a `Title`, the grid uses the `[Display(Name = "...")]` attribute on the property if there is one. If not, it uses the field name split into words with `SplitCamelCase()`, so `DateOfBirth` becomes "Date of birth" (for a nested field, it uses the last part of the path). **This differs from Telerik on purpose**, as Telerik shows the field name unchanged.
 
@@ -112,6 +115,28 @@ As in Telerik's grid...
 - Picking "All" sets `PageSize` to the number of items, so that's what the dropdown shows afterwards
 - If the page is past the end (because the data shrank, or you set `Page` too high), the grid moves to the last page and raises `PageChanged`
 - A page number typed in the box is limited to the pages that exist, and anything that isn't a number is ignored
+
+## Sorting
+
+Set `Sortable="true"` and the user can sort by clicking a column header (or pressing Enter on it). Each click moves the column through ascending, descending and back to unsorted. With `SortMode="PixataGridSortMode.Multiple"`, each column clicked is added to the sort, after the ones already there, and the header shows its position.
+
+```razor
+<PixataGrid Data="_people" Sortable="true" SortMode="PixataGridSortMode.Multiple">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(Person.Surname)" />
+    <PixataGridColumn Field="@nameof(Person.FirstName)" />
+    <PixataGridColumn Field="@nameof(Person.Notes)" Sortable="false" />
+  </GridColumns>
+</PixataGrid>
+```
+
+As in Telerik's grid...
+
+- Sorting uses the normal .NET ordering for the field's type, so strings are compared using the current culture, and enums by their underlying value
+- Sorting doesn't change the page, so you see the same page of the newly sorted data
+- A nested field such as "Address.City" sorts safely when part of the path is null. Those rows count as null, which comes first in ascending order
+
+Setting the initial sort from code will be possible through the grid's state, when that's added.
 
 ## Updating the data
 

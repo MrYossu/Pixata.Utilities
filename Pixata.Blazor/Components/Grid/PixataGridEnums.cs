@@ -9,6 +9,14 @@ public enum PixataGridSize {
 }
 
 /// <summary>
+/// Whether the user can sort by one column at a time, or several
+/// </summary>
+public enum PixataGridSortMode {
+  Single,
+  Multiple
+}
+
+/// <summary>
 /// The horizontal alignment of a column's data cells
 /// </summary>
 public enum PixataGridTextAlign {

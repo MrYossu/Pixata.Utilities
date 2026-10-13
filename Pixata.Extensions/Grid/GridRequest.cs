@@ -1,7 +1,9 @@
+using System.Collections.Generic;
+
 namespace Pixata.Extensions.Grid;
 
 /// <summary>
-/// Describes the data a grid wants: which page, and (in later versions) the sorting, filtering and grouping to apply. It
+/// Describes the data a grid wants: which page, how to sort it, and (in later versions) the filtering and grouping. It
 /// contains nothing but data, so it serialises cleanly, and can be sent from a WASM client to an API, whose server applies it
 /// to a query with <see cref="GridQueryExtensions.ToGridResult{T}(System.Linq.IQueryable{T}, GridRequest)"/>
 /// </summary>
@@ -15,4 +17,9 @@ public record GridRequest {
   /// The number of items on a page. Zero means no paging, so every item is returned
   /// </summary>
   public int PageSize { get; init; }
+
+  /// <summary>
+  /// The sorts to apply, in order of priority
+  /// </summary>
+  public List<GridSortDescriptor> Sorts { get; init; } = [];
 }

@@ -102,6 +102,41 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Sorting</h4>
+
+<p>Click a header to sort by that column. Clicking again sorts the other way, and a third click removes the sort. In multiple mode, each click adds to the sort, and the header shows the order. City is a nested field.</p>
+
+<div class="pixata-grid-sample-options">
+  <label>
+    <input type="checkbox" @bind="_multipleSort" />
+    Sort by several columns
+  </label>
+</div>
+
+<p class="pixata-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Sortable="true" SortMode="@(_multipleSort ? PixataGridSortMode.Multiple : PixataGridSortMode.Single)" Pageable="true" PageSize="5">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" TextAlign="PixataGridTextAlign.Right" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" Sortable="false" Title="Manager (not sortable)" />
+    <PixataGridColumn Field="Address.City" Title="City" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Sortable="true" SortMode="@(_multipleSort ? SortMode.Multiple : SortMode.Single)" Pageable="true" PageSize="5">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" TextAlign="ColumnTextAlign.Right" />
+    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" Sortable="false" Title="Manager (not sortable)" />
+    <GridColumn Field="Address.City" Title="City" />
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -130,6 +165,7 @@
   private readonly List<GridSampleEmployee> _employees = GridSampleEmployee.All();
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
+  private bool _multipleSort;
   private int _pageSize = 3;
   private int _page = 1;
   private readonly List<int?> _pageSizes = [3, 5, 10, null];

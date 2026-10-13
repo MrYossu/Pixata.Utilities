@@ -514,10 +514,89 @@
   border-bottom-width: 1px;
 }
 
+/*
+  As in Telerik's grid, the header content is pulled out over the cell's padding and then padded again, so the whole cell is
+  the click target for sorting
+*/
+.pixata-grid-cell-inner {
+  display: flex;
+  align-items: center;
+  margin: -.5rem -.75rem;
+}
+
+.pixata-grid-sm .pixata-grid-cell-inner {
+  margin: -.25rem -.5rem;
+}
+
+.pixata-grid-link {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  padding: .5rem .75rem;
+}
+
+.pixata-grid-sm .pixata-grid-link {
+  padding: .25rem .5rem;
+}
+
+.pixata-grid-sortable {
+  cursor: pointer;
+}
+
+.pixata-grid-sortable:focus {
+  outline: none;
+}
+
+.pixata-grid-sortable:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .16);
+}
+
+/* Telerik tints a sorted header slightly. It's a gradient so that it goes over the header's own background colour */
+.pixata-grid-sorted {
+  background-image: linear-gradient(rgba(61, 61, 61, .03), rgba(61, 61, 61, .03));
+}
+
 .pixata-grid-column-title {
   display: block;
+  flex-shrink: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-grid-sort-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin-inline-start: 7px;
+  color: var(--pixata-grid-primary);
+}
+
+.pixata-grid-sort-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-grid-sort-order {
+  display: block;
+  height: 16px;
+  margin: 2px 0 0 -2px;
+  font-size: 12px;
+  line-height: normal;
+  color: var(--pixata-grid-primary);
+}
+
+.pixata-grid-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
   white-space: nowrap;
 }
 

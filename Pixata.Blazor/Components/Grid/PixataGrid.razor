@@ -1,4 +1,6 @@
 @typeparam TItem
+@using System.ComponentModel
+@using Pixata.Extensions.Grid
 
 @* The columns render nothing; they just register with the grid. The table is deferred so it renders after they have done so *@
 <CascadingValue Value="this" IsFixed="true">
@@ -23,8 +25,34 @@
         <thead>
           <tr>
             @foreach (PixataGridColumn<TItem> column in columns) {
-              <th class="@column.HeaderCellClass" scope="col">
-                <span class="pixata-grid-column-title">@column.HeaderText</span>
+              bool sortable = CanSort(column);
+              GridSortDescriptor? sort = sortable ? SortFor(column) : null;
+              <th class="@Css.Join(column.HeaderCellClass, sortable ? "pixata-grid-sortable" : null, sort is null ? null : "pixata-grid-sorted")"
+                  scope="col"
+                  aria-sort="@(sort is null ? null : sort.SortDirection == ListSortDirection.Ascending ? "ascending" : "descending")"
+                  tabindex="@(sortable ? "0" : null)"
+                  @onclick="() => OnHeaderClick(column)"
+                  @onkeydown="e => OnHeaderKeyDown(e, column)">
+                <span class="pixata-grid-cell-inner">
+                  <span class="pixata-grid-link">
+                    <span class="pixata-grid-column-title">@column.HeaderText</span>
+                    @if (sort is not null) {
+                      <span class="pixata-grid-sort-icon" aria-hidden="true">
+                        @if (sort.SortDirection == ListSortDirection.Ascending) {
+                          <svg viewBox="0 0 16 16"><path d="M7 6v7h1V6h3L7.5 2 4 6z" /></svg>
+                        } else {
+                          <svg viewBox="0 0 16 16"><path d="M7 10V3h1v7h3l-3.5 4L4 10z" /></svg>
+                        }
+                      </span>
+                      @if (SortMode == PixataGridSortMode.Multiple) {
+                        <span class="pixata-grid-sort-order">@(_sorts.IndexOf(sort) + 1)</span>
+                      }
+                    }
+                  </span>
+                  @if (sort is not null) {
+                    <span class="pixata-grid-visually-hidden">@(sort.SortDirection == ListSortDirection.Ascending ? PixataGridMessages.SortedAscending : PixataGridMessages.SortedDescending)</span>
+                  }
+                </span>
               </th>
             }
           </tr>

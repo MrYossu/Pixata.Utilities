@@ -6,6 +6,8 @@ namespace Pixata.Blazor.Components.Grid;
 /// </summary>
 internal static class PixataGridMessages {
   public const string NoRecords = "No records available.";
+  public const string SortedAscending = "Sorted in ascending order";
+  public const string SortedDescending = "Sorted in descending order";
   public const string PagerFirstPage = "Go to the first page";
   public const string PagerPreviousPage = "Go to the previous page";
   public const string PagerNextPage = "Go to the next page";

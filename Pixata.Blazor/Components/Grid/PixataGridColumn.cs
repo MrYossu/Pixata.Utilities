@@ -64,6 +64,12 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   [Parameter]
   public string? HeaderClass { get; set; }
 
+  /// <summary>
+  /// Set to false to stop the user sorting by this column when the grid is <c>Sortable</c>. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool Sortable { get; set; } = true;
+
   private string? _resolvedField;
   private Func<TItem, object?>? _getter;
   private string? _attributeTitle;

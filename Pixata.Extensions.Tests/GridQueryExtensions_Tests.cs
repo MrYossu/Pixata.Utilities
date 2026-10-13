@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Extensions.Grid;
@@ -68,4 +69,36 @@ public class GridQueryExtensions_Tests {
     Assert.AreEqual(typeof(string), FieldAccessor.FieldType(typeof(Person), "Address.City"));
     Assert.AreEqual(typeof(int?), FieldAccessor.FieldType(typeof(Person), "Age"));
   }
+
+  [TestMethod]
+  public void ToGridResult_Sorts_AreAppliedInPriorityOrderBeforePaging() {
+    List<Person> people = [new(1, "B", Age: 30), new(2, "A", Age: 30), new(3, "C", Age: 20), new(4, "D", Age: 40)];
+
+    GridResult<Person> result = people.ToGridResult(new GridRequest {
+      PageSize = 3,
+      Sorts = [new("Age", ListSortDirection.Descending), new("Name")]
+    });
+
+    CollectionAssert.AreEqual(new[] { 4, 2, 1 }, result.Data.Select(p => p.Id).ToArray());
+    Assert.AreEqual(4, result.Total);
+  }
+
+  [TestMethod]
+  public void ApplySorts_NestedFieldWithNullParent_SortsNullsFirstWithoutThrowing() {
+    List<Person> people = [new(1, "A", new("York")), new(2, "B"), new(3, "C", new("Bath"))];
+
+    int[] ids = [.. people.AsQueryable().ApplySorts([new("Address.City")]).Select(p => p.Id)];
+
+    CollectionAssert.AreEqual(new[] { 2, 3, 1 }, ids);
+  }
+
+  [TestMethod]
+  public void FieldAccessor_Lambda_MakesValueTypesNullableOnlyWhenThePathCanBeNull() {
+    Assert.AreEqual(typeof(int), FieldAccessor.Lambda(typeof(Person), "Id").ReturnType);
+    Assert.AreEqual(typeof(int?), FieldAccessor.Lambda(typeof(Person), "Age").ReturnType);
+    Assert.AreEqual(typeof(int?), FieldAccessor.Lambda(typeof(Wrapper), "Person.Id").ReturnType);
+    Assert.AreEqual("item => item.Id", FieldAccessor.Lambda(typeof(Person), "Id").ToString());
+  }
+
+  private record Wrapper(Person? Person);
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -48,6 +49,37 @@ public static class FieldAccessor {
   /// <exception cref="ArgumentException">Thrown if the path doesn't match public properties or fields of the type</exception>
   public static Type FieldType(Type type, string field) =>
     MemberType(Member(type, field));
+
+  /// <summary>
+  /// Builds a lambda that reads the field, such as <c>item =&gt; item.Address.City</c>, for use in a LINQ query (it works
+  /// with EF Core). If anything along a nested path can be null, the lambda checks for it and returns null, so a value type
+  /// at the end of such a path comes back as nullable
+  /// </summary>
+  /// <param name="type">The type that the path starts from</param>
+  /// <param name="field">The field path, such as "Name" or "Address.City". This is case sensitive</param>
+  /// <exception cref="ArgumentException">Thrown if the path doesn't match public properties or fields of the type</exception>
+  public static LambdaExpression Lambda(Type type, string field) {
+    Member(type, field);
+    ParameterExpression item = Expression.Parameter(type, "item");
+    string[] parts = Split(field);
+    Type resultType = FieldType(type, field);
+    // Only intermediate objects are checked for null. The item itself isn't, as a query never contains a null item
+    bool nullable = parts.Length > 1 && Enumerable.Range(1, parts.Length - 1).Any(i => CanBeNull(FieldType(type, string.Join('.', parts.Take(i)))));
+    if (nullable && !CanBeNull(resultType)) {
+      resultType = typeof(Nullable<>).MakeGenericType(resultType);
+    }
+    return Expression.Lambda(BuildTyped(item, parts, 0, resultType), item);
+  }
+
+  private static Expression BuildTyped(Expression target, string[] parts, int index, Type resultType) {
+    Expression member = Expression.MakeMemberAccess(target, Member(target.Type, parts[index]));
+    Expression rest = index == parts.Length - 1
+      ? (member.Type == resultType ? member : Expression.Convert(member, resultType))
+      : BuildTyped(member, parts, index + 1, resultType);
+    return index > 0 && CanBeNull(target.Type)
+      ? Expression.Condition(Expression.Equal(target, Expression.Constant(null, target.Type)), Expression.Constant(null, resultType), rest)
+      : rest;
+  }
 
   private static Func<T, object?> BuildGetter<T>(string field) {
     // Checks the whole path first, so that a bad one gets an error message that describes the path, not just one part of it

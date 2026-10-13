@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Pixata.Extensions.Grid;
 
 namespace Pixata.Blazor.Components.Grid;
@@ -100,7 +102,21 @@ public partial class PixataGrid<TItem> : IDisposable {
   [Parameter]
   public EventCallback<int> PageChanged { get; set; }
 
+  /// <summary>
+  /// Whether the user can sort the rows by clicking a column header
+  /// </summary>
+  [Parameter]
+  public bool Sortable { get; set; }
+
+  /// <summary>
+  /// Whether the user can sort by one column at a time (the default), or several
+  /// </summary>
+  [Parameter]
+  public PixataGridSortMode SortMode { get; set; } = PixataGridSortMode.Single;
+
   internal PixataGridPagerSettings<TItem>? PagerSettings { get; set; }
+
+  private readonly List<GridSortDescriptor> _sorts = [];
 
   private readonly List<PixataGridColumnBase<TItem>> _columns = [];
   private List<TItem> _items = [];
@@ -153,7 +169,7 @@ public partial class PixataGrid<TItem> : IDisposable {
   // no longer enough items to fill it, in which case the caller should raise PageChanged
   private bool ProcessData() {
     IEnumerable<TItem> data = _boundData ?? [];
-    GridRequest request = Pageable ? new() { Page = _page, PageSize = _pageSize } : new();
+    GridRequest request = Pageable ? new() { Page = _page, PageSize = _pageSize, Sorts = _sorts } : new() { Sorts = _sorts };
     GridResult<TItem> result = data.ToGridResult(request);
     bool moved = false;
     if (Pageable && _pageSize > 0) {
@@ -173,6 +189,38 @@ public partial class PixataGrid<TItem> : IDisposable {
     _page = page;
     ProcessData();
     await PageChanged.InvokeAsync(page);
+  }
+
+  private bool CanSort(PixataGridColumn<TItem> column) =>
+    Sortable && column.Sortable && !string.IsNullOrWhiteSpace(column.Field);
+
+  private GridSortDescriptor? SortFor(PixataGridColumn<TItem> column) =>
+    _sorts.FirstOrDefault(s => s.Member == column.Field);
+
+  // Each click moves the column through ascending, descending and unsorted. In single mode, sorting by a column replaces
+  // any other sort. In multiple mode, it's added to the end of the existing ones, so it has the lowest priority
+  private void OnHeaderClick(PixataGridColumn<TItem> column) {
+    if (!CanSort(column)) {
+      return;
+    }
+    GridSortDescriptor? current = SortFor(column);
+    if (SortMode == PixataGridSortMode.Single) {
+      _sorts.RemoveAll(s => s != current);
+    }
+    if (current is null) {
+      _sorts.Add(new(column.Field!));
+    } else if (current.SortDirection == ListSortDirection.Ascending) {
+      _sorts[_sorts.IndexOf(current)] = current with { SortDirection = ListSortDirection.Descending };
+    } else {
+      _sorts.Remove(current);
+    }
+    ProcessData();
+  }
+
+  private void OnHeaderKeyDown(KeyboardEventArgs e, PixataGridColumn<TItem> column) {
+    if (e.Key == "Enter") {
+      OnHeaderClick(column);
+    }
   }
 
   // Changing the page size goes back to the first page, as Telerik's grid does
