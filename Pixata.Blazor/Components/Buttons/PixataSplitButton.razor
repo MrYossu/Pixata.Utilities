@@ -1,0 +1,90 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataMenuButtonBase
+
+@*
+  A main button for the primary action, plus an arrow button that opens a menu of secondary actions. The items go in
+  SplitButtonItems, as PixataSplitButtonItem components
+*@
+<div @ref="WrapperElement"
+     class="@PixataCss.Classes("pixata-blazor-splitbutton", IsOpen ? "pixata-blazor-splitbutton-open" : null, Class)"
+     @onkeydown:stopPropagation="IsOpen"
+     @attributes="AdditionalAttributes">
+  <button @ref="_mainButton"
+          type="button"
+          id="@ButtonId"
+          class="@PixataCss.Classes(PixataCss.Button(ThemeColor, FillMode, Rounded, Size, IsIconOnly), "pixata-blazor-splitbutton-main")"
+          disabled="@(!Enabled)"
+          title="@Title"
+          tabindex="@TabIndex"
+          aria-label="@AriaLabel"
+          aria-labelledby="@AriaLabelledBy"
+          aria-describedby="@AriaDescribedBy"
+          @onclick="HandleMainClick"
+          @onkeydown="@(args => HandleKeyDown(args, _mainButton))">
+    <PixataIcon Icon="Icon" Class="pixata-blazor-splitbutton-icon" />
+    @if (SplitButtonContent is not null) {
+      <span class="pixata-blazor-splitbutton-text">@SplitButtonContent</span>
+    }
+  </button>
+  <button @ref="_arrowButton"
+          type="button"
+          class="@PixataCss.Classes(PixataCss.Button(ThemeColor, FillMode, Rounded, Size, true), "pixata-blazor-splitbutton-arrow")"
+          disabled="@(!Enabled)"
+          tabindex="@TabIndex"
+          aria-label="@ArrowButtonAriaLabel"
+          aria-haspopup="menu"
+          aria-expanded="@(IsOpen ? "true" : "false")"
+          aria-controls="@(IsOpen ? MenuId : null)"
+          @onclick="HandleArrowClick"
+          @onkeydown="@(args => HandleKeyDown(args, _arrowButton))">
+    <PixataIcon Icon="PixataSvgIcons.ChevronDown" />
+  </button>
+  @RenderSettings(SplitButtonSettings)
+  @RenderMenu(SplitButtonItems)
+</div>
+
+@code {
+
+  /// <summary>
+  /// The content of the main button, usually its text
+  /// </summary>
+  [Parameter]
+  public RenderFragment? SplitButtonContent { get; set; }
+
+  /// <summary>
+  /// The items in the menu: <see cref="PixataSplitButtonItem"/> components
+  /// </summary>
+  [Parameter]
+  public RenderFragment? SplitButtonItems { get; set; }
+
+  /// <summary>
+  /// Holds a <see cref="PixataSplitButtonPopupSettings"/>, to set the size of the menu. You can use
+  /// <see cref="PixataMenuButtonBase.PopupSettings"/> instead
+  /// </summary>
+  [Parameter]
+  public RenderFragment? SplitButtonSettings { get; set; }
+
+  /// <summary>
+  /// The <c>aria-label</c> of the arrow button, which screen readers announce. Defaults to "More options"
+  /// </summary>
+  [Parameter]
+  public string ArrowButtonAriaLabel { get; set; } = "More options";
+
+  private ElementReference _mainButton;
+  private ElementReference _arrowButton;
+
+  protected override ElementReference MainButtonElement =>
+    _mainButton;
+
+  private bool IsIconOnly =>
+    SplitButtonContent is null && Icon is not null;
+
+  private async Task HandleMainClick(MouseEventArgs args) {
+    await CloseAsync();
+    await OnClick.InvokeAsync(args);
+  }
+
+  private Task HandleArrowClick() =>
+    Toggle(_arrowButton);
+
+}

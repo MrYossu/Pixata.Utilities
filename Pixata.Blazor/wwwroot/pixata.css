@@ -1439,9 +1439,340 @@
 
 /* ========== PixataRadioGroup ========== */
 
+/*
+  pixata-blazor-radiogroup is the list, plus -vertical or -horizontal, and pixata-blazor-disabled or pixata-blazor-invalid
+  when they apply. Each pixata-blazor-radiogroup-item holds a native radio button (pixata-blazor-radiogroup-radio, plus -sm,
+  -md or -lg) and its pixata-blazor-radiogroup-label; the checked item also has pixata-blazor-radiogroup-item-checked
+*/
+:root {
+  --pixata-blazor-radiogroup-radio-size-sm: 12px;
+  --pixata-blazor-radiogroup-radio-size-md: 16px;
+  --pixata-blazor-radiogroup-radio-size-lg: 20px;
+  --pixata-blazor-radiogroup-radio-bg: #fff;
+  --pixata-blazor-radiogroup-radio-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-radiogroup-checked-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-radiogroup-checked-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-radiogroup-dot-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-radiogroup-dot-size: 57%;
+  --pixata-blazor-radiogroup-focus-shadow: 0 0 0 2px var(--pixata-blazor-border-color);
+  --pixata-blazor-radiogroup-checked-focus-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-primary) 30%, transparent);
+  --pixata-blazor-radiogroup-item-gap: var(--pixata-blazor-spacing);
+  --pixata-blazor-radiogroup-item-padding: var(--pixata-blazor-spacing) 0;
+  --pixata-blazor-radiogroup-horizontal-gap: calc(var(--pixata-blazor-spacing) * 4);
+}
+
+.pixata-blazor-radiogroup {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pixata-blazor-radiogroup-horizontal {
+  flex-flow: row wrap;
+  column-gap: var(--pixata-blazor-radiogroup-horizontal-gap);
+}
+
+.pixata-blazor-radiogroup-item {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: var(--pixata-blazor-radiogroup-item-gap);
+  margin: 0;
+  padding: var(--pixata-blazor-radiogroup-item-padding);
+}
+
+/* The native radio button, drawn by us */
+.pixata-blazor-radiogroup-radio {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-md);
+  box-sizing: border-box;
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--pixata-blazor-radiogroup-radio-size);
+  height: var(--pixata-blazor-radiogroup-radio-size);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pixata-blazor-radiogroup-radio-border-color);
+  border-radius: 50%;
+  outline: 0;
+  background-color: var(--pixata-blazor-radiogroup-radio-bg);
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background-color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-radiogroup-radio-sm {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-sm);
+}
+
+.pixata-blazor-radiogroup-radio-lg {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-lg);
+}
+
+.pixata-blazor-radiogroup-radio:focus-visible {
+  box-shadow: var(--pixata-blazor-radiogroup-focus-shadow);
+}
+
+.pixata-blazor-radiogroup-radio:checked {
+  border-color: var(--pixata-blazor-radiogroup-checked-border-color);
+  background-color: var(--pixata-blazor-radiogroup-checked-bg);
+  background-image: radial-gradient(circle closest-side, var(--pixata-blazor-radiogroup-dot-color) 0 var(--pixata-blazor-radiogroup-dot-size), transparent calc(var(--pixata-blazor-radiogroup-dot-size) + 1px));
+}
+
+.pixata-blazor-radiogroup-radio:checked:focus-visible {
+  box-shadow: var(--pixata-blazor-radiogroup-checked-focus-shadow);
+}
+
+.pixata-blazor-radiogroup-radio:disabled {
+  cursor: default;
+}
+
+.pixata-blazor-radiogroup-label {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--pixata-blazor-spacing);
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.pixata-blazor-radiogroup-label:empty {
+  display: none;
+}
+
+.pixata-blazor-radiogroup.pixata-blazor-invalid .pixata-blazor-radiogroup-radio {
+  border-color: var(--pixata-blazor-error);
+}
+
+/* On a touch screen, each option is at least --pixata-blazor-touch-target high, and its label fills that height */
+@media (pointer: coarse) {
+  .pixata-blazor-radiogroup-item {
+    min-height: var(--pixata-blazor-touch-target);
+    padding-block: 0;
+  }
+
+  .pixata-blazor-radiogroup-label {
+    align-self: stretch;
+    align-items: center;
+    flex: 1 1 auto;
+  }
+
+  .pixata-blazor-radiogroup-horizontal .pixata-blazor-radiogroup-label {
+    flex: 0 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-radiogroup-radio {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataRadioGroup ========== */
 
 /* ========== PixataSwitch ========== */
+
+/*
+  pixata-blazor-switch is the button, plus a size (-sm, -md, -lg), -on or -off, and -readonly when it can't be changed. Inside
+  it are the track (pixata-blazor-switch-track, holding the -label-on and -label-off text) and the thumb
+  (pixata-blazor-switch-thumb, inside pixata-blazor-switch-thumb-wrap). The Width parameter sets --pixata-blazor-switch-width
+*/
+:root {
+  --pixata-blazor-switch-width-sm: 52px;
+  --pixata-blazor-switch-height-sm: 26px;
+  --pixata-blazor-switch-label-inset-sm: 4px;
+  --pixata-blazor-switch-width-md: 60px;
+  --pixata-blazor-switch-height-md: 30px;
+  --pixata-blazor-switch-label-inset-md: 6px;
+  --pixata-blazor-switch-width-lg: 68px;
+  --pixata-blazor-switch-height-lg: 34px;
+  --pixata-blazor-switch-label-inset-lg: 8px;
+  --pixata-blazor-switch-label-font-size: 10px;
+  --pixata-blazor-switch-off-track-bg: #fff;
+  --pixata-blazor-switch-off-track-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-switch-off-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-switch-on-track-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-switch-on-track-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-switch-on-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-switch-thumb-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-switch-thumb-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-switch-off-focus-outline: 2px solid color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-switch-on-focus-outline: 2px solid color-mix(in srgb, var(--pixata-blazor-primary) 25%, transparent);
+  --pixata-blazor-switch-on-transition: .3s cubic-bezier(.68, -.55, .265, 1.55);
+  --pixata-blazor-switch-off-transition: .25s cubic-bezier(0, 0, .58, 1);
+}
+
+.pixata-blazor-switch {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-md);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-md);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-md);
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  width: var(--pixata-blazor-switch-width);
+  height: var(--pixata-blazor-switch-height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-switch-label-font-size);
+  line-height: 1;
+  vertical-align: middle;
+  outline: 0;
+  cursor: pointer;
+  user-select: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Lets a sideways swipe reach the switch, rather than being taken as a scroll */
+  touch-action: pan-y;
+}
+
+/* The sizes only set the custom properties, so the Width parameter (an inline --pixata-blazor-switch-width) wins */
+.pixata-blazor-switch-sm {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-sm);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-sm);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-sm);
+}
+
+.pixata-blazor-switch-lg {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-lg);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-lg);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-lg);
+}
+
+.pixata-blazor-switch-readonly {
+  cursor: default;
+}
+
+.pixata-blazor-switch-track {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  width: 100%;
+  height: 100%;
+  border-width: 1px;
+  border-style: solid;
+  outline: 0;
+  transition: background-color .15s ease-out, border-color .15s ease-out, color .15s ease-out;
+}
+
+.pixata-blazor-switch-label-on,
+.pixata-blazor-switch-label-off {
+  position: absolute;
+  top: 50%;
+  display: inline;
+  overflow: hidden;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  transition: color var(--pixata-blazor-switch-off-transition);
+}
+
+.pixata-blazor-switch-label-on {
+  inset-inline-start: var(--pixata-blazor-switch-label-inset);
+}
+
+.pixata-blazor-switch-label-off {
+  inset-inline-end: var(--pixata-blazor-switch-label-inset);
+}
+
+/* A zero-size box whose centre the thumb sits on, which slides from one end of the track to the other */
+.pixata-blazor-switch-thumb-wrap {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  inset-inline-start: calc(var(--pixata-blazor-switch-height) / 2);
+  transition: left var(--pixata-blazor-switch-off-transition), right var(--pixata-blazor-switch-off-transition);
+}
+
+.pixata-blazor-switch-on .pixata-blazor-switch-thumb-wrap {
+  inset-inline-start: calc(100% - var(--pixata-blazor-switch-height) / 2);
+  transition: left var(--pixata-blazor-switch-on-transition), right var(--pixata-blazor-switch-on-transition);
+}
+
+.pixata-blazor-switch-thumb {
+  box-sizing: border-box;
+  position: absolute;
+  display: block;
+  width: var(--pixata-blazor-switch-height);
+  height: var(--pixata-blazor-switch-height);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--pixata-blazor-switch-thumb-border-color);
+  background-color: var(--pixata-blazor-switch-thumb-bg);
+  transform: translate(-50%, -50%);
+  transition: background-color .15s ease-out, border-color .15s ease-out;
+}
+
+.pixata-blazor-switch:dir(rtl) .pixata-blazor-switch-thumb {
+  transform: translate(50%, -50%);
+}
+
+.pixata-blazor-switch-off .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-switch-off-track-border-color);
+  background-color: var(--pixata-blazor-switch-off-track-bg);
+  color: var(--pixata-blazor-switch-off-color);
+}
+
+.pixata-blazor-switch-off .pixata-blazor-switch-label-on,
+.pixata-blazor-switch-on .pixata-blazor-switch-label-off {
+  color: transparent;
+}
+
+.pixata-blazor-switch-on .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-switch-on-track-border-color);
+  background-color: var(--pixata-blazor-switch-on-track-bg);
+  color: var(--pixata-blazor-switch-on-color);
+}
+
+.pixata-blazor-switch-off:focus-visible .pixata-blazor-switch-track {
+  outline: var(--pixata-blazor-switch-off-focus-outline);
+}
+
+.pixata-blazor-switch-on:focus-visible .pixata-blazor-switch-track {
+  outline: var(--pixata-blazor-switch-on-focus-outline);
+}
+
+.pixata-blazor-switch.pixata-blazor-invalid .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-error);
+}
+
+/* On a touch screen, the area you can tap is at least --pixata-blazor-touch-target high */
+@media (pointer: coarse) {
+  .pixata-blazor-switch::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: max(100%, var(--pixata-blazor-touch-target));
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-switch-track,
+  .pixata-blazor-switch-label-on,
+  .pixata-blazor-switch-label-off,
+  .pixata-blazor-switch-thumb-wrap,
+  .pixata-blazor-switch-on .pixata-blazor-switch-thumb-wrap,
+  .pixata-blazor-switch-thumb {
+    transition: none;
+  }
+}
 
 /* ========== end of PixataSwitch ========== */
 
@@ -1450,6 +1781,131 @@
 /* ========== end of PixataChart ========== */
 
 /* ========== PixataDropDownButton and PixataSplitButton ========== */
+
+/*
+  The buttons use the shared pixata-blazor-button classes. pixata-blazor-dropdownbutton and pixata-blazor-splitbutton are
+  their outer elements (with -open while the menu is showing). The menu is a pixata-blazor-popup with
+  pixata-blazor-button-menu-popup, holding a pixata-blazor-button-menu list (plus -sm, -md or -lg, matching the button) of
+  pixata-blazor-button-menu-item items
+*/
+:root {
+  --pixata-blazor-button-menu-max-height: 80vh;
+  --pixata-blazor-button-menu-bg: var(--pixata-blazor-popup-bg);
+  --pixata-blazor-button-menu-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-button-menu-item-padding-sm: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-padding-md: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-padding-lg: calc(var(--pixata-blazor-spacing) * 1.5) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-end-padding: calc(var(--pixata-blazor-spacing) * 4 + 1rem);
+  --pixata-blazor-button-menu-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-button-menu-item-active-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
+  --pixata-blazor-button-menu-item-focus-ring: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+  --pixata-blazor-splitbutton-arrow-touch-width: 2.75rem;
+}
+
+.pixata-blazor-dropdownbutton,
+.pixata-blazor-splitbutton {
+  position: relative;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  vertical-align: middle;
+}
+
+/* The down arrow a drop-down button shows when ShowArrowButton is set */
+.pixata-blazor-dropdownbutton-arrow {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * -1);
+  margin-inline-end: calc(var(--pixata-blazor-spacing) * -2);
+  padding-inline: var(--pixata-blazor-spacing);
+}
+
+/* The two halves of a split button share a border, and only the outer corners are rounded */
+.pixata-blazor-splitbutton-main {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.pixata-blazor-splitbutton-arrow {
+  margin-inline-start: -1px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.pixata-blazor-splitbutton-main:focus-visible,
+.pixata-blazor-splitbutton-arrow:focus-visible {
+  z-index: 1;
+}
+
+/* The arrow is narrower than other icon-only buttons, but as tall as the main button */
+.pixata-blazor-splitbutton-arrow .pixata-blazor-icon {
+  width: 1rem;
+  padding-inline: 0;
+}
+
+/* The menu */
+.pixata-blazor-button-menu-popup {
+  background-color: var(--pixata-blazor-button-menu-bg);
+  color: var(--pixata-blazor-button-menu-color);
+}
+
+.pixata-blazor-button-menu.pixata-blazor-popup-content {
+  max-height: var(--pixata-blazor-popup-max-height, var(--pixata-blazor-button-menu-max-height));
+}
+
+.pixata-blazor-button-menu {
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+}
+
+.pixata-blazor-button-menu-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+}
+
+.pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-md);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+  outline: 0;
+}
+
+.pixata-blazor-button-menu-sm .pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-sm);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+}
+
+.pixata-blazor-button-menu-lg .pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-lg);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+}
+
+.pixata-blazor-button-menu-item:hover {
+  background-color: var(--pixata-blazor-button-menu-item-hover-bg);
+}
+
+.pixata-blazor-button-menu-item:active {
+  background-color: var(--pixata-blazor-button-menu-item-active-bg);
+}
+
+.pixata-blazor-button-menu-item:focus-visible {
+  box-shadow: var(--pixata-blazor-button-menu-item-focus-ring);
+}
+
+.pixata-blazor-button-menu-item-text {
+  display: flex;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Touch screens get a wider arrow on split buttons (the buttons and menu items are already enlarged by the shared styles) */
+@media (pointer: coarse) {
+  .pixata-blazor-splitbutton-arrow {
+    min-width: var(--pixata-blazor-splitbutton-arrow-touch-width);
+  }
+}
 
 /* ========== end of PixataDropDownButton and PixataSplitButton ========== */
 
