@@ -81,6 +81,13 @@ export function closeLayer(id) {
   }
   layer.cleanup.forEach(c => c());
   layer.cleanup = [];
+  // A layer opened from this one would give the focus back to something that is going with it (eg when a dialog and one
+  // opened from it are removed together), so it gives it to whatever this one would have instead
+  layers.forEach(l => {
+    if (l.returnFocus && layer.wrapper.contains(l.returnFocus)) {
+      l.returnFocus = layer.returnFocus;
+    }
+  });
   // Blazor removes the wrapper when the layer is hidden. If it's still here, the component was removed from the page while
   // the layer was open, so Blazor took away the placeholder it was declared in, but not the wrapper we moved to <body>
   if (layer.wrapper.isConnected) {
