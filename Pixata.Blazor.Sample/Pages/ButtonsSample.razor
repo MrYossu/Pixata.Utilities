@@ -1,0 +1,350 @@
+@page "/ButtonsSample"
+@using Pixata.Blazor.Components
+@using Telerik.SvgIcons
+
+<h3>Drop-down and split buttons</h3>
+
+<p><code>PixataDropDownButton</code> is a button that opens a menu of actions, and <code>PixataSplitButton</code> is a button for a primary action with an arrow that opens a menu of secondary ones. Each example below shows them next to the equivalent Telerik buttons, set up the same way. With the keyboard, Alt+Down opens the menu, the arrow keys move through the items, Enter or Space picks one, and Esc closes it.</p>
+
+<p class="text-muted">Last action: <strong>@(_log == "" ? "none yet" : _log)</strong></p>
+
+<h4 class="mt-4">Drop-down button</h4>
+
+<ComponentComparison Title="Basic use">
+  <Description>
+    <p>The button's content goes in <code>DropDownButtonContent</code>, and the items, each with its own <code>Icon</code> and <code>OnClick</code>, in <code>DropDownButtonItems</code>. The menu closes when you pick an item, press Esc, or click outside it.</p>
+  </Description>
+  <Pixata>
+    <PixataDropDownButton Icon="PixataSvgIcons.Pencil">
+      <DropDownButtonContent>Edit</DropDownButtonContent>
+      <DropDownButtonItems>
+        <PixataDropDownButtonItem Icon="PixataSvgIcons.Pencil" OnClick="@(() => Log("Pixata: Rename"))">Rename</PixataDropDownButtonItem>
+        <PixataDropDownButtonItem Icon="PixataSvgIcons.Refresh" OnClick="@(() => Log("Pixata: Refresh"))">Refresh</PixataDropDownButtonItem>
+        <PixataDropDownButtonItem Icon="PixataSvgIcons.Trash" OnClick="@(() => Log("Pixata: Delete"))">Delete</PixataDropDownButtonItem>
+      </DropDownButtonItems>
+    </PixataDropDownButton>
+  </Pixata>
+  <Telerik>
+    <TelerikDropDownButton Icon="SvgIcon.Pencil">
+      <DropDownButtonContent>Edit</DropDownButtonContent>
+      <DropDownButtonItems>
+        <DropDownButtonItem Icon="SvgIcon.Pencil" OnClick="@(() => Log("Telerik: Rename"))">Rename</DropDownButtonItem>
+        <DropDownButtonItem Icon="SvgIcon.ArrowRotateCw" OnClick="@(() => Log("Telerik: Refresh"))">Refresh</DropDownButtonItem>
+        <DropDownButtonItem Icon="SvgIcon.Trash" OnClick="@(() => Log("Telerik: Delete"))">Delete</DropDownButtonItem>
+      </DropDownButtonItems>
+    </TelerikDropDownButton>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Arrow and icon-only buttons">
+  <Description>
+    <p><code>ShowArrowButton</code> adds a down arrow after the content. A button with an icon and no content is square; give it an <code>AriaLabel</code> so screen readers can announce it.</p>
+  </Description>
+  <Pixata>
+    <PixataDropDownButton ShowArrowButton="true">
+      <DropDownButtonContent>Export</DropDownButtonContent>
+      <DropDownButtonItems>
+        <PixataDropDownButtonItem Icon="PixataSvgIcons.File" OnClick="@(() => Log("Pixata: Export to PDF"))">PDF</PixataDropDownButtonItem>
+        <PixataDropDownButtonItem Icon="PixataSvgIcons.File" OnClick="@(() => Log("Pixata: Export to Excel"))">Excel</PixataDropDownButtonItem>
+      </DropDownButtonItems>
+    </PixataDropDownButton>
+    <PixataDropDownButton Icon="PixataSvgIcons.MoreVertical" AriaLabel="More actions" Title="More actions" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Class="ms-3">
+      <DropDownButtonItems>
+        <PixataDropDownButtonItem OnClick="@(() => Log("Pixata: Settings"))">Settings</PixataDropDownButtonItem>
+        <PixataDropDownButtonItem OnClick="@(() => Log("Pixata: Help"))">Help</PixataDropDownButtonItem>
+      </DropDownButtonItems>
+    </PixataDropDownButton>
+  </Pixata>
+  <Telerik>
+    <TelerikDropDownButton ShowArrowButton="true">
+      <DropDownButtonContent>Export</DropDownButtonContent>
+      <DropDownButtonItems>
+        <DropDownButtonItem Icon="SvgIcon.FilePdf" OnClick="@(() => Log("Telerik: Export to PDF"))">PDF</DropDownButtonItem>
+        <DropDownButtonItem Icon="SvgIcon.FileExcel" OnClick="@(() => Log("Telerik: Export to Excel"))">Excel</DropDownButtonItem>
+      </DropDownButtonItems>
+    </TelerikDropDownButton>
+    <TelerikDropDownButton Icon="SvgIcon.MoreVertical" AriaLabel="More actions" Title="More actions" FillMode="@ThemeConstants.Button.FillMode.Flat" Class="ms-3">
+      <DropDownButtonItems>
+        <DropDownButtonItem OnClick="@(() => Log("Telerik: Settings"))">Settings</DropDownButtonItem>
+        <DropDownButtonItem OnClick="@(() => Log("Telerik: Help"))">Help</DropDownButtonItem>
+      </DropDownButtonItems>
+    </TelerikDropDownButton>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Appearance">
+  <Description>
+    <p><code>ThemeColor</code>, <code>FillMode</code>, <code>Rounded</code> and <code>Size</code> work as they do on any button. The menu's items follow the button's size.</p>
+  </Description>
+  <Pixata>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <PixataDropDownButton ThemeColor="@PixataThemeConstants.Button.ThemeColor.Primary">
+        <DropDownButtonContent>Primary</DropDownButtonContent>
+        <DropDownButtonItems>@PixataItems</DropDownButtonItems>
+      </PixataDropDownButton>
+      <PixataDropDownButton ThemeColor="@PixataThemeConstants.Button.ThemeColor.Primary" FillMode="@PixataThemeConstants.Button.FillMode.Outline" Rounded="@PixataThemeConstants.Button.Rounded.Full">
+        <DropDownButtonContent>Outline, full</DropDownButtonContent>
+        <DropDownButtonItems>@PixataItems</DropDownButtonItems>
+      </PixataDropDownButton>
+      <PixataDropDownButton Size="@PixataThemeConstants.Button.Size.Small">
+        <DropDownButtonContent>Small</DropDownButtonContent>
+        <DropDownButtonItems>@PixataItems</DropDownButtonItems>
+      </PixataDropDownButton>
+      <PixataDropDownButton ThemeColor="@PixataThemeConstants.Button.ThemeColor.Success" Size="@PixataThemeConstants.Button.Size.Large">
+        <DropDownButtonContent>Large</DropDownButtonContent>
+        <DropDownButtonItems>@PixataItems</DropDownButtonItems>
+      </PixataDropDownButton>
+    </div>
+  </Pixata>
+  <Telerik>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <TelerikDropDownButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">
+        <DropDownButtonContent>Primary</DropDownButtonContent>
+        <DropDownButtonItems>@TelerikItems</DropDownButtonItems>
+      </TelerikDropDownButton>
+      <TelerikDropDownButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" FillMode="@ThemeConstants.Button.FillMode.Outline" Rounded="@ThemeConstants.Button.Rounded.Full">
+        <DropDownButtonContent>Outline, full</DropDownButtonContent>
+        <DropDownButtonItems>@TelerikItems</DropDownButtonItems>
+      </TelerikDropDownButton>
+      <TelerikDropDownButton Size="@ThemeConstants.Button.Size.Small">
+        <DropDownButtonContent>Small</DropDownButtonContent>
+        <DropDownButtonItems>@TelerikItems</DropDownButtonItems>
+      </TelerikDropDownButton>
+      <TelerikDropDownButton ThemeColor="@ThemeConstants.Button.ThemeColor.Success" Size="@ThemeConstants.Button.Size.Large">
+        <DropDownButtonContent>Large</DropDownButtonContent>
+        <DropDownButtonItems>@TelerikItems</DropDownButtonItems>
+      </TelerikDropDownButton>
+    </div>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Disabled">
+  <Description>
+    <p><code>Enabled="false"</code> on an item greys it out and the arrow keys skip it. On the button, it disables the whole thing.</p>
+  </Description>
+  <Pixata>
+    <PixataDropDownButton>
+      <DropDownButtonContent>Some disabled items</DropDownButtonContent>
+      <DropDownButtonItems>
+        <PixataDropDownButtonItem OnClick="@(() => Log("Pixata: First"))">First</PixataDropDownButtonItem>
+        <PixataDropDownButtonItem Enabled="false" OnClick="@(() => Log("Pixata: Second"))">Second (disabled)</PixataDropDownButtonItem>
+        <PixataDropDownButtonItem OnClick="@(() => Log("Pixata: Third"))">Third</PixataDropDownButtonItem>
+      </DropDownButtonItems>
+    </PixataDropDownButton>
+    <PixataDropDownButton Enabled="false" Class="ms-3">
+      <DropDownButtonContent>Disabled</DropDownButtonContent>
+      <DropDownButtonItems>@PixataItems</DropDownButtonItems>
+    </PixataDropDownButton>
+  </Pixata>
+  <Telerik>
+    <TelerikDropDownButton>
+      <DropDownButtonContent>Some disabled items</DropDownButtonContent>
+      <DropDownButtonItems>
+        <DropDownButtonItem OnClick="@(() => Log("Telerik: First"))">First</DropDownButtonItem>
+        <DropDownButtonItem Enabled="false" OnClick="@(() => Log("Telerik: Second"))">Second (disabled)</DropDownButtonItem>
+        <DropDownButtonItem OnClick="@(() => Log("Telerik: Third"))">Third</DropDownButtonItem>
+      </DropDownButtonItems>
+    </TelerikDropDownButton>
+    <TelerikDropDownButton Enabled="false" Class="ms-3">
+      <DropDownButtonContent>Disabled</DropDownButtonContent>
+      <DropDownButtonItems>@TelerikItems</DropDownButtonItems>
+    </TelerikDropDownButton>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Popup settings">
+  <Description>
+    <p>The menu's size can be set in <code>DropDownButtonSettings</code>, as the Pixata and Telerik buttons on the left do, or (Pixata only) with the <code>PopupSettings</code> parameter. These menus are 220px wide and scroll after 120px.</p>
+  </Description>
+  <Pixata>
+    <PixataDropDownButton>
+      <DropDownButtonContent>Settings tag</DropDownButtonContent>
+      <DropDownButtonSettings>
+        <PixataDropDownButtonPopupSettings Width="220px" MaxHeight="120px" />
+      </DropDownButtonSettings>
+      <DropDownButtonItems>@PixataLongList</DropDownButtonItems>
+    </PixataDropDownButton>
+    <PixataDropDownButton PopupSettings="@(new() { Width = "220px", MaxHeight = "120px" })" Class="ms-3">
+      <DropDownButtonContent>Parameter</DropDownButtonContent>
+      <DropDownButtonItems>@PixataLongList</DropDownButtonItems>
+    </PixataDropDownButton>
+  </Pixata>
+  <Telerik>
+    <TelerikDropDownButton>
+      <DropDownButtonContent>Settings tag</DropDownButtonContent>
+      <DropDownButtonSettings>
+        <DropDownButtonPopupSettings Width="220px" MaxHeight="120px" />
+      </DropDownButtonSettings>
+      <DropDownButtonItems>@TelerikLongList</DropDownButtonItems>
+    </TelerikDropDownButton>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Open and close events">
+  <Description>
+    <p><code>OnOpen</code> and <code>OnClose</code> are raised before the menu opens and closes, and either can be cancelled. Tick the box to stop this menu opening.</p>
+  </Description>
+  <Pixata>
+    <label class="d-block mb-2"><input type="checkbox" @bind="_cancelOpen" /> Cancel opening</label>
+    <PixataDropDownButton OnOpen="HandleOpen" OnClose="@(() => _events.Add("OnClose"))">
+      <DropDownButtonContent>Events</DropDownButtonContent>
+      <DropDownButtonItems>@PixataItems</DropDownButtonItems>
+    </PixataDropDownButton>
+    <p class="mt-2">Events: @string.Join(", ", _events)</p>
+  </Pixata>
+  <Telerik>
+    <p><em>The Telerik drop-down button doesn't have these events.</em></p>
+  </Telerik>
+</ComponentComparison>
+
+<h4 class="mt-4">Split button</h4>
+
+<ComponentComparison Title="Basic use">
+  <Description>
+    <p>Clicking the main part raises <code>OnClick</code>, and the arrow opens the menu of <code>SplitButtonItems</code>. The main part's content goes in <code>SplitButtonContent</code>.</p>
+  </Description>
+  <Pixata>
+    <PixataSplitButton Icon="PixataSvgIcons.Download" OnClick="@(() => Log("Pixata: Download"))">
+      <SplitButtonContent>Download</SplitButtonContent>
+      <SplitButtonItems>
+        <PixataSplitButtonItem Icon="PixataSvgIcons.File" OnClick="@(() => Log("Pixata: Download as PDF"))">As PDF</PixataSplitButtonItem>
+        <PixataSplitButtonItem Icon="PixataSvgIcons.File" OnClick="@(() => Log("Pixata: Download as Excel"))">As Excel</PixataSplitButtonItem>
+        <PixataSplitButtonItem Icon="PixataSvgIcons.Upload" OnClick="@(() => Log("Pixata: Upload"))">Upload instead</PixataSplitButtonItem>
+      </SplitButtonItems>
+    </PixataSplitButton>
+  </Pixata>
+  <Telerik>
+    <TelerikSplitButton Icon="SvgIcon.Download" OnClick="@(() => Log("Telerik: Download"))">
+      <SplitButtonContent>Download</SplitButtonContent>
+      <SplitButtonItems>
+        <SplitButtonItem Icon="SvgIcon.FilePdf" OnClick="@(() => Log("Telerik: Download as PDF"))">As PDF</SplitButtonItem>
+        <SplitButtonItem Icon="SvgIcon.FileExcel" OnClick="@(() => Log("Telerik: Download as Excel"))">As Excel</SplitButtonItem>
+        <SplitButtonItem Icon="SvgIcon.Upload" OnClick="@(() => Log("Telerik: Upload"))">Upload instead</SplitButtonItem>
+      </SplitButtonItems>
+    </TelerikSplitButton>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Appearance">
+  <Description>
+    <p>The split button takes the same <code>ThemeColor</code>, <code>FillMode</code>, <code>Rounded</code> and <code>Size</code> as the drop-down button. On touch screens the arrow is widened, so it is easy to tap.</p>
+  </Description>
+  <Pixata>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <PixataSplitButton ThemeColor="@PixataThemeConstants.Button.ThemeColor.Primary" OnClick="@(() => Log("Pixata: Save"))">
+        <SplitButtonContent>Save</SplitButtonContent>
+        <SplitButtonItems>@PixataSplitItems</SplitButtonItems>
+      </PixataSplitButton>
+      <PixataSplitButton FillMode="@PixataThemeConstants.Button.FillMode.Outline" Rounded="@PixataThemeConstants.Button.Rounded.Full" OnClick="@(() => Log("Pixata: Save"))">
+        <SplitButtonContent>Outline, full</SplitButtonContent>
+        <SplitButtonItems>@PixataSplitItems</SplitButtonItems>
+      </PixataSplitButton>
+      <PixataSplitButton Size="@PixataThemeConstants.Button.Size.Small" OnClick="@(() => Log("Pixata: Save"))">
+        <SplitButtonContent>Small</SplitButtonContent>
+        <SplitButtonItems>@PixataSplitItems</SplitButtonItems>
+      </PixataSplitButton>
+      <PixataSplitButton Size="@PixataThemeConstants.Button.Size.Large" Enabled="false">
+        <SplitButtonContent>Large, disabled</SplitButtonContent>
+        <SplitButtonItems>@PixataSplitItems</SplitButtonItems>
+      </PixataSplitButton>
+    </div>
+  </Pixata>
+  <Telerik>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <TelerikSplitButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="@(() => Log("Telerik: Save"))">
+        <SplitButtonContent>Save</SplitButtonContent>
+        <SplitButtonItems>@TelerikSplitItems</SplitButtonItems>
+      </TelerikSplitButton>
+      <TelerikSplitButton FillMode="@ThemeConstants.Button.FillMode.Outline" Rounded="@ThemeConstants.Button.Rounded.Full" OnClick="@(() => Log("Telerik: Save"))">
+        <SplitButtonContent>Outline, full</SplitButtonContent>
+        <SplitButtonItems>@TelerikSplitItems</SplitButtonItems>
+      </TelerikSplitButton>
+      <TelerikSplitButton Size="@ThemeConstants.Button.Size.Small" OnClick="@(() => Log("Telerik: Save"))">
+        <SplitButtonContent>Small</SplitButtonContent>
+        <SplitButtonItems>@TelerikSplitItems</SplitButtonItems>
+      </TelerikSplitButton>
+      <TelerikSplitButton Size="@ThemeConstants.Button.Size.Large" Enabled="false">
+        <SplitButtonContent>Large, disabled</SplitButtonContent>
+        <SplitButtonItems>@TelerikSplitItems</SplitButtonItems>
+      </TelerikSplitButton>
+    </div>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Opening from code">
+  <Description>
+    <p><code>OpenAsync()</code> and <code>CloseAsync()</code> open and close the menu from code.</p>
+  </Description>
+  <Pixata>
+    <PixataSplitButton @ref="_pixataSplit" OnClick="@(() => Log("Pixata: Send"))">
+      <SplitButtonContent>Send</SplitButtonContent>
+      <SplitButtonItems>@PixataSplitItems</SplitButtonItems>
+    </PixataSplitButton>
+    <button type="button" class="btn btn-sm btn-outline-secondary ms-3" @onclick="() => _pixataSplit.OpenAsync()">Open</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _pixataSplit.CloseAsync()">Close</button>
+  </Pixata>
+  <Telerik>
+    <TelerikSplitButton @ref="_telerikSplit" OnClick="@(() => Log("Telerik: Send"))">
+      <SplitButtonContent>Send</SplitButtonContent>
+      <SplitButtonItems>@TelerikSplitItems</SplitButtonItems>
+    </TelerikSplitButton>
+    <button type="button" class="btn btn-sm btn-outline-secondary ms-3" @onclick="() => _telerikSplit.OpenAsync()">Open</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _telerikSplit.CloseAsync()">Close</button>
+  </Telerik>
+</ComponentComparison>
+
+@code {
+  private string _log = "";
+  private bool _cancelOpen;
+  private readonly List<string> _events = [];
+  private PixataSplitButton _pixataSplit = null!;
+  private TelerikSplitButton _telerikSplit = null!;
+
+  private void Log(string message) =>
+    _log = message;
+
+  private void HandleOpen(PixataMenuButtonOpenEventArgs args) {
+    args.IsCancelled = _cancelOpen;
+    _events.Add(_cancelOpen ? "OnOpen (cancelled)" : "OnOpen");
+  }
+
+  private RenderFragment PixataItems =>
+    @<text>
+      <PixataDropDownButtonItem OnClick="@(() => Log("Pixata: One"))">One</PixataDropDownButtonItem>
+      <PixataDropDownButtonItem OnClick="@(() => Log("Pixata: Two"))">Two</PixataDropDownButtonItem>
+      <PixataDropDownButtonItem OnClick="@(() => Log("Pixata: Three"))">Three</PixataDropDownButtonItem>
+    </text>;
+
+  private RenderFragment TelerikItems =>
+    @<text>
+      <DropDownButtonItem OnClick="@(() => Log("Telerik: One"))">One</DropDownButtonItem>
+      <DropDownButtonItem OnClick="@(() => Log("Telerik: Two"))">Two</DropDownButtonItem>
+      <DropDownButtonItem OnClick="@(() => Log("Telerik: Three"))">Three</DropDownButtonItem>
+    </text>;
+
+  private RenderFragment PixataSplitItems =>
+    @<text>
+      <PixataSplitButtonItem OnClick="@(() => Log("Pixata: Save as"))">Save as...</PixataSplitButtonItem>
+      <PixataSplitButtonItem OnClick="@(() => Log("Pixata: Save a copy"))">Save a copy</PixataSplitButtonItem>
+    </text>;
+
+  private RenderFragment TelerikSplitItems =>
+    @<text>
+      <SplitButtonItem OnClick="@(() => Log("Telerik: Save as"))">Save as...</SplitButtonItem>
+      <SplitButtonItem OnClick="@(() => Log("Telerik: Save a copy"))">Save a copy</SplitButtonItem>
+    </text>;
+
+  private RenderFragment PixataLongList =>
+    @<text>
+      @foreach (int i in Enumerable.Range(1, 10)) {
+        <PixataDropDownButtonItem OnClick="@(() => Log($"Pixata: Item {i}"))">Item @i</PixataDropDownButtonItem>
+      }
+    </text>;
+
+  private RenderFragment TelerikLongList =>
+    @<text>
+      @foreach (int i in Enumerable.Range(1, 10)) {
+        <DropDownButtonItem OnClick="@(() => Log($"Telerik: Item {i}"))">Item @i</DropDownButtonItem>
+      }
+    </text>;
+}

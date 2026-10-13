@@ -1774,6 +1774,131 @@
 
 /* ========== PixataDropDownButton and PixataSplitButton ========== */
 
+/*
+  The buttons use the shared pixata-blazor-button classes. pixata-blazor-dropdownbutton and pixata-blazor-splitbutton are
+  their outer elements (with -open while the menu is showing). The menu is a pixata-blazor-popup with
+  pixata-blazor-button-menu-popup, holding a pixata-blazor-button-menu list (plus -sm, -md or -lg, matching the button) of
+  pixata-blazor-button-menu-item items
+*/
+:root {
+  --pixata-blazor-button-menu-max-height: 80vh;
+  --pixata-blazor-button-menu-bg: var(--pixata-blazor-popup-bg);
+  --pixata-blazor-button-menu-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-button-menu-item-padding-sm: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-padding-md: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-padding-lg: calc(var(--pixata-blazor-spacing) * 1.5) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-end-padding: calc(var(--pixata-blazor-spacing) * 4 + 1rem);
+  --pixata-blazor-button-menu-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-button-menu-item-active-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
+  --pixata-blazor-button-menu-item-focus-ring: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+  --pixata-blazor-splitbutton-arrow-touch-width: 2.75rem;
+}
+
+.pixata-blazor-dropdownbutton,
+.pixata-blazor-splitbutton {
+  position: relative;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  vertical-align: middle;
+}
+
+/* The down arrow a drop-down button shows when ShowArrowButton is set */
+.pixata-blazor-dropdownbutton-arrow {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * -1);
+  margin-inline-end: calc(var(--pixata-blazor-spacing) * -2);
+  padding-inline: var(--pixata-blazor-spacing);
+}
+
+/* The two halves of a split button share a border, and only the outer corners are rounded */
+.pixata-blazor-splitbutton-main {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.pixata-blazor-splitbutton-arrow {
+  margin-inline-start: -1px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.pixata-blazor-splitbutton-main:focus-visible,
+.pixata-blazor-splitbutton-arrow:focus-visible {
+  z-index: 1;
+}
+
+/* The arrow is narrower than other icon-only buttons, but as tall as the main button */
+.pixata-blazor-splitbutton-arrow .pixata-blazor-icon {
+  width: 1rem;
+  padding-inline: 0;
+}
+
+/* The menu */
+.pixata-blazor-button-menu-popup {
+  background-color: var(--pixata-blazor-button-menu-bg);
+  color: var(--pixata-blazor-button-menu-color);
+}
+
+.pixata-blazor-button-menu.pixata-blazor-popup-content {
+  max-height: var(--pixata-blazor-popup-max-height, var(--pixata-blazor-button-menu-max-height));
+}
+
+.pixata-blazor-button-menu {
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+}
+
+.pixata-blazor-button-menu-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+}
+
+.pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-md);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+  outline: 0;
+}
+
+.pixata-blazor-button-menu-sm .pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-sm);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+}
+
+.pixata-blazor-button-menu-lg .pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-lg);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+}
+
+.pixata-blazor-button-menu-item:hover {
+  background-color: var(--pixata-blazor-button-menu-item-hover-bg);
+}
+
+.pixata-blazor-button-menu-item:active {
+  background-color: var(--pixata-blazor-button-menu-item-active-bg);
+}
+
+.pixata-blazor-button-menu-item:focus-visible {
+  box-shadow: var(--pixata-blazor-button-menu-item-focus-ring);
+}
+
+.pixata-blazor-button-menu-item-text {
+  display: flex;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Touch screens get a wider arrow on split buttons (the buttons and menu items are already enlarged by the shared styles) */
+@media (pointer: coarse) {
+  .pixata-blazor-splitbutton-arrow {
+    min-width: var(--pixata-blazor-splitbutton-arrow-touch-width);
+  }
+}
+
 /* ========== end of PixataDropDownButton and PixataSplitButton ========== */
 
 /* ========== PixataScheduler ========== */
