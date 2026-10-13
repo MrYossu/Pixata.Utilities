@@ -59,13 +59,16 @@ public abstract class PixataChartSettingsBase : ComponentBase, IDisposable {
   }
 
   /// <summary>
-  /// The values of the parameters that affect how the chart is drawn. Templates and other delegates are left out, as Razor
-  /// creates new ones every time the page renders, and the chart reads them when it needs them anyway
+  /// The values of the parameters that affect how the chart is drawn. Event callbacks are left out, as they are only read
+  /// when the event happens, and so is the child content, as the settings inside it report their own changes. Templates are
+  /// kept, as the chart uses them while it is drawn (a label template, say). Razor creates a new delegate every time the page
+  /// renders, but delegates compare equal when they call the same method on the same object, so a template only counts as
+  /// changed when it really is a different one (or one that captured different values)
   /// </summary>
   private object?[] Signature() =>
     SignatureProperties.GetOrAdd(GetType(), type => type
         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-        .Where(p => p.GetCustomAttribute<ParameterAttribute>() is not null && !typeof(Delegate).IsAssignableFrom(p.PropertyType) && !p.PropertyType.Name.StartsWith("EventCallback"))
+        .Where(p => p.GetCustomAttribute<ParameterAttribute>() is not null && p.Name != "ChildContent" && !p.PropertyType.Name.StartsWith("EventCallback"))
         .OrderBy(p => p.Name)
         .ToArray())
       .Select(p => p.GetValue(this))
@@ -77,7 +80,7 @@ public abstract class PixataChartSettingsBase : ComponentBase, IDisposable {
       object? y = b[i];
       bool same = x switch {
         null => y is null,
-        string or ValueType => x.Equals(y),
+        string or ValueType or Delegate => x.Equals(y),
         object[] array => y is object[] other && array.SequenceEqual(other),
         _ => ReferenceEquals(x, y)
       };

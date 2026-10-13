@@ -622,8 +622,8 @@ internal static class PixataChartLayout {
       object? category = string.IsNullOrEmpty(series.CategoryField) ? null : PixataFieldReader.GetValue(item, series.CategoryField);
       categories.Add(category);
       categoryTexts.Add(PixataChartFormatter.Format(category, null));
-      string? colour = string.IsNullOrEmpty(series.ColorField) ? null : PixataFieldReader.GetValue(item, series.ColorField)?.ToString();
-      colours.Add(string.IsNullOrWhiteSpace(colour) ? (PixataChartPalette.Css(i), PixataChartPalette.Hex(i)) : (colour, colour));
+      string? colour = string.IsNullOrEmpty(series.ColorField) ? null : PixataChartPalette.Safe(PixataFieldReader.GetValue(item, series.ColorField)?.ToString());
+      colours.Add(colour is null ? (PixataChartPalette.Css(i), PixataChartPalette.Hex(i)) : (colour, colour));
       explode.Add(!string.IsNullOrEmpty(series.ExplodeField) && PixataChartFormatter.ToBool(PixataFieldReader.GetValue(item, series.ExplodeField)) == true);
       bool inLegend = string.IsNullOrEmpty(series.VisibleInLegendField) || PixataChartFormatter.ToBool(PixataFieldReader.GetValue(item, series.VisibleInLegendField)) != false;
       if (inLegend && (series.VisibleInLegend ?? true)) {
@@ -790,12 +790,12 @@ internal static class PixataChartLayout {
   /// to event handlers
   /// </summary>
   private static (string Css, string Reported) PointColour(PixataChartSeries series, int index, object? item) {
-    string? own = !string.IsNullOrEmpty(series.ColorField) && item is not null ? SafeField(item, series.ColorField)?.ToString() : null;
-    if (!string.IsNullOrWhiteSpace(own)) {
+    string? own = !string.IsNullOrEmpty(series.ColorField) && item is not null ? PixataChartPalette.Safe(SafeField(item, series.ColorField)?.ToString()) : null;
+    if (own is not null) {
       return (own, own);
     }
-    if (!string.IsNullOrWhiteSpace(series.Color)) {
-      return (series.Color, series.Color);
+    if (PixataChartPalette.Safe(series.Color) is { } colour) {
+      return (colour, colour);
     }
     return (PixataChartPalette.Css(index), PixataChartPalette.Hex(index));
   }

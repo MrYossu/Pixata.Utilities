@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
@@ -336,6 +337,13 @@ public class Chart_Tests {
   }
 
   [TestMethod]
+  public void Formatter_ApplyTemplate_AllowsHashesInsideFormats() {
+    Func<string, object?> resolve = name => name == "value" ? 1234.5 : null;
+    Assert.AreEqual("1,235 units", PixataChartFormatter.ApplyTemplate("#= format('{0:#,##0}', value) # units", resolve));
+    Assert.AreEqual("[1234.5]", PixataChartFormatter.ApplyTemplate("[#= format(\"{0:0.##}\", value) #]", resolve));
+  }
+
+  [TestMethod]
   public void Formatter_Lines_SplitsAtEscapedAndRealNewLines() =>
     CollectionAssert.AreEqual(new[] { "a", "b", "c" }, PixataChartFormatter.Lines("a\\nb\nc"));
 
@@ -568,6 +576,23 @@ public class Chart_Tests {
   }
 
   [TestMethod]
+  public void Layout_Colours_FromTheDataCannotAddOtherStyles() {
+    List<Sale> sales = [
+      new() { Month = "Jan", Amount = 1, Colour = "red;position:fixed;inset:0" },
+      new() { Month = "Feb", Amount = 2, Colour = "url(//example.com/a.png)" },
+      new() { Month = "Mar", Amount = 3, Colour = "rgb(0 0 0 / 50%)" }
+    ];
+    PixataChartScene scene = Layout([new() { Data = sales, Field = nameof(Sale.Amount), CategoryField = nameof(Sale.Month), ColorField = nameof(Sale.Colour) }]);
+    Assert.AreEqual(PixataChartPalette.Css(0), scene.Points[0].Colour);
+    Assert.AreEqual(PixataChartPalette.Css(0), scene.Points[1].Colour);
+    Assert.AreEqual("rgb(0 0 0 / 50%)", scene.Points[2].Colour);
+    PixataChartScene pie = Layout([new() { Type = PixataChartSeriesType.Pie, Data = sales, Field = nameof(Sale.Amount), ColorField = nameof(Sale.Colour) }]);
+    Assert.AreEqual(PixataChartPalette.Css(0), pie.Points[0].Colour);
+    Assert.AreEqual(PixataChartPalette.Css(0), pie.LegendEntries[0].Colour);
+    Assert.AreEqual("rgb(0 0 0 / 50%)", pie.Points[2].Colour);
+  }
+
+  [TestMethod]
   public void Layout_ColumnLabels_UseTheTemplate() {
     PixataChartSeries series = new() { Name = "S", Data = Sales(), Field = nameof(Sale.Amount), CategoryField = nameof(Sale.Month), Labels = new() { Visible = true, Template = "#= category #: #= value #" } };
     PixataChartScene scene = Layout([series]);
@@ -598,6 +623,66 @@ public class Chart_Tests {
     PixataChartScene scene = Layout([pie]);
     CollectionAssert.AreEquivalent(new[] { "Jan: 17%", "Feb: 33%", "Mar: 50%" }, scene.Labels.Select(l => l.Lines[0]).ToArray());
     Assert.AreEqual(3, scene.Connectors.Count);
+  }
+
+  // Empty data, all zero, all negative, one category, nulls, tiny and huge ranges, each stacked and not, with and without
+  // labels, at a normal size and squashed, mustn't throw or put NaN or infinity into the SVG
+  private static void AssertFinite(PixataChartScene scene) {
+    static string Text(object o) => o.ToString() ?? "";
+    foreach (PixataChartScenePoint p in scene.Points) {
+      Assert.IsTrue(double.IsFinite(p.X) && double.IsFinite(p.Y) && double.IsFinite(p.Width) && double.IsFinite(p.Height), $"point {p.SeriesIndex}/{p.PointIndex}");
+      Assert.IsFalse((p.Path ?? "").Contains("NaN") || (p.Path ?? "").Contains("∞"), p.Path);
+    }
+    foreach (PixataChartSceneLine l in scene.GridLines.Concat(scene.AxisLines)) {
+      Assert.IsTrue(double.IsFinite(l.X1) && double.IsFinite(l.Y1) && double.IsFinite(l.X2) && double.IsFinite(l.Y2), Text(l));
+    }
+    foreach (PixataChartSceneText t in scene.AxisTexts.Concat(scene.Labels)) {
+      Assert.IsTrue(double.IsFinite(t.X) && double.IsFinite(t.Y), Text(t));
+    }
+    foreach (PixataChartScenePath path in scene.Paths.Concat(scene.Connectors)) {
+      Assert.IsFalse(path.D.Contains("NaN") || path.D.Contains("∞"), path.D);
+    }
+  }
+
+  [TestMethod]
+  [DataRow(PixataChartSeriesType.Column)]
+  [DataRow(PixataChartSeriesType.Line)]
+  [DataRow(PixataChartSeriesType.Pie)]
+  public void Layout_AwkwardData_IsDrawnWithFiniteNumbers(PixataChartSeriesType type) {
+    object?[][] datasets = [
+      [],
+      [0.0, 0.0, 0.0],
+      [-5.0, -10.0, -1.0],
+      [42.0],
+      [null, null],
+      [null, 3.0, null],
+      [1e-12, 2e-12],
+      [1e300, -1e300],
+      [1e15, 1e15 + 1],
+      [5.0, 5.0],
+      [-0.0001, 1e9]
+    ];
+    foreach (object?[] data in datasets) {
+      foreach (bool stacked in new[] { false, true }) {
+        foreach (bool labels in new[] { false, true }) {
+          PixataChartSeries series = new() { Type = type, Name = "S", Data = data.Cast<object>().ToList(), Labels = labels ? new() { Visible = true } : null, Stack = stacked ? new() : null };
+          PixataChartSeries other = new() { Type = type, Name = "T", Data = data.Cast<object>().ToList() };
+          foreach ((double w, double h) in new[] { (600.0, 300.0), (1.0, 1.0), (50.0, 30.0) }) {
+            foreach (bool percent in new[] { false, true }) {
+              if (percent && series.Stack is not null) {
+                series.Stack.Type = PixataChartSeriesStackType.Stack100;
+              }
+              try {
+                PixataChartScene scene = Layout([series, other], width: w, height: h);
+                AssertFinite(scene);
+              } catch (Exception ex) {
+                Assert.Fail($"{type} [{string.Join(",", data)}] stacked={stacked} labels={labels} {w}x{h} percent={percent}: {ex}");
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   [TestMethod]
@@ -950,6 +1035,83 @@ public class Chart_Tests {
     CollectionAssert.AreEqual(new[] { "Jan=10", "Feb=20", "Mar=30" }, cut.FindAll("text.pixata-blazor-chart-label").Select(t => t.TextContent).ToArray());
     IElement marker = cut.Find("g.pixata-blazor-chart-marker rect.pixata-blazor-chart-marker-shape");
     Assert.AreEqual("10", marker.GetAttribute("width"));
+  }
+
+  [TestMethod]
+  public void Chart_ChangedLabelTemplate_RedrawsTheLabels() {
+    using BunitContext context = PixataTestContext.Create();
+    RenderFragment Content(string prefix) {
+      Func<PixataChartSeriesLabelsTemplateContext, string> text = c => $"{prefix}{c.Value}";
+      return Component<PixataChartSeriesItems>(Component<PixataChartSeries>(
+        Component<PixataChartSeriesLabels>((nameof(PixataChartSeriesLabels.Visible), true), (nameof(PixataChartSeriesLabels.TextTemplate), text)),
+        (nameof(PixataChartSeries.Data), new object[] { 1.0, 2.0 })));
+    }
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Content("a"));
+    CollectionAssert.AreEqual(new[] { "a1", "a2" }, cut.FindAll("text.pixata-blazor-chart-label").Select(t => t.TextContent).ToArray());
+    cut.Render(p => p.AddChildContent(Content("b")));
+    CollectionAssert.AreEqual(new[] { "b1", "b2" }, cut.FindAll("text.pixata-blazor-chart-label").Select(t => t.TextContent).ToArray());
+  }
+
+  [TestMethod]
+  public void Chart_SeriesShownAgain_KeepsItsPlaceInTheLegendAndItsColour() {
+    using BunitContext context = PixataTestContext.Create();
+    List<Sale> sales = Sales();
+    // As Razor renders @if (showFirst) { <PixataChartSeries ... /> } <PixataChartSeries ... />, with its own sequence numbers
+    RenderFragment Content(bool showFirst) =>
+      Component<PixataChartSeriesItems>(builder => {
+        if (showFirst) {
+          builder.AddContent(0, ColumnSeries("Amount", sales));
+        }
+        builder.AddContent(1, ColumnSeries("Other", sales, nameof(Sale.Other)));
+      });
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Content(true));
+    cut.Render(p => p.AddChildContent(Content(false)));
+    cut.Render(p => p.AddChildContent(Content(true)));
+    CollectionAssert.AreEqual(new[] { "Amount", "Other" }, cut.FindAll(".pixata-blazor-chart-legend-text").Select(t => t.TextContent).ToArray());
+    StringAssert.Contains(cut.FindAll("rect.pixata-blazor-chart-column")[0].GetAttribute("style"), "--pixata-blazor-chart-series-1");
+    Assert.AreEqual("Amount, Jan: 10", cut.FindAll("rect.pixata-blazor-chart-column")[0].GetAttribute("aria-label"));
+  }
+
+  [TestMethod]
+  public void Chart_ValueAxisShownAgain_KeepsItsSide() {
+    using BunitContext context = PixataTestContext.Create();
+    RenderFragment Axis(string name) =>
+      Component<PixataChartValueAxis>(Component<PixataChartValueAxisTitle>((nameof(PixataChartValueAxisTitle.Text), name)), (nameof(PixataChartValueAxis.Name), name));
+    RenderFragment Content(bool showFirst) => Fragments(
+      Component<PixataChartSeriesItems>(ColumnSeries("Amount", Sales())),
+      Component<PixataChartCategoryAxes>(Component<PixataChartCategoryAxis>((nameof(PixataChartCategoryAxis.AxisCrossingValue), new object[] { 0, 100 }))),
+      Component<PixataChartValueAxes>(builder => {
+        if (showFirst) {
+          builder.AddContent(0, Axis("left"));
+        }
+        builder.AddContent(1, Axis("right"));
+      }));
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Content(true));
+    cut.Render(p => p.AddChildContent(Content(false)));
+    cut.Render(p => p.AddChildContent(Content(true)));
+    IElement[] titles = [.. cut.FindAll("text.pixata-blazor-chart-axis-title")];
+    double X(string text) => double.Parse(titles.Single(t => t.TextContent == text).GetAttribute("x")!, CultureInfo.InvariantCulture);
+    Assert.IsTrue(X("left") < X("right"), "The first declared axis is on the left again");
+  }
+
+  [TestMethod]
+  public async Task Chart_RemovedWhileItsScriptIsAttaching_IsDetachedWhenTheScriptAnswers() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule("./_content/Pixata.Blazor/Components/Chart/PixataChart.razor.js");
+    // attach() returns a private type, so its handler is set up by reflection
+    Type resultType = typeof(PixataChart).GetNestedType("AttachResult", BindingFlags.NonPublic)!;
+    MethodInfo setup = typeof(BunitJSInteropSetupExtensions).GetMethod(nameof(BunitJSInteropSetupExtensions.Setup), [typeof(BunitJSInterop), typeof(string), typeof(InvocationMatcher)])!.MakeGenericMethod(resultType);
+    object handler = setup.Invoke(null, [module, "attach", (InvocationMatcher)(_ => true)])!;
+    RenderChart(context, Component<PixataChartSeriesItems>(ColumnSeries("Amount", Sales())));
+    await context.DisposeComponentsAsync();
+    Assert.IsFalse(module.Invocations["detach"].Any());
+    object result = Activator.CreateInstance(resultType, true)!;
+    resultType.GetProperty("Id")!.SetValue(result, 5);
+    handler.GetType().GetMethod("SetResult")!.Invoke(handler, [result]);
+    for (int i = 0; i < 100 && !module.Invocations["detach"].Any(); i++) {
+      await Task.Delay(10);
+    }
+    Assert.IsTrue(module.Invocations["detach"].Any(i => Equals(i.Arguments[0], 5)), "The script's attachment is removed");
   }
 
   [TestMethod]

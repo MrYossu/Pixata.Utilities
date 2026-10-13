@@ -9,11 +9,17 @@ namespace Pixata.Blazor.Components;
 /// Holds the chart's series. Put it inside a <see cref="PixataChart"/>, and put <see cref="PixataChartSeries"/> inside it
 /// </summary>
 public class PixataChartSeriesItems : ComponentBase {
+  [CascadingParameter]
+  private PixataChart? Chart { get; set; }
+
   [Parameter]
   public RenderFragment? ChildContent { get; set; }
 
-  protected override void BuildRenderTree(RenderTreeBuilder builder) =>
+  protected override void BuildRenderTree(RenderTreeBuilder builder) {
+    // The series are given their parameters in the order they are declared, straight after this
+    Chart?.BeginDeclaringSeries();
     builder.AddContent(0, ChildContent);
+  }
 }
 
 /// <summary>
@@ -193,6 +199,7 @@ public class PixataChartSeries : PixataChartSettingsBase {
       VisibleOverride = null;
       _lastVisible = Visible;
     }
+    Chart?.SeriesDeclared(this);
     base.OnParametersSet();
   }
 

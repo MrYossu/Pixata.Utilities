@@ -105,7 +105,7 @@ Passing a new list (`_sales = [.. _sales, newMonth]`) redraws the chart without 
 | `CategoryField` | `string` | The property holding each item's category. Without it, items are matched to the category axis's `Categories` by position |
 | `Name` | `string` | The name shown in the legend and tooltips. A series without a name isn't shown in the legend |
 | `Color` | `string` | The series colour, as any CSS colour. By default the series take the palette colours in turn |
-| `ColorField` | `string` | The property holding each item's colour, which overrides `Color` |
+| `ColorField` | `string` | The property holding each item's colour, which overrides `Color`. As these colours can come from your data, anything that isn't a plain colour value (text containing `;`, `:`, braces, quotes or `url(`) is ignored, and the point gets the colour it would have had without it |
 | `Axis` | `string` | The `Name` of the value axis to plot the series against. The first value axis by default |
 | `Gap` | `double` | The space between categories, as a multiple of a column's width. 1.5 by default |
 | `Spacing` | `double` | The space between the columns in a category, as a multiple of a column's width. 0.4 by default |
