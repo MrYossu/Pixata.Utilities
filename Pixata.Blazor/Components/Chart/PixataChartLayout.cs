@@ -391,7 +391,7 @@ internal static class PixataChartLayout {
     foreach (SeriesInfo info in visible.Where(s => s.Series.SeriesType == PixataChartSeriesType.Line)) {
       PixataChartSeries series = info.Series;
       PixataChartValueScale scale = scales[info.AxisIndex];
-      PixataChartSeriesMissingValues missing = series.MissingValues ?? PixataChartSeriesMissingValues.Gap;
+      PixataChartSeriesMissingValues missing = Missing(info);
       List<(double X, double Y)?> path = [];
       List<(double Start, double End)> spans = [];
       PixataChartSeriesMarkers? markers = series.Markers;
@@ -468,9 +468,15 @@ internal static class PixataChartLayout {
   }
 
   private static double?[] StackableValues(SeriesInfo info) =>
-    info.Series.SeriesType == PixataChartSeriesType.Line && info.Series.MissingValues == PixataChartSeriesMissingValues.Zero
+    info.Series.SeriesType == PixataChartSeriesType.Line && Missing(info) == PixataChartSeriesMissingValues.Zero
       ? info.Values.Select(v => v ?? 0).Select(v => (double?)v).ToArray()
       : info.Values;
+
+  /// <summary>
+  /// What a line series does with missing values: interpolate by default, or treat them as zero when stacked
+  /// </summary>
+  private static PixataChartSeriesMissingValues Missing(SeriesInfo info) =>
+    info.Series.MissingValues ?? (info.StackKey is null ? PixataChartSeriesMissingValues.Interpolate : PixataChartSeriesMissingValues.Zero);
 
   private static string SlotKey(SeriesInfo info) =>
     info.StackKey is null ? $"series|{info.Index}" : $"stack|{info.StackKey}";
@@ -655,9 +661,15 @@ internal static class PixataChartLayout {
     if (series.Size is > 0) {
       radius = series.Size.Value;
     } else if (outside) {
+      double smallest = Math.Min(area.Width, area.Height);
       double byWidth = area.Width / 2 - widest - distance - LabelGap;
+      if (byWidth < smallest * .3 && labels?.Distance is null) {
+        // On a narrow chart (a phone, say), bring the labels in closer to leave more room for the pie
+        distance = Math.Min(distance, 16);
+        byWidth = area.Width / 2 - widest - distance - LabelGap;
+      }
       double byHeight = area.Height / 2 - distance / 2 - tallest;
-      radius = Math.Max(Math.Min(byWidth, byHeight), Math.Min(area.Width, area.Height) * .2);
+      radius = Math.Max(Math.Min(byWidth, byHeight), smallest * .25);
     } else {
       radius = Math.Min(area.Width, area.Height) / 2;
     }

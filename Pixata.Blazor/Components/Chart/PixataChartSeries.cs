@@ -91,7 +91,8 @@ public class PixataChartSeries : PixataChartSettingsBase {
   public PixataChartSeriesStyle? Style { get; set; }
 
   /// <summary>
-  /// What a line series does with null values. <see cref="PixataChartSeriesMissingValues.Gap"/> by default
+  /// What a line series does with null values. <see cref="PixataChartSeriesMissingValues.Interpolate"/> by default, or
+  /// <see cref="PixataChartSeriesMissingValues.Zero"/> for a stacked series
   /// </summary>
   [Parameter]
   public PixataChartSeriesMissingValues? MissingValues { get; set; }

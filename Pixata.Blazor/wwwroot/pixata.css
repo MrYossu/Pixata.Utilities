@@ -1862,7 +1862,7 @@
 }
 
 /* Until the browser has reported the chart's size, a phone-sized screen moves a side legend underneath */
-@media (max-width: 440px) {
+@media (max-width: 400px) {
   .pixata-blazor-chart-body-legend-left,
   .pixata-blazor-chart-body-legend-right {
     flex-direction: column;

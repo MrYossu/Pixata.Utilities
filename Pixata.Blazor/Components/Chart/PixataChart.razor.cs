@@ -22,7 +22,7 @@ public partial class PixataChart : IAsyncDisposable {
   /// <summary>
   /// Below this width (in pixels) the chart is laid out for a phone: a legend on the left or right moves underneath
   /// </summary>
-  public const double CompactWidth = 440;
+  public const double CompactWidth = 400;
 
   [Inject]
   private IJSRuntime Js { get; set; } = null!;

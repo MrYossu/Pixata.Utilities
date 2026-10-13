@@ -60,17 +60,17 @@ public enum PixataChartSeriesStyle {
 /// </summary>
 public enum PixataChartSeriesMissingValues {
   /// <summary>
-  /// Leaves a gap in the line. This is the default
+  /// Leaves a gap in the line
   /// </summary>
   Gap,
 
   /// <summary>
-  /// Joins the points either side of the missing one
+  /// Joins the points either side of the missing one. This is the default
   /// </summary>
   Interpolate,
 
   /// <summary>
-  /// Treats the missing value as zero
+  /// Treats the missing value as zero. This is the default for stacked series
   /// </summary>
   Zero
 }
