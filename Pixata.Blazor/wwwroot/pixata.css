@@ -1407,6 +1407,403 @@
 
 /* ========== PixataComboBox, PixataDropDownList and PixataMultiSelect ========== */
 
+/*
+  The drop-downs use the shared input classes (pixata-blazor-input, -input-inner, -input-button, -clear-value) and popup and
+  list classes (pixata-blazor-popup, -popup-content, -list, -list-item, -list-group-header, -no-data). Their own element also
+  has pixata-blazor-dropdown plus pixata-blazor-dropdownlist, pixata-blazor-combobox or pixata-blazor-multiselect, and their
+  popup has pixata-blazor-dropdown-popup plus pixata-blazor-dropdownlist-popup (and so on)
+*/
+:root {
+  --pixata-blazor-dropdown-popup-padding: calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-dropdown-item-radius: var(--pixata-blazor-border-radius);
+  --pixata-blazor-dropdown-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-dropdown-item-selected-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
+  --pixata-blazor-dropdown-item-selected-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 16%, transparent);
+  --pixata-blazor-dropdown-item-selected-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-dropdown-item-focus-ring: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+  --pixata-blazor-dropdown-group-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-dropdown-checkbox-size: 1rem;
+  --pixata-blazor-dropdown-checkbox-border-color: var(--pixata-blazor-border-alt-color);
+  --pixata-blazor-dropdown-checkbox-checked-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-dropdown-checkbox-checked-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-dropdownlist-bg: var(--pixata-blazor-base-bg);
+  --pixata-blazor-dropdownlist-hover-bg: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-dropdownlist-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-multiselect-tag-bg: #ebebeb;
+  --pixata-blazor-multiselect-tag-hover-bg: #e0e0e0;
+  --pixata-blazor-multiselect-tag-border-color: #c2c2c2;
+  --pixata-blazor-multiselect-tag-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-multiselect-tag-gap: .125rem;
+}
+
+/* ---------- The component ---------- */
+
+.pixata-blazor-dropdown {
+  outline: none;
+}
+
+.pixata-blazor-dropdown.pixata-blazor-dropdown-readonly {
+  cursor: default;
+}
+
+.pixata-blazor-dropdown.pixata-blazor-input-lg,
+.pixata-blazor-dropdown-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: 1.5;
+}
+
+/* The drop-down list looks like a button, with the selected item's text on it */
+.pixata-blazor-dropdownlist {
+  border-color: var(--pixata-blazor-dropdownlist-border-color);
+  background-color: var(--pixata-blazor-dropdownlist-bg);
+  color: var(--pixata-blazor-base-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-blazor-dropdownlist:hover {
+  border-color: var(--pixata-blazor-dropdownlist-border-color);
+  background-color: var(--pixata-blazor-dropdownlist-hover-bg);
+}
+
+.pixata-blazor-dropdownlist:focus,
+.pixata-blazor-dropdownlist:focus-within {
+  border-color: var(--pixata-blazor-dropdownlist-border-color);
+  box-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-input-outline {
+  border-color: color-mix(in srgb, var(--pixata-blazor-text-color) 50%, transparent);
+  background-color: transparent;
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-input-flat {
+  border-color: transparent;
+  border-bottom-color: var(--pixata-blazor-border-alt-color);
+  background-color: transparent;
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-input-outline:hover,
+.pixata-blazor-dropdownlist.pixata-blazor-input-flat:hover {
+  background-color: var(--pixata-blazor-dropdown-item-hover-bg);
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-invalid {
+  border-color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-dropdownlist-value {
+  display: flex;
+  align-items: center;
+}
+
+.pixata-blazor-input-value-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The arrow of the drop-down list is part of the button, so has no background or border of its own */
+.pixata-blazor-dropdownlist .pixata-blazor-input-button,
+.pixata-blazor-dropdownlist .pixata-blazor-input-button:hover {
+  border-inline-start: 0;
+  background: none;
+  color: inherit;
+}
+
+.pixata-blazor-combobox .pixata-blazor-input-button,
+.pixata-blazor-multiselect .pixata-blazor-input-button {
+  user-select: none;
+}
+
+.pixata-blazor-dropdown .pixata-blazor-clear-value {
+  align-self: stretch;
+}
+
+.pixata-blazor-dropdown.pixata-blazor-dropdown-readonly .pixata-blazor-input-button {
+  cursor: default;
+}
+
+/* The spinner shown while OnRead is fetching data */
+.pixata-blazor-dropdown-loading {
+  box-sizing: border-box;
+  display: inline-block;
+  flex: none;
+  align-self: center;
+  width: 1em;
+  height: 1em;
+  margin: 0 var(--pixata-blazor-spacing);
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  opacity: .6;
+  animation: pixata-blazor-dropdown-spin .75s linear infinite;
+}
+
+@keyframes pixata-blazor-dropdown-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- The multi-select's tags ---------- */
+
+.pixata-blazor-multiselect {
+  cursor: text;
+}
+
+.pixata-blazor-multiselect-values {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixata-blazor-multiselect-tag-gap);
+  min-width: 0;
+  padding: var(--pixata-blazor-multiselect-tag-gap);
+}
+
+.pixata-blazor-multiselect-tags {
+  display: contents;
+}
+
+.pixata-blazor-multiselect .pixata-blazor-multiselect-input {
+  flex: 1 1 3em;
+  width: 3em;
+  min-width: 3em;
+  margin: calc(var(--pixata-blazor-multiselect-tag-gap) * -1);
+}
+
+.pixata-blazor-multiselect-tag {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+  max-width: 100%;
+  padding: calc(var(--pixata-blazor-spacing) - 1px) var(--pixata-blazor-spacing);
+  border: 1px solid var(--pixata-blazor-multiselect-tag-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-multiselect-tag-bg);
+  color: var(--pixata-blazor-multiselect-tag-color);
+  line-height: 1rem;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.pixata-blazor-multiselect-tag:hover {
+  background-color: var(--pixata-blazor-multiselect-tag-hover-bg);
+}
+
+.pixata-blazor-input-sm .pixata-blazor-multiselect-tag {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.pixata-blazor-input-lg .pixata-blazor-multiselect-tag {
+  padding-top: calc(var(--pixata-blazor-spacing) * 1.5 - 1px);
+  padding-bottom: calc(var(--pixata-blazor-spacing) * 1.5 - 1px);
+}
+
+.pixata-blazor-multiselect-tag-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-multiselect-tag-remove {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  opacity: .8;
+  cursor: pointer;
+}
+
+.pixata-blazor-multiselect-tag-remove:hover {
+  opacity: 1;
+}
+
+/* ---------- The popup and its list ---------- */
+
+.pixata-blazor-dropdown-popup {
+  padding: var(--pixata-blazor-dropdown-popup-padding);
+}
+
+.pixata-blazor-dropdown-filter {
+  flex: none;
+  padding: var(--pixata-blazor-dropdown-popup-padding);
+  padding-top: 0;
+}
+
+.pixata-blazor-dropdown-filter-box {
+  align-items: center;
+}
+
+.pixata-blazor-dropdown-filter-icon {
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * 2);
+  opacity: .8;
+}
+
+/* The filter box takes the popup's width rather than setting it */
+.pixata-blazor-dropdown-filter-box .pixata-blazor-input-inner {
+  width: 0;
+  padding-inline-start: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-dropdown-header,
+.pixata-blazor-dropdown-footer {
+  flex: none;
+  padding: 0;
+  border: 0;
+}
+
+.pixata-blazor-dropdown-content {
+  position: relative;
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item {
+  border-radius: var(--pixata-blazor-dropdown-item-radius);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item:hover {
+  background-color: var(--pixata-blazor-dropdown-item-hover-bg);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item.pixata-blazor-focus {
+  box-shadow: var(--pixata-blazor-dropdown-item-focus-ring);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-dropdown-item-selected-bg);
+  color: var(--pixata-blazor-dropdown-item-selected-color);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item.pixata-blazor-selected:hover {
+  background-color: var(--pixata-blazor-dropdown-item-selected-hover-bg);
+}
+
+.pixata-blazor-dropdown-item-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-dropdown-sm .pixata-blazor-list-item,
+.pixata-blazor-dropdown-sm .pixata-blazor-list-group-header {
+  padding-top: calc(var(--pixata-blazor-spacing) * .5);
+  padding-bottom: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-dropdown-lg .pixata-blazor-list-item {
+  padding-top: calc(var(--pixata-blazor-spacing) * 2);
+  padding-bottom: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* Group headers stick to the top of the list while their items are in view */
+.pixata-blazor-dropdown-group-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: calc(var(--pixata-blazor-spacing) + 1px) calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 0;
+  background-color: var(--pixata-blazor-popup-bg);
+  box-shadow: inset 0 1px 0 0 var(--pixata-blazor-border-color);
+  color: var(--pixata-blazor-dropdown-group-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.5;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-dropdown-list > .pixata-blazor-dropdown-group-header:first-child {
+  box-shadow: none;
+}
+
+/* "Select all" stays at the top of the list as it scrolls */
+.pixata-blazor-dropdown-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--pixata-blazor-popup-bg);
+}
+
+.pixata-blazor-dropdown-select-all {
+  margin-bottom: var(--pixata-blazor-spacing);
+  box-shadow: 0 1px 0 0 var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-dropdown-select-all.pixata-blazor-focus {
+  box-shadow: var(--pixata-blazor-dropdown-item-focus-ring), 0 1px 0 0 var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-dropdown-custom-value-icon {
+  opacity: .8;
+}
+
+.pixata-blazor-dropdown-placeholder {
+  background: linear-gradient(var(--pixata-blazor-dropdown-item-hover-bg), var(--pixata-blazor-dropdown-item-hover-bg)) no-repeat calc(var(--pixata-blazor-spacing) * 2) center / 60% 40%;
+}
+
+.pixata-blazor-dropdown-no-data {
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 4) calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* A drawn checkbox (the option is what gets chosen, so it isn't an input) */
+.pixata-blazor-dropdown-checkbox {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--pixata-blazor-dropdown-checkbox-size);
+  height: var(--pixata-blazor-dropdown-checkbox-size);
+  border: 1px solid var(--pixata-blazor-dropdown-checkbox-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-input-bg);
+  color: var(--pixata-blazor-dropdown-checkbox-checked-bg);
+}
+
+.pixata-blazor-dropdown-checkbox .pixata-blazor-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.pixata-blazor-dropdown-checkbox svg {
+  stroke-width: 3;
+}
+
+.pixata-blazor-dropdown-checkbox.pixata-blazor-checked {
+  border-color: var(--pixata-blazor-dropdown-checkbox-checked-bg);
+  background-color: var(--pixata-blazor-dropdown-checkbox-checked-bg);
+  color: var(--pixata-blazor-dropdown-checkbox-checked-color);
+}
+
+/* Touch screens: bigger targets for removing a tag, without making the tags themselves bigger */
+@media (pointer: coarse) {
+  .pixata-blazor-multiselect-tag-remove::after {
+    content: "";
+    position: absolute;
+    inset: -.5rem;
+  }
+
+  .pixata-blazor-dropdown .pixata-blazor-clear-value,
+  .pixata-blazor-dropdown .pixata-blazor-input-button {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-dropdown-loading {
+    animation-duration: 2s;
+  }
+}
+
 /* ========== end of PixataComboBox, PixataDropDownList and PixataMultiSelect ========== */
 
 /* ========== PixataTabStrip ========== */
