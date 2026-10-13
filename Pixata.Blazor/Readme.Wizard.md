@@ -108,7 +108,7 @@ A `PixataWizardStep` must be inside a `PixataWizard`, and throws an exception if
 
 If the current step is hidden, the wizard moves to the visible step before it (or, if there isn't one, the one after it) and raises `ValueChanged`.
 
-Steps can also be added and removed with `@if` and `@foreach`, and are always shown in the order they are declared. Give steps generated in a loop a `@key`.
+Steps can also be added and removed with `@if` and `@foreach`, and are always shown in the order they are declared, even when one is added between existing ones. Give steps generated in a loop a `@key`. Steps that are already there and are moved (eg by sorting the collection a keyed `@foreach` loops over) keep their old places, so if you need to change the order of the steps, give the wizard a `@key` that changes with it, so it is created afresh.
 
 ### Validating each step
 
@@ -120,7 +120,7 @@ Most wizards collect information, and shouldn't let the user move on until what 
 - Pressing Enter in one of the step's inputs does the same as Next (or Done on the last step), and moves the focus into the next step.
 - Previous (or clicking an earlier step) is always allowed, so the user can go back and check something without fixing the current step first.
 - Once a step has been validated, the stepper shows a tick or an exclamation mark for it, which changes as soon as the user fixes (or breaks) the step.
-- Done validates the current step, and then checks the other steps. If the user skipped a step (by clicking a later step in the stepper), or left one that wasn't valid, the wizard goes back to it and shows its validation messages. Only when every step is valid is `OnFinish` raised.
+- Done validates the current step, and then checks the other steps (except disabled ones, which the user can't go to). If the user skipped a step (by clicking a later step in the stepper), or left one that wasn't valid, the wizard goes back to it and shows its validation messages. Only when every step is valid is `OnFinish` raised.
 
 ```razor
 <PixataWizard OnFinish="SignUp">
@@ -294,7 +294,7 @@ Any other attributes (eg `aria-label`) are rendered on the stepper's outer eleme
 | `AriaControls` | `string?` | | The `id` of the element the step controls, rendered as its `aria-controls` attribute. |
 | `Class` | `string?` | | Extra CSS classes for the step. |
 
-A `PixataStepperStep` must be inside a `PixataStepper`, and throws an exception if it isn't. Steps can be added and removed with `@if` and `@foreach`, and are always shown in the order they are declared.
+A `PixataStepperStep` must be inside a `PixataStepper`, and throws an exception if it isn't. Steps can be added and removed with `@if` and `@foreach`, and are always shown in the order they are declared, even when one is added between existing ones. As with the wizard, steps that are moved in a keyed `@foreach` keep their old places, so give the stepper a `@key` that changes with the order of the steps if you need to move them. If the current step is removed from the end, the new last step becomes the current one, and `ValueChanged` is raised.
 
 ### On phones
 

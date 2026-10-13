@@ -305,6 +305,10 @@ public partial class PixataStepper : IDisposable {
       _steps.AddRange(_newSteps);
       _newSteps.Clear();
       StateHasChanged();
+    } else if (_steps.Count > 0 && _value != CurrentIndex) {
+      // The step Value pointed to has been removed, so the last step is shown instead. Tell the parent
+      _value = CurrentIndex;
+      await ValueChanged.InvokeAsync(_value);
     }
     if (_focusPending) {
       _focusPending = false;

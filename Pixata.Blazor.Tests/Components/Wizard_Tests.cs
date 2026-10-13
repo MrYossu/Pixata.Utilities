@@ -8,6 +8,7 @@ using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components;
@@ -312,6 +313,61 @@ public class Wizard_Tests {
   }
 
   [TestMethod]
+  public void Stepper_RemovingTheCurrentStepAtTheEnd_SelectsTheLastStepAndRaisesValueChanged() {
+    using BunitContext context = PixataTestContext.Create();
+    List<int> changes = [];
+    IRenderedComponent<PixataStepper> cut = RenderStepper(context, StepperSteps(Labels("a", "b", "c")), 2, p => p.Add(c => c.ValueChanged, (int v) => changes.Add(v)));
+    cut.Render(p => p.Add(c => c.StepperSteps, StepperSteps(Labels("a", "b"))));
+    Assert.AreEqual("b", CurrentStep(cut).QuerySelector(".pixata-blazor-stepper-step-text")!.TextContent);
+    CollectionAssert.AreEqual(new[] { 1 }, changes);
+  }
+
+  /// <summary>
+  /// Declares steps whose templates and content show a value worked out when the host renders, as a page might in a @foreach
+  /// </summary>
+  private class TemplateHost : ComponentBase {
+    [Parameter]
+    public bool Wizard { get; set; }
+
+    public int Count { get; private set; }
+
+    public void Increment() {
+      Count++;
+      StateHasChanged();
+    }
+
+    protected override void BuildRenderTree(RenderTreeBuilder builder) {
+      string text = $"Count {Count}";
+      if (Wizard) {
+        builder.OpenComponent<PixataWizard>(0);
+        builder.AddAttribute(1, nameof(PixataWizard.WizardSteps), (RenderFragment)(steps => {
+          steps.OpenComponent<PixataWizardStep>(0);
+          steps.AddAttribute(1, nameof(PixataWizardStep.StepTemplate), (RenderFragment)(t => t.AddContent(0, $"Template {text}")));
+          steps.AddAttribute(2, nameof(PixataWizardStep.Content), (RenderFragment)(c => c.AddContent(0, $"Content {text}")));
+          steps.CloseComponent();
+        }));
+        builder.CloseComponent();
+      } else {
+        builder.OpenComponent<PixataStepper>(0);
+        builder.AddAttribute(1, nameof(PixataStepper.StepperSteps), (RenderFragment)(steps => {
+          steps.OpenComponent<PixataStepperStep>(0);
+          steps.AddAttribute(1, nameof(PixataStepperStep.Template), (RenderFragment)(t => t.AddContent(0, $"Template {text}")));
+          steps.CloseComponent();
+        }));
+        builder.CloseComponent();
+      }
+    }
+  }
+
+  [TestMethod]
+  public void Stepper_Template_ShowsWhatTheParentRenderedLast() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<TemplateHost> cut = context.Render<TemplateHost>();
+    cut.InvokeAsync(cut.Instance.Increment);
+    Assert.AreEqual("Template Count 1", cut.Find(".pixata-blazor-stepper-list button").TextContent.Trim());
+  }
+
+  [TestMethod]
   public void Stepper_AdditionalAttributes_AreRenderedOnTheOuterElement() {
     using BunitContext context = PixataTestContext.Create();
     IRenderedComponent<PixataStepper> cut = RenderStepper(context, StepperSteps(Labels("a")), more: p => p
@@ -419,6 +475,16 @@ public class Wizard_Tests {
     Click(cut, "Previous");
     Assert.AreEqual(1, changed);
     Assert.AreEqual("Content Two", Content(cut));
+  }
+
+  [TestMethod]
+  public void Wizard_ContentAndStepTemplate_ShowWhatTheParentRenderedLast() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<TemplateHost> cut = context.Render<TemplateHost>(p => p.Add(c => c.Wizard, true));
+    Assert.AreEqual("Content Count 0", cut.Find(".pixata-blazor-wizard-content").TextContent.Trim());
+    cut.InvokeAsync(cut.Instance.Increment);
+    Assert.AreEqual("Content Count 1", cut.Find(".pixata-blazor-wizard-content").TextContent.Trim());
+    Assert.AreEqual("Template Count 1", cut.Find(".pixata-blazor-wizard-stepper .pixata-blazor-stepper-list button").TextContent.Trim());
   }
 
   [TestMethod]
@@ -655,6 +721,19 @@ public class Wizard_Tests {
     person.Email = "jim@example.com";
     Click(cut, "Next");
     Click(cut, "Done");
+    Assert.AreEqual(1, finished);
+  }
+
+  [TestMethod]
+  public void Wizard_Finish_LeavesOutDisabledSteps() {
+    using BunitContext context = PixataTestContext.Create();
+    int finished = 0;
+    IRenderedComponent<PixataWizard> cut = RenderWizard(context, WizardSteps(new WizardStepSpec("One"), new WizardStepSpec("Two", Disabled: true, Model: new Person()), new WizardStepSpec("Three")), p => p
+      .Add(c => c.OnFinish, () => finished++));
+    Click(cut, "Next");
+    Assert.AreEqual("Content Three", Content(cut));
+    Click(cut, "Done");
+    Assert.AreEqual("Content Three", Content(cut));
     Assert.AreEqual(1, finished);
   }
 

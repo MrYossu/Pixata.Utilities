@@ -137,6 +137,9 @@ public class PixataWizardStep : ComponentBase, IDisposable {
       _display = display;
       Wizard?.StepChanged();
     }
+    if (Content is not null) {
+      Wizard?.StepContentChanged(this);
+    }
   }
 
   public void Dispose() {
