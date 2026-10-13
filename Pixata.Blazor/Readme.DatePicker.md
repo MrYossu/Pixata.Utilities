@@ -2,7 +2,7 @@
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataDatePicker`, `PixataDateInput` and `PixataCalendar` look and behave like Telerik's [DatePicker](https://www.telerik.com/blazor-ui/documentation/components/datepicker/overview), [DateInput](https://www.telerik.com/blazor-ui/documentation/components/dateinput/overview) and [Calendar](https://www.telerik.com/blazor-ui/documentation/components/calendar/overview), but don't need a Telerik licence. Their parameters have the same names as Telerik's, so moving from one to the other is mostly a matter of renaming the component. The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor) shows each one beside its Telerik equivalent.
+`PixataDatePicker`, `PixataDateInput` and `PixataCalendar` are a date picker (an input with a calendar popup), a date input on its own, and a calendar on its own. They render on the client or the server, so they can be used in WASM as well as Blazor Server apps. The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor) shows each one.
 
 They are in the `Pixata.Blazor.Components` namespace, and need [the stylesheet](Readme.Styling.md). They use a small JavaScript module (`_content/Pixata.Blazor/pixata-blazor.js`), which they load themselves, so there's nothing to add to your page.
 
@@ -16,7 +16,7 @@ They are in the `Pixata.Blazor.Components` namespace, and need [the stylesheet](
 
 ## Typing a date
 
-The date input (and the input in the date picker) works a part at a time, as Telerik's does. Clicking in the input selects the part (day, month, year and so on) under the mouse, and then...
+The date input (and the input in the date picker) works a part at a time. Clicking in the input selects the part (day, month, year and so on) under the mouse, and then...
 
 - Typing digits fills in the selected part. It moves on to the next part when another digit couldn't follow, so typing 3 in the day waits for a second digit (it could be 30 or 31), but typing 4 moves on to the month. Turn this off with `AutoSwitchParts="false"`
 - A digit that would make an impossible date is ignored, so with a day of 31, the month can't be set to November
@@ -27,7 +27,7 @@ The date input (and the input in the date picker) works a part at a time, as Tel
 - Backspace and Delete clear the selected part. An empty part shows its format, such as `MMM`
 - Pasting a whole date works, as long as it's in the input's format or one the culture recognises
 
-The value only changes when the input holds a complete date between `Min` and `Max`. Until then, the input is shown as invalid (with a red border). A nullable value becomes `null` while the date is incomplete, as in Telerik.
+The value only changes when the input holds a complete date between `Min` and `Max`. Until then, the input is shown as invalid (with a red border). A nullable value becomes `null` while the date is incomplete.
 
 A two-digit year (`yy`) is in the 2000s up to `TwoDigitYearMax` (68 by default), and in the 1900s above it.
 
@@ -41,7 +41,7 @@ These apply to both `PixataDateInput` and `PixataDatePicker`. `TValue` can be `D
 | --- | --- | --- |
 | `Value` | `TValue` | The date. Can be two-way bound |
 | `Format` | `string` | A .NET date format, such as `dd/MM/yyyy`, or a standard one such as `d` (the default, which is the culture's short date) |
-| `Min`, `Max` | `DateTime` | The range allowed. Default to 1st January 1900 and 31st December 2099, as in Telerik |
+| `Min`, `Max` | `DateTime` | The range allowed. Default to 1st January 1900 and 31st December 2099 |
 | `Placeholder` | `string` | Shown when the value is null and the input doesn't have focus |
 | `ShowClearButton` | `bool` | Shows an x that clears the value. Only for nullable types |
 | `Enabled`, `ReadOnly` | `bool` | As you'd expect |
@@ -92,13 +92,13 @@ Both work inside an `EditForm`. Bind with `@bind-Value`, and they tell the form 
 
 It has `FocusAsync()` and `NavigateTo(date, view)` methods.
 
-The keyboard works as in Telerik's calendar: the arrow keys move by one cell or one row, Page Up and Page Down by one month (or year, decade or century), Home and End go to the start and end of it, Ctrl+Up goes up a view, and Enter or Space picks the cell (or goes down a view).
+The keyboard works like this: the arrow keys move by one cell or one row, Page Up and Page Down by one month (or year, decade or century), Home and End go to the start and end of it, Ctrl+Up goes up a view, and Enter or Space picks the cell (or goes down a view).
 
 The first day of the week, and the day and month names, come from the current culture.
 
 ## Styling
 
-The look matches Telerik's Default theme. The colours and sizes come from these custom properties, which you can override on `:root` or on any container...
+The colours and sizes come from these custom properties, which you can override on `:root` or on any container...
 
 | Property | Default | What it sets |
 | --- | --- | --- |
@@ -113,7 +113,7 @@ The look matches Telerik's Default theme. The colours and sizes come from these 
 | `--pixata-datepicker-button-bg`, `--pixata-datepicker-button-hover-bg` | `#f5f5f5`, `#ebebeb` | The calendar button |
 | `--pixata-datepicker-primary`, `--pixata-datepicker-primary-hover`, `--pixata-datepicker-primary-color` | `#ff6358`, `#ea5a51`, `#fff` | The selected date, today, and the calendar title |
 | `--pixata-datepicker-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The input's focus ring |
-| `--pixata-datepicker-popup-shadow` | Telerik's popup shadow | The calendar popup's shadow |
+| `--pixata-datepicker-popup-shadow` | A soft two-layer shadow | The calendar popup's shadow |
 | `--pixata-datepicker-border-radius` | `4px` | Rounded corners |
 
 All the classes start with `pixata-blazor-dateinput-`, `pixata-blazor-datepicker-` or `pixata-blazor-calendar-` (for example `pixata-blazor-calendar-title`, `pixata-blazor-calendar-selected` and `pixata-blazor-datepicker-popup`), so you can target any part of them in your own CSS.

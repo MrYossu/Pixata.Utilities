@@ -27,7 +27,7 @@ The stylesheet is written in terms of CSS custom properties, so you can restyle 
 }
 ```
 
-The full list is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter. The `--pixata-grid-*` properties are for `PixataGrid`, and default to the look of Telerik's Default theme rather than Bootstrap. See [Grid](Readme.Grid.md#styling).
+The full list is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter. The `--pixata-grid-*` properties are for `PixataGrid`, and have their own defaults rather than Bootstrap's. See [Grid](Readme.Grid.md#styling).
 
 The classes used by those components all start with `pixata-blazor-`, followed by the component name where they're specific to one component (such as `pixata-blazor-grid-pager`), so you can target them in your own CSS without clashing with anything else.
 

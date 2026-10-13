@@ -2,9 +2,9 @@
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataGrid` is a data grid that looks and behaves like the [Telerik Blazor grid](https://www.telerik.com/blazor-ui/documentation/components/grid/overview), but doesn't need a Telerik licence. Its parameters, events and methods have the same names as Telerik's, so moving a grid from one to the other is mostly a matter of renaming the components.
+`PixataGrid` is a data grid with paging, sorting, filtering, searching, selection, editing, grouping and aggregates. It renders on the client or the server, so it can be used in WASM as well as Blazor Server apps.
 
->**Work in progress.** The grid is being built up in stages, tracked in [issue #49](https://github.com/MrYossu/Pixata.Utilities/issues/49). This page describes what's there so far. The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataGridSample.razor) shows each feature beside a Telerik grid with the same settings.
+>**Work in progress.** The grid is being built up in stages, tracked in [issue #49](https://github.com/MrYossu/Pixata.Utilities/issues/49). This page describes what's there so far. The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataGridSample.razor) shows each feature.
 
 ## Getting started
 
@@ -31,7 +31,7 @@ You don't need to specify `TItem`, as the grid works it out from `Data`, and the
 
 ### Why the components aren't called `GridColumn` and so on
 
-Telerik's column component is called `GridColumn`. If ours were too, any app that uses both (including our own sample) would get ambiguous reference errors wherever both namespaces are imported. So all the grid's components and types start with `PixataGrid`, while their parameters match Telerik's.
+Names such as `GridColumn` are common in component libraries, and an app that uses two libraries with the same names gets ambiguous reference errors wherever both namespaces are imported. So all the grid's components and types start with `PixataGrid`.
 
 ## Grid parameters
 
@@ -45,7 +45,7 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `Height` | `string` | A CSS height, such as "400px". If set, the rows scroll under a fixed header. If not, the grid is as tall as its rows |
 | `Width` | `string` | A CSS width. If not set, the grid fills its container |
 | `Class` | `string` | A CSS class for the grid's outer element |
-| `Size` | `PixataGridSize` | `Medium` (the default) or `Small`, which sets the padding around the cells. Like Telerik's grid, there's no large size |
+| `Size` | `PixataGridSize` | `Medium` (the default) or `Small`, which sets the padding around the cells |
 | `NoDataTemplate` | `RenderFragment` | What to show when there are no items. Defaults to "No records available." |
 | `GridSettings` | `RenderFragment` | Settings for parts of the grid, such as the [pager](#paging) |
 | `Pageable` | `bool` | Splits the rows into pages, with a pager. See [paging](#paging) |
@@ -98,7 +98,7 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `GroupFooterTemplate` | `RenderFragment<PixataGridGroupTemplateContext>` | The content of this column's cell in each group's footer row |
 | `FooterTemplate` | `RenderFragment<PixataGridAggregateTemplateContext>` | The content of this column's cell in the grid's footer row |
 
-If you don't set a `Title`, the grid uses the `[Display(Name = "...")]` attribute on the property if there is one. If not, it uses the field name split into words with `SplitCamelCase()`, so `DateOfBirth` becomes "Date of birth" (for a nested field, it uses the last part of the path). **This differs from Telerik on purpose**, as Telerik shows the field name unchanged.
+If you don't set a `Title`, the grid uses the `[Display(Name = "...")]` attribute on the property if there is one. If not, it uses the field name split into words with `SplitCamelCase()`, so `DateOfBirth` becomes "Date of birth" (for a nested field, it uses the last part of the path). So you rarely need to set a `Title` for a well-named property.
 
 Similarly, if you don't set a `DisplayFormat`, the grid uses the `[DisplayFormat(DataFormatString = "...")]` attribute on the property if there is one.
 
@@ -138,10 +138,10 @@ Set `Pageable="true"` to split the rows into pages. Bind `Page` and `PageSize` i
 | `ButtonCount` | `int` | The number of page buttons shown at once. Defaults to 10. Pages are shown in fixed groups (1-10, 11-20...), with "..." buttons that move to the next or previous group |
 | `PageSizes` | `List<int?>` | The page sizes the user can pick from. Include `null` to offer "All". If not set, there's no page size dropdown |
 | `InputType` | `PixataGridPagerInputType` | `Buttons` (the default) for a button per page, or `Input` for a box where the user types the page number |
-| `Position` | `PixataGridPagerPosition` | `Bottom` (the default) or `Top`. Like Telerik's grid, there's no option to have both |
+| `Position` | `PixataGridPagerPosition` | `Bottom` (the default) or `Top` |
 | `Adaptive` | `bool` | Whether the pager adapts to its width. Defaults to true. As it narrows, the "1 - 10 of 91 items" text goes first, then the page size dropdown, and finally the page buttons become a dropdown |
 
-As in Telerik's grid...
+A few things to know...
 
 - Picking a page size goes back to the first page
 - Picking "All" sets `PageSize` to the number of items, so that's what the dropdown shows afterwards
@@ -162,7 +162,7 @@ Set `Sortable="true"` and the user can sort by clicking a column header (or pres
 </PixataGrid>
 ```
 
-As in Telerik's grid...
+A few things to know...
 
 - Sorting uses the normal .NET ordering for the field's type, so strings are compared using the current culture, and enums by their underlying value
 - Sorting doesn't change the page, so you see the same page of the newly sorted data
@@ -187,7 +187,7 @@ Set `FilterMode` to choose how the user filters...
 </PixataGrid>
 ```
 
-The editor and the operators depend on the field's type, as in Telerik's grid...
+The editor and the operators depend on the field's type...
 
 | Type | Editor | Operators |
 | --- | --- | --- |
@@ -199,7 +199,7 @@ The editor and the operators depend on the field's type, as in Telerik's grid...
 
 Nullable numbers, dates and enums also get Is null and Is not null. Columns of other types can't be filtered unless you give them a template.
 
-As in Telerik's grid, text comparisons ignore case, and filtering (or searching) goes back to the first page.
+Text comparisons ignore case, and filtering (or searching) goes back to the first page.
 
 ### Search box
 
@@ -258,7 +258,7 @@ If `Data` is an `ObservableCollection<T>` (or anything else that implements `INo
 
 ## Styling
 
-The grid's colours, borders and spacing match Telerik's Default theme. To change them, override these custom properties, either on `:root` or on any container around the grid...
+The grid's colours, borders and spacing come from CSS custom properties. To change them, override these custom properties, either on `:root` or on any container around the grid...
 
 | Property | Default | What it sets |
 | --- | --- | --- |
@@ -275,15 +275,15 @@ The grid's colours, borders and spacing match Telerik's Default theme. To change
 | `--pixata-grid-picker-bg`, `--pixata-grid-picker-hover-bg` | `#f5f5f5`, `#ebebeb` | The background of dropdowns and solid buttons |
 | `--pixata-grid-chip-bg`, `--pixata-grid-chip-border-color` | `#ebebeb`, `#c2c2c2` | The chips in the group panel |
 | `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The focus ring on inputs and buttons |
-| `--pixata-grid-popup-shadow` | Telerik's popup shadow | The shadow under dropdown lists and filter menus |
+| `--pixata-grid-popup-shadow` | A soft two-layer shadow | The shadow under dropdown lists and filter menus |
 | `--pixata-grid-border-radius` | `4px` | Rounded corners on inputs and buttons |
 | `--pixata-grid-error-color` | `#ca1400` | The message shown when `OnRead` reports an error |
 
-The grid's elements all have classes starting with `pixata-blazor-grid-`, so you can target them in your own CSS. The grid doesn't use Telerik's `k-` classes, so it isn't affected by a Telerik theme on the same page.
+The grid's elements all have classes starting with `pixata-blazor-grid-`, so you can target them in your own CSS. It doesn't use any other library's classes, so it isn't affected by another library's theme on the same page.
 
 ## Templates and row events
 
-A column's `Template` replaces the formatted value in each cell. Unlike Telerik's, the context is the row's item itself, so there's no need to cast it (although `context as Person` still compiles, if you're moving from Telerik). A template column doesn't need a `Field`, but if it has one, the column can be sorted and filtered by it...
+A column's `Template` replaces the formatted value in each cell. The context is the row's item itself, so there's no need to cast it. A template column doesn't need a `Field`, but if it has one, the column can be sorted and filtered by it...
 
 ```razor
 <PixataGridColumn Title="Name" Field="@nameof(Person.Surname)">
@@ -325,7 +325,7 @@ Set `SelectionMode` to `Single` or `Multiple`, and bind `SelectedItems`...
 </PixataGrid>
 ```
 
-As in Telerik's grid, clicking a row selects just that row, Ctrl+click adds or removes a row, and Shift+click selects the rows between it and the last row clicked. In multiple mode, the user can also press on a row and drag over others. The selection is kept as the user moves between pages, sorts and filters.
+Clicking a row selects just that row, Ctrl+click adds or removes a row, and Shift+click selects the rows between it and the last row clicked. In multiple mode, the user can also press on a row and drag over others. The selection is kept as the user moves between pages, sorts and filters.
 
 Selected items are matched with `Equals`. If your items are recreated (for example, read from a database again with `OnRead`), either override `Equals` in your class, use a record, or set `ItemKey`, such as `ItemKey="person => person.Id"`.
 
@@ -339,7 +339,7 @@ Selected items are matched with `Equals`. If your items are recreated (for examp
 | `SelectAllMode` | `PixataGridSelectAllMode` | `Current` (the default) selects the rows on the current page. `All` selects every row that passes the filters (with `OnRead`, the grid only has the current page) |
 | `CheckBoxOnlySelection` | `bool` | When `true`, clicking a row doesn't select it, only its checkbox does |
 
-It's 65px wide unless you give it a `Width`, as in Telerik's grid.
+It's 65px wide unless you give it a `Width`.
 
 ### Selecting cells
 
@@ -385,7 +385,7 @@ Set `EditMode` to `Inline` or `Popup`, add a `PixataGridCommandColumn` with the 
 }
 ```
 
-As in Telerik's grid...
+A few things to know...
 
 - The user edits a shallow copy of the item, so cancelling leaves your data alone. In `OnUpdate`, `args.Item` is that copy, so put it in place of the original (or copy its values across). Nested objects are shared with the original, so changes to them can't be cancelled
 - `Add` creates a new item (with its parameterless constructor, or `OnModelInit`), and shows it as a new row at the top (or in the popup). `OnCreate` is where you add it to your data
@@ -396,7 +396,7 @@ As in Telerik's grid...
 
 ### Editing a cell at a time
 
-With `EditMode="PixataGridEditMode.InCell"`, clicking a cell edits just that cell, and the keyboard works as in Telerik's grid (and a spreadsheet)...
+With `EditMode="PixataGridEditMode.InCell"`, clicking a cell edits just that cell, and the keyboard works as in a spreadsheet...
 
 - Tab and Shift+Tab save the cell and move to the next or previous editable cell, carrying on into the next or previous row
 - Enter saves the cell and moves to the same column in the next row
@@ -442,9 +442,9 @@ To show totals and so on, ask for the aggregates in `GridAggregates`, and show t
 </PixataGrid>
 ```
 
-The aggregate types are `Count`, `Sum`, `Average`, `Min` and `Max` (`GridAggregateType`, in `Pixata.Extensions.Grid`. Telerik has a type with the same name, so if you use both, you'll need to say which you mean). The template contexts have a property for each, which is null if it wasn't asked for, and `AggregateResults`, which has the aggregates for every field, so one column can show another's. The group templates' context also has `Value` (the group's value), `GroupField` and `ItemsCount`.
+The aggregate types are `Count`, `Sum`, `Average`, `Min` and `Max` (`GridAggregateType`, in `Pixata.Extensions.Grid`. If another library you use has a type with the same name, you'll need to say which you mean). The template contexts have a property for each, which is null if it wasn't asked for, and `AggregateResults`, which has the aggregates for every field, so one column can show another's. The group templates' context also has `Value` (the group's value), `GroupField` and `ItemsCount`.
 
-As in Telerik's grid...
+A few things to know...
 
 - The aggregates, and the group counts, are for all the data (or the whole group), not just the page
 - Paging counts the items, not the group rows, so a group can carry on to the next page, with its header shown again
@@ -484,7 +484,7 @@ A few things to know...
 
 - `OnRead` isn't called again when the parent component re-renders. Call `Rebind()` when you know the data has changed
 - If a slow request finishes after a newer one, its result is ignored, so the grid always shows what was asked for last
-- When a read takes more than 600ms, a loading indicator covers the rows (turn it off with `EnableLoaderContainer="false"`). As in Telerik, it isn't shown for the first read, which is awaited so the data is there when the page is prerendered
+- When a read takes more than 600ms, a loading indicator covers the rows (turn it off with `EnableLoaderContainer="false"`). It isn't shown for the first read, which is awaited so the data is there when the page is prerendered
 - If the page is past the end of the data, the grid moves to the last page and asks again
 - A checkbox-list filter can only offer the values on the current page, as the grid doesn't have the rest
 - Setting both `Data` and `OnRead` throws an exception
