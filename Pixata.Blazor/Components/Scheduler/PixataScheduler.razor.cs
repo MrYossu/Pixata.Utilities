@@ -491,6 +491,11 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
     if (firstRender) {
       _dotNetReference = DotNetObjectReference.Create(this);
       _dragHandle = await PixataSchedulerJs.Invoke(Js, "attach", 0, _element, _dotNetReference);
+      if (_disposed) {
+        // Disposed while the browser was attaching, so DisposeAsync couldn't detach
+        await PixataSchedulerJs.InvokeVoid(Js, "detach", _dragHandle);
+        return;
+      }
       await PixataJs.InvokeVoid(Js, "preventDefaultKeys", _content, new[] { "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown" });
     }
     if (!_mobileChecked) {

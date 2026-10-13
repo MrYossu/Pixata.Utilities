@@ -483,6 +483,17 @@ public class Scheduler_Tests {
 
   #region Dragging
 
+  [TestMethod]
+  public async Task DisposedWhileAttaching_DetachesTheDragScript() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(PixataSchedulerJs.ModulePath);
+    JSRuntimeInvocationHandler<int> attach = module.Setup<int>("attach", _ => true);
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [Board]);
+    await context.DisposeComponentsAsync();
+    attach.SetResult(4);
+    cut.WaitForAssertion(() => Assert.AreEqual(4, module.VerifyInvoke("detach").Arguments[0]));
+  }
+
   private static PixataScheduler<Meeting>.DropSlot Drop(DateTime start, DateTime end, bool allDay = false, int group = 0) =>
     new() { Start = start.ToString("s", CultureInfo.InvariantCulture), End = end.ToString("s", CultureInfo.InvariantCulture), AllDay = allDay, Group = group };
 
