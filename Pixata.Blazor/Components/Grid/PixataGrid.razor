@@ -1,0 +1,53 @@
+@typeparam TItem
+
+@* The columns render nothing; they just register with the grid. The table is deferred so it renders after they have done so *@
+<CascadingValue Value="this" IsFixed="true">
+  @GridColumns
+</CascadingValue>
+<PixataGridDefer>
+  @{
+    List<PixataGridColumn<TItem>> columns = RenderedColumns();
+  }
+  <div class="@GridClass" style="@GridStyle">
+    <div class="pixata-grid-content">
+      <table class="pixata-grid-table">
+        <colgroup>
+          @foreach (PixataGridColumn<TItem> column in columns) {
+            <col style="@column.WidthStyle" />
+          }
+        </colgroup>
+        <thead>
+          <tr>
+            @foreach (PixataGridColumn<TItem> column in columns) {
+              <th class="@column.HeaderCellClass" scope="col">
+                <span class="pixata-grid-column-title">@column.HeaderText</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @if (_items.Count == 0) {
+            <tr class="pixata-grid-norecords">
+              <td class="pixata-grid-td" colspan="@Math.Max(columns.Count, 1)">
+                @if (NoDataTemplate is null) {
+                  @("No records available.")
+                } else {
+                  @NoDataTemplate
+                }
+              </td>
+            </tr>
+          } else {
+            @for (int i = 0; i < _items.Count; i++) {
+              TItem item = _items[i];
+              <tr class="@(i % 2 == 1 ? "pixata-grid-row pixata-grid-alt-row" : "pixata-grid-row")">
+                @foreach (PixataGridColumn<TItem> column in columns) {
+                  <td class="@column.CellClass">@column.CellText(item)</td>
+                }
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</PixataGridDefer>

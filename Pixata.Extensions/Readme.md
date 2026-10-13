@@ -23,7 +23,7 @@ The documentation is split over the following pages...
 | [Exception extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Exceptions.md) | Flattening the `InnerException` stack into readable text |
 | [Enum helpers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Enums.md) | Listing the members of an `enum` with display-friendly names |
 | [Caching](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Caching.md) | `GetOrCreateSafe()`, which adds cache stampede protection to `IMemoryCache`, and the trouble with caching EF Core entities |
-| [Shared models](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md) | The auditing models, the encryption DTOs and `UploadFileDto`, which are shared between the client-side and server-side packages |
+| [Shared models](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md) | The auditing models, the encryption DTOs, the grid request types and `UploadFileDto`, which are shared between the client-side and server-side packages |
 
 ## Related packages
 

@@ -50,3 +50,16 @@ Namespace `Pixata.Extensions.Encryption`...
 ## File uploads
 
 `UploadFileDto` is a record of `(string JoinGuid, string FileName, byte[] Buffer)`, used to send a file from a Blazor client to an API endpoint. `PixataBaseClientService` in Pixata.Blazor has a `PostBson()` method that posts one of these as BSON, which avoids the base64 inflation you get from sending a byte array as JSON.
+
+## Grid requests
+
+The `PixataGrid` component in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md) describes the data it wants with a `GridRequest`. The types are here, rather than in Pixata.Blazor, so a WASM client can send a request to an API and the server can apply it to a query using the same types. The grid is a work in progress, so the request will gain sorting, filtering and grouping as the grid does.
+
+Namespace `Pixata.Extensions.Grid`...
+
+| Type | What it is |
+| --- | --- |
+| `GridRequest` | `Page` (1-based) and `PageSize` (zero means no paging) |
+| `GridResult<T>` | `Data` (the requested page of items) and `Total` (the number of items before paging) |
+| `GridQueryExtensions` | `ToGridResult(request)` on an `IQueryable<T>` or `IEnumerable<T>`, which applies the request. It only uses standard LINQ, so on an EF Core query it is translated to SQL |
+| `FieldAccessor` | Reads a field from an object given its path as a string, such as "Address.City", returning null if anything along the path is null. `Getter<T>(field)` returns a compiled function, cached per type and path. `Member()` and `FieldType()` describe what's at the end of the path. A path that doesn't match public properties or fields (it is case sensitive) throws an `ArgumentException` |

@@ -50,6 +50,15 @@
   --pixata-spacer: 1rem;
   --pixata-focus-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
   --pixata-transition: .15s ease-in-out;
+  /* The grid's own values match Telerik's Default theme rather than Bootstrap, so a PixataGrid looks like a Telerik grid */
+  --pixata-grid-font-size: .875rem;
+  --pixata-grid-line-height: 1.4285;
+  --pixata-grid-color: #3d3d3d;
+  --pixata-grid-bg: #fff;
+  --pixata-grid-border-color: rgba(0, 0, 0, .08);
+  --pixata-grid-header-bg: #fafafa;
+  --pixata-grid-alt-row-bg: rgba(61, 61, 61, .05);
+  --pixata-grid-hover-bg: rgba(61, 61, 61, .11);
 }
 
 /*
@@ -429,6 +438,106 @@
   white-space: nowrap;
   vertical-align: baseline;
   border-radius: var(--pixata-border-radius);
+}
+
+/* ---------- Grid ---------- */
+
+.pixata-grid {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid var(--pixata-grid-border-color);
+  font-size: var(--pixata-grid-font-size);
+  line-height: var(--pixata-grid-line-height);
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-bg);
+}
+
+/*
+  Only scrolls when the grid has a height, as otherwise the grid is as tall as its rows. The vertical scrollbar is always
+  shown, as it is in Telerik's grid, so the columns are the same width whether or not the rows overflow
+*/
+.pixata-grid-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: scroll;
+}
+
+/* Separate borders, as collapsed ones don't stay with a sticky header */
+.pixata-grid-table {
+  width: 100%;
+  margin: 0;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.pixata-grid-th,
+.pixata-grid-td {
+  box-sizing: content-box;
+  padding: .5rem .75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: start;
+  font-weight: inherit;
+  border: 0 solid var(--pixata-grid-border-color);
+  border-inline-start-width: 1px;
+}
+
+.pixata-grid-th:first-child,
+.pixata-grid-td:first-child {
+  border-inline-start-width: 0;
+}
+
+.pixata-grid-sm .pixata-grid-th,
+.pixata-grid-sm .pixata-grid-td {
+  padding: .25rem .5rem;
+}
+
+.pixata-grid-th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+  vertical-align: bottom;
+  background-color: var(--pixata-grid-header-bg);
+  border-bottom-width: 1px;
+}
+
+.pixata-grid-column-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-grid-td {
+  vertical-align: middle;
+}
+
+.pixata-grid-alt-row {
+  background-color: var(--pixata-grid-alt-row-bg);
+}
+
+.pixata-grid-row:hover {
+  background-color: var(--pixata-grid-hover-bg);
+}
+
+.pixata-grid-norecords .pixata-grid-td {
+  text-align: center;
+}
+
+.pixata-grid-text-left {
+  text-align: left;
+}
+
+.pixata-grid-text-center {
+  text-align: center;
+}
+
+.pixata-grid-text-right {
+  text-align: right;
 }
 
 /* ---------- Spinner ---------- */
