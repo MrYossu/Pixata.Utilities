@@ -141,6 +141,8 @@ public class DropDowns_ComboBox_Tests {
     using BunitContext context = PixataTestContext.Create();
     IRenderedComponent<PixataComboBox<DropDownTestData.Country, int>> cut = RenderCountries(context, p => p.Add(c => c.Value, 1));
     await cut.Find("input").InputAsync(new ChangeEventArgs { Value = "Ja" });
+    // What the user types isn't rendered back to the text box, so a slow render can't overwrite newer typing
+    Assert.AreEqual("France", Text(cut));
     await cut.Find("input").KeyDownAsync(DropDownTestData.Key("Escape"));
     Assert.AreEqual(0, cut.FindAll("[role=listbox]").Count);
     await cut.Find("input").KeyDownAsync(DropDownTestData.Key("Escape"));

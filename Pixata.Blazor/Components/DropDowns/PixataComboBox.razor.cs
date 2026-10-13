@@ -41,6 +41,7 @@ public partial class PixataComboBox<TItem, TValue> {
 
   private ElementReference _input;
   private string _text = "";
+  private string _shownText = "";
   private bool _editing;
 
   private protected override string ComponentName => "combobox";
@@ -60,9 +61,20 @@ public partial class PixataComboBox<TItem, TValue> {
   /// Shows the selected item's text (or the custom value) in the text box
   /// </summary>
   private void SyncText() =>
-    _text = HasSelectedItem
+    SetText(HasSelectedItem
       ? TextOf(SelectedItem!)
-      : AllowCustom && !IsEmptyValue(Value) ? Convert.ToString(Value, CultureInfo.CurrentCulture) ?? "" : "";
+      : AllowCustom && !IsEmptyValue(Value) ? Convert.ToString(Value, CultureInfo.CurrentCulture) ?? "" : "");
+
+  /// <summary>
+  /// Sets the text in the text box from code (what the user types only goes in <see cref="_text"/>)
+  /// </summary>
+  private void SetText(string text) {
+    if (text != _text) {
+      WriteTextAfterRender(() => _input, text);
+    }
+    _text = text;
+    _shownText = text;
+  }
 
   private protected override async Task ChooseItem(TItem item) {
     _editing = false;
@@ -177,7 +189,7 @@ public partial class PixataComboBox<TItem, TValue> {
   }
 
   private async Task HandleClear() {
-    _text = "";
+    SetText("");
     _editing = false;
     await SetValueWithoutItem(default!);
     await ClosePopup();

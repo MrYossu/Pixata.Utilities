@@ -123,6 +123,7 @@ public partial class PixataMultiSelect<TItem, TValue> {
 
   private ElementReference _input;
   private string _text = "";
+  private string _shownText = "";
   private bool _showCustom;
   private List<Tag> _tags = [];
   private HashSet<TValue> _selected = [];
@@ -342,7 +343,7 @@ public partial class PixataMultiSelect<TItem, TValue> {
   /// </summary>
   private async Task AfterChoosing(TValue chosen) {
     if (!PersistFilterOnSelect && _text != "") {
-      _text = "";
+      SetText("");
       _showCustom = false;
       await ClearFilter();
       int index = IndexOfItem(i => ValuesEqual(ValueOf(i), chosen));
@@ -353,6 +354,17 @@ public partial class PixataMultiSelect<TItem, TValue> {
     if (AutoClose) {
       await ClosePopup();
     }
+  }
+
+  /// <summary>
+  /// Sets the text in the text box from code (what the user types only goes in <see cref="_text"/>)
+  /// </summary>
+  private void SetText(string text) {
+    if (text != _text) {
+      WriteTextAfterRender(() => _input, text);
+    }
+    _text = text;
+    _shownText = text;
   }
 
   private (bool Found, TItem Item) FindItemWithText(string text) {
@@ -463,7 +475,7 @@ public partial class PixataMultiSelect<TItem, TValue> {
   }
 
   private async Task HandleClear() {
-    _text = "";
+    SetText("");
     _showCustom = false;
     await SetValues([]);
     await ClosePopup();
@@ -471,7 +483,7 @@ public partial class PixataMultiSelect<TItem, TValue> {
   }
 
   private protected override async Task OnFocusLost() {
-    _text = "";
+    SetText("");
     _showCustom = false;
     await ClearFilter();
   }

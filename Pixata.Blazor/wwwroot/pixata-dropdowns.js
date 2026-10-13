@@ -129,6 +129,12 @@ export function focusElement(element) {
   }
 }
 
+export function setValue(element, value) {
+  if (element && "value" in element && element.value !== value) {
+    element.value = value;
+  }
+}
+
 export function selectText(element) {
   if (element && element.select) {
     element.select();

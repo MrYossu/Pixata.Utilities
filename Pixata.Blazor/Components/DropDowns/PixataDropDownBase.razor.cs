@@ -263,6 +263,7 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
 
   private bool _scrollPending;
   private Func<ElementReference>? _pendingFocus;
+  private readonly List<(Func<ElementReference> Element, string Text)> _pendingTexts = [];
   private string _typeAhead = "";
   private DateTime _typeAheadTime;
 
@@ -777,6 +778,14 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
   private protected void FocusAfterRender(Func<ElementReference> element) =>
     _pendingFocus = element;
 
+  /// <summary>
+  /// Writes the text of a text box the user types into, after the next render. Those text boxes only render text set by code,
+  /// not what the user typed, as in Blazor Server a render that arrives after the user has typed more would put back the older
+  /// text. That means rendering alone won't put back text that was rendered before, so it is written by script as well
+  /// </summary>
+  private protected void WriteTextAfterRender(Func<ElementReference> element, string text) =>
+    _pendingTexts.Add((element, text));
+
   private protected void SetFocusedPosition(int position) {
     FocusedPosition = OptionCount == 0 ? -1 : Math.Clamp(position, 0, OptionCount - 1);
     _scrollPending = true;
@@ -934,6 +943,13 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
     if (_pendingFocus is { } focus) {
       _pendingFocus = null;
       await PixataDropDownJs.InvokeVoid(Js, "focusElement", focus());
+    }
+    if (_pendingTexts.Count > 0) {
+      List<(Func<ElementReference> Element, string Text)> texts = [.. _pendingTexts];
+      _pendingTexts.Clear();
+      foreach ((Func<ElementReference> element, string text) in texts) {
+        await PixataDropDownJs.InvokeVoid(Js, "setValue", element(), text);
+      }
     }
     if (_scrollPending && IsOpen && FocusedPosition >= 0) {
       _scrollPending = false;
