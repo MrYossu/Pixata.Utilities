@@ -211,6 +211,50 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Templates and row events</h4>
+
+<p>The name is a template, the salary header has a template, managers' rows get a CSS class from <code>OnRowRender</code>, and salaries over 300,000 get one from <code>OnCellRender</code>. Click a row to see <code>OnRowClick</code>, or right-click it for <code>OnRowContextMenu</code>.</p>
+
+<p>@_rowEvent</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid TItem="GridSampleEmployee" Data="Data" Size="_size" Pageable="true" PageSize="5"
+            OnRowRender="PixataRowRender"
+            OnRowClick="RowClicked"
+            OnRowContextMenu="RowRightClicked">
+  <GridColumns>
+    <PixataGridColumn Title="Name">
+      <Template>
+        <strong>@context.FirstName</strong> @context.Surname
+      </Template>
+    </PixataGridColumn>
+    <PixataGridColumn TItem="GridSampleEmployee" Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" OnCellRender="PixataSalaryRender">
+      <HeaderTemplate>
+        Salary <em>(GBP)</em>
+      </HeaderTemplate>
+    </PixataGridColumn>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" Title="Manager" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5"
+             OnRowRender="TelerikRowRender">
+  <GridColumns>
+    <GridColumn Title="Name">
+      <Template>
+        <strong>@((context as GridSampleEmployee)!.FirstName)</strong> @((context as GridSampleEmployee)!.Surname)
+      </Template>
+    </GridColumn>
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" OnCellRender="TelerikSalaryRender">
+      <HeaderTemplate>
+        Salary <em>(GBP)</em>
+      </HeaderTemplate>
+    </GridColumn>
+    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" Title="Manager" />
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -229,6 +273,15 @@
     margin-bottom: 1rem;
   }
 
+  .sample-manager-row {
+    font-style: italic;
+  }
+
+  .sample-high-salary {
+    color: #2e7d32;
+    font-weight: bold;
+  }
+
   .pixata-blazor-grid-sample-label {
     margin: 1rem 0 .25rem;
     font-weight: bold;
@@ -240,6 +293,25 @@
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
   private bool _multipleSort;
+  private string _rowEvent = "Click a row in the PixataGrid";
+
+  private static void PixataRowRender(PixataGridRowRenderEventArgs<GridSampleEmployee> args) =>
+    args.Class = args.Item.IsManager ? "sample-manager-row" : null;
+
+  private static void PixataSalaryRender(PixataGridCellRenderEventArgs<GridSampleEmployee> args) =>
+    args.Class = args.Value is decimal salary && salary > 300000 ? "sample-high-salary" : null;
+
+  private static void TelerikRowRender(GridRowRenderEventArgs args) =>
+    args.Class = ((GridSampleEmployee)args.Item).IsManager ? "sample-manager-row" : null;
+
+  private static void TelerikSalaryRender(GridCellRenderEventArgs args) =>
+    args.Class = args.Value is decimal salary && salary > 300000 ? "sample-high-salary" : null;
+
+  private void RowClicked(PixataGridRowClickEventArgs<GridSampleEmployee> args) =>
+    _rowEvent = $"Clicked {args.Item.FirstName} {args.Item.Surname}, in the {args.Field ?? "name"} column";
+
+  private void RowRightClicked(PixataGridRowClickEventArgs<GridSampleEmployee> args) =>
+    _rowEvent = $"Right-clicked {args.Item.FirstName} at {args.EventArgs.ClientX}, {args.EventArgs.ClientY}";
 
   private async Task ReadEmployees(PixataGridReadEventArgs<GridSampleEmployee> args) =>
     args.SetResult(await EmployeeService.Read(args.Request, TimeSpan.FromMilliseconds(1500), args.CancellationToken));

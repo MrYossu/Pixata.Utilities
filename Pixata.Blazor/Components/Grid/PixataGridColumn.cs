@@ -101,6 +101,25 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   [Parameter]
   public RenderFragment<PixataGridFilterTemplateContext>? FilterMenuTemplate { get; set; }
 
+  /// <summary>
+  /// The content of each data cell, in place of the formatted value. The context is the row's item. A column with a template
+  /// doesn't need a <see cref="Field"/>, but if it has one, the column can still be sorted and filtered by it
+  /// </summary>
+  [Parameter]
+  public RenderFragment<TItem>? Template { get; set; }
+
+  /// <summary>
+  /// The content of the header cell, in place of the title. Clicking it still sorts the column
+  /// </summary>
+  [Parameter]
+  public RenderFragment? HeaderTemplate { get; set; }
+
+  /// <summary>
+  /// Called as each cell is rendered, so you can set a CSS class on it based on the item or the value
+  /// </summary>
+  [Parameter]
+  public Action<PixataGridCellRenderEventArgs<TItem>>? OnCellRender { get; set; }
+
   private string? _resolvedField;
   private Func<TItem, object?>? _getter;
   private string? _attributeTitle;
@@ -146,6 +165,21 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
 
   internal string HeaderCellClass =>
     Css.Join("pixata-blazor-grid-th", HeaderClass);
+
+  internal object? CellValue(TItem item) {
+    Resolve();
+    return _getter?.Invoke(item);
+  }
+
+  // The cell's classes, including any set by OnCellRender
+  internal string CellClassFor(TItem item) {
+    if (OnCellRender is null) {
+      return CellClass;
+    }
+    PixataGridCellRenderEventArgs<TItem> args = new(item, CellValue(item));
+    OnCellRender(args);
+    return Css.Join(CellClass, args.Class);
+  }
 
   internal string CellText(TItem item) {
     Resolve();

@@ -72,6 +72,44 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   public RenderFragment? NoDataTemplate { get; set; }
 
   /// <summary>
+  /// The content of each row, in place of the cells the grid would render. The context is the row's item, and the template
+  /// should render a <c>td</c> for each column
+  /// </summary>
+  [Parameter]
+  public RenderFragment<TItem>? RowTemplate { get; set; }
+
+  /// <summary>
+  /// What to show while <c>OnRead</c> is slow, in place of the dots
+  /// </summary>
+  [Parameter]
+  public RenderFragment? LoaderTemplate { get; set; }
+
+  /// <summary>
+  /// Called as each row is rendered, so you can set a CSS class on it based on the item
+  /// </summary>
+  [Parameter]
+  public Action<PixataGridRowRenderEventArgs<TItem>>? OnRowRender { get; set; }
+
+  /// <summary>
+  /// Fires when the user clicks a row
+  /// </summary>
+  [Parameter]
+  public EventCallback<PixataGridRowClickEventArgs<TItem>> OnRowClick { get; set; }
+
+  /// <summary>
+  /// Fires when the user double-clicks a row
+  /// </summary>
+  [Parameter]
+  public EventCallback<PixataGridRowClickEventArgs<TItem>> OnRowDoubleClick { get; set; }
+
+  /// <summary>
+  /// Fires when the user right-clicks a row (or long-presses it on a touch screen), so you can show a context menu. When this
+  /// is handled, the browser's own menu isn't shown
+  /// </summary>
+  [Parameter]
+  public EventCallback<PixataGridRowClickEventArgs<TItem>> OnRowContextMenu { get; set; }
+
+  /// <summary>
   /// Settings for parts of the grid, such as <see cref="PixataGridPagerSettings{TItem}"/>
   /// </summary>
   [Parameter]
@@ -215,6 +253,22 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     _page = page;
     ProcessData();
     await PageChanged.InvokeAsync(page);
+  }
+
+  private string RowClass(TItem item, int index) {
+    string rowClass = index % 2 == 1 ? "pixata-blazor-grid-row pixata-blazor-grid-alt-row" : "pixata-blazor-grid-row";
+    if (OnRowRender is null) {
+      return rowClass;
+    }
+    PixataGridRowRenderEventArgs<TItem> args = new(item);
+    OnRowRender(args);
+    return Css.Join(rowClass, args.Class);
+  }
+
+  private static async Task RowClicked(EventCallback<PixataGridRowClickEventArgs<TItem>> callback, TItem item, MouseEventArgs e, string? field) {
+    if (callback.HasDelegate) {
+      await callback.InvokeAsync(new(item, e, field));
+    }
   }
 
   private bool CanSort(PixataGridColumn<TItem> column) =>

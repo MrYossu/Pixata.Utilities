@@ -43,7 +43,13 @@
                     @onkeydown="e => OnHeaderKeyDown(e, column)">
                   <span class="pixata-blazor-grid-cell-inner">
                     <span class="pixata-blazor-grid-link">
-                      <span class="pixata-blazor-grid-column-title">@column.HeaderText</span>
+                      <span class="pixata-blazor-grid-column-title">
+                        @if (column.HeaderTemplate is null) {
+                          @column.HeaderText
+                        } else {
+                          @column.HeaderTemplate
+                        }
+                      </span>
                       @if (sort is not null) {
                         <span class="pixata-blazor-grid-sort-icon" aria-hidden="true">
                           @if (sort.SortDirection == ListSortDirection.Ascending) {
@@ -108,11 +114,31 @@
             } else {
               @for (int i = 0; i < _items.Count; i++) {
                 TItem item = _items[i];
-                <tr class="@(i % 2 == 1 ? "pixata-blazor-grid-row pixata-blazor-grid-alt-row" : "pixata-blazor-grid-row")">
-                  @foreach (PixataGridColumn<TItem> column in columns) {
-                    <td class="@column.CellClass">@column.CellText(item)</td>
-                  }
-                </tr>
+                if (RowTemplate is not null) {
+                  <tr class="@RowClass(item, i)"
+                      @onclick="e => RowClicked(OnRowClick, item, e, null)"
+                      @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, null)"
+                      @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, null)"
+                      @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate">
+                    @RowTemplate(item)
+                  </tr>
+                } else {
+                  <tr class="@RowClass(item, i)">
+                    @foreach (PixataGridColumn<TItem> column in columns) {
+                      <td class="@column.CellClassFor(item)"
+                          @onclick="e => RowClicked(OnRowClick, item, e, column.Field)"
+                          @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, column.Field)"
+                          @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, column.Field)"
+                          @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate">
+                        @if (column.Template is null) {
+                          @column.CellText(item)
+                        } else {
+                          @column.Template(item)
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
               }
             }
           </tbody>
@@ -121,11 +147,15 @@
         @if (_showLoader) {
           <div class="pixata-blazor-grid-loader" role="status" aria-label="Loading">
             <div class="pixata-blazor-grid-loader-overlay"></div>
-            <div class="pixata-blazor-loader">
-              <span class="pixata-blazor-loader-segment"></span>
-              <span class="pixata-blazor-loader-segment"></span>
-              <span class="pixata-blazor-loader-segment"></span>
-            </div>
+            @if (LoaderTemplate is null) {
+              <div class="pixata-blazor-loader">
+                <span class="pixata-blazor-loader-segment"></span>
+                <span class="pixata-blazor-loader-segment"></span>
+                <span class="pixata-blazor-loader-segment"></span>
+              </div>
+            } else {
+              <div class="pixata-blazor-grid-loader-template">@LoaderTemplate</div>
+            }
           </div>
         }
       </div>

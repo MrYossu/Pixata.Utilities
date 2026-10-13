@@ -1606,6 +1606,11 @@
   }
 }
 
+.pixata-blazor-grid-loader-template {
+  position: relative;
+  z-index: 2;
+}
+
 .pixata-blazor-grid-error .pixata-blazor-grid-td {
   color: var(--pixata-grid-error-color);
 }

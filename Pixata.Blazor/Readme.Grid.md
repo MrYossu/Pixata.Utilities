@@ -55,6 +55,10 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `SortMode` | `PixataGridSortMode` | `Single` (the default) or `Multiple` |
 | `FilterMode` | `PixataGridFilterMode` | `None` (the default), `FilterRow` or `FilterMenu`. See [filtering](#filtering) |
 | `GridToolBarTemplate` | `RenderFragment` | Content for a toolbar above the grid, such as a [search box](#search-box) |
+| `RowTemplate` | `RenderFragment<TItem>` | The content of each row, in place of the grid's cells. See [templates](#templates-and-row-events) |
+| `LoaderTemplate` | `RenderFragment` | What the loading indicator shows, in place of the dots |
+| `OnRowRender` | `Action<PixataGridRowRenderEventArgs<TItem>>` | Lets you set a CSS class on each row |
+| `OnRowClick`, `OnRowDoubleClick`, `OnRowContextMenu` | `EventCallback<PixataGridRowClickEventArgs<TItem>>` | Fire when the user clicks, double-clicks or right-clicks a row |
 
 ## Column parameters
 
@@ -73,6 +77,9 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `FilterMenuType` | `PixataGridFilterMenuType` | `Menu` (two conditions, the default) or `CheckBoxList` |
 | `DefaultFilterOperator` | `GridFilterOperator?` | The operator the filter starts with. Defaults to Contains for text, and Is equal to for everything else |
 | `FilterCellTemplate`, `FilterMenuTemplate` | `RenderFragment<PixataGridFilterTemplateContext>` | Your own filter UI. See [custom filters](#custom-filters) |
+| `Template` | `RenderFragment<TItem>` | The content of each data cell. See [templates](#templates-and-row-events) |
+| `HeaderTemplate` | `RenderFragment` | The content of the header cell, in place of the title |
+| `OnCellRender` | `Action<PixataGridCellRenderEventArgs<TItem>>` | Lets you set a CSS class on each cell |
 
 If you don't set a `Title`, the grid uses the `[Display(Name = "...")]` attribute on the property if there is one. If not, it uses the field name split into words with `SplitCamelCase()`, so `DateOfBirth` becomes "Date of birth" (for a nested field, it uses the last part of the path). **This differs from Telerik on purpose**, as Telerik shows the field name unchanged.
 
@@ -255,6 +262,37 @@ The grid's colours, borders and spacing match Telerik's Default theme. To change
 | `--pixata-grid-error-color` | `#ca1400` | The message shown when `OnRead` reports an error |
 
 The grid's elements all have classes starting with `pixata-blazor-grid-`, so you can target them in your own CSS. The grid doesn't use Telerik's `k-` classes, so it isn't affected by a Telerik theme on the same page.
+
+## Templates and row events
+
+A column's `Template` replaces the formatted value in each cell. Unlike Telerik's, the context is the row's item itself, so there's no need to cast it (although `context as Person` still compiles, if you're moving from Telerik). A template column doesn't need a `Field`, but if it has one, the column can be sorted and filtered by it...
+
+```razor
+<PixataGridColumn Title="Name" Field="@nameof(Person.Surname)">
+  <Template>
+    <a href="/people/@context.Id">@context.FirstName @context.Surname</a>
+  </Template>
+</PixataGridColumn>
+```
+
+`HeaderTemplate` does the same for the header (clicking it still sorts), and the grid's `RowTemplate` replaces a whole row's cells (render a `td` for each column).
+
+`OnRowRender` and a column's `OnCellRender` let you add CSS classes based on the data. They're plain `Action`s, called as the grid renders...
+
+```razor
+<PixataGrid TItem="Person" Data="_people" OnRowRender="MarkOverdue">
+  ...
+</PixataGrid>
+
+@code {
+  private void MarkOverdue(PixataGridRowRenderEventArgs<Person> args) =>
+    args.Class = args.Item.IsOverdue ? "overdue" : null;
+}
+```
+
+`OnRowClick`, `OnRowDoubleClick` and `OnRowContextMenu` give you the item, the mouse event (for its position, to show a context menu), and the field of the column that was clicked. When `OnRowContextMenu` is handled, the browser's own menu isn't shown.
+
+>If you pass a method rather than a lambda to one of these events, give the grid's `TItem` (and a column's, for `OnCellRender`), as Razor can't work out the type from a method.
 
 ## Supplying the data with OnRead
 
