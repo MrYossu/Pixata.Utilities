@@ -1972,40 +1972,43 @@
   box-shadow: var(--pixata-blazor-tabstrip-focus-ring);
 }
 
-/* Each position rounds the corners away from the content, and opens the active tab on to the content */
-.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-item {
+/*
+  Each position rounds the corners away from the content, and opens the active tab on to the content. These rules (and the
+  size rules) only reach the tab strip's own tabs, not those of a tab strip in one of its tabs
+*/
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
   border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
   border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
 }
 
-.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-item.pixata-blazor-active {
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
   border-bottom-color: transparent;
 }
 
-.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-item {
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
   border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
   border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
 }
 
-.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-item.pixata-blazor-active {
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
   border-top-color: transparent;
 }
 
-.pixata-blazor-tabstrip-left .pixata-blazor-tabstrip-item {
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
   border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
   border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
 }
 
-.pixata-blazor-tabstrip-left .pixata-blazor-tabstrip-item.pixata-blazor-active {
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
   border-inline-end-color: transparent;
 }
 
-.pixata-blazor-tabstrip-right .pixata-blazor-tabstrip-item {
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
   border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
   border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
 }
 
-.pixata-blazor-tabstrip-right .pixata-blazor-tabstrip-item.pixata-blazor-active {
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
   border-inline-start-color: transparent;
 }
 
@@ -2019,16 +2022,16 @@
   white-space: nowrap;
 }
 
-.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-link,
-.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-link {
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link,
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link {
   justify-content: center;
 }
 
-.pixata-blazor-tabstrip-sm .pixata-blazor-tabstrip-link {
+.pixata-blazor-tabstrip-sm > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link {
   padding: var(--pixata-blazor-spacing);
 }
 
-.pixata-blazor-tabstrip-lg .pixata-blazor-tabstrip-link {
+.pixata-blazor-tabstrip-lg > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link {
   padding: calc(var(--pixata-blazor-spacing) * 2.5);
   font-size: var(--pixata-blazor-font-size-lg);
   line-height: 1.5;
@@ -2130,8 +2133,8 @@
   align-self: stretch;
 }
 
-.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl),
-.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl) {
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl),
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl) {
   transform: scaleX(-1);
 }
 

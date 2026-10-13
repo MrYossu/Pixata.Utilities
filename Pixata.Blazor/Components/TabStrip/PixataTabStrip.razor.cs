@@ -29,7 +29,7 @@ public partial class PixataTabStrip {
   public string? ActiveTabId { get; set; }
 
   /// <summary>
-  /// Raised when the user selects a different tab, or the selected tab is closed or removed
+  /// Raised when the user selects a different tab, or the selected tab is closed, hidden or removed
   /// </summary>
   [Parameter]
   public EventCallback<string> ActiveTabIdChanged { get; set; }
@@ -143,6 +143,7 @@ public partial class PixataTabStrip {
   private IJSObjectReference? _module;
   private DotNetObjectReference<PixataTabStrip>? _dotNetReference;
   private int _scrollHandle;
+  private bool _attachedVertical;
   private bool _overflowing;
   private bool _canScrollBack;
   private bool _canScrollForward;
@@ -188,6 +189,9 @@ public partial class PixataTabStrip {
     ?? _tabs.FirstOrDefault(t => t.IsShown && !t.Disabled);
 
   protected override void OnParametersSet() {
+    // The parent has rendered, and may have moved some tabs (eg by sorting the collection in a keyed @foreach). Moved tabs
+    // aren't registered again, and are given their parameters in their old order, so only the page can tell us
+    _orderMayBeWrong |= _hasRendered && _tabs.Count > 1;
     if (_firstParametersSet || ActiveTabId != _previousActiveTabIdParameter) {
       _firstParametersSet = false;
       _previousActiveTabIdParameter = ActiveTabId;
@@ -242,6 +246,23 @@ public partial class PixataTabStrip {
     if (!_disposed) {
       StateHasChanged();
     }
+  }
+
+  /// <summary>
+  /// Called when the active tab is hidden, or becomes a different tab (when tabs in a @foreach without a @key are removed, the
+  /// tab components that are left are given the parameters of the tabs after them). Selects the tab that is now in its place,
+  /// or failing that its neighbour, and tells the parent
+  /// </summary>
+  internal void ActiveTabChanged(PixataTab tab) {
+    if (_disposed) {
+      return;
+    }
+    PixataTab? active = tab.IsShown ? tab : Neighbour(tab);
+    _activeTabId = active?.EffectiveId;
+    _scrollActiveTabIntoView = true;
+    _notifyActiveTabChanged = true;
+    active?.Redraw();
+    StateHasChanged();
   }
 
   private async Task Select(PixataTab tab) {
@@ -350,12 +371,15 @@ public partial class PixataTabStrip {
     if (_disposed) {
       return;
     }
+    if (_scrollHandle != 0 && (!IsScrollable || _attachedVertical != IsVertical)) {
+      // Not scrollable any more, or the tabs have moved between a row and a column, which the script measures differently
+      await Detach();
+    }
     if (IsScrollable && _scrollHandle == 0) {
       _dotNetReference ??= DotNetObjectReference.Create(this);
+      _attachedVertical = IsVertical;
       _scrollHandle = await InvokeModule("attach", 0, _list, _dotNetReference, IsVertical);
       _scrollActiveTabIntoView = true;
-    } else if (!IsScrollable && _scrollHandle != 0) {
-      await Detach();
     }
     if (_orderMayBeWrong) {
       _orderMayBeWrong = false;
@@ -439,10 +463,10 @@ public partial class PixataTabStrip {
   }
 
   public async ValueTask DisposeAsync() {
+    _disposed = true;
     if (_scrollHandle != 0) {
       await Detach();
     }
-    _disposed = true;
     if (_module is not null) {
       try {
         await _module.DisposeAsync();

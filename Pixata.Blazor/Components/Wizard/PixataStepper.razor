@@ -44,7 +44,7 @@
                 disabled="@step.Disabled"
                 @onclick="() => Select(index)">
           @if (step.Template is not null) {
-            @step.Template
+            @step.TemplateContent
           } else {
             @if (StepType == PixataStepperStepType.Steps) {
               <span class="pixata-blazor-stepper-step-indicator">

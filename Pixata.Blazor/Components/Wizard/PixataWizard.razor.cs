@@ -148,6 +148,7 @@ public partial class PixataWizard : IDisposable {
   private ElementReference _nextButton;
   private ElementReference _doneButton;
   private FocusTarget _focusAfterRender;
+  private PixataTemplateHost? _contentHost;
   private bool _disposed;
 
   /// <summary>
@@ -263,8 +264,8 @@ public partial class PixataWizard : IDisposable {
   }
 
   /// <summary>
-  /// What the Done button does: validates the current step and any others that haven't been shown to be valid (moving to the
-  /// first one that isn't), validates the surrounding <see cref="EditForm"/> if there is one, and then raises
+  /// What the Done button does: validates the current step and any others (except disabled ones) that haven't been shown to be
+  /// valid (moving to the first one that isn't), validates the surrounding <see cref="EditForm"/> if there is one, and then raises
   /// <see cref="OnFinish"/>
   /// </summary>
   public async Task Finish() {
@@ -273,7 +274,8 @@ public partial class PixataWizard : IDisposable {
       StateHasChanged();
       return;
     }
-    foreach (PixataWizardStep step in VisibleSteps.Where(s => s != current)) {
+    // Disabled steps are left out, as the user can't go to them to put them right
+    foreach (PixataWizardStep step in VisibleSteps.Where(s => s != current && !s.Disabled)) {
       bool valid = StepEditContext(step) is not null
         // A step's own validators are only attached while its content is shown, so rely on the result from when it was last
         // shown, and show any step that has never been validated so the user can see whether it is valid
@@ -319,6 +321,19 @@ public partial class PixataWizard : IDisposable {
       StateHasChanged();
     }
   }
+
+  /// <summary>
+  /// Called when a step is given its content. The current step's content is rendered by a host that reads it when it renders,
+  /// as the wizard renders before its steps are given their new parameters, so this redraws it if it has changed
+  /// </summary>
+  internal void StepContentChanged(PixataWizardStep step) {
+    if (!_disposed && step == CurrentStep) {
+      _contentHost?.Refresh();
+    }
+  }
+
+  private RenderFragment ContentHost(PixataWizardStep step) =>
+    PixataTemplateHost.For(() => step.Content, host => _contentHost = host);
 
   internal void SetStepperSettings(PixataWizardStepperSettings settings) {
     _stepperSettings = settings;

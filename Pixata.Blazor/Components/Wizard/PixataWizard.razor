@@ -59,17 +59,17 @@
              created again (see AddStep). The buttons aren't keyed, so a button keeps the focus when it is clicked *@
           <div @key="_steps.IndexOf(currentStep)" @ref="_content" class="pixata-blazor-wizard-content">
             @if (stepContext is null) {
-              @currentStep.Content
+              @ContentHost(currentStep)
             } else if (CascadedEditContext is null) {
               <EditForm EditContext="stepContext" OnSubmit="SubmitStep" class="pixata-blazor-wizard-form">
-                @currentStep.Content
+                @ContentHost(currentStep)
                 @* Browsers only submit a form with more than one text box when Enter is pressed if it has a submit button *@
                 <button type="submit" class="pixata-blazor-sr-only" tabindex="-1" aria-hidden="true"></button>
               </EditForm>
             } else {
               @* The wizard is already inside a form, and forms can't be nested, so the step just gets its own edit context *@
               <CascadingValue Value="stepContext" IsFixed="true" @key="stepContext">
-                @currentStep.Content
+                @ContentHost(currentStep)
               </CascadingValue>
             }
           </div>

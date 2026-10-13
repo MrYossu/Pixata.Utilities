@@ -75,11 +75,19 @@ public class PixataStepperStep : ComponentBase, IDisposable {
 
   private (string?, string?, object?, bool, bool, bool?, string?, bool, string?) _display;
   private bool _registered;
+  private PixataTemplateHost? _templateHost;
 
   /// <summary>
   /// The step's element in the stepper, set by the stepper
   /// </summary>
   internal ElementReference Element { get; set; }
+
+  /// <summary>
+  /// The step's <see cref="Template"/>, for the stepper to render. It is rendered by a host that this step refreshes when it is
+  /// given a new template, as the stepper may render before the steps are given their new parameters
+  /// </summary>
+  internal RenderFragment TemplateContent =>
+    PixataTemplateHost.For(() => Template, host => _templateHost = host);
 
   protected override void OnInitialized() {
     if (Stepper is null) {
@@ -95,6 +103,9 @@ public class PixataStepperStep : ComponentBase, IDisposable {
     if (!display.Equals(_display)) {
       _display = display;
       Stepper?.StepChanged();
+    }
+    if (Template is not null) {
+      _templateHost?.Refresh();
     }
   }
 
