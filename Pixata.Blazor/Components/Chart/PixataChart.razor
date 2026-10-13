@@ -1,0 +1,244 @@
+@namespace Pixata.Blazor.Components
+
+@*
+  The chart's settings (series, axes, title and so on) are child components that render nothing; they attach themselves to
+  the chart through the cascading value. The chart itself is SVG, laid out by PixataChartLayout at the size the browser
+  reports, with the title, legend and tooltip as ordinary HTML around and over it
+*@
+@RenderSettings
+
+@{
+  PixataChartScene scene = BuildScene();
+  PixataChartScenePoint? active = ActivePoint;
+}
+<div @ref="_element"
+     id="@Id"
+     class="@ChartClass"
+     style="@ChartStyle"
+     @onfocusout="HandleFocusOut"
+     @attributes="AdditionalAttributes">
+  @if (TitleVisible && (Title!.Position ?? PixataChartTitlePosition.Top) == PixataChartTitlePosition.Top) {
+    <div class="@TitleClass" style="@TitleStyle">@Title.Text</div>
+  }
+  <div class="pixata-blazor-chart-body pixata-blazor-chart-body-legend-@LegendPosition.ToString().ToLowerInvariant()">
+    <div @ref="_plot" class="pixata-blazor-chart-plot">
+      <svg @ref="_surface"
+           class="pixata-blazor-chart-surface"
+           viewBox="0 0 @Num(scene.Width) @Num(scene.Height)"
+           preserveAspectRatio="xMidYMid meet"
+           role="graphics-document"
+           aria-roledescription="chart"
+           aria-label="@(TitleVisible ? Title!.Text : "Chart")"
+           aria-describedby="@(string.IsNullOrEmpty(Title?.Description) ? null : $"{_uid}-description")"
+           aria-activedescendant="@(_keyboardFocus && active is not null ? PointId(active) : null)"
+           tabindex="0"
+           @onkeydown="HandleKeyDown"
+           @onkeydown:stopPropagation="_tooltipShown"
+           @onfocus="HandleFocus"
+           @onpointerdown="HandlePointerDown"
+           @onpointerleave="PointerLeavePlot">
+        <defs>
+          <clipPath id="@ClipId">
+            <rect x="@Num(scene.Plot.X)" y="@Num(scene.Plot.Y - 2)" width="@Num(scene.Plot.Width)" height="@Num(scene.Plot.Height + 4)" />
+          </clipPath>
+        </defs>
+        <rect class="pixata-blazor-chart-background" x="0" y="0" width="@Num(scene.Width)" height="@Num(scene.Height)" @onclick="HideTooltip" />
+
+        <g class="pixata-blazor-chart-gridlines">
+          @foreach (PixataChartSceneLine line in scene.GridLines) {
+            <line class="@line.Class" x1="@Num(line.X1)" y1="@Num(line.Y1)" x2="@Num(line.X2)" y2="@Num(line.Y2)" style="@LineStyle(line)" />
+          }
+        </g>
+
+        @if (!scene.IsPie && scene.CategoryScale is { Count: > 0 } categoryScale) {
+          <g class="pixata-blazor-chart-bands">
+            @for (int i = 0; i < categoryScale.Count; i++) {
+              int category = i;
+              double start = Math.Max(scene.Plot.X, categoryScale.BandStart(i));
+              double end = Math.Min(scene.Plot.Right, categoryScale.BandStart(i) + categoryScale.BandWidth);
+              <rect class="@PixataCss.Classes("pixata-blazor-chart-band", IsTooltipShared && _tooltipShown && _activeCategory == i ? "pixata-blazor-chart-band-active" : null)"
+                    x="@Num(start)" y="@Num(scene.Plot.Y)" width="@Num(Math.Max(0, end - start))" height="@Num(scene.Plot.Height)"
+                    @onpointerenter="() => PointerEnterBand(category)"
+                    @onclick="() => ClickBand(category)" />
+            }
+          </g>
+        }
+
+        <g class="pixata-blazor-chart-series" clip-path="@(scene.IsPie ? null : $"url(#{ClipId})")">
+          @foreach (PixataChartScenePoint point in scene.Points) {
+            PixataChartScenePoint p = point;
+            if (p.Kind == PixataChartPointKind.Column) {
+              <rect @key="@($"c{p.SeriesIndex}-{p.PointIndex}")"
+                    id="@PointId(p)"
+                    class="@PointClass("column", p, p.AnchorY > p.Y ? "pixata-blazor-chart-column-negative" : null)"
+                    x="@Num(p.X)" y="@Num(p.Y)" width="@Num(Math.Max(p.Width, 0))" height="@Num(Math.Max(p.Height, 0))"
+                    style="@PointStyle(p)"
+                    role="graphics-symbol"
+                    aria-roledescription="point"
+                    aria-label="@p.Description"
+                    @onpointerenter="() => PointerEnterPoint(p)"
+                    @onclick="() => ClickPoint(p)" />
+            } else if (p.Kind == PixataChartPointKind.Segment) {
+              <path @key="@($"s{p.SeriesIndex}-{p.PointIndex}")"
+                    id="@PointId(p)"
+                    class="@PointClass("segment", p)"
+                    d="@p.Path"
+                    style="@PointStyle(p)"
+                    role="graphics-symbol"
+                    aria-roledescription="point"
+                    aria-label="@p.Description"
+                    @onpointerenter="() => PointerEnterPoint(p)"
+                    @onclick="() => ClickPoint(p)" />
+            }
+          }
+          @foreach (PixataChartScenePath path in scene.Paths) {
+            <path @key="@($"l{path.SeriesIndex}")" class="@path.Class" d="@path.D" style="@PathStyle(path)" />
+          }
+        </g>
+
+        <g class="pixata-blazor-chart-markers">
+          @foreach (PixataChartScenePoint point in scene.Points.Where(p => p.Kind == PixataChartPointKind.Marker)) {
+            PixataChartScenePoint p = point;
+            double size = p.Width;
+            <g @key="@($"m{p.SeriesIndex}-{p.PointIndex}")"
+               id="@PointId(p)"
+               class="@PointClass("marker", p, p.MarkerVisible ? null : "pixata-blazor-chart-marker-hidden")"
+               style="@PointStyle(p)"
+               role="graphics-symbol"
+               aria-roledescription="point"
+               aria-label="@p.Description"
+               @onpointerenter="() => PointerEnterPoint(p)"
+               @onclick="() => ClickPoint(p)">
+              <circle class="pixata-blazor-chart-marker-target" cx="@Num(p.X)" cy="@Num(p.Y)" r="12" />
+              @switch (p.MarkerType) {
+                case PixataChartSeriesMarkersType.Square:
+                case PixataChartSeriesMarkersType.Rect:
+                case PixataChartSeriesMarkersType.RoundedRect:
+                  <rect class="pixata-blazor-chart-marker-shape" x="@Num(p.X - size / 2)" y="@Num(p.Y - size / 2)" width="@Num(size)" height="@Num(size)" rx="@(p.MarkerType == PixataChartSeriesMarkersType.RoundedRect ? Num(size / 4) : null)" />
+                  break;
+                case PixataChartSeriesMarkersType.Triangle:
+                  <path class="pixata-blazor-chart-marker-shape" d="@p.Path" />
+                  break;
+                case PixataChartSeriesMarkersType.Cross:
+                  <path class="pixata-blazor-chart-marker-shape pixata-blazor-chart-marker-cross" d="@p.Path" />
+                  break;
+                default:
+                  <circle class="pixata-blazor-chart-marker-shape" cx="@Num(p.X)" cy="@Num(p.Y)" r="@Num(size / 2)" />
+                  break;
+              }
+            </g>
+          }
+        </g>
+
+        <g class="pixata-blazor-chart-axes">
+          @foreach (PixataChartSceneLine line in scene.AxisLines) {
+            <line class="@line.Class" x1="@Num(line.X1)" y1="@Num(line.Y1)" x2="@Num(line.X2)" y2="@Num(line.Y2)" style="@LineStyle(line)" />
+          }
+          @foreach (PixataChartSceneText text in scene.AxisTexts) {
+            @RenderText(text)
+          }
+        </g>
+
+        @if (scene.Labels.Count > 0) {
+          <g class="pixata-blazor-chart-labels" aria-hidden="true">
+            @foreach (PixataChartScenePath connector in scene.Connectors) {
+              <path class="@connector.Class" d="@connector.D" style="@(string.IsNullOrWhiteSpace(connector.Colour) ? null : $"stroke:{connector.Colour};")" />
+            }
+            @foreach (PixataChartSceneText label in scene.Labels) {
+              if (!string.IsNullOrWhiteSpace(label.Background)) {
+                double x = label.Anchor == "middle" ? label.X - label.Width / 2 : label.Anchor == "end" ? label.X - label.Width : label.X;
+                <rect class="pixata-blazor-chart-label-background" x="@Num(x - 3)" y="@Num(label.Y - label.FontSize * .85 - 2)" width="@Num(label.Width + 6)" height="@Num(label.Lines.Length * label.LineHeight + 2)" style="fill:@label.Background;" />
+              }
+              @RenderText(label)
+            }
+          </g>
+        }
+      </svg>
+
+      @if (_tooltipShown) {
+        @RenderTooltip(scene, active)
+      }
+    </div>
+
+    @if (Legend?.Visible ?? true) {
+      @if (scene.LegendEntries.Count > 0) {
+        <div class="@LegendClass" style="@(string.IsNullOrWhiteSpace(Legend?.Background) ? null : $"background:{Legend.Background};")" role="group" aria-label="Legend">
+          @foreach (PixataChartLegendEntry entry in LegendEntries) {
+            PixataChartLegendEntry e = entry;
+            <button type="button"
+                    class="@PixataCss.Classes("pixata-blazor-chart-legend-item", e.Visible ? null : "pixata-blazor-chart-legend-item-hidden")"
+                    aria-pressed="@(e.Visible ? "true" : "false")"
+                    @onclick="() => ClickLegendItem(e)">
+              <span class="pixata-blazor-chart-legend-marker pixata-blazor-chart-legend-marker-@(e.Type == PixataChartSeriesType.Line ? "line" : "column")" style="@ColourStyle(e.Colour)" aria-hidden="true">
+                @if (e.Type == PixataChartSeriesType.Line) {
+                  <svg viewBox="0 0 20 16" focusable="false">
+                    <path d="M 5 8.5 V 13 H 19" style="@(e.DashArray is null ? null : $"stroke-dasharray:{e.DashArray};")" />
+                    <circle cx="5" cy="5" r="3.5" />
+                  </svg>
+                }
+              </span>
+              <span class="pixata-blazor-chart-legend-text">@e.Text</span>
+            </button>
+          }
+        </div>
+      }
+    }
+  </div>
+  @if (TitleVisible && Title!.Position == PixataChartTitlePosition.Bottom) {
+    <div class="@TitleClass" style="@TitleStyle">@Title.Text</div>
+  }
+  @if (!string.IsNullOrEmpty(Title?.Description)) {
+    <div id="@($"{_uid}-description")" class="pixata-blazor-sr-only">@Title.Description</div>
+  }
+  <div class="pixata-blazor-sr-only" aria-live="polite">@_announcement</div>
+</div>
+
+@code {
+
+  private RenderFragment RenderTooltip(PixataChartScene scene, PixataChartScenePoint? active) => __builder => {
+    if (IsTooltipShared && _activeCategory is int category && scene.CategoryScale is { } categoryScale) {
+      List<PixataChartScenePoint> points = scene.PointsInCategory(category).Where(p => TooltipEnabled(p.Series)).OrderBy(p => p.SeriesIndex).ToList();
+      if (points.Count == 0) {
+        return;
+      }
+      double y = scene.Plot.Y + scene.Plot.Height / 2;
+      (string placement, string style) = TooltipPlacement(categoryScale.Centre(category), y, true, categoryScale.BandWidth);
+      object? categoryValue = category < scene.Categories.Count ? scene.Categories[category] : null;
+      string colours = Tooltip?.Background is null ? "" : $"--pixata-blazor-chart-shared-tooltip-bg:{Tooltip.Background};";
+      colours += Tooltip?.Color is null ? "" : $"color:{Tooltip.Color};";
+      colours += Tooltip?.Font is null ? "" : $"font:{Tooltip.Font};";
+      <div class="@PixataCss.Classes("pixata-blazor-chart-tooltip", "pixata-blazor-chart-tooltip-shared", placement)" style="@(style + colours)" role="tooltip">
+        @if (Tooltip?.SharedTemplate is { } sharedTemplate) {
+          @sharedTemplate(new() { Category = categoryValue, Points = points.Select(p => p.ToSeriesPoint<PixataChartSeriesTooltipTemplatePoint>(FormattedValue(p))).ToList() })
+        } else {
+          <div class="pixata-blazor-chart-tooltip-category">@PixataChartFormatter.Format(categoryValue, null)</div>
+          <table>
+            <tbody>
+              @foreach (PixataChartScenePoint p in points) {
+                <tr>
+                  <td><span class="pixata-blazor-chart-tooltip-marker" style="@ColourStyle(p.Colour)"></span></td>
+                  <td>@p.Series.Name</td>
+                  <td class="pixata-blazor-chart-tooltip-value">@FormattedValue(p)</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    } else if (!IsTooltipShared && active is not null && TooltipEnabled(active.Series)) {
+      PixataChartSeriesTooltip? own = active.Series.SeriesTooltip;
+      (string placement, string style) = TooltipPlacement(active.AnchorX, active.AnchorY, false, 0);
+      string colours = TooltipColours(own?.Background ?? Tooltip?.Background, own?.Color ?? Tooltip?.Color, active.Colour, active.ReportedColour) ?? "";
+      string? font = own?.Font ?? Tooltip?.Font;
+      RenderFragment<PixataChartSeriesTooltipTemplateContext>? template = own?.Template ?? Tooltip?.Template;
+      <div class="@PixataCss.Classes("pixata-blazor-chart-tooltip", placement)" style="@(style + colours + (font is null ? "" : $"font:{font};"))" role="tooltip">
+        @if (template is not null) {
+          @template(active.ToSeriesPoint<PixataChartSeriesTooltipTemplateContext>(FormattedValue(active)))
+        } else {
+          @FormattedValue(active)
+        }
+      </div>
+    }
+  };
+
+}
