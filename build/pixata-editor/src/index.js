@@ -644,6 +644,20 @@ export function flush(id) {
   instances.get(id)?.flushValue();
 }
 
+// Focuses the first field in a dialog. A text area (the HTML source) starts with the caret and the scroll position at the top
+export function focusField(container) {
+  const field = container ? container.querySelector("input:not([type=checkbox]), textarea") : null;
+  if (!field) {
+    return;
+  }
+  field.focus({ preventScroll: true });
+  if (field.tagName === "TEXTAREA") {
+    field.setSelectionRange(0, 0);
+    field.scrollTop = 0;
+    field.scrollLeft = 0;
+  }
+}
+
 // Keeps Tab and Shift+Tab inside a modal dialog. Returns a handle for releaseFocus
 const traps = new Map();
 let nextTrap = 1;

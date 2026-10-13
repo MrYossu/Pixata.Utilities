@@ -2180,6 +2180,11 @@
     flex-direction: column;
   }
 
+  .pixata-blazor-editor-html-source {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
   .pixata-blazor-editor-palette-cell {
     width: min(1.75rem, calc((100vw - 3rem) / var(--pixata-blazor-editor-palette-columns, 10) - 1px));
     height: min(1.75rem, calc((100vw - 3rem) / var(--pixata-blazor-editor-palette-columns, 10) - 1px));

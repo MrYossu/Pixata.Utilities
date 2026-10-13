@@ -285,7 +285,7 @@ public partial class PixataEditor : PixataInputBase<string>, IAsyncDisposable {
     if (_dialogOpened) {
       _dialogOpened = false;
       _dialogTrap = await Invoke("trapFocus", 0, _dialogElement);
-      await PixataJs.InvokeVoid(Js, "focusSelector", _dialogElement, "input, textarea");
+      await InvokeVoid("focusField", _dialogElement);
     }
     if (_focusEditor) {
       _focusEditor = false;
