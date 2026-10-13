@@ -50,12 +50,18 @@
 @code {
 
   private readonly List<PixataPredefinedDialog> _dialogs = [];
+  private bool _disposed;
 
   protected override void OnInitialized() =>
     Factory.Attach(this);
 
   internal Task<PixataPredefinedDialogResult> Show(PixataPredefinedDialog dialog) {
     _ = InvokeAsync(() => {
+      // Asked for from another thread just as the host went (eg as the circuit closed), so nobody can answer it
+      if (_disposed) {
+        dialog.Result.TrySetResult(new(false, null));
+        return;
+      }
       _dialogs.Add(dialog);
       StateHasChanged();
     });
@@ -69,6 +75,7 @@
   }
 
   public void Dispose() {
+    _disposed = true;
     Factory.Detach(this);
     // Nobody is left to answer these, so treat them as cancelled rather than leaving the callers waiting for ever
     _dialogs.ForEach(d => d.Result.TrySetResult(new(false, null)));

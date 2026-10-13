@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Pixata.Blazor.Components;
@@ -19,7 +20,9 @@ public class PixataDialogFactory(PixataDialogTexts texts) {
   internal const string MissingHostMessage = "There is no PixataDialogHost to show the dialog. Add <PixataDialogHost /> to your layout (eg MainLayout.razor), "
     + "somewhere that is rendered interactively, so that PixataDialogFactory can show alert, confirm and prompt dialogs.";
 
-  private PixataDialogHost? _host;
+  // Normally there's one, but there can be more (eg a host in each of several interactive parts of a page), so when one goes
+  // the dialogs are shown by the one before it
+  private readonly List<PixataDialogHost> _hosts = [];
 
   /// <summary>
   /// Shows a message with an OK button, and completes when the user closes it
@@ -58,17 +61,26 @@ public class PixataDialogFactory(PixataDialogTexts texts) {
     return result.Accepted ? result.Value ?? "" : null;
   }
 
-  internal void Attach(PixataDialogHost host) =>
-    _host = host;
-
-  internal void Detach(PixataDialogHost host) {
-    if (ReferenceEquals(_host, host)) {
-      _host = null;
+  internal void Attach(PixataDialogHost host) {
+    lock (_hosts) {
+      _hosts.Remove(host);
+      _hosts.Add(host);
     }
   }
 
-  private Task<PixataPredefinedDialogResult> Show(PixataPredefinedDialog dialog) =>
-    (_host ?? throw new InvalidOperationException(MissingHostMessage)).Show(dialog);
+  internal void Detach(PixataDialogHost host) {
+    lock (_hosts) {
+      _hosts.Remove(host);
+    }
+  }
+
+  private Task<PixataPredefinedDialogResult> Show(PixataPredefinedDialog dialog) {
+    PixataDialogHost? host;
+    lock (_hosts) {
+      host = _hosts.Count == 0 ? null : _hosts[^1];
+    }
+    return (host ?? throw new InvalidOperationException(MissingHostMessage)).Show(dialog);
+  }
 }
 
 internal enum PixataPredefinedDialogKind {

@@ -135,7 +135,7 @@ These apply to `PixataDialog`, the predefined dialogs and [`PixataWindow`](Readm
 - **Keeping the focus inside**: while a dialog (or a modal window) is open, Tab and Shift+Tab cycle through the elements inside it, and the page behind can't be clicked.
 - **Esc** closes the dialog that has the focus (if it closes on Esc), and only that one. Components inside a dialog that use Esc themselves, such as drop-downs, stop the key there, so pressing Esc in an open drop-down closes the drop-down rather than the dialog.
 - **Giving the focus back**: when a dialog closes, the focus goes back to whatever had it before the dialog opened (usually the button that opened it).
-- **Stacking**: several dialogs and windows can be open at once. The one most recently opened, clicked or focused is in front, and modal ones always stay in front of what was open before them. They are stacked upwards from `--pixata-blazor-overlay-z-index`, and stay below `--pixata-blazor-popup-z-index`, so the drop-downs and menus of components inside a dialog show on top of it. The wrapper of the one in front has a `data-pixata-blazor-active` attribute.
+- **Stacking**: several dialogs and windows can be open at once. The one most recently opened, clicked or focused is in front, except that modal ones always stay in front of what was open before them, and behind what was opened after them (so a window opened from a dialog isn't hidden behind the dialog's overlay when you click the dialog). They are stacked upwards from `--pixata-blazor-overlay-z-index`, and stay below `--pixata-blazor-popup-z-index`, so the drop-downs and menus of components inside a dialog show on top of it. The wrapper of the one in front has a `data-pixata-blazor-active` attribute.
 - **Right-to-left**: if the page (or the element the dialog was declared in) has `dir="rtl"`, so does the dialog.
 
 The script that does this is `_content/Pixata.Blazor/pixata-dialogs.js`, which the components load themselves when the first one opens. You don't need to add a `<script>` tag. Nothing is called until the component has rendered interactively, so dialogs are safe to use with prerendering.
@@ -154,7 +154,9 @@ The dialogs are shown by a `PixataDialogHost`, which you add once to your layout
 
 The host must be somewhere that is rendered interactively, and in the same DI scope as the code that shows the dialogs. In a Blazor Server or WASM app, or a Blazor Web App with global interactivity, the layout is fine. If your layout is rendered statically and only some pages are interactive, put the host in those pages (or in an interactive component they share) instead.
 
-If a dialog is requested when there's no host, `PixataDialogFactory` throws an `InvalidOperationException` saying so, rather than leaving your code waiting for an answer that will never come.
+If a dialog is requested when there's no host, `PixataDialogFactory` throws an `InvalidOperationException` saying so, rather than leaving your code waiting for an answer that will never come. If the host goes while a dialog is waiting for an answer (eg because the circuit has ended), the dialog counts as cancelled: `AlertAsync` completes, `ConfirmAsync` returns `false` and `PromptAsync` returns `null`.
+
+Show the dialogs in response to something the user does (eg in a button's click handler), or from `OnAfterRenderAsync`, rather than while a component is initialising (in `OnInitialized(Async)` or `OnParametersSet(Async)`). A host in the layout is created after the page inside it, so on the first page the user visits it doesn't exist yet at that point, and while a page is being prerendered there is nobody to answer anyway.
 
 ### Showing them
 

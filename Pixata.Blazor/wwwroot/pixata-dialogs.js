@@ -81,6 +81,13 @@ export function closeLayer(id) {
   }
   layer.cleanup.forEach(c => c());
   layer.cleanup = [];
+  // A layer opened from this one would give the focus back to something that is going with it (eg when a dialog and one
+  // opened from it are removed together), so it gives it to whatever this one would have instead
+  layers.forEach(l => {
+    if (l.returnFocus && layer.wrapper.contains(l.returnFocus)) {
+      l.returnFocus = layer.returnFocus;
+    }
+  });
   // Blazor removes the wrapper when the layer is hidden. If it's still here, the component was removed from the page while
   // the layer was open, so Blazor took away the placeholder it was declared in, but not the wrapper we moved to <body>
   if (layer.wrapper.isConnected) {
@@ -112,7 +119,9 @@ function restack() {
 
 function activate(layer) {
   const index = layers.indexOf(layer);
-  if (index < 0 || index === layers.length - 1) {
+  // A modal layer is already in front of everything it blocks. Anything above it was opened while it was open (eg a window
+  // opened from a dialog), and bringing the modal one forward would hide that behind its overlay, out of reach
+  if (index < 0 || index === layers.length - 1 || layer.options.modal) {
     return;
   }
   let target = layers.length - 1;

@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -240,6 +243,27 @@ public class Dialogs_Tests {
   }
 
   [TestMethod]
+  public async Task PixataDialog_HiddenAndShownWhileTheScriptIsBusy_OpensOnlyOneLayer() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    module.Setup<int>("openLayer", _ => true).SetResult(1);
+    IRenderedComponent<PixataDialog> cut = RenderDialog(context);
+    // From here on, the script doesn't answer until told to, as when the browser is slow to reply
+    JSRuntimeInvocationHandler closing = module.SetupVoid("closeLayer", _ => true);
+    JSRuntimeInvocationHandler<int> reopening = module.Setup<int>("openLayer", _ => true);
+    cut.Render(p => p.Add(c => c.Visible, false));
+    cut.Render(p => p.Add(c => c.Visible, true));
+    closing.SetVoidResult();
+    await cut.InvokeAsync(() => { });
+    reopening.SetResult(2);
+    await cut.InvokeAsync(() => { });
+    Assert.AreEqual(2, module.Invocations["openLayer"].Count);
+    cut.Render(p => p.Add(c => c.Visible, false));
+    await cut.InvokeAsync(() => { });
+    CollectionAssert.AreEqual(new object?[] { 1, 2 }, module.Invocations["closeLayer"].Select(i => i.Arguments[0]).ToList());
+  }
+
+  [TestMethod]
   public async Task PixataDialog_Disposed_ClosesItsLayer() {
     BunitContext context = PixataTestContext.Create();
     BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
@@ -412,6 +436,44 @@ public class Dialogs_Tests {
     await context.DisposeComponentsAsync();
     Assert.IsNull(await prompt);
     await context.DisposeAsync();
+  }
+
+  [TestMethod]
+  public async Task PixataDialogHost_AskedAfterItWasDisposed_CancelsTheDialog() {
+    // As when a dialog is asked for from another thread just as the circuit closes
+    using BunitContext context = PixataTestContext.Create();
+    (IRenderedComponent<PixataDialogHost> host, PixataDialogFactory _) = RenderHost(context);
+    host.Instance.Dispose();
+    Task<PixataPredefinedDialogResult> result = host.Instance.Show(new(PixataPredefinedDialogKind.Confirm, "Sure?", "", "OK", "Cancel", null));
+    await host.InvokeAsync(() => { });
+    Assert.IsTrue(result.IsCompleted);
+    Assert.IsFalse((await result).Accepted);
+  }
+
+  [TestMethod]
+  public async Task PixataDialogFactory_OneOfTwoHostsRemoved_UsesTheOther() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<TwoHosts> cut = context.Render<TwoHosts>();
+    PixataDialogFactory factory = context.Services.GetRequiredService<PixataDialogFactory>();
+    cut.Render(p => p.Add(c => c.ShowSecond, false));
+    Task alert = factory.AlertAsync("Saved");
+    cut.WaitForAssertion(() => Assert.AreEqual(1, cut.FindAll(".pixata-blazor-dialog").Count));
+    cut.Find(".pixata-blazor-dialog-ok").Click();
+    await alert;
+  }
+
+  private class TwoHosts : ComponentBase {
+    [Parameter]
+    public bool ShowSecond { get; set; } = true;
+
+    protected override void BuildRenderTree(RenderTreeBuilder builder) {
+      builder.OpenComponent<PixataDialogHost>(0);
+      builder.CloseComponent();
+      if (ShowSecond) {
+        builder.OpenComponent<PixataDialogHost>(1);
+        builder.CloseComponent();
+      }
+    }
   }
 
   #endregion
