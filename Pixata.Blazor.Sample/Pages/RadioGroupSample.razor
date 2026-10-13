@@ -1,0 +1,153 @@
+@page "/RadioGroupSample"
+@using Pixata.Blazor.Components
+@using Pixata.Blazor.Sample.Models
+
+<h3>Radio group</h3>
+
+<p><code>PixataRadioGroup</code> shows a radio button for each item in a list, and binds the chosen item's value. Each example below shows it next to the equivalent Telerik radio group, set up the same way. Tab into a group and use the arrow keys to move between the options.</p>
+
+<ComponentComparison Title="Primitive data">
+  <Description>
+    <p>Bound to a list of strings, so each item is both the text and the value. <code>OnChange</code> is raised when the user picks an item.</p>
+  </Description>
+  <Pixata>
+    <PixataRadioGroup Data="_sizes" @bind-Value="_pixataSize" OnChange="@((object v) => _pixataLog = $"OnChange: {v}")" AriaLabel="Size" />
+    <p class="mt-2">Value: <strong>@(_pixataSize ?? "null")</strong><br />@_pixataLog</p>
+  </Pixata>
+  <Telerik>
+    <TelerikRadioGroup Data="_sizes" @bind-Value="_telerikSize" OnChange="@((object v) => _telerikLog = $"OnChange: {v}")" AriaLabel="Size" />
+    <p class="mt-2">Value: <strong>@(_telerikSize ?? "null")</strong><br />@_telerikLog</p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Model data, horizontal">
+  <Description>
+    <p>Bound to a list of objects, with <code>TextField</code> and <code>ValueField</code> naming the properties to use, and <code>Layout</code> set to horizontal. The row wraps when it runs out of room.</p>
+  </Description>
+  <Pixata>
+    <PixataRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" @bind-Value="_pixataContact" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Contact method" />
+    <p class="mt-2">Value: <strong>@(_pixataContact?.ToString() ?? "null")</strong></p>
+  </Pixata>
+  <Telerik>
+    <TelerikRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" @bind-Value="_telerikContact" Layout="RadioGroupLayout.Horizontal" AriaLabel="Contact method" />
+    <p class="mt-2">Value: <strong>@(_telerikContact?.ToString() ?? "null")</strong></p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Labels before the radio buttons">
+  <Description>
+    <p><code>LabelPosition</code> puts the labels before (or after, the default) the radio buttons.</p>
+  </Description>
+  <Pixata>
+    <PixataRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" @bind-Value="_pixataBefore" LabelPosition="PixataRadioGroupLabelPosition.Before" AriaLabel="Contact method" />
+  </Pixata>
+  <Telerik>
+    <TelerikRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" @bind-Value="_telerikBefore" LabelPosition="RadioGroupLabelPosition.Before" AriaLabel="Contact method" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Item template">
+  <Description>
+    <p><code>ItemTemplate</code> renders each label, with the item as its context.</p>
+  </Description>
+  <Pixata>
+    <PixataRadioGroup Data="_contactMethods" ValueField="Id" @bind-Value="_pixataTemplate" AriaLabel="Contact method">
+      <ItemTemplate>
+        <span><strong>@context.Name</strong> <small class="text-muted">(@context.Description)</small></span>
+      </ItemTemplate>
+    </PixataRadioGroup>
+  </Pixata>
+  <Telerik>
+    <TelerikRadioGroup Data="_contactMethods" ValueField="Id" @bind-Value="_telerikTemplate" AriaLabel="Contact method">
+      <ItemTemplate>
+        <span><strong>@context.Name</strong> <small class="text-muted">(@context.Description)</small></span>
+      </ItemTemplate>
+    </TelerikRadioGroup>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Disabled">
+  <Description>
+    <p><code>Enabled="false"</code> disables the whole group, and <code>DisabledField</code> names a <code>bool</code> property that disables individual items (here, post).</p>
+  </Description>
+  <Pixata>
+    <PixataRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" Value="2" Enabled="false" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Disabled group" />
+    <hr />
+    <PixataRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" DisabledField="Unavailable" @bind-Value="_pixataDisabledItem" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Contact method" />
+  </Pixata>
+  <Telerik>
+    <TelerikRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" Value="2" Enabled="false" Layout="RadioGroupLayout.Horizontal" AriaLabel="Disabled group" />
+    <hr />
+    <TelerikRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" DisabledField="Unavailable" @bind-Value="_telerikDisabledItem" Layout="RadioGroupLayout.Horizontal" AriaLabel="Contact method" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Sizes">
+  <Description>
+    <p><code>Size</code> is <code>sm</code>, <code>md</code> (the default) or <code>lg</code>.</p>
+  </Description>
+  <Pixata>
+    <PixataRadioGroup Data="_sizes" Value="@("Small")" Size="@PixataThemeConstants.Size.Small" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Small" />
+    <PixataRadioGroup Data="_sizes" Value="@("Medium")" Size="@PixataThemeConstants.Size.Medium" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Medium" />
+    <PixataRadioGroup Data="_sizes" Value="@("Large")" Size="@PixataThemeConstants.Size.Large" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Large" />
+  </Pixata>
+  <Telerik>
+    <TelerikRadioGroup Data="_sizes" Value="@("Small")" Size="sm" Layout="RadioGroupLayout.Horizontal" AriaLabel="Small" />
+    <TelerikRadioGroup Data="_sizes" Value="@("Medium")" Size="md" Layout="RadioGroupLayout.Horizontal" AriaLabel="Medium" />
+    <TelerikRadioGroup Data="_sizes" Value="@("Large")" Size="lg" Layout="RadioGroupLayout.Horizontal" AriaLabel="Large" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Inside an EditForm">
+  <Description>
+    <p>The group takes part in validation. Click Submit without choosing anything to see the invalid state.</p>
+  </Description>
+  <Pixata>
+    <EditForm Model="_pixataModel" OnValidSubmit="@(() => _pixataSubmitted = "Submitted")">
+      <DataAnnotationsValidator />
+      <p id="pixata-contact-label" class="mb-1">How should we contact you?</p>
+      <PixataRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" @bind-Value="_pixataModel.ContactMethodId" AriaLabelledBy="pixata-contact-label" />
+      <ValidationMessage For="() => _pixataModel.ContactMethodId" />
+      <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+      <span class="ms-2">@_pixataSubmitted</span>
+    </EditForm>
+  </Pixata>
+  <Telerik>
+    <EditForm Model="_telerikModel" OnValidSubmit="@(() => _telerikSubmitted = "Submitted")">
+      <DataAnnotationsValidator />
+      <p id="telerik-contact-label" class="mb-1">How should we contact you?</p>
+      <TelerikRadioGroup Data="_contactMethods" TextField="Name" ValueField="Id" @bind-Value="_telerikModel.ContactMethodId" AriaLabelledBy="telerik-contact-label" />
+      <ValidationMessage For="() => _telerikModel.ContactMethodId" />
+      <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+      <span class="ms-2">@_telerikSubmitted</span>
+    </EditForm>
+  </Telerik>
+</ComponentComparison>
+
+@code {
+  private readonly List<string> _sizes = ["Small", "Medium", "Large"];
+
+  private readonly List<RadioGroupSampleContactMethod> _contactMethods = [
+    new() { Id = 1, Name = "Email", Description = "We'll reply within a day" },
+    new() { Id = 2, Name = "Phone", Description = "Office hours only" },
+    new() { Id = 3, Name = "Text message", Description = "Quick updates" },
+    new() { Id = 4, Name = "Post", Description = "Currently unavailable", Unavailable = true }
+  ];
+
+  private string? _pixataSize;
+  private string? _telerikSize;
+  private string _pixataLog = "";
+  private string _telerikLog = "";
+  private int? _pixataContact = 1;
+  private int? _telerikContact = 1;
+  private int? _pixataBefore = 2;
+  private int? _telerikBefore = 2;
+  private int? _pixataTemplate = 1;
+  private int? _telerikTemplate = 1;
+  private int? _pixataDisabledItem = 1;
+  private int? _telerikDisabledItem = 1;
+  private readonly RadioGroupSampleModel _pixataModel = new();
+  private readonly RadioGroupSampleModel _telerikModel = new();
+  private string _pixataSubmitted = "";
+  private string _telerikSubmitted = "";
+}

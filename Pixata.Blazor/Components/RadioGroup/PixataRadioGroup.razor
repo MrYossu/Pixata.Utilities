@@ -1,0 +1,59 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@typeparam TValue
+@inherits PixataInputBase<TValue>
+
+@*
+  A group of native radio buttons sharing a name, so the browser provides the arrow-key navigation (the arrow keys move to the
+  next or previous option and select it, and Tab moves in and out of the group as a single stop)
+*@
+<ul @ref="_element"
+    id="@GroupId"
+    class="@CssClass"
+    role="radiogroup"
+    aria-label="@AriaLabel"
+    aria-labelledby="@AriaLabelledBy"
+    aria-describedby="@AriaDescribedBy"
+    aria-disabled="@(Enabled ? null : "true")"
+    aria-invalid="@(IsInvalid ? "true" : null)"
+    @attributes="AdditionalAttributes">
+  @{
+    int index = 0;
+  }
+  @foreach (TItem item in Data ?? []) {
+    string inputId = $"{GroupId}-{index}";
+    bool itemEnabled = Enabled && !IsItemDisabled(item);
+    bool isChecked = IsSelected(item);
+    <li class="@PixataCss.Classes("pixata-blazor-radiogroup-item", PixataCss.Disabled(itemEnabled), isChecked ? "pixata-blazor-radiogroup-item-checked" : null)" role="none">
+      @if (LabelPosition == PixataRadioGroupLabelPosition.Before) {
+        @RenderLabel(item, inputId)
+      }
+      <input type="radio"
+             id="@inputId"
+             class="@PixataCss.Classes("pixata-blazor-radiogroup-radio", $"pixata-blazor-radiogroup-radio-{SizeOrDefault}", InvalidClass)"
+             name="@GroupName"
+             value="@index"
+             checked="@isChecked"
+             disabled="@(!itemEnabled)"
+             tabindex="@TabIndex"
+             @onchange="() => Select(item)" />
+      @if (LabelPosition == PixataRadioGroupLabelPosition.After) {
+        @RenderLabel(item, inputId)
+      }
+    </li>
+    index++;
+  }
+</ul>
+
+@code {
+
+  private RenderFragment RenderLabel(TItem item, string inputId) =>
+    @<label class="pixata-blazor-radiogroup-label" for="@inputId">
+      @if (ItemTemplate is null) {
+        @GetText(item)
+      } else {
+        @ItemTemplate(item)
+      }
+    </label>;
+
+}

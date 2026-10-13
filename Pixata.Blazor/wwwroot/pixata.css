@@ -1431,6 +1431,141 @@
 
 /* ========== PixataRadioGroup ========== */
 
+/*
+  pixata-blazor-radiogroup is the list, plus -vertical or -horizontal, and pixata-blazor-disabled or pixata-blazor-invalid
+  when they apply. Each pixata-blazor-radiogroup-item holds a native radio button (pixata-blazor-radiogroup-radio, plus -sm,
+  -md or -lg) and its pixata-blazor-radiogroup-label; the checked item also has pixata-blazor-radiogroup-item-checked
+*/
+:root {
+  --pixata-blazor-radiogroup-radio-size-sm: 12px;
+  --pixata-blazor-radiogroup-radio-size-md: 16px;
+  --pixata-blazor-radiogroup-radio-size-lg: 20px;
+  --pixata-blazor-radiogroup-radio-bg: #fff;
+  --pixata-blazor-radiogroup-radio-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-radiogroup-checked-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-radiogroup-checked-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-radiogroup-dot-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-radiogroup-dot-size: 57%;
+  --pixata-blazor-radiogroup-focus-shadow: 0 0 0 2px var(--pixata-blazor-border-color);
+  --pixata-blazor-radiogroup-checked-focus-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-primary) 30%, transparent);
+  --pixata-blazor-radiogroup-item-gap: var(--pixata-blazor-spacing);
+  --pixata-blazor-radiogroup-item-padding: var(--pixata-blazor-spacing) 0;
+  --pixata-blazor-radiogroup-horizontal-gap: calc(var(--pixata-blazor-spacing) * 4);
+}
+
+.pixata-blazor-radiogroup {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pixata-blazor-radiogroup-horizontal {
+  flex-flow: row wrap;
+  column-gap: var(--pixata-blazor-radiogroup-horizontal-gap);
+}
+
+.pixata-blazor-radiogroup-item {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: var(--pixata-blazor-radiogroup-item-gap);
+  margin: 0;
+  padding: var(--pixata-blazor-radiogroup-item-padding);
+}
+
+/* The native radio button, drawn by us */
+.pixata-blazor-radiogroup-radio {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-md);
+  box-sizing: border-box;
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--pixata-blazor-radiogroup-radio-size);
+  height: var(--pixata-blazor-radiogroup-radio-size);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pixata-blazor-radiogroup-radio-border-color);
+  border-radius: 50%;
+  outline: 0;
+  background-color: var(--pixata-blazor-radiogroup-radio-bg);
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background-color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-radiogroup-radio-sm {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-sm);
+}
+
+.pixata-blazor-radiogroup-radio-lg {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-lg);
+}
+
+.pixata-blazor-radiogroup-radio:focus-visible {
+  box-shadow: var(--pixata-blazor-radiogroup-focus-shadow);
+}
+
+.pixata-blazor-radiogroup-radio:checked {
+  border-color: var(--pixata-blazor-radiogroup-checked-border-color);
+  background-color: var(--pixata-blazor-radiogroup-checked-bg);
+  background-image: radial-gradient(circle closest-side, var(--pixata-blazor-radiogroup-dot-color) 0 var(--pixata-blazor-radiogroup-dot-size), transparent calc(var(--pixata-blazor-radiogroup-dot-size) + 1px));
+}
+
+.pixata-blazor-radiogroup-radio:checked:focus-visible {
+  box-shadow: var(--pixata-blazor-radiogroup-checked-focus-shadow);
+}
+
+.pixata-blazor-radiogroup-radio:disabled {
+  cursor: default;
+}
+
+.pixata-blazor-radiogroup-label {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--pixata-blazor-spacing);
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.pixata-blazor-radiogroup-label:empty {
+  display: none;
+}
+
+.pixata-blazor-radiogroup.pixata-blazor-invalid .pixata-blazor-radiogroup-radio {
+  border-color: var(--pixata-blazor-error);
+}
+
+/* On a touch screen, each option is at least --pixata-blazor-touch-target high, and its label fills that height */
+@media (pointer: coarse) {
+  .pixata-blazor-radiogroup-item {
+    min-height: var(--pixata-blazor-touch-target);
+    padding-block: 0;
+  }
+
+  .pixata-blazor-radiogroup-label {
+    align-self: stretch;
+    align-items: center;
+    flex: 1 1 auto;
+  }
+
+  .pixata-blazor-radiogroup-horizontal .pixata-blazor-radiogroup-label {
+    flex: 0 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-radiogroup-radio {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataRadioGroup ========== */
 
 /* ========== PixataSwitch ========== */
