@@ -1,0 +1,131 @@
+@namespace Pixata.Blazor.Components
+
+@*
+  A button in a PixataWindow's titlebar. Declare these inside the window's WindowActions. The built-in ones are named
+  Minimize, Maximize and Close, and anything else is a custom action that does whatever its OnClick says
+*@
+@if (IsShown) {
+  <button type="button"
+          class="@ButtonClass"
+          title="@ActionTitle"
+          aria-label="@ActionTitle"
+          @onclick="Click">
+    <PixataIcon Icon="@ActionIcon" />
+  </button>
+}
+
+@code {
+
+  /// <summary>
+  /// The name of a built-in action (<c>Minimize</c>, <c>Maximize</c> or <c>Close</c>; <c>Minimise</c> and <c>Maximise</c>
+  /// work too), or any other name for a custom one
+  /// </summary>
+  [Parameter]
+  public string Name { get; set; } = "";
+
+  /// <summary>
+  /// The button's tooltip, which screen readers announce as its name. The built-in actions have one already, taken from the
+  /// app's <see cref="PixataDialogTexts"/>
+  /// </summary>
+  [Parameter]
+  public string? Title { get; set; }
+
+  /// <summary>
+  /// The button's icon: a <see cref="PixataSvgIcon"/> (see <see cref="PixataSvgIcons"/>), or the CSS class(es) of an icon
+  /// font. The built-in actions have one already
+  /// </summary>
+  [Parameter]
+  public object? Icon { get; set; }
+
+  /// <summary>
+  /// What a custom action does. If you set this on a built-in action, it replaces what the action normally does
+  /// </summary>
+  [Parameter]
+  public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+  /// <summary>
+  /// Hides the button
+  /// </summary>
+  [Parameter]
+  public bool Hidden { get; set; }
+
+  [CascadingParameter]
+  private PixataWindow? Window { get; set; }
+
+  [CascadingParameter]
+  private PixataWindowState WindowState { get; set; }
+
+  private enum Kind {
+    Custom,
+    Minimise,
+    Maximise,
+    Close
+  }
+
+  private Kind ActionKind =>
+    Name.ToLowerInvariant() switch {
+      "minimize" or "minimise" => Kind.Minimise,
+      "maximize" or "maximise" => Kind.Maximise,
+      "close" => Kind.Close,
+      _ => Kind.Custom
+    };
+
+  // As with a desktop window, there's no minimising a maximised window, or maximising a minimised one: restore it first
+  private bool IsShown =>
+    !Hidden && ActionKind switch {
+      Kind.Minimise => WindowState != PixataWindowState.Maximized,
+      Kind.Maximise => WindowState != PixataWindowState.Minimized,
+      _ => true
+    };
+
+  private bool Restores =>
+    (ActionKind == Kind.Minimise && WindowState == PixataWindowState.Minimized)
+    || (ActionKind == Kind.Maximise && WindowState == PixataWindowState.Maximized);
+
+  private string? ActionTitle {
+    get {
+      if (!string.IsNullOrEmpty(Title)) {
+        return Title;
+      }
+      PixataDialogTexts? texts = Window?.Texts;
+      return ActionKind switch {
+        Kind.Custom => Name,
+        _ when Restores => texts?.Restore,
+        Kind.Minimise => texts?.Minimise,
+        Kind.Maximise => texts?.Maximise,
+        _ => texts?.Close
+      };
+    }
+  }
+
+  private object? ActionIcon =>
+    Icon ?? ActionKind switch {
+      Kind.Custom => null,
+      _ when Restores => PixataSvgIcons.WindowRestore,
+      Kind.Minimise => PixataSvgIcons.WindowMinimise,
+      Kind.Maximise => PixataSvgIcons.WindowMaximise,
+      _ => PixataSvgIcons.X
+    };
+
+  private string ButtonClass =>
+    PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, PixataThemeConstants.Button.FillMode.Flat, null, PixataThemeConstants.Button.Size.Small, true),
+      "pixata-blazor-window-titlebar-action",
+      ActionKind == Kind.Custom ? null : $"pixata-blazor-window-action-{ActionKind.ToString().ToLowerInvariant()}");
+
+  private async Task Click(MouseEventArgs e) {
+    if (OnClick.HasDelegate) {
+      await OnClick.InvokeAsync(e);
+      return;
+    }
+    if (Window is null) {
+      return;
+    }
+    await (ActionKind switch {
+      Kind.Minimise => Window.ToggleMinimised(),
+      Kind.Maximise => Window.ToggleMaximised(),
+      Kind.Close => Window.CloseFromAction(),
+      _ => Task.CompletedTask
+    });
+  }
+
+}
