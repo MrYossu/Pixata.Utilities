@@ -1,0 +1,208 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+@inherits PixataDateInputBase<TValue>
+@using Microsoft.JSInterop
+
+@* A date input with a button that opens a calendar, as in Telerik's DatePicker *@
+<span @ref="_wrapper" class="@WrapperClass" style="@WidthStyle">
+  <input @ref="InputElement"
+         class="pixata-blazor-dateinput-input"
+         id="@Id"
+         type="text"
+         role="combobox"
+         value="@InitialText"
+         placeholder="@Placeholder"
+         inputmode="@EffectiveInputMode"
+         autocomplete="off"
+         disabled="@(!Enabled)"
+         readonly="@ReadOnly"
+         tabindex="@TabIndex"
+         aria-haspopup="grid"
+         aria-expanded="@(_open ? "true" : "false")"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         @onkeydown="OnInputKeyDown" />
+  @if (ShowClearButton && IsNullable && HasValue && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-dateinput-clear" role="button" title="Clear" aria-label="Clear" @onclick="Clear">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 7.3 3.6-3.6.7.7L8.7 8l3.6 3.6-.7.7L8 8.7l-3.6 3.6-.7-.7L7.3 8 3.7 4.4l.7-.7z" /></svg>
+    </span>
+  }
+  <button type="button"
+          class="pixata-blazor-datepicker-button"
+          tabindex="-1"
+          aria-label="Open"
+          disabled="@(!Enabled || ReadOnly)"
+          @onclick="Toggle">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 1h1v2h4V1h1v2h3v12H2V3h3zm8 5H3v8h10zM3 5h10V4H3zm1 2h2v2H4zm3 0h2v2H7zm3 0h2v2h-2zm-6 3h2v2H4zm3 0h2v2H7z" /></svg>
+  </button>
+  @if (_open) {
+    <div @ref="_popup" class="@DatePickerCss.Join("pixata-blazor-datepicker-popup", PopupClass)">
+      <PixataCalendar @ref="_calendar"
+                      Value="CurrentDate"
+                      ValueChanged="OnCalendarChanged"
+                      Min="Min"
+                      Max="Max"
+                      View="View"
+                      BottomView="BottomView"
+                      DisabledDates="DisabledDates"
+                      ShowWeekNumbers="ShowWeekNumbers"
+                      ShowOtherMonthDays="ShowOtherMonthDays"
+                      OnEscape="CloseAndFocus" />
+    </div>
+  }
+</span>
+
+@code {
+  /// <summary>
+  /// The view the calendar opens in. Defaults to <see cref="PixataCalendarView.Month"/>
+  /// </summary>
+  [Parameter]
+  public PixataCalendarView View { get; set; } = PixataCalendarView.Month;
+
+  /// <summary>
+  /// The most detailed view the calendar shows, where clicking a cell picks it
+  /// </summary>
+  [Parameter]
+  public PixataCalendarView BottomView { get; set; } = PixataCalendarView.Month;
+
+  /// <summary>
+  /// Dates the user can't pick from the calendar
+  /// </summary>
+  [Parameter]
+  public List<DateTime>? DisabledDates { get; set; }
+
+  [Parameter]
+  public bool ShowWeekNumbers { get; set; }
+
+  [Parameter]
+  public bool ShowOtherMonthDays { get; set; } = true;
+
+  /// <summary>
+  /// A CSS class for the popup
+  /// </summary>
+  [Parameter]
+  public string? PopupClass { get; set; }
+
+  [Parameter]
+  public EventCallback OnOpen { get; set; }
+
+  [Parameter]
+  public EventCallback OnClose { get; set; }
+
+  private ElementReference _wrapper;
+  private ElementReference _popup;
+  private PixataCalendar? _calendar;
+  private DotNetObjectReference<PixataDatePicker<TValue>>? _pickerRef;
+  private bool _open;
+  private bool _justOpened;
+
+  private string WrapperClass =>
+    DatePickerCss.Join("pixata-blazor-dateinput", "pixata-blazor-datepicker", IsInvalid ? "pixata-blazor-dateinput-invalid" : null,
+                       Enabled ? null : "pixata-blazor-dateinput-disabled", _open ? "pixata-blazor-datepicker-open" : null, Class);
+
+  private string? WidthStyle =>
+    Width is null ? null : $"width: {Width}";
+
+  /// <summary>
+  /// Opens the calendar
+  /// </summary>
+  public async Task Open() {
+    if (_open || !Enabled || ReadOnly) {
+      return;
+    }
+    _open = true;
+    _justOpened = true;
+    await OnOpen.InvokeAsync();
+    StateHasChanged();
+  }
+
+  /// <summary>
+  /// Closes the calendar
+  /// </summary>
+  public async Task Close() {
+    // Cleared even when closed, in case the popup is closed before it has been rendered
+    _justOpened = false;
+    if (!_open) {
+      return;
+    }
+    _open = false;
+    if (Module is not null) {
+      try {
+        await Module.InvokeVoidAsync("closePopup", _popup);
+      } catch (JSException) {
+        // The popup has already gone from the page
+      } catch (JSDisconnectedException) {
+        // The page has gone
+      }
+    }
+    await OnClose.InvokeAsync();
+    StateHasChanged();
+  }
+
+  [JSInvokable]
+  public async Task ClosePopup() =>
+    await Close();
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    await base.OnAfterRenderAsync(firstRender);
+    if (_justOpened && _open && Module is not null) {
+      _justOpened = false;
+      _pickerRef ??= DotNetObjectReference.Create(this);
+      try {
+        await Module.InvokeVoidAsync("openPopup", _wrapper, _popup, _pickerRef);
+        // The keyboard focus goes into the calendar, so the arrow keys move around it
+        if (_calendar is not null) {
+          await _calendar.FocusAsync();
+        }
+      } catch (JSException) {
+        // The popup was closed again before it could be positioned
+      }
+    }
+  }
+
+  private async Task Toggle() {
+    if (_open) {
+      await CloseAndFocus();
+    } else {
+      await Open();
+    }
+  }
+
+  private async Task CloseAndFocus() {
+    await Close();
+    await FocusAsync();
+  }
+
+  private async Task OnCalendarChanged(DateTime date) {
+    await SetValue(date);
+    await CloseAndFocus();
+    await RaiseChangeIfNeeded();
+  }
+
+  // Alt+Down opens the calendar, and Alt+Up or Escape closes it, as in Telerik's date picker
+  private async Task OnInputKeyDown(KeyboardEventArgs e) {
+    switch (e.Key) {
+      case "ArrowDown" when e.AltKey:
+        await Open();
+        break;
+      case "ArrowUp" when e.AltKey:
+      case "Escape":
+        await Close();
+        break;
+      case "Enter":
+        await RaiseChangeIfNeeded();
+        break;
+    }
+  }
+
+  public override async ValueTask DisposeAsync() {
+    if (_open && Module is not null) {
+      try {
+        await Module.InvokeVoidAsync("closePopup", _popup);
+      } catch (JSDisconnectedException) {
+        // The circuit has gone
+      }
+    }
+    _pickerRef?.Dispose();
+    await base.DisposeAsync();
+  }
+}

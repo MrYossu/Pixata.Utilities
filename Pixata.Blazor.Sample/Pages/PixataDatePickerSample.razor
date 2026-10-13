@@ -1,0 +1,114 @@
+@page "/pixata-datepicker"
+@using System.Globalization
+@using Pixata.Blazor.Components
+
+<SitePageTitle>Pixata date picker</SitePageTitle>
+
+<h3>Pixata date picker</h3>
+
+<p>Each example shows a Pixata component with the Telerik equivalent beside it, with the same settings, so you can compare them.</p>
+
+<h4>Date picker</h4>
+
+<p>Click a part of the date and type, or use the up and down arrow keys to change it. Left and right move between the parts. Alt+Down opens the calendar.</p>
+
+<div class="pixata-dp-sample-row">
+  <div>
+    <p class="pixata-dp-sample-label">Pixata</p>
+    <PixataDatePicker @bind-Value="_date" Min="_min" Max="_max" ShowWeekNumbers="_weekNumbers" Id="pixata-dp" />
+  </div>
+  <div>
+    <p class="pixata-dp-sample-label">Telerik</p>
+    <TelerikDatePicker @bind-Value="_date" Min="_min" Max="_max" ShowWeekNumbers="_weekNumbers" Id="telerik-dp" />
+  </div>
+</div>
+<p>Value: @_date.ToString("dd MMM yyyy", CultureInfo.CurrentCulture)</p>
+
+<h4>Nullable, with a placeholder and clear button</h4>
+
+<div class="pixata-dp-sample-row">
+  <div>
+    <p class="pixata-dp-sample-label">Pixata</p>
+    <PixataDatePicker @bind-Value="_nullableDate" Placeholder="Pick a date" ShowClearButton="true" Id="pixata-dp-nullable" />
+  </div>
+  <div>
+    <p class="pixata-dp-sample-label">Telerik</p>
+    <TelerikDatePicker @bind-Value="_nullableDate" Placeholder="Pick a date" ShowClearButton="true" Id="telerik-dp-nullable" />
+  </div>
+</div>
+<p>Value: @(_nullableDate?.ToString("dd MMM yyyy", CultureInfo.CurrentCulture) ?? "null")</p>
+
+<h4>Date input, with a DateOnly value and a custom format</h4>
+
+<div class="pixata-dp-sample-row">
+  <div>
+    <p class="pixata-dp-sample-label">Pixata</p>
+    <PixataDateInput @bind-Value="_dateOnly" Format="dd/MM/yyyy" />
+  </div>
+  <div>
+    <p class="pixata-dp-sample-label">Telerik</p>
+    <TelerikDateInput @bind-Value="_dateOnlyAsDateTime" Format="dd/MM/yyyy" />
+  </div>
+</div>
+<p>Value: @_dateOnly</p>
+
+<h4>In a form</h4>
+
+<EditForm Model="_form">
+  <DataAnnotationsValidator />
+  <PixataDatePicker @bind-Value="_form.Due" Id="pixata-dp-form" />
+  <ValidationMessage For="() => _form.Due" />
+</EditForm>
+
+<h4>Calendar</h4>
+
+<div class="pixata-dp-sample-row">
+  <div>
+    <p class="pixata-dp-sample-label">Pixata</p>
+    <PixataCalendar @bind-Value="_calendarDate" ShowWeekNumbers="_weekNumbers" />
+  </div>
+  <div>
+    <p class="pixata-dp-sample-label">Telerik</p>
+    <TelerikCalendar @bind-Value="_calendarDate" ShowWeekNumbers="_weekNumbers" />
+  </div>
+</div>
+
+<label>
+  <input type="checkbox" @bind="_weekNumbers" />
+  Show week numbers
+</label>
+
+<style>
+  .pixata-dp-sample-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .pixata-dp-sample-label {
+    margin: .5rem 0 .25rem;
+    font-weight: bold;
+  }
+</style>
+
+@code {
+  private DateTime _date = new(2026, 1, 31);
+  private DateTime? _nullableDate;
+  private DateTime _calendarDate = new(2026, 10, 13);
+  private readonly DateTime _min = new(2000, 1, 1);
+  private readonly DateTime _max = new(2030, 12, 31);
+  private bool _weekNumbers;
+  private DateOnly _dateOnly = new(2026, 7, 14);
+  private readonly SampleForm _form = new();
+
+  private DateTime _dateOnlyAsDateTime {
+    get => _dateOnly.ToDateTime(TimeOnly.MinValue);
+    set => _dateOnly = DateOnly.FromDateTime(value);
+  }
+
+  private class SampleForm {
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Please pick a date")]
+    public DateTime? Due { get; set; }
+  }
+}

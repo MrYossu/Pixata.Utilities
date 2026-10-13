@@ -68,6 +68,23 @@
   --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
   --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-grid-border-radius: 4px;
+  /* The date input, date picker and calendar, again matching Telerik's Default theme */
+  --pixata-datepicker-font-size: .875rem;
+  --pixata-datepicker-line-height: 1.4285;
+  --pixata-datepicker-color: #3d3d3d;
+  --pixata-datepicker-subtle-color: #666;
+  --pixata-datepicker-bg: #fff;
+  --pixata-datepicker-border-color: rgba(0, 0, 0, .08);
+  --pixata-datepicker-hover-border-color: rgba(0, 0, 0, .16);
+  --pixata-datepicker-invalid-border-color: #ca1400;
+  --pixata-datepicker-button-bg: #f5f5f5;
+  --pixata-datepicker-button-hover-bg: #ebebeb;
+  --pixata-datepicker-primary: #ff6358;
+  --pixata-datepicker-primary-hover: #ea5a51;
+  --pixata-datepicker-primary-color: #fff;
+  --pixata-datepicker-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
+  --pixata-datepicker-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-datepicker-border-radius: 4px;
 }
 
 /*
@@ -917,6 +934,265 @@
 
 .pixata-blazor-grid-dropdown-item.pixata-blazor-grid-dropdown-selected:hover {
   background-color: var(--pixata-grid-primary-hover);
+}
+
+/* ---------- Date input, date picker and calendar ---------- */
+
+.pixata-blazor-dateinput {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  vertical-align: middle;
+  overflow: hidden;
+  font-size: var(--pixata-datepicker-font-size);
+  line-height: var(--pixata-datepicker-line-height);
+  color: var(--pixata-datepicker-color);
+  background-color: var(--pixata-datepicker-bg);
+  border: 1px solid var(--pixata-datepicker-border-color);
+  border-radius: var(--pixata-datepicker-border-radius);
+}
+
+.pixata-blazor-dateinput:hover {
+  border-color: var(--pixata-datepicker-hover-border-color);
+}
+
+.pixata-blazor-dateinput:focus-within,
+.pixata-blazor-datepicker-open {
+  border-color: var(--pixata-datepicker-hover-border-color);
+  box-shadow: var(--pixata-datepicker-focus-shadow);
+}
+
+.pixata-blazor-dateinput-invalid,
+.pixata-blazor-dateinput-invalid:hover,
+.pixata-blazor-dateinput-invalid:focus-within {
+  border-color: var(--pixata-datepicker-invalid-border-color);
+}
+
+.pixata-blazor-dateinput-disabled {
+  opacity: .6;
+  pointer-events: none;
+}
+
+.pixata-blazor-dateinput-input {
+  flex: 1 1 0%;
+  width: 100%;
+  min-width: 0;
+  padding: .25rem .5rem;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: none;
+  font: inherit;
+}
+
+.pixata-blazor-dateinput-input::placeholder {
+  color: var(--pixata-datepicker-subtle-color);
+  opacity: 1;
+}
+
+.pixata-blazor-dateinput-clear {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  padding: 0 .25rem;
+  opacity: .5;
+  cursor: pointer;
+}
+
+.pixata-blazor-dateinput-clear:hover {
+  opacity: 1;
+}
+
+.pixata-blazor-dateinput-clear svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-blazor-datepicker-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  padding: .25rem;
+  border: 0;
+  border-inline-start: 1px solid var(--pixata-datepicker-border-color);
+  color: inherit;
+  background-color: var(--pixata-datepicker-button-bg);
+  cursor: pointer;
+}
+
+.pixata-blazor-datepicker-button:hover {
+  background-color: var(--pixata-datepicker-button-hover-bg);
+}
+
+.pixata-blazor-datepicker-button:disabled {
+  cursor: default;
+}
+
+.pixata-blazor-datepicker-button svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Positioned by the JavaScript, with fixed positioning so it isn't clipped by a container with overflow hidden */
+.pixata-blazor-datepicker-popup {
+  position: fixed;
+  z-index: 10002;
+  display: flex;
+  background-color: var(--pixata-datepicker-bg);
+  border: 1px solid var(--pixata-datepicker-border-color);
+  box-shadow: var(--pixata-datepicker-popup-shadow);
+}
+
+.pixata-blazor-calendar {
+  display: inline-flex;
+  flex-direction: column;
+  font-size: var(--pixata-datepicker-font-size);
+  line-height: var(--pixata-datepicker-line-height);
+  color: var(--pixata-datepicker-color);
+  background-color: var(--pixata-datepicker-bg);
+  border: 1px solid var(--pixata-datepicker-border-color);
+  border-radius: var(--pixata-datepicker-border-radius);
+}
+
+.pixata-blazor-datepicker-popup .pixata-blazor-calendar {
+  border: 0;
+  border-radius: 0;
+}
+
+.pixata-blazor-calendar-header {
+  display: flex;
+  align-items: center;
+  padding: .25rem;
+}
+
+.pixata-blazor-calendar-title {
+  color: var(--pixata-datepicker-primary);
+}
+
+.pixata-blazor-calendar-title:disabled {
+  opacity: 1;
+  pointer-events: none;
+}
+
+.pixata-blazor-calendar-spacer {
+  flex: 1 1 auto;
+}
+
+.pixata-blazor-calendar-nav {
+  display: flex;
+}
+
+.pixata-blazor-calendar-view {
+  display: flex;
+  justify-content: center;
+  padding: 0 .25rem;
+}
+
+.pixata-blazor-calendar-table {
+  margin: 0 16px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+  outline: none;
+}
+
+/* The week numbers take the space the margin would have used, so the calendar stays the same width, as in Telerik's */
+.pixata-blazor-calendar-with-week-numbers .pixata-blazor-calendar-table,
+.pixata-blazor-calendar-yearview .pixata-blazor-calendar-table,
+.pixata-blazor-calendar-decadeview .pixata-blazor-calendar-table,
+.pixata-blazor-calendar-centuryview .pixata-blazor-calendar-table {
+  margin: 0;
+}
+
+.pixata-blazor-calendar-th,
+.pixata-blazor-calendar-td {
+  padding: 0;
+  border: 0;
+  font-weight: normal;
+  text-align: center;
+  cursor: default;
+}
+
+.pixata-blazor-calendar-th {
+  width: 32px;
+  height: 32px;
+  font-size: .75rem;
+  line-height: 24px;
+  text-transform: uppercase;
+  color: var(--pixata-datepicker-subtle-color);
+}
+
+.pixata-blazor-calendar-td {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--pixata-datepicker-border-radius);
+}
+
+.pixata-blazor-calendar-yearview .pixata-blazor-calendar-td,
+.pixata-blazor-calendar-decadeview .pixata-blazor-calendar-td,
+.pixata-blazor-calendar-centuryview .pixata-blazor-calendar-td {
+  width: 64px;
+  height: 64px;
+}
+
+.pixata-blazor-calendar-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: .25rem;
+  border-radius: var(--pixata-datepicker-border-radius);
+  cursor: pointer;
+}
+
+.pixata-blazor-calendar-centuryview .pixata-blazor-calendar-link {
+  text-align: start;
+}
+
+.pixata-blazor-calendar-td:hover .pixata-blazor-calendar-link {
+  color: var(--pixata-datepicker-color);
+  background-color: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.pixata-blazor-calendar-other-month {
+  color: var(--pixata-datepicker-subtle-color);
+}
+
+.pixata-blazor-calendar-today {
+  font-weight: bold;
+  color: var(--pixata-datepicker-primary);
+}
+
+.pixata-blazor-calendar-td.pixata-blazor-calendar-selected .pixata-blazor-calendar-link {
+  font-weight: bold;
+  color: var(--pixata-datepicker-primary-color);
+  background-color: var(--pixata-datepicker-primary);
+}
+
+.pixata-blazor-calendar-td.pixata-blazor-calendar-selected:hover .pixata-blazor-calendar-link {
+  color: var(--pixata-datepicker-primary-color);
+  background-color: var(--pixata-datepicker-primary-hover);
+}
+
+.pixata-blazor-calendar-focus .pixata-blazor-calendar-link {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.pixata-blazor-calendar-disabled {
+  opacity: .6;
+  pointer-events: none;
+}
+
+.pixata-blazor-calendar-week-number {
+  font-size: .75rem;
+  color: var(--pixata-datepicker-subtle-color);
 }
 
 /* ---------- Spinner ---------- */

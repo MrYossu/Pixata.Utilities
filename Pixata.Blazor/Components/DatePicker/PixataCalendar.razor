@@ -1,0 +1,85 @@
+@namespace Pixata.Blazor.Components
+
+<div class="@DatePickerCss.Join("pixata-blazor-calendar", Class)" id="@Id">
+  <div class="pixata-blazor-calendar-header">
+    <button type="button"
+            class="pixata-blazor-button pixata-blazor-calendar-title"
+            title="@(_view == TopView ? null : TitleTooltip)"
+            disabled="@(_view == TopView)"
+            @onclick="GoUp">
+      @Title
+    </button>
+    <span class="pixata-blazor-calendar-spacer"></span>
+    <span class="pixata-blazor-calendar-nav">
+      <button type="button" tabindex="-1" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-calendar-nav-prev" title="Go to the previous period" aria-label="Go to the previous period" disabled="@(!CanGoBack)" @onclick="() => Navigate(-1)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.4 3.6 6 8l4.4 4.4-.7.7L4.6 8l5.1-5.1z" /></svg>
+      </button>
+      <button type="button" tabindex="-1" class="pixata-blazor-button pixata-blazor-calendar-nav-today" disabled="@(!TodayAvailable)" @onclick="GoToToday">Today</button>
+      <button type="button" tabindex="-1" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-calendar-nav-next" title="Go to the next period" aria-label="Go to the next period" disabled="@(!CanGoForward)" @onclick="() => Navigate(1)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.6 12.4 10 8 5.6 3.6l.7-.7L11.4 8l-5.1 5.1z" /></svg>
+      </button>
+    </span>
+  </div>
+  <div class="@DatePickerCss.Join("pixata-blazor-calendar-view", $"pixata-blazor-calendar-{_view.ToString().ToLowerInvariant()}view", ShowWeekNumbers && _view == PixataCalendarView.Month ? "pixata-blazor-calendar-with-week-numbers" : null)">
+    <table @ref="_table"
+           class="pixata-blazor-calendar-table"
+           role="grid"
+           tabindex="0"
+           aria-label="@Title"
+           @onkeydown="OnKeyDown"
+           @onfocus="() => _tableHasFocus = true"
+           @onblur="() => _tableHasFocus = false">
+      @if (_view == PixataCalendarView.Month) {
+        <thead>
+          <tr>
+            @if (ShowWeekNumbers) {
+              <th class="pixata-blazor-calendar-th pixata-blazor-calendar-week-number" scope="col"></th>
+            }
+            @foreach (string day in DayHeaders) {
+              <th class="pixata-blazor-calendar-th" scope="col" abbr="@day">@day[..1]</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (List<Cell?> row in MonthRows()) {
+            <tr>
+              @if (ShowWeekNumbers) {
+                <td class="pixata-blazor-calendar-td pixata-blazor-calendar-week-number">@WeekNumber(row)</td>
+              }
+              @foreach (Cell? cell in row) {
+                @CellMarkup(cell)
+              }
+            </tr>
+          }
+        </tbody>
+      } else {
+        <tbody>
+          @foreach (List<Cell?> row in GridRows()) {
+            <tr>
+              @foreach (Cell? cell in row) {
+                @CellMarkup(cell)
+              }
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+  </div>
+</div>
+
+@code {
+  private RenderFragment CellMarkup(Cell? cell) => __builder => {
+    if (cell is null) {
+      <td class="pixata-blazor-calendar-td pixata-blazor-calendar-empty" role="gridcell"></td>
+    } else {
+      <td class="@CellClass(cell)"
+          role="gridcell"
+          title="@cell.Title"
+          aria-selected="@(cell.Selected ? "true" : "false")"
+          aria-disabled="@(cell.Disabled ? "true" : null)"
+          @onclick="() => CellClicked(cell)">
+        <span class="pixata-blazor-calendar-link">@cell.Text</span>
+      </td>
+    }
+  };
+}

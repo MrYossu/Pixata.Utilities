@@ -1,0 +1,39 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+@inherits PixataDateInputBase<TValue>
+
+@* A date input where each part of the date is typed or changed with the arrow keys, as in Telerik's DateInput *@
+<span class="@WrapperClass" style="@WidthStyle">
+  <input @ref="InputElement"
+         class="pixata-blazor-dateinput-input"
+         id="@Id"
+         type="text"
+         value="@InitialText"
+         placeholder="@Placeholder"
+         inputmode="@EffectiveInputMode"
+         autocomplete="off"
+         disabled="@(!Enabled)"
+         readonly="@ReadOnly"
+         tabindex="@TabIndex"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         @onkeydown="OnKeyDown" />
+  @if (ShowClearButton && IsNullable && HasValue && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-dateinput-clear" role="button" title="Clear" aria-label="Clear" @onclick="Clear">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 7.3 3.6-3.6.7.7L8.7 8l3.6 3.6-.7.7L8 8.7l-3.6 3.6-.7-.7L7.3 8 3.7 4.4l.7-.7z" /></svg>
+    </span>
+  }
+</span>
+
+@code {
+  private string WrapperClass =>
+    DatePickerCss.Join("pixata-blazor-dateinput", IsInvalid ? "pixata-blazor-dateinput-invalid" : null, Enabled ? null : "pixata-blazor-dateinput-disabled", Class);
+
+  private string? WidthStyle =>
+    Width is null ? null : $"width: {Width}";
+
+  private async Task OnKeyDown(KeyboardEventArgs e) {
+    if (e.Key == "Enter") {
+      await RaiseChangeIfNeeded();
+    }
+  }
+}

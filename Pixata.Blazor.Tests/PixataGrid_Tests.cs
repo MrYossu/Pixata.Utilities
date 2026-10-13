@@ -57,7 +57,7 @@ public class PixataGrid_Tests {
   public void Initialise() {
     _ctx = new();
     _culture = CultureInfo.CurrentCulture;
-    CultureInfo.CurrentCulture = new("en-GB");
+    CultureInfo.CurrentCulture = new("en-GB", useUserOverride: false);
   }
 
   [TestCleanup]
