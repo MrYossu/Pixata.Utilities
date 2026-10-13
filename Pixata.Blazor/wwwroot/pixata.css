@@ -781,7 +781,7 @@
   --pixata-blazor-popup-border-color: rgba(0, 0, 0, .08);
   --pixata-blazor-popup-shadow: 0 4px 6px rgba(0, 0, 0, .06), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-blazor-popup-z-index: 100000;
-  --pixata-blazor-overlay-bg: rgba(0, 0, 0, .5);
+  --pixata-blazor-overlay-bg: rgba(61, 61, 61, .5);
   --pixata-blazor-overlay-z-index: 10000;
   --pixata-blazor-window-shadow: 0 6px 8px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-blazor-transition: .1s ease-in-out;
