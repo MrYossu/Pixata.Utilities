@@ -1,0 +1,153 @@
+@using System.ComponentModel
+@using System.Globalization
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+
+@* The grid's pager. Its layout and classes mirror Telerik's, so that it looks the same. The container is there so the pager can
+   adapt to its own width with container queries, rather than needing JavaScript to measure it *@
+<div class="pixata-grid-pager-container">
+  <div class="@Css.Join("pixata-grid-pager", Adaptive ? "pixata-grid-pager-adaptive" : null)"
+       role="navigation"
+       aria-label="@PixataGridMessages.PagerNavigation(Page, PageCount)">
+    <div class="pixata-grid-pager-numbers-wrap">
+      <button type="button" class="pixata-grid-btn pixata-grid-btn-icon pixata-grid-pager-nav pixata-grid-pager-first" title="@PixataGridMessages.PagerFirstPage" aria-label="@PixataGridMessages.PagerFirstPage" disabled="@(Page <= 1)" @onclick="() => GoTo(1)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 4v8L5 8zM4 4v8h1V4z" /></svg>
+      </button>
+      <button type="button" class="pixata-grid-btn pixata-grid-btn-icon pixata-grid-pager-nav" title="@PixataGridMessages.PagerPreviousPage" aria-label="@PixataGridMessages.PagerPreviousPage" disabled="@(Page <= 1)" @onclick="() => GoTo(Page - 1)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 4v8L5 8z" /></svg>
+      </button>
+      @if (InputType == PixataGridPagerInputType.Buttons) {
+        <div class="pixata-grid-pager-numbers">
+          @if (FirstButton > 1) {
+            <button type="button" class="pixata-grid-btn pixata-grid-pager-number" title="@PixataGridMessages.PagerMorePages" aria-label="@PixataGridMessages.PagerMorePages" @onclick="() => GoTo(FirstButton - 1)">...</button>
+          }
+          @for (int p = FirstButton; p <= LastButton; p++) {
+            int pageNumber = p;
+            <button type="button"
+                    class="@Css.Join("pixata-grid-btn", "pixata-grid-pager-number", pageNumber == Page ? "pixata-grid-selected" : null)"
+                    title="@($"{PixataGridMessages.PagerPage} {pageNumber}")"
+                    aria-current="@(pageNumber == Page ? "page" : null)"
+                    @onclick="() => GoTo(pageNumber)">
+              @pageNumber
+            </button>
+          }
+          @if (LastButton < PageCount) {
+            <button type="button" class="pixata-grid-btn pixata-grid-pager-number" title="@PixataGridMessages.PagerMorePages" aria-label="@PixataGridMessages.PagerMorePages" @onclick="() => GoTo(LastButton + 1)">...</button>
+          }
+        </div>
+        @if (Adaptive && PageCount > 0) {
+          <PixataGridDropDownList TValue="int"
+                                  Class="pixata-grid-pager-numbers-dropdown"
+                                  Items="PageItems"
+                                  Value="Page"
+                                  ValueChanged="GoTo"
+                                  AriaLabel="@PixataGridMessages.PagerSelectPage" />
+        }
+      } else {
+        <span class="pixata-grid-pager-input">
+          <span class="pixata-grid-pager-input-label">@PixataGridMessages.PagerPage</span>
+          <input @key="_inputKey"
+                 class="pixata-grid-pager-input-box"
+                 type="text"
+                 inputmode="numeric"
+                 aria-label="@PixataGridMessages.PagerSelectPage"
+                 value="@Page"
+                 @onchange="OnInputChange" />
+          <span>@PixataGridMessages.PagerOf @PageCount</span>
+        </span>
+      }
+      <button type="button" class="pixata-grid-btn pixata-grid-btn-icon pixata-grid-pager-nav" title="@PixataGridMessages.PagerNextPage" aria-label="@PixataGridMessages.PagerNextPage" disabled="@(Page >= PageCount)" @onclick="() => GoTo(Page + 1)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 4v8l6-4z" /></svg>
+      </button>
+      <button type="button" class="pixata-grid-btn pixata-grid-btn-icon pixata-grid-pager-nav pixata-grid-pager-last" title="@PixataGridMessages.PagerLastPage" aria-label="@PixataGridMessages.PagerLastPage" disabled="@(Page >= PageCount)" @onclick="() => GoTo(PageCount)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 4v8l6-4zM11 4v8h1V4z" /></svg>
+      </button>
+    </div>
+    @if (PageSizes is { Count: > 0 }) {
+      <span class="pixata-grid-pager-sizes">
+        <PixataGridDropDownList TValue="int?"
+                                Items="PageSizeItems"
+                                Value="PageSize"
+                                ValueChanged="OnPageSizeChange"
+                                AriaLabel="@PixataGridMessages.PagerSelectPageSize" />
+        <span class="pixata-grid-pager-sizes-label">@PixataGridMessages.PagerItemsPerPage</span>
+      </span>
+    }
+    <span class="pixata-grid-pager-info">@Info</span>
+  </div>
+</div>
+
+@code {
+  [Parameter]
+  public int Page { get; set; }
+
+  [Parameter]
+  public int PageSize { get; set; }
+
+  [Parameter]
+  public int Total { get; set; }
+
+  [Parameter]
+  public int ButtonCount { get; set; } = 10;
+
+  [Parameter]
+  public List<int?>? PageSizes { get; set; }
+
+  [Parameter]
+  public PixataGridPagerInputType InputType { get; set; }
+
+  [Parameter]
+  public bool Adaptive { get; set; } = true;
+
+  [Parameter]
+  public EventCallback<int> PageChanged { get; set; }
+
+  [Parameter]
+  public EventCallback<int?> PageSizeChanged { get; set; }
+
+  private int _inputKey;
+
+  private int PageCount =>
+    PageSize <= 0 ? (Total > 0 ? 1 : 0) : (Total + PageSize - 1) / PageSize;
+
+  // The buttons are shown in fixed groups, as in Telerik's pager: with ButtonCount = 5, pages 1-5, then 6-10 and so on
+  private int FirstButton =>
+    (Math.Max(Page, 1) - 1) / Math.Max(ButtonCount, 1) * Math.Max(ButtonCount, 1) + 1;
+
+  private int LastButton =>
+    Math.Min(FirstButton + Math.Max(ButtonCount, 1) - 1, PageCount);
+
+  private string Info {
+    get {
+      if (Total == 0) {
+        return PixataGridMessages.PagerInfo(0, 0, 0);
+      }
+      int first = PageSize <= 0 ? 1 : (Page - 1) * PageSize + 1;
+      int last = PageSize <= 0 ? Total : Math.Min(Page * PageSize, Total);
+      return PixataGridMessages.PagerInfo(first, last, Total);
+    }
+  }
+
+  private List<(int, string)> PageItems =>
+    [.. Enumerable.Range(1, PageCount).Select(p => (p, p.ToString(CultureInfo.CurrentCulture)))];
+
+  private List<(int?, string)> PageSizeItems =>
+    [.. (PageSizes ?? []).Select(s => (s, s?.ToString(CultureInfo.CurrentCulture) ?? PixataGridMessages.PagerAll))];
+
+  private async Task GoTo(int page) {
+    page = Math.Clamp(page, 1, Math.Max(PageCount, 1));
+    if (page != Page) {
+      await PageChanged.InvokeAsync(page);
+    }
+  }
+
+  private async Task OnPageSizeChange(int? size) =>
+    await PageSizeChanged.InvokeAsync(size);
+
+  private async Task OnInputChange(ChangeEventArgs e) {
+    if (int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out int page)) {
+      await GoTo(page);
+    }
+    // Recreates the box, so it shows the actual page even when what was typed was invalid or out of range
+    _inputKey++;
+  }
+}

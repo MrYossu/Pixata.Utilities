@@ -2,6 +2,7 @@
 
 @* The columns render nothing; they just register with the grid. The table is deferred so it renders after they have done so *@
 <CascadingValue Value="this" IsFixed="true">
+  @GridSettings
   @GridColumns
 </CascadingValue>
 <PixataGridDefer>
@@ -9,6 +10,9 @@
     List<PixataGridColumn<TItem>> columns = RenderedColumns();
   }
   <div class="@GridClass" style="@GridStyle">
+    @if (Pageable && PagerPosition == PixataGridPagerPosition.Top) {
+      @Pager
+    }
     <div class="pixata-grid-content">
       <table class="pixata-grid-table">
         <colgroup>
@@ -49,5 +53,24 @@
         </tbody>
       </table>
     </div>
+    @if (Pageable && PagerPosition == PixataGridPagerPosition.Bottom) {
+      @Pager
+    }
   </div>
 </PixataGridDefer>
+
+@code {
+  private PixataGridPagerPosition PagerPosition =>
+    PagerSettings?.Position ?? PixataGridPagerPosition.Bottom;
+
+  private RenderFragment Pager =>
+    @<PixataGridPager Page="_page"
+                      PageSize="_pageSize"
+                      Total="_total"
+                      ButtonCount="@(PagerSettings?.ButtonCount ?? 10)"
+                      PageSizes="PagerSettings?.PageSizes"
+                      InputType="@(PagerSettings?.InputType ?? PixataGridPagerInputType.Buttons)"
+                      Adaptive="@(PagerSettings?.Adaptive ?? true)"
+                      PageChanged="OnPageChanged"
+                      PageSizeChanged="OnPageSizeChanged" />;
+}

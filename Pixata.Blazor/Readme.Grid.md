@@ -45,6 +45,10 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `Class` | `string` | A CSS class for the grid's outer element |
 | `Size` | `PixataGridSize` | `Medium` (the default) or `Small`, which sets the padding around the cells. Like Telerik's grid, there's no large size |
 | `NoDataTemplate` | `RenderFragment` | What to show when there are no items. Defaults to "No records available." |
+| `GridSettings` | `RenderFragment` | Settings for parts of the grid, such as the [pager](#paging) |
+| `Pageable` | `bool` | Splits the rows into pages, with a pager. See [paging](#paging) |
+| `PageSize` | `int` | The number of rows on a page. Defaults to 10. Can be two-way bound |
+| `Page` | `int` | The current page, starting from 1. Can be two-way bound |
 
 ## Column parameters
 
@@ -80,6 +84,34 @@ Generated columns go after any declared columns. To put them somewhere else, add
   </GridColumns>
 </PixataGrid>
 ```
+
+## Paging
+
+Set `Pageable="true"` to split the rows into pages. Bind `Page` and `PageSize` if you want to know or set them, and use `GridSettings` to change the pager...
+
+```razor
+<PixataGrid Data="_people" Pageable="true" @bind-Page="_page" @bind-PageSize="_pageSize">
+  <GridSettings>
+    <PixataGridPagerSettings ButtonCount="5" PageSizes="@([10, 25, 50, null])" />
+  </GridSettings>
+  <GridColumns>...</GridColumns>
+</PixataGrid>
+```
+
+| Pager setting | Type | What it does |
+| --- | --- | --- |
+| `ButtonCount` | `int` | The number of page buttons shown at once. Defaults to 10. Pages are shown in fixed groups (1-10, 11-20...), with "..." buttons that move to the next or previous group |
+| `PageSizes` | `List<int?>` | The page sizes the user can pick from. Include `null` to offer "All". If not set, there's no page size dropdown |
+| `InputType` | `PixataGridPagerInputType` | `Buttons` (the default) for a button per page, or `Input` for a box where the user types the page number |
+| `Position` | `PixataGridPagerPosition` | `Bottom` (the default) or `Top`. Like Telerik's grid, there's no option to have both |
+| `Adaptive` | `bool` | Whether the pager adapts to its width. Defaults to true. As it narrows, the "1 - 10 of 91 items" text goes first, then the page size dropdown, and finally the page buttons become a dropdown |
+
+As in Telerik's grid...
+
+- Picking a page size goes back to the first page
+- Picking "All" sets `PageSize` to the number of items, so that's what the dropdown shows afterwards
+- If the page is past the end (because the data shrank, or you set `Page` too high), the grid moves to the last page and raises `PageChanged`
+- A page number typed in the box is limited to the pages that exist, and anything that isn't a number is ignored
 
 ## Updating the data
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Pixata.Extensions.Grid;
 
@@ -63,21 +64,77 @@ public partial class PixataGrid<TItem> : IDisposable {
   [Parameter]
   public RenderFragment? NoDataTemplate { get; set; }
 
+  /// <summary>
+  /// Settings for parts of the grid, such as <see cref="PixataGridPagerSettings{TItem}"/>
+  /// </summary>
+  [Parameter]
+  public RenderFragment? GridSettings { get; set; }
+
+  /// <summary>
+  /// Whether the rows are split into pages, with a pager to move between them
+  /// </summary>
+  [Parameter]
+  public bool Pageable { get; set; }
+
+  /// <summary>
+  /// The number of rows on a page. Defaults to 10. Can be two-way bound
+  /// </summary>
+  [Parameter]
+  public int PageSize { get; set; } = 10;
+
+  /// <summary>
+  /// Fires when the user picks a page size. If they pick "All", the page size is set to the number of items
+  /// </summary>
+  [Parameter]
+  public EventCallback<int> PageSizeChanged { get; set; }
+
+  /// <summary>
+  /// The current page, starting from 1. Can be two-way bound
+  /// </summary>
+  [Parameter]
+  public int Page { get; set; } = 1;
+
+  /// <summary>
+  /// Fires when the page changes, whether the user moved to another one, or the grid moved back because the data shrank
+  /// </summary>
+  [Parameter]
+  public EventCallback<int> PageChanged { get; set; }
+
+  internal PixataGridPagerSettings<TItem>? PagerSettings { get; set; }
+
   private readonly List<PixataGridColumnBase<TItem>> _columns = [];
   private List<TItem> _items = [];
+  private int _total;
   private IEnumerable<TItem>? _boundData;
   private (string? Width, List<PixataGridColumn<TItem>> Columns)? _generated;
   private bool _disposed;
+
+  // The page and page size the grid is using. They follow the parameters when those change, but the user can change them
+  // too, so the grid pages even when the parent doesn't bind them
+  private int _page = 1;
+  private int _pageSize = 10;
+  private int? _lastPageParameter;
+  private int? _lastPageSizeParameter;
 
   /// <summary>
   /// Re-reads the data. Call this after changing the contents of <see cref="Data"/> without replacing it
   /// </summary>
   public void Rebind() {
-    ProcessData();
+    if (ProcessData()) {
+      _ = PageChanged.InvokeAsync(_page);
+    }
     StateHasChanged();
   }
 
-  protected override void OnParametersSet() {
+  protected override async Task OnParametersSetAsync() {
+    if (Page != _lastPageParameter) {
+      _page = Math.Max(Page, 1);
+      _lastPageParameter = Page;
+    }
+    if (PageSize != _lastPageSizeParameter) {
+      _pageSize = PageSize;
+      _lastPageSizeParameter = PageSize;
+    }
     if (!ReferenceEquals(Data, _boundData)) {
       Unsubscribe();
       _boundData = Data;
@@ -87,11 +144,48 @@ public partial class PixataGrid<TItem> : IDisposable {
     }
     // The data is processed on every parameter change, not just when the reference changes, so a parent that changes the
     // collection in place and then re-renders sees the change. Telerik's grid needs a new reference or a Rebind() for that
-    ProcessData();
+    if (ProcessData()) {
+      await PageChanged.InvokeAsync(_page);
+    }
   }
 
-  private void ProcessData() =>
-    _items = (_boundData ?? []).ToGridResult(new GridRequest()).Data;
+  // Applies paging (and later sorting and so on) to the data. Returns true if the page had to move back because there are
+  // no longer enough items to fill it, in which case the caller should raise PageChanged
+  private bool ProcessData() {
+    IEnumerable<TItem> data = _boundData ?? [];
+    GridRequest request = Pageable ? new() { Page = _page, PageSize = _pageSize } : new();
+    GridResult<TItem> result = data.ToGridResult(request);
+    bool moved = false;
+    if (Pageable && _pageSize > 0) {
+      int pageCount = Math.Max((result.Total + _pageSize - 1) / _pageSize, 1);
+      if (_page > pageCount) {
+        _page = pageCount;
+        result = data.ToGridResult(request with { Page = _page });
+        moved = true;
+      }
+    }
+    _items = result.Data;
+    _total = result.Total;
+    return moved;
+  }
+
+  private async Task OnPageChanged(int page) {
+    _page = page;
+    ProcessData();
+    await PageChanged.InvokeAsync(page);
+  }
+
+  // Changing the page size goes back to the first page, as Telerik's grid does
+  private async Task OnPageSizeChanged(int? size) {
+    _pageSize = size ?? _total;
+    bool pageMoved = _page != 1;
+    _page = 1;
+    ProcessData();
+    await PageSizeChanged.InvokeAsync(_pageSize);
+    if (pageMoved) {
+      await PageChanged.InvokeAsync(1);
+    }
+  }
 
   private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
     _ = InvokeAsync(Rebind);

@@ -1,0 +1,119 @@
+@using System.ComponentModel
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@typeparam TValue
+
+@* A dropdown list that looks like Telerik's. It's used inside the grid (pager sizes, page numbers, and later the filters), so it
+   lives with the grid rather than being a general component *@
+<span class="@Css.Join("pixata-grid-dropdown", _open ? "pixata-grid-dropdown-open" : null, Class)" style="@(Width is null ? null : $"width: {Width}")">
+  <button type="button"
+          class="pixata-grid-dropdown-button"
+          role="combobox"
+          aria-label="@AriaLabel"
+          aria-haspopup="listbox"
+          aria-expanded="@(_open ? "true" : "false")"
+          @onclick="Toggle"
+          @onkeydown="OnKeyDown"
+          @onkeydown:preventDefault="_open">
+    <span class="pixata-grid-dropdown-text">@SelectedText</span>
+    <span class="pixata-grid-dropdown-arrow" aria-hidden="true">
+      <svg viewBox="0 0 16 16"><path d="M4 6h8l-4 5z" /></svg>
+    </span>
+  </button>
+  @if (_open) {
+    <span class="pixata-grid-dropdown-backdrop" @onclick="Close"></span>
+    <ul class="pixata-grid-dropdown-list" role="listbox">
+      @for (int i = 0; i < Items.Count; i++) {
+        int index = i;
+        (TValue value, string text) = Items[i];
+        <li role="option"
+            aria-selected="@(Equals(value, Value) ? "true" : "false")"
+            class="@Css.Join("pixata-grid-dropdown-item", Equals(value, Value) ? "pixata-grid-dropdown-selected" : null, index == _highlighted ? "pixata-grid-dropdown-focus" : null)"
+            @onclick="() => Select(index)">
+          @text
+        </li>
+      }
+    </ul>
+  }
+</span>
+
+@code {
+  [Parameter]
+  public IReadOnlyList<(TValue Value, string Text)> Items { get; set; } = [];
+
+  [Parameter]
+  public TValue? Value { get; set; }
+
+  [Parameter]
+  public EventCallback<TValue> ValueChanged { get; set; }
+
+  [Parameter]
+  public string? Width { get; set; }
+
+  [Parameter]
+  public string? Class { get; set; }
+
+  [Parameter]
+  public string? AriaLabel { get; set; }
+
+  private bool _open;
+  private int _highlighted = -1;
+
+  // A value that isn't in the list is still shown, as Telerik's pager does when "All" turns the page size into the item count
+  private string SelectedText =>
+    Items.FirstOrDefault(i => Equals(i.Value, Value)).Text ?? Value?.ToString() ?? "";
+
+  private void Toggle() {
+    if (_open) {
+      Close();
+    } else {
+      Open();
+    }
+  }
+
+  private void Open() {
+    _open = true;
+    _highlighted = Items.ToList().FindIndex(i => Equals(i.Value, Value));
+  }
+
+  private void Close() {
+    _open = false;
+    _highlighted = -1;
+  }
+
+  private async Task Select(int index) {
+    Close();
+    TValue value = Items[index].Value;
+    if (!Equals(value, Value)) {
+      Value = value;
+      await ValueChanged.InvokeAsync(value);
+    }
+  }
+
+  // Keyboard handling as in Telerik's dropdown list: Alt+Down opens, Up/Down move (or change the value when closed), Enter selects,
+  // Esc closes. Enter and Space open it through the button's normal click. Default key actions are only blocked while it's open,
+  // as the flag is read when the element is rendered, not when the key is pressed
+  private async Task OnKeyDown(KeyboardEventArgs e) {
+    int current = _open ? _highlighted : Items.ToList().FindIndex(i => Equals(i.Value, Value));
+    switch (e.Key) {
+      case "ArrowDown" when e.AltKey:
+        Open();
+        break;
+      case "ArrowUp" when e.AltKey:
+      case "Escape":
+        Close();
+        break;
+      case "ArrowDown" or "ArrowUp": {
+        int next = Math.Clamp(current + (e.Key == "ArrowDown" ? 1 : -1), 0, Items.Count - 1);
+        if (_open) {
+          _highlighted = next;
+        } else if (next != current) {
+          await Select(next);
+        }
+        break;
+      }
+      case "Enter" when _open && _highlighted >= 0:
+        await Select(_highlighted);
+        break;
+    }
+  }
+}

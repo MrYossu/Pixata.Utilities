@@ -59,6 +59,15 @@
   --pixata-grid-header-bg: #fafafa;
   --pixata-grid-alt-row-bg: rgba(61, 61, 61, .05);
   --pixata-grid-hover-bg: rgba(61, 61, 61, .11);
+  --pixata-grid-primary: #ff6358;
+  --pixata-grid-primary-hover: #ea5a51;
+  --pixata-grid-primary-color: #fff;
+  --pixata-grid-input-bg: #fff;
+  --pixata-grid-picker-bg: #f5f5f5;
+  --pixata-grid-picker-hover-bg: #ebebeb;
+  --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
+  --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-grid-border-radius: 4px;
 }
 
 /*
@@ -538,6 +547,297 @@
 
 .pixata-grid-text-right {
   text-align: right;
+}
+
+/* Buttons inside the grid. Hover, press and selection are shown by an overlay in the text colour, as in Telerik's flat buttons */
+.pixata-grid-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  min-width: 30px;
+  padding: .25rem .5rem;
+  border: 1px solid transparent;
+  border-radius: var(--pixata-grid-border-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-grid-btn::before,
+.pixata-grid-btn::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .1s ease-in-out;
+}
+
+.pixata-grid-btn::before {
+  background-color: currentColor;
+}
+
+.pixata-grid-btn::after {
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.pixata-grid-btn:hover::before {
+  opacity: .08;
+}
+
+.pixata-grid-btn:active::before {
+  opacity: .16;
+}
+
+.pixata-grid-btn.pixata-grid-selected::before {
+  opacity: .2;
+}
+
+.pixata-grid-btn:focus {
+  outline: none;
+}
+
+.pixata-grid-btn:focus-visible::after {
+  opacity: .12;
+}
+
+.pixata-grid-btn:disabled {
+  opacity: .6;
+  pointer-events: none;
+}
+
+.pixata-grid-btn-icon {
+  padding: .25rem;
+}
+
+.pixata-grid-btn svg {
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  fill: currentColor;
+}
+
+/* The pager. Its container lets it adapt to its own width with container queries */
+/* The width is needed, as an element that contains its inline size doesn't stretch to fill the grid's flex column */
+.pixata-grid-pager-container {
+  width: 100%;
+  container-type: inline-size;
+}
+
+.pixata-grid-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .875rem;
+  padding: .5rem;
+  white-space: nowrap;
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-header-bg);
+  border-top: 1px solid var(--pixata-grid-border-color);
+}
+
+.pixata-grid > .pixata-grid-pager-container:first-child .pixata-grid-pager {
+  border-top: 0;
+  border-bottom: 1px solid var(--pixata-grid-border-color);
+}
+
+.pixata-grid-pager-adaptive {
+  flex-wrap: nowrap;
+}
+
+.pixata-grid-pager-numbers-wrap,
+.pixata-grid-pager-numbers {
+  display: flex;
+}
+
+/* Telerik's pager buttons are square, unlike its other buttons */
+.pixata-grid-pager .pixata-grid-btn {
+  border-radius: 0;
+}
+
+.pixata-grid-pager-number {
+  color: var(--pixata-grid-primary);
+}
+
+.pixata-grid-pager-number.pixata-grid-selected {
+  cursor: default;
+}
+
+.pixata-grid-pager .pixata-grid-pager-numbers-dropdown {
+  display: none;
+}
+
+.pixata-grid-pager-input,
+.pixata-grid-pager-sizes {
+  display: flex;
+  align-items: center;
+  gap: 1ex;
+}
+
+.pixata-grid-pager-input {
+  margin: 0 .875rem;
+}
+
+.pixata-grid-pager-input-box {
+  width: 5em;
+  padding: .25rem .5rem;
+  border: 1px solid var(--pixata-grid-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+  background-color: var(--pixata-grid-input-bg);
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+}
+
+.pixata-grid-pager-input-box:focus {
+  outline: none;
+  box-shadow: var(--pixata-grid-focus-shadow);
+}
+
+.pixata-grid-pager-info {
+  display: flex;
+  flex: 1 1 0%;
+  justify-content: flex-end;
+  text-align: end;
+  order: 9;
+}
+
+/*
+  As the pager narrows, the info goes, then the page size dropdown, and finally the page buttons become a dropdown, which is
+  what Telerik's adaptive pager is documented to do
+*/
+@container (max-width: 760px) {
+  .pixata-grid-pager-adaptive .pixata-grid-pager-info {
+    display: none;
+  }
+}
+
+@container (max-width: 560px) {
+  .pixata-grid-pager-adaptive .pixata-grid-pager-sizes {
+    display: none;
+  }
+}
+
+@container (max-width: 460px) {
+  .pixata-grid-pager-adaptive .pixata-grid-pager-numbers {
+    display: none;
+  }
+
+  .pixata-grid-pager-adaptive .pixata-grid-pager-numbers-dropdown {
+    display: inline-flex;
+    margin: 0 .25rem;
+  }
+}
+
+/* The dropdown list used by the pager and the filters, which looks like Telerik's */
+.pixata-grid-dropdown {
+  position: relative;
+  display: inline-flex;
+  min-width: 5em;
+}
+
+.pixata-grid-dropdown-button {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--pixata-grid-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+  background-color: var(--pixata-grid-picker-bg);
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.pixata-grid-dropdown-button:hover {
+  background-color: var(--pixata-grid-picker-hover-bg);
+}
+
+.pixata-grid-dropdown-button:focus {
+  outline: none;
+}
+
+.pixata-grid-dropdown-button:focus-visible,
+.pixata-grid-dropdown-open .pixata-grid-dropdown-button {
+  box-shadow: var(--pixata-grid-focus-shadow);
+}
+
+.pixata-grid-dropdown-text {
+  flex: 1 1 0%;
+  padding: .25rem .5rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.pixata-grid-dropdown-arrow {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  padding: .25rem;
+}
+
+.pixata-grid-dropdown-arrow svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Covers the page while the list is open, so a click anywhere else closes it without needing JavaScript */
+.pixata-grid-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.pixata-grid-dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1001;
+  min-width: 100%;
+  max-height: 200px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-input-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  box-shadow: var(--pixata-grid-popup-shadow);
+}
+
+.pixata-grid-dropdown-item {
+  padding: .25rem .5rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pixata-grid-dropdown-item:hover {
+  background-color: rgba(61, 61, 61, .08);
+}
+
+.pixata-grid-dropdown-focus {
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .16);
+}
+
+.pixata-grid-dropdown-item.pixata-grid-dropdown-selected {
+  color: var(--pixata-grid-primary-color);
+  background-color: var(--pixata-grid-primary);
+}
+
+.pixata-grid-dropdown-item.pixata-grid-dropdown-selected:hover {
+  background-color: var(--pixata-grid-primary-hover);
 }
 
 /* ---------- Spinner ---------- */

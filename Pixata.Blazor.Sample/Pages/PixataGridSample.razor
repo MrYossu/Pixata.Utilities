@@ -54,6 +54,54 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Paging</h4>
+
+<p>Both grids are bound to the same <code>Page</code> and <code>PageSize</code>, so moving one moves the other. The pager shows 5 page buttons at a time, and offers page sizes of 3, 5, 10 and All. Narrow the window to see the pager adapt.</p>
+
+<div class="pixata-grid-sample-options">
+  <label>
+    Pager input
+    <select @bind="_pagerInputType">
+      @foreach (PixataGridPagerInputType inputType in Enum.GetValues<PixataGridPagerInputType>()) {
+        <option value="@inputType">@inputType</option>
+      }
+    </select>
+  </label>
+  <label>
+    Pager position
+    <select @bind="_pagerPosition">
+      @foreach (PixataGridPagerPosition position in Enum.GetValues<PixataGridPagerPosition>()) {
+        <option value="@position">@position</option>
+      }
+    </select>
+  </label>
+  <span>Page @_page, page size @_pageSize</span>
+</div>
+
+<p class="pixata-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Pageable="true" @bind-PageSize="_pageSize" @bind-Page="_page">
+  <GridSettings>
+    <PixataGridPagerSettings ButtonCount="5" PageSizes="@_pageSizes" InputType="_pagerInputType" Position="_pagerPosition" />
+  </GridSettings>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" @bind-PageSize="_pageSize" @bind-Page="_page">
+  <GridSettings>
+    <GridPagerSettings ButtonCount="5" PageSizes="@_pageSizes" InputType="@TelerikInputType" Position="@TelerikPagerPosition" />
+  </GridSettings>
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Email)" />
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -82,6 +130,11 @@
   private readonly List<GridSampleEmployee> _employees = GridSampleEmployee.All();
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
+  private int _pageSize = 3;
+  private int _page = 1;
+  private readonly List<int?> _pageSizes = [3, 5, 10, null];
+  private PixataGridPagerInputType _pagerInputType = PixataGridPagerInputType.Buttons;
+  private PixataGridPagerPosition _pagerPosition = PixataGridPagerPosition.Bottom;
 
   private List<GridSampleEmployee> Data =>
     _empty ? [] : _employees;
@@ -90,4 +143,10 @@
     PixataGridSize.Small => ThemeConstants.Grid.Size.Small,
     _ => ThemeConstants.Grid.Size.Medium
   };
+
+  private PagerInputType TelerikInputType =>
+    _pagerInputType == PixataGridPagerInputType.Input ? PagerInputType.Input : PagerInputType.Buttons;
+
+  private PagerPosition TelerikPagerPosition =>
+    _pagerPosition == PixataGridPagerPosition.Top ? PagerPosition.Top : PagerPosition.Bottom;
 }
