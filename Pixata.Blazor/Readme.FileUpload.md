@@ -40,7 +40,7 @@ Handle `OnSelect`, and read each file's `Stream`...
 A few things to know about the stream...
 
 - It reads the file from the browser as you go, so it has to be read asynchronously (`CopyToAsync()`, `ReadAsync()` and so on). The synchronous `Read()` throws.
-- `Stream` can be read once. If you need to read the file again, call `OpenReadStream()`, which gives you a new stream each time. Its `maxAllowedSize` parameter (500 KB by default) is a safety net: it throws an `IOException` if the file is bigger, so set it to the most you're prepared to read.
+- `Stream` can be read once. Once it has been read to the end, it lets go of the browser's copy of the file, so you don't need to dispose it (though doing so does no harm, and releases the file early if you stop part way). If you need to read the file again, call `OpenReadStream()`, which gives you a new stream each time. Its `maxAllowedSize` parameter (500 KB by default) is a safety net: it throws an `IOException` if the file is bigger, so set it to the most you're prepared to read.
 - Read the file before it leaves the list, as the browser lets go of it then. You can read it in `OnSelect`, or later (eg when a form is saved) from `CurrentFiles`.
 - Files that fail validation are still passed to `OnSelect` (so you can tell the user why), with `IsValid` set to false. Check it before using the file. Validation in the browser is a convenience for the user, not security, so check the file again on the server if it matters.
 
@@ -132,7 +132,7 @@ Each chunk is posted like a whole file would be, with the chunk in the `SaveFiel
 | `Size` | `long` | 1 MB | The size of each chunk, in bytes |
 | `AutoRetryAfter` | `int` | 100 | How long to wait before sending a failed chunk again, in milliseconds |
 | `MaxAutoRetries` | `int` | 1 | How many times a failed chunk is sent again before the file is marked as failed |
-| `Resumable` | `bool` | `true` | When true, the user can pause and resume the upload. Pausing stops the chunk being sent, and resuming sends it again |
+| `Resumable` | `bool` | `true` | When true, the user can pause and resume the upload. Pausing lets the chunk being sent finish, and stops before the next one; resuming carries on from there |
 | `MetadataField` | `string` | `chunkMetadata` | The form field the JSON description is sent in |
 
 `PixataUploadChunkSettings` throws an `InvalidOperationException` if it isn't inside a `PixataUpload`.

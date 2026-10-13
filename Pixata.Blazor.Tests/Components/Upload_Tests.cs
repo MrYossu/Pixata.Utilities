@@ -245,6 +245,18 @@ public class Upload_Tests {
   }
 
   [TestMethod]
+  public async Task SingleFile_OnSelectLeavingEveryFileOut_KeepsTheOldOne() {
+    using Browser browser = new();
+    IRenderedComponent<PixataFileSelect> cut = browser.Context.Render<PixataFileSelect>(p => p
+      .Add(c => c.Multiple, false)
+      .Add(c => c.OnSelect, (PixataFileSelectEventArgs e) => e.Files.RemoveAll(f => f.Name.StartsWith("reject"))));
+    await browser.Pick(cut, ("first.txt", 10));
+    await browser.Pick(cut, ("reject.txt", 10));
+    CollectionAssert.AreEqual(new[] { "first.txt" }, Names(cut));
+    Assert.AreEqual(0, browser.Calls("forgetFiles").Count(c => ((string[])c.Arguments[1]!).Contains("b1")));
+  }
+
+  [TestMethod]
   public async Task Stream_ReadsTheFileFromTheBrowser() {
     using Browser browser = new();
     FakeStreamReference reference = new(Encoding.UTF8.GetBytes("Hello"));
@@ -262,6 +274,36 @@ public class Upload_Tests {
     JSRuntimeInvocation getFile = browser.Calls("getFile").Single();
     Assert.AreEqual(7, getFile.Arguments[0]);
     Assert.AreEqual("b1", getFile.Arguments[1]);
+  }
+
+  [TestMethod]
+  public async Task Stream_ReadToTheEnd_LetsGoOfTheBrowserFile() {
+    using Browser browser = new();
+    FakeStreamReference reference = new(Encoding.UTF8.GetBytes("Hello"));
+    browser.Upload.Setup<IJSStreamReference>("getFile", _ => true).SetResult(reference);
+    IRenderedComponent<PixataFileSelect> cut = browser.Context.Render<PixataFileSelect>(p => p
+      .Add(c => c.OnSelect, async (PixataFileSelectEventArgs e) => {
+        // Read without disposing the stream, as most code does
+        using MemoryStream copy = new();
+        await e.Files[0].Stream!.CopyToAsync(copy);
+      }));
+    await browser.Pick(cut, ("hello.txt", 5));
+    // Otherwise the browser holds on to the file (and the server to the stream) until the user leaves the app
+    Assert.IsTrue(reference.Disposed);
+    Assert.AreEqual(0, await cut.Instance.CurrentFiles[0].Stream!.ReadAsync(new byte[10]));
+    Assert.AreEqual(1, browser.Calls("getFile").Count);
+  }
+
+  [TestMethod]
+  public async Task Stream_ReadAfterDisposing_Throws() {
+    using Browser browser = new();
+    browser.Upload.Setup<IJSStreamReference>("getFile", _ => true).SetResult(new FakeStreamReference(Encoding.UTF8.GetBytes("Hello")));
+    IRenderedComponent<PixataFileSelect> cut = browser.Context.Render<PixataFileSelect>();
+    await browser.Pick(cut, ("hello.txt", 5));
+    Stream stream = cut.Instance.CurrentFiles[0].OpenReadStream();
+    await stream.DisposeAsync();
+    await Assert.ThrowsExceptionAsync<ObjectDisposedException>(async () => await stream.ReadAsync(new byte[10]));
+    Assert.AreEqual(0, browser.Calls("getFile").Count);
   }
 
   [TestMethod]
@@ -792,6 +834,65 @@ public class Upload_Tests {
     IRenderedComponent<PixataUpload> cut = browser.Context.Render<PixataUpload>(p => p.Add(c => c.SaveUrl, SaveUrl));
     await cut.Instance.DisposeAsync();
     Assert.AreEqual(7, browser.Calls("dispose").Single().Arguments[0]);
+  }
+
+  [TestMethod]
+  public async Task Upload_DisposedWhileOnUploadRuns_SendsNothingAndFinishes() {
+    using Browser browser = new();
+    TaskCompletionSource release = new();
+    IRenderedComponent<PixataUpload> cut = browser.Context.Render<PixataUpload>(p => p
+      .Add(c => c.SaveUrl, SaveUrl)
+      .Add(c => c.AutoUpload, false)
+      .Add(c => c.OnUpload, async (PixataUploadEventArgs _) => await release.Task));
+    await browser.Pick(cut, ("photo.png", 2048));
+    Task uploading = Task.CompletedTask;
+    await cut.InvokeAsync(() => {
+      uploading = cut.Instance.UploadFiles();
+    });
+    await cut.Instance.DisposeAsync();
+    release.SetResult();
+    // The browser has forgotten the component, so it would never answer a request sent now
+    Assert.AreSame(uploading, await Task.WhenAny(uploading, Task.Delay(2000)));
+    Assert.AreEqual(0, browser.Calls("send").Count);
+  }
+
+  [TestMethod]
+  public async Task Upload_BrowserRefusingTheRequest_MarksTheFileFailed() {
+    using Browser browser = new();
+    // eg a header name with a space in it, or a SaveUrl that isn't a valid URL
+    browser.Upload.SetupVoid("send", _ => true).SetException(new JSException("'bad header' is not a valid HTTP header field name"));
+    List<PixataUploadErrorEventArgs> errors = [];
+    IRenderedComponent<PixataUpload> cut = browser.Context.Render<PixataUpload>(p => p
+      .Add(c => c.SaveUrl, SaveUrl)
+      .Add(c => c.OnError, (PixataUploadErrorEventArgs e) => errors.Add(e)));
+    await browser.Pick(cut, ("photo.png", 2048));
+    cut.WaitForAssertion(() => Assert.AreEqual(PixataUploadFileStatus.Failed, cut.Instance.CurrentFiles[0].Status));
+    Assert.AreEqual(1, errors.Count);
+    Assert.AreEqual(0, errors[0].Request.Status);
+    StringAssert.Contains(errors[0].Request.StatusText, "bad header");
+    Assert.IsNotNull(cut.Find(".pixata-blazor-upload-retry"));
+  }
+
+  [TestMethod]
+  public async Task Upload_FinishingWhileOnCancelRuns_KeepsTheUploadedFile() {
+    using Browser browser = new();
+    TaskCompletionSource release = new();
+    IRenderedComponent<PixataUpload> cut = browser.Context.Render<PixataUpload>(p => p
+      .Add(c => c.SaveUrl, SaveUrl)
+      .Add(c => c.OnCancel, async (PixataUploadCancelEventArgs _) => await release.Task));
+    await browser.Pick(cut, ("photo.png", 2048));
+    cut.WaitForAssertion(() => Assert.AreEqual(1, browser.Requests.Count));
+    Task cancelling = Task.CompletedTask;
+    await cut.InvokeAsync(() => {
+      cancelling = cut.Instance.CancelFile(cut.Instance.CurrentFiles[0].Id);
+    });
+    await browser.Complete(cut, browser.Requests[0].Id, 200);
+    release.SetResult();
+    await cancelling;
+    // It's on the server now, so dropping it from the list would leave it there with no way to remove it
+    Assert.AreEqual(1, cut.Instance.CurrentFiles.Count);
+    Assert.AreEqual(PixataUploadFileStatus.Uploaded, cut.Instance.CurrentFiles[0].Status);
+    Assert.AreEqual(0, browser.Calls("cancel").Count);
   }
 
   // ---------- PixataDropZone ----------

@@ -15,6 +15,8 @@ internal sealed class PixataFileStream(long length, long maxAllowedSize, Func<Ca
   private IJSStreamReference? _reference;
   private Stream? _inner;
   private long _position;
+  private bool _finished;
+  private bool _disposed;
 
   public override bool CanRead => true;
   public override bool CanSeek => false;
@@ -33,9 +35,19 @@ internal sealed class PixataFileStream(long length, long maxAllowedSize, Func<Ca
     throw new NotSupportedException("The file is read from the browser, so it has to be read asynchronously, eg with CopyToAsync() or ReadAsync()");
 
   public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) {
+    ObjectDisposedException.ThrowIf(_disposed, this);
+    if (_finished || buffer.Length == 0) {
+      return 0;
+    }
     Stream inner = await Inner(cancellationToken);
     int read = await inner.ReadAsync(buffer, cancellationToken);
     _position += read;
+    if (read == 0) {
+      // Let go of the browser's file as soon as it has all been read, as code that reads a stream often doesn't dispose it,
+      // and the browser (and in Blazor Server, the server) would otherwise hold on to it for as long as the user is here
+      _finished = true;
+      await Release();
+    }
     return read;
   }
 
@@ -68,6 +80,7 @@ internal sealed class PixataFileStream(long length, long maxAllowedSize, Func<Ca
 
   protected override void Dispose(bool disposing) {
     if (disposing) {
+      _disposed = true;
       _inner?.Dispose();
       _inner = null;
       _ = DisposeReference();
@@ -76,12 +89,17 @@ internal sealed class PixataFileStream(long length, long maxAllowedSize, Func<Ca
   }
 
   public override async ValueTask DisposeAsync() {
+    _disposed = true;
+    await Release();
+    await base.DisposeAsync();
+  }
+
+  private async Task Release() {
     if (_inner is not null) {
       await _inner.DisposeAsync();
       _inner = null;
     }
     await DisposeReference();
-    await base.DisposeAsync();
   }
 
   private async Task DisposeReference() {

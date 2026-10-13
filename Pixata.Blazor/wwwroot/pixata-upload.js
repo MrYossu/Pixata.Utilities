@@ -237,14 +237,16 @@ export function send(id, requestId, request) {
   sendNext(state, job);
 }
 
+// Pausing lets the chunk being sent finish, and then stops. Aborting it instead would mean sending it again on resume, and
+// if it was the last chunk and the server had already received it, the server would have finished the file, and would
+// reject the chunk sent again
 export function pause(id, requestId) {
   const job = findJob(id, requestId);
   if (job && !job.paused) {
     job.paused = true;
+    // A failed chunk waiting to be sent again waits for the upload to be resumed instead
     clearTimeout(job.retryTimer);
-    if (job.xhr) {
-      job.xhr.abort();
-    }
+    job.retryTimer = 0;
   }
 }
 
@@ -253,7 +255,10 @@ export function resume(id, requestId) {
   const job = findJob(id, requestId);
   if (state && job && job.paused) {
     job.paused = false;
-    sendNext(state, job);
+    // If a chunk is still on its way, the next one is sent when it has finished
+    if (!job.xhr) {
+      sendNext(state, job);
+    }
   }
 }
 
@@ -284,6 +289,16 @@ function sendNext(state, job) {
   if (job.cancelled || job.paused) {
     return;
   }
+  try {
+    post(state, job);
+  } catch (e) {
+    // The browser wouldn't send the request, eg because a header name or the URL isn't valid
+    job.xhr = null;
+    complete(state, job, { status: 0, statusText: (e && e.message) || String(e), responseType: "text", responseText: "", success: false });
+  }
+}
+
+function post(state, job) {
   const request = job.request;
   const form = new FormData();
   Object.entries(request.data || {}).forEach(([key, value]) => form.append(key, value));
@@ -324,7 +339,7 @@ function sendNext(state, job) {
     };
   }
   xhr.onload = () => {
-    if (job.cancelled || job.paused) {
+    if (job.cancelled) {
       return;
     }
     job.xhr = null;
@@ -344,7 +359,7 @@ function sendNext(state, job) {
     complete(state, job, result(xhr, ok));
   };
   xhr.onerror = () => {
-    if (job.cancelled || job.paused) {
+    if (job.cancelled) {
       return;
     }
     job.xhr = null;
@@ -362,7 +377,13 @@ function retry(state, job) {
     return false;
   }
   job.retries++;
-  job.retryTimer = setTimeout(() => sendNext(state, job), chunk.autoRetryAfter || 0);
+  // A paused upload sends the chunk again when it is resumed
+  if (!job.paused) {
+    job.retryTimer = setTimeout(() => {
+      job.retryTimer = 0;
+      sendNext(state, job);
+    }, chunk.autoRetryAfter || 0);
+  }
   return true;
 }
 

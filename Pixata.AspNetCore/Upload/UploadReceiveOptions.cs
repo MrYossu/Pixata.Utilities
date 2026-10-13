@@ -22,7 +22,7 @@ public class UploadReceiveOptions {
 
   /// <summary>
   /// The largest file accepted, in bytes. Null (the default) means no limit, other than the ones the server imposes on the
-  /// request size
+  /// request size. Those don't limit a chunked upload, as each chunk is a separate request, so set this if you accept them
   /// </summary>
   public long? MaxFileSize { get; set; }
 

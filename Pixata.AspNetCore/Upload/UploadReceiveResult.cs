@@ -5,7 +5,8 @@ namespace Pixata.AspNetCore.Upload;
 /// </summary>
 public class UploadReceiveResult {
   /// <summary>
-  /// The files this request completed. For a chunked upload, this is empty until the last chunk arrives
+  /// The files this request completed. For a chunked upload, this is empty until the last chunk arrives. If a request with
+  /// several files fails part way through, it holds the ones that were saved before the failure
   /// </summary>
   public List<ReceivedFile> Files { get; init; } = [];
 
@@ -19,6 +20,12 @@ public class UploadReceiveResult {
   /// component shows the file as failed
   /// </summary>
   public string? Error { get; init; }
+
+  /// <summary>
+  /// When a file couldn't be written to the folder, the exception that stopped it, for you to log. Its message isn't put in
+  /// <see cref="Error"/>, as that is usually sent back to the browser, and the message can include the server's folder names
+  /// </summary>
+  public Exception? Exception { get; init; }
 
   /// <summary>
   /// True if the request was accepted
