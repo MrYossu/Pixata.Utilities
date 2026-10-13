@@ -16,7 +16,8 @@
                 ButtonsLayout="PixataDialogButtonsLayout.End"
                 FocusedElementSelector="@(dialog.Kind == PixataPredefinedDialogKind.Prompt ? ".pixata-blazor-dialog-prompt-input" : ".pixata-blazor-dialog-ok")"
                 Class="@($"pixata-blazor-dialog-predefined pixata-blazor-dialog-{dialog.Kind.ToString().ToLowerInvariant()}")"
-                role="alertdialog">
+                role="alertdialog"
+                aria-label="@(string.IsNullOrWhiteSpace(dialog.Title) ? dialog.Text : null)">
     <DialogContent>
       <div class="pixata-blazor-dialog-message">@dialog.Text</div>
       @if (dialog.Kind == PixataPredefinedDialogKind.Prompt) {

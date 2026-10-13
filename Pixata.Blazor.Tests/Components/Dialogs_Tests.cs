@@ -307,6 +307,7 @@ public class Dialogs_Tests {
     host.WaitForAssertion(() => Assert.AreEqual(1, host.FindAll(".pixata-blazor-dialog").Count));
     IElement dialog = host.Find(".pixata-blazor-dialog");
     Assert.AreEqual("alertdialog", dialog.GetAttribute("role"));
+    Assert.IsFalse(dialog.HasAttribute("aria-label"));
     StringAssert.Contains(dialog.ClassName, "pixata-blazor-dialog-alert");
     Assert.AreEqual("Saved", host.Find(".pixata-blazor-dialog-title").TextContent.Trim());
     Assert.AreEqual("Your changes have been saved.", host.Find(".pixata-blazor-dialog-message").TextContent);
@@ -320,12 +321,13 @@ public class Dialogs_Tests {
   }
 
   [TestMethod]
-  public async Task PixataDialogFactory_NoTitle_HasNoTitlebar() {
+  public async Task PixataDialogFactory_NoTitle_HasNoTitlebarAndIsNamedByItsMessage() {
     using BunitContext context = PixataTestContext.Create();
     (IRenderedComponent<PixataDialogHost> host, PixataDialogFactory factory) = RenderHost(context);
     _ = factory.AlertAsync("Saved");
     host.WaitForAssertion(() => Assert.AreEqual(1, host.FindAll(".pixata-blazor-dialog").Count));
     Assert.AreEqual(0, host.FindAll(".pixata-blazor-dialog-titlebar").Count);
+    Assert.AreEqual("Saved", host.Find(".pixata-blazor-dialog").GetAttribute("aria-label"));
   }
 
   [TestMethod]
