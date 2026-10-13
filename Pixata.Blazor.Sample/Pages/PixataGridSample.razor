@@ -11,7 +11,7 @@
 
 <p>Each example shows a <code>PixataGrid</code> with a Telerik grid underneath it, bound to the same data with the same settings, so you can compare them.</p>
 
-<div class="pixata-grid-sample-options">
+<div class="pixata-blazor-grid-sample-options">
   <label>
     Size
     <select @bind="_size">
@@ -30,7 +30,7 @@
 
 <p>The First name column has a width, Date of birth gets its format from a <code>[DisplayFormat]</code> attribute, Salary has a <code>DisplayFormat</code> and is right-aligned, and City is a nested field (<code>Address.City</code>). Columns without a <code>Title</code> get one from a <code>[Display(Name)]</code> attribute, or else from the field name split into words (so <code>DateOfBirth</code> becomes "Date of birth"). Telerik doesn't split the field name, so its headers differ there on purpose.</p>
 
-<p class="pixata-grid-sample-label">PixataGrid</p>
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Height="300px">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="140px" />
@@ -42,7 +42,7 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-grid-sample-label">Telerik grid</p>
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
 <TelerikGrid Data="Data" Size="@TelerikSize" Height="300px">
   <GridColumns>
     <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="140px" />
@@ -58,7 +58,7 @@
 
 <p>Both grids are bound to the same <code>Page</code> and <code>PageSize</code>, so moving one moves the other. The pager shows 5 page buttons at a time, and offers page sizes of 3, 5, 10 and All. Narrow the window to see the pager adapt.</p>
 
-<div class="pixata-grid-sample-options">
+<div class="pixata-blazor-grid-sample-options">
   <label>
     Pager input
     <select @bind="_pagerInputType">
@@ -78,7 +78,7 @@
   <span>Page @_page, page size @_pageSize</span>
 </div>
 
-<p class="pixata-grid-sample-label">PixataGrid</p>
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Pageable="true" @bind-PageSize="_pageSize" @bind-Page="_page">
   <GridSettings>
     <PixataGridPagerSettings ButtonCount="5" PageSizes="@_pageSizes" InputType="_pagerInputType" Position="_pagerPosition" />
@@ -90,7 +90,7 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-grid-sample-label">Telerik grid</p>
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
 <TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" @bind-PageSize="_pageSize" @bind-Page="_page">
   <GridSettings>
     <GridPagerSettings ButtonCount="5" PageSizes="@_pageSizes" InputType="@TelerikInputType" Position="@TelerikPagerPosition" />
@@ -106,14 +106,14 @@
 
 <p>Click a header to sort by that column. Clicking again sorts the other way, and a third click removes the sort. In multiple mode, each click adds to the sort, and the header shows the order. City is a nested field.</p>
 
-<div class="pixata-grid-sample-options">
+<div class="pixata-blazor-grid-sample-options">
   <label>
     <input type="checkbox" @bind="_multipleSort" />
     Sort by several columns
   </label>
 </div>
 
-<p class="pixata-grid-sample-label">PixataGrid</p>
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Sortable="true" SortMode="@(_multipleSort ? PixataGridSortMode.Multiple : PixataGridSortMode.Single)" Pageable="true" PageSize="5">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
@@ -125,7 +125,7 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-grid-sample-label">Telerik grid</p>
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
 <TelerikGrid Data="Data" Size="@TelerikSize" Sortable="true" SortMode="@(_multipleSort ? SortMode.Multiple : SortMode.Single)" Pageable="true" PageSize="5">
   <GridColumns>
     <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
@@ -141,21 +141,21 @@
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
 
-<p class="pixata-grid-sample-label">PixataGrid</p>
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data.Take(5)" Size="_size" AutoGenerateColumns="true" />
 
-<p class="pixata-grid-sample-label">Telerik grid</p>
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
 <TelerikGrid Data="Data.Take(5)" Size="@TelerikSize" AutoGenerateColumns="true" />
 
 <style>
-  .pixata-grid-sample-options {
+  .pixata-blazor-grid-sample-options {
     display: flex;
     gap: 2rem;
     align-items: center;
     margin-bottom: 1rem;
   }
 
-  .pixata-grid-sample-label {
+  .pixata-blazor-grid-sample-label {
     margin: 1rem 0 .25rem;
     font-weight: bold;
   }

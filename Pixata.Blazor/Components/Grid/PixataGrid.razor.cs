@@ -276,9 +276,9 @@ public partial class PixataGrid<TItem> : IDisposable {
   }
 
   private string GridClass =>
-    Css.Join("pixata-grid", Size switch {
-      PixataGridSize.Small => "pixata-grid-sm",
-      _ => "pixata-grid-md"
+    Css.Join("pixata-blazor-grid", Size switch {
+      PixataGridSize.Small => "pixata-blazor-grid-sm",
+      _ => "pixata-blazor-grid-md"
     }, Class);
 
   private string? GridStyle {

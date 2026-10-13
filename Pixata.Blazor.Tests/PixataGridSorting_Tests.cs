@@ -59,7 +59,7 @@ public class PixataGridSorting_Tests {
     string.Join(",", grid.FindAll("tbody tr").Select(tr => tr.QuerySelector("td")!.TextContent.Trim()));
 
   private static IElement Header(IRenderedFragment grid, string title) =>
-    grid.FindAll("th").Single(th => th.QuerySelector(".pixata-grid-column-title")!.TextContent.Trim() == title);
+    grid.FindAll("th").Single(th => th.QuerySelector(".pixata-blazor-grid-column-title")!.TextContent.Trim() == title);
 
   [TestMethod]
   public void Sorting_ClicksCycleThroughAscendingDescendingAndNone() {
@@ -68,7 +68,7 @@ public class PixataGridSorting_Tests {
     Header(grid, "Name").Click();
     Assert.AreEqual("Alice,Bob,Carol,Dave", Names(grid));
     Assert.AreEqual("ascending", Header(grid, "Name").GetAttribute("aria-sort"));
-    Assert.IsNotNull(Header(grid, "Name").QuerySelector(".pixata-grid-sort-icon"));
+    Assert.IsNotNull(Header(grid, "Name").QuerySelector(".pixata-blazor-grid-sort-icon"));
 
     Header(grid, "Name").Click();
     Assert.AreEqual("Dave,Carol,Bob,Alice", Names(grid));
@@ -77,7 +77,7 @@ public class PixataGridSorting_Tests {
     Header(grid, "Name").Click();
     Assert.AreEqual("Carol,Alice,Bob,Dave", Names(grid));
     Assert.IsNull(Header(grid, "Name").GetAttribute("aria-sort"));
-    Assert.IsNull(Header(grid, "Name").QuerySelector(".pixata-grid-sort-icon"));
+    Assert.IsNull(Header(grid, "Name").QuerySelector(".pixata-blazor-grid-sort-icon"));
   }
 
   [TestMethod]
@@ -89,7 +89,7 @@ public class PixataGridSorting_Tests {
 
     Assert.AreEqual("Dave,Carol,Bob,Alice", Names(grid));
     Assert.IsNull(Header(grid, "Name").GetAttribute("aria-sort"));
-    Assert.AreEqual(0, grid.FindAll(".pixata-grid-sort-order").Count);
+    Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-sort-order").Count);
   }
 
   [TestMethod]
@@ -101,13 +101,13 @@ public class PixataGridSorting_Tests {
     Header(grid, "Name").Click();
 
     Assert.AreEqual("Dave,Carol,Bob,Alice", Names(grid));
-    Assert.AreEqual("1", Header(grid, "Age").QuerySelector(".pixata-grid-sort-order")!.TextContent);
-    Assert.AreEqual("2", Header(grid, "Name").QuerySelector(".pixata-grid-sort-order")!.TextContent);
+    Assert.AreEqual("1", Header(grid, "Age").QuerySelector(".pixata-blazor-grid-sort-order")!.TextContent);
+    Assert.AreEqual("2", Header(grid, "Name").QuerySelector(".pixata-blazor-grid-sort-order")!.TextContent);
 
     // Removing the first sort promotes the second
     Header(grid, "Age").Click();
     Header(grid, "Age").Click();
-    Assert.AreEqual("1", Header(grid, "Name").QuerySelector(".pixata-grid-sort-order")!.TextContent);
+    Assert.AreEqual("1", Header(grid, "Name").QuerySelector(".pixata-blazor-grid-sort-order")!.TextContent);
     Assert.AreEqual("Dave,Carol,Bob,Alice", Names(grid));
   }
 
@@ -129,8 +129,8 @@ public class PixataGridSorting_Tests {
     Header(unsortable, "Name").Click();
 
     Assert.AreEqual("Carol,Alice,Bob,Dave", Names(grid));
-    Assert.IsFalse(Header(grid, "Age").ClassList.Contains("pixata-grid-sortable"));
-    Assert.IsTrue(Header(grid, "Name").ClassList.Contains("pixata-grid-sortable"));
+    Assert.IsFalse(Header(grid, "Age").ClassList.Contains("pixata-blazor-grid-sortable"));
+    Assert.IsTrue(Header(grid, "Name").ClassList.Contains("pixata-blazor-grid-sortable"));
     Assert.AreEqual("Carol,Alice,Bob,Dave", Names(unsortable));
     Assert.IsNull(Header(unsortable, "Name").GetAttribute("tabindex"));
   }

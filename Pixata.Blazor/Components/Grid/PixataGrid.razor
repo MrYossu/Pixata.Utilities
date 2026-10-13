@@ -15,8 +15,8 @@
     @if (Pageable && PagerPosition == PixataGridPagerPosition.Top) {
       @Pager
     }
-    <div class="pixata-grid-content">
-      <table class="pixata-grid-table">
+    <div class="pixata-blazor-grid-content">
+      <table class="pixata-blazor-grid-table">
         <colgroup>
           @foreach (PixataGridColumn<TItem> column in columns) {
             <col style="@column.WidthStyle" />
@@ -27,17 +27,17 @@
             @foreach (PixataGridColumn<TItem> column in columns) {
               bool sortable = CanSort(column);
               GridSortDescriptor? sort = sortable ? SortFor(column) : null;
-              <th class="@Css.Join(column.HeaderCellClass, sortable ? "pixata-grid-sortable" : null, sort is null ? null : "pixata-grid-sorted")"
+              <th class="@Css.Join(column.HeaderCellClass, sortable ? "pixata-blazor-grid-sortable" : null, sort is null ? null : "pixata-blazor-grid-sorted")"
                   scope="col"
                   aria-sort="@(sort is null ? null : sort.SortDirection == ListSortDirection.Ascending ? "ascending" : "descending")"
                   tabindex="@(sortable ? "0" : null)"
                   @onclick="() => OnHeaderClick(column)"
                   @onkeydown="e => OnHeaderKeyDown(e, column)">
-                <span class="pixata-grid-cell-inner">
-                  <span class="pixata-grid-link">
-                    <span class="pixata-grid-column-title">@column.HeaderText</span>
+                <span class="pixata-blazor-grid-cell-inner">
+                  <span class="pixata-blazor-grid-link">
+                    <span class="pixata-blazor-grid-column-title">@column.HeaderText</span>
                     @if (sort is not null) {
-                      <span class="pixata-grid-sort-icon" aria-hidden="true">
+                      <span class="pixata-blazor-grid-sort-icon" aria-hidden="true">
                         @if (sort.SortDirection == ListSortDirection.Ascending) {
                           <svg viewBox="0 0 16 16"><path d="M7 6v7h1V6h3L7.5 2 4 6z" /></svg>
                         } else {
@@ -45,12 +45,12 @@
                         }
                       </span>
                       @if (SortMode == PixataGridSortMode.Multiple) {
-                        <span class="pixata-grid-sort-order">@(_sorts.IndexOf(sort) + 1)</span>
+                        <span class="pixata-blazor-grid-sort-order">@(_sorts.IndexOf(sort) + 1)</span>
                       }
                     }
                   </span>
                   @if (sort is not null) {
-                    <span class="pixata-grid-visually-hidden">@(sort.SortDirection == ListSortDirection.Ascending ? PixataGridMessages.SortedAscending : PixataGridMessages.SortedDescending)</span>
+                    <span class="pixata-blazor-visually-hidden">@(sort.SortDirection == ListSortDirection.Ascending ? PixataGridMessages.SortedAscending : PixataGridMessages.SortedDescending)</span>
                   }
                 </span>
               </th>
@@ -59,8 +59,8 @@
         </thead>
         <tbody>
           @if (_items.Count == 0) {
-            <tr class="pixata-grid-norecords">
-              <td class="pixata-grid-td" colspan="@Math.Max(columns.Count, 1)">
+            <tr class="pixata-blazor-grid-norecords">
+              <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)">
                 @if (NoDataTemplate is null) {
                   @("No records available.")
                 } else {
@@ -71,7 +71,7 @@
           } else {
             @for (int i = 0; i < _items.Count; i++) {
               TItem item = _items[i];
-              <tr class="@(i % 2 == 1 ? "pixata-grid-row pixata-grid-alt-row" : "pixata-grid-row")">
+              <tr class="@(i % 2 == 1 ? "pixata-blazor-grid-row pixata-blazor-grid-alt-row" : "pixata-blazor-grid-row")">
                 @foreach (PixataGridColumn<TItem> column in columns) {
                   <td class="@column.CellClass">@column.CellText(item)</td>
                 }

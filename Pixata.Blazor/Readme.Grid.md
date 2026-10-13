@@ -163,16 +163,16 @@ The grid's colours, borders and spacing match Telerik's Default theme. To change
 
 | Property | Default | What it sets |
 | --- | --- | --- |
-| `--pixata-grid-font-size` | `.875rem` | The font size |
-| `--pixata-grid-line-height` | `1.4285` | The line height (20px with the default font size) |
-| `--pixata-grid-color` | `#3d3d3d` | The text colour |
-| `--pixata-grid-bg` | `#fff` | The background |
-| `--pixata-grid-border-color` | `rgba(0, 0, 0, .08)` | The outer border and the lines between columns |
+| `--pixata-ui-font-size` | `.875rem` | The font size |
+| `--pixata-ui-line-height` | `1.4285` | The line height (20px with the default font size) |
+| `--pixata-ui-color` | `#3d3d3d` | The text colour |
+| `--pixata-ui-bg` | `#fff` | The background |
+| `--pixata-ui-border-color` | `rgba(0, 0, 0, .08)` | The outer border and the lines between columns |
 | `--pixata-grid-header-bg` | `#fafafa` | The header background |
 | `--pixata-grid-alt-row-bg` | `rgba(61, 61, 61, .05)` | The background of every other row |
 | `--pixata-grid-hover-bg` | `rgba(61, 61, 61, .11)` | The background of the row under the mouse |
 
-The grid's elements all have classes starting with `pixata-grid-`, so you can target them in your own CSS. The grid doesn't use Telerik's `k-` classes, so it isn't affected by a Telerik theme on the same page.
+The grid's elements all have classes starting with `pixata-blazor-grid-`, so you can target them in your own CSS. The grid doesn't use Telerik's `k-` classes, so it isn't affected by a Telerik theme on the same page.
 
 ## Using the request types on the server
 

@@ -89,15 +89,15 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
     string.IsNullOrWhiteSpace(Width) ? null : $"width: {Width}";
 
   internal string CellClass =>
-    Css.Join("pixata-grid-td", TextAlign switch {
-      PixataGridTextAlign.Left => "pixata-grid-text-left",
-      PixataGridTextAlign.Center => "pixata-grid-text-center",
-      PixataGridTextAlign.Right => "pixata-grid-text-right",
+    Css.Join("pixata-blazor-grid-td", TextAlign switch {
+      PixataGridTextAlign.Left => "pixata-blazor-grid-text-left",
+      PixataGridTextAlign.Center => "pixata-blazor-grid-text-center",
+      PixataGridTextAlign.Right => "pixata-blazor-grid-text-right",
       _ => null
     }, Class);
 
   internal string HeaderCellClass =>
-    Css.Join("pixata-grid-th", HeaderClass);
+    Css.Join("pixata-blazor-grid-th", HeaderClass);
 
   internal string CellText(TItem item) {
     Resolve();

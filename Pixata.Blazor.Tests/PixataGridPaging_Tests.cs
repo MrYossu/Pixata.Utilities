@@ -60,19 +60,19 @@ public class PixataGridPaging_Tests {
     [.. grid.FindAll("tbody td").Select(td => td.TextContent.Trim())];
 
   private static string[] PageButtons(IRenderedFragment grid) =>
-    [.. grid.FindAll(".pixata-grid-pager-number").Select(b => b.TextContent.Trim())];
+    [.. grid.FindAll(".pixata-blazor-grid-pager-number").Select(b => b.TextContent.Trim())];
 
   private static IElement Nav(IRenderedFragment grid, string title) =>
-    grid.FindAll(".pixata-grid-pager-nav").Single(b => b.GetAttribute("title") == title);
+    grid.FindAll(".pixata-blazor-grid-pager-nav").Single(b => b.GetAttribute("title") == title);
 
   [TestMethod]
   public void Paging_ShowsTheFirstPageAndInfo() {
     IRenderedComponent<PixataGrid<Item>> grid = Render();
 
     CollectionAssert.AreEqual(new[] { "1", "2", "3", "4", "5" }, Ids(grid));
-    Assert.AreEqual("1 - 5 of 23 items", grid.Find(".pixata-grid-pager-info").TextContent);
+    Assert.AreEqual("1 - 5 of 23 items", grid.Find(".pixata-blazor-grid-pager-info").TextContent);
     CollectionAssert.AreEqual(new[] { "1", "2", "3", "4", "5" }, PageButtons(grid));
-    Assert.IsTrue(grid.Find(".pixata-grid-pager-number.pixata-grid-selected").TextContent.Contains('1'));
+    Assert.IsTrue(grid.Find(".pixata-blazor-grid-pager-number.pixata-blazor-grid-selected").TextContent.Contains('1'));
   }
 
   [TestMethod]
@@ -80,7 +80,7 @@ public class PixataGridPaging_Tests {
     IRenderedComponent<PixataGrid<Item>> grid = Render(pageable: false);
 
     Assert.AreEqual(23, Ids(grid).Length);
-    Assert.AreEqual(0, grid.FindAll(".pixata-grid-pager").Count);
+    Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-pager").Count);
   }
 
   [TestMethod]
@@ -88,11 +88,11 @@ public class PixataGridPaging_Tests {
     int changedTo = 0;
     IRenderedComponent<PixataGrid<Item>> grid = Render(pageChanged: EventCallback.Factory.Create<int>(this, p => changedTo = p));
 
-    grid.FindAll(".pixata-grid-pager-number").Single(b => b.TextContent.Trim() == "3").Click();
+    grid.FindAll(".pixata-blazor-grid-pager-number").Single(b => b.TextContent.Trim() == "3").Click();
 
     Assert.AreEqual(3, changedTo);
     CollectionAssert.AreEqual(new[] { "11", "12", "13", "14", "15" }, Ids(grid));
-    Assert.AreEqual("11 - 15 of 23 items", grid.Find(".pixata-grid-pager-info").TextContent);
+    Assert.AreEqual("11 - 15 of 23 items", grid.Find(".pixata-blazor-grid-pager-info").TextContent);
   }
 
   [TestMethod]
@@ -120,11 +120,11 @@ public class PixataGridPaging_Tests {
 
     CollectionAssert.AreEqual(new[] { "1", "2", "3", "..." }, PageButtons(grid));
 
-    grid.FindAll(".pixata-grid-pager-number").Last().Click();
+    grid.FindAll(".pixata-blazor-grid-pager-number").Last().Click();
     CollectionAssert.AreEqual(new[] { "...", "4", "5", "6", "..." }, PageButtons(grid));
     CollectionAssert.AreEqual(new[] { "7", "8" }, Ids(grid));
 
-    grid.FindAll(".pixata-grid-pager-number").First().Click();
+    grid.FindAll(".pixata-blazor-grid-pager-number").First().Click();
     CollectionAssert.AreEqual(new[] { "1", "2", "3", "..." }, PageButtons(grid));
     CollectionAssert.AreEqual(new[] { "5", "6" }, Ids(grid));
   }
@@ -154,9 +154,9 @@ public class PixataGridPaging_Tests {
     int newSize = 0;
     IRenderedComponent<PixataGrid<Item>> grid = Render(page: 3, pageSizes: [5, 10, null], pageSizeChanged: EventCallback.Factory.Create<int>(this, s => newSize = s));
 
-    grid.Find(".pixata-grid-pager-sizes .pixata-grid-dropdown-button").Click();
-    CollectionAssert.AreEqual(new[] { "5", "10", "All" }, grid.FindAll(".pixata-grid-dropdown-item").Select(i => i.TextContent.Trim()).ToArray());
-    grid.FindAll(".pixata-grid-dropdown-item").Single(i => i.TextContent.Trim() == "10").Click();
+    grid.Find(".pixata-blazor-grid-pager-sizes .pixata-blazor-grid-dropdown-button").Click();
+    CollectionAssert.AreEqual(new[] { "5", "10", "All" }, grid.FindAll(".pixata-blazor-grid-dropdown-item").Select(i => i.TextContent.Trim()).ToArray());
+    grid.FindAll(".pixata-blazor-grid-dropdown-item").Single(i => i.TextContent.Trim() == "10").Click();
 
     Assert.AreEqual(10, newSize);
     Assert.AreEqual(10, Ids(grid).Length);
@@ -168,44 +168,44 @@ public class PixataGridPaging_Tests {
     int newSize = 0;
     IRenderedComponent<PixataGrid<Item>> grid = Render(pageSizes: [5, null], pageSizeChanged: EventCallback.Factory.Create<int>(this, s => newSize = s));
 
-    grid.Find(".pixata-grid-pager-sizes .pixata-grid-dropdown-button").Click();
-    grid.FindAll(".pixata-grid-dropdown-item").Single(i => i.TextContent.Trim() == "All").Click();
+    grid.Find(".pixata-blazor-grid-pager-sizes .pixata-blazor-grid-dropdown-button").Click();
+    grid.FindAll(".pixata-blazor-grid-dropdown-item").Single(i => i.TextContent.Trim() == "All").Click();
 
     Assert.AreEqual(23, newSize);
     Assert.AreEqual(23, Ids(grid).Length);
-    Assert.AreEqual("23", grid.Find(".pixata-grid-pager-sizes .pixata-grid-dropdown-text").TextContent.Trim());
+    Assert.AreEqual("23", grid.Find(".pixata-blazor-grid-pager-sizes .pixata-blazor-grid-dropdown-text").TextContent.Trim());
   }
 
   [TestMethod]
   public void Paging_InputType_GoesToTheTypedPageClampedToTheRange() {
     IRenderedComponent<PixataGrid<Item>> grid = Render(inputType: PixataGridPagerInputType.Input);
 
-    Assert.AreEqual(0, grid.FindAll(".pixata-grid-pager-number").Count);
-    Assert.IsTrue(grid.Find(".pixata-grid-pager-input").TextContent.Contains("of 5"));
+    Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-pager-number").Count);
+    Assert.IsTrue(grid.Find(".pixata-blazor-grid-pager-input").TextContent.Contains("of 5"));
 
-    grid.Find(".pixata-grid-pager-input-box").Change("2");
+    grid.Find(".pixata-blazor-grid-pager-input-box").Change("2");
     CollectionAssert.AreEqual(new[] { "6", "7", "8", "9", "10" }, Ids(grid));
 
-    grid.Find(".pixata-grid-pager-input-box").Change("99");
+    grid.Find(".pixata-blazor-grid-pager-input-box").Change("99");
     CollectionAssert.AreEqual(new[] { "21", "22", "23" }, Ids(grid));
 
-    grid.Find(".pixata-grid-pager-input-box").Change("rubbish");
-    Assert.AreEqual("5", grid.Find(".pixata-grid-pager-input-box").GetAttribute("value"));
+    grid.Find(".pixata-blazor-grid-pager-input-box").Change("rubbish");
+    Assert.AreEqual("5", grid.Find(".pixata-blazor-grid-pager-input-box").GetAttribute("value"));
   }
 
   [TestMethod]
   public void Paging_PositionTop_PutsThePagerAboveTheRows() {
-    IElement root = Render(position: PixataGridPagerPosition.Top).Find(".pixata-grid");
+    IElement root = Render(position: PixataGridPagerPosition.Top).Find(".pixata-blazor-grid");
 
-    Assert.IsTrue(root.FirstElementChild!.ClassList.Contains("pixata-grid-pager-container"));
-    Assert.IsTrue(root.LastElementChild!.ClassList.Contains("pixata-grid-content"));
+    Assert.IsTrue(root.FirstElementChild!.ClassList.Contains("pixata-blazor-grid-pager-container"));
+    Assert.IsTrue(root.LastElementChild!.ClassList.Contains("pixata-blazor-grid-content"));
   }
 
   [TestMethod]
   public void Paging_NoData_ShowsZeroInfoAndNoPageButtons() {
     IRenderedComponent<PixataGrid<Item>> grid = Render(data: []);
 
-    Assert.AreEqual("0 - 0 of 0 items", grid.Find(".pixata-grid-pager-info").TextContent);
+    Assert.AreEqual("0 - 0 of 0 items", grid.Find(".pixata-blazor-grid-pager-info").TextContent);
     Assert.AreEqual(0, PageButtons(grid).Length);
   }
 }

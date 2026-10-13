@@ -51,23 +51,23 @@
   --pixata-focus-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
   --pixata-transition: .15s ease-in-out;
   /* The grid's own values match Telerik's Default theme rather than Bootstrap, so a PixataGrid looks like a Telerik grid */
-  --pixata-grid-font-size: .875rem;
-  --pixata-grid-line-height: 1.4285;
-  --pixata-grid-color: #3d3d3d;
-  --pixata-grid-bg: #fff;
-  --pixata-grid-border-color: rgba(0, 0, 0, .08);
+  --pixata-ui-font-size: .875rem;
+  --pixata-ui-line-height: 1.4285;
+  --pixata-ui-color: #3d3d3d;
+  --pixata-ui-bg: #fff;
+  --pixata-ui-border-color: rgba(0, 0, 0, .08);
   --pixata-grid-header-bg: #fafafa;
   --pixata-grid-alt-row-bg: rgba(61, 61, 61, .05);
   --pixata-grid-hover-bg: rgba(61, 61, 61, .11);
-  --pixata-grid-primary: #ff6358;
-  --pixata-grid-primary-hover: #ea5a51;
-  --pixata-grid-primary-color: #fff;
-  --pixata-grid-input-bg: #fff;
-  --pixata-grid-picker-bg: #f5f5f5;
-  --pixata-grid-picker-hover-bg: #ebebeb;
-  --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
-  --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
-  --pixata-grid-border-radius: 4px;
+  --pixata-ui-primary: #ff6358;
+  --pixata-ui-primary-hover: #ea5a51;
+  --pixata-ui-primary-color: #fff;
+  --pixata-ui-input-bg: #fff;
+  --pixata-ui-picker-bg: #f5f5f5;
+  --pixata-ui-picker-hover-bg: #ebebeb;
+  --pixata-ui-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
+  --pixata-ui-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-ui-border-radius: 4px;
 }
 
 /*
@@ -451,22 +451,22 @@
 
 /* ---------- Grid ---------- */
 
-.pixata-grid {
+.pixata-blazor-grid {
   display: flex;
   flex-direction: column;
   position: relative;
-  border: 1px solid var(--pixata-grid-border-color);
-  font-size: var(--pixata-grid-font-size);
-  line-height: var(--pixata-grid-line-height);
-  color: var(--pixata-grid-color);
-  background-color: var(--pixata-grid-bg);
+  border: 1px solid var(--pixata-ui-border-color);
+  font-size: var(--pixata-ui-font-size);
+  line-height: var(--pixata-ui-line-height);
+  color: var(--pixata-ui-color);
+  background-color: var(--pixata-ui-bg);
 }
 
 /*
   Only scrolls when the grid has a height, as otherwise the grid is as tall as its rows. The vertical scrollbar is always
   shown, as it is in Telerik's grid, so the columns are the same width whether or not the rows overflow
 */
-.pixata-grid-content {
+.pixata-blazor-grid-content {
   flex: 1 1 auto;
   min-height: 0;
   overflow-x: auto;
@@ -474,7 +474,7 @@
 }
 
 /* Separate borders, as collapsed ones don't stay with a sticky header */
-.pixata-grid-table {
+.pixata-blazor-grid-table {
   width: 100%;
   margin: 0;
   table-layout: fixed;
@@ -482,29 +482,29 @@
   border-spacing: 0;
 }
 
-.pixata-grid-th,
-.pixata-grid-td {
+.pixata-blazor-grid-th,
+.pixata-blazor-grid-td {
   box-sizing: content-box;
   padding: .5rem .75rem;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: start;
   font-weight: inherit;
-  border: 0 solid var(--pixata-grid-border-color);
+  border: 0 solid var(--pixata-ui-border-color);
   border-inline-start-width: 1px;
 }
 
-.pixata-grid-th:first-child,
-.pixata-grid-td:first-child {
+.pixata-blazor-grid-th:first-child,
+.pixata-blazor-grid-td:first-child {
   border-inline-start-width: 0;
 }
 
-.pixata-grid-sm .pixata-grid-th,
-.pixata-grid-sm .pixata-grid-td {
+.pixata-blazor-grid-sm .pixata-blazor-grid-th,
+.pixata-blazor-grid-sm .pixata-blazor-grid-td {
   padding: .25rem .5rem;
 }
 
-.pixata-grid-th {
+.pixata-blazor-grid-th {
   position: sticky;
   top: 0;
   z-index: 1;
@@ -518,17 +518,17 @@
   As in Telerik's grid, the header content is pulled out over the cell's padding and then padded again, so the whole cell is
   the click target for sorting
 */
-.pixata-grid-cell-inner {
+.pixata-blazor-grid-cell-inner {
   display: flex;
   align-items: center;
   margin: -.5rem -.75rem;
 }
 
-.pixata-grid-sm .pixata-grid-cell-inner {
+.pixata-blazor-grid-sm .pixata-blazor-grid-cell-inner {
   margin: -.25rem -.5rem;
 }
 
-.pixata-grid-link {
+.pixata-blazor-grid-link {
   display: flex;
   flex: 1 1 auto;
   align-items: center;
@@ -536,28 +536,28 @@
   padding: .5rem .75rem;
 }
 
-.pixata-grid-sm .pixata-grid-link {
+.pixata-blazor-grid-sm .pixata-blazor-grid-link {
   padding: .25rem .5rem;
 }
 
-.pixata-grid-sortable {
+.pixata-blazor-grid-sortable {
   cursor: pointer;
 }
 
-.pixata-grid-sortable:focus {
+.pixata-blazor-grid-sortable:focus {
   outline: none;
 }
 
-.pixata-grid-sortable:focus-visible {
+.pixata-blazor-grid-sortable:focus-visible {
   box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .16);
 }
 
 /* Telerik tints a sorted header slightly. It's a gradient so that it goes over the header's own background colour */
-.pixata-grid-sorted {
+.pixata-blazor-grid-sorted {
   background-image: linear-gradient(rgba(61, 61, 61, .03), rgba(61, 61, 61, .03));
 }
 
-.pixata-grid-column-title {
+.pixata-blazor-grid-column-title {
   display: block;
   flex-shrink: 1;
   min-width: 0;
@@ -566,32 +566,32 @@
   white-space: nowrap;
 }
 
-.pixata-grid-sort-icon {
+.pixata-blazor-grid-sort-icon {
   display: block;
   flex: 0 0 auto;
   width: 16px;
   height: 16px;
   margin-inline-start: 7px;
-  color: var(--pixata-grid-primary);
+  color: var(--pixata-ui-primary);
 }
 
-.pixata-grid-sort-icon svg {
+.pixata-blazor-grid-sort-icon svg {
   display: block;
   width: 16px;
   height: 16px;
   fill: currentColor;
 }
 
-.pixata-grid-sort-order {
+.pixata-blazor-grid-sort-order {
   display: block;
   height: 16px;
   margin: 2px 0 0 -2px;
   font-size: 12px;
   line-height: normal;
-  color: var(--pixata-grid-primary);
+  color: var(--pixata-ui-primary);
 }
 
-.pixata-grid-visually-hidden {
+.pixata-blazor-visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -600,36 +600,36 @@
   white-space: nowrap;
 }
 
-.pixata-grid-td {
+.pixata-blazor-grid-td {
   vertical-align: middle;
 }
 
-.pixata-grid-alt-row {
+.pixata-blazor-grid-alt-row {
   background-color: var(--pixata-grid-alt-row-bg);
 }
 
-.pixata-grid-row:hover {
+.pixata-blazor-grid-row:hover {
   background-color: var(--pixata-grid-hover-bg);
 }
 
-.pixata-grid-norecords .pixata-grid-td {
+.pixata-blazor-grid-norecords .pixata-blazor-grid-td {
   text-align: center;
 }
 
-.pixata-grid-text-left {
+.pixata-blazor-grid-text-left {
   text-align: left;
 }
 
-.pixata-grid-text-center {
+.pixata-blazor-grid-text-center {
   text-align: center;
 }
 
-.pixata-grid-text-right {
+.pixata-blazor-grid-text-right {
   text-align: right;
 }
 
 /* Buttons inside the grid. Hover, press and selection are shown by an overlay in the text colour, as in Telerik's flat buttons */
-.pixata-grid-btn {
+.pixata-blazor-button {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -638,7 +638,7 @@
   min-width: 30px;
   padding: .25rem .5rem;
   border: 1px solid transparent;
-  border-radius: var(--pixata-grid-border-radius);
+  border-radius: var(--pixata-ui-border-radius);
   background: none;
   color: inherit;
   font: inherit;
@@ -648,8 +648,8 @@
   user-select: none;
 }
 
-.pixata-grid-btn::before,
-.pixata-grid-btn::after {
+.pixata-blazor-button::before,
+.pixata-blazor-button::after {
   content: "";
   position: absolute;
   inset: -1px;
@@ -659,44 +659,44 @@
   transition: opacity .1s ease-in-out;
 }
 
-.pixata-grid-btn::before {
+.pixata-blazor-button::before {
   background-color: currentColor;
 }
 
-.pixata-grid-btn::after {
+.pixata-blazor-button::after {
   box-shadow: inset 0 0 0 2px currentColor;
 }
 
-.pixata-grid-btn:hover::before {
+.pixata-blazor-button:hover::before {
   opacity: .08;
 }
 
-.pixata-grid-btn:active::before {
+.pixata-blazor-button:active::before {
   opacity: .16;
 }
 
-.pixata-grid-btn.pixata-grid-selected::before {
+.pixata-blazor-button.pixata-blazor-grid-selected::before {
   opacity: .2;
 }
 
-.pixata-grid-btn:focus {
+.pixata-blazor-button:focus {
   outline: none;
 }
 
-.pixata-grid-btn:focus-visible::after {
+.pixata-blazor-button:focus-visible::after {
   opacity: .12;
 }
 
-.pixata-grid-btn:disabled {
+.pixata-blazor-button:disabled {
   opacity: .6;
   pointer-events: none;
 }
 
-.pixata-grid-btn-icon {
+.pixata-blazor-button-icon {
   padding: .25rem;
 }
 
-.pixata-grid-btn svg {
+.pixata-blazor-button svg {
   width: 16px;
   height: 16px;
   margin: 2px;
@@ -705,82 +705,82 @@
 
 /* The pager. Its container lets it adapt to its own width with container queries */
 /* The width is needed, as an element that contains its inline size doesn't stretch to fill the grid's flex column */
-.pixata-grid-pager-container {
+.pixata-blazor-grid-pager-container {
   width: 100%;
   container-type: inline-size;
 }
 
-.pixata-grid-pager {
+.pixata-blazor-grid-pager {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: .875rem;
   padding: .5rem;
   white-space: nowrap;
-  color: var(--pixata-grid-color);
+  color: var(--pixata-ui-color);
   background-color: var(--pixata-grid-header-bg);
-  border-top: 1px solid var(--pixata-grid-border-color);
+  border-top: 1px solid var(--pixata-ui-border-color);
 }
 
-.pixata-grid > .pixata-grid-pager-container:first-child .pixata-grid-pager {
+.pixata-blazor-grid > .pixata-blazor-grid-pager-container:first-child .pixata-blazor-grid-pager {
   border-top: 0;
-  border-bottom: 1px solid var(--pixata-grid-border-color);
+  border-bottom: 1px solid var(--pixata-ui-border-color);
 }
 
-.pixata-grid-pager-adaptive {
+.pixata-blazor-grid-pager-adaptive {
   flex-wrap: nowrap;
 }
 
-.pixata-grid-pager-numbers-wrap,
-.pixata-grid-pager-numbers {
+.pixata-blazor-grid-pager-numbers-wrap,
+.pixata-blazor-grid-pager-numbers {
   display: flex;
 }
 
 /* Telerik's pager buttons are square, unlike its other buttons */
-.pixata-grid-pager .pixata-grid-btn {
+.pixata-blazor-grid-pager .pixata-blazor-button {
   border-radius: 0;
 }
 
-.pixata-grid-pager-number {
-  color: var(--pixata-grid-primary);
+.pixata-blazor-grid-pager-number {
+  color: var(--pixata-ui-primary);
 }
 
-.pixata-grid-pager-number.pixata-grid-selected {
+.pixata-blazor-grid-pager-number.pixata-blazor-grid-selected {
   cursor: default;
 }
 
-.pixata-grid-pager .pixata-grid-pager-numbers-dropdown {
+.pixata-blazor-grid-pager .pixata-blazor-grid-pager-numbers-dropdown {
   display: none;
 }
 
-.pixata-grid-pager-input,
-.pixata-grid-pager-sizes {
+.pixata-blazor-grid-pager-input,
+.pixata-blazor-grid-pager-sizes {
   display: flex;
   align-items: center;
   gap: 1ex;
 }
 
-.pixata-grid-pager-input {
+.pixata-blazor-grid-pager-input {
   margin: 0 .875rem;
 }
 
-.pixata-grid-pager-input-box {
+.pixata-blazor-grid-pager-input-box {
   width: 5em;
   padding: .25rem .5rem;
-  border: 1px solid var(--pixata-grid-border-color);
-  border-radius: var(--pixata-grid-border-radius);
-  background-color: var(--pixata-grid-input-bg);
+  border: 1px solid var(--pixata-ui-border-color);
+  border-radius: var(--pixata-ui-border-radius);
+  background-color: var(--pixata-ui-input-bg);
   color: inherit;
   font: inherit;
   line-height: inherit;
 }
 
-.pixata-grid-pager-input-box:focus {
+.pixata-blazor-grid-pager-input-box:focus {
   outline: none;
-  box-shadow: var(--pixata-grid-focus-shadow);
+  box-shadow: var(--pixata-ui-focus-shadow);
 }
 
-.pixata-grid-pager-info {
+.pixata-blazor-grid-pager-info {
   display: flex;
   flex: 1 1 0%;
   justify-content: flex-end;
@@ -793,43 +793,43 @@
   what Telerik's adaptive pager is documented to do
 */
 @container (max-width: 760px) {
-  .pixata-grid-pager-adaptive .pixata-grid-pager-info {
+  .pixata-blazor-grid-pager-adaptive .pixata-blazor-grid-pager-info {
     display: none;
   }
 }
 
 @container (max-width: 560px) {
-  .pixata-grid-pager-adaptive .pixata-grid-pager-sizes {
+  .pixata-blazor-grid-pager-adaptive .pixata-blazor-grid-pager-sizes {
     display: none;
   }
 }
 
 @container (max-width: 460px) {
-  .pixata-grid-pager-adaptive .pixata-grid-pager-numbers {
+  .pixata-blazor-grid-pager-adaptive .pixata-blazor-grid-pager-numbers {
     display: none;
   }
 
-  .pixata-grid-pager-adaptive .pixata-grid-pager-numbers-dropdown {
+  .pixata-blazor-grid-pager-adaptive .pixata-blazor-grid-pager-numbers-dropdown {
     display: inline-flex;
     margin: 0 .25rem;
   }
 }
 
 /* The dropdown list used by the pager and the filters, which looks like Telerik's */
-.pixata-grid-dropdown {
+.pixata-blazor-grid-dropdown {
   position: relative;
   display: inline-flex;
   min-width: 5em;
 }
 
-.pixata-grid-dropdown-button {
+.pixata-blazor-grid-dropdown-button {
   display: flex;
   align-items: stretch;
   width: 100%;
   padding: 0;
-  border: 1px solid var(--pixata-grid-border-color);
-  border-radius: var(--pixata-grid-border-radius);
-  background-color: var(--pixata-grid-picker-bg);
+  border: 1px solid var(--pixata-ui-border-color);
+  border-radius: var(--pixata-ui-border-radius);
+  background-color: var(--pixata-ui-picker-bg);
   color: inherit;
   font: inherit;
   line-height: inherit;
@@ -837,27 +837,27 @@
   cursor: pointer;
 }
 
-.pixata-grid-dropdown-button:hover {
-  background-color: var(--pixata-grid-picker-hover-bg);
+.pixata-blazor-grid-dropdown-button:hover {
+  background-color: var(--pixata-ui-picker-hover-bg);
 }
 
-.pixata-grid-dropdown-button:focus {
+.pixata-blazor-grid-dropdown-button:focus {
   outline: none;
 }
 
-.pixata-grid-dropdown-button:focus-visible,
-.pixata-grid-dropdown-open .pixata-grid-dropdown-button {
-  box-shadow: var(--pixata-grid-focus-shadow);
+.pixata-blazor-grid-dropdown-button:focus-visible,
+.pixata-blazor-grid-dropdown-open .pixata-blazor-grid-dropdown-button {
+  box-shadow: var(--pixata-ui-focus-shadow);
 }
 
-.pixata-grid-dropdown-text {
+.pixata-blazor-grid-dropdown-text {
   flex: 1 1 0%;
   padding: .25rem .5rem;
   overflow: hidden;
   white-space: nowrap;
 }
 
-.pixata-grid-dropdown-arrow {
+.pixata-blazor-grid-dropdown-arrow {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -866,20 +866,20 @@
   padding: .25rem;
 }
 
-.pixata-grid-dropdown-arrow svg {
+.pixata-blazor-grid-dropdown-arrow svg {
   width: 16px;
   height: 16px;
   fill: currentColor;
 }
 
 /* Covers the page while the list is open, so a click anywhere else closes it without needing JavaScript */
-.pixata-grid-dropdown-backdrop {
+.pixata-blazor-grid-dropdown-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1000;
 }
 
-.pixata-grid-dropdown-list {
+.pixata-blazor-grid-dropdown-list {
   position: absolute;
   top: 100%;
   left: 0;
@@ -890,33 +890,33 @@
   padding: 0;
   overflow-y: auto;
   list-style: none;
-  color: var(--pixata-grid-color);
-  background-color: var(--pixata-grid-input-bg);
-  border: 1px solid var(--pixata-grid-border-color);
-  box-shadow: var(--pixata-grid-popup-shadow);
+  color: var(--pixata-ui-color);
+  background-color: var(--pixata-ui-input-bg);
+  border: 1px solid var(--pixata-ui-border-color);
+  box-shadow: var(--pixata-ui-popup-shadow);
 }
 
-.pixata-grid-dropdown-item {
+.pixata-blazor-grid-dropdown-item {
   padding: .25rem .5rem;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.pixata-grid-dropdown-item:hover {
+.pixata-blazor-grid-dropdown-item:hover {
   background-color: rgba(61, 61, 61, .08);
 }
 
-.pixata-grid-dropdown-focus {
+.pixata-blazor-grid-dropdown-focus {
   box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .16);
 }
 
-.pixata-grid-dropdown-item.pixata-grid-dropdown-selected {
-  color: var(--pixata-grid-primary-color);
-  background-color: var(--pixata-grid-primary);
+.pixata-blazor-grid-dropdown-item.pixata-blazor-grid-dropdown-selected {
+  color: var(--pixata-ui-primary-color);
+  background-color: var(--pixata-ui-primary);
 }
 
-.pixata-grid-dropdown-item.pixata-grid-dropdown-selected:hover {
-  background-color: var(--pixata-grid-primary-hover);
+.pixata-blazor-grid-dropdown-item.pixata-blazor-grid-dropdown-selected:hover {
+  background-color: var(--pixata-ui-primary-hover);
 }
 
 /* ---------- Spinner ---------- */

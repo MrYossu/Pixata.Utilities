@@ -153,7 +153,7 @@ public class PixataGrid_Tests {
       }));
 
     IElement td = grid.Find("tbody td");
-    Assert.IsTrue(td.ClassList.Contains("pixata-grid-text-right"));
+    Assert.IsTrue(td.ClassList.Contains("pixata-blazor-grid-text-right"));
     Assert.IsTrue(td.ClassList.Contains("money"));
     Assert.IsTrue(grid.Find("th").ClassList.Contains("money-header"));
     Assert.AreEqual("width: 120px", grid.Find("col").GetAttribute("style"));
@@ -203,8 +203,8 @@ public class PixataGrid_Tests {
       .Add(g => g.Data, [])
       .Add(g => g.NoDataTemplate, b => b.AddContent(0, "Nobody here")));
 
-    Assert.AreEqual("No records available.", plain.Find(".pixata-grid-norecords td").TextContent.Trim());
-    Assert.AreEqual("Nobody here", templated.Find(".pixata-grid-norecords td").TextContent.Trim());
+    Assert.AreEqual("No records available.", plain.Find(".pixata-blazor-grid-norecords td").TextContent.Trim());
+    Assert.AreEqual("Nobody here", templated.Find(".pixata-blazor-grid-norecords td").TextContent.Trim());
   }
 
   [TestMethod]
@@ -216,8 +216,8 @@ public class PixataGrid_Tests {
       .Add(g => g.Height, "300px")
       .Add(g => g.Width, "50%"));
 
-    IElement root = grid.Find(".pixata-grid");
-    Assert.IsTrue(root.ClassList.Contains("pixata-grid-sm"));
+    IElement root = grid.Find(".pixata-blazor-grid");
+    Assert.IsTrue(root.ClassList.Contains("pixata-blazor-grid-sm"));
     Assert.IsTrue(root.ClassList.Contains("mine"));
     Assert.AreEqual("height: 300px; width: 50%;", root.GetAttribute("style"));
   }
@@ -227,8 +227,8 @@ public class PixataGrid_Tests {
     IRenderedComponent<PixataGrid<Person>> grid = RenderWithColumns(("Field", nameof(Person.FirstName), null, null));
 
     IRefreshableElementCollection<IElement> rows = grid.FindAll("tbody tr");
-    Assert.IsFalse(rows[0].ClassList.Contains("pixata-grid-alt-row"));
-    Assert.IsTrue(rows[1].ClassList.Contains("pixata-grid-alt-row"));
+    Assert.IsFalse(rows[0].ClassList.Contains("pixata-blazor-grid-alt-row"));
+    Assert.IsTrue(rows[1].ClassList.Contains("pixata-blazor-grid-alt-row"));
   }
 
   [TestMethod]

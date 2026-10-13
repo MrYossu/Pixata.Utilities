@@ -4,9 +4,9 @@
 
 @* A dropdown list that looks like Telerik's. It's used inside the grid (pager sizes, page numbers, and later the filters), so it
    lives with the grid rather than being a general component *@
-<span class="@Css.Join("pixata-grid-dropdown", _open ? "pixata-grid-dropdown-open" : null, Class)" style="@(Width is null ? null : $"width: {Width}")">
+<span class="@Css.Join("pixata-blazor-grid-dropdown", _open ? "pixata-blazor-grid-dropdown-open" : null, Class)" style="@(Width is null ? null : $"width: {Width}")">
   <button type="button"
-          class="pixata-grid-dropdown-button"
+          class="pixata-blazor-grid-dropdown-button"
           role="combobox"
           aria-label="@AriaLabel"
           aria-haspopup="listbox"
@@ -14,20 +14,20 @@
           @onclick="Toggle"
           @onkeydown="OnKeyDown"
           @onkeydown:preventDefault="_open">
-    <span class="pixata-grid-dropdown-text">@SelectedText</span>
-    <span class="pixata-grid-dropdown-arrow" aria-hidden="true">
+    <span class="pixata-blazor-grid-dropdown-text">@SelectedText</span>
+    <span class="pixata-blazor-grid-dropdown-arrow" aria-hidden="true">
       <svg viewBox="0 0 16 16"><path d="M4 6h8l-4 5z" /></svg>
     </span>
   </button>
   @if (_open) {
-    <span class="pixata-grid-dropdown-backdrop" @onclick="Close"></span>
-    <ul class="pixata-grid-dropdown-list" role="listbox">
+    <span class="pixata-blazor-grid-dropdown-backdrop" @onclick="Close"></span>
+    <ul class="pixata-blazor-grid-dropdown-list" role="listbox">
       @for (int i = 0; i < Items.Count; i++) {
         int index = i;
         (TValue value, string text) = Items[i];
         <li role="option"
             aria-selected="@(Equals(value, Value) ? "true" : "false")"
-            class="@Css.Join("pixata-grid-dropdown-item", Equals(value, Value) ? "pixata-grid-dropdown-selected" : null, index == _highlighted ? "pixata-grid-dropdown-focus" : null)"
+            class="@Css.Join("pixata-blazor-grid-dropdown-item", Equals(value, Value) ? "pixata-blazor-grid-dropdown-selected" : null, index == _highlighted ? "pixata-blazor-grid-dropdown-focus" : null)"
             @onclick="() => Select(index)">
           @text
         </li>
