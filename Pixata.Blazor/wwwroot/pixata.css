@@ -764,6 +764,10 @@
   --pixata-blazor-selected-bg: #ff6358;
   --pixata-blazor-selected-hover-bg: #eb5b51;
   --pixata-blazor-selected-color: #fff;
+  --pixata-blazor-list-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 6%, transparent);
+  --pixata-blazor-list-item-selected-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
+  --pixata-blazor-list-item-selected-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 18%, transparent);
+  --pixata-blazor-list-item-selected-color: var(--pixata-blazor-text-color);
   --pixata-blazor-focus-shadow: 0 0 0 .25rem rgba(0, 0, 0, .1);
   --pixata-blazor-focus-ring: inset 0 0 0 2px rgba(0, 0, 0, .13);
   --pixata-blazor-input-bg: #fff;
@@ -1339,7 +1343,7 @@
 
 .pixata-blazor-list-item:hover,
 .pixata-blazor-list-item.pixata-blazor-hover {
-  background-color: var(--pixata-blazor-hover-bg);
+  background-color: var(--pixata-blazor-list-item-hover-bg);
 }
 
 .pixata-blazor-list-item.pixata-blazor-focus {
@@ -1347,12 +1351,12 @@
 }
 
 .pixata-blazor-list-item.pixata-blazor-selected {
-  background-color: var(--pixata-blazor-selected-bg);
-  color: var(--pixata-blazor-selected-color);
+  background-color: var(--pixata-blazor-list-item-selected-bg);
+  color: var(--pixata-blazor-list-item-selected-color);
 }
 
 .pixata-blazor-list-item.pixata-blazor-selected:hover {
-  background-color: var(--pixata-blazor-selected-hover-bg);
+  background-color: var(--pixata-blazor-list-item-selected-hover-bg);
 }
 
 .pixata-blazor-list-item.pixata-blazor-disabled {
