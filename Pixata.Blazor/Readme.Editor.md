@@ -24,6 +24,15 @@ Add `@using Pixata.Blazor.Components` to your `_Imports.razor`, and the Pixata s
 
 Nothing needs registering. The editor loads its script (`_content/Pixata.Blazor/pixata-editor.js`) itself the first time it is shown. It doesn't use anything server-only, so it works in Blazor Server, WebAssembly and Auto. While the page is being prerendered, the (sanitised) content is shown read-only in the editor's place, and the editor takes over once the page is interactive.
 
+In Blazor Server, the editor sends its HTML to the server over the circuit's SignalR connection, and by default SignalR closes the connection (losing the circuit) if it is sent a message bigger than 32 KB. Several pages of text fit easily, but an image pasted in as a `data:` URL can take the document over the limit, so if your documents can be big, raise it when you register Blazor...
+
+```csharp
+builder.Services.AddServerSideBlazor()
+  .AddHubOptions(options => options.MaximumReceiveMessageSize = 1024 * 1024);
+```
+
+(`AddInteractiveServerComponents()` has the same `AddHubOptions()`.)
+
 ## Parameters
 
 | Parameter | Type | Default | Description |

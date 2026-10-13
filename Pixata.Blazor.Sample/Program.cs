@@ -22,7 +22,9 @@ using Pixata.Email;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+// The editor sample's documents (eg with a pasted image) can be bigger than SignalR's default limit of 32 KB per message
+builder.Services.AddServerSideBlazor()
+  .AddHubOptions(options => options.MaximumReceiveMessageSize = 1024 * 1024);
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddTelerikBlazor();
 

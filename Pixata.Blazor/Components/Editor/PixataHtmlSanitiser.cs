@@ -157,6 +157,9 @@ public static partial class PixataHtmlSanitiser {
 
   private static List<KeyValuePair<string, string>> ReadAttributes(string html, int start, out int end) {
     List<KeyValuePair<string, string>> attributes = [];
+    // Only the first of a repeated attribute counts. The names seen are kept in a set rather than found by searching the
+    // list, so that a tag with thousands of attributes takes linear rather than quadratic time
+    HashSet<string> names = new(StringComparer.Ordinal);
     int i = start;
     while (i < html.Length) {
       while (i < html.Length && (char.IsWhiteSpace(html[i]) || html[i] == '/')) {
@@ -194,7 +197,7 @@ public static partial class PixataHtmlSanitiser {
           value = html[valueStart..i];
         }
       }
-      if (attributes.All(a => a.Key != name)) {
+      if (names.Add(name)) {
         attributes.Add(new(name, WebUtility.HtmlDecode(value)));
       }
     }
@@ -244,6 +247,9 @@ public static partial class PixataHtmlSanitiser {
   private sealed class Writer(int capacity) {
     private readonly StringBuilder _output = new(capacity);
     private readonly Stack<string> _open = new();
+    // How many of each element are in _open, so an end tag can be checked without searching the stack (which made deeply
+    // nested input with many stray end tags take quadratic time)
+    private readonly Dictionary<string, int> _openCounts = new(StringComparer.Ordinal);
     private string? _skipping;
     private int _skipDepth;
 
@@ -277,6 +283,7 @@ public static partial class PixataHtmlSanitiser {
       _output.Append('>');
       if (!VoidElements.Contains(name)) {
         _open.Push(name);
+        _openCounts[name] = _openCounts.GetValueOrDefault(name) + 1;
       }
     }
 
@@ -287,11 +294,12 @@ public static partial class PixataHtmlSanitiser {
         }
         return;
       }
-      if (!AllowedElements.Contains(name) || VoidElements.Contains(name) || !_open.Contains(name)) {
+      if (!AllowedElements.Contains(name) || VoidElements.Contains(name) || _openCounts.GetValueOrDefault(name) == 0) {
         return;
       }
       while (_open.Count > 0) {
         string open = _open.Pop();
+        _openCounts[open]--;
         _output.Append("</").Append(open).Append('>');
         if (open == name) {
           break;

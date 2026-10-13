@@ -97,9 +97,11 @@ public partial class PixataEditor {
     _dialogError = null;
   }
 
-  private void DialogKeyDown(KeyboardEventArgs e) {
+  // Awaited, so the component renders again once the dialog has released the focus, and the focus goes back to the
+  // document then rather than at the next unrelated render
+  private async Task DialogKeyDown(KeyboardEventArgs e) {
     if (e.Key == "Escape") {
-      _ = CloseDialog();
+      await CloseDialog();
     }
   }
 

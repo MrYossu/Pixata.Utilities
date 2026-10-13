@@ -235,14 +235,16 @@ public partial class PixataEditor : PixataInputBase<string>, IAsyncDisposable {
       _createdMode = EditMode;
       _ready = false;
       _module ??= await Js.InvokeAsync<IJSObjectReference>("import", ModulePath);
-      _dotNetReference ??= DotNetObjectReference.Create(this);
-      object options = Options();
-      string value = _sanitisedValue;
-      object? toolbar = _tools.Count > 0 ? _toolbar : null;
-      _handle = await _module.InvokeAsync<int>("create", _element, _mount, toolbar, _dotNetReference, options, value);
-      _syncedValue = value;
-      _pushedOptions = JsonSerializer.Serialize(options);
-      _ready = _handle != 0;
+      if (!_disposed) {
+        _dotNetReference ??= DotNetObjectReference.Create(this);
+        object options = Options();
+        string value = _sanitisedValue;
+        object? toolbar = _tools.Count > 0 ? _toolbar : null;
+        _handle = await _module.InvokeAsync<int>("create", _element, _mount, toolbar, _dotNetReference, options, value);
+        _syncedValue = value;
+        _pushedOptions = JsonSerializer.Serialize(options);
+        _ready = _handle != 0;
+      }
     }
     catch (JSDisconnectedException) {
     }
@@ -254,7 +256,11 @@ public partial class PixataEditor : PixataInputBase<string>, IAsyncDisposable {
     finally {
       _initialising = false;
     }
-    if (_ready && !_disposed) {
+    if (_disposed) {
+      // The component was disposed while the editor was being created, and DisposeAsync left the clean-up to this, as only
+      // now is there a handle to destroy
+      await DisposeJs();
+    } else if (_ready) {
       // Removes the prerendered content, and catches up with anything that changed while the editor was being created
       StateHasChanged();
     }
@@ -483,23 +489,32 @@ public partial class PixataEditor : PixataInputBase<string>, IAsyncDisposable {
 
   public async ValueTask DisposeAsync() {
     _disposed = true;
+    if (!_initialising) {
+      // Otherwise Create() cleans up when the editor has been created
+      await DisposeJs();
+    }
+    _dotNetReference?.Dispose();
+    Dispose();
+    GC.SuppressFinalize(this);
+  }
+
+  private async Task DisposeJs() {
+    IJSObjectReference? module = _module;
+    _module = null;
     try {
-      if (_module is not null) {
+      if (module is not null) {
         if (_dialogTrap != 0) {
-          await _module.InvokeVoidAsync("releaseFocus", _dialogTrap);
+          await module.InvokeVoidAsync("releaseFocus", _dialogTrap);
         }
         if (_handle != 0) {
-          await _module.InvokeVoidAsync("destroy", _handle);
+          await module.InvokeVoidAsync("destroy", _handle);
         }
-        await _module.DisposeAsync();
+        await module.DisposeAsync();
       }
     }
     catch (JSDisconnectedException) {
     }
     catch (TaskCanceledException) {
     }
-    _dotNetReference?.Dispose();
-    Dispose();
-    GC.SuppressFinalize(this);
   }
 }

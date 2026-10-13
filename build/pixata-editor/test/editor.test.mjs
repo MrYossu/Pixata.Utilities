@@ -7,11 +7,16 @@ import { JSDOM } from "jsdom";
 const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
 globalThis.window = dom.window;
 globalThis.document = dom.window.document;
+globalThis.MutationObserver = dom.window.MutationObserver;
+globalThis.getComputedStyle = dom.window.getComputedStyle;
+globalThis.requestAnimationFrame = callback => setTimeout(callback, 0);
+globalThis.cancelAnimationFrame = handle => clearTimeout(handle);
 
 const { sanitiseHtml, schema, docFromHtml, docToHtml, safeUrl } = await import("../src/schema.js");
 const { commands, linkInfo } = await import("../src/commands.js");
 const { cleanPastedHtml } = await import("../src/paste.js");
 const { formatHtml } = await import("../src/format.js");
+const { create, setValue, flush, destroy } = await import("../src/index.js");
 const { EditorState, TextSelection } = await import("prosemirror-state");
 const { history } = await import("prosemirror-history");
 
@@ -238,4 +243,56 @@ test("insertHtml inserts at the cursor", () => {
 test("cleanFormatting removes marks and alignment but keeps links", () => {
   const { html } = run(stateFor("<p style=\"text-align: center\"><strong><a href=\"/x\">ab</a></strong><em>c</em></p>"), "cleanFormatting");
   assert.equal(html, "<p><a href=\"/x\">ab</a>c</p>");
+});
+
+// The editor
+
+// Creates an editor in div mode, with a stand-in for the .NET object that records the calls made to it
+async function createEditor(value, toolbarHtml) {
+  const calls = [];
+  const dotNet = { invokeMethodAsync: (name, ...args) => { calls.push([name, ...args]); return Promise.resolve(); } };
+  const host = document.createElement("div");
+  let toolbar = null;
+  if (toolbarHtml) {
+    toolbar = host.appendChild(document.createElement("div"));
+    toolbar.innerHTML = toolbarHtml;
+  }
+  const mount = host.appendChild(document.createElement("div"));
+  document.body.appendChild(host);
+  const id = await create(host, mount, toolbar, dotNet, { editMode: "div", debounceDelay: 0 }, value);
+  return { id, valueChanges: () => calls.filter(c => c[0] === "OnEditorValueChanged").map(c => c[1]) };
+}
+
+function keyDown(element, key) {
+  element.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+}
+
+test("a value set from .NET isn't reported back as a change, even when the editor writes it differently", async () => {
+  const { id, valueChanges } = await createEditor("<p>start</p>");
+  setValue(id, "<p><b>bold</b> text</p>");
+  flush(id);
+  destroy(id);
+  assert.deepEqual(valueChanges(), []);
+});
+
+test("the toolbar's arrow keys are left to a drop-down that has been asked to open, and to text fields", async () => {
+  const item = html => `<div class="pixata-blazor-editor-toolbar-item">${html}</div>`;
+  const { id } = await createEditor("<p>a</p>", item("<button data-pixata-editor-tool id=\"list\" aria-expanded=\"false\">List</button>")
+    + item("<button data-pixata-editor-tool id=\"bold\">Bold</button>")
+    + item("<span class=\"pixata-blazor-editor-custom-tool\"><input id=\"field\"></span>"));
+  const [list, bold, field] = ["list", "bold", "field"].map(name => document.getElementById(name));
+  list.focus();
+  // The drop-down isn't shown as open until .NET has rendered it, but the arrow key is still meant for it
+  keyDown(list, "Enter");
+  keyDown(list, "ArrowRight");
+  assert.equal(document.activeElement, list);
+  keyDown(list, "Escape");
+  keyDown(list, "ArrowRight");
+  assert.equal(document.activeElement, bold);
+  keyDown(bold, "ArrowRight");
+  assert.equal(document.activeElement, field);
+  keyDown(field, "ArrowLeft");
+  keyDown(field, "Home");
+  assert.equal(document.activeElement, field);
+  destroy(id);
 });

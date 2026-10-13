@@ -139,7 +139,9 @@ function prepareIframe(iframe, host) {
       doc.body.style.color = hostStyle.color;
       resolve(doc.body);
     }, { once: true });
-    iframe.srcdoc = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"></head><body></body></html>";
+    // The base target makes a link clicked while the editor is read-only or disabled open in the page, as it does in div
+    // mode, rather than replace the editor's document in the iframe
+    iframe.srcdoc = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><base target=\"_parent\"></head><body></body></html>";
   });
 }
 
@@ -156,6 +158,7 @@ class EditorInstance {
     this.lastState = null;
     this.valueTimer = 0;
     this.stateTimer = 0;
+    this.opening = null;
     this.destroyed = false;
   }
 
@@ -206,8 +209,15 @@ class EditorInstance {
         this.view.focus();
       }
     };
+    // Pointer events in the iframe don't reach the page, so pass each pointerdown on as one on the iframe element. Without
+    // this, clicking in the document wouldn't close an open drop-down or menu, in the toolbar or elsewhere on the page
+    this.onFramePointerDown = e => {
+      const init = { bubbles: true, cancelable: true, composed: true, button: e.button, buttons: e.buttons, pointerId: e.pointerId, pointerType: e.pointerType };
+      frame.dispatchEvent(typeof PointerEvent === "function" ? new PointerEvent("pointerdown", init) : new Event("pointerdown", init));
+    };
     this.frameWindow.addEventListener("focus", this.onFrameFocus);
     body.parentElement.addEventListener("mousedown", this.onFrameMouseDown);
+    body.ownerDocument.addEventListener("pointerdown", this.onFramePointerDown, true);
     this.frameBody = body;
   }
 
@@ -307,7 +317,9 @@ class EditorInstance {
     }
     clearTimeout(this.valueTimer);
     this.view.updateState(this.createState(value));
-    this.lastValue = value;
+    // What the editor emits for this value (eg <b> becomes <strong>), as in init(), so that just focusing and leaving the
+    // editor doesn't report a change the user didn't make
+    this.lastValue = docToHtml(this.view.state.doc);
     this.reportState();
   }
 
@@ -426,6 +438,10 @@ class EditorInstance {
       }
     };
     this.mutationObserver = new MutationObserver(() => {
+      // Opening a drop-down adds its popup, so this is also where a tool that was asked to open one is seen to have done so
+      if (this.opening && this.opening.tool.getAttribute("aria-expanded") === "true") {
+        this.opening = null;
+      }
       observeItems();
       this.updateTabStops();
       scheduleMeasure();
@@ -474,8 +490,31 @@ class EditorInstance {
 
   toolbarKeyDown(e) {
     const tool = this.toolElement(e.target);
+    if (!tool) {
+      return;
+    }
     // A tool whose drop-down is open uses the keys itself
-    if (!tool || tool.getAttribute("aria-expanded") === "true") {
+    if (tool.getAttribute("aria-expanded") === "true") {
+      this.opening = null;
+      return;
+    }
+    // So does one that has just been asked to open it. .NET opens the drop-down, so (in Blazor Server especially) it only
+    // shows as open a moment later, and keys pressed in that moment are meant for it, not for the toolbar
+    if (this.opening && this.opening.tool === tool && performance.now() < this.opening.until) {
+      if (e.key === "Escape" || e.key === "Tab" || e.key === "Enter" || e.key === " ") {
+        // These close it again
+        this.opening = null;
+      }
+      return;
+    }
+    this.opening = null;
+    const opens = e.key === "Enter" || e.key === " " || e.key === "ArrowDown" || (e.key === "ArrowUp" && tool.getAttribute("aria-haspopup") === "listbox");
+    if (opens && tool.getAttribute("aria-expanded") === "false") {
+      this.opening = { tool, until: performance.now() + 1000 };
+      return;
+    }
+    // Text fields and lists in custom tools use the arrow keys, Home and End themselves
+    if (e.key !== "Escape" && tool.matches("input:not([type=button], [type=checkbox], [type=radio], [type=submit], [type=reset], [type=image]), textarea, select")) {
       return;
     }
     const tools = this.focusableTools();
@@ -575,6 +614,7 @@ class EditorInstance {
       try {
         this.frameWindow.removeEventListener("focus", this.onFrameFocus);
         this.frameBody.parentElement.removeEventListener("mousedown", this.onFrameMouseDown);
+        this.frameBody.ownerDocument.removeEventListener("pointerdown", this.onFramePointerDown, true);
       } catch {
         // The iframe has already gone
       }
