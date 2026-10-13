@@ -59,6 +59,8 @@ This registers the following services (all from this package)...
 | `NotificationHelper` | The [notifications](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md) ([sample page](https://test.pixata.co.uk/Notifications)) |
 | `PasswordOptionsHelper` | Showing the user your Identity password requirements |
 | `PersistentStateHelper<T>` | Avoiding hitting the database twice when a page loads. Used by the [`ApiResponseView`](https://test.pixata.co.uk/ApiResponseViewRegular), but can be used independently |
+| `PixataDialogFactory` | The [alert, confirm and prompt dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) you show from code ([sample page](https://test.pixata.co.uk/DialogsSample)). It also needs `<PixataDialogHost />` in your layout, as described below |
+| `PixataDialogTexts` | The button text and tooltips used by the dialogs and windows (OK, Cancel, Close and so on). Register your own instance before calling `AddPixataBlazor()` to translate them |
 | `ScrollStateService` | The `VirtualiseWithState` component |
 | `TemplateHelper` | Building templates for grids and other templated components ([sample page](https://test.pixata.co.uk/TelerikGrid)) |
 
@@ -75,6 +77,18 @@ It is a good idea to add this line **after** your own service registrations, as 
 This isn't actually a problem, but removing the duplicate registration will keep the code file a bit cleaner.
 
 The audit viewer and the payload encryption have their own registration methods, as most apps don't want them. See the pages listed above.
+
+### The dialog host
+
+If you want to show the alert, confirm and prompt dialogs from code (with `PixataDialogFactory`), add the host component to your layout, inside an interactively rendered component...
+
+```razor
+@using Pixata.Blazor.Components
+
+<PixataDialogHost />
+```
+
+If you ask for one of these dialogs without a host on the page, you get an exception telling you to add it. If your layout is rendered statically and only some pages are interactive, put the host in those pages instead, as it has to share a DI scope with the code that shows the dialogs. See [Dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) for more.
 
 ## Styling
 
