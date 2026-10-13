@@ -55,8 +55,9 @@ public partial class PixataStepper : IDisposable {
   public bool Linear { get; set; }
 
   /// <summary>
-  /// When true (the default), a horizontal stepper that is less than 480px wide collapses to show just the current step and a
-  /// progress bar, with buttons to move to the previous and next steps, so it still works on a phone
+  /// When true (the default), a horizontal stepper with less than 80px for each step (eg less than 400px wide with five steps)
+  /// collapses to show just the current step and a progress bar, with buttons to move to the previous and next steps, so it
+  /// still works on a phone
   /// </summary>
   [Parameter]
   public bool Collapsible { get; set; } = true;
@@ -143,6 +144,7 @@ public partial class PixataStepper : IDisposable {
       StepType == PixataStepperStepType.Labels ? "pixata-blazor-stepper-labels" : null,
       Linear ? "pixata-blazor-stepper-linear" : null,
       Collapsible ? "pixata-blazor-stepper-collapsible" : null,
+      Collapsible && _steps.Count > 1 ? $"pixata-blazor-stepper-count-{Math.Min(_steps.Count, 8)}" : null,
       Class);
 
   private string? Style {

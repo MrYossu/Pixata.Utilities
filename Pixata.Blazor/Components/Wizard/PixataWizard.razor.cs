@@ -132,6 +132,7 @@ public partial class PixataWizard : IDisposable {
   private readonly List<PixataWizardStep> _steps = [];
   private readonly List<PixataWizardStep> _newSteps = [];
   private readonly Dictionary<object, EditContext> _modelContexts = new(ReferenceEqualityComparer.Instance);
+  private readonly HashSet<EditContext> _watchedContexts = [];
   private readonly string _panelId = $"pixata-blazor-wizard-{Guid.NewGuid():N}-step";
   private PixataWizardStepperSettings? _stepperSettings;
   private bool _linear;
@@ -142,6 +143,11 @@ public partial class PixataWizard : IDisposable {
   private bool _rebuilding;
   private int _generation;
   private bool _validateCurrentStepAfterRender;
+  private ElementReference _panel;
+  private ElementReference _content;
+  private ElementReference _nextButton;
+  private ElementReference _doneButton;
+  private FocusTarget _focusAfterRender;
   private bool _disposed;
 
   /// <summary>
@@ -184,12 +190,18 @@ public partial class PixataWizard : IDisposable {
     [.. _steps.Where(s => s.Visible)];
 
   /// <summary>
-  /// The step whose index is <see cref="Value"/>, or the first visible step if that one is hidden or doesn't exist
+  /// The step whose index is <see cref="Value"/>. If that one is hidden (or doesn't exist), the nearest visible step before it,
+  /// or failing that after it
   /// </summary>
-  private PixataWizardStep? CurrentStep =>
-    _value >= 0 && _value < _steps.Count && _steps[_value].Visible
-      ? _steps[_value]
-      : _steps.FirstOrDefault(s => s.Visible);
+  private PixataWizardStep? CurrentStep {
+    get {
+      if (_value >= 0 && _value < _steps.Count && _steps[_value].Visible) {
+        return _steps[_value];
+      }
+      int from = Math.Clamp(_value, 0, _steps.Count);
+      return _steps.Take(from).LastOrDefault(s => s.Visible) ?? _steps.Skip(from).FirstOrDefault(s => s.Visible);
+    }
+  }
 
   private string PagerText {
     get {
@@ -384,18 +396,57 @@ public partial class PixataWizard : IDisposable {
   private bool? ValidateStep(PixataWizardStep step) {
     bool? result = null;
     if (StepEditContext(step) is { } context) {
+      Watch(context);
       result = context.Validate();
-    } else if (CascadedEditContext is not null && step.Fields is { } fields) {
-      List<FieldIdentifier> identifiers = [.. fields.Select(f => FieldIdentifier.Create(f))];
-      foreach (FieldIdentifier identifier in identifiers) {
+    } else if (CascadedEditContext is not null && step.Fields is not null) {
+      Watch(CascadedEditContext);
+      foreach (FieldIdentifier identifier in FieldIdentifiers(step)) {
         CascadedEditContext.NotifyFieldChanged(identifier);
       }
-      result = identifiers.All(i => !CascadedEditContext.GetValidationMessages(i).Any());
+      result = FieldsAreValid(step, CascadedEditContext);
     }
     if (result is not null) {
       step.ValidationResult = result;
     }
     return result;
+  }
+
+  private static List<FieldIdentifier> FieldIdentifiers(PixataWizardStep step) =>
+    [.. (step.Fields ?? []).Select(f => FieldIdentifier.Create(f))];
+
+  private static bool FieldsAreValid(PixataWizardStep step, EditContext context) =>
+    FieldIdentifiers(step).All(i => !context.GetValidationMessages(i).Any());
+
+  /// <summary>
+  /// Once a step has been validated, its indicator in the stepper follows its validation messages, so it turns from an
+  /// exclamation mark to a tick as soon as the user fixes the step
+  /// </summary>
+  private void Watch(EditContext context) {
+    if (_watchedContexts.Add(context)) {
+      context.OnValidationStateChanged += ValidationStateChanged;
+    }
+  }
+
+  private void ValidationStateChanged(object? sender, ValidationStateChangedEventArgs e) {
+    if (sender is not EditContext context || _disposed) {
+      return;
+    }
+    bool changed = false;
+    PixataWizardStep? current = CurrentStep;
+    foreach (PixataWizardStep step in _steps.Where(s => s.ValidationResult is not null)) {
+      // A step's own validators are only there while it is shown, and clear its messages when they go, so only the current
+      // step's messages count
+      bool? result = StepEditContext(step) == context ? (step == current ? !context.GetValidationMessages().Any() : null)
+        : StepEditContext(step) is null && context == CascadedEditContext && step.Fields is not null ? FieldsAreValid(step, context)
+        : null;
+      if (result is not null && result != step.ValidationResult) {
+        step.ValidationResult = result;
+        changed = true;
+      }
+    }
+    if (changed) {
+      StateHasChanged();
+    }
   }
 
   /// <summary>
@@ -422,8 +473,27 @@ public partial class PixataWizard : IDisposable {
   private async Task SubmitStep(EditContext context) {
     if (IsLastStep) {
       await Finish();
-    } else {
-      await Next();
+    } else if (SiblingStep(1) is { } next && await ChangeStep(_steps.IndexOf(next))) {
+      // The form the user was typing in has gone, so move the focus into the new step
+      _focusAfterRender = FocusTarget.Content;
+    }
+  }
+
+  /// <summary>
+  /// The built-in Next button. When it takes the user to the last step, it is replaced by Done, so that gets the focus
+  /// </summary>
+  private async Task NextClicked() {
+    if (SiblingStep(1) is { } next && await ChangeStep(_steps.IndexOf(next)) && IsLastStep) {
+      _focusAfterRender = FocusTarget.Done;
+    }
+  }
+
+  /// <summary>
+  /// The built-in Previous button. When it takes the user to the first step, it goes, so Next gets the focus
+  /// </summary>
+  private async Task PreviousClicked() {
+    if (SiblingStep(-1) is { } previous && await ChangeStep(_steps.IndexOf(previous)) && IsFirstStep) {
+      _focusAfterRender = IsLastStep ? FocusTarget.Done : FocusTarget.Next;
     }
   }
 
@@ -443,12 +513,13 @@ public partial class PixataWizard : IDisposable {
     }
   }
 
-  protected override void OnAfterRender(bool firstRender) {
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (firstRender) {
       _hasRendered = true;
     }
     if (_rebuilding) {
       CompleteRebuild();
+      return;
     }
     if (_validateCurrentStepAfterRender) {
       // The step's validators are attached now that its content has been rendered, so its messages can be shown
@@ -456,6 +527,26 @@ public partial class PixataWizard : IDisposable {
       if (CurrentStep is { } step && ValidateStep(step) is not null) {
         StateHasChanged();
       }
+    }
+    if (CurrentStep is { } current && _steps.IndexOf(current) != _value) {
+      // The step Value pointed to has been hidden or removed, so another one is shown instead. Tell the parent
+      _value = _steps.IndexOf(current);
+      await ValueChanged.InvokeAsync(_value);
+    }
+    FocusTarget focus = _focusAfterRender;
+    _focusAfterRender = FocusTarget.None;
+    switch (focus) {
+      case FocusTarget.Content:
+        if (!await PixataJs.Invoke(Js, "focusFirst", false, _content)) {
+          await PixataJs.InvokeVoid(Js, "focusElement", _panel);
+        }
+        break;
+      case FocusTarget.Next:
+        await PixataJs.InvokeVoid(Js, "focusElement", _nextButton);
+        break;
+      case FocusTarget.Done:
+        await PixataJs.InvokeVoid(Js, "focusElement", _doneButton);
+        break;
     }
   }
 
@@ -477,8 +568,19 @@ public partial class PixataWizard : IDisposable {
     StateHasChanged();
   }
 
+  private enum FocusTarget {
+    None,
+    Content,
+    Next,
+    Done
+  }
+
   public void Dispose() {
     _disposed = true;
+    foreach (EditContext context in _watchedContexts) {
+      context.OnValidationStateChanged -= ValidationStateChanged;
+    }
+    _watchedContexts.Clear();
     GC.SuppressFinalize(this);
   }
 }

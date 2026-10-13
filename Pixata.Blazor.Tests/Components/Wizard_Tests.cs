@@ -483,12 +483,46 @@ public class Wizard_Tests {
   }
 
   [TestMethod]
-  public void Wizard_ValueOfAHiddenStep_ShowsTheFirstVisibleStep() {
+  public void Wizard_ValueOfAHiddenStep_ShowsTheNextVisibleStepIfThereIsNoPreviousOne() {
     using BunitContext context = PixataTestContext.Create();
-    IRenderedComponent<PixataWizard> cut = RenderWizard(context, WizardSteps(new WizardStepSpec("One", Visible: false), new WizardStepSpec("Two"), new WizardStepSpec("Three")), p => p.Add(c => c.Value, 0));
+    int? changed = null;
+    IRenderedComponent<PixataWizard> cut = RenderWizard(context, WizardSteps(new WizardStepSpec("One", Visible: false), new WizardStepSpec("Two"), new WizardStepSpec("Three")), p => p
+      .Add(c => c.Value, 0)
+      .Add(c => c.ValueChanged, (int v) => changed = v));
     Assert.AreEqual("Content Two", Content(cut));
+    Assert.AreEqual(1, changed);
     cut.Render(p => p.Add(c => c.Value, 2));
     Assert.AreEqual("Content Three", Content(cut));
+  }
+
+  [TestMethod]
+  public void Wizard_HidingTheCurrentStep_ShowsThePreviousOneAndRaisesValueChanged() {
+    using BunitContext context = PixataTestContext.Create();
+    int? changed = null;
+    IRenderedComponent<PixataWizard> cut = RenderWizard(context, WizardSteps(WizardLabels("One", "Two", "Three")), p => p
+      .Add(c => c.Value, 1)
+      .Add(c => c.ValueChanged, (int v) => changed = v));
+    cut.Render(p => p.Add(c => c.WizardSteps, WizardSteps(new WizardStepSpec("One"), new WizardStepSpec("Two", Visible: false), new WizardStepSpec("Three"))));
+    Assert.AreEqual("Content One", Content(cut));
+    Assert.AreEqual(0, changed);
+  }
+
+  [TestMethod]
+  public void Wizard_FocusMovesSensiblyWhenTheStepChanges() {
+    using BunitContext context = PixataTestContext.Create();
+    Person person = new() { Name = "Jim", Email = "jim@example.com" };
+    IRenderedComponent<PixataWizard> cut = RenderWizard(context, WizardSteps(new WizardStepSpec("One", Model: person), new WizardStepSpec("Two"), new WizardStepSpec("Three")));
+    // Enter in a step's form moves into the next step's content, as the form has gone
+    cut.Find("form").Submit();
+    Assert.AreEqual(1, context.JSInterop.Invocations.Count(i => i.Identifier == "focusFirst"));
+    // Next taking the user to the last step focuses Done, which replaces it
+    int focusCalls = context.JSInterop.Invocations.Count(i => i.Identifier == "focusElement");
+    Click(cut, "Next");
+    Assert.AreEqual("Content Three", Content(cut));
+    Assert.AreEqual(focusCalls + 1, context.JSInterop.Invocations.Count(i => i.Identifier == "focusElement"));
+    // Previous from the last step leaves the focus alone, as the button is still there
+    Click(cut, "Previous");
+    Assert.AreEqual(focusCalls + 1, context.JSInterop.Invocations.Count(i => i.Identifier == "focusElement"));
   }
 
   [TestMethod]
@@ -550,6 +584,57 @@ public class Wizard_Tests {
     Click(cut, "Next");
     Assert.IsTrue(editContext.GetValidationMessages().Any());
     Assert.AreEqual("Step 1 of 2", cut.Find(".pixata-blazor-wizard-pager").TextContent);
+  }
+
+  [TestMethod]
+  public void Wizard_StepsForm_HasASubmitButtonSoEnterWorksWithSeveralTextBoxes() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataWizard> cut = RenderWizard(context, WizardSteps(new WizardStepSpec("One", Model: new Person())));
+    IElement submit = cut.Find("form.pixata-blazor-wizard-form button[type=submit]");
+    Assert.AreEqual("-1", submit.GetAttribute("tabindex"));
+    Assert.AreEqual("true", submit.GetAttribute("aria-hidden"));
+  }
+
+  [TestMethod]
+  public void Wizard_FixingAnInvalidStep_UpdatesItsIndicator() {
+    using BunitContext context = PixataTestContext.Create();
+    Person person = new();
+    EditContext editContext = new(person);
+    IRenderedComponent<PixataWizard> cut = context.Render<PixataWizard>(p => p
+      .Add(c => c.WizardSteps, builder => {
+        builder.OpenComponent<PixataWizardStep>(0);
+        builder.AddAttribute(1, nameof(PixataWizardStep.EditContext), editContext);
+        builder.AddAttribute(2, nameof(PixataWizardStep.Content), (RenderFragment)(content => {
+          content.OpenComponent<DataAnnotationsValidator>(0);
+          content.CloseComponent();
+        }));
+        builder.CloseComponent();
+        builder.OpenComponent<PixataWizardStep>(3);
+        builder.CloseComponent();
+      }));
+    Click(cut, "Next");
+    Assert.AreEqual("true", WizardStepButtons(cut)[0].GetAttribute("aria-invalid"));
+    person.Name = "Jim";
+    cut.InvokeAsync(() => editContext.NotifyFieldChanged(editContext.Field(nameof(Person.Name))));
+    // The email is still missing
+    Assert.AreEqual("true", WizardStepButtons(cut)[0].GetAttribute("aria-invalid"));
+    person.Email = "jim@example.com";
+    cut.InvokeAsync(() => editContext.NotifyFieldChanged(editContext.Field(nameof(Person.Email))));
+    Assert.IsNull(WizardStepButtons(cut)[0].GetAttribute("aria-invalid"));
+    Assert.IsTrue(cut.FindAll(".pixata-blazor-wizard-stepper .pixata-blazor-stepper-list > li")[0].ClassList.Contains("pixata-blazor-stepper-step-success"));
+  }
+
+  [TestMethod]
+  public void Wizard_LeavingAnInvalidStepBackwards_KeepsItInvalid() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataWizard> cut = RenderWizard(context, WizardSteps(new WizardStepSpec("One"), new WizardStepSpec("Two", Model: new Person()), new WizardStepSpec("Three")), p => p
+      .Add(c => c.Value, 1));
+    Click(cut, "Next");
+    Assert.AreEqual("Content Two", Content(cut));
+    // Going back is allowed, and the step's validator going (which clears its messages) doesn't make it valid
+    Click(cut, "Previous");
+    Assert.AreEqual("Content One", Content(cut));
+    Assert.AreEqual("true", WizardStepButtons(cut)[1].GetAttribute("aria-invalid"));
   }
 
   [TestMethod]
