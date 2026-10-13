@@ -119,7 +119,9 @@ function restack() {
 
 function activate(layer) {
   const index = layers.indexOf(layer);
-  if (index < 0 || index === layers.length - 1) {
+  // A modal layer is already in front of everything it blocks. Anything above it was opened while it was open (eg a window
+  // opened from a dialog), and bringing the modal one forward would hide that behind its overlay, out of reach
+  if (index < 0 || index === layers.length - 1 || layer.options.modal) {
     return;
   }
   let target = layers.length - 1;
