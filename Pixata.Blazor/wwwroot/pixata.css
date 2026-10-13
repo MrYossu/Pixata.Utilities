@@ -1439,6 +1439,472 @@
 
 /* ========== PixataChart ========== */
 
+/*
+  PixataChart is SVG drawn by the component, with the title, legend and tooltip as HTML. The series colours, text sizes and
+  line colours below can all be overridden. The point colour of each column, line, marker, segment and legend marker is
+  passed to it in the --pixata-blazor-chart-point-color property
+*/
+:root {
+  --pixata-blazor-chart-series-1: #ff6358;
+  --pixata-blazor-chart-series-2: #ffd246;
+  --pixata-blazor-chart-series-3: #78d237;
+  --pixata-blazor-chart-series-4: #28b4c8;
+  --pixata-blazor-chart-series-5: #2d73f5;
+  --pixata-blazor-chart-series-6: #aa46be;
+  --pixata-blazor-chart-height: 400px;
+  --pixata-blazor-chart-bg: transparent;
+  --pixata-blazor-chart-text-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-chart-font-size: var(--pixata-blazor-font-size);
+  --pixata-blazor-chart-title-font-size: 1rem;
+  --pixata-blazor-chart-axis-title-font-size: .875rem;
+  --pixata-blazor-chart-label-font-size: .75rem;
+  --pixata-blazor-chart-major-lines: rgba(61, 61, 61, .08);
+  --pixata-blazor-chart-minor-lines: rgba(61, 61, 61, .04);
+  --pixata-blazor-chart-axis-color: rgba(61, 61, 61, .12);
+  --pixata-blazor-chart-inactive: rgba(61, 61, 61, .5);
+  --pixata-blazor-chart-column-border: 20%;
+  --pixata-blazor-chart-marker-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-chart-hover-opacity: .75;
+  --pixata-blazor-chart-label-halo: rgba(255, 255, 255, .85);
+  --pixata-blazor-chart-connector-color: rgba(61, 61, 61, .5);
+  --pixata-blazor-chart-focus-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-chart-legend-marker-size: .875rem;
+  --pixata-blazor-chart-tooltip-color: #fff;
+  --pixata-blazor-chart-tooltip-dark-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-chart-tooltip-font-size: .8125rem;
+  --pixata-blazor-chart-shared-tooltip-bg: var(--pixata-blazor-base-bg);
+  --pixata-blazor-chart-tooltip-z-index: 3;
+  --pixata-blazor-chart-transition: .5s ease-out;
+}
+
+.pixata-blazor-chart {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--pixata-blazor-chart-height);
+  min-width: 0;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-chart-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-chart-text-color);
+  background: var(--pixata-blazor-chart-bg);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.pixata-blazor-chart-title {
+  flex: none;
+  padding: calc(var(--pixata-blazor-spacing) * 1.25);
+  font-size: var(--pixata-blazor-chart-title-font-size);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pixata-blazor-chart-title-align-left {
+  text-align: start;
+}
+
+.pixata-blazor-chart-title-align-right {
+  text-align: end;
+}
+
+.pixata-blazor-chart-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-chart-body-legend-top,
+.pixata-blazor-chart-body-legend-bottom {
+  flex-direction: column;
+}
+
+.pixata-blazor-chart-plot {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-chart-surface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  font-family: inherit;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.pixata-blazor-chart-surface:focus-visible {
+  outline: 1px dotted var(--pixata-blazor-chart-focus-color);
+  outline-offset: -1px;
+}
+
+.pixata-blazor-chart-background,
+.pixata-blazor-chart-band {
+  fill: transparent;
+}
+
+.pixata-blazor-chart-gridline {
+  stroke: var(--pixata-blazor-chart-major-lines);
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.pixata-blazor-chart-gridline-minor {
+  stroke: var(--pixata-blazor-chart-minor-lines);
+}
+
+.pixata-blazor-chart-axis-line {
+  stroke: var(--pixata-blazor-chart-axis-color);
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.pixata-blazor-chart-axis-label,
+.pixata-blazor-chart-axis-title,
+.pixata-blazor-chart-label {
+  fill: var(--pixata-blazor-chart-text-color);
+}
+
+.pixata-blazor-chart-axis-label {
+  font-size: var(--pixata-blazor-chart-label-font-size);
+}
+
+.pixata-blazor-chart-axis-title {
+  font-size: var(--pixata-blazor-chart-axis-title-font-size);
+}
+
+.pixata-blazor-chart-label {
+  font-size: var(--pixata-blazor-chart-label-font-size);
+  paint-order: stroke;
+  stroke: var(--pixata-blazor-chart-label-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.pixata-blazor-chart-labels {
+  pointer-events: none;
+}
+
+.pixata-blazor-chart-label-connector {
+  fill: none;
+  stroke: var(--pixata-blazor-chart-connector-color);
+  stroke-width: 1px;
+}
+
+.pixata-blazor-chart-column,
+.pixata-blazor-chart-segment,
+.pixata-blazor-chart-marker {
+  cursor: pointer;
+  transition: opacity var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-chart-column {
+  fill: var(--pixata-blazor-chart-point-color);
+  stroke: color-mix(in srgb, var(--pixata-blazor-chart-point-color), #000 var(--pixata-blazor-chart-column-border));
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.pixata-blazor-chart-segment {
+  fill: var(--pixata-blazor-chart-point-color);
+}
+
+.pixata-blazor-chart-line {
+  fill: none;
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.pixata-blazor-chart-marker-target {
+  fill: transparent;
+}
+
+.pixata-blazor-chart-marker-shape {
+  fill: var(--pixata-blazor-chart-marker-bg);
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-width: 2px;
+}
+
+.pixata-blazor-chart-marker-cross {
+  fill: none;
+}
+
+.pixata-blazor-chart-marker-hidden .pixata-blazor-chart-marker-shape {
+  visibility: hidden;
+}
+
+.pixata-blazor-chart-column.pixata-blazor-chart-point-active,
+.pixata-blazor-chart-segment.pixata-blazor-chart-point-active {
+  opacity: var(--pixata-blazor-chart-hover-opacity);
+}
+
+.pixata-blazor-chart-marker.pixata-blazor-chart-point-active .pixata-blazor-chart-marker-shape {
+  visibility: visible;
+  stroke-width: 3px;
+}
+
+/* The keyboard focus */
+.pixata-blazor-chart-column.pixata-blazor-chart-point-focused,
+.pixata-blazor-chart-segment.pixata-blazor-chart-point-focused {
+  stroke: var(--pixata-blazor-chart-focus-color);
+  stroke-width: 2px;
+}
+
+.pixata-blazor-chart-marker.pixata-blazor-chart-point-focused .pixata-blazor-chart-marker-target {
+  stroke: var(--pixata-blazor-chart-focus-color);
+  stroke-width: 2px;
+  r: 8px;
+}
+
+/* Legend */
+
+.pixata-blazor-chart-legend {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 1.25);
+}
+
+.pixata-blazor-chart-legend-vertical {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  overflow-y: auto;
+}
+
+.pixata-blazor-chart-legend-top,
+.pixata-blazor-chart-legend-left {
+  order: -1;
+}
+
+.pixata-blazor-chart-legend-align-start {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-chart-legend-align-end {
+  justify-content: flex-end;
+}
+
+.pixata-blazor-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 1.5);
+  margin: 0;
+  padding: calc(var(--pixata-blazor-spacing) * .25) calc(var(--pixata-blazor-spacing) * .5);
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-blazor-chart-legend-item:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-ring);
+}
+
+.pixata-blazor-chart-legend-item-hidden {
+  color: var(--pixata-blazor-chart-inactive);
+}
+
+.pixata-blazor-chart-legend-item-hidden .pixata-blazor-chart-legend-marker {
+  --pixata-blazor-chart-point-color: var(--pixata-blazor-chart-inactive) !important;
+}
+
+.pixata-blazor-chart-legend-marker {
+  display: inline-block;
+  flex: none;
+  width: var(--pixata-blazor-chart-legend-marker-size);
+  height: var(--pixata-blazor-chart-legend-marker-size);
+}
+
+.pixata-blazor-chart-legend-marker-column {
+  background: var(--pixata-blazor-chart-point-color);
+}
+
+.pixata-blazor-chart-legend-marker-line {
+  width: calc(var(--pixata-blazor-chart-legend-marker-size) * 1.25);
+}
+
+.pixata-blazor-chart-legend-marker-line svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pixata-blazor-chart-legend-marker-line path {
+  fill: none;
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-width: 2px;
+}
+
+.pixata-blazor-chart-legend-marker-line circle {
+  fill: var(--pixata-blazor-chart-marker-bg);
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-width: 2px;
+}
+
+/* Tooltip. It is placed by its point, and these classes move it above, below or to the side */
+
+.pixata-blazor-chart-tooltip {
+  position: absolute;
+  z-index: var(--pixata-blazor-chart-tooltip-z-index);
+  box-sizing: border-box;
+  max-width: min(18rem, 90vw);
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border-radius: var(--pixata-blazor-border-radius);
+  background: var(--pixata-blazor-chart-tooltip-bg, var(--pixata-blazor-text-color));
+  color: var(--pixata-blazor-chart-tooltip-color);
+  font-size: var(--pixata-blazor-chart-tooltip-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(var(--pixata-blazor-chart-tooltip-x, -50%), var(--pixata-blazor-chart-tooltip-y, calc(-100% - 8px)));
+}
+
+.pixata-blazor-chart-tooltip-below {
+  --pixata-blazor-chart-tooltip-y: 12px;
+}
+
+.pixata-blazor-chart-tooltip-start {
+  --pixata-blazor-chart-tooltip-x: -12px;
+}
+
+.pixata-blazor-chart-tooltip-end {
+  --pixata-blazor-chart-tooltip-x: calc(-100% + 12px);
+}
+
+.pixata-blazor-chart-tooltip-after {
+  --pixata-blazor-chart-tooltip-x: 0;
+  --pixata-blazor-chart-tooltip-y: -50%;
+}
+
+.pixata-blazor-chart-tooltip-before {
+  --pixata-blazor-chart-tooltip-x: -100%;
+  --pixata-blazor-chart-tooltip-y: -50%;
+}
+
+.pixata-blazor-chart-tooltip-shared {
+  border: 1px solid var(--pixata-blazor-border-color);
+  background: var(--pixata-blazor-chart-shared-tooltip-bg);
+  color: var(--pixata-blazor-chart-text-color);
+}
+
+.pixata-blazor-chart-tooltip-category {
+  font-weight: 600;
+  text-align: center;
+}
+
+.pixata-blazor-chart-tooltip table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.pixata-blazor-chart-tooltip td {
+  padding: calc(var(--pixata-blazor-spacing) * .5) var(--pixata-blazor-spacing);
+  vertical-align: middle;
+}
+
+.pixata-blazor-chart-tooltip-marker {
+  display: block;
+  width: 15px;
+  height: 3px;
+  background: var(--pixata-blazor-chart-point-color);
+}
+
+/* The columns grow and everything else fades in when the chart first appears */
+@keyframes pixata-blazor-chart-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes pixata-blazor-chart-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-column {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: pixata-blazor-chart-grow var(--pixata-blazor-chart-transition);
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-column-negative {
+  transform-origin: 50% 0;
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-line,
+.pixata-blazor-chart-animate .pixata-blazor-chart-marker,
+.pixata-blazor-chart-animate .pixata-blazor-chart-segment,
+.pixata-blazor-chart-animate .pixata-blazor-chart-labels {
+  animation: pixata-blazor-chart-fade var(--pixata-blazor-chart-transition);
+}
+
+/* Until the browser has reported the chart's size, a phone-sized screen moves a side legend underneath */
+@media (max-width: 440px) {
+  .pixata-blazor-chart-body-legend-left,
+  .pixata-blazor-chart-body-legend-right {
+    flex-direction: column;
+  }
+
+  .pixata-blazor-chart-legend-left {
+    order: 0;
+  }
+
+  .pixata-blazor-chart-legend-vertical {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (pointer: coarse) {
+  .pixata-blazor-chart-legend-item {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-chart-marker-target {
+    r: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-chart-animate .pixata-blazor-chart-column,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-line,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-marker,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-segment,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-labels {
+    animation: none;
+  }
+
+  .pixata-blazor-chart-column,
+  .pixata-blazor-chart-segment,
+  .pixata-blazor-chart-marker {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataChart ========== */
 
 /* ========== PixataDropDownButton and PixataSplitButton ========== */
