@@ -1832,6 +1832,424 @@
 
 /* ========== PixataDialog and PixataWindow ========== */
 
+/*
+  PixataDialog and PixataWindow share most of their look: a surface with a shadow, a titlebar, content that scrolls, and a
+  row of buttons along the bottom. While one is open, it is moved into a wrapper at the end of the page's body, which the
+  script stacks above the page from --pixata-blazor-overlay-z-index upwards (staying below --pixata-blazor-popup-z-index, so
+  drop-downs inside a dialog still show on top of it). The wrapper of the one in front has the data-pixata-blazor-active
+  attribute
+*/
+:root {
+  --pixata-blazor-window-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-window-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-window-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-window-border-radius: 0;
+  --pixata-blazor-window-line-height: 1.25;
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-window-titlebar-padding: .75rem 1rem;
+  --pixata-blazor-window-title-font-size: var(--pixata-blazor-font-size-lg);
+  --pixata-blazor-window-content-padding: 1rem;
+  --pixata-blazor-window-footer-padding: .5rem;
+  --pixata-blazor-window-footer-gap: .5rem;
+  --pixata-blazor-window-active-shadow: 0 14px 16px rgba(0, 0, 0, .24), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-blazor-window-resize-handle-size: 6px;
+  --pixata-blazor-dialog-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-blazor-dialog-viewport-margin: 1rem;
+  --pixata-blazor-dialog-predefined-min-width: 200px;
+}
+
+/* The placeholder left where the dialog or window was declared */
+.pixata-blazor-layer-anchor {
+  display: contents;
+}
+
+.pixata-blazor-dialog-wrapper,
+.pixata-blazor-window-wrapper {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 1);
+}
+
+.pixata-blazor-dialog-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pixata-blazor-dialog-viewport-margin);
+}
+
+/* A non-modal window's wrapper covers the viewport (or the containment element), but lets clicks through to the page */
+.pixata-blazor-window-wrapper {
+  pointer-events: none;
+}
+
+.pixata-blazor-window-wrapper-modal {
+  pointer-events: auto;
+}
+
+/* The dimmed backdrop behind a dialog or a modal window */
+.pixata-blazor-dialog-wrapper > .pixata-blazor-overlay,
+.pixata-blazor-window-wrapper > .pixata-blazor-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--pixata-blazor-overlay-bg);
+}
+
+.pixata-blazor-dialog,
+.pixata-blazor-window {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0 solid var(--pixata-blazor-window-border-color);
+  border-radius: var(--pixata-blazor-window-border-radius);
+  outline: none;
+  background-color: var(--pixata-blazor-window-bg);
+  color: var(--pixata-blazor-window-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  font-weight: 400;
+  line-height: var(--pixata-blazor-window-line-height);
+  text-align: start;
+  pointer-events: auto;
+}
+
+/* Width and Height set these properties, so that a phone can override them */
+.pixata-blazor-dialog {
+  position: relative;
+  width: var(--pixata-blazor-dialog-width, auto);
+  height: var(--pixata-blazor-dialog-height, auto);
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: var(--pixata-blazor-dialog-shadow);
+}
+
+/* Top and Left are measured from the wrapper, which covers the viewport (or the containment element) */
+.pixata-blazor-window {
+  position: absolute;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: var(--pixata-blazor-window-shadow);
+}
+
+.pixata-blazor-window-wrapper[data-pixata-blazor-active] > .pixata-blazor-window {
+  box-shadow: var(--pixata-blazor-window-active-shadow);
+}
+
+.pixata-blazor-window-centred {
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+}
+
+.pixata-blazor-window-sm {
+  width: 300px;
+}
+
+.pixata-blazor-window-md {
+  width: 800px;
+}
+
+.pixata-blazor-window-lg {
+  width: 1200px;
+}
+
+.pixata-blazor-window-maximised {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+
+.pixata-blazor-window-wrapper > .pixata-blazor-window-maximised {
+  box-shadow: none;
+}
+
+/* ---------- Titlebar ---------- */
+
+.pixata-blazor-dialog-titlebar,
+.pixata-blazor-window-titlebar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  padding: var(--pixata-blazor-window-titlebar-padding);
+  border-bottom: 1px solid var(--pixata-blazor-window-border-color);
+  background-color: var(--pixata-blazor-window-titlebar-bg);
+  color: var(--pixata-blazor-window-titlebar-color);
+  white-space: nowrap;
+}
+
+/* The titlebar is what the user drags to move a window, with a mouse or a finger */
+.pixata-blazor-window-titlebar {
+  touch-action: none;
+  user-select: none;
+}
+
+.pixata-blazor-window-minimised .pixata-blazor-window-titlebar {
+  border-bottom-width: 0;
+}
+
+.pixata-blazor-dialog-title,
+.pixata-blazor-window-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--pixata-blazor-window-title-font-size);
+  line-height: 1.25;
+}
+
+.pixata-blazor-dialog-title:empty::before,
+.pixata-blazor-window-title:empty::before {
+  content: "";
+  display: inline-block;
+}
+
+/* The negative margins stop the buttons making the titlebar taller than the title */
+.pixata-blazor-dialog-titlebar-actions,
+.pixata-blazor-window-titlebar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row nowrap;
+  align-items: center;
+  margin-block: -.5rem;
+  margin-inline-end: -.25rem;
+}
+
+.pixata-blazor-dialog-titlebar-action.pixata-blazor-icon-button,
+.pixata-blazor-window-titlebar-action.pixata-blazor-icon-button {
+  padding: 1px;
+  color: inherit;
+}
+
+.pixata-blazor-dialog-titlebar-action .pixata-blazor-icon,
+.pixata-blazor-window-titlebar-action .pixata-blazor-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: .125rem;
+}
+
+/* A ThemeColor colours the titlebar */
+.pixata-blazor-dialog-primary,
+.pixata-blazor-window-primary {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-primary-color);
+}
+
+.pixata-blazor-dialog-secondary,
+.pixata-blazor-window-secondary {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-secondary);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-secondary-color);
+}
+
+.pixata-blazor-dialog-tertiary,
+.pixata-blazor-window-tertiary {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-tertiary);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-tertiary-color);
+}
+
+.pixata-blazor-dialog-info,
+.pixata-blazor-window-info {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-info);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-info-color);
+}
+
+.pixata-blazor-dialog-success,
+.pixata-blazor-window-success {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-success);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-success-color);
+}
+
+.pixata-blazor-dialog-warning,
+.pixata-blazor-window-warning {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-warning);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-warning-color);
+}
+
+.pixata-blazor-dialog-error,
+.pixata-blazor-window-error {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-error);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-error-color);
+}
+
+.pixata-blazor-dialog-dark,
+.pixata-blazor-window-dark {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-dark);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-dark-color);
+}
+
+.pixata-blazor-dialog-light,
+.pixata-blazor-window-light {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-light);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-light-color);
+}
+
+.pixata-blazor-dialog-inverse,
+.pixata-blazor-window-inverse {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-inverse);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-inverse-color);
+}
+
+/* ---------- Content, buttons and footer ---------- */
+
+.pixata-blazor-dialog-content,
+.pixata-blazor-window-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--pixata-blazor-window-content-padding);
+  overflow: auto;
+  overscroll-behavior: contain;
+  outline: 0;
+}
+
+.pixata-blazor-dialog-actions,
+.pixata-blazor-window-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: var(--pixata-blazor-window-footer-gap);
+  padding: var(--pixata-blazor-window-footer-padding);
+  border-top: 1px solid var(--pixata-blazor-window-border-color);
+}
+
+.pixata-blazor-dialog-actions-start,
+.pixata-blazor-window-footer-start {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-dialog-actions-center,
+.pixata-blazor-window-footer-center {
+  justify-content: center;
+}
+
+.pixata-blazor-dialog-actions-end,
+.pixata-blazor-window-footer-end {
+  justify-content: flex-end;
+}
+
+.pixata-blazor-dialog-actions-stretch > *,
+.pixata-blazor-window-footer-stretch > * {
+  flex: 1 0 0%;
+}
+
+/* ---------- The alert, confirm and prompt dialogs ---------- */
+
+.pixata-blazor-dialog-predefined {
+  min-width: var(--pixata-blazor-dialog-predefined-min-width);
+}
+
+.pixata-blazor-dialog-message {
+  white-space: pre-line;
+}
+
+.pixata-blazor-dialog-prompt-form {
+  margin: 1.5rem 0 0;
+}
+
+/* ---------- Resize handles ---------- */
+
+.pixata-blazor-window-resize-handle {
+  position: absolute;
+  z-index: 1;
+  touch-action: none;
+}
+
+.pixata-blazor-window-resize-n,
+.pixata-blazor-window-resize-s {
+  left: 0;
+  width: 100%;
+  height: var(--pixata-blazor-window-resize-handle-size);
+}
+
+.pixata-blazor-window-resize-e,
+.pixata-blazor-window-resize-w {
+  top: 0;
+  width: var(--pixata-blazor-window-resize-handle-size);
+  height: 100%;
+}
+
+.pixata-blazor-window-resize-ne,
+.pixata-blazor-window-resize-nw,
+.pixata-blazor-window-resize-se,
+.pixata-blazor-window-resize-sw {
+  z-index: 2;
+  width: calc(var(--pixata-blazor-window-resize-handle-size) * 2);
+  height: calc(var(--pixata-blazor-window-resize-handle-size) * 2);
+}
+
+.pixata-blazor-window-resize-n {
+  top: 0;
+  cursor: n-resize;
+}
+
+.pixata-blazor-window-resize-s {
+  bottom: 0;
+  cursor: s-resize;
+}
+
+.pixata-blazor-window-resize-e {
+  right: 0;
+  cursor: e-resize;
+}
+
+.pixata-blazor-window-resize-w {
+  left: 0;
+  cursor: w-resize;
+}
+
+.pixata-blazor-window-resize-ne {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+
+.pixata-blazor-window-resize-nw {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+
+.pixata-blazor-window-resize-se {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
+.pixata-blazor-window-resize-sw {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+
+/* ---------- Phones and touch screens ---------- */
+
+/* On a phone, a dialog takes the full width of the screen, whatever its Width */
+@media (max-width: 575.98px) {
+  .pixata-blazor-dialog-wrapper {
+    padding: calc(var(--pixata-blazor-dialog-viewport-margin) / 2);
+  }
+
+  .pixata-blazor-dialog {
+    width: 100%;
+  }
+}
+
+/* Fingers get bigger resize handles */
+@media (pointer: coarse) {
+  :root {
+    --pixata-blazor-window-resize-handle-size: 12px;
+  }
+}
+
 /* ========== end of PixataDialog and PixataWindow ========== */
 
 /* ========== PixataWizard and PixataStepper ========== */
