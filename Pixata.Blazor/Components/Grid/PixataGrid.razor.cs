@@ -138,9 +138,14 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   private int? _lastPageSizeParameter;
 
   /// <summary>
-  /// Re-reads the data. Call this after changing the contents of <see cref="Data"/> without replacing it
+  /// Re-reads the data. Call this after changing the contents of <see cref="Data"/> without replacing it, or to make the grid
+  /// call <see cref="OnRead"/> again
   /// </summary>
   public void Rebind() {
+    if (UsesOnRead) {
+      _ = InvokeAsync(ReadData);
+      return;
+    }
     if (ProcessData()) {
       _ = PageChanged.InvokeAsync(_page);
     }
@@ -163,6 +168,17 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
         observable.CollectionChanged += OnCollectionChanged;
       }
     }
+    if (UsesOnRead) {
+      if (Data is not null) {
+        throw new InvalidOperationException("A PixataGrid can have Data or OnRead, but not both");
+      }
+      // With OnRead, the data is only read at the start, and when the grid or the parent asks for it. The first read is
+      // awaited, so the data is there when the page is prerendered
+      if (!_firstReadDone && _readVersion == 0) {
+        await ReadData();
+      }
+      return;
+    }
     // The data is processed on every parameter change, not just when the reference changes, so a parent that changes the
     // collection in place and then re-renders sees the change. Telerik's grid needs a new reference or a Rebind() for that
     if (ProcessData()) {
@@ -173,8 +189,13 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   // Applies paging (and later sorting and so on) to the data. Returns true if the page had to move back because there are
   // no longer enough items to fill it, in which case the caller should raise PageChanged
   private bool ProcessData() {
+    // With OnRead, the data comes back later, and the grid re-renders when it does
+    if (UsesOnRead) {
+      _ = InvokeAsync(ReadData);
+      return false;
+    }
     IEnumerable<TItem> data = _boundData ?? [];
-    GridRequest request = new() { Page = Pageable ? _page : 1, PageSize = Pageable ? _pageSize : 0, Sorts = _sorts, Filters = CurrentFilters, Search = _search };
+    GridRequest request = CurrentRequest();
     GridResult<TItem> result = data.ToGridResult(request);
     bool moved = false;
     if (Pageable && _pageSize > 0) {
@@ -305,6 +326,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   public async ValueTask DisposeAsync() {
     _disposed = true;
     Unsubscribe();
+    _readCancel?.Cancel();
     foreach (CancellationTokenSource cancel in _filterDebounce.Values) {
       await cancel.CancelAsync();
     }

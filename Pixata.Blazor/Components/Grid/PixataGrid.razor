@@ -91,7 +91,11 @@
             }
           </thead>
           <tbody>
-            @if (_items.Count == 0) {
+            @if (_readError is not null) {
+              <tr class="pixata-blazor-grid-norecords pixata-blazor-grid-error">
+                <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)" role="alert">@_readError</td>
+              </tr>
+            } else if (_items.Count == 0) {
               <tr class="pixata-blazor-grid-norecords">
                 <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)">
                   @if (NoDataTemplate is null) {
@@ -113,6 +117,17 @@
             }
           </tbody>
         </table>
+        @* Inside the scrolling area and under the sticky header, so it covers the rows but not the headers, as Telerik's does *@
+        @if (_showLoader) {
+          <div class="pixata-blazor-grid-loader" role="status" aria-label="Loading">
+            <div class="pixata-blazor-grid-loader-overlay"></div>
+            <div class="pixata-blazor-loader">
+              <span class="pixata-blazor-loader-segment"></span>
+              <span class="pixata-blazor-loader-segment"></span>
+              <span class="pixata-blazor-loader-segment"></span>
+            </div>
+          </div>
+        }
       </div>
       @if (Pageable && PagerPosition == PixataGridPagerPosition.Bottom) {
         @Pager

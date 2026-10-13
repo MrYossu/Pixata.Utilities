@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +17,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddScoped<GridSampleEmployeeService>();
 builder.Services.AddTelerikBlazor();
 
 SmtpSettings smtpSettings = builder.Configuration.GetSection("Smtp").Get<SmtpSettings>()!;
@@ -53,6 +54,7 @@ app.MapGet("/hello-world", () => "Hello, world!");
 using (IServiceScope scope = app.Services.CreateScope()) {
   SampleDbContext db = scope.ServiceProvider.GetRequiredService<SampleDbContext>();
   SampleDataSeeder.Seed(db);
+  SampleDataSeeder.SeedEmployees(db);
 }
 
 ApiResponseViewConfig.LogInUrl = "LogIn";

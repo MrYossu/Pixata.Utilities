@@ -358,10 +358,11 @@ public partial class PixataGrid<TItem> {
     }
   }
 
-  // The distinct values in the column, for the checkbox list, from all the data rather than just the filtered rows
+  // The distinct values in the column, for the checkbox list, from all the data rather than just the filtered rows. With
+  // OnRead, the grid only has the current page, so that's all it can offer, as with Telerik's grid
   private List<(object? Value, string Text)> DistinctValues(PixataGridColumn<TItem> column) {
     Func<TItem, object?> getter = FieldAccessor.Getter<TItem>(column.Field!);
-    return [.. (_boundData ?? [])
+    return [.. (UsesOnRead ? _items : _boundData ?? [])
       .Select(getter)
       .Distinct()
       .OrderBy(v => v)

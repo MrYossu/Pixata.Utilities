@@ -38,6 +38,8 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | Parameter | Type | What it does |
 | --- | --- | --- |
 | `Data` | `IEnumerable<TItem>` | The items to show. See [updating the data](#updating-the-data) |
+| `OnRead` | `EventCallback<PixataGridReadEventArgs<TItem>>` | Supplies the data yourself, a page at a time, instead of `Data`. See [OnRead](#supplying-the-data-with-onread) |
+| `EnableLoaderContainer` | `bool` | Shows a loading indicator when `OnRead` is slow. Defaults to `true` |
 | `GridColumns` | `RenderFragment` | The column definitions |
 | `AutoGenerateColumns` | `bool` | Adds a column for each simple property of `TItem`. See [auto-generated columns](#auto-generated-columns) |
 | `Height` | `string` | A CSS height, such as "400px". If set, the rows scroll under a fixed header. If not, the grid is as tall as its rows |
@@ -244,9 +246,45 @@ The grid's colours, borders and spacing match Telerik's Default theme. To change
 | `--pixata-grid-header-bg` | `#fafafa` | The header background |
 | `--pixata-grid-alt-row-bg` | `rgba(61, 61, 61, .05)` | The background of every other row |
 | `--pixata-grid-hover-bg` | `rgba(61, 61, 61, .11)` | The background of the row under the mouse |
+| `--pixata-grid-primary`, `--pixata-grid-primary-hover`, `--pixata-grid-primary-color` | `#ff6358`, `#ea5a51`, `#fff` | The accent colour: the current page, sort arrows, the active filter icon, selected items and primary buttons |
+| `--pixata-grid-input-bg` | `#fff` | The background of text boxes, number boxes, popups and dropdown lists |
+| `--pixata-grid-picker-bg`, `--pixata-grid-picker-hover-bg` | `#f5f5f5`, `#ebebeb` | The background of dropdowns and solid buttons |
+| `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The focus ring on inputs and buttons |
+| `--pixata-grid-popup-shadow` | Telerik's popup shadow | The shadow under dropdown lists and filter menus |
+| `--pixata-grid-border-radius` | `4px` | Rounded corners on inputs and buttons |
+| `--pixata-grid-error-color` | `#ca1400` | The message shown when `OnRead` reports an error |
 
 The grid's elements all have classes starting with `pixata-blazor-grid-`, so you can target them in your own CSS. The grid doesn't use Telerik's `k-` classes, so it isn't affected by a Telerik theme on the same page.
 
-## Using the request types on the server
+## Supplying the data with OnRead
 
-When the grid gets its data, it describes what it wants with a `GridRequest`, and gets back a `GridResult<T>`. These are in Pixata.Extensions (namespace `Pixata.Extensions.Grid`), so that a WASM client and a server can both use them. For now the request only holds the page, but sorting, filtering and grouping will be added as the grid gets them, along with a way for you to supply the data yourself. See [Pixata.Extensions](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md#grid-requests) for details.
+For a lot of data, or data from an API, handle `OnRead` instead of setting `Data`. The grid calls it when it first renders, and whenever the page, sorting, filtering or search changes, with a `GridRequest` saying what it wants. You set the page of data and the total number of items...
+
+```razor
+<PixataGrid TItem="Person" OnRead="ReadPeople" Pageable="true" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow">
+  <GridColumns>...</GridColumns>
+</PixataGrid>
+
+@code {
+  private async Task ReadPeople(PixataGridReadEventArgs<Person> args) =>
+    args.SetResult(await Db.People.OrderBy(p => p.Id).ToGridResultAsync(args.Request, args.CancellationToken));
+}
+```
+
+You need to give `TItem`, as the grid can't work it out without `Data`. `ToGridResult()` (in Pixata.Extensions) applies the request to any query, and `ToGridResultAsync()` (in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Grid.md)) does it with EF Core's async methods. In a WASM app, send `args.Request` to your API, and have the server call one of those. `GridRequest` and `GridResult<T>` serialise with `System.Text.Json` as they are.
+
+| Member of the event args | What it is |
+| --- | --- |
+| `Request` | The page, page size, sorts, filters and search the grid wants |
+| `CancellationToken` | Cancelled if the grid asks for something else before this has finished (such as when the user types quickly in a filter). Pass it on to your database or API calls |
+| `Data`, `Total` | Set these to the page of items and the number of items before paging. Or call `SetResult(gridResult)` |
+| `ErrorMessage` | Set this to show a message in the grid instead of rows. `SetResult(apiResponse)` does this for you when given a failed `ApiResponse<GridResult<T>>` |
+
+A few things to know...
+
+- `OnRead` isn't called again when the parent component re-renders. Call `Rebind()` when you know the data has changed
+- If a slow request finishes after a newer one, its result is ignored, so the grid always shows what was asked for last
+- When a read takes more than 600ms, a loading indicator covers the rows (turn it off with `EnableLoaderContainer="false"`). As in Telerik, it isn't shown for the first read, which is awaited so the data is there when the page is prerendered
+- If the page is past the end of the data, the grid moves to the last page and asks again
+- A checkbox-list filter can only offer the values on the current page, as the grid doesn't have the rest
+- Setting both `Data` and `OnRead` throws an exception

@@ -8,4 +8,8 @@ public class SampleDbContext(DbContextOptions<SampleDbContext> options) : DbCont
   public DbSet<Person> People { get; set; }
   public DbSet<Customer> Customers { get; set; }
   public DbSet<Audit> Audits { get; set; }
+  public DbSet<GridSampleEmployee> Employees { get; set; }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+    modelBuilder.Entity<GridSampleEmployee>().OwnsOne(e => e.Address);
 }

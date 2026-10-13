@@ -2,6 +2,11 @@
 @using Pixata.Blazor.Components
 @using Pixata.Blazor.Components.Grid
 @using Pixata.Blazor.Sample.Models
+@using Pixata.Blazor.Sample.Data
+@using Pixata.Extensions.Grid
+@using Telerik.DataSource
+@using Telerik.DataSource.Extensions
+@inject GridSampleEmployeeService EmployeeService
 
 <SitePageTitle>Pixata grid</SitePageTitle>
 
@@ -182,6 +187,30 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Supplying the data with OnRead</h4>
+
+<p>These grids get their data from the sample app's database through <code>OnRead</code>, so only the page being shown is loaded. Each read is slowed down to 1.5 seconds, so you can see the loading indicator when you page, sort or filter (as in Telerik, it isn't shown for the first read). The PixataGrid uses <code>ToGridResultAsync()</code> from Pixata.AspNetCore, which runs the paging, sorting and filtering in the database.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid TItem="GridSampleEmployee" OnRead="ReadEmployees" Size="_size" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
+    <PixataGridColumn Field="Address.City" Title="City" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid TItem="GridSampleEmployee" OnRead="ReadEmployeesForTelerik" Size="@TelerikSize" Pageable="true" PageSize="5" Sortable="true" FilterMode="GridFilterMode.FilterRow">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
+    <GridColumn Field="Address.City" Title="City" />
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -211,6 +240,16 @@
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
   private bool _multipleSort;
+
+  private async Task ReadEmployees(PixataGridReadEventArgs<GridSampleEmployee> args) =>
+    args.SetResult(await EmployeeService.Read(args.Request, TimeSpan.FromMilliseconds(1500), args.CancellationToken));
+
+  private async Task ReadEmployeesForTelerik(GridReadEventArgs args) {
+    await Task.Delay(1500);
+    DataSourceResult result = GridSampleEmployee.All().ToDataSourceResult(args.Request);
+    args.Data = result.Data;
+    args.Total = result.Total;
+  }
   private string _filterMode = "row";
 
   private PixataGridFilterMenuType PixataFilterMenuType =>

@@ -7,6 +7,14 @@ using Pixata.Extensions.Auditing.Models;
 namespace Pixata.Blazor.Sample.Data;
 
 public static class SampleDataSeeder {
+  // The employees are for the PixataGrid page's OnRead example. They're marked [NoAudit], so they don't fill the audit viewer
+  public static void SeedEmployees(SampleDbContext db) {
+    if (!db.Employees.Any()) {
+      db.Employees.AddRange(GridSampleEmployee.All());
+      db.SaveChanges();
+    }
+  }
+
   public static void Seed(SampleDbContext db) {
     if (db.Audits.Any()) {
       return;

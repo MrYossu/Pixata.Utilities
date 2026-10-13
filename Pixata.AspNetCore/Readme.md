@@ -23,6 +23,7 @@ The documentation is split over the following pages...
 | [Request logging middleware](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.RequestLogging.md) | Logging incoming requests to help debug API calls, with redaction of anything that looks sensitive |
 | [Validation endpoint filter](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Validation.md) | Running your FluentValidation validators on the server, so a WASM client can't bypass them |
 | [Generating documents and PDFs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md) | `DocumentTemplateHelper`, which renders a Blazor component to HTML or to a PDF |
+| [Serving data to PixataGrid](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Grid.md) | `ToGridResultAsync()`, which applies a grid's paging, sorting and filtering to an EF Core query in the database |
 | [Route dumping](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.RouteDumping.md) | An endpoint that lists every route in your app |
 
 ## Registering services

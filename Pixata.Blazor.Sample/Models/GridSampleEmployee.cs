@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Pixata.Extensions.Auditing.Attributes;
 
 namespace Pixata.Blazor.Sample.Models;
 
 // Sample data for the PixataGrid page. It has a mix of types, a nested object and some attributes, to show what the grid
 // does with each
+[NoAudit]
 public class GridSampleEmployee {
   public int Id { get; set; }
   public string FirstName { get; set; } = "";
@@ -44,6 +46,7 @@ public class GridSampleEmployee {
   }
 }
 
+[NoAudit]
 public class GridSampleAddress {
   public string City { get; set; } = "";
 }
