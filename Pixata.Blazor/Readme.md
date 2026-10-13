@@ -30,6 +30,18 @@ The documentation is split over the following pages...
 | [Helpers and services](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Helpers.md) | `PersistentStateHelper`, `TemplateHelper`, `MessageBroker`, `PasswordOptionsHelper`, `ScrollStateService`, `PixataBaseClientService` and `TryGetQueryString()` |
 | [Payload encryption](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Encryption.md) | Client-side setup for encrypting API traffic between a WASM app and an ASP.NET Core server |
 | [Declarative control flow](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ControlFlow.md) | `If`, `Switch` and `ForEach`, which replace the Razor `@if`, `@switch` and `@foreach` statements |
+| [Drop-downs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md) | `PixataComboBox`, `PixataDropDownList` and `PixataMultiSelect` |
+| [Tab strip](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TabStrip.md) | `PixataTabStrip` and `PixataTab` |
+| [Editor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Editor.md) | `PixataEditor`, a rich (HTML) text editor |
+| [File select and upload](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.FileUpload.md) | `PixataFileSelect`, which hands the chosen files to your code, and `PixataUpload`, which posts them to an endpoint |
+| [Dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) | `PixataDialog`, and the alert, confirm and prompt dialogs you can show from code |
+| [Window](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Window.md) | `PixataWindow`, a floating window that can be moved, resized, minimised and maximised |
+| [Wizard and stepper](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Wizard.md) | `PixataWizard` and `PixataStepper` |
+| [Radio group](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.RadioGroup.md) | `PixataRadioGroup` |
+| [Switch](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Switch.md) | `PixataSwitch`, a toggle switch for booleans |
+| [Charts](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Charts.md) | `PixataChart`, with column, line and pie series |
+| [Buttons](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md) | `PixataDropDownButton` and `PixataSplitButton` |
+| [Scheduler](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Scheduler.md) | `PixataScheduler`, for showing and editing appointments in day, week, month and timeline views |
 
 ## Registering dependencies
 

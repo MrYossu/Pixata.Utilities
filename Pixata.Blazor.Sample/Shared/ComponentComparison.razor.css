@@ -1,0 +1,28 @@
+.component-comparison {
+  margin-bottom: 2rem;
+}
+
+.component-comparison-description {
+  margin-bottom: .75rem;
+}
+
+.component-comparison-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1.5rem;
+}
+
+.component-comparison-column {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: .25rem;
+}
+
+.component-comparison-column h5 {
+  margin-bottom: .75rem;
+  color: #6c757d;
+  font-size: .9rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}

@@ -1,0 +1,142 @@
+@namespace Pixata.Blazor.Components
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+@*
+  The floating panel used by the drop-downs, the drop-down and split buttons and so on. It is rendered inside the component
+  that owns it (so keyboard events bubble up to that component as usual), but is position: fixed, placed next to the anchor
+  element by script, so it isn't clipped by a scrolling container. It opens upwards if there isn't room below, and stays
+  inside the viewport on small screens. Without script (eg while prerendering) it falls back to sitting below the anchor, so
+  the anchor's wrapper should be position: relative
+*@
+@if (Visible) {
+  <div @ref="_element"
+       id="@Id"
+       class="@PixataCss.Classes("pixata-blazor-popup", Settings?.Class, Class)"
+       style="@Style"
+       role="@Role"
+       aria-label="@AriaLabel"
+       @attributes="AdditionalAttributes">
+    @ChildContent
+  </div>
+}
+
+@code {
+
+  /// <summary>
+  /// Whether the popup is shown
+  /// </summary>
+  [Parameter]
+  public bool Visible { get; set; }
+
+  /// <summary>
+  /// The element the popup is placed against, usually the component's outer element
+  /// </summary>
+  [Parameter]
+  public ElementReference AnchorElement { get; set; }
+
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  /// <summary>
+  /// The popup's size and extra classes
+  /// </summary>
+  [Parameter]
+  public PixataPopupSettings? Settings { get; set; }
+
+  [Parameter]
+  public string? Class { get; set; }
+
+  [Parameter]
+  public string? Id { get; set; }
+
+  [Parameter]
+  public string? Role { get; set; }
+
+  [Parameter]
+  public string? AriaLabel { get; set; }
+
+  /// <summary>
+  /// Whether the popup is at least as wide as the anchor. True by default
+  /// </summary>
+  [Parameter]
+  public bool MatchAnchorWidth { get; set; } = true;
+
+  /// <summary>
+  /// <c>start</c> (the default) lines the popup up with the anchor's leading edge, <c>end</c> with its trailing edge
+  /// </summary>
+  [Parameter]
+  public string Align { get; set; } = "start";
+
+  /// <summary>
+  /// Raised when the user clicks or taps anywhere outside both the anchor and the popup. The owner usually closes the popup
+  /// </summary>
+  [Parameter]
+  public EventCallback OnOutsideClick { get; set; }
+
+  [Parameter(CaptureUnmatchedValues = true)]
+  public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+  private ElementReference _element;
+  private DotNetObjectReference<PixataPopup>? _dotNetReference;
+  private int _handle;
+  private bool _disposed;
+
+  private string? Style {
+    get {
+      string style = string.Join("", new[] {
+        Css("width", Settings?.Width),
+        Css("min-width", Settings?.MinWidth),
+        Css("max-width", Settings?.MaxWidth),
+        Css("--pixata-blazor-popup-height", Settings?.Height),
+        Css("--pixata-blazor-popup-min-height", Settings?.MinHeight),
+        Css("--pixata-blazor-popup-max-height", Settings?.MaxHeight)
+      });
+      return style == "" ? null : style;
+    }
+  }
+
+  private static string Css(string property, string? value) =>
+    string.IsNullOrWhiteSpace(value) ? "" : $"{property}:{value};";
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (Visible && _handle == 0) {
+      _dotNetReference ??= DotNetObjectReference.Create(this);
+      _handle = await PixataJs.Invoke(Js, "attachPopup", 0, AnchorElement, _element, _dotNetReference, new { matchAnchorWidth = MatchAnchorWidth, align = Align });
+    } else if (Visible) {
+      await PixataJs.InvokeVoid(Js, "repositionPopup", _handle);
+    } else if (_handle != 0) {
+      await Detach();
+    }
+  }
+
+  /// <summary>
+  /// Places the popup against its anchor again. It does this itself when the page scrolls or resizes, or the popup changes
+  /// size, so you only need this if the anchor moved for some other reason
+  /// </summary>
+  public Task Reposition() =>
+    _handle == 0 ? Task.CompletedTask : PixataJs.InvokeVoid(Js, "repositionPopup", _handle);
+
+  [JSInvokable("OnOutsideClick")]
+  public async Task HandleOutsideClick() {
+    if (!_disposed && Visible) {
+      await OnOutsideClick.InvokeAsync();
+    }
+  }
+
+  private async Task Detach() {
+    int handle = _handle;
+    _handle = 0;
+    await PixataJs.InvokeVoid(Js, "detachPopup", handle);
+  }
+
+  public async ValueTask DisposeAsync() {
+    _disposed = true;
+    if (_handle != 0) {
+      await Detach();
+    }
+    _dotNetReference?.Dispose();
+  }
+
+}
