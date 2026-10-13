@@ -267,8 +267,8 @@ public static partial class UploadRequestExtensions {
 
   /// <summary>
   /// Reduces a name sent by the browser to a plain file name that is safe to save on any platform: no folders, no characters
-  /// that Windows rejects, no control or invisible formatting characters (such as the ones that reverse the text, to disguise
-  /// <c>exe.pdf</c> as <c>fdp.exe</c>), not one of the names Windows reserves for devices (eg <c>CON</c> or <c>nul.txt</c>),
+  /// that Windows rejects, no control or invisible formatting characters (such as the ones that reverse the text, used to make
+  /// <c>fdp.exe</c> look like <c>exe.pdf</c>), not one of the names Windows reserves for devices (eg <c>CON</c> or <c>nul.txt</c>),
   /// at most 200 bytes long (keeping the extension), never empty, and never ending in <c>.part</c> (so it can't be mistaken
   /// for an unfinished chunked upload)
   /// </summary>
