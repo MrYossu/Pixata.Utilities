@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
@@ -237,6 +238,27 @@ public class Dialogs_Tests {
     cut.Render(p => p.Add(c => c.Visible, false));
     JSRuntimeInvocation close = module.VerifyInvoke("closeLayer");
     Assert.AreEqual(5, close.Arguments[0]);
+  }
+
+  [TestMethod]
+  public async Task PixataDialog_HiddenAndShownWhileTheScriptIsBusy_OpensOnlyOneLayer() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    module.Setup<int>("openLayer", _ => true).SetResult(1);
+    IRenderedComponent<PixataDialog> cut = RenderDialog(context);
+    // From here on, the script doesn't answer until told to, as when the browser is slow to reply
+    JSRuntimeInvocationHandler closing = module.SetupVoid("closeLayer", _ => true);
+    JSRuntimeInvocationHandler<int> reopening = module.Setup<int>("openLayer", _ => true);
+    cut.Render(p => p.Add(c => c.Visible, false));
+    cut.Render(p => p.Add(c => c.Visible, true));
+    closing.SetVoidResult();
+    await cut.InvokeAsync(() => { });
+    reopening.SetResult(2);
+    await cut.InvokeAsync(() => { });
+    Assert.AreEqual(2, module.Invocations["openLayer"].Count);
+    cut.Render(p => p.Add(c => c.Visible, false));
+    await cut.InvokeAsync(() => { });
+    CollectionAssert.AreEqual(new object?[] { 1, 2 }, module.Invocations["closeLayer"].Select(i => i.Arguments[0]).ToList());
   }
 
   [TestMethod]

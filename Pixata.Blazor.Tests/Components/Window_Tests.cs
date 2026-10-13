@@ -417,7 +417,7 @@ public class Window_Tests {
     using BunitContext context = PixataTestContext.Create();
     BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
     module.Setup<int>("openLayer", _ => true).SetResult(9);
-    module.SetupVoid("updateLayer", _ => true);
+    module.SetupVoid("updateLayer", _ => true).SetVoidResult();
     module.SetupVoid("closeLayer", _ => true);
     IRenderedComponent<PixataWindow> cut = RenderWindow(context, p => {
       p.Add(c => c.ContainmentSelector, "#workspace");

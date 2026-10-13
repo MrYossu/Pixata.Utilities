@@ -23,7 +23,8 @@ public abstract class PixataLayerBase : ComponentBase, IHandleEvent, IAsyncDispo
   private int _layerId;
   private string? _layerWrapperId;
   private PixataLayerOptions? _layerOptions;
-  private bool _opening;
+  private bool _syncing;
+  private bool _renderedWhileSyncing;
   private bool _disposed;
 
   private protected PixataLayerBase() {
@@ -97,12 +98,32 @@ public abstract class PixataLayerBase : ComponentBase, IHandleEvent, IAsyncDispo
 
   private protected abstract PixataLayerOptions LayerOptions { get; }
 
+  // Opening, updating and closing the layer each wait for the script, and the component can be rendered again (eg hidden and
+  // shown again) in the meantime. Only one of these runs at a time, going round again if there was a render while it waited,
+  // so the script never has two layers for one component
   protected override async Task OnAfterRenderAsync(bool firstRender) {
-    if (_opening) {
+    if (_syncing) {
+      _renderedWhileSyncing = true;
       return;
     }
+    _syncing = true;
+    try {
+      do {
+        _renderedWhileSyncing = false;
+        await SyncLayer();
+      } while (_renderedWhileSyncing && !_disposed);
+    }
+    finally {
+      _syncing = false;
+    }
+  }
+
+  private async Task SyncLayer() {
     if (_layerId != 0 && (!Visible || WrapperElement.Id != _layerWrapperId)) {
       await CloseLayer();
+    }
+    if (_disposed) {
+      return;
     }
     if (Visible && _layerId == 0) {
       await OpenLayer();
@@ -113,26 +134,17 @@ public abstract class PixataLayerBase : ComponentBase, IHandleEvent, IAsyncDispo
   }
 
   private async Task OpenLayer() {
-    _opening = true;
     PixataLayerOptions options = LayerOptions;
     string? wrapperId = WrapperElement.Id;
-    int id;
-    try {
-      _dotNetReference ??= DotNetObjectReference.Create(this);
-      id = await PixataLayerJs.Invoke(Js, "openLayer", 0, AnchorElement, WrapperElement, LayerElement, _dotNetReference, options);
-    }
-    finally {
-      _opening = false;
-    }
+    _dotNetReference ??= DotNetObjectReference.Create(this);
+    int id = await PixataLayerJs.Invoke(Js, "openLayer", 0, AnchorElement, WrapperElement, LayerElement, _dotNetReference, options);
     if (id == 0) {
       return;
     }
     if (_disposed || !Visible || WrapperElement.Id != wrapperId) {
-      // Closed (or re-rendered from scratch) while the script was opening it
+      // Hidden, disposed or rendered from scratch while the script was opening it. A render that did that sends
+      // OnAfterRenderAsync round again
       await PixataLayerJs.InvokeVoid(Js, "closeLayer", id);
-      if (!_disposed && Visible) {
-        StateHasChanged();
-      }
       return;
     }
     _layerId = id;
