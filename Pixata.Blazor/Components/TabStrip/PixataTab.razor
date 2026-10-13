@@ -1,0 +1,193 @@
+@namespace Pixata.Blazor.Components
+@implements IDisposable
+
+@*
+  One tab of a PixataTabStrip. The tab strip draws the tab's header in its tab list; the tab itself renders its content panel
+  here, where it was declared, so the panels are always in the same order as the tabs in your markup
+*@
+@if (TabStrip is not null) {
+  if (IsShown) {
+    bool active = IsActive;
+    if (active) {
+      _visited = true;
+    }
+    <div id="@PanelDomId"
+         class="@PixataCss.Classes("pixata-blazor-tabstrip-content", active ? "pixata-blazor-active" : null)"
+         role="tabpanel"
+         aria-labelledby="@HeaderDomId"
+         tabindex="0"
+         hidden="@(!active)"
+         data-pixata-tab-panel="@DomId">
+      @if (active || (TabStrip.PersistTabContent && _visited)) {
+        @(ChildContent ?? Content)
+      }
+    </div>
+  } else {
+    <div hidden data-pixata-tab-panel="@DomId"></div>
+  }
+}
+
+@code {
+
+  [CascadingParameter]
+  private PixataTabStrip? TabStrip { get; set; }
+
+  /// <summary>
+  /// The text shown in the tab. Ignored if you supply a <see cref="HeaderTemplate"/>
+  /// </summary>
+  [Parameter]
+  public string? Title { get; set; }
+
+  /// <summary>
+  /// Custom content for the tab itself (eg an icon and some text, or a badge), instead of <see cref="Title"/>
+  /// </summary>
+  [Parameter]
+  public RenderFragment? HeaderTemplate { get; set; }
+
+  /// <summary>
+  /// What the tab shows when it is active
+  /// </summary>
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  /// <summary>
+  /// Another way to supply <see cref="ChildContent"/>, for when you want to use a <c>&lt;Content&gt;</c> tag alongside a
+  /// <c>&lt;HeaderTemplate&gt;</c>. If both are set, <see cref="ChildContent"/> wins
+  /// </summary>
+  [Parameter]
+  public RenderFragment? Content { get; set; }
+
+  /// <summary>
+  /// When true, the tab is greyed out and can't be selected with the mouse or the keyboard
+  /// </summary>
+  [Parameter]
+  public bool Disabled { get; set; }
+
+  /// <summary>
+  /// When false, the tab isn't shown at all. When the user closes the tab, it is hidden and <see cref="VisibleChanged"/> is
+  /// raised with false, so use <c>@bind-Visible</c> if you want to know, and to show it again later
+  /// </summary>
+  [Parameter]
+  public bool Visible { get; set; } = true;
+
+  [Parameter]
+  public EventCallback<bool> VisibleChanged { get; set; }
+
+  /// <summary>
+  /// When true, the tab has a close button (and can be closed with the Delete key). See <see cref="PixataTabStrip.OnTabClose"/>
+  /// </summary>
+  [Parameter]
+  public bool Closeable { get; set; }
+
+  /// <summary>
+  /// Identifies the tab for <see cref="PixataTabStrip.ActiveTabId"/>. If you don't set one, a unique id is generated
+  /// </summary>
+  [Parameter]
+  public string? Id { get; set; }
+
+  /// <summary>
+  /// Extra CSS classes for the tab itself (not its content)
+  /// </summary>
+  [Parameter]
+  public string? Class { get; set; }
+
+  private readonly string _generatedId = Guid.NewGuid().ToString();
+  private (string? Title, bool Disabled, bool Visible, bool Closeable, string? Class, bool HasTemplate, string? Id) _header;
+  private bool _registered;
+  private bool _visited;
+  private bool _shown = true;
+  private bool? _previousVisible;
+
+  /// <summary>
+  /// The tab's <see cref="Id"/>, or the one generated for it
+  /// </summary>
+  internal string EffectiveId =>
+    string.IsNullOrEmpty(Id) ? _generatedId : Id;
+
+  /// <summary>
+  /// The prefix of the ids rendered on the tab's header and panel, so aria-controls and aria-labelledby can link them. It is
+  /// generated, as <see cref="Id"/> may not be a valid HTML id
+  /// </summary>
+  internal string DomId { get; } = $"pixata-blazor-tab-{Guid.NewGuid():N}";
+
+  internal string HeaderDomId =>
+    $"{DomId}-header";
+
+  internal string PanelDomId =>
+    $"{DomId}-panel";
+
+  /// <summary>
+  /// The tab's header element in the tab strip's list, set by the tab strip
+  /// </summary>
+  internal ElementReference HeaderElement { get; set; }
+
+  /// <summary>
+  /// Whether the tab is shown. This follows <see cref="Visible"/>, but a closed tab stays hidden until the parent changes
+  /// <see cref="Visible"/>, even if the parent keeps passing true
+  /// </summary>
+  internal bool IsShown =>
+    _shown;
+
+  internal bool IsActive =>
+    TabStrip?.IsActive(this) == true;
+
+  internal bool IsDisposed { get; private set; }
+
+  protected override void OnInitialized() {
+    if (TabStrip is null) {
+      throw new InvalidOperationException($"{nameof(PixataTab)} must be inside a {nameof(PixataTabStrip)}");
+    }
+    TabStrip.AddTab(this);
+    _registered = true;
+  }
+
+  protected override void OnParametersSet() {
+    if (Visible != _previousVisible) {
+      _previousVisible = Visible;
+      _shown = Visible;
+    }
+    (string?, bool, bool, bool, string?, bool, string?) header = (Title, Disabled, _shown, Closeable, Class, HeaderTemplate is not null, Id);
+    bool changed = header != _header;
+    _header = header;
+    if (changed && _registered) {
+      TabStrip!.TabChanged();
+    }
+  }
+
+  /// <summary>
+  /// Redraws the tab
+  /// </summary>
+  public void Refresh() {
+    if (!IsDisposed) {
+      StateHasChanged();
+    }
+    TabStrip?.TabChanged();
+  }
+
+  /// <summary>
+  /// Hides the tab when it is closed, telling the parent through <see cref="VisibleChanged"/>
+  /// </summary>
+  internal async Task Close() {
+    _shown = false;
+    _header = (Title, Disabled, _shown, Closeable, Class, HeaderTemplate is not null, Id);
+    await VisibleChanged.InvokeAsync(false);
+    Redraw();
+  }
+
+  /// <summary>
+  /// Re-renders the panel after the tab strip's state changes (eg a different tab became active)
+  /// </summary>
+  internal void Redraw() {
+    if (!IsDisposed) {
+      StateHasChanged();
+    }
+  }
+
+  public void Dispose() {
+    IsDisposed = true;
+    if (_registered) {
+      TabStrip!.RemoveTab(this);
+    }
+  }
+
+}

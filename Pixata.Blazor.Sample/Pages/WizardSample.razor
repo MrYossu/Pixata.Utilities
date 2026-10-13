@@ -1,0 +1,531 @@
+@page "/WizardSample"
+@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using Pixata.Blazor.Components
+@using Telerik.SvgIcons
+
+<h3>Wizard and stepper</h3>
+
+<p>
+  <code>PixataStepper</code> and <code>PixataWizard</code>, next to the Telerik <code>TelerikStepper</code> and
+  <code>TelerikWizard</code> configured the same way. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Wizard.md">the documentation</a>.
+</p>
+
+<ComponentComparison Title="Stepper">
+  <Description>
+    <p>
+      Bound to <code>Value</code>, with a valid step, an optional step, an invalid step, a disabled step and icons. Click a step,
+      or focus the steps and use the arrow keys, Home and End to move, and Enter or Space to select.
+    </p>
+    <label>Step type
+      <select @bind="_stepType">
+        @foreach (PixataStepperStepType stepType in Enum.GetValues<PixataStepperStepType>()) {
+          <option value="@stepType">@stepType</option>
+        }
+      </select>
+    </label>
+    <label class="ml-3">Orientation
+      <select @bind="_orientation">
+        @foreach (PixataStepperOrientation orientation in Enum.GetValues<PixataStepperOrientation>()) {
+          <option value="@orientation">@orientation</option>
+        }
+      </select>
+    </label>
+    <label class="ml-3"><input type="checkbox" @bind="_linear" /> Linear</label>
+  </Description>
+  <Pixata>
+    <PixataStepper @bind-Value="_pixataStep" StepType="_stepType" Orientation="_orientation" Linear="_linear" Height="@(IsVertical ? "320px" : null)">
+      <StepperSteps>
+        <PixataStepperStep Label="Cart" Valid="true" />
+        <PixataStepperStep Label="Delivery" Icon="PixataSvgIcons.Calendar" Optional="true" />
+        <PixataStepperStep Label="Payment" Icon="PixataSvgIcons.Pencil" Valid="false" />
+        <PixataStepperStep Label="Gift wrap" Disabled="true" />
+        <PixataStepperStep Label="Confirm" Icon="PixataSvgIcons.Check" />
+      </StepperSteps>
+    </PixataStepper>
+    <p class="mt-2">Current step: <strong>@_pixataStep</strong></p>
+  </Pixata>
+  <Telerik>
+    @* The Telerik stepper has no Height parameter, so it is given its height by the div around it *@
+    <div class="@(IsVertical ? "telerik-vertical-stepper" : null)">
+    <TelerikStepper @bind-Value="_telerikStep" StepType="@(Enum.Parse<StepperStepType>(_stepType.ToString()))" Orientation="@(Enum.Parse<StepperOrientation>(_orientation.ToString()))" Linear="_linear">
+      <StepperSteps>
+        <StepperStep Label="Cart" Valid="true" />
+        <StepperStep Label="Delivery" Icon="SvgIcon.Calendar" Optional="true" />
+        <StepperStep Label="Payment" Icon="SvgIcon.Pencil" Valid="false" />
+        <StepperStep Label="Gift wrap" Disabled="true" />
+        <StepperStep Label="Confirm" Icon="SvgIcon.Check" />
+      </StepperSteps>
+    </TelerikStepper>
+    </div>
+    <p class="mt-2">Current step: <strong>@_telerikStep</strong></p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="On a narrow screen">
+  <Description>
+    Both steppers are 300px wide. With less than 80px for each step, the Pixata stepper collapses to show the current step, buttons to move either way and a
+    progress bar, so it is usable on a phone. Set <code>Collapsible="false"</code> to turn this off.
+  </Description>
+  <Pixata>
+    <div class="narrow-box">
+      <PixataStepper @bind-Value="_pixataNarrowStep">
+        <StepperSteps>
+          <PixataStepperStep Label="Personal details" />
+          <PixataStepperStep Label="Address" />
+          <PixataStepperStep Label="Payment details" />
+          <PixataStepperStep Label="Confirmation" />
+        </StepperSteps>
+      </PixataStepper>
+    </div>
+  </Pixata>
+  <Telerik>
+    <div class="narrow-box">
+      <TelerikStepper @bind-Value="_telerikNarrowStep">
+        <StepperSteps>
+          <StepperStep Label="Personal details" />
+          <StepperStep Label="Address" />
+          <StepperStep Label="Payment details" />
+          <StepperStep Label="Confirmation" />
+        </StepperSteps>
+      </TelerikStepper>
+    </div>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Wizard">
+  <Description>
+    <p>
+      Bound to <code>Value</code>, with an optional step, a step that can be hidden, and <code>OnFinish</code>. The step after the
+      hidden one keeps its index.
+    </p>
+    <label>Stepper position
+      <select @bind="_stepperPosition">
+        @foreach (PixataWizardStepperPosition position in Enum.GetValues<PixataWizardStepperPosition>()) {
+          <option value="@position">@position</option>
+        }
+      </select>
+    </label>
+    <label class="ml-3">Step type
+      <select @bind="_wizardStepType">
+        @foreach (PixataStepperStepType stepType in Enum.GetValues<PixataStepperStepType>()) {
+          <option value="@stepType">@stepType</option>
+        }
+      </select>
+    </label>
+    <label class="ml-3"><input type="checkbox" @bind="_wizardLinear" /> Linear</label>
+    <label class="ml-3"><input type="checkbox" @bind="_showPager" /> ShowPager</label>
+    <label class="ml-3"><input type="checkbox" @bind="_showExtras" /> Show the extras step</label>
+  </Description>
+  <Pixata>
+    <PixataWizard @bind-Value="_pixataWizardStep" StepperPosition="_stepperPosition" ShowPager="_showPager" Height="@WizardHeight" OnFinish="@(() => _pixataFinished = DateTime.Now)">
+      <WizardSettings>
+        <PixataWizardStepperSettings Linear="_wizardLinear" StepType="_wizardStepType" />
+      </WizardSettings>
+      <WizardSteps>
+        <PixataWizardStep Label="Plan" Icon="PixataSvgIcons.File">
+          <Content>
+            <p>Choose a plan. The step's content goes here.</p>
+          </Content>
+        </PixataWizardStep>
+        <PixataWizardStep Label="Extras" Icon="PixataSvgIcons.Plus" Optional="true" Visible="_showExtras">
+          <Content>
+            <p>Add some extras, if you like.</p>
+          </Content>
+        </PixataWizardStep>
+        <PixataWizardStep Label="Schedule" Icon="PixataSvgIcons.Calendar">
+          <Content>
+            <p>Pick a start date.</p>
+          </Content>
+        </PixataWizardStep>
+        <PixataWizardStep Label="Confirm" Icon="PixataSvgIcons.Check">
+          <Content>
+            <p>Check everything and click Done.</p>
+          </Content>
+        </PixataWizardStep>
+      </WizardSteps>
+    </PixataWizard>
+    <p class="mt-2">Current step: <strong>@_pixataWizardStep</strong>@(_pixataFinished is null ? "" : $", finished at {_pixataFinished:T}")</p>
+  </Pixata>
+  <Telerik>
+    <TelerikWizard @bind-Value="_telerikWizardStep" StepperPosition="@(Enum.Parse<WizardStepperPosition>(_stepperPosition.ToString()))" ShowPager="_showPager" Height="@WizardHeight" OnFinish="@(() => _telerikFinished = DateTime.Now)">
+      <WizardSettings>
+        <WizardStepperSettings Linear="_wizardLinear" StepType="@(Enum.Parse<StepperStepType>(_wizardStepType.ToString()))" />
+      </WizardSettings>
+      <WizardSteps>
+        <WizardStep Label="Plan" Icon="SvgIcon.File">
+          <Content>
+            <p>Choose a plan. The step's content goes here.</p>
+          </Content>
+        </WizardStep>
+        <WizardStep Label="Extras" Icon="SvgIcon.Plus" Optional="true" Visible="_showExtras">
+          <Content>
+            <p>Add some extras, if you like.</p>
+          </Content>
+        </WizardStep>
+        <WizardStep Label="Schedule" Icon="SvgIcon.Calendar">
+          <Content>
+            <p>Pick a start date.</p>
+          </Content>
+        </WizardStep>
+        <WizardStep Label="Confirm" Icon="SvgIcon.Check">
+          <Content>
+            <p>Check everything and click Done.</p>
+          </Content>
+        </WizardStep>
+      </WizardSteps>
+    </TelerikWizard>
+    <p class="mt-2">Current step: <strong>@_telerikWizardStep</strong>@(_telerikFinished is null ? "" : $", finished at {_telerikFinished:T}")</p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Validating each step">
+  <Description>
+    Each step edits its own model. The Pixata steps just set <code>Model</code>: the wizard puts the content in a form, and won't
+    move on (or finish) until the step is valid. Pressing Enter in a text box moves on. The Telerik steps need a form each, and an
+    <code>OnChange</code> handler that validates it and sets <code>Valid</code>.
+  </Description>
+  <Pixata>
+    <PixataWizard OnFinish="@(() => _pixataFormMessage = $"Signed up {_pixataAccount.Email} ({_pixataPersonal.Name})")">
+      <WizardSteps>
+        <PixataWizardStep Label="Account" Model="_pixataAccount">
+          <Content>
+            <DataAnnotationsValidator />
+            <div class="sample-field">
+              <label for="pixata-email">Email</label>
+              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-email" class="pixata-blazor-input-inner" @bind-Value="_pixataAccount.Email" /></span>
+              <ValidationMessage For="() => _pixataAccount.Email" />
+            </div>
+            <div class="sample-field">
+              <label for="pixata-password">Password</label>
+              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-password" type="password" class="pixata-blazor-input-inner" @bind-Value="_pixataAccount.Password" /></span>
+              <ValidationMessage For="() => _pixataAccount.Password" />
+            </div>
+          </Content>
+        </PixataWizardStep>
+        <PixataWizardStep Label="Personal details" Model="_pixataPersonal">
+          <Content>
+            <DataAnnotationsValidator />
+            <div class="sample-field">
+              <label for="pixata-name">Name</label>
+              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-name" class="pixata-blazor-input-inner" @bind-Value="_pixataPersonal.Name" /></span>
+              <ValidationMessage For="() => _pixataPersonal.Name" />
+            </div>
+            <div class="sample-field">
+              <label for="pixata-city">City</label>
+              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-city" class="pixata-blazor-input-inner" @bind-Value="_pixataPersonal.City" /></span>
+              <ValidationMessage For="() => _pixataPersonal.City" />
+            </div>
+          </Content>
+        </PixataWizardStep>
+        <PixataWizardStep Label="Finish">
+          <Content>
+            <p>Click Done to sign up.</p>
+          </Content>
+        </PixataWizardStep>
+      </WizardSteps>
+    </PixataWizard>
+    <p class="mt-2">@_pixataFormMessage</p>
+  </Pixata>
+  <Telerik>
+    <TelerikWizard OnFinish="TelerikFormFinish">
+      <WizardSteps>
+        <WizardStep Label="Account" Valid="_telerikAccountValid" OnChange="@(e => TelerikStepChange(e, 0, _telerikAccountContext, valid => _telerikAccountValid = valid))">
+          <Content>
+            <EditForm EditContext="_telerikAccountContext">
+              <DataAnnotationsValidator />
+              <div class="sample-field">
+                <label for="telerik-email">Email</label>
+                <TelerikTextBox Id="telerik-email" @bind-Value="_telerikAccount.Email" />
+                <ValidationMessage For="() => _telerikAccount.Email" />
+              </div>
+              <div class="sample-field">
+                <label for="telerik-password">Password</label>
+                <TelerikTextBox Id="telerik-password" Password="true" @bind-Value="_telerikAccount.Password" />
+                <ValidationMessage For="() => _telerikAccount.Password" />
+              </div>
+            </EditForm>
+          </Content>
+        </WizardStep>
+        <WizardStep Label="Personal details" Valid="_telerikPersonalValid" OnChange="@(e => TelerikStepChange(e, 1, _telerikPersonalContext, valid => _telerikPersonalValid = valid))">
+          <Content>
+            <EditForm EditContext="_telerikPersonalContext">
+              <DataAnnotationsValidator />
+              <div class="sample-field">
+                <label for="telerik-name">Name</label>
+                <TelerikTextBox Id="telerik-name" @bind-Value="_telerikPersonal.Name" />
+                <ValidationMessage For="() => _telerikPersonal.Name" />
+              </div>
+              <div class="sample-field">
+                <label for="telerik-city">City</label>
+                <TelerikTextBox Id="telerik-city" @bind-Value="_telerikPersonal.City" />
+                <ValidationMessage For="() => _telerikPersonal.City" />
+              </div>
+            </EditForm>
+          </Content>
+        </WizardStep>
+        <WizardStep Label="Finish">
+          <Content>
+            <p>Click Done to sign up.</p>
+          </Content>
+        </WizardStep>
+      </WizardSteps>
+    </TelerikWizard>
+    <p class="mt-2">@_telerikFormMessage</p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="One form for the whole wizard">
+  <Description>
+    The wizard is inside an <code>EditForm</code> for one model. Each Pixata step lists its <code>Fields</code>, which are
+    validated before the user can move on from it, so the fields on later steps don't get in the way. Done validates the whole
+    form. The Telerik wizard has nothing like <code>Fields</code>, so only validates the form when Done is clicked.
+  </Description>
+  <Pixata>
+    <EditForm Model="_pixataOrder">
+      <DataAnnotationsValidator />
+      <PixataWizard OnFinish="@(() => _pixataOrderMessage = $"Ordered {_pixataOrder.Quantity} x {_pixataOrder.Product} for {_pixataOrder.Email}")">
+        <WizardSteps>
+          <PixataWizardStep Label="Product" Fields="@([() => _pixataOrder.Product, () => _pixataOrder.Quantity])">
+            <Content>
+              <div class="sample-field">
+                <label for="pixata-product">Product</label>
+                <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-product" class="pixata-blazor-input-inner" @bind-Value="_pixataOrder.Product" /></span>
+                <ValidationMessage For="() => _pixataOrder.Product" />
+              </div>
+              <div class="sample-field">
+                <label for="pixata-quantity">Quantity</label>
+                <span class="@PixataCss.Input(null, null, null)"><InputNumber id="pixata-quantity" class="pixata-blazor-input-inner" @bind-Value="_pixataOrder.Quantity" /></span>
+                <ValidationMessage For="() => _pixataOrder.Quantity" />
+              </div>
+            </Content>
+          </PixataWizardStep>
+          <PixataWizardStep Label="Contact" Fields="@([() => _pixataOrder.Email])">
+            <Content>
+              <div class="sample-field">
+                <label for="pixata-order-email">Email</label>
+                <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-order-email" class="pixata-blazor-input-inner" @bind-Value="_pixataOrder.Email" /></span>
+                <ValidationMessage For="() => _pixataOrder.Email" />
+              </div>
+            </Content>
+          </PixataWizardStep>
+        </WizardSteps>
+      </PixataWizard>
+    </EditForm>
+    <p class="mt-2">@_pixataOrderMessage</p>
+  </Pixata>
+  <Telerik>
+    <EditForm EditContext="_telerikOrderContext">
+      <DataAnnotationsValidator />
+      <TelerikWizard OnFinish="TelerikOrderFinish">
+        <WizardSteps>
+          <WizardStep Label="Product">
+            <Content>
+              <div class="sample-field">
+                <label for="telerik-product">Product</label>
+                <TelerikTextBox Id="telerik-product" @bind-Value="_telerikOrder.Product" />
+                <ValidationMessage For="() => _telerikOrder.Product" />
+              </div>
+              <div class="sample-field">
+                <label for="telerik-quantity">Quantity</label>
+                <TelerikNumericTextBox Id="telerik-quantity" @bind-Value="_telerikOrder.Quantity" />
+                <ValidationMessage For="() => _telerikOrder.Quantity" />
+              </div>
+            </Content>
+          </WizardStep>
+          <WizardStep Label="Contact">
+            <Content>
+              <div class="sample-field">
+                <label for="telerik-order-email">Email</label>
+                <TelerikTextBox Id="telerik-order-email" @bind-Value="_telerikOrder.Email" />
+                <ValidationMessage For="() => _telerikOrder.Email" />
+              </div>
+            </Content>
+          </WizardStep>
+        </WizardSteps>
+      </TelerikWizard>
+    </EditForm>
+    <p class="mt-2">@_telerikOrderMessage</p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Custom buttons">
+  <Description>
+    <code>WizardButtons</code> replaces the Previous, Next and Done buttons. The Pixata template's context is the wizard, so the
+    buttons can call its <code>Previous</code>, <code>Next</code> and <code>Finish</code> methods (which run the usual checks); the
+    Telerik template's context is the step's index.
+  </Description>
+  <Pixata>
+    <PixataWizard @bind-Value="_pixataButtonsStep" ShowPager="false" OnFinish="@(() => _pixataButtonsMessage = "All done")">
+      <WizardSteps>
+        <PixataWizardStep Label="Start"><Content><p>The first step.</p></Content></PixataWizardStep>
+        <PixataWizardStep Label="Middle"><Content><p>The second step.</p></Content></PixataWizardStep>
+        <PixataWizardStep Label="End"><Content><p>The last step.</p></Content></PixataWizardStep>
+      </WizardSteps>
+      <WizardButtons>
+        <button type="button" class="@PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null)" @onclick="@(() => { _pixataButtonsStep = 0; _pixataButtonsMessage = ""; })">Start again</button>
+        @if (!context.IsFirstStep) {
+          <button type="button" class="@PixataCss.Button(null, null, null, null)" @onclick="context.Previous">Back</button>
+        }
+        @if (context.IsLastStep) {
+          <button type="button" class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Success, null, null, null)" @onclick="context.Finish">Finish</button>
+        } else {
+          <button type="button" class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null)" @onclick="context.Next">Continue</button>
+        }
+      </WizardButtons>
+    </PixataWizard>
+    <p class="mt-2">@_pixataButtonsMessage</p>
+  </Pixata>
+  <Telerik>
+    <TelerikWizard @bind-Value="_telerikButtonsStep" ShowPager="false" OnFinish="@(() => _telerikButtonsMessage = "All done")">
+      <WizardSteps>
+        <WizardStep Label="Start"><Content><p>The first step.</p></Content></WizardStep>
+        <WizardStep Label="Middle"><Content><p>The second step.</p></Content></WizardStep>
+        <WizardStep Label="End"><Content><p>The last step.</p></Content></WizardStep>
+      </WizardSteps>
+      <WizardButtons>
+        <TelerikButton FillMode="@ThemeConstants.Button.FillMode.Flat" OnClick="@(() => { _telerikButtonsStep = 0; _telerikButtonsMessage = ""; })">Start again</TelerikButton>
+        @if (context > 0) {
+          <TelerikButton OnClick="@(() => _telerikButtonsStep--)">Back</TelerikButton>
+        }
+        @if (context == 2) {
+          <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Success" OnClick="@(() => _telerikButtonsMessage = "All done")">Finish</TelerikButton>
+        } else {
+          <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="@(() => _telerikButtonsStep++)">Continue</TelerikButton>
+        }
+      </WizardButtons>
+    </TelerikWizard>
+    <p class="mt-2">@_telerikButtonsMessage</p>
+  </Telerik>
+</ComponentComparison>
+
+<style>
+  .telerik-vertical-stepper {
+    height: 320px;
+  }
+
+  .telerik-vertical-stepper > .k-stepper {
+    height: 100%;
+  }
+
+  .narrow-box {
+    width: 300px;
+    max-width: 100%;
+    padding: .5rem;
+    border: 1px dashed rgba(0, 0, 0, .2);
+  }
+
+  .sample-field {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    margin-bottom: .75rem;
+    max-width: 20rem;
+  }
+</style>
+
+@code {
+  private PixataStepperStepType _stepType = PixataStepperStepType.Steps;
+  private PixataStepperOrientation _orientation = PixataStepperOrientation.Horizontal;
+  private bool _linear;
+  private int _pixataStep = 1;
+  private int _telerikStep = 1;
+  private int _pixataNarrowStep = 1;
+  private int _telerikNarrowStep = 1;
+
+  private PixataWizardStepperPosition _stepperPosition = PixataWizardStepperPosition.Top;
+  private PixataStepperStepType _wizardStepType = PixataStepperStepType.Steps;
+  private bool _wizardLinear;
+  private bool _showPager = true;
+  private bool _showExtras = true;
+  private int _pixataWizardStep;
+  private int _telerikWizardStep;
+  private DateTime? _pixataFinished;
+  private DateTime? _telerikFinished;
+
+  private readonly AccountModel _pixataAccount = new();
+  private readonly PersonalModel _pixataPersonal = new();
+  private string _pixataFormMessage = "";
+  private readonly AccountModel _telerikAccount = new();
+  private readonly PersonalModel _telerikPersonal = new();
+  private EditContext _telerikAccountContext = null!;
+  private EditContext _telerikPersonalContext = null!;
+  private bool? _telerikAccountValid;
+  private bool? _telerikPersonalValid;
+  private string _telerikFormMessage = "";
+
+  private readonly OrderModel _pixataOrder = new();
+  private string _pixataOrderMessage = "";
+  private readonly OrderModel _telerikOrder = new();
+  private EditContext _telerikOrderContext = null!;
+  private string _telerikOrderMessage = "";
+
+  private int _pixataButtonsStep;
+  private int _telerikButtonsStep;
+  private string _pixataButtonsMessage = "";
+  private string _telerikButtonsMessage = "";
+
+  private bool IsVertical =>
+    _orientation == PixataStepperOrientation.Vertical;
+
+  private string? WizardHeight =>
+    _stepperPosition is PixataWizardStepperPosition.Left or PixataWizardStepperPosition.Right ? "360px" : null;
+
+  protected override void OnInitialized() {
+    _telerikAccountContext = new(_telerikAccount);
+    _telerikPersonalContext = new(_telerikPersonal);
+    _telerikOrderContext = new(_telerikOrder);
+  }
+
+  private static void TelerikStepChange(WizardStepChangeEventArgs args, int index, EditContext context, Action<bool> setValid) {
+    if (args.TargetIndex > index) {
+      bool valid = context.Validate();
+      setValid(valid);
+      args.IsCancelled = !valid;
+    }
+  }
+
+  private void TelerikFormFinish() {
+    _telerikAccountValid = _telerikAccountContext.Validate();
+    _telerikPersonalValid = _telerikPersonalContext.Validate();
+    if (_telerikAccountValid is true && _telerikPersonalValid is true) {
+      _telerikFormMessage = $"Signed up {_telerikAccount.Email} ({_telerikPersonal.Name})";
+    }
+  }
+
+  private void TelerikOrderFinish() {
+    if (_telerikOrderContext.Validate()) {
+      _telerikOrderMessage = $"Ordered {_telerikOrder.Quantity} x {_telerikOrder.Product} for {_telerikOrder.Email}";
+    }
+  }
+
+  private class AccountModel {
+    [Required]
+    [EmailAddress]
+    public string? Email { get; set; }
+
+    [Required]
+    [MinLength(6, ErrorMessage = "The password must be at least 6 characters long.")]
+    public string? Password { get; set; }
+  }
+
+  private class PersonalModel {
+    [Required]
+    public string? Name { get; set; }
+
+    [Required]
+    public string? City { get; set; }
+  }
+
+  private class OrderModel {
+    [Required]
+    public string? Product { get; set; }
+
+    [Range(1, 10)]
+    public int Quantity { get; set; }
+
+    [Required]
+    [EmailAddress]
+    public string? Email { get; set; }
+  }
+}

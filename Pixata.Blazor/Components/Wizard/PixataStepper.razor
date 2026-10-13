@@ -1,0 +1,133 @@
+@namespace Pixata.Blazor.Components
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+@*
+  Shows the steps of a process, which one the user is on, and lets them move between them. Declare the steps with
+  PixataStepperStep components inside StepperSteps. They register themselves here, and the stepper draws them
+*@
+<nav id="@Id"
+     class="@RootClass"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+  <CascadingValue Value="this" IsFixed="true" @key="_generation">
+    @StepperSteps
+  </CascadingValue>
+  @{
+    int value = CurrentIndex;
+    int tabStop = TabStop;
+  }
+  <ol @ref="_list"
+      class="@PixataCss.Classes("pixata-blazor-stepper-list", $"pixata-blazor-stepper-list-{(IsVertical ? "vertical" : "horizontal")}")"
+      role="@(InWizard ? "tablist" : null)"
+      aria-orientation="@(InWizard ? (IsVertical ? "vertical" : "horizontal") : null)"
+      @onkeydown="KeyDown">
+    @for (int i = 0; i < _steps.Count; i++) {
+      int index = i;
+      PixataStepperStep step = _steps[index];
+      bool? valid = step.Valid;
+      bool reachable = IsReachable(index);
+      <li @key="step"
+          class="@StepClass(step, index, value, valid)"
+          role="@(InWizard ? "none" : null)">
+        <button @ref="step.Element"
+                type="button"
+                class="pixata-blazor-stepper-step-link"
+                role="@(InWizard ? "tab" : null)"
+                tabindex="@(index == tabStop ? "0" : "-1")"
+                title="@step.Label"
+                aria-current="@(!InWizard && index == value ? "step" : null)"
+                aria-selected="@(InWizard ? (index == value ? "true" : "false") : null)"
+                aria-controls="@step.AriaControls"
+                aria-invalid="@(valid is false ? "true" : null)"
+                aria-disabled="@(!step.Disabled && !reachable && index != value ? "true" : null)"
+                disabled="@step.Disabled"
+                @onclick="() => Select(index)">
+          @if (step.Template is not null) {
+            @step.Template
+          } else {
+            @if (StepType == PixataStepperStepType.Steps) {
+              <span class="pixata-blazor-stepper-step-indicator">
+                @Indicator(step, index, valid)
+              </span>
+            }
+            @if (StepType == PixataStepperStepType.Labels || !string.IsNullOrEmpty(step.Label) || step.Optional) {
+              <span class="pixata-blazor-stepper-step-label">
+                <span class="pixata-blazor-stepper-step-text">@step.Label</span>
+                @if (StepType == PixataStepperStepType.Labels && valid is not null) {
+                  <PixataIcon Icon="@(valid.Value ? PixataSvgIcons.StepSuccess : PixataSvgIcons.StepError)" Class="pixata-blazor-stepper-step-label-icon" />
+                }
+                @if (step.Optional) {
+                  <span class="pixata-blazor-stepper-step-label-optional">@OptionalText</span>
+                }
+              </span>
+            }
+          }
+        </button>
+      </li>
+    }
+  </ol>
+  @if (_steps.Count > 1) {
+    <div class="pixata-blazor-stepper-progress" style="@ProgressStyle" aria-hidden="true">
+      <div class="pixata-blazor-stepper-progress-value" style="@ProgressValueStyle(value)"></div>
+    </div>
+  }
+  @if (_steps.Count > 0) {
+    PixataStepperStep? current = value >= 0 && value < _steps.Count ? _steps[value] : null;
+    string summary = string.Format(CollapsedTextFormat, value + 1, _steps.Count);
+    <div class="pixata-blazor-stepper-compact">
+      <button type="button"
+              class="@PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, PixataThemeConstants.Button.FillMode.Flat, PixataThemeConstants.Button.Rounded.Full, PixataThemeConstants.Button.Size.Medium, true), "pixata-blazor-stepper-compact-button")"
+              aria-label="@PreviousStepLabel"
+              title="@PreviousStepLabel"
+              disabled="@(SiblingIndex(value, -1) is null)"
+              @onclick="() => SelectSibling(-1)">
+        <PixataIcon Icon="PixataSvgIcons.ChevronLeft" />
+      </button>
+      <div class="pixata-blazor-stepper-compact-summary">
+        @if (current is not null && StepType == PixataStepperStepType.Steps) {
+          <span class="pixata-blazor-stepper-step-indicator" aria-hidden="true">@Indicator(current, value, current.Valid)</span>
+        }
+        <span class="pixata-blazor-stepper-compact-text">
+          <span class="pixata-blazor-stepper-compact-count">@summary</span>
+          @if (current is not null) {
+            <span class="pixata-blazor-stepper-compact-label">@current.Label</span>
+          }
+        </span>
+      </div>
+      <button type="button"
+              class="@PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, PixataThemeConstants.Button.FillMode.Flat, PixataThemeConstants.Button.Rounded.Full, PixataThemeConstants.Button.Size.Medium, true), "pixata-blazor-stepper-compact-button")"
+              aria-label="@NextStepLabel"
+              title="@NextStepLabel"
+              disabled="@(SiblingIndex(value, 1) is null)"
+              @onclick="() => SelectSibling(1)">
+        <PixataIcon Icon="PixataSvgIcons.ChevronRight" />
+      </button>
+      <div class="pixata-blazor-stepper-compact-progress"
+           role="progressbar"
+           aria-valuemin="1"
+           aria-valuemax="@_steps.Count"
+           aria-valuenow="@(value + 1)"
+           aria-valuetext="@(current is null ? summary : $"{summary}: {current.Label}")">
+        <div class="pixata-blazor-stepper-compact-progress-value" style="@($"width:{Percent(value + 1, _steps.Count)}%")"></div>
+      </div>
+    </div>
+  }
+</nav>
+
+@code {
+
+  private RenderFragment Indicator(PixataStepperStep step, int index, bool? valid) =>
+    @<text>
+      @if (valid is true) {
+        <PixataIcon Icon="PixataSvgIcons.StepSuccess" Class="pixata-blazor-stepper-step-indicator-icon" />
+      } else if (valid is false) {
+        <PixataIcon Icon="PixataSvgIcons.StepError" Class="pixata-blazor-stepper-step-indicator-icon" />
+      } else if (step.Icon is not null) {
+        <PixataIcon Icon="step.Icon" Class="pixata-blazor-stepper-step-indicator-icon" />
+      } else {
+        <span class="pixata-blazor-stepper-step-indicator-text">@(string.IsNullOrEmpty(step.Text) ? (index + 1).ToString() : step.Text)</span>
+      }
+    </text>;
+
+}
