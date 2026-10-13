@@ -6,6 +6,7 @@
 @using Pixata.Extensions.Grid
 @using Telerik.DataSource
 @using Telerik.DataSource.Extensions
+@using Telerik.SvgIcons
 @inject GridSampleEmployeeService EmployeeService
 
 <SitePageTitle>Pixata grid</SitePageTitle>
@@ -295,6 +296,68 @@
 </PixataGrid>
 <p>Selected cells: @string.Join(", ", _selectedCells.Select(c => $"{c.DataItem.FirstName}'s {c.ColumnField}"))</p>
 
+<h4>Editing</h4>
+
+<div class="pixata-blazor-grid-sample-options">
+  <label>
+    Edit mode
+    <select @bind="_editMode">
+      <option value="inline">Inline</option>
+      <option value="popup">Popup</option>
+    </select>
+  </label>
+</div>
+
+<p>Each grid edits its own copy of the first 12 employees, so you can try them separately. First name is required (try saving without one), and the email address can't be changed.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid TItem="GridSampleEditableEmployee" Data="_pixataEditable" Size="_size" Pageable="true" PageSize="5" ConfirmDelete="true"
+            EditMode="@(_editMode == "popup" ? PixataGridEditMode.Popup : PixataGridEditMode.Inline)"
+            OnCreate="PixataCreate" OnUpdate="PixataUpdate" OnDelete="PixataDelete">
+  <GridToolBarTemplate>
+    <PixataGridCommandButton Command="Add" Icon="PixataGridIcon.Plus">Add employee</PixataGridCommandButton>
+  </GridToolBarTemplate>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.Email)" Editable="false" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.Salary)" DisplayFormat="{0:C2}" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.IsManager)" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.Pet)" />
+    <PixataGridCommandColumn Width="180px">
+      <PixataGridCommandButton Command="Edit" Icon="PixataGridIcon.Pencil">Edit</PixataGridCommandButton>
+      <PixataGridCommandButton Command="Delete" Icon="PixataGridIcon.Trash">Delete</PixataGridCommandButton>
+      <PixataGridCommandButton Command="Save" Icon="PixataGridIcon.Save" ShowInEdit="true">Save</PixataGridCommandButton>
+      <PixataGridCommandButton Command="Cancel" Icon="PixataGridIcon.Cancel" ShowInEdit="true">Cancel</PixataGridCommandButton>
+    </PixataGridCommandColumn>
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="_telerikEditable" Size="@TelerikSize" Pageable="true" PageSize="5" ConfirmDelete="true"
+             EditMode="@(_editMode == "popup" ? GridEditMode.Popup : GridEditMode.Inline)"
+             OnCreate="TelerikCreate" OnUpdate="TelerikUpdate" OnDelete="TelerikDelete">
+  <GridToolBarTemplate>
+    <GridCommandButton Command="Add" Icon="@SvgIcon.Plus">Add employee</GridCommandButton>
+  </GridToolBarTemplate>
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEditableEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEditableEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEditableEmployee.Email)" Editable="false" />
+    <GridColumn Field="@nameof(GridSampleEditableEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
+    <GridColumn Field="@nameof(GridSampleEditableEmployee.Salary)" DisplayFormat="{0:C2}" />
+    <GridColumn Field="@nameof(GridSampleEditableEmployee.IsManager)" />
+    <GridColumn Field="@nameof(GridSampleEditableEmployee.Pet)" />
+    <GridCommandColumn Width="180px">
+      <GridCommandButton Command="Edit" Icon="@SvgIcon.Pencil">Edit</GridCommandButton>
+      <GridCommandButton Command="Delete" Icon="@SvgIcon.Trash">Delete</GridCommandButton>
+      <GridCommandButton Command="Save" Icon="@SvgIcon.Save" ShowInEdit="true">Save</GridCommandButton>
+      <GridCommandButton Command="Cancel" Icon="@SvgIcon.Cancel" ShowInEdit="true">Cancel</GridCommandButton>
+    </GridCommandColumn>
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -333,6 +396,34 @@
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
   private bool _multipleSort;
+  private string _editMode = "inline";
+  private List<GridSampleEditableEmployee> _telerikEditable = GridSampleEditableEmployee.Some();
+  private List<GridSampleEditableEmployee> _pixataEditable = GridSampleEditableEmployee.Some();
+
+  private void PixataCreate(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) {
+    args.Item.Id = _pixataEditable.Max(e => e.Id) + 1;
+    _pixataEditable.Insert(0, args.Item);
+  }
+
+  private void PixataUpdate(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) =>
+    _pixataEditable[_pixataEditable.FindIndex(e => e.Id == args.Item.Id)] = args.Item;
+
+  private void PixataDelete(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) =>
+    _pixataEditable.RemoveAll(e => e.Id == args.Item.Id);
+
+  private void TelerikCreate(GridCommandEventArgs args) {
+    GridSampleEditableEmployee employee = (GridSampleEditableEmployee)args.Item;
+    employee.Id = _telerikEditable.Max(e => e.Id) + 1;
+    _telerikEditable.Insert(0, employee);
+  }
+
+  private void TelerikUpdate(GridCommandEventArgs args) {
+    GridSampleEditableEmployee employee = (GridSampleEditableEmployee)args.Item;
+    _telerikEditable[_telerikEditable.FindIndex(e => e.Id == employee.Id)] = employee;
+  }
+
+  private void TelerikDelete(GridCommandEventArgs args) =>
+    _telerikEditable.RemoveAll(e => e.Id == ((GridSampleEditableEmployee)args.Item).Id);
   private IEnumerable<GridSampleEmployee> _telerikSelected = [];
   private IEnumerable<GridSampleEmployee> _pixataSelected = [];
   private IEnumerable<PixataGridSelectedCell<GridSampleEmployee>> _selectedCells = [];

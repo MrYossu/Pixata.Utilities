@@ -120,6 +120,25 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   [Parameter]
   public Action<PixataGridCellRenderEventArgs<TItem>>? OnCellRender { get; set; }
 
+  /// <summary>
+  /// Set to false to stop the user editing this column. Defaults to true, but a property with no public setter can't be
+  /// edited anyway
+  /// </summary>
+  [Parameter]
+  public bool Editable { get; set; } = true;
+
+  /// <summary>
+  /// The editor to use, if not the default for the field's type
+  /// </summary>
+  [Parameter]
+  public PixataGridEditorType? EditorType { get; set; }
+
+  /// <summary>
+  /// Your own editor. The context is the copy of the item being edited, so bind your editor to its property
+  /// </summary>
+  [Parameter]
+  public RenderFragment<TItem>? EditorTemplate { get; set; }
+
   private string? _resolvedField;
   private Func<TItem, object?>? _getter;
   private string? _attributeTitle;

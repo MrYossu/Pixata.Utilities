@@ -722,8 +722,12 @@
 .pixata-blazor-button svg {
   width: 16px;
   height: 16px;
-  margin: 2px;
   fill: currentColor;
+}
+
+/* An icon on its own is padded out to the line height, so icon buttons are square */
+.pixata-blazor-button-icon svg {
+  margin: 2px;
 }
 
 /* The pager. Its container lets it adapt to its own width with container queries */
@@ -1636,6 +1640,184 @@
 
 .pixata-blazor-grid-error .pixata-blazor-grid-td {
   color: var(--pixata-grid-error-color);
+}
+
+/* ---------- Grid editing ---------- */
+
+/* Command and edit cells have less vertical padding, so rows with buttons and editors are no taller than other rows */
+.pixata-blazor-grid-command-cell,
+.pixata-blazor-grid-edit-cell {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.pixata-blazor-grid-sm .pixata-blazor-grid-command-cell,
+.pixata-blazor-grid-sm .pixata-blazor-grid-edit-cell {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+/* Solid buttons are the same height as Telerik's (30px), and the text is a separate span so it can be hidden on narrow screens */
+.pixata-blazor-button-solid {
+  vertical-align: middle;
+}
+
+.pixata-blazor-button-text {
+  position: relative;
+}
+
+.pixata-blazor-grid-edit-cell > .pixata-blazor-grid-textbox,
+.pixata-blazor-grid-edit-cell > .pixata-blazor-grid-editor,
+.pixata-blazor-form-field-wrap > .pixata-blazor-grid-textbox,
+.pixata-blazor-form-field-wrap > .pixata-blazor-grid-editor {
+  display: flex;
+  width: 100%;
+}
+
+.pixata-blazor-grid-editor > .pixata-blazor-grid-numeric,
+.pixata-blazor-grid-editor > .pixata-blazor-dateinput,
+.pixata-blazor-grid-editor > .pixata-blazor-grid-dropdown {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.pixata-blazor-grid-textarea textarea {
+  min-height: 4em;
+  resize: vertical;
+}
+
+/* An editor whose value failed validation, as Telerik's k-invalid */
+.pixata-blazor-grid-invalid,
+.pixata-blazor-grid-invalid:hover,
+.pixata-blazor-grid-invalid > .pixata-blazor-grid-numeric,
+.pixata-blazor-grid-invalid > .pixata-blazor-dateinput,
+.pixata-blazor-grid-invalid .pixata-blazor-grid-dropdown-button {
+  border-color: var(--pixata-grid-error-color);
+}
+
+/* ---------- Windows and dialogs (the grid's popup editor and delete confirmation) ---------- */
+
+.pixata-blazor-dialog-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 10003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pixata-blazor-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: #3d3d3d;
+  opacity: .5;
+}
+
+.pixata-blazor-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  font-size: var(--pixata-grid-font-size);
+  line-height: 1.25;
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-input-bg);
+  box-shadow: 0 16px 18px rgba(0, 0, 0, .28), 0 4px 16px rgba(0, 0, 0, .12);
+  outline: 0;
+}
+
+.pixata-blazor-window-titlebar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: .75rem 1rem;
+  white-space: nowrap;
+  background-color: var(--pixata-grid-header-bg);
+  border-bottom: 1px solid var(--pixata-grid-border-color);
+}
+
+.pixata-blazor-window-title {
+  flex: 1 1 0%;
+  padding: .5em 0;
+  margin: -.5em 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.pixata-blazor-window-close {
+  margin: -.25rem -.25rem -.25rem .5rem;
+}
+
+.pixata-blazor-window-content {
+  flex: 1 1 auto;
+  padding: 1rem;
+  overflow: auto;
+}
+
+.pixata-blazor-window-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: .5rem;
+  padding: .5rem;
+  border-top: 1px solid var(--pixata-grid-border-color);
+}
+
+.pixata-blazor-window-actions-start {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-window-actions-center {
+  justify-content: center;
+}
+
+.pixata-blazor-window-actions-end {
+  justify-content: flex-end;
+}
+
+.pixata-blazor-window-actions-stretch > .pixata-blazor-button {
+  flex: 1 1 0%;
+}
+
+.pixata-blazor-dialog {
+  min-width: 200px;
+}
+
+/* The popup editor's form */
+.pixata-blazor-form {
+  margin: 0;
+  line-height: var(--pixata-grid-line-height);
+}
+
+.pixata-blazor-form-layout {
+  display: grid;
+  column-gap: 1rem;
+}
+
+.pixata-blazor-form-field {
+  margin-top: .875rem;
+}
+
+.pixata-blazor-form-field:nth-child(-n+1) {
+  margin-top: 0;
+}
+
+.pixata-blazor-form-label {
+  display: flex;
+}
+
+.pixata-blazor-form-error {
+  margin-top: .25rem;
+  font-size: .75rem;
+  color: var(--pixata-grid-error-color);
+}
+
+.pixata-blazor-grid-popup-edit {
+  min-width: 320px;
 }
 
 /* ---------- Spinner ---------- */

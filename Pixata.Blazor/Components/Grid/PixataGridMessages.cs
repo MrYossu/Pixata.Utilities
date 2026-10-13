@@ -7,6 +7,14 @@ namespace Pixata.Blazor.Components.Grid;
 internal static class PixataGridMessages {
   public const string NoRecords = "No records available.";
   public const string ReadFailed = "The data couldn't be loaded";
+  public const string Edit = "Edit";
+  public const string AddNewRecord = "Add new record";
+  public const string Update = "Update";
+  public const string Cancel = "Cancel";
+  public const string Close = "Close";
+  public const string Delete = "Delete";
+  public const string ConfirmDelete = "Are you sure you want to delete this record?";
+  public const string Ok = "OK";
   public const string SortedAscending = "Sorted in ascending order";
   public const string SortedDescending = "Sorted in descending order";
   public const string PagerFirstPage = "Go to the first page";

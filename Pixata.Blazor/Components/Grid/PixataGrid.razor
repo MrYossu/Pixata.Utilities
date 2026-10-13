@@ -113,7 +113,10 @@
               <tr class="pixata-blazor-grid-norecords pixata-blazor-grid-error">
                 <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)" role="alert">@_readError</td>
               </tr>
-            } else if (_items.Count == 0) {
+            } else if (_editing && _isNew && EditMode == PixataGridEditMode.Inline && _editItem is not null) {
+              @EditRow(_editItem, columns)
+            }
+            @if (_readError is null && _items.Count == 0 && !(_editing && _isNew && EditMode == PixataGridEditMode.Inline)) {
               <tr class="pixata-blazor-grid-norecords">
                 <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)">
                   @if (NoDataTemplate is null) {
@@ -123,7 +126,7 @@
                   }
                 </td>
               </tr>
-            } else {
+            } else if (_readError is null) {
               @for (int i = 0; i < _items.Count; i++) {
                 TItem item = _items[i];
                 if (RowTemplate is not null) {
@@ -134,18 +137,24 @@
                       @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate">
                     @RowTemplate(item)
                   </tr>
+                } else if (IsEditing(item)) {
+                  @EditRow(_editItem!, columns)
                 } else {
                   bool rowSelected = SelectionType == PixataGridSelectionType.Row && IsSelected(item);
                   <tr class="@Css.Join(RowClass(item, i), rowSelected ? "pixata-blazor-grid-selected" : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
                     @foreach (PixataGridColumn<TItem> column in columns) {
-                      <td class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null)"
+                      <td class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, column is PixataGridCommandColumn<TItem> ? "pixata-blazor-grid-command-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null)"
                           @onclick="e => CellClicked(item, column, e)"
                           @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, column.Field)"
                           @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, column.Field)"
                           @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate"
                           @onmousedown="e => DragStart(item, column, e)"
                           @onmouseover="e => DragOver(item, column, e)">
-                        @if (column is PixataGridCheckboxColumn<TItem>) {
+                        @if (column is PixataGridCommandColumn<TItem> commandColumn) {
+                          <CascadingValue Value="RowContext(item)">
+                            @commandColumn.ChildContent
+                          </CascadingValue>
+                        } else if (column is PixataGridCheckboxColumn<TItem>) {
                           <input type="checkbox"
                                  class="pixata-blazor-checkbox"
                                  checked="@IsSelected(item)"
@@ -187,6 +196,24 @@
       @if (_menuColumn is not null) {
         @FilterMenu(_menuColumn)
       }
+      @if (_editing && EditMode == PixataGridEditMode.Popup && _editItem is not null) {
+        @PopupEditor(_editItem)
+      }
+      @if (_confirmingDelete) {
+        <div class="pixata-blazor-dialog-wrapper">
+          <div class="pixata-blazor-overlay"></div>
+          <div class="pixata-blazor-window pixata-blazor-dialog" role="alertdialog" aria-modal="true" aria-labelledby="@($"{_gridId}-delete-title")">
+            <div class="pixata-blazor-window-titlebar">
+              <span class="pixata-blazor-window-title" id="@($"{_gridId}-delete-title")">@PixataGridMessages.Delete</span>
+            </div>
+            <div class="pixata-blazor-window-content">@PixataGridMessages.ConfirmDelete</div>
+            <div class="pixata-blazor-window-actions pixata-blazor-window-actions-end">
+              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="() => ConfirmDeleteAnswered(true)">@PixataGridMessages.Ok</button>
+              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => ConfirmDeleteAnswered(false)">@PixataGridMessages.Cancel</button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   </PixataGridDefer>
 </CascadingValue>
@@ -212,6 +239,144 @@
     await RowSelectionClick(item, e);
     await CellSelectionClick(item, column, e);
   }
+
+  // A row being edited inline. The validator is keyed on the edit context, so a new one is created for each edit
+  private RenderFragment EditRow(TItem editItem, List<PixataGridColumn<TItem>> columns) =>
+    @<tr class="pixata-blazor-grid-row pixata-blazor-grid-edit-row">
+      @foreach (PixataGridColumn<TItem> column in columns) {
+        @if (column is PixataGridCommandColumn<TItem> commandColumn) {
+          <td class="@Css.Join(column.CellClass, "pixata-blazor-grid-command-cell")">
+            <CascadingValue Value="RowContext(_isNew ? editItem : _originalEditItem!)">
+              @commandColumn.ChildContent
+            </CascadingValue>
+          </td>
+        } else if (CanEdit(column)) {
+          <td class="@Css.Join(column.CellClass, "pixata-blazor-grid-edit-cell")">
+            @Editor(column, editItem)
+          </td>
+        } else {
+          <td class="@column.CellClass">@column.CellText(editItem)</td>
+        }
+      }
+      @Validator
+    </tr>;
+
+  private RenderFragment Validator =>
+    @<CascadingValue Value="_editContext" IsFixed="false">
+      @if (ValidationSettings?.ValidatorTemplate is not null) {
+        @ValidationSettings.ValidatorTemplate
+      } else if (ValidationSettings?.Enabled ?? true) {
+        <DataAnnotationsValidator @key="_editContext" />
+      }
+    </CascadingValue>;
+
+  // An editor for one field of the item being edited, suited to its type, and shown as invalid when validation fails
+  private RenderFragment Editor(PixataGridColumn<TItem> column, TItem editItem) {
+    if (column.EditorTemplate is not null) {
+      return column.EditorTemplate(editItem);
+    }
+    object? value = EditValue(column);
+    string? message = ValidationMessage(column);
+    string? invalid = message is null ? null : "pixata-blazor-grid-invalid";
+    string label = column.HeaderText;
+    return EditorTypeFor(column) switch {
+      PixataGridEditorType.NumericTextBox =>
+        @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
+          <PixataGridNumericTextBox Value="ToDecimal(value)" ValueChanged="d => SetEditValue(column, FromDecimal(column, d))" AriaLabel="@label" />
+        </span>,
+      PixataGridEditorType.DatePicker =>
+        @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
+          <PixataDatePicker TValue="DateTime?" Value="ToDate(value)" ValueChanged="d => SetEditValue(column, FromDate(column, d))" Class="pixata-blazor-grid-filter-date" />
+        </span>,
+      PixataGridEditorType.CheckBox =>
+        @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
+          <input type="checkbox" class="pixata-blazor-checkbox" checked="@(value is true)" aria-label="@label" @onchange="e => SetEditValue(column, e.Value is true)" />
+        </span>,
+      PixataGridEditorType.DropDownList =>
+        @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
+          <PixataGridDropDownList TValue="object" Items="EnumItems(column)" Value="value" ValueChanged="v => SetEditValue(column, v)" AriaLabel="@label" Class="pixata-blazor-grid-filter-editor" />
+        </span>,
+      PixataGridEditorType.TextArea =>
+        @<span class="@Css.Join("pixata-blazor-grid-textbox", "pixata-blazor-grid-textarea", invalid)" title="@message">
+          <textarea class="pixata-blazor-grid-input-inner" aria-label="@label" aria-invalid="@(message is null ? null : "true")" @onchange="e => SetEditValue(column, e.Value?.ToString())">@(value as string)</textarea>
+        </span>,
+      _ =>
+        @<span class="@Css.Join("pixata-blazor-grid-textbox", invalid)" title="@message">
+          <input class="pixata-blazor-grid-input-inner" type="text" value="@(Convert.ToString(value, CultureInfo.CurrentCulture))" aria-label="@label" aria-invalid="@(message is null ? null : "true")" @onchange="e => SetEditValue(column, e.Value?.ToString())" />
+        </span>
+    };
+  }
+
+  // The popup window for editing. Escape cancels, as in Telerik's grid
+  private RenderFragment PopupEditor(TItem editItem) {
+    PixataGridPopupEditFormSettings<TItem>? form = PopupEditFormSettings;
+    string? style = Css.Join(PopupEditSettings?.Width is string width ? $"width: {width};" : null, PopupEditSettings?.MaxHeight is string height ? $"max-height: {height};" : null);
+    string buttonsLayout = (form?.ButtonsLayout ?? PixataGridFormButtonsLayout.Start).ToString().ToLowerInvariant();
+    return
+      @<div class="pixata-blazor-dialog-wrapper">
+        <div class="pixata-blazor-overlay"></div>
+        <div class="@Css.Join("pixata-blazor-window", "pixata-blazor-grid-popup-edit", PopupEditSettings?.Class)" style="@(style == "" ? null : style)" role="dialog" aria-modal="true" aria-labelledby="@($"{_gridId}-edit-title")" tabindex="0" @onkeydown="PopupKeyDown">
+          <div class="pixata-blazor-window-titlebar">
+            <span class="pixata-blazor-window-title" id="@($"{_gridId}-edit-title")">@PopupTitle</span>
+            <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-window-close" title="@PixataGridMessages.Close" aria-label="@PixataGridMessages.Close" @onclick="CancelEditCommand">
+              @PixataGridIcons.For(PixataGridIcon.X)
+            </button>
+          </div>
+          <div class="pixata-blazor-window-content">
+            <form class="pixata-blazor-form" @onsubmit="SaveEdit">
+              @if (form?.FormTemplate is not null) {
+                @form.FormTemplate(editItem)
+              } else {
+                <div class="pixata-blazor-form-layout" style="@($"grid-template-columns: repeat({Math.Max(form?.Columns ?? 1, 1)}, minmax(0, 1fr))")">
+                  @foreach (PixataGridColumn<TItem> column in PopupColumns) {
+                    <div class="pixata-blazor-form-field">
+                      <label class="pixata-blazor-form-label">@column.HeaderText</label>
+                      <div class="pixata-blazor-form-field-wrap">
+                        @if (CanEdit(column)) {
+                          @Editor(column, editItem)
+                          @if (ValidationMessage(column) is string message) {
+                            <div class="pixata-blazor-form-error">@message</div>
+                          }
+                        } else {
+                          <span class="pixata-blazor-form-readonly">@column.CellText(editItem)</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+              @Validator
+              <button type="submit" hidden></button>
+            </form>
+          </div>
+          <div class="@($"pixata-blazor-window-actions pixata-blazor-window-actions-{buttonsLayout}")">
+            @if (form?.ButtonsTemplate is not null) {
+              <CascadingValue Value="RowContext(_isNew ? editItem : _originalEditItem!)">
+                @form.ButtonsTemplate
+              </CascadingValue>
+            } else {
+              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="SaveEdit">
+                @PixataGridIcons.For(PixataGridIcon.Save)
+                <span class="pixata-blazor-button-text">@PixataGridMessages.Update</span>
+              </button>
+              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="CancelEditCommand">
+                @PixataGridIcons.For(PixataGridIcon.Cancel)
+                <span class="pixata-blazor-button-text">@PixataGridMessages.Cancel</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>;
+  }
+
+  private Task SaveEdit() =>
+    Command("Save", default);
+
+  private Task CancelEditCommand() =>
+    Command("Cancel", default);
+
+  private Task PopupKeyDown(KeyboardEventArgs e) =>
+    e.Key == "Escape" ? CancelEditCommand() : Task.CompletedTask;
 
   private static readonly RenderFragment FilterIcon =
     @<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2h14l-5.5 6.5V14l-3-2V8.5z" /></svg>;

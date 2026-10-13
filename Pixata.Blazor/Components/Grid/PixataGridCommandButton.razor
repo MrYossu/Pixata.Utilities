@@ -1,0 +1,108 @@
+@typeparam TItem
+
+@* A button that runs a grid command. In a command column it acts on its row, and in the toolbar it can add a row *@
+@if (Visible) {
+  <button type="button"
+          class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", ThemeColor == "primary" ? "pixata-blazor-button-primary" : null, Class)"
+          title="@Title"
+          disabled="@(!Enabled)"
+          @onclick="Clicked"
+          @onclick:stopPropagation="true">
+    @if (IconTemplate is not null) {
+      @IconTemplate
+    } else {
+      @PixataGridIcons.For(Icon)
+    }
+    @if (ChildContent is not null) {
+      <span class="pixata-blazor-button-text">@ChildContent</span>
+    }
+  </button>
+}
+
+@code {
+  [CascadingParameter]
+  internal PixataGrid<TItem>? Grid { get; set; }
+
+  [CascadingParameter]
+  internal PixataGridRowContext<TItem>? Row { get; set; }
+
+  /// <summary>
+  /// The built-in command to run: Add, Edit, Save, Cancel or Delete. Leave it empty (or use your own name) for a custom
+  /// button, and handle <see cref="OnClick"/>
+  /// </summary>
+  [Parameter]
+  public string? Command { get; set; }
+
+  /// <summary>
+  /// Fires when the button is clicked, with the row's item (in a command column). Runs before the built-in command, which
+  /// you can stop by setting <c>IsCancelled</c>
+  /// </summary>
+  [Parameter]
+  public EventCallback<PixataGridCommandEventArgs<TItem>> OnClick { get; set; }
+
+  /// <summary>
+  /// Show the button when the row is being edited, rather than when it isn't. Save and Cancel buttons need this
+  /// </summary>
+  [Parameter]
+  public bool ShowInEdit { get; set; }
+
+  /// <summary>
+  /// Show the button on a new row that's being added (as well as on rows being edited, if <see cref="ShowInEdit"/> is set).
+  /// Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool ShowInAdd { get; set; } = true;
+
+  [Parameter]
+  public PixataGridIcon Icon { get; set; }
+
+  /// <summary>
+  /// Your own icon, in place of <see cref="Icon"/>
+  /// </summary>
+  [Parameter]
+  public RenderFragment? IconTemplate { get; set; }
+
+  /// <summary>
+  /// "base" (the default) or "primary", as Telerik's buttons
+  /// </summary>
+  [Parameter]
+  public string ThemeColor { get; set; } = "base";
+
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  [Parameter]
+  public string? Title { get; set; }
+
+  [Parameter]
+  public string? Class { get; set; }
+
+  /// <summary>
+  /// The button's text
+  /// </summary>
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  // In a command column, buttons show either when the row is being edited or when it isn't, as Telerik's do
+  private bool Visible =>
+    Row is null || (Row.IsNew ? ShowInEdit && ShowInAdd : ShowInEdit == Row.IsEditing);
+
+  protected override void OnInitialized() {
+    if (Grid is null) {
+      throw new InvalidOperationException("PixataGridCommandButton must be inside a PixataGrid, in a command column or the toolbar");
+    }
+  }
+
+  private async Task Clicked() {
+    if (OnClick.HasDelegate) {
+      PixataGridCommandEventArgs<TItem> args = new(Row is null ? default! : Row.IsEditing ? Grid!.EditItem! : Row.Item, Row?.IsNew ?? false);
+      await OnClick.InvokeAsync(args);
+      if (args.IsCancelled) {
+        return;
+      }
+    }
+    if (!string.IsNullOrEmpty(Command)) {
+      await Grid!.Command(Command, Row is null ? default : Row.Item);
+    }
+  }
+}

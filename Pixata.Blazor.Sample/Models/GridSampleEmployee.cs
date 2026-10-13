@@ -46,6 +46,33 @@ public class GridSampleEmployee {
   }
 }
 
+// For the editing examples, which need settable properties, validation and a parameterless constructor, and no nested object
+public class GridSampleEditableEmployee {
+  public int Id { get; set; }
+
+  [Required(ErrorMessage = "Please enter a first name")]
+  public string FirstName { get; set; } = "";
+
+  public string Surname { get; set; } = "";
+  public string Email { get; set; } = "";
+  public DateTime DateOfBirth { get; set; }
+  public decimal Salary { get; set; }
+  public bool IsManager { get; set; }
+  public Pets Pet { get; set; }
+
+  public static List<GridSampleEditableEmployee> Some() =>
+    [.. GridSampleEmployee.All().Take(12).Select(e => new GridSampleEditableEmployee {
+      Id = e.Id,
+      FirstName = e.FirstName,
+      Surname = e.Surname,
+      Email = e.Email,
+      DateOfBirth = e.DateOfBirth,
+      Salary = e.Salary,
+      IsManager = e.IsManager,
+      Pet = e.Pet
+    })];
+}
+
 [NoAudit]
 public class GridSampleAddress {
   public string City { get; set; } = "";

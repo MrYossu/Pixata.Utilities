@@ -63,6 +63,10 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `SelectedItems` | `IEnumerable<TItem>` | The selected rows. Can be two-way bound |
 | `SelectedCells` | `IEnumerable<PixataGridSelectedCell<TItem>>` | The selected cells, when selecting cells. Can be two-way bound |
 | `ItemKey` | `Func<TItem, object?>` | Gets a key (such as the id) used to match selected items, instead of `Equals` |
+| `EditMode` | `PixataGridEditMode` | `None` (the default), `Inline` or `Popup`. See [editing](#editing) |
+| `OnAdd`, `OnCreate`, `OnEdit`, `OnUpdate`, `OnDelete`, `OnCancel` | `EventCallback<PixataGridCommandEventArgs<TItem>>` | The editing events |
+| `OnModelInit` | `Func<TItem>` | Creates a new item, if `TItem` has no parameterless constructor |
+| `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
 
 ## Column parameters
 
@@ -84,6 +88,9 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `Template` | `RenderFragment<TItem>` | The content of each data cell. See [templates](#templates-and-row-events) |
 | `HeaderTemplate` | `RenderFragment` | The content of the header cell, in place of the title |
 | `OnCellRender` | `Action<PixataGridCellRenderEventArgs<TItem>>` | Lets you set a CSS class on each cell |
+| `Editable` | `bool` | Set to `false` to stop the column being edited. Defaults to `true`, but a property with no public setter is never editable |
+| `EditorType` | `PixataGridEditorType?` | The editor to use, if not the default for the field's type |
+| `EditorTemplate` | `RenderFragment<TItem>` | Your own editor. The context is the copy being edited |
 
 If you don't set a `Title`, the grid uses the `[Display(Name = "...")]` attribute on the property if there is one. If not, it uses the field name split into words with `SplitCamelCase()`, so `DateOfBirth` becomes "Date of birth" (for a nested field, it uses the last part of the path). **This differs from Telerik on purpose**, as Telerik shows the field name unchanged.
 
@@ -341,6 +348,57 @@ To select cells rather than rows, set the selection type in the grid's settings,
 ```
 
 `PixataGridSelectionSettings` also has `DragToSelect` (default `true`), to turn off selecting by dragging.
+
+## Editing
+
+Set `EditMode` to `Inline` or `Popup`, add a `PixataGridCommandColumn` with the buttons you want, and handle the events that change your data...
+
+```razor
+<PixataGrid TItem="Person" Data="_people" EditMode="PixataGridEditMode.Inline" ConfirmDelete="true"
+            OnCreate="Create" OnUpdate="Update" OnDelete="Delete">
+  <GridToolBarTemplate>
+    <PixataGridCommandButton Command="Add" Icon="PixataGridIcon.Plus">Add person</PixataGridCommandButton>
+  </GridToolBarTemplate>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(Person.Name)" />
+    <PixataGridColumn Field="@nameof(Person.Email)" Editable="false" />
+    <PixataGridCommandColumn Width="180px">
+      <PixataGridCommandButton Command="Edit" Icon="PixataGridIcon.Pencil">Edit</PixataGridCommandButton>
+      <PixataGridCommandButton Command="Delete" Icon="PixataGridIcon.Trash">Delete</PixataGridCommandButton>
+      <PixataGridCommandButton Command="Save" Icon="PixataGridIcon.Save" ShowInEdit="true">Save</PixataGridCommandButton>
+      <PixataGridCommandButton Command="Cancel" Icon="PixataGridIcon.Cancel" ShowInEdit="true">Cancel</PixataGridCommandButton>
+    </PixataGridCommandColumn>
+  </GridColumns>
+</PixataGrid>
+
+@code {
+  private void Update(PixataGridCommandEventArgs<Person> args) =>
+    _people[_people.FindIndex(p => p.Id == args.Item.Id)] = args.Item;
+  ...
+}
+```
+
+As in Telerik's grid...
+
+- The user edits a shallow copy of the item, so cancelling leaves your data alone. In `OnUpdate`, `args.Item` is that copy, so put it in place of the original (or copy its values across). Nested objects are shared with the original, so changes to them can't be cancelled
+- `Add` creates a new item (with its parameterless constructor, or `OnModelInit`), and shows it as a new row at the top (or in the popup). `OnCreate` is where you add it to your data
+- In any event, set `args.IsCancelled = true` to stop what's happening. In `OnCreate` or `OnUpdate`, that keeps the row in edit mode, which is useful when saving fails
+- With `OnRead`, the grid reads the data again after a change. With `Data`, it re-reads your collection
+- The editors depend on the field's type: a text box for text, a number box, a date picker, a checkbox for `bool`, and a dropdown for enums. Columns that aren't editable show their value
+- Edited items are validated with their data annotations before they're saved. In inline mode, an invalid editor gets a red border, with the message in its tooltip. In the popup, the message is shown under the editor. To use FluentValidation (or turn validation off), add `<PixataGridValidationSettings>` to the grid's `GridSettings`, with `<ValidatorTemplate><FluentValidationValidator /></ValidatorTemplate>` (or `Enabled="false"`)
+
+### Command buttons
+
+`PixataGridCommandButton` runs one of the built-in commands, `Add`, `Edit`, `Save`, `Cancel` or `Delete`. For anything else, leave out `Command` and handle `OnClick`, which is given the row's item. In a command column, a button shows when the row isn't being edited, or, with `ShowInEdit="true"`, when it is. `Icon` takes one of the `PixataGridIcon` values (or use `IconTemplate` for your own), and `ThemeColor="primary"` makes it stand out.
+
+### Popup editing
+
+In `Popup` mode, the item is edited in a form in a window, titled "Edit" (or "Add new record"), with Update and Cancel buttons. Escape cancels. You can change it with these in the grid's `GridSettings`...
+
+| Setting | What it does |
+| --- | --- |
+| `PixataGridPopupEditSettings` | `Title`, `Width`, `MaxHeight` and `Class` for the window |
+| `PixataGridPopupEditFormSettings` | `Columns` (the number of columns the fields are laid out in), `ButtonsLayout` (`Start`, `Center`, `End` or `Stretch`), `FormTemplate` (your own form, given the item) and `ButtonsTemplate` (your own buttons) |
 
 ## Supplying the data with OnRead
 

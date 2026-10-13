@@ -39,7 +39,8 @@
     // Only replaces the text when the value changes from outside, so what the user is typing (such as "1.") isn't reformatted
     if (Value != _lastValue) {
       _lastValue = Value;
-      _text = Value?.ToString(CultureInfo.CurrentCulture) ?? "";
+      // G29 drops trailing zeros, so 23751.0 shows as 23751
+      _text = Value?.ToString("G29", CultureInfo.CurrentCulture) ?? "";
     }
   }
 
@@ -51,7 +52,7 @@
 
   private async Task Step(int delta) {
     decimal value = (Value ?? 0) + delta;
-    _text = value.ToString(CultureInfo.CurrentCulture);
+    _text = value.ToString("G29", CultureInfo.CurrentCulture);
     await SetValue(value);
   }
 

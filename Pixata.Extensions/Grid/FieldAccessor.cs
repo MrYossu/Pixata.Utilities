@@ -24,6 +24,46 @@ public static class FieldAccessor {
     (Func<T, object?>)Getters.GetOrAdd((typeof(T), field), _ => BuildGetter<T>(field));
 
   /// <summary>
+  /// Sets the field on an item, converting the value to the field's type (so a <c>decimal</c> from an editor can set an
+  /// <c>int</c> property, for example). For a nested path, the objects along the way must already exist; if one is null,
+  /// nothing is set
+  /// </summary>
+  /// <param name="item">The object to change</param>
+  /// <param name="field">The field path, such as "Name" or "Address.City". This is case sensitive</param>
+  /// <param name="value">The new value</param>
+  /// <exception cref="ArgumentException">Thrown if the path doesn't match public properties or fields of the type</exception>
+  /// <exception cref="InvalidOperationException">Thrown if the property has no public setter</exception>
+  public static void SetValue<T>(T item, string field, object? value) {
+    MemberInfo member = Member(typeof(T), field);
+    string[] parts = Split(field);
+    object? target = parts.Length == 1 ? item : Getter<T>(string.Join('.', parts[..^1]))(item);
+    if (target is null) {
+      return;
+    }
+    object? converted = GridFilterExpressions.ConvertValue(value, MemberType(member));
+    switch (member) {
+      case PropertyInfo property when property.SetMethod?.IsPublic == true:
+        property.SetValue(target, converted);
+        break;
+      case FieldInfo fieldInfo when !fieldInfo.IsInitOnly:
+        fieldInfo.SetValue(target, converted);
+        break;
+      default:
+        throw new InvalidOperationException($"'{field}' on {typeof(T).Name} can't be set, as it has no public setter");
+    }
+  }
+
+  /// <summary>
+  /// Whether the field at the end of the path can be set, which is false for a property with no public setter, or a
+  /// read-only field
+  /// </summary>
+  public static bool CanWrite(Type type, string field) => Member(type, field) switch {
+    PropertyInfo property => property.SetMethod?.IsPublic == true,
+    FieldInfo fieldInfo => !fieldInfo.IsInitOnly,
+    _ => false
+  };
+
+  /// <summary>
   /// Gets the property or field at the end of the path, for reading its type or attributes
   /// </summary>
   /// <param name="type">The type that the path starts from</param>
