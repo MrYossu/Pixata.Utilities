@@ -372,7 +372,7 @@ public static partial class PixataHtmlSanitiser {
         case '"' when attribute:
           output.Append("&quot;");
           break;
-        case ' ':
+        case '\u00a0':
           output.Append("&nbsp;");
           break;
         case '\0':

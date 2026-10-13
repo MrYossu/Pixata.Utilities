@@ -64,7 +64,7 @@ public class PixataEditorAlignLeft : PixataEditorToggleButtonTool {
 public class PixataEditorAlignCenter : PixataEditorToggleButtonTool {
   public PixataEditorAlignCenter() {
     CommandName = PixataEditorCommands.AlignCenter;
-    Title = "Centre";
+    Title = "Align centre";
     Icon = PixataSvgIcons.AlignCentre;
   }
 }
