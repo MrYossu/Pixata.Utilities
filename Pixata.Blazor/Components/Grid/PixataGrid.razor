@@ -8,6 +8,7 @@
    The cascade covers the table too, so that things in the toolbar, such as the search box, can find the grid *@
 <CascadingValue Value="this" IsFixed="true">
   @GridSettings
+  @GridAggregates
   @GridColumns
   <PixataGridDefer>
     @{
@@ -22,15 +23,24 @@
       @if (Pageable && PagerPosition == PixataGridPagerPosition.Top) {
         @Pager
       }
+      @if (Groupable) {
+        @GroupPanel
+      }
       <div class="pixata-blazor-grid-content">
         <table class="pixata-blazor-grid-table">
           <colgroup>
+            @for (int level = 0; level < GroupLevels; level++) {
+              <col class="pixata-blazor-grid-group-col" />
+            }
             @foreach (PixataGridColumn<TItem> column in columns) {
               <col style="@column.WidthStyle" />
             }
           </colgroup>
           <thead class="pixata-blazor-grid-thead">
             <tr>
+              @for (int level = 0; level < GroupLevels; level++) {
+                <th class="pixata-blazor-grid-th pixata-blazor-grid-group-cell" aria-hidden="true"></th>
+              }
               @foreach (PixataGridColumn<TItem> column in columns) {
                 if (column is PixataGridCheckboxColumn<TItem> checkboxColumn) {
                   <th class="@Css.Join(column.HeaderCellClass, "pixata-blazor-grid-checkbox-cell")" scope="col">
@@ -47,7 +57,9 @@
                 bool sortable = CanSort(column);
                 GridSortDescriptor? sort = sortable ? SortFor(column) : null;
                 bool menu = FilterMode == PixataGridFilterMode.FilterMenu && CanFilter(column);
-                <th class="@Css.Join(column.HeaderCellClass, sortable ? "pixata-blazor-grid-sortable" : null, sort is null ? null : "pixata-blazor-grid-sorted", menu ? "pixata-blazor-grid-filterable" : null)"
+                <th class="@Css.Join(column.HeaderCellClass, sortable ? "pixata-blazor-grid-sortable" : null, sort is null ? null : "pixata-blazor-grid-sorted", menu ? "pixata-blazor-grid-filterable" : null, CanGroup(column) ? "pixata-blazor-grid-group-draggable" : null)"
+                    data-pixata-group-field="@(CanGroup(column) ? column.Field : null)"
+                    data-pixata-group-title="@(CanGroup(column) ? column.HeaderText : null)"
                     scope="col"
                     aria-sort="@(sort is null ? null : sort.SortDirection == ListSortDirection.Ascending ? "ascending" : "descending")"
                     tabindex="@(sortable ? "0" : null)"
@@ -98,6 +110,9 @@
             </tr>
             @if (FilterMode == PixataGridFilterMode.FilterRow) {
               <tr class="pixata-blazor-grid-filter-row">
+                @for (int level = 0; level < GroupLevels; level++) {
+                  <td class="pixata-blazor-grid-filter-cell pixata-blazor-grid-group-cell" aria-hidden="true"></td>
+                }
                 @foreach (PixataGridColumn<TItem> column in columns) {
                   <td class="pixata-blazor-grid-filter-cell" aria-label="@($"{column.HeaderText} filter")">
                     @if (CanFilter(column)) {
@@ -109,14 +124,19 @@
             }
           </thead>
           <tbody>
+            @{
+              int span = Math.Max(columns.Count + GroupLevels, 1);
+              _rowIndex = 0;
+            }
             @if (_readError is not null) {
               <tr class="pixata-blazor-grid-norecords pixata-blazor-grid-error">
-                <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)" role="alert">@_readError</td>
+                <td class="pixata-blazor-grid-td" colspan="@span" role="alert">@_readError</td>
               </tr>
             } else if (_editing && _isNew && EditMode == PixataGridEditMode.Inline && _editItem is not null) {
               @EditRow(_editItem, columns)
             } else if (IsNewInCellRow) {
               <tr class="pixata-blazor-grid-row pixata-blazor-grid-edit-row">
+                @GroupCells(GroupLevels)
                 @foreach (PixataGridColumn<TItem> column in columns) {
                   @InCellCell(_editItem!, column)
                 }
@@ -125,7 +145,7 @@
             }
             @if (_readError is null && _items.Count == 0 && !(_editing && _isNew && EditMode is PixataGridEditMode.Inline or PixataGridEditMode.InCell)) {
               <tr class="pixata-blazor-grid-norecords">
-                <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)">
+                <td class="pixata-blazor-grid-td" colspan="@span">
                   @if (NoDataTemplate is null) {
                     @PixataGridMessages.NoRecords
                   } else {
@@ -133,60 +153,28 @@
                   }
                 </td>
               </tr>
+            } else if (_readError is null && _resultGroups is { Count: > 0 }) {
+              @GroupRows(_resultGroups, "", 0, columns)
             } else if (_readError is null) {
-              @for (int i = 0; i < _items.Count; i++) {
-                TItem item = _items[i];
-                if (RowTemplate is not null) {
-                  <tr class="@RowClass(item, i)"
-                      @onclick="e => RowClicked(OnRowClick, item, e, null)"
-                      @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, null)"
-                      @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, null)"
-                      @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate">
-                    @RowTemplate(item)
-                  </tr>
-                } else if (IsEditing(item)) {
-                  @EditRow(_editItem!, columns)
-                } else {
-                  bool rowSelected = SelectionType == PixataGridSelectionType.Row && IsSelected(item);
-                  <tr class="@Css.Join(RowClass(item, i), rowSelected ? "pixata-blazor-grid-selected" : null, IsInCellRow(item) ? "pixata-blazor-grid-edit-row" : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
-                    @if (IsInCellRow(item)) {
-                      @Validator
-                    }
-                    @foreach (PixataGridColumn<TItem> column in columns) {
-                      if (IsCellEditing(item, column)) {
-                        @InCellCell(_editItem!, column)
-                        continue;
-                      }
-                      <td class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, column is PixataGridCommandColumn<TItem> ? "pixata-blazor-grid-command-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null)"
-                          @onclick="e => CellClicked(item, column, e)"
-                          @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, column.Field)"
-                          @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, column.Field)"
-                          @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate"
-                          @onmousedown="e => DragStart(item, column, e)"
-                          @onmouseover="e => DragOver(item, column, e)">
-                        @if (column is PixataGridCommandColumn<TItem> commandColumn) {
-                          <CascadingValue Value="RowContext(item)">
-                            @commandColumn.ChildContent
-                          </CascadingValue>
-                        } else if (column is PixataGridCheckboxColumn<TItem>) {
-                          <input type="checkbox"
-                                 class="pixata-blazor-checkbox"
-                                 checked="@IsSelected(item)"
-                                 aria-label="Select a row"
-                                 @onclick="() => CheckboxClicked(item)"
-                                 @onclick:stopPropagation="true" />
-                        } else if (column.Template is null) {
-                          @column.CellText(item)
-                        } else {
-                          @column.Template(item)
-                        }
-                      </td>
-                    }
-                  </tr>
-                }
+              @foreach (TItem item in _items) {
+                @DataRow(item, columns)
               }
             }
           </tbody>
+          @if (HasFooter(columns)) {
+            <tfoot class="pixata-blazor-grid-tfoot">
+              <tr class="pixata-blazor-grid-footer-row">
+                @GroupCells(GroupLevels)
+                @foreach (PixataGridColumn<TItem> column in columns) {
+                  <td class="@column.CellClass">
+                    @if (column.FooterTemplate is not null) {
+                      @column.FooterTemplate(PixataGridAggregateTemplateContext.For<PixataGridAggregateTemplateContext>(column.Field, _resultAggregates))
+                    }
+                  </td>
+                }
+              </tr>
+            </tfoot>
+          }
         </table>
         @* Inside the scrolling area and under the sticky header, so it covers the rows but not the headers, as Telerik's does *@
         @if (_showLoader) {
@@ -247,6 +235,165 @@
                       PageChanged="OnPageChanged"
                       PageSizeChanged="OnPageSizeChanged" />;
 
+  // The panel that headers are dragged into to group by them, showing a chip for each group
+  private RenderFragment GroupPanel =>
+    @<div class="pixata-blazor-grid-group-panel" role="toolbar" aria-label="@PixataGridMessages.GroupPanelLabel">
+      @if (_groups.Count > 0) {
+        <div class="pixata-blazor-grid-group-chips" role="listbox" aria-label="@PixataGridMessages.GroupPanelLabel" aria-orientation="horizontal">
+          @for (int i = 0; i < _groups.Count; i++) {
+            int index = i;
+            GridGroupDescriptor group = _groups[index];
+            string title = ColumnFor(group.Member)?.HeaderText ?? group.Member;
+            <div class="pixata-blazor-grid-group-chip pixata-blazor-grid-group-draggable"
+                 data-pixata-group-index="@index"
+                 data-pixata-group-title="@title"
+                 role="option"
+                 tabindex="0"
+                 aria-selected="true"
+                 title="@title"
+                 @onkeydown="e => GroupChipKeyDown(e, index)">
+              <span class="pixata-blazor-grid-group-chip-content">
+                <span class="pixata-blazor-grid-group-chip-label">@title</span>
+              </span>
+              <span class="pixata-blazor-grid-group-chip-remove"
+                    role="button"
+                    title="@PixataGridMessages.Remove"
+                    aria-label="@($"{PixataGridMessages.Remove} {title}")"
+                    @onclick="() => Ungroup(group.Member)"
+                    @onclick:stopPropagation="true">
+                @PixataGridIcons.For(PixataGridIcon.XCircle)
+              </span>
+            </div>
+          }
+        </div>
+      }
+      <div class="pixata-blazor-grid-group-hint">@(_groups.Count == 0 ? PixataGridMessages.GroupPanelEmpty : "")</div>
+    </div>;
+
+  // Delete or Backspace on a chip stops grouping by its field
+  private void GroupChipKeyDown(KeyboardEventArgs e, int index) {
+    if (e.Key is "Delete" or "Backspace") {
+      Ungroup(_groups[index].Member);
+    }
+  }
+
+  // The empty cells down the left of the table, one for each group level
+  private static RenderFragment GroupCells(int count) =>
+    @<text>
+      @for (int i = 0; i < count; i++) {
+        <td class="pixata-blazor-grid-td pixata-blazor-grid-group-cell"></td>
+      }
+    </text>;
+
+  // A group's header row, its items or subgroups, and its footer row. Each level is indented by one more group cell
+  private RenderFragment GroupRows(List<GridGroup<TItem>> groups, string parent, int level, List<PixataGridColumn<TItem>> columns) =>
+    @<text>
+      @foreach (GridGroup<TItem> group in groups) {
+        string path = GroupPath(parent, group);
+        bool expanded = !_collapsedGroups.Contains(path);
+        PixataGridColumn<TItem>? groupColumn = ColumnFor(group.Member);
+        <tr class="pixata-blazor-grid-group-row" aria-expanded="@(expanded ? "true" : "false")">
+          @GroupCells(level)
+          <td class="pixata-blazor-grid-td pixata-blazor-grid-group-header" colspan="@(columns.Count + GroupLevels - level)">
+            <p class="pixata-blazor-grid-group-header-inner">
+              <span class="pixata-blazor-grid-group-toggle"
+                    role="button"
+                    tabindex="0"
+                    aria-label="@(expanded ? PixataGridMessages.Collapse : PixataGridMessages.Expand)"
+                    @onclick="() => ToggleGroup(path)"
+                    @onkeydown="e => GroupToggleKeyDown(e, path)">
+                @PixataGridIcons.For(expanded ? PixataGridIcon.CaretDown : PixataGridIcon.CaretRight)
+              </span>
+              @if (groupColumn?.GroupHeaderTemplate is not null) {
+                @groupColumn.GroupHeaderTemplate(GroupContext(group, group.Member))
+              } else {
+                @GroupTitle(group)
+              }
+            </p>
+          </td>
+        </tr>
+        @if (expanded) {
+          if (level + 1 < GroupLevels) {
+            @GroupRows(group.Subgroups, path, level + 1, columns)
+          } else {
+            foreach (TItem item in group.Items) {
+              @DataRow(item, columns)
+            }
+          }
+        }
+        @* As in Telerik's grid, the footer stays when the group is collapsed *@
+        @if (HasGroupFooters(columns)) {
+          <tr class="pixata-blazor-grid-group-footer">
+            @GroupCells(GroupLevels)
+            @foreach (PixataGridColumn<TItem> column in columns) {
+              <td class="@column.CellClass">
+                @if (column.GroupFooterTemplate is not null) {
+                  @column.GroupFooterTemplate(GroupContext(group, column.Field))
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </text>;
+
+  // A row for an item: the row template, the row being edited, or the normal cells
+  private RenderFragment DataRow(TItem item, List<PixataGridColumn<TItem>> columns) {
+    int index = _rowIndex++;
+    if (RowTemplate is not null) {
+      return
+        @<tr class="@RowClass(item, index)"
+            @onclick="e => RowClicked(OnRowClick, item, e, null)"
+            @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, null)"
+            @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, null)"
+            @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate">
+          @GroupCells(GroupLevels)
+          @RowTemplate(item)
+        </tr>;
+    }
+    if (IsEditing(item)) {
+      return EditRow(_editItem!, columns);
+    }
+    bool rowSelected = SelectionType == PixataGridSelectionType.Row && IsSelected(item);
+    return
+      @<tr class="@Css.Join(RowClass(item, index), rowSelected ? "pixata-blazor-grid-selected" : null, IsInCellRow(item) ? "pixata-blazor-grid-edit-row" : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
+        @GroupCells(GroupLevels)
+        @if (IsInCellRow(item)) {
+          @Validator
+        }
+        @foreach (PixataGridColumn<TItem> column in columns) {
+          if (IsCellEditing(item, column)) {
+            @InCellCell(_editItem!, column)
+            continue;
+          }
+          <td class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, column is PixataGridCommandColumn<TItem> ? "pixata-blazor-grid-command-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null)"
+              @onclick="e => CellClicked(item, column, e)"
+              @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, column.Field)"
+              @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, column.Field)"
+              @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate"
+              @onmousedown="e => DragStart(item, column, e)"
+              @onmouseover="e => DragOver(item, column, e)">
+            @if (column is PixataGridCommandColumn<TItem> commandColumn) {
+              <CascadingValue Value="RowContext(item)">
+                @commandColumn.ChildContent
+              </CascadingValue>
+            } else if (column is PixataGridCheckboxColumn<TItem>) {
+              <input type="checkbox"
+                     class="pixata-blazor-checkbox"
+                     checked="@IsSelected(item)"
+                     aria-label="Select a row"
+                     @onclick="() => CheckboxClicked(item)"
+                     @onclick:stopPropagation="true" />
+            } else if (column.Template is null) {
+              @column.CellText(item)
+            } else {
+              @column.Template(item)
+            }
+          </td>
+        }
+      </tr>;
+  }
+
   // A click raises OnRowClick, and then selects the row or cell, or starts editing it
   private async Task CellClicked(TItem item, PixataGridColumn<TItem> column, MouseEventArgs e) {
     await RowClicked(OnRowClick, item, e, column.Field);
@@ -286,6 +433,7 @@
   // A row being edited inline. The validator is keyed on the edit context, so a new one is created for each edit
   private RenderFragment EditRow(TItem editItem, List<PixataGridColumn<TItem>> columns) =>
     @<tr class="pixata-blazor-grid-row pixata-blazor-grid-edit-row">
+      @GroupCells(GroupLevels)
       @foreach (PixataGridColumn<TItem> column in columns) {
         @if (column is PixataGridCommandColumn<TItem> commandColumn) {
           <td class="@Css.Join(column.CellClass, "pixata-blazor-grid-command-cell")">

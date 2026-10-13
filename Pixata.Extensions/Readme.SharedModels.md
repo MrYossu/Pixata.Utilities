@@ -53,16 +53,20 @@ Namespace `Pixata.Extensions.Encryption`...
 
 ## Grid requests
 
-The `PixataGrid` component in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md) describes the data it wants with a `GridRequest`. The types are here, rather than in Pixata.Blazor, so a WASM client can send a request to an API and the server can apply it to a query using the same types. The grid is a work in progress, so the request will gain sorting, filtering and grouping as the grid does.
+The `PixataGrid` component in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md) describes the data it wants with a `GridRequest`. The types are here, rather than in Pixata.Blazor, so a WASM client can send a request to an API and the server can apply it to a query using the same types. The grid is a work in progress, so the request may gain more as the grid does.
 
 Namespace `Pixata.Extensions.Grid`...
 
 | Type | What it is |
 | --- | --- |
-| `GridRequest` | `Page` (1-based), `PageSize` (zero means no paging), `Sorts` (a list of `GridSortDescriptor`s in priority order), `Filters` (a list of `GridCompositeFilterDescriptor`s, all of which must pass) and `Search` (the search box's filter, if any) |
+| `GridRequest` | `Page` (1-based), `PageSize` (zero means no paging), `Sorts` (a list of `GridSortDescriptor`s in priority order), `Filters` (a list of `GridCompositeFilterDescriptor`s, all of which must pass), `Search` (the search box's filter, if any), `Groups` (a list of `GridGroupDescriptor`s, outermost first) and `Aggregates` (a list of `GridAggregateDescriptor`s) |
 | `GridFilterDescriptor` | `Member`, `Operator` (a `GridFilterOperator`, whose values match Telerik's `FilterOperator`) and `Value`. A value that has been through JSON arrives as a `JsonElement`, and is converted to the field's type when the filter is applied |
 | `GridCompositeFilterDescriptor` | `Logic` (`And` or `Or`) and `Filters`, a list of `GridFilterDescriptor`s, such as the two conditions in a column's filter menu |
 | `GridSortDescriptor` | `Member` (the field, such as "Address.City") and `SortDirection` (a `ListSortDirection`). It isn't called `SortDescriptor`, so it doesn't clash with Telerik's |
-| `GridResult<T>` | `Data` (the requested page of items) and `Total` (the number of items before paging) |
-| `GridQueryExtensions` | `ToGridResult(request)` on an `IQueryable<T>` or `IEnumerable<T>`, which sorts, counts and pages. `ApplySorts(sorts)` and `ApplyFilters(filters)` do just the sorting or filtering. Text comparisons ignore case (using `ToLower()`, which EF Core can translate). These only use standard LINQ, so on an EF Core query they are translated to SQL |
+| `GridGroupDescriptor` | `Member` (the field to group by) and `SortDirection` (the order of the groups, ascending by default) |
+| `GridAggregateDescriptor` | `Member` and `Aggregate`, a `GridAggregateType` (`Count`, `Sum`, `Average`, `Min` or `Max`) |
+| `GridResult<T>` | `Data` (the requested page of items) and `Total` (the number of items before paging). If the request asked for them, `Groups` (a list of `GridGroup<T>`s) and `Aggregates` (a `GridFieldAggregates` for each field, keyed by field) |
+| `GridGroup<T>` | `Member`, `Key` (the value the group's items share), `Count` (the number of items in the whole group, not just on the page), `Items` (the group's items on the page, for the innermost level), `Subgroups` (for the other levels) and `Aggregates` (for the whole group) |
+| `GridFieldAggregates` | `Count`, `Sum`, `Average`, `Min` and `Max` for one field, each null if it wasn't asked for. `Min`, `Max` and `Average` of no items are null |
+| `GridQueryExtensions` | `ToGridResult(request)` on an `IQueryable<T>` or `IEnumerable<T>`, which filters, sorts (by the groups first), counts, pages, and then works out the groups and aggregates. The group counts and aggregates are separate queries, so on EF Core they run in the database. `ApplySorts(sorts)` and `ApplyFilters(filters)` do just the sorting or filtering. Text comparisons ignore case (using `ToLower()`, which EF Core can translate). These only use standard LINQ, so on an EF Core query they are translated to SQL |
 | `FieldAccessor` | Reads a field from an object given its path as a string, such as "Address.City", returning null if anything along the path is null. `Getter<T>(field)` returns a compiled function, cached per type and path. `Lambda(type, field)` builds the equivalent expression (such as `item => item.Address.City`) for use in a query, checking for nulls along the way. `Member()` and `FieldType()` describe what's at the end of the path. A path that doesn't match public properties or fields (it is case sensitive) throws an `ArgumentException` |

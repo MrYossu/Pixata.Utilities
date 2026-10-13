@@ -359,6 +359,52 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Grouping and aggregates</h4>
+
+<p>Drag a column header into the panel above the grid to group by it. The salary column has aggregates, shown in group footers and the grid's footer.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid @ref="_groupedGrid" Data="Data" Size="_size" Groupable="true" Pageable="true" PageSize="8">
+  <GridAggregates>
+    <PixataGridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Pixata.Extensions.Grid.GridAggregateType.Sum" />
+    <PixataGridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Pixata.Extensions.Grid.GridAggregateType.Average" />
+    <PixataGridAggregate Field="@nameof(GridSampleEmployee.FirstName)" Aggregate="@Pixata.Extensions.Grid.GridAggregateType.Count" />
+  </GridAggregates>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)">
+      <FooterTemplate>Total: @context.Count</FooterTemplate>
+    </PixataGridColumn>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}">
+      <GroupFooterTemplate>Sum: @(((decimal?)context.Sum)?.ToString("C0"))</GroupFooterTemplate>
+      <FooterTemplate>Average: @(((decimal?)context.Average)?.ToString("C0"))</FooterTemplate>
+    </PixataGridColumn>
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Groupable="true" Pageable="true" PageSize="8" OnStateInit="@((GridStateEventArgs<GridSampleEmployee> args) => TelerikGroupInit(args))">
+  <GridAggregates>
+    <GridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Telerik.Blazor.GridAggregateType.Sum" />
+    <GridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Telerik.Blazor.GridAggregateType.Average" />
+    <GridAggregate Field="@nameof(GridSampleEmployee.FirstName)" Aggregate="@Telerik.Blazor.GridAggregateType.Count" />
+  </GridAggregates>
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)">
+      <FooterTemplate>Total: @context.Count</FooterTemplate>
+    </GridColumn>
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}">
+      <GroupFooterTemplate>Sum: @(((decimal?)context.Sum)?.ToString("C0"))</GroupFooterTemplate>
+      <FooterTemplate>Average: @(((decimal?)context.Average)?.ToString("C0"))</FooterTemplate>
+    </GridColumn>
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -397,6 +443,19 @@
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
   private bool _multipleSort;
+
+  private static void TelerikGroupInit(GridStateEventArgs<GridSampleEmployee> args) =>
+    args.GridState.GroupDescriptors = [new GroupDescriptor { Member = nameof(GridSampleEmployee.Pet), MemberType = typeof(Pets) }];
+
+  private PixataGrid<GridSampleEmployee>? _groupedGrid;
+
+  // Starts the PixataGrid grouped by pet, as the Telerik one is
+  protected override void OnAfterRender(bool firstRender) {
+    if (firstRender) {
+      _groupedGrid?.GroupBy(nameof(GridSampleEmployee.Pet));
+    }
+  }
+
   private string _editMode = "inline";
 
   private GridEditMode TelerikEditMode => _editMode switch {

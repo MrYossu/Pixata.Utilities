@@ -139,6 +139,32 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   [Parameter]
   public RenderFragment<TItem>? EditorTemplate { get; set; }
 
+  /// <summary>
+  /// Whether the user can group by this column, when the grid is <c>Groupable</c>. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool Groupable { get; set; } = true;
+
+  /// <summary>
+  /// The content of the header row of each group, when the data is grouped by this column, in place of "Title: value"
+  /// </summary>
+  [Parameter]
+  public RenderFragment<PixataGridGroupTemplateContext>? GroupHeaderTemplate { get; set; }
+
+  /// <summary>
+  /// The content of this column's cell in the footer row of each group, usually showing aggregates. The aggregates must be
+  /// asked for in the grid's <c>GridAggregates</c>
+  /// </summary>
+  [Parameter]
+  public RenderFragment<PixataGridGroupTemplateContext>? GroupFooterTemplate { get; set; }
+
+  /// <summary>
+  /// The content of this column's cell in the grid's footer, usually showing aggregates over all the data. The aggregates
+  /// must be asked for in the grid's <c>GridAggregates</c>
+  /// </summary>
+  [Parameter]
+  public RenderFragment<PixataGridAggregateTemplateContext>? FooterTemplate { get; set; }
+
   private string? _resolvedField;
   private Func<TItem, object?>? _getter;
   private string? _attributeTitle;
@@ -202,7 +228,12 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
 
   internal string CellText(TItem item) {
     Resolve();
-    object? value = _getter?.Invoke(item);
+    return FormatValue(_getter?.Invoke(item));
+  }
+
+  // A value of this column's field, formatted as the cells are
+  internal string FormatValue(object? value) {
+    Resolve();
     if (value is null) {
       return "";
     }

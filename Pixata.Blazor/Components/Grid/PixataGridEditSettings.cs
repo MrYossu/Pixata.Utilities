@@ -12,7 +12,7 @@ public abstract class PixataGridSettingsBase<TItem> : ComponentBase, IDisposable
 
   protected override void OnInitialized() {
     if (Grid is null) {
-      throw new InvalidOperationException($"{GetType().Name.Split('`')[0]} must be inside the GridSettings of a PixataGrid");
+      throw new InvalidOperationException($"{GetType().Name.Split('`')[0]} must be inside a PixataGrid");
     }
     Register(Grid, true);
   }

@@ -28,6 +28,11 @@ internal static class PixataGridMessages {
   public const string PagerAll = "All";
   public const string PagerSelectPage = "Select a page";
   public const string PagerSelectPageSize = "Select a page size";
+  public const string GroupPanelEmpty = "Drag a column header and drop it here to group by that column";
+  public const string GroupPanelLabel = "Grouped by";
+  public const string Remove = "Remove";
+  public const string Expand = "Expand";
+  public const string Collapse = "Collapse";
 
   public static string PagerInfo(int first, int last, int total) =>
     $"{first} - {last} of {total} items";

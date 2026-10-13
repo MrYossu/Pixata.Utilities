@@ -191,3 +191,100 @@ export function unwatchOutside(id) {
     outsideWatchers.delete(id);
   }
 }
+
+// ---------- Dragging grid headers into the group panel ----------
+
+const groupDrags = new Map();
+
+// Lets the user drag a grid's column headers into its group panel, and its group chips to reorder them or (dropped outside
+// the panel) remove them. It uses pointer events rather than HTML drag and drop, so it works with touch too
+export function initGroupDrag(gridId, dotNet) {
+  const grid = document.getElementById(gridId);
+  if (!grid || groupDrags.has(gridId)) {
+    return;
+  }
+  let drag = null;
+  const panelOf = () => grid.querySelector(".pixata-blazor-grid-group-panel");
+  const isOverPanel = (x, y) => {
+    const panel = panelOf();
+    const target = document.elementFromPoint(x, y);
+    return panel && target && panel.contains(target) ? target : null;
+  };
+  const end = () => {
+    if (drag?.clue) {
+      drag.clue.remove();
+      grid.classList.remove("pixata-blazor-grid-group-dragging");
+      panelOf()?.classList.remove("pixata-blazor-grid-group-panel-drop");
+    }
+    drag = null;
+  };
+  const down = e => {
+    if (e.button !== 0 || e.target.closest(".pixata-blazor-grid-header-menu, .pixata-blazor-grid-group-chip-remove")) {
+      return;
+    }
+    const source = e.target.closest("[data-pixata-group-field], [data-pixata-group-index]");
+    if (source && grid.contains(source)) {
+      drag = { source, x: e.clientX, y: e.clientY, clue: null };
+    }
+  };
+  const move = e => {
+    if (!drag) {
+      return;
+    }
+    if (!drag.clue) {
+      // A small movement is still a click
+      if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 5) {
+        return;
+      }
+      drag.clue = document.createElement("div");
+      drag.clue.className = "pixata-blazor-grid-drag-clue";
+      drag.clue.textContent = drag.source.dataset.pixataGroupTitle ?? drag.source.textContent.trim();
+      document.body.appendChild(drag.clue);
+      grid.classList.add("pixata-blazor-grid-group-dragging");
+      window.getSelection()?.removeAllRanges();
+    }
+    e.preventDefault();
+    drag.clue.style.left = `${e.clientX + 12}px`;
+    drag.clue.style.top = `${e.clientY + 12}px`;
+    const over = isOverPanel(e.clientX, e.clientY) !== null;
+    panelOf()?.classList.toggle("pixata-blazor-grid-group-panel-drop", over);
+    drag.clue.classList.toggle("pixata-blazor-grid-drag-clue-drop", over);
+  };
+  const up = e => {
+    if (!drag?.clue) {
+      drag = null;
+      return;
+    }
+    const source = drag.source;
+    end();
+    // The click that follows the drag mustn't sort the column
+    const swallow = ev => {
+      ev.stopPropagation();
+      ev.preventDefault();
+    };
+    window.addEventListener("click", swallow, { capture: true, once: true });
+    setTimeout(() => window.removeEventListener("click", swallow, { capture: true }), 0);
+    const target = isOverPanel(e.clientX, e.clientY);
+    const chip = target?.closest("[data-pixata-group-index]");
+    const from = source.dataset.pixataGroupIndex === undefined ? -1 : Number(source.dataset.pixataGroupIndex);
+    const to = chip ? Number(chip.dataset.pixataGroupIndex) : -1;
+    dotNet.invokeMethodAsync("GroupDrop", source.dataset.pixataGroupField ?? null, from, to, target !== null);
+  };
+  const cancel = () => end();
+  grid.addEventListener("pointerdown", down);
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", up);
+  document.addEventListener("pointercancel", cancel);
+  groupDrags.set(gridId, () => {
+    end();
+    grid.removeEventListener("pointerdown", down);
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", up);
+    document.removeEventListener("pointercancel", cancel);
+  });
+}
+
+export function disposeGroupDrag(gridId) {
+  groupDrags.get(gridId)?.();
+  groupDrags.delete(gridId);
+}

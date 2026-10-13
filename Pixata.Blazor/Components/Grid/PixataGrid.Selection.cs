@@ -168,8 +168,14 @@ public partial class PixataGrid<TItem> {
 
   private List<TItem> SelectAllCandidates(PixataGridCheckboxColumn<TItem> column) =>
     column.SelectAllMode == PixataGridSelectAllMode.All && !UsesOnRead
-      ? (_boundData ?? []).ToGridResult(CurrentRequest() with { Page = 1, PageSize = 0 }).Data
+      ? (_boundData ?? []).ToGridResult(AllItemsRequest()).Data
       : _items;
+
+  // Every item, in the order shown, without working out the groups and aggregates
+  private GridRequest AllItemsRequest() {
+    GridRequest request = CurrentRequest();
+    return request with { Page = 1, PageSize = 0, Sorts = GridQueryExtensions.SortsWithGroups(request), Groups = [], Aggregates = [] };
+  }
 
   private bool AllSelected(PixataGridCheckboxColumn<TItem> column) {
     List<TItem> candidates = SelectAllCandidates(column);

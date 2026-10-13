@@ -15,13 +15,34 @@ public static class GridQueryExtensions {
   /// <param name="request">What the grid wants</param>
   /// <returns>The requested page of data, and the total number of items before paging</returns>
   public static GridResult<T> ToGridResult<T>(this IQueryable<T> query, GridRequest request) {
-    query = query.ApplyFilters(request.Search is null ? request.Filters : [.. request.Filters, request.Search]).ApplySorts(request.Sorts);
-    int total = query.Count();
+    IQueryable<T> filtered = query.ApplyFilters(request.Search is null ? request.Filters : [.. request.Filters, request.Search]);
+    IQueryable<T> sorted = filtered.ApplySorts(SortsWithGroups(request));
+    int total = sorted.Count();
     if (request.PageSize > 0) {
-      query = query.Skip((Math.Max(request.Page, 1) - 1) * request.PageSize).Take(request.PageSize);
+      sorted = sorted.Skip((Math.Max(request.Page, 1) - 1) * request.PageSize).Take(request.PageSize);
     }
-    return new([.. query], total);
+    return WithGroupsAndAggregates(filtered, [.. sorted], total, request);
   }
+
+  /// <summary>
+  /// The sorts to apply for a request: by the group fields first, so the items in each group are together, then by the
+  /// other sorts
+  /// </summary>
+  public static List<GridSortDescriptor> SortsWithGroups(GridRequest request) =>
+    [.. request.Groups.Select(g => new GridSortDescriptor(g.Member, g.SortDirection)), .. request.Sorts.Where(s => request.Groups.All(g => g.Member != s.Member))];
+
+  /// <summary>
+  /// Adds the groups and aggregates a request asked for to a page of data
+  /// </summary>
+  /// <param name="filtered">The data, filtered but not paged, for the counts and aggregates</param>
+  /// <param name="page">The page of items</param>
+  /// <param name="total">The number of items before paging</param>
+  /// <param name="request">The request</param>
+  public static GridResult<T> WithGroupsAndAggregates<T>(IQueryable<T> filtered, List<T> page, int total, GridRequest request) =>
+    new(page, total) {
+      Groups = request.Groups.Count == 0 ? null : GridGroupingExtensions.GroupPage(filtered, page, request.Groups, request.Aggregates),
+      Aggregates = request.Aggregates.Count == 0 ? null : filtered.Aggregate(request.Aggregates)
+    };
 
   /// <summary>
   /// Applies a <see cref="GridRequest"/> to in-memory data

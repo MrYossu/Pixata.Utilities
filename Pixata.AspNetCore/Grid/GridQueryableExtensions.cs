@@ -23,12 +23,14 @@ public static class GridQueryableExtensions {
     if (query.Provider is not IAsyncQueryProvider) {
       return query.ToGridResult(request);
     }
-    query = query.ApplyFilters(request.Search is null ? request.Filters : [.. request.Filters, request.Search]).ApplySorts(request.Sorts);
-    int total = await query.CountAsync(cancellationToken);
+    IQueryable<T> filtered = query.ApplyFilters(request.Search is null ? request.Filters : [.. request.Filters, request.Search]);
+    IQueryable<T> sorted = filtered.ApplySorts(GridQueryExtensions.SortsWithGroups(request));
+    int total = await sorted.CountAsync(cancellationToken);
     if (request.PageSize > 0) {
-      query = query.Skip((Math.Max(request.Page, 1) - 1) * request.PageSize).Take(request.PageSize);
+      sorted = sorted.Skip((Math.Max(request.Page, 1) - 1) * request.PageSize).Take(request.PageSize);
     }
-    List<T> data = await query.ToListAsync(cancellationToken);
-    return new(data, total);
+    List<T> data = await sorted.ToListAsync(cancellationToken);
+    // The group counts and aggregates are a handful of small queries, which are run synchronously
+    return GridQueryExtensions.WithGroupsAndAggregates(filtered, data, total, request);
   }
 }

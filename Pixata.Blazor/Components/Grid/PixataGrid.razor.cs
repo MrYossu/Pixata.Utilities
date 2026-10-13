@@ -235,6 +235,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     }
     IEnumerable<TItem> data = _boundData ?? [];
     GridRequest request = CurrentRequest();
+    _requestedAggregates = request.Aggregates;
     GridResult<TItem> result = data.ToGridResult(request);
     bool moved = false;
     if (Pageable && _pageSize > 0) {
@@ -247,6 +248,8 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     }
     _items = result.Data;
     _total = result.Total;
+    _resultGroups = result.Groups;
+    _resultAggregates = result.Aggregates;
     return moved;
   }
 
@@ -378,6 +381,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     await OpenFilterMenuPopup();
     await AfterInCellRender();
+    await InitGroupDrag();
   }
 
   public async ValueTask DisposeAsync() {
@@ -390,6 +394,9 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     if (_module is not null) {
       try {
         await CloseFilterMenu();
+        if (_groupDragReady) {
+          await _module.InvokeVoidAsync("disposeGroupDrag", _gridId);
+        }
         await _module.DisposeAsync();
       } catch (JSDisconnectedException) {
         // The circuit has gone

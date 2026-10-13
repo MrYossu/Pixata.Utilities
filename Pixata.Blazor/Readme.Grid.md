@@ -67,6 +67,8 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `OnAdd`, `OnCreate`, `OnEdit`, `OnUpdate`, `OnDelete`, `OnCancel` | `EventCallback<PixataGridCommandEventArgs<TItem>>` | The editing events |
 | `OnModelInit` | `Func<TItem>` | Creates a new item, if `TItem` has no parameterless constructor |
 | `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
+| `Groupable` | `bool` | Shows a panel above the grid that the user can drag column headers into, to group the rows. See [grouping](#grouping-and-aggregates) |
+| `GridAggregates` | `RenderFragment` | The aggregates to calculate, as `PixataGridAggregate`s, for the footer templates |
 
 ## Column parameters
 
@@ -91,6 +93,10 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `Editable` | `bool` | Set to `false` to stop the column being edited. Defaults to `true`, but a property with no public setter is never editable |
 | `EditorType` | `PixataGridEditorType?` | The editor to use, if not the default for the field's type |
 | `EditorTemplate` | `RenderFragment<TItem>` | Your own editor. The context is the copy being edited |
+| `Groupable` | `bool` | Set to `false` to stop the user grouping by this column. Defaults to `true`, but only matters if the grid is `Groupable` |
+| `GroupHeaderTemplate` | `RenderFragment<PixataGridGroupTemplateContext>` | The content of a group's header row when grouped by this column, in place of "Title: value" |
+| `GroupFooterTemplate` | `RenderFragment<PixataGridGroupTemplateContext>` | The content of this column's cell in each group's footer row |
+| `FooterTemplate` | `RenderFragment<PixataGridAggregateTemplateContext>` | The content of this column's cell in the grid's footer row |
 
 If you don't set a `Title`, the grid uses the `[Display(Name = "...")]` attribute on the property if there is one. If not, it uses the field name split into words with `SplitCamelCase()`, so `DateOfBirth` becomes "Date of birth" (for a nested field, it uses the last part of the path). **This differs from Telerik on purpose**, as Telerik shows the field name unchanged.
 
@@ -267,6 +273,7 @@ The grid's colours, borders and spacing match Telerik's Default theme. To change
 | `--pixata-grid-primary`, `--pixata-grid-primary-hover`, `--pixata-grid-primary-color` | `#ff6358`, `#ea5a51`, `#fff` | The accent colour: the current page, sort arrows, the active filter icon, selected items and primary buttons |
 | `--pixata-grid-input-bg` | `#fff` | The background of text boxes, number boxes, popups and dropdown lists |
 | `--pixata-grid-picker-bg`, `--pixata-grid-picker-hover-bg` | `#f5f5f5`, `#ebebeb` | The background of dropdowns and solid buttons |
+| `--pixata-grid-chip-bg`, `--pixata-grid-chip-border-color` | `#ebebeb`, `#c2c2c2` | The chips in the group panel |
 | `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The focus ring on inputs and buttons |
 | `--pixata-grid-popup-shadow` | Telerik's popup shadow | The shadow under dropdown lists and filter menus |
 | `--pixata-grid-border-radius` | `4px` | Rounded corners on inputs and buttons |
@@ -411,6 +418,43 @@ In `Popup` mode, the item is edited in a form in a window, titled "Edit" (or "Ad
 | `PixataGridPopupEditSettings` | `Title`, `Width`, `MaxHeight` and `Class` for the window |
 | `PixataGridPopupEditFormSettings` | `Columns` (the number of columns the fields are laid out in), `ButtonsLayout` (`Start`, `Center`, `End` or `Stretch`), `FormTemplate` (your own form, given the item) and `ButtonsTemplate` (your own buttons) |
 
+## Grouping and aggregates
+
+With `Groupable="true"`, there's a panel above the grid. Drag a column header into it to group the rows by that column, and drag more to group within groups. Each group has a header row ("Pet: Cat"), with an arrow that collapses and expands it. Each grouping is shown as a chip in the panel. Click the chip's cross (or press Delete when it has the focus) to stop grouping by it, drag a chip onto another to change the order, or drag it out of the panel to remove it. The dragging uses pointer events, so it works with touch as well as the mouse. Call `GroupBy(field)` and `Ungroup(field)` to do the same in code.
+
+To show totals and so on, ask for the aggregates in `GridAggregates`, and show them in the columns' templates...
+
+```razor
+<PixataGrid Data="People" Groupable="true" Pageable="true">
+  <GridAggregates>
+    <PixataGridAggregate Field="@nameof(Person.Salary)" Aggregate="GridAggregateType.Sum" />
+    <PixataGridAggregate Field="@nameof(Person.Name)" Aggregate="GridAggregateType.Count" />
+  </GridAggregates>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(Person.Name)">
+      <FooterTemplate>Total: @context.Count</FooterTemplate>
+    </PixataGridColumn>
+    <PixataGridColumn Field="@nameof(Person.Salary)" DisplayFormat="{0:C0}">
+      <GroupFooterTemplate>Sum: @(((decimal?)context.Sum)?.ToString("C0"))</GroupFooterTemplate>
+      <FooterTemplate>Sum: @(((decimal?)context.Sum)?.ToString("C0"))</FooterTemplate>
+    </PixataGridColumn>
+  </GridColumns>
+</PixataGrid>
+```
+
+The aggregate types are `Count`, `Sum`, `Average`, `Min` and `Max` (`GridAggregateType`, in `Pixata.Extensions.Grid`. Telerik has a type with the same name, so if you use both, you'll need to say which you mean). The template contexts have a property for each, which is null if it wasn't asked for, and `AggregateResults`, which has the aggregates for every field, so one column can show another's. The group templates' context also has `Value` (the group's value), `GroupField` and `ItemsCount`.
+
+As in Telerik's grid...
+
+- The aggregates, and the group counts, are for all the data (or the whole group), not just the page
+- Paging counts the items, not the group rows, so a group can carry on to the next page, with its header shown again
+- A collapsed group still shows its footer row
+- The rows are striped across groups, rather than starting again in each one
+- Clicking a chip does nothing, and the groups are in ascending order
+- Grouping goes back to the first page, and expands all the groups
+
+With `OnRead`, the request includes the groups and aggregates, and `ToGridResult()` and `ToGridResultAsync()` fill in the result's `Groups` and `Aggregates`, which `SetResult()` passes on. If you set `Data` and `Total` yourself and leave out `Groups`, the grid groups the page it's given, but then the group counts and aggregates only cover that page.
+
 ## Supplying the data with OnRead
 
 For a lot of data, or data from an API, handle `OnRead` instead of setting `Data`. The grid calls it when it first renders, and whenever the page, sorting, filtering or search changes, with a `GridRequest` saying what it wants. You set the page of data and the total number of items...
@@ -430,9 +474,10 @@ You need to give `TItem`, as the grid can't work it out without `Data`. `ToGridR
 
 | Member of the event args | What it is |
 | --- | --- |
-| `Request` | The page, page size, sorts, filters and search the grid wants |
+| `Request` | The page, page size, sorts, filters, search, groups and aggregates the grid wants |
 | `CancellationToken` | Cancelled if the grid asks for something else before this has finished (such as when the user types quickly in a filter). Pass it on to your database or API calls |
 | `Data`, `Total` | Set these to the page of items and the number of items before paging. Or call `SetResult(gridResult)` |
+| `Groups`, `Aggregates` | The groups the page's items are in, and the aggregates over all the data, if the request asked for them. `SetResult(gridResult)` sets these too |
 | `ErrorMessage` | Set this to show a message in the grid instead of rows. `SetResult(apiResponse)` does this for you when given a failed `ApiResponse<GridResult<T>>` |
 
 A few things to know...

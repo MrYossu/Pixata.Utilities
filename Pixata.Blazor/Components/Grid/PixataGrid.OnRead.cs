@@ -41,9 +41,22 @@ public class PixataGridReadEventArgs<TItem>(GridRequest request, CancellationTok
   /// </summary>
   public string? ErrorMessage { get; set; }
 
+  /// <summary>
+  /// The groups the page's items are in, if the request asked for grouping. If not set, the grid groups the page itself, but
+  /// then the group counts and aggregates only cover the page
+  /// </summary>
+  public List<GridGroup<TItem>>? Groups { get; set; }
+
+  /// <summary>
+  /// The aggregates over all the data, if the request asked for any
+  /// </summary>
+  public Dictionary<string, GridFieldAggregates>? Aggregates { get; set; }
+
   public void SetResult(GridResult<TItem> result) {
     Data = result.Data;
     Total = result.Total;
+    Groups = result.Groups;
+    Aggregates = result.Aggregates;
   }
 
   /// <summary>
@@ -85,7 +98,15 @@ public partial class PixataGrid<TItem> {
   private string? _readError;
 
   private GridRequest CurrentRequest() =>
-    new() { Page = Pageable ? _page : 1, PageSize = Pageable ? _pageSize : 0, Sorts = [.. _sorts], Filters = CurrentFilters, Search = _search };
+    new() {
+      Page = Pageable ? _page : 1,
+      PageSize = Pageable ? _pageSize : 0,
+      Sorts = [.. _sorts],
+      Filters = CurrentFilters,
+      Search = _search,
+      Groups = [.. _groups],
+      Aggregates = AggregateDescriptors
+    };
 
   // Asks for the data. A newer request makes any older one irrelevant, so its result is ignored if it arrives later
   private async Task ReadData() {
@@ -94,7 +115,9 @@ public partial class PixataGrid<TItem> {
       await _readCancel.CancelAsync();
     }
     _readCancel = new();
-    PixataGridReadEventArgs<TItem> args = new(CurrentRequest(), _readCancel.Token);
+    GridRequest request = CurrentRequest();
+    _requestedAggregates = request.Aggregates;
+    PixataGridReadEventArgs<TItem> args = new(request, _readCancel.Token);
     _loading = true;
     if (EnableLoaderContainer && _firstReadDone) {
       _ = ShowLoaderAfterDelay(version);
@@ -115,6 +138,8 @@ public partial class PixataGrid<TItem> {
     }
     _items = [.. args.Data ?? []];
     _total = args.Total;
+    _resultGroups = request.Groups.Count == 0 ? null : args.Groups ?? GridGroupingExtensions.GroupPage(_items.AsQueryable(), _items, request.Groups, request.Aggregates);
+    _resultAggregates = args.Aggregates;
     _readError = args.ErrorMessage;
     // If the page is now past the end (because the data has shrunk), go to the last page and ask again
     if (Pageable && _pageSize > 0 && _readError is null && _total > 0) {

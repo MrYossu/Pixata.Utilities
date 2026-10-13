@@ -65,6 +65,8 @@
   --pixata-grid-input-bg: #fff;
   --pixata-grid-picker-bg: #f5f5f5;
   --pixata-grid-picker-hover-bg: #ebebeb;
+  --pixata-grid-chip-bg: #ebebeb;
+  --pixata-grid-chip-border-color: #c2c2c2;
   --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
   --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-grid-border-radius: 4px;
@@ -1694,6 +1696,174 @@
 .pixata-blazor-grid-invalid > .pixata-blazor-dateinput,
 .pixata-blazor-grid-invalid .pixata-blazor-grid-dropdown-button {
   border-color: var(--pixata-grid-error-color);
+}
+
+/* ---------- Grid grouping and aggregates ---------- */
+
+/* The panel that column headers are dragged into to group by them */
+.pixata-blazor-grid-group-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  line-height: 20px;
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-header-bg);
+  border-bottom: 1px solid var(--pixata-grid-border-color);
+}
+
+/* Headers and chips can be dragged with touch as well as the mouse, so touch mustn't scroll them */
+.pixata-blazor-grid-group-draggable {
+  touch-action: none;
+}
+
+.pixata-blazor-grid-group-dragging {
+  user-select: none;
+}
+
+.pixata-blazor-grid-group-panel-drop {
+  box-shadow: inset 0 0 0 2px var(--pixata-grid-primary);
+}
+
+/* What follows the pointer while a header or chip is dragged */
+.pixata-blazor-grid-drag-clue {
+  position: fixed;
+  z-index: 10003;
+  padding: 4px 8px;
+  font-size: var(--pixata-grid-font-size);
+  line-height: 20px;
+  color: var(--pixata-grid-color);
+  white-space: nowrap;
+  pointer-events: none;
+  background-color: var(--pixata-grid-header-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+  box-shadow: var(--pixata-grid-popup-shadow);
+  opacity: .7;
+}
+
+.pixata-blazor-grid-drag-clue-drop {
+  opacity: 1;
+}
+
+.pixata-blazor-grid-group-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pixata-blazor-grid-group-hint {
+  flex: 1 1 auto;
+  min-height: 20px;
+  opacity: .6;
+}
+
+.pixata-blazor-grid-group-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  height: 24px;
+  padding: 4px;
+  line-height: 14px;
+  cursor: pointer;
+  background-color: var(--pixata-grid-chip-bg);
+  border: 1px solid var(--pixata-grid-chip-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+}
+
+.pixata-blazor-grid-group-chip:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-grid-focus-shadow);
+}
+
+.pixata-blazor-grid-group-chip-content {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: 4px;
+  cursor: move;
+}
+
+/* Padded to make it easier to hit, without making the chip taller */
+.pixata-blazor-grid-group-chip-remove {
+  display: inline-flex;
+  padding: 4px;
+  margin-block: -4px;
+  cursor: pointer;
+}
+
+.pixata-blazor-grid-group-chip-remove svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  fill-rule: evenodd;
+}
+
+/* The narrow columns down the left, one for each level of grouping */
+.pixata-blazor-grid-group-col {
+  width: 32px;
+}
+
+.pixata-blazor-grid-th.pixata-blazor-grid-group-cell,
+.pixata-blazor-grid-td.pixata-blazor-grid-group-cell {
+  padding-inline: 0;
+}
+
+.pixata-blazor-grid-td.pixata-blazor-grid-group-cell {
+  background-color: var(--pixata-grid-header-bg);
+}
+
+/* The cell after the group cells has no border between them, as the first cell of a row doesn't */
+.pixata-blazor-grid-group-cell + .pixata-blazor-grid-td,
+.pixata-blazor-grid-group-cell + .pixata-blazor-grid-th {
+  border-inline-start-width: 0;
+}
+
+.pixata-blazor-grid-group-row,
+.pixata-blazor-grid-group-row:hover {
+  background-color: var(--pixata-grid-header-bg);
+}
+
+.pixata-blazor-grid-group-header {
+  font-weight: 700;
+}
+
+.pixata-blazor-grid-group-header-inner {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.pixata-blazor-grid-group-toggle {
+  display: inline-flex;
+  margin: 0 8px 0 -4px;
+  cursor: pointer;
+}
+
+.pixata-blazor-grid-group-toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-blazor-grid-group-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-grid-focus-shadow);
+}
+
+/* Group footers and the grid's footer, which shows the aggregates */
+.pixata-blazor-grid-group-footer .pixata-blazor-grid-td,
+.pixata-blazor-grid-footer-row .pixata-blazor-grid-td {
+  font-weight: 700;
+  background-color: var(--pixata-grid-header-bg);
+  border-top-width: 1px;
+}
+
+/* The footer stays at the bottom of a grid with a height, as Telerik's does */
+.pixata-blazor-grid-tfoot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
 }
 
 /* ---------- Windows and dialogs (the grid's popup editor and delete confirmation) ---------- */

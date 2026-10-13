@@ -19,7 +19,10 @@ public enum PixataGridIcon {
   Search,
   Download,
   FileCsv,
-  FileExcel
+  FileExcel,
+  CaretDown,
+  CaretRight,
+  XCircle
 }
 
 internal static class PixataGridIcons {
@@ -50,6 +53,10 @@ internal static class PixataGridIcons {
     PixataGridIcon.Download => "M7.5 1h1v8.3l3-3 .7.7L8 11.2 3.8 7l.7-.7 3 3zM2 13h12v1H2z",
     PixataGridIcon.FileCsv => "M3 1h7l3 3v11H3zm1 1v12h8V5H9V2zm1 6h6v1H5zm0 2h6v1H5zm0 2h4v1H5z",
     PixataGridIcon.FileExcel => "M3 1h7l3 3v11H3zm1 1v12h8V5H9V2zm1.3 5h1.2L8 9.2 9.5 7h1.2l-2.1 3 2.1 3H9.5L8 10.8 6.5 13H5.3l2.1-3z",
+    PixataGridIcon.CaretDown => "M4 6h8l-4 5z",
+    PixataGridIcon.CaretRight => "M6 4v8l5-4z",
+    // The cross is cut out of the circle, with fill-rule evenodd set in the CSS
+    PixataGridIcon.XCircle => "M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm2.6 3.3L8 6.9 5.4 4.3 4.3 5.4 6.9 8l-2.6 2.6 1.1 1.1L8 9.1l2.6 2.6 1.1-1.1L9.1 8l2.6-2.6z",
     _ => null
   };
 }
