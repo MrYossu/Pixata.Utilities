@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using Pixata.Blazor.Components
 
 <TelerikRootComponent>
   <div class="page">
@@ -16,4 +17,6 @@
       </div>
     </div>
   </div>
+  @* Shows the alert, confirm and prompt dialogs requested through PixataDialogFactory *@
+  <PixataDialogHost />
 </TelerikRootComponent>

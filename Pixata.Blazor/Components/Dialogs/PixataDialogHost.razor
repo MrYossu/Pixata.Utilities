@@ -1,0 +1,78 @@
+@namespace Pixata.Blazor.Components
+@implements IDisposable
+@inject PixataDialogFactory Factory
+
+@*
+  Shows the alert, confirm and prompt dialogs requested through PixataDialogFactory. Put one in your layout, somewhere that is
+  rendered interactively. Each request gets its own PixataDialog, so several can be open at once, the newest in front
+*@
+@foreach (PixataPredefinedDialog dialog in _dialogs) {
+  <PixataDialog @key="dialog"
+                Visible="true"
+                VisibleChanged="@(_ => Answer(dialog, false))"
+                Title="@dialog.Title"
+                ShowCloseButton="false"
+                CloseOnEscape="true"
+                ButtonsLayout="PixataDialogButtonsLayout.End"
+                FocusedElementSelector="@(dialog.Kind == PixataPredefinedDialogKind.Prompt ? ".pixata-blazor-dialog-prompt-input" : ".pixata-blazor-dialog-ok")"
+                Class="@($"pixata-blazor-dialog-predefined pixata-blazor-dialog-{dialog.Kind.ToString().ToLowerInvariant()}")"
+                role="alertdialog">
+    <DialogContent>
+      <div class="pixata-blazor-dialog-message">@dialog.Text</div>
+      @if (dialog.Kind == PixataPredefinedDialogKind.Prompt) {
+        <form class="pixata-blazor-dialog-prompt-form" @onsubmit="() => Answer(dialog, true)">
+          <span class="@PixataCss.Input(null, null, null)">
+            <input type="text"
+                   class="pixata-blazor-input-inner pixata-blazor-dialog-prompt-input"
+                   aria-label="@dialog.Text"
+                   @bind="dialog.Value" />
+          </span>
+        </form>
+      }
+    </DialogContent>
+    <DialogButtons>
+      <button type="button"
+              class="@PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null), "pixata-blazor-dialog-ok")"
+              @onclick="() => Answer(dialog, true)">
+        @dialog.OkButtonText
+      </button>
+      @if (dialog.Kind != PixataPredefinedDialogKind.Alert) {
+        <button type="button"
+                class="@PixataCss.Classes(PixataCss.Button(null, null, null, null), "pixata-blazor-dialog-cancel")"
+                @onclick="() => Answer(dialog, false)">
+          @dialog.CancelButtonText
+        </button>
+      }
+    </DialogButtons>
+  </PixataDialog>
+}
+
+@code {
+
+  private readonly List<PixataPredefinedDialog> _dialogs = [];
+
+  protected override void OnInitialized() =>
+    Factory.Attach(this);
+
+  internal Task<PixataPredefinedDialogResult> Show(PixataPredefinedDialog dialog) {
+    _ = InvokeAsync(() => {
+      _dialogs.Add(dialog);
+      StateHasChanged();
+    });
+    return dialog.Result.Task;
+  }
+
+  private void Answer(PixataPredefinedDialog dialog, bool accepted) {
+    if (_dialogs.Remove(dialog)) {
+      dialog.Result.TrySetResult(new(accepted, dialog.Value));
+    }
+  }
+
+  public void Dispose() {
+    Factory.Detach(this);
+    // Nobody is left to answer these, so treat them as cancelled rather than leaving the callers waiting for ever
+    _dialogs.ForEach(d => d.Result.TrySetResult(new(false, null)));
+    _dialogs.Clear();
+  }
+
+}
