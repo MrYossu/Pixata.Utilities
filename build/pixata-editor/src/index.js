@@ -139,7 +139,9 @@ function prepareIframe(iframe, host) {
       doc.body.style.color = hostStyle.color;
       resolve(doc.body);
     }, { once: true });
-    iframe.srcdoc = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"></head><body></body></html>";
+    // The base target makes a link clicked while the editor is read-only or disabled open in the page, as it does in div
+    // mode, rather than replace the editor's document in the iframe
+    iframe.srcdoc = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><base target=\"_parent\"></head><body></body></html>";
   });
 }
 
