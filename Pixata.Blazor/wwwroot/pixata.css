@@ -1411,6 +1411,345 @@
 
 /* ========== PixataTabStrip ========== */
 
+:root {
+  --pixata-blazor-tabstrip-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-tabstrip-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-tabstrip-hover-color: var(--pixata-blazor-primary);
+  --pixata-blazor-tabstrip-active-color: var(--pixata-blazor-primary);
+  --pixata-blazor-tabstrip-active-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-tabstrip-content-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-tabstrip-content-padding: calc(var(--pixata-blazor-spacing) * 4);
+  --pixata-blazor-tabstrip-radius: var(--pixata-blazor-border-radius);
+  --pixata-blazor-tabstrip-focus-ring: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-tabstrip {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-tabstrip-color);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-tabstrip-bottom {
+  flex-direction: column-reverse;
+}
+
+.pixata-blazor-tabstrip-left {
+  flex-direction: row;
+}
+
+.pixata-blazor-tabstrip-right {
+  flex-direction: row-reverse;
+}
+
+/* The row (or column) holding the tabs, the scroll buttons and the suffix template */
+.pixata-blazor-tabstrip-items-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper,
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper {
+  flex-direction: column;
+}
+
+/*
+  The line between the tabs and the content. It is drawn behind the tabs, so the active tab (which has a background) hides
+  it and looks joined to the content, even when the tab list scrolls
+*/
+.pixata-blazor-tabstrip-items-wrapper::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border: 0 solid var(--pixata-blazor-tabstrip-border-color);
+  pointer-events: none;
+}
+
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset: auto 0 0 0;
+  border-bottom-width: 1px;
+}
+
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset: 0 0 auto 0;
+  border-top-width: 1px;
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset-block: 0;
+  inset-inline-end: 0;
+  border-inline-end-width: 1px;
+}
+
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-inline-start-width: 1px;
+}
+
+.pixata-blazor-tabstrip-items {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: inherit;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: 0;
+}
+
+.pixata-blazor-tabstrip-items-start {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-tabstrip-items-center {
+  justify-content: center;
+}
+
+.pixata-blazor-tabstrip-items-end {
+  justify-content: flex-end;
+}
+
+.pixata-blazor-tabstrip-items-justify {
+  justify-content: space-between;
+}
+
+.pixata-blazor-tabstrip-items-stretched > .pixata-blazor-tabstrip-item {
+  flex: 1 0 0;
+}
+
+.pixata-blazor-tabstrip-item {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 var(--pixata-blazor-spacing);
+  border: 1px solid transparent;
+  color: inherit;
+  cursor: pointer;
+  outline: 0;
+  user-select: none;
+  transition: color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), background-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-tabstrip-item:hover {
+  color: var(--pixata-blazor-tabstrip-hover-color);
+}
+
+.pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-color: var(--pixata-blazor-tabstrip-border-color);
+  background-color: var(--pixata-blazor-tabstrip-active-bg);
+  color: var(--pixata-blazor-tabstrip-active-color);
+}
+
+.pixata-blazor-tabstrip-item:focus-visible {
+  box-shadow: var(--pixata-blazor-tabstrip-focus-ring);
+}
+
+/* Each position rounds the corners away from the content, and opens the active tab on to the content */
+.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-item {
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-bottom-color: transparent;
+}
+
+.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-item {
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-top-color: transparent;
+}
+
+.pixata-blazor-tabstrip-left .pixata-blazor-tabstrip-item {
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-left .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-inline-end-color: transparent;
+}
+
+.pixata-blazor-tabstrip-right .pixata-blazor-tabstrip-item {
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-right .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-inline-start-color: transparent;
+}
+
+.pixata-blazor-tabstrip-link {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  padding: calc(var(--pixata-blazor-spacing) * 1.5);
+  color: inherit;
+  white-space: nowrap;
+}
+
+.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-link,
+.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-link {
+  justify-content: center;
+}
+
+.pixata-blazor-tabstrip-sm .pixata-blazor-tabstrip-link {
+  padding: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-tabstrip-lg .pixata-blazor-tabstrip-link {
+  padding: calc(var(--pixata-blazor-spacing) * 2.5);
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: 1.5;
+}
+
+.pixata-blazor-tabstrip-item-actions {
+  display: flex;
+  align-items: center;
+  align-self: center;
+}
+
+.pixata-blazor-tabstrip-close.pixata-blazor-icon-button.pixata-blazor-button-sm {
+  padding: .125rem;
+}
+
+.pixata-blazor-tabstrip-close.pixata-blazor-icon-button .pixata-blazor-icon {
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+}
+
+/* The content of each tab. Only the active tab's is shown */
+.pixata-blazor-tabstrip-content {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: var(--pixata-blazor-tabstrip-content-padding);
+  overflow: auto;
+  border: 1px solid var(--pixata-blazor-tabstrip-border-color);
+  background-color: var(--pixata-blazor-tabstrip-content-bg);
+  color: inherit;
+  outline: 0;
+}
+
+.pixata-blazor-tabstrip-content[hidden] {
+  display: none;
+}
+
+.pixata-blazor-tabstrip-content:focus-visible {
+  outline: 1px dotted currentColor;
+  outline-offset: -1px;
+}
+
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-content {
+  border-top-width: 0;
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-content {
+  border-bottom-width: 0;
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-content {
+  border-inline-start-width: 0;
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-content {
+  border-inline-end-width: 0;
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+/* A scrollable tab strip keeps its tabs on one line, and scrolls them (with a swipe, the scroll buttons or the keyboard) */
+.pixata-blazor-tabstrip-scrollable > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+.pixata-blazor-tabstrip-scrollable > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items::-webkit-scrollbar {
+  display: none;
+}
+
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items,
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items,
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.pixata-blazor-tabstrip-scroll-button.pixata-blazor-button {
+  flex: none;
+  z-index: 1;
+  align-self: stretch;
+}
+
+.pixata-blazor-tabstrip-top .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl),
+.pixata-blazor-tabstrip-bottom .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl) {
+  transform: scaleX(-1);
+}
+
+/* The suffix template, after the tabs */
+.pixata-blazor-tabstrip-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+/* Touch screens get bigger tabs and buttons */
+@media (pointer: coarse) {
+  .pixata-blazor-tabstrip-link {
+    min-width: var(--pixata-blazor-touch-target);
+    min-height: var(--pixata-blazor-touch-target);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-tabstrip-item {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataTabStrip ========== */
 
 /* ========== PixataEditor ========== */
