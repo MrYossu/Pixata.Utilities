@@ -1,0 +1,89 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@typeparam TValue
+@inherits PixataDropDownBase<TItem, TValue, List<TValue>>
+
+@*
+  A list the user can pick several items from. The selected items are shown as removable tags, followed by a text box for
+  typing to find (or, with AllowCustom, add) items
+*@
+<div @ref="Element"
+     @attributes="AdditionalAttributes"
+     class="@MainClasses()"
+     style="@WidthStyle"
+     data-pixata-dropdown="@Uid"
+     @onclick="HandleClick">
+  <div class="pixata-blazor-multiselect-values">
+    <div class="pixata-blazor-multiselect-tags" id="@TagListId">
+      @foreach (Tag tag in VisibleTags) {
+        <span class="pixata-blazor-multiselect-tag" title="@tag.Text">
+          <span class="pixata-blazor-multiselect-tag-text">
+            @if (TagTemplate is not null && TemplateItem(tag) is (true, TItem item)) {
+              @TagTemplate(item)
+            } else {
+              @tag.Text
+            }
+          </span>
+          @if (CanEdit) {
+            <span class="pixata-blazor-multiselect-tag-remove" role="button" aria-label="@($"Remove {tag.Text}")" @onclick="() => RemoveValue(tag.Value)" @onclick:stopPropagation="true">
+              <PixataIcon Icon="@PixataSvgIcons.XCircle" Size="sm" />
+            </span>
+          }
+        </span>
+      }
+      @if (SummaryCount > 0) {
+        <span class="pixata-blazor-multiselect-tag pixata-blazor-multiselect-summary-tag">
+          <span class="pixata-blazor-multiselect-tag-text">
+            @if (SummaryTagTemplate is not null) {
+              @SummaryTagTemplate(SummaryContext)
+            } else {
+              @SummaryText
+            }
+          </span>
+          @if (CanEdit) {
+            <span class="pixata-blazor-multiselect-tag-remove" role="button" aria-label="@($"Remove {SummaryText}")" @onclick="RemoveSummarised" @onclick:stopPropagation="true">
+              <PixataIcon Icon="@PixataSvgIcons.XCircle" Size="sm" />
+            </span>
+          }
+        </span>
+      }
+    </div>
+    <input @ref="_input"
+           id="@Id"
+           type="text"
+           class="pixata-blazor-input-inner pixata-blazor-multiselect-input"
+           value="@_text"
+           placeholder="@(_tags.Count == 0 ? Placeholder : null)"
+           autocomplete="off"
+           tabindex="@TabIndex"
+           disabled="@(!Enabled)"
+           readonly="@ReadOnly"
+           role="combobox"
+           aria-autocomplete="list"
+           aria-haspopup="listbox"
+           aria-expanded="@AriaExpanded"
+           aria-controls="@(IsOpen ? ListId : null)"
+           aria-activedescendant="@ActiveDescendant"
+           aria-label="@AriaLabel"
+           aria-labelledby="@AriaLabelledBy"
+           aria-describedby="@PixataCss.Classes(TagListId, AriaDescribedBy)"
+           aria-readonly="@(ReadOnly ? "true" : null)"
+           aria-invalid="@(IsInvalid ? "true" : null)"
+           aria-busy="@(Loading ? "true" : null)"
+           @oninput="HandleInput"
+           @onkeydown="HandleKeyDown"
+           @onkeydown:stopPropagation="IsOpen" />
+  </div>
+  @LoadingFragment
+  @if (ShowClearButton && _tags.Count > 0 && CanEdit) {
+    <span class="pixata-blazor-clear-value" role="button" aria-label="Clear" title="Clear" @onclick="HandleClear" @onclick:stopPropagation="true">
+      <PixataIcon Icon="@PixataSvgIcons.X" />
+    </span>
+  }
+  @if (ShowArrowButton) {
+    <span class="pixata-blazor-input-button pixata-blazor-multiselect-button" role="button" aria-label="Open" @onclick="HandleButtonClick" @onclick:stopPropagation="true">
+      <PixataIcon Icon="@PixataSvgIcons.ChevronDown" />
+    </span>
+  }
+</div>
+@PopupFragment
