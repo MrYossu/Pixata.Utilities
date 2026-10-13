@@ -1766,6 +1766,502 @@
 
 /* ========== PixataWizard and PixataStepper ========== */
 
+:root {
+  --pixata-blazor-stepper-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-stepper-indicator-size: 1.75rem;
+  --pixata-blazor-stepper-indicator-margin: 3px;
+  --pixata-blazor-stepper-indicator-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-stepper-indicator-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-stepper-indicator-hover-bg: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-stepper-accent: var(--pixata-blazor-primary);
+  --pixata-blazor-stepper-accent-hover: var(--pixata-blazor-primary-hover);
+  --pixata-blazor-stepper-accent-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-stepper-line-width: 2px;
+  --pixata-blazor-stepper-line-color: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-stepper-label-max-width: 10em;
+  --pixata-blazor-stepper-success-color: var(--pixata-blazor-success);
+  --pixata-blazor-stepper-error-color: var(--pixata-blazor-error);
+  --pixata-blazor-stepper-optional-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-stepper-disabled-color: color-mix(in srgb, var(--pixata-blazor-stepper-color) 60%, transparent);
+  --pixata-blazor-wizard-padding: calc(var(--pixata-blazor-spacing) * 5);
+  --pixata-blazor-wizard-gap: calc(var(--pixata-blazor-spacing) * 8);
+}
+
+/* ---------- Stepper ---------- */
+
+.pixata-blazor-stepper {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-stepper-color);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-stepper-horizontal {
+  width: 100%;
+}
+
+/* A horizontal stepper collapses when it is too narrow for its steps (see the container query below) */
+.pixata-blazor-stepper-horizontal.pixata-blazor-stepper-collapsible {
+  container: pixata-blazor-stepper / inline-size;
+}
+
+.pixata-blazor-stepper-list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pixata-blazor-stepper-list-horizontal {
+  flex-direction: row;
+}
+
+.pixata-blazor-stepper-list-vertical {
+  flex-direction: column;
+  height: 100%;
+}
+
+.pixata-blazor-stepper-step {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.pixata-blazor-stepper-list-horizontal > .pixata-blazor-stepper-step {
+  flex: 1 1 0;
+  justify-content: center;
+  text-align: center;
+}
+
+.pixata-blazor-stepper-list-vertical > .pixata-blazor-stepper-step {
+  flex: 1 1 0;
+  align-items: flex-start;
+  min-height: calc(var(--pixata-blazor-stepper-indicator-size) + var(--pixata-blazor-stepper-indicator-margin) * 2 + 1.25rem);
+}
+
+/* The clickable part of a step: its indicator and label */
+.pixata-blazor-stepper-step-link {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: 0;
+  appearance: none;
+}
+
+.pixata-blazor-stepper-list-horizontal .pixata-blazor-stepper-step-link {
+  flex-direction: column;
+  max-width: min(100%, var(--pixata-blazor-stepper-label-max-width));
+  margin: 0 auto;
+}
+
+.pixata-blazor-stepper-step-link:disabled,
+.pixata-blazor-stepper-step-unreachable .pixata-blazor-stepper-step-link {
+  cursor: default;
+}
+
+/* The circle holding the step's number, text or icon */
+.pixata-blazor-stepper-step-indicator {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--pixata-blazor-stepper-indicator-size);
+  height: var(--pixata-blazor-stepper-indicator-size);
+  margin: var(--pixata-blazor-stepper-indicator-margin);
+  border: 1px solid var(--pixata-blazor-stepper-indicator-border-color);
+  border-radius: 50%;
+  background-color: var(--pixata-blazor-stepper-indicator-bg);
+  color: var(--pixata-blazor-stepper-color);
+  line-height: 1;
+  transition: color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), background-color var(--pixata-blazor-transition);
+}
+
+/* The focus ring around the indicator */
+.pixata-blazor-stepper-step-indicator::after {
+  content: "";
+  display: none;
+  position: absolute;
+  inset: calc(-1px - var(--pixata-blazor-stepper-indicator-margin));
+  border: 1px solid var(--pixata-blazor-stepper-color);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.pixata-blazor-stepper-step-link:focus-visible .pixata-blazor-stepper-step-indicator::after {
+  display: block;
+}
+
+.pixata-blazor-stepper-step-indicator .pixata-blazor-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.pixata-blazor-stepper-step-label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  transition: font-weight var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-stepper-list-horizontal .pixata-blazor-stepper-step-indicator + .pixata-blazor-stepper-step-label {
+  margin-top: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-stepper-list-vertical .pixata-blazor-stepper-step-label {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-stepper-list-vertical .pixata-blazor-stepper-step-indicator + .pixata-blazor-stepper-step-label {
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-stepper-step-text {
+  flex-grow: 1;
+  max-width: var(--pixata-blazor-stepper-label-max-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-stepper-step-label-icon {
+  margin-inline-start: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-stepper-step-label-optional {
+  flex-basis: 100%;
+  font-style: italic;
+  color: var(--pixata-blazor-stepper-optional-color);
+}
+
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-label {
+  font-weight: 600;
+}
+
+/* A stepper of labels shows each one as a pill */
+.pixata-blazor-stepper-labels .pixata-blazor-stepper-step-label {
+  padding: calc(var(--pixata-blazor-spacing) * 1.25) calc(var(--pixata-blazor-spacing) * 3);
+  border-radius: 9999px;
+  background-color: var(--pixata-blazor-stepper-indicator-bg);
+}
+
+.pixata-blazor-stepper-labels .pixata-blazor-stepper-step-link:focus-visible .pixata-blazor-stepper-step-label {
+  box-shadow: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+}
+
+/* States */
+.pixata-blazor-stepper-step:not(.pixata-blazor-stepper-step-disabled, .pixata-blazor-stepper-step-unreachable) .pixata-blazor-stepper-step-link:hover .pixata-blazor-stepper-step-indicator {
+  background-color: var(--pixata-blazor-stepper-indicator-hover-bg);
+}
+
+.pixata-blazor-stepper-step-done .pixata-blazor-stepper-step-indicator,
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-indicator {
+  border-color: var(--pixata-blazor-stepper-accent);
+  background-color: var(--pixata-blazor-stepper-accent);
+  color: var(--pixata-blazor-stepper-accent-color);
+}
+
+.pixata-blazor-stepper-step-done .pixata-blazor-stepper-step-indicator::after,
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-indicator::after {
+  border-color: var(--pixata-blazor-stepper-accent);
+}
+
+.pixata-blazor-stepper-step-done:not(.pixata-blazor-stepper-step-disabled, .pixata-blazor-stepper-step-unreachable) .pixata-blazor-stepper-step-link:hover .pixata-blazor-stepper-step-indicator,
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-link:hover .pixata-blazor-stepper-step-indicator {
+  background-color: var(--pixata-blazor-stepper-accent-hover);
+}
+
+.pixata-blazor-stepper-step-disabled .pixata-blazor-stepper-step-label,
+.pixata-blazor-stepper-step-disabled .pixata-blazor-stepper-step-indicator {
+  color: var(--pixata-blazor-stepper-disabled-color);
+}
+
+.pixata-blazor-stepper-step-disabled.pixata-blazor-stepper-step-done .pixata-blazor-stepper-step-indicator,
+.pixata-blazor-stepper-step-disabled.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-indicator {
+  border-color: color-mix(in srgb, var(--pixata-blazor-stepper-accent) 60%, transparent);
+  background-color: color-mix(in srgb, var(--pixata-blazor-stepper-accent) 60%, var(--pixata-blazor-stepper-indicator-bg));
+  color: var(--pixata-blazor-stepper-accent-color);
+}
+
+.pixata-blazor-stepper-step-success .pixata-blazor-stepper-step-label-icon {
+  color: var(--pixata-blazor-stepper-success-color);
+}
+
+.pixata-blazor-stepper-step-error .pixata-blazor-stepper-step-label {
+  color: var(--pixata-blazor-stepper-error-color);
+}
+
+/* The line joining the steps, filled in up to the current step */
+.pixata-blazor-stepper-progress {
+  position: absolute;
+  z-index: 0;
+  overflow: hidden;
+  background-color: var(--pixata-blazor-stepper-line-color);
+  pointer-events: none;
+}
+
+.pixata-blazor-stepper-horizontal > .pixata-blazor-stepper-progress {
+  top: calc(var(--pixata-blazor-stepper-indicator-margin) + var(--pixata-blazor-stepper-indicator-size) / 2 - var(--pixata-blazor-stepper-line-width) / 2);
+  height: var(--pixata-blazor-stepper-line-width);
+}
+
+.pixata-blazor-stepper-horizontal.pixata-blazor-stepper-labels > .pixata-blazor-stepper-progress {
+  top: calc((var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) + var(--pixata-blazor-spacing) * 2.5) / 2 - var(--pixata-blazor-stepper-line-width) / 2);
+}
+
+.pixata-blazor-stepper-vertical > .pixata-blazor-stepper-progress {
+  top: calc(var(--pixata-blazor-stepper-indicator-margin) + var(--pixata-blazor-stepper-indicator-size) / 2);
+  inset-inline-start: calc(var(--pixata-blazor-stepper-indicator-margin) + var(--pixata-blazor-stepper-indicator-size) / 2 - var(--pixata-blazor-stepper-line-width) / 2);
+  width: var(--pixata-blazor-stepper-line-width);
+}
+
+.pixata-blazor-stepper-progress-value {
+  background-color: var(--pixata-blazor-stepper-accent);
+  transition: width .2s ease-in-out, height .2s ease-in-out;
+}
+
+.pixata-blazor-stepper-horizontal > .pixata-blazor-stepper-progress > .pixata-blazor-stepper-progress-value {
+  height: 100%;
+}
+
+.pixata-blazor-stepper-vertical > .pixata-blazor-stepper-progress > .pixata-blazor-stepper-progress-value {
+  width: 100%;
+}
+
+/* The collapsed stepper: the current step, buttons to move either way, and a progress bar */
+.pixata-blazor-stepper-compact {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-stepper-compact-summary {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  min-width: 0;
+}
+
+.pixata-blazor-stepper-compact .pixata-blazor-stepper-step-indicator {
+  margin: 0;
+  border-color: var(--pixata-blazor-stepper-accent);
+  background-color: var(--pixata-blazor-stepper-accent);
+  color: var(--pixata-blazor-stepper-accent-color);
+}
+
+.pixata-blazor-stepper-compact-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pixata-blazor-stepper-compact-count {
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-stepper-compact-label {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-stepper-compact-progress {
+  flex: 1 0 100%;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background-color: var(--pixata-blazor-stepper-line-color);
+}
+
+.pixata-blazor-stepper-compact-progress-value {
+  height: 100%;
+  background-color: var(--pixata-blazor-stepper-accent);
+  transition: width .2s ease-in-out;
+}
+
+@container pixata-blazor-stepper (max-width: 480px) {
+  .pixata-blazor-stepper-collapsible > .pixata-blazor-stepper-list,
+  .pixata-blazor-stepper-collapsible > .pixata-blazor-stepper-progress {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-collapsible > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+/* ---------- Wizard ---------- */
+
+/* The wizard is a size container, so it can rearrange itself when it is narrow (see the container query below) */
+.pixata-blazor-wizard {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: var(--pixata-blazor-wizard-padding);
+  overflow: hidden;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-text-color);
+  container: pixata-blazor-wizard / inline-size;
+}
+
+.pixata-blazor-wizard-layout {
+  display: flex;
+  gap: var(--pixata-blazor-wizard-gap);
+  height: 100%;
+  min-height: 0;
+}
+
+.pixata-blazor-wizard-top > .pixata-blazor-wizard-layout {
+  flex-direction: column;
+}
+
+.pixata-blazor-wizard-bottom > .pixata-blazor-wizard-layout {
+  flex-direction: column-reverse;
+}
+
+.pixata-blazor-wizard-left > .pixata-blazor-wizard-layout {
+  flex-direction: row;
+}
+
+.pixata-blazor-wizard-right > .pixata-blazor-wizard-layout {
+  flex-direction: row-reverse;
+}
+
+.pixata-blazor-wizard-stepper {
+  flex: none;
+}
+
+.pixata-blazor-wizard-vertical .pixata-blazor-wizard-stepper {
+  align-self: stretch;
+  height: auto;
+}
+
+/* The wizard has its own buttons, so the collapsed stepper doesn't need any */
+.pixata-blazor-wizard-stepper .pixata-blazor-stepper-compact-button {
+  display: none;
+}
+
+.pixata-blazor-wizard-steps {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-wizard-step {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2 + 2px);
+  outline: 0;
+}
+
+.pixata-blazor-wizard-step:focus-visible {
+  outline: 1px dotted var(--pixata-blazor-subtle-color);
+  outline-offset: -1px;
+}
+
+.pixata-blazor-wizard-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.pixata-blazor-wizard-form {
+  margin: 0;
+}
+
+.pixata-blazor-wizard-buttons {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  margin-top: var(--pixata-blazor-wizard-gap);
+}
+
+.pixata-blazor-wizard-buttons-end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--pixata-blazor-spacing) * 2.5);
+  margin-inline-start: auto;
+}
+
+/* A narrow wizard (eg on a phone) puts its stepper above the step, collapsed, whichever position it is in */
+@container pixata-blazor-wizard (max-width: 576px) {
+  .pixata-blazor-wizard-layout {
+    gap: calc(var(--pixata-blazor-spacing) * 4);
+  }
+
+  .pixata-blazor-wizard-top > .pixata-blazor-wizard-layout,
+  .pixata-blazor-wizard-left > .pixata-blazor-wizard-layout,
+  .pixata-blazor-wizard-right > .pixata-blazor-wizard-layout {
+    flex-direction: column;
+  }
+
+  .pixata-blazor-wizard-stepper.pixata-blazor-stepper-collapsible > .pixata-blazor-stepper-list,
+  .pixata-blazor-wizard-stepper.pixata-blazor-stepper-collapsible > .pixata-blazor-stepper-progress {
+    display: none;
+  }
+
+  .pixata-blazor-wizard-stepper.pixata-blazor-stepper-collapsible > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+
+  .pixata-blazor-wizard-buttons {
+    margin-top: calc(var(--pixata-blazor-spacing) * 4);
+  }
+}
+
+/* Touch screens get bigger targets */
+@media (pointer: coarse) {
+  .pixata-blazor-stepper-step-link {
+    min-width: var(--pixata-blazor-touch-target);
+    min-height: var(--pixata-blazor-touch-target);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-stepper-step-indicator,
+  .pixata-blazor-stepper-step-label,
+  .pixata-blazor-stepper-progress-value,
+  .pixata-blazor-stepper-compact-progress-value {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataWizard and PixataStepper ========== */
 
 /* ========== PixataRadioGroup ========== */
