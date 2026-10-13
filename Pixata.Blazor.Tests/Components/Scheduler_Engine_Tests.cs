@@ -28,6 +28,23 @@ public class Scheduler_Engine_Tests {
     public List<DateTime>? RecurrenceExceptions { get; set; }
   }
 
+  private class LongIds {
+    public long Id { get; set; }
+    public string Title { get; set; } = "";
+    public DateTime Start { get; set; }
+    public DateTime End { get; set; }
+    public string? RecurrenceRule { get; set; }
+    public long RecurrenceId { get; set; }
+  }
+
+  // A time zone like London's: GMT in the winter, and an hour ahead from the last Sunday in March to the last in October
+  private static TimeZoneInfo LondonLike() {
+    TimeZoneInfo.TransitionTime start = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 1, 0, 0), 3, 5, DayOfWeek.Sunday);
+    TimeZoneInfo.TransitionTime end = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
+    TimeZoneInfo.AdjustmentRule rule = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(new DateTime(2000, 1, 1), new DateTime(2099, 12, 31), TimeSpan.FromHours(1), start, end);
+    return TimeZoneInfo.CreateCustomTimeZone("Test/London", TimeSpan.Zero, "Test London", "GMT", "BST", [rule]);
+  }
+
   private class NoTitle {
     public DateTime Start { get; set; }
     public DateTime End { get; set; }
@@ -347,6 +364,39 @@ public class Scheduler_Engine_Tests {
   }
 
   [TestMethod]
+  public void ToOffset_LocalTimesTakeTheLocalOffsetForTheirNewDate() {
+    TimeZoneInfo london = LondonLike();
+    DateTimeOffset winter = new(2026, 1, 12, 9, 0, 0, TimeSpan.Zero);
+    DateTimeOffset summer = new(2026, 6, 15, 9, 0, 0, TimeSpan.FromHours(1));
+    Assert.AreEqual(new DateTimeOffset(2026, 6, 15, 9, 0, 0, TimeSpan.FromHours(1)), PixataSchedulerItemFields.ToOffset(new(2026, 6, 15, 9, 0, 0), winter, london),
+      "A winter appointment moved into the summer");
+    Assert.AreEqual(new DateTimeOffset(2026, 12, 14, 9, 0, 0, TimeSpan.Zero), PixataSchedulerItemFields.ToOffset(new(2026, 12, 14, 9, 0, 0), summer, london),
+      "A summer appointment moved into the winter");
+    Assert.AreEqual(TimeSpan.FromHours(1), PixataSchedulerItemFields.ToOffset(new(2026, 6, 15, 9, 0, 0), default(DateTimeOffset), london).Offset,
+      "A new appointment");
+    Assert.AreEqual(TimeSpan.FromHours(1), PixataSchedulerItemFields.ToOffset(new(2026, 6, 15, 9, 0, 0), null, london).Offset);
+  }
+
+  [TestMethod]
+  public void ToOffset_OtherOffsetsAreKept() {
+    TimeZoneInfo london = LondonLike();
+    DateTimeOffset utcInSummer = new(2026, 6, 15, 8, 0, 0, TimeSpan.Zero);
+    Assert.AreEqual(new DateTimeOffset(2026, 6, 16, 8, 0, 0, TimeSpan.Zero), PixataSchedulerItemFields.ToOffset(new(2026, 6, 16, 8, 0, 0), utcInSummer, london));
+    DateTimeOffset india = new(2026, 1, 12, 9, 0, 0, new TimeSpan(5, 30, 0));
+    Assert.AreEqual(new TimeSpan(5, 30, 0), PixataSchedulerItemFields.ToOffset(new(2026, 6, 15, 9, 0, 0), india, london).Offset);
+  }
+
+  [TestMethod]
+  public void IsEmptyId_ForEachKindOfId() {
+    foreach (object? id in new object?[] { null, 0, 0L, (short)0, "", Guid.Empty }) {
+      Assert.IsTrue(PixataSchedulerItemFields.IsEmptyId(id), $"{id?.GetType().Name}");
+    }
+    foreach (object id in new object[] { 1, 2L, "a", Guid.NewGuid() }) {
+      Assert.IsFalse(PixataSchedulerItemFields.IsEmptyId(id), $"{id.GetType().Name}");
+    }
+  }
+
+  [TestMethod]
   public void ValuesMatch_AllowsForDifferentTypes() {
     Assert.IsTrue(PixataSchedulerItemFields.ValuesMatch(1, 1L));
     Assert.IsTrue(PixataSchedulerItemFields.ValuesMatch(1, "1"));
@@ -369,6 +419,19 @@ public class Scheduler_Engine_Tests {
     Assert.AreEqual((Tuesday.AddDays(7), Tuesday.AddDays(10)), (model.Start, model.End), "Moving the start keeps the length");
     model.ApplyTo<Appointment>(item, fields, []);
     Assert.AreEqual((Tuesday.AddDays(7), Tuesday.AddDays(10), true), (item.Start, item.End, item.IsAllDay));
+  }
+
+  // With a long (rather than a nullable) recurrence id, zero means the appointment isn't an exception
+  [TestMethod]
+  public void EditModel_ZeroLongRecurrenceId_IsNotAnException() {
+    PixataSchedulerItemFields fields = new();
+    LongIds series = new() { Id = 5, Title = "Run", Start = Tuesday.AddHours(7), End = Tuesday.AddHours(8), RecurrenceRule = "FREQ=DAILY" };
+    PixataSchedulerEditModel model = PixataSchedulerEditModel.From<LongIds>(series, fields, []);
+    Assert.IsFalse(model.IsException);
+    model.RecurrenceRule = "FREQ=WEEKLY";
+    model.ApplyTo<LongIds>(series, fields, []);
+    Assert.AreEqual("FREQ=WEEKLY", series.RecurrenceRule);
+    Assert.IsTrue(PixataSchedulerEditModel.From<LongIds>(new LongIds { Title = "Run (late)", RecurrenceId = 5 }, fields, []).IsException);
   }
 
   [TestMethod]

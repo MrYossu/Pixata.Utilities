@@ -491,6 +491,11 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
     if (firstRender) {
       _dotNetReference = DotNetObjectReference.Create(this);
       _dragHandle = await PixataSchedulerJs.Invoke(Js, "attach", 0, _element, _dotNetReference);
+      if (_disposed) {
+        // Disposed while the browser was attaching, so DisposeAsync couldn't detach
+        await PixataSchedulerJs.InvokeVoid(Js, "detach", _dragHandle);
+        return;
+      }
       await PixataJs.InvokeVoid(Js, "preventDefaultKeys", _content, new[] { "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown" });
     }
     if (!_mobileChecked) {
@@ -521,12 +526,19 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
     }
     if (_focusItemKey is { } key) {
       _focusItemKey = null;
-      await PixataJs.Invoke(Js, "focusSelector", false, _content, $"[data-pixata-key=\"{key}\"]");
+      await PixataJs.Invoke(Js, "focusSelector", false, _content, KeySelector(key));
     } else if (_focusContentPending) {
       _focusContentPending = false;
       await PixataJs.InvokeVoid(Js, "focusElement", _content, true);
     }
   }
+
+  /// <summary>
+  /// The CSS selector for an appointment's element. The key comes from the appointment's id, so quotes and backslashes in it
+  /// are escaped (an invalid selector would make the browser throw)
+  /// </summary>
+  internal static string KeySelector(string key) =>
+    $"[data-pixata-key=\"{key.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\a ").Replace("\r", "\\d ")}\"]";
 
   /// <summary>
   /// Reads the data again and re-renders the scheduler, for when the data has changed in a way the scheduler can't see (an
@@ -632,10 +644,10 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
       bool isAllDay = _fields.GetIsAllDay(item);
       object? id = _fields.GetId(item);
       object? recurrenceId = _fields.GetRecurrenceId(item);
-      bool isException = !IsEmptyId(recurrenceId);
+      bool isException = !PixataSchedulerItemFields.IsEmptyId(recurrenceId);
       Dictionary<string, object?> resourceValues = resources.GroupBy(r => r.Field).ToDictionary(g => g.Key, g => _fields.GetField(item, g.Key));
       string? colour = resources.Select(r => r.Find(resourceValues[r.Field])?.Colour).FirstOrDefault(c => !string.IsNullOrWhiteSpace(c));
-      string key = IsEmptyId(id) ? $"#{index}" : Convert.ToString(id, CultureInfo.InvariantCulture) ?? $"#{index}";
+      string key = PixataSchedulerItemFields.IsEmptyId(id) ? $"#{index}" : Convert.ToString(id, CultureInfo.InvariantCulture) ?? $"#{index}";
       if (!usedKeys.Add(key)) {
         // Two appointments with the same id: keep them apart
         key = $"{key}#{index}";
@@ -647,7 +659,9 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
       if (!isException && PixataRecurrenceRule.TryParse(_fields.GetRecurrenceRule(item), out PixataRecurrenceRule? rule)) {
         TimeSpan duration = end - start;
         HashSet<DateTime> exceptions = _fields.GetRecurrenceExceptions(item).Select(d => d.Date).ToHashSet();
-        foreach (DateTime occurrenceStart in rule!.GetOccurrences(start, from - duration - TimeSpan.FromDays(1), to)) {
+        // Occurrences that start before the range can last into it
+        DateTime earliest = new(Math.Max(0, from.Ticks - duration.Ticks - TimeSpan.TicksPerDay));
+        foreach (DateTime occurrenceStart in rule!.GetOccurrences(start, earliest, to, WeekStart)) {
           DateTime occurrenceEnd = occurrenceStart + duration;
           if (exceptions.Contains(occurrenceStart.Date) || !Overlaps(occurrenceStart, occurrenceEnd, isAllDay, from, to)) {
             continue;
@@ -702,15 +716,6 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
     return start < to && (end > from || (end == start && start >= from));
   }
 
-  private static bool IsEmptyId(object? id) =>
-    id switch {
-      null => true,
-      Guid guid => guid == Guid.Empty,
-      string text => text == "",
-      int number => number == 0,
-      long number => number == 0,
-      _ => false
-    };
 
   /// <summary>
   /// The CSS classes <see cref="OnItemRender"/> adds to an appointment
@@ -1504,7 +1509,8 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
         }
         break;
       case "end":
-        if (drop.IsAllDay || monthView) {
+        // An all-day appointment always ends on a date, even when its edge is dropped on a time slot (in the timeline)
+        if (drop.IsAllDay || monthView || isAllDay) {
           end = isAllDay ? drop.Start.Date : drop.Start.Date + end.TimeOfDay;
           if (isAllDay ? end < start.Date : end <= start) {
             return null;
@@ -1514,7 +1520,7 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
         }
         break;
       case "start":
-        if (drop.IsAllDay || monthView) {
+        if (drop.IsAllDay || monthView || isAllDay) {
           start = isAllDay ? drop.Start.Date : drop.Start.Date + start.TimeOfDay;
           if (isAllDay ? start > end.Date : start >= end) {
             return null;

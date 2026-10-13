@@ -34,7 +34,8 @@ internal static class PixataSchedulerRecurrenceEditing {
       Frequency = frequency,
       Interval = previous?.Interval ?? 1,
       Count = previous?.Count,
-      Until = previous?.Until
+      Until = previous?.Until,
+      WeekStart = previous?.WeekStart
     };
     switch (frequency) {
       case PixataRecurrenceFrequency.Weekly:

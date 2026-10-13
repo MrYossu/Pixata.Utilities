@@ -221,6 +221,11 @@ public class Scheduler_Tests {
     Assert.IsNotNull(cut.Find(".pixata-blazor-scheduler-edit-dialog"));
   }
 
+  // Ids can hold characters that would break the selector used to focus an appointment
+  [TestMethod]
+  public void KeySelector_EscapesQuotesAndBackslashes() =>
+    Assert.AreEqual("[data-pixata-key=\"a\\\"b\\\\c\"]", PixataScheduler<Meeting>.KeySelector("a\"b\\c"));
+
   [TestMethod]
   public void Keyboard_ArrowsMoveBetweenAppointments() {
     using BunitContext context = PixataTestContext.Create();
@@ -386,6 +391,48 @@ public class Scheduler_Tests {
     Assert.IsNotNull(Events(cut, "Run")[0].QuerySelector(".pixata-blazor-svg-icon-repeat"));
   }
 
+  // An exception doesn't give the series an extra occurrence: COUNT counts the occurrences before exceptions are taken out
+  [TestMethod]
+  public void Count_IncludesTheExceptions() {
+    using BunitContext context = PixataTestContext.Create();
+    Meeting run = Run;
+    run.RecurrenceRule = "FREQ=DAILY;COUNT=5";
+    run.RecurrenceExceptions = [Tuesday.AddHours(7)];
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [run]);
+    // The occurrences' keys end in their start times' ticks
+    CollectionAssert.AreEqual(new[] { 12, 14, 15, 16 },
+      Events(cut, "Run").Select(e => new DateTime(long.Parse(e.GetAttribute("data-pixata-key")!.Split('@')[1], CultureInfo.InvariantCulture)).Day).ToArray());
+  }
+
+  // Without WKST, "every other week" follows the scheduler's weeks: here they start on Sunday, so the Sunday after the first
+  // Tuesday is in the next week, which is skipped
+  [TestMethod]
+  public void EveryOtherWeek_FollowsTheSchedulersFirstDayOfTheWeek() {
+    using BunitContext context = PixataTestContext.Create();
+    Meeting run = Run;
+    run.Start = Tuesday.AddHours(7);
+    run.End = Tuesday.AddHours(7.5);
+    run.RecurrenceRule = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,SU";
+    IRenderedComponent<PixataScheduler<Meeting>> unitedStates = Render(context, [run], culture: CultureInfo.GetCultureInfo("en-US"));
+    unitedStates.Find(".pixata-blazor-scheduler-next").Click();
+    Assert.AreEqual(0, Events(unitedStates, "Run").Count, "18 to 24 October is the week that is skipped");
+    unitedStates.Find(".pixata-blazor-scheduler-next").Click();
+    Assert.AreEqual(2, Events(unitedStates, "Run").Count, "Sunday 25 and Tuesday 27 October");
+    IRenderedComponent<PixataScheduler<Meeting>> britain = Render(context, [run]);
+    Assert.AreEqual(2, Events(britain, "Run").Count, "Tuesday 13 and Sunday 18 October are in the same week");
+  }
+
+  // Series with no start (so on the first day of the calendar): one whose week would start the day before, and one that
+  // lasts until today
+  [TestMethod]
+  public void SeriesStartingOnTheFirstDayOfTheCalendar_DoNotBreakTheScheduler() {
+    using BunitContext context = PixataTestContext.Create();
+    Meeting run = new() { Id = 2, Title = "Run", End = DateTime.MinValue.AddHours(1), RecurrenceRule = "FREQ=WEEKLY;INTERVAL=2" };
+    Meeting untilToday = new() { Id = 3, Title = "Long", End = Tuesday, RecurrenceRule = "FREQ=YEARLY" };
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [run, untilToday], culture: CultureInfo.GetCultureInfo("en-US"));
+    Assert.IsNotNull(cut.Find(".pixata-blazor-scheduler-time-grid"));
+  }
+
   [TestMethod]
   public void EditingAnOccurrence_CreatesAnException() {
     using BunitContext context = PixataTestContext.Create();
@@ -436,6 +483,17 @@ public class Scheduler_Tests {
 
   #region Dragging
 
+  [TestMethod]
+  public async Task DisposedWhileAttaching_DetachesTheDragScript() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(PixataSchedulerJs.ModulePath);
+    JSRuntimeInvocationHandler<int> attach = module.Setup<int>("attach", _ => true);
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [Board]);
+    await context.DisposeComponentsAsync();
+    attach.SetResult(4);
+    cut.WaitForAssertion(() => Assert.AreEqual(4, module.VerifyInvoke("detach").Arguments[0]));
+  }
+
   private static PixataScheduler<Meeting>.DropSlot Drop(DateTime start, DateTime end, bool allDay = false, int group = 0) =>
     new() { Start = start.ToString("s", CultureInfo.InvariantCulture), End = end.ToString("s", CultureInfo.InvariantCulture), AllDay = allDay, Group = group };
 
@@ -455,6 +513,22 @@ public class Scheduler_Tests {
     await cut.InvokeAsync(() => cut.Instance.OnDragEnd("1", "move", Drop(wednesday.AddHours(10), wednesday.AddHours(10.5)), Drop(wednesday.AddDays(2), wednesday.AddDays(3), true)));
     Meeting allDay = (Meeting)updates[2].Item;
     Assert.AreEqual((true, wednesday.AddDays(2), wednesday.AddDays(2)), (allDay.IsAllDay, allDay.Start, allDay.End));
+  }
+
+  // In the timeline every slot has a time, but an all-day appointment still ends on a date
+  [TestMethod]
+  public async Task ResizingAnAllDayAppointmentInTheTimeline_KeepsItAllDay() {
+    using BunitContext context = PixataTestContext.Create();
+    List<PixataSchedulerUpdateEventArgs> updates = [];
+    Meeting trip = new() { Id = 3, Title = "Trip", Start = Tuesday, End = Tuesday.AddDays(1), IsAllDay = true };
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [trip], p => p
+      .Add(s => s.AllowUpdate, true)
+      .Add(s => s.OnUpdate, args => updates.Add(args))
+      .Add(s => s.SchedulerViews, Component<PixataSchedulerTimelineView<Meeting>>(("NumberOfDays", 7))), PixataSchedulerView.Timeline);
+    await cut.InvokeAsync(() => cut.Instance.OnDragEnd("3", "end", Drop(Tuesday.AddDays(1).AddHours(10), Tuesday.AddDays(1).AddHours(10.5)),
+      Drop(Tuesday.AddDays(3).AddHours(14), Tuesday.AddDays(3).AddHours(14.5))));
+    Meeting resized = (Meeting)updates.Single().Item;
+    Assert.AreEqual((Tuesday, Tuesday.AddDays(3), true), (resized.Start, resized.End, resized.IsAllDay));
   }
 
   [TestMethod]

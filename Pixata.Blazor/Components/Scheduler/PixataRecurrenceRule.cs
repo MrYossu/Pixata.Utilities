@@ -104,9 +104,11 @@ public sealed class PixataRecurrenceRule {
   public List<int> BySetPosition { get; set; } = [];
 
   /// <summary>
-  /// The day a week starts on, which matters for weekly rules with an interval of more than one. Monday by default
+  /// The day a week starts on (<c>WKST</c>), which matters for weekly rules with an interval of more than one, or null when the
+  /// rule doesn't say, in which case <see cref="GetOccurrences"/> uses the first day of the week it is given (the scheduler
+  /// gives its own), or Monday
   /// </summary>
-  public DayOfWeek WeekStart { get; set; } = DayOfWeek.Monday;
+  public DayOfWeek? WeekStart { get; set; }
 
   private bool _untilIsUtc;
 
@@ -245,8 +247,8 @@ public sealed class PixataRecurrenceRule {
     if (Until is { } until) {
       parts.Add($"UNTIL={until.ToString("yyyyMMdd'T'HHmmss", CultureInfo.InvariantCulture)}{(_untilIsUtc ? "Z" : "")}");
     }
-    if (WeekStart != DayOfWeek.Monday) {
-      parts.Add($"WKST={PixataRecurrenceDay.Code(WeekStart)}");
+    if (WeekStart is { } weekStart) {
+      parts.Add($"WKST={PixataRecurrenceDay.Code(weekStart)}");
     }
     return string.Join(";", parts);
   }
@@ -254,21 +256,32 @@ public sealed class PixataRecurrenceRule {
   /// <summary>
   /// The start times of the occurrences of a series whose first appointment starts at <paramref name="seriesStart"/>, from
   /// <paramref name="from"/> (inclusive) to <paramref name="to"/> (exclusive). The first appointment is always an occurrence,
-  /// and counts towards <see cref="Count"/>, even if it doesn't match the rule. Exceptions aren't taken into account here
+  /// and counts towards <see cref="Count"/>, even if it doesn't match the rule. Exceptions aren't taken into account here.
+  /// A UTC <see cref="Until"/> (one that ends in <c>Z</c>) is converted to local time, unless <paramref name="seriesStart"/>
+  /// is itself in UTC
   /// </summary>
-  public List<DateTime> GetOccurrences(DateTime seriesStart, DateTime from, DateTime to) {
+  /// <param name="seriesStart">The start of the series' first appointment</param>
+  /// <param name="from">The start of the range</param>
+  /// <param name="to">The end of the range</param>
+  /// <param name="firstDayOfWeek">The day weeks start on when the rule has no <c>WKST</c>. Monday when null</param>
+  public List<DateTime> GetOccurrences(DateTime seriesStart, DateTime from, DateTime to, DayOfWeek? firstDayOfWeek = null) =>
+    GetOccurrences(seriesStart, from, to, firstDayOfWeek, TimeZoneInfo.Local);
+
+  internal List<DateTime> GetOccurrences(DateTime seriesStart, DateTime from, DateTime to, DayOfWeek? firstDayOfWeek, TimeZoneInfo localZone) {
     List<DateTime> result = [];
     if (to <= from || to <= seriesStart) {
       return result;
     }
     int interval = Math.Max(1, Interval);
+    DayOfWeek weekStart = WeekStart ?? firstDayOfWeek ?? DayOfWeek.Monday;
+    DateTime? until = UntilIn(seriesStart.Kind, localZone);
     TimeSpan time = seriesStart.TimeOfDay;
-    DateTime period = PeriodStart(seriesStart.Date);
+    DateTime period = PeriodStart(seriesStart.Date, weekStart);
     bool firstDone = false;
     int produced = 0;
     if (Count is null && from > seriesStart) {
       // Nothing is counted, so jump straight to (a whole number of intervals before) the period containing the range's start
-      int periods = PeriodsBetween(period, PeriodStart(from.Date));
+      int periods = PeriodsBetween(period, PeriodStart(from.Date, weekStart));
       int skip = periods / interval * interval;
       if (skip > 0) {
         period = Advance(period, skip);
@@ -278,7 +291,7 @@ public sealed class PixataRecurrenceRule {
 
     // Adds an occurrence, returning false once the series (or the range) has ended
     bool Add(DateTime occurrence) {
-      if (Until is { } until && occurrence > until) {
+      if (until is { } last && occurrence > last) {
         return false;
       }
       if (Count is { } count && produced >= count) {
@@ -321,9 +334,23 @@ public sealed class PixataRecurrenceRule {
     return result;
   }
 
-  private DateTime PeriodStart(DateTime date) =>
+  // The end of the series in the same terms as its start: a UTC UNTIL is converted to local time for a series in local time
+  private DateTime? UntilIn(DateTimeKind seriesKind, TimeZoneInfo localZone) {
+    if (Until is not { } until || !_untilIsUtc || seriesKind == DateTimeKind.Utc) {
+      return Until;
+    }
+    try {
+      return TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(until, DateTimeKind.Utc), localZone);
+    }
+    catch (ArgumentException) {
+      return until;
+    }
+  }
+
+  private DateTime PeriodStart(DateTime date, DayOfWeek weekStart) =>
     Frequency switch {
-      PixataRecurrenceFrequency.Weekly => date.AddDays(-(((int)date.DayOfWeek - (int)WeekStart + 7) % 7)),
+      // (A week that would start before the first day of the calendar starts on that day instead)
+      PixataRecurrenceFrequency.Weekly => date.AddDays(-Math.Min(((int)date.DayOfWeek - (int)weekStart + 7) % 7, (date - DateTime.MinValue).Days)),
       PixataRecurrenceFrequency.Monthly => new(date.Year, date.Month, 1),
       PixataRecurrenceFrequency.Yearly => new(date.Year, 1, 1),
       _ => date
@@ -488,7 +515,7 @@ public sealed class PixataRecurrenceRule {
     string[] formats = ["yyyyMMdd'T'HHmmss", "yyyyMMdd'T'HHmm", "yyyyMMdd", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd"];
     if (DateTime.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime until)) {
       // A date without a time means the whole of that day
-      return (text.Contains('T') ? until : until.Date.AddDays(1).AddTicks(-1), utc);
+      return (text.Contains('T') ? until : until.Date.AddTicks(TimeSpan.TicksPerDay - 1), utc);
     }
     throw new FormatException($"'{value}' is not a valid UNTIL value");
   }

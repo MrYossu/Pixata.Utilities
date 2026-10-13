@@ -177,6 +177,20 @@ internal sealed class PixataSchedulerItemFields {
   }
 
   /// <summary>
+  /// True if an id (or a recurrence id) has no value: null, an empty Guid or string, or zero
+  /// </summary>
+  public static bool IsEmptyId(object? id) =>
+    id switch {
+      null => true,
+      Guid guid => guid == Guid.Empty,
+      string text => text == "",
+      int number => number == 0,
+      long number => number == 0,
+      short number => number == 0,
+      _ => false
+    };
+
+  /// <summary>
   /// True if two field values are the same, allowing for different numeric types and for strings that hold the same value
   /// (eg a resource value of 1 and an appointment field of "1")
   /// </summary>
@@ -233,17 +247,34 @@ internal sealed class PixataSchedulerItemFields {
 
   private static void WriteDate(object item, string field, DateTime value) {
     if (item is IDictionary<string, object?> dictionary && !field.Contains('.')) {
-      dictionary[field] = dictionary.TryGetValue(field, out object? current) && current is DateTimeOffset offset ? new DateTimeOffset(value, offset.Offset) : value;
+      dictionary[field] = dictionary.TryGetValue(field, out object? current) && current is DateTimeOffset offset ? ToOffset(value, offset, TimeZoneInfo.Local) : value;
       return;
     }
     Type? type = FieldType(item, field);
     Type? target = type is null ? null : Nullable.GetUnderlyingType(type) ?? type;
     object converted = target switch {
-      _ when target == typeof(DateTimeOffset) => Read(item, field) is DateTimeOffset current ? new DateTimeOffset(value, current.Offset) : new DateTimeOffset(value),
+      _ when target == typeof(DateTimeOffset) => ToOffset(value, Read(item, field) as DateTimeOffset?, TimeZoneInfo.Local),
       _ when target == typeof(DateOnly) => DateOnly.FromDateTime(value),
       _ => value
     };
     Write(item, field, converted);
+  }
+
+  /// <summary>
+  /// A time as the scheduler shows it (the clock time), for a <see cref="DateTimeOffset"/> field that held
+  /// <paramref name="current"/>. A field in local time (or with no value yet) gets the local offset for the new time, so that
+  /// it is right on the other side of a change to or from daylight saving time; any other offset (eg UTC) is kept
+  /// </summary>
+  internal static DateTimeOffset ToOffset(DateTime value, DateTimeOffset? current, TimeZoneInfo localZone) {
+    DateTime time = DateTime.SpecifyKind(value, DateTimeKind.Unspecified);
+    bool local = current is not { } existing || existing == default || existing.Offset == localZone.GetUtcOffset(existing);
+    try {
+      return new(time, local ? localZone.GetUtcOffset(time) : current!.Value.Offset);
+    }
+    catch (ArgumentOutOfRangeException) {
+      // At the very start or end of the calendar, where the offset would take it out of range
+      return new(time, TimeSpan.Zero);
+    }
   }
 
   private static bool Writable(object item, string field) {

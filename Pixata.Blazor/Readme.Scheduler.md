@@ -83,6 +83,8 @@ Only the title, start and end fields are required; leave out the others and the 
 
 A timed appointment that lasts a day or more also goes in the all-day row.
 
+**`DateTimeOffset` fields** are shown at their own clock time (the offset isn't converted). When the scheduler writes one (after a drag, an edit or for an occurrence), a value that was in local time (or had no value) gets the local offset for its new time, so it stays right across a change to or from daylight saving time; a value with any other offset (eg UTC) keeps its offset.
+
 ## Parameters
 
 | Parameter | Type | Default | Description |
@@ -199,12 +201,12 @@ An appointment with a recurrence rule repeats. The scheduler supports these part
 | `FREQ` | `FREQ=WEEKLY` | `DAILY`, `WEEKLY`, `MONTHLY` or `YEARLY` |
 | `INTERVAL` | `INTERVAL=2` | Every second day, week, month or year |
 | `COUNT` | `COUNT=10` | Ten occurrences in all, including the first |
-| `UNTIL` | `UNTIL=20261231T235959` | No occurrences start after this. A date on its own means the end of that day |
+| `UNTIL` | `UNTIL=20261231T235959` | No occurrences start after this. A date on its own means the end of that day. A time in UTC (ending in `Z`) is converted to local time, unless the series' start is itself a UTC `DateTime` |
 | `BYDAY` | `BYDAY=MO,WE` or `BYDAY=-1FR` | On these days, optionally with an ordinal: `2TU` is the second Tuesday, `-1FR` the last Friday |
 | `BYMONTHDAY` | `BYMONTHDAY=14` or `BYMONTHDAY=-1` | On these days of the month (negative numbers count back from the end) |
 | `BYMONTH` | `BYMONTH=3,9` | In these months |
 | `BYSETPOS` | `BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1` | Picks from each month's matches: this one is the last weekday of the month |
-| `WKST` | `WKST=SU` | The day weeks start on, which matters for weekly rules with an interval |
+| `WKST` | `WKST=SU` | The day weeks start on, which matters for weekly rules with an interval. Without it, the scheduler's first day of the week is used |
 
 A leading `RRULE:` is allowed. Every occurrence starts at the time of day of the series' first appointment, and lasts as long. Rules the scheduler can't read are ignored, so the appointment shows once. `PixataRecurrenceRule` parses and writes rules, and works out occurrences, if you need to do that in your own code:
 
@@ -212,6 +214,8 @@ A leading `RRULE:` is allowed. Every occurrence starts at the time of day of the
 PixataRecurrenceRule rule = PixataRecurrenceRule.Parse("FREQ=MONTHLY;BYDAY=-1FR");
 List<DateTime> lunches = rule.GetOccurrences(firstLunch, from, to);
 ```
+
+`GetOccurrences` takes an optional fourth argument, the first day of the week for a weekly rule without `WKST` (Monday if you leave it out).
 
 When the user edits, moves, resizes or deletes an occurrence, the scheduler asks whether they mean that occurrence or the whole series.
 
