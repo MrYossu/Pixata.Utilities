@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Pixata.Extensions.Grid;
 
 /// <summary>
-/// Describes the data a grid wants: which page, how to sort it, and (in later versions) the filtering and grouping. It
+/// Describes the data a grid wants: which page, how to sort and filter it, and (in later versions) how to group it. It
 /// contains nothing but data, so it serialises cleanly, and can be sent from a WASM client to an API, whose server applies it
 /// to a query with <see cref="GridQueryExtensions.ToGridResult{T}(System.Linq.IQueryable{T}, GridRequest)"/>
 /// </summary>
@@ -22,4 +22,15 @@ public record GridRequest {
   /// The sorts to apply, in order of priority
   /// </summary>
   public List<GridSortDescriptor> Sorts { get; init; } = [];
+
+  /// <summary>
+  /// The column filters. An item must pass all of them
+  /// </summary>
+  public List<GridCompositeFilterDescriptor> Filters { get; init; } = [];
+
+  /// <summary>
+  /// The search box's filter, if the user has typed anything in it. It is kept apart from <see cref="Filters"/>, as it is
+  /// in Telerik's grid, but an item must pass it as well
+  /// </summary>
+  public GridCompositeFilterDescriptor? Search { get; init; }
 }

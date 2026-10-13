@@ -1,27 +1,35 @@
 @using System.ComponentModel
+@using Microsoft.JSInterop
 @attribute [EditorBrowsable(EditorBrowsableState.Never)]
 @typeparam TValue
+@implements IAsyncDisposable
+@inject IJSRuntime Js
 
-@* A dropdown list that looks like Telerik's. It's used inside the grid (pager sizes, page numbers, and later the filters), so it
-   lives with the grid rather than being a general component *@
-<span class="@Css.Join("pixata-blazor-grid-dropdown", _open ? "pixata-blazor-grid-dropdown-open" : null, Class)" style="@(Width is null ? null : $"width: {Width}")">
+@* A dropdown list that looks like Telerik's. It's used inside the grid (pager sizes, page numbers and filters), so it lives
+   with the grid rather than being a general component. The list is positioned by JavaScript, with fixed positioning, so it
+   isn't cut off by the grid's cells, which hide their overflow *@
+<span @ref="_wrapper" class="@Css.Join("pixata-blazor-grid-dropdown", Icon is null ? null : "pixata-blazor-grid-dropdown-icon-only", _open ? "pixata-blazor-grid-dropdown-open" : null, Class)" style="@(Width is null ? null : $"width: {Width}")">
   <button type="button"
           class="pixata-blazor-grid-dropdown-button"
           role="combobox"
+          title="@Title"
           aria-label="@AriaLabel"
           aria-haspopup="listbox"
           aria-expanded="@(_open ? "true" : "false")"
           @onclick="Toggle"
           @onkeydown="OnKeyDown"
           @onkeydown:preventDefault="_open">
-    <span class="pixata-blazor-grid-dropdown-text">@SelectedText</span>
-    <span class="pixata-blazor-grid-dropdown-arrow" aria-hidden="true">
-      <svg viewBox="0 0 16 16"><path d="M4 6h8l-4 5z" /></svg>
-    </span>
+    @if (Icon is null) {
+      <span class="pixata-blazor-grid-dropdown-text">@SelectedText</span>
+      <span class="pixata-blazor-grid-dropdown-arrow" aria-hidden="true">
+        <svg viewBox="0 0 16 16"><path d="M4 6h8l-4 5z" /></svg>
+      </span>
+    } else {
+      <span class="pixata-blazor-grid-dropdown-arrow" aria-hidden="true">@Icon</span>
+    }
   </button>
   @if (_open) {
-    <span class="pixata-blazor-grid-dropdown-backdrop" @onclick="Close"></span>
-    <ul class="pixata-blazor-grid-dropdown-list" role="listbox">
+    <ul @ref="_list" class="pixata-blazor-grid-dropdown-list" role="listbox">
       @for (int i = 0; i < Items.Count; i++) {
         int index = i;
         (TValue value, string text) = Items[i];
@@ -55,16 +63,36 @@
   [Parameter]
   public string? AriaLabel { get; set; }
 
+  [Parameter]
+  public string? Title { get; set; }
+
+  /// <summary>
+  /// Shown when the value isn't in the list, such as "-Select value-"
+  /// </summary>
+  [Parameter]
+  public string? DefaultText { get; set; }
+
+  /// <summary>
+  /// If set, the button shows just this icon, as the filter row's operator dropdown does
+  /// </summary>
+  [Parameter]
+  public RenderFragment? Icon { get; set; }
+
+  private ElementReference _wrapper;
+  private ElementReference _list;
+  private IJSObjectReference? _module;
+  private DotNetObjectReference<PixataGridDropDownList<TValue>>? _self;
   private bool _open;
+  private bool _justOpened;
   private int _highlighted = -1;
 
   // A value that isn't in the list is still shown, as Telerik's pager does when "All" turns the page size into the item count
   private string SelectedText =>
-    Items.FirstOrDefault(i => Equals(i.Value, Value)).Text ?? Value?.ToString() ?? "";
+    Items.Any(i => Equals(i.Value, Value)) ? Items.First(i => Equals(i.Value, Value)).Text : DefaultText ?? Value?.ToString() ?? "";
 
-  private void Toggle() {
+  private async Task Toggle() {
     if (_open) {
-      Close();
+      await Close();
     } else {
       Open();
     }
@@ -72,16 +100,51 @@
 
   private void Open() {
     _open = true;
+    _justOpened = true;
     _highlighted = Items.ToList().FindIndex(i => Equals(i.Value, Value));
   }
 
-  private void Close() {
+  private async Task Close() {
+    _justOpened = false;
+    if (!_open) {
+      return;
+    }
     _open = false;
     _highlighted = -1;
+    if (_module is not null) {
+      try {
+        await _module.InvokeVoidAsync("closePopup", _list);
+      } catch (JSException) {
+        // The list has already gone
+      } catch (JSDisconnectedException) {
+        // So has the page
+      }
+    }
+  }
+
+  [JSInvokable]
+  public async Task ClosePopup() {
+    await Close();
+    StateHasChanged();
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (_justOpened && _open) {
+      _justOpened = false;
+      try {
+        _module ??= await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/pixata-blazor.js");
+        _self ??= DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("openPopup", _wrapper, _list, _self);
+      } catch (JSException) {
+        // The list was closed again before it could be positioned
+      } catch (JSDisconnectedException) {
+        // The page has gone
+      }
+    }
   }
 
   private async Task Select(int index) {
-    Close();
+    await Close();
     TValue value = Items[index].Value;
     if (!Equals(value, Value)) {
       Value = value;
@@ -100,7 +163,7 @@
         break;
       case "ArrowUp" when e.AltKey:
       case "Escape":
-        Close();
+        await Close();
         break;
       case "ArrowDown" or "ArrowUp": {
         int next = Math.Clamp(current + (e.Key == "ArrowDown" ? 1 : -1), 0, Items.Count - 1);
@@ -115,5 +178,21 @@
         await Select(_highlighted);
         break;
     }
+  }
+
+  public async ValueTask DisposeAsync() {
+    if (_module is not null) {
+      try {
+        if (_open) {
+          await _module.InvokeVoidAsync("closePopup", _list);
+        }
+        await _module.DisposeAsync();
+      } catch (JSException) {
+        // Nothing to clean up
+      } catch (JSDisconnectedException) {
+        // The circuit has gone
+      }
+    }
+    _self?.Dispose();
   }
 }

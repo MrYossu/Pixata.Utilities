@@ -70,10 +70,58 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   [Parameter]
   public bool Sortable { get; set; } = true;
 
+  /// <summary>
+  /// Set to false to stop the user filtering by this column when the grid has a <c>FilterMode</c>. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool Filterable { get; set; } = true;
+
+  /// <summary>
+  /// Whether the column's filter menu has two conditions (the default) or a checkbox for each value. Only used when the
+  /// grid's <c>FilterMode</c> is <c>FilterMenu</c>
+  /// </summary>
+  [Parameter]
+  public PixataGridFilterMenuType FilterMenuType { get; set; } = PixataGridFilterMenuType.Menu;
+
+  /// <summary>
+  /// The operator the filter starts with. Defaults to Contains for text, and Is equal to for everything else
+  /// </summary>
+  [Parameter]
+  public GridFilterOperator? DefaultFilterOperator { get; set; }
+
+  /// <summary>
+  /// Your own content for the column's cell in the filter row
+  /// </summary>
+  [Parameter]
+  public RenderFragment<PixataGridFilterTemplateContext>? FilterCellTemplate { get; set; }
+
+  /// <summary>
+  /// Your own content for the column's filter menu, in place of the conditions
+  /// </summary>
+  [Parameter]
+  public RenderFragment<PixataGridFilterTemplateContext>? FilterMenuTemplate { get; set; }
+
   private string? _resolvedField;
   private Func<TItem, object?>? _getter;
   private string? _attributeTitle;
   private string? _attributeFormat;
+  private Type? _fieldType;
+
+  /// <summary>
+  /// The type of the field, or null for a column with no field
+  /// </summary>
+  internal Type? FieldType {
+    get {
+      Resolve();
+      return _fieldType;
+    }
+  }
+
+  internal PixataGrid<TItem>.FilterKind FilterKind =>
+    FieldType is null ? PixataGrid<TItem>.FilterKind.None : PixataGrid<TItem>.KindOf(FieldType);
+
+  internal bool IsNullable =>
+    FieldType is not null && (!FieldType.IsValueType || Nullable.GetUnderlyingType(FieldType) is not null);
 
   internal bool IsVisible =>
     Visible ?? true;
@@ -120,9 +168,11 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
     _getter = null;
     _attributeTitle = null;
     _attributeFormat = null;
+    _fieldType = null;
     if (string.IsNullOrWhiteSpace(Field)) {
       return;
     }
+    _fieldType = FieldAccessor.FieldType(typeof(TItem), Field);
     _getter = FieldAccessor.Getter<TItem>(Field);
     MemberInfo member = FieldAccessor.Member(typeof(TItem), Field);
     _attributeTitle = member.GetCustomAttribute<DisplayAttribute>()?.GetName();

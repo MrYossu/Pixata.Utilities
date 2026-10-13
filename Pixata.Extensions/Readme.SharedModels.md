@@ -59,8 +59,10 @@ Namespace `Pixata.Extensions.Grid`...
 
 | Type | What it is |
 | --- | --- |
-| `GridRequest` | `Page` (1-based), `PageSize` (zero means no paging) and `Sorts`, a list of `GridSortDescriptor`s in priority order |
+| `GridRequest` | `Page` (1-based), `PageSize` (zero means no paging), `Sorts` (a list of `GridSortDescriptor`s in priority order), `Filters` (a list of `GridCompositeFilterDescriptor`s, all of which must pass) and `Search` (the search box's filter, if any) |
+| `GridFilterDescriptor` | `Member`, `Operator` (a `GridFilterOperator`, whose values match Telerik's `FilterOperator`) and `Value`. A value that has been through JSON arrives as a `JsonElement`, and is converted to the field's type when the filter is applied |
+| `GridCompositeFilterDescriptor` | `Logic` (`And` or `Or`) and `Filters`, a list of `GridFilterDescriptor`s, such as the two conditions in a column's filter menu |
 | `GridSortDescriptor` | `Member` (the field, such as "Address.City") and `SortDirection` (a `ListSortDirection`). It isn't called `SortDescriptor`, so it doesn't clash with Telerik's |
 | `GridResult<T>` | `Data` (the requested page of items) and `Total` (the number of items before paging) |
-| `GridQueryExtensions` | `ToGridResult(request)` on an `IQueryable<T>` or `IEnumerable<T>`, which sorts, counts and pages. `ApplySorts(sorts)` does just the sorting. These only use standard LINQ, so on an EF Core query they are translated to SQL |
+| `GridQueryExtensions` | `ToGridResult(request)` on an `IQueryable<T>` or `IEnumerable<T>`, which sorts, counts and pages. `ApplySorts(sorts)` and `ApplyFilters(filters)` do just the sorting or filtering. Text comparisons ignore case (using `ToLower()`, which EF Core can translate). These only use standard LINQ, so on an EF Core query they are translated to SQL |
 | `FieldAccessor` | Reads a field from an object given its path as a string, such as "Address.City", returning null if anything along the path is null. `Getter<T>(field)` returns a compiled function, cached per type and path. `Lambda(type, field)` builds the equivalent expression (such as `item => item.Address.City`) for use in a query, checking for nulls along the way. `Member()` and `FieldType()` describe what's at the end of the path. A path that doesn't match public properties or fields (it is case sensitive) throws an `ArgumentException` |

@@ -521,10 +521,14 @@
   padding: .25rem .5rem;
 }
 
-.pixata-blazor-grid-th {
+.pixata-blazor-grid-thead {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
+}
+
+.pixata-blazor-grid-th {
+  position: relative;
   white-space: nowrap;
   vertical-align: bottom;
   background-color: var(--pixata-grid-header-bg);
@@ -889,28 +893,32 @@
   fill: currentColor;
 }
 
-/* Covers the page while the list is open, so a click anywhere else closes it without needing JavaScript */
-.pixata-blazor-grid-dropdown-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-}
-
+/* Positioned by the JavaScript, with fixed positioning, so it isn't cut off by a grid cell */
 .pixata-blazor-grid-dropdown-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1001;
-  min-width: 100%;
+  position: fixed;
+  z-index: 10002;
   max-height: 200px;
   margin: 0;
   padding: 0;
   overflow-y: auto;
   list-style: none;
+  font-size: var(--pixata-grid-font-size);
+  line-height: var(--pixata-grid-line-height);
   color: var(--pixata-grid-color);
   background-color: var(--pixata-grid-input-bg);
   border: 1px solid var(--pixata-grid-border-color);
   box-shadow: var(--pixata-grid-popup-shadow);
+}
+
+/* The filter row's operator dropdown is just an icon button */
+.pixata-blazor-grid-dropdown-icon-only {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.pixata-blazor-grid-dropdown-icon-only .pixata-blazor-grid-dropdown-arrow {
+  width: 28px;
+  height: 28px;
 }
 
 .pixata-blazor-grid-dropdown-item {
@@ -1193,6 +1201,334 @@
 .pixata-blazor-calendar-week-number {
   font-size: .75rem;
   color: var(--pixata-datepicker-subtle-color);
+}
+
+/* ---------- Grid toolbar, filters and search ---------- */
+
+.pixata-blazor-grid-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem;
+  background-color: var(--pixata-grid-header-bg);
+  border-bottom: 1px solid var(--pixata-grid-border-color);
+}
+
+/* Solid buttons, such as the filter menu's Filter and Clear */
+.pixata-blazor-button-solid {
+  border-color: var(--pixata-grid-border-color);
+  background-color: var(--pixata-grid-picker-bg);
+}
+
+.pixata-blazor-button-solid:hover:not(:disabled) {
+  background-color: var(--pixata-grid-picker-hover-bg);
+}
+
+.pixata-blazor-button-solid::before {
+  display: none;
+}
+
+.pixata-blazor-button-primary,
+.pixata-blazor-button-solid.pixata-blazor-button-selected {
+  color: var(--pixata-grid-primary-color);
+  border-color: var(--pixata-grid-primary);
+  background-color: var(--pixata-grid-primary);
+}
+
+.pixata-blazor-button-primary:hover:not(:disabled),
+.pixata-blazor-button-solid.pixata-blazor-button-selected:hover {
+  border-color: var(--pixata-grid-primary-hover);
+  background-color: var(--pixata-grid-primary-hover);
+}
+
+.pixata-blazor-button-solid:focus-visible {
+  box-shadow: var(--pixata-grid-focus-shadow);
+}
+
+/* Inputs inside the grid: text boxes, number boxes and the search box */
+.pixata-blazor-grid-textbox,
+.pixata-blazor-grid-numeric,
+.pixata-blazor-grid-search {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-input-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+}
+
+.pixata-blazor-grid-textbox:hover,
+.pixata-blazor-grid-numeric:hover,
+.pixata-blazor-grid-search:hover {
+  border-color: rgba(0, 0, 0, .16);
+}
+
+.pixata-blazor-grid-textbox:focus-within,
+.pixata-blazor-grid-numeric:focus-within,
+.pixata-blazor-grid-search:focus-within {
+  border-color: rgba(0, 0, 0, .16);
+  box-shadow: var(--pixata-grid-focus-shadow);
+}
+
+.pixata-blazor-grid-input-inner {
+  flex: 1 1 0%;
+  width: 100%;
+  min-width: 0;
+  padding: .25rem .5rem;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: none;
+  font: inherit;
+}
+
+.pixata-blazor-grid-search {
+  display: inline-flex;
+  width: 140px;
+}
+
+.pixata-blazor-grid-search-icon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0 0 0 .5rem;
+}
+
+.pixata-blazor-grid-search-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-blazor-grid-numeric-spinner {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  width: 28px;
+}
+
+.pixata-blazor-grid-numeric-spinner button {
+  display: flex;
+  flex: 0 0 auto;
+  height: 14px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-inline-start: 1px solid var(--pixata-grid-border-color);
+  color: inherit;
+  background-color: var(--pixata-grid-picker-bg);
+  cursor: pointer;
+}
+
+.pixata-blazor-grid-numeric-spinner button:hover {
+  background-color: var(--pixata-grid-picker-hover-bg);
+}
+
+.pixata-blazor-grid-numeric-spinner svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* The filter row */
+.pixata-blazor-grid-filter-cell {
+  padding: .5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  background-color: var(--pixata-grid-header-bg);
+  border: 0 solid var(--pixata-grid-border-color);
+  border-inline-start-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.pixata-blazor-grid-filter-cell:first-child {
+  border-inline-start-width: 0;
+}
+
+.pixata-blazor-grid-sm .pixata-blazor-grid-filter-cell {
+  padding: .375rem;
+}
+
+.pixata-blazor-grid-filtercell,
+.pixata-blazor-grid-filtercell-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pixata-blazor-grid-filtercell-wrapper {
+  flex: 1 1 auto;
+  gap: .25rem;
+}
+
+.pixata-blazor-grid-filtercell-wrapper > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pixata-blazor-grid-filtercell-operator {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.pixata-blazor-grid-filter-clear {
+  height: 30px;
+}
+
+.pixata-blazor-grid-filter-date {
+  width: 100%;
+  min-width: 0;
+}
+
+/* The filter menu icon in a header, which is coloured when the column has a filter */
+.pixata-blazor-grid-header-menu {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: .25rem;
+  margin-inline-end: .25rem;
+  cursor: pointer;
+}
+
+.pixata-blazor-grid-header-menu:hover {
+  background-color: var(--pixata-grid-picker-hover-bg);
+}
+
+.pixata-blazor-grid-header-menu svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-blazor-grid-filter-active,
+.pixata-blazor-grid-filter-active:hover {
+  color: var(--pixata-grid-primary-color);
+  background-color: var(--pixata-grid-primary);
+}
+
+/* The filter menu itself, positioned by the JavaScript */
+.pixata-blazor-grid-filter-popup {
+  position: fixed;
+  z-index: 10002;
+  width: 232px;
+  font-size: var(--pixata-grid-font-size);
+  line-height: var(--pixata-grid-line-height);
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-input-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  box-shadow: var(--pixata-grid-popup-shadow);
+}
+
+.pixata-blazor-grid-columnmenu-item {
+  display: flex;
+  align-items: center;
+  padding: .25rem .5rem;
+}
+
+.pixata-blazor-grid-columnmenu-item svg,
+.pixata-blazor-button svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-blazor-grid-columnmenu-item svg {
+  margin-inline-end: .25rem;
+}
+
+.pixata-blazor-grid-filter-menu {
+  margin: 0;
+}
+
+.pixata-blazor-grid-filter-menu-container {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding: .5rem;
+}
+
+.pixata-blazor-grid-filter-menu-container > .pixata-blazor-grid-dropdown,
+.pixata-blazor-grid-filter-menu-container > .pixata-blazor-dateinput {
+  width: 100%;
+}
+
+.pixata-blazor-grid-button-group {
+  display: flex;
+}
+
+.pixata-blazor-grid-button-group .pixata-blazor-button:first-child {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.pixata-blazor-grid-button-group .pixata-blazor-button:last-child {
+  margin-inline-start: -1px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.pixata-blazor-grid-filter-actions {
+  display: flex;
+  gap: .5rem;
+}
+
+.pixata-blazor-grid-filter-actions .pixata-blazor-button {
+  flex: 1 1 0%;
+}
+
+.pixata-blazor-grid-multicheck {
+  max-height: 300px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.pixata-blazor-grid-multicheck-item {
+  display: flex;
+  padding: .25rem .5rem;
+}
+
+.pixata-blazor-grid-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* A checkbox drawn like Telerik's */
+.pixata-blazor-checkbox {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background-color: var(--pixata-grid-input-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+  cursor: pointer;
+}
+
+.pixata-blazor-checkbox:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pixata-grid-border-color);
+}
+
+.pixata-blazor-checkbox:checked {
+  border-color: var(--pixata-grid-primary);
+  background-color: var(--pixata-grid-primary);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M3,8 l3,3 l7-7'/%3e%3c/svg%3e");
 }
 
 /* ---------- Spinner ---------- */

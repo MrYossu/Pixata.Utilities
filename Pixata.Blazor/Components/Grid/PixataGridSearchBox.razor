@@ -1,0 +1,61 @@
+@typeparam TItem
+@using System.Threading
+@implements IDisposable
+
+@* A search box for the grid's toolbar. It filters the rows to those where any of the searched fields contain the text,
+   ignoring case, as Telerik's GridSearchBox does *@
+<span class="pixata-blazor-grid-search" style="@(Width is null ? null : $"width: {Width}")">
+  <span class="pixata-blazor-grid-search-icon" aria-hidden="true">
+    <svg viewBox="0 0 16 16"><path d="M6.5 1a5.5 5.5 0 0 1 4.4 8.8l4 4-.7.7-4-4A5.5 5.5 0 1 1 6.5 1m0 1a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9" /></svg>
+  </span>
+  <input class="pixata-blazor-grid-input-inner" type="text" placeholder="@Placeholder" aria-label="@Placeholder" value="@_text" @oninput="OnInput" />
+</span>
+
+@code {
+  [CascadingParameter]
+  internal PixataGrid<TItem>? Grid { get; set; }
+
+  /// <summary>
+  /// The fields to search. If not set, every text column in the grid is searched
+  /// </summary>
+  [Parameter]
+  public List<string>? Fields { get; set; }
+
+  [Parameter]
+  public string Placeholder { get; set; } = "Search...";
+
+  /// <summary>
+  /// How long to wait after the last key press before searching, in milliseconds. Defaults to 300
+  /// </summary>
+  [Parameter]
+  public int DebounceDelay { get; set; } = 300;
+
+  [Parameter]
+  public string? Width { get; set; }
+
+  private string _text = "";
+  private CancellationTokenSource? _debounce;
+
+  protected override void OnInitialized() {
+    if (Grid is null) {
+      throw new InvalidOperationException("PixataGridSearchBox must be inside a PixataGrid, such as in its GridToolBarTemplate");
+    }
+  }
+
+  private async Task OnInput(ChangeEventArgs e) {
+    _text = e.Value?.ToString() ?? "";
+    if (_debounce is not null) {
+      await _debounce.CancelAsync();
+    }
+    _debounce = new();
+    try {
+      await Task.Delay(DebounceDelay, _debounce.Token);
+    } catch (TaskCanceledException) {
+      return;
+    }
+    await Grid!.SetSearch(_text, Fields);
+  }
+
+  public void Dispose() =>
+    _debounce?.Cancel();
+}

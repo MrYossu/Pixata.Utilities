@@ -18,8 +18,11 @@ public class PixataGridPaging_Tests {
   private static readonly List<Item> Items = [.. Enumerable.Range(1, 23).Select(n => new Item(n))];
 
   [TestInitialize]
-  public void Initialise() =>
+  public void Initialise() {
     _ctx = new();
+    // The grid's dropdowns load a JavaScript module, which doesn't matter here
+    _ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+  }
 
   [TestCleanup]
   public void Cleanup() =>

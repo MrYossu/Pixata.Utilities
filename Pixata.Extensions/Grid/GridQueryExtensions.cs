@@ -15,7 +15,7 @@ public static class GridQueryExtensions {
   /// <param name="request">What the grid wants</param>
   /// <returns>The requested page of data, and the total number of items before paging</returns>
   public static GridResult<T> ToGridResult<T>(this IQueryable<T> query, GridRequest request) {
-    query = query.ApplySorts(request.Sorts);
+    query = query.ApplyFilters(request.Search is null ? request.Filters : [.. request.Filters, request.Search]).ApplySorts(request.Sorts);
     int total = query.Count();
     if (request.PageSize > 0) {
       query = query.Skip((Math.Max(request.Page, 1) - 1) * request.PageSize).Take(request.PageSize);
@@ -31,6 +31,17 @@ public static class GridQueryExtensions {
   /// <returns>The requested page of data, and the total number of items before paging</returns>
   public static GridResult<T> ToGridResult<T>(this IEnumerable<T> data, GridRequest request) =>
     data.AsQueryable().ToGridResult(request);
+
+  /// <summary>
+  /// Filters a query, keeping the items that pass every composite filter. String comparisons ignore case, as Telerik's do
+  /// </summary>
+  /// <param name="query">The data</param>
+  /// <param name="filters">The filters to apply</param>
+  /// <returns>The filtered query</returns>
+  public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> query, IEnumerable<GridCompositeFilterDescriptor> filters) {
+    Expression<Func<T, bool>>? predicate = GridFilterExpressions.Predicate<T>(filters);
+    return predicate is null ? query : query.Where(predicate);
+  }
 
   /// <summary>
   /// Sorts a query by each of the descriptors in turn, so the first has the highest priority. A nested field is sorted

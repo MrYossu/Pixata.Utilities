@@ -105,6 +105,8 @@ const popups = new WeakMap();
 // fixed positioning, so it isn't clipped by containers with overflow hidden, such as a grid cell
 function positionPopup(anchor, popup) {
   const a = anchor.getBoundingClientRect();
+  // A list is at least as wide as the control it drops down from
+  popup.style.minWidth = `${a.width}px`;
   const p = popup.getBoundingClientRect();
   const below = window.innerHeight - a.bottom;
   const top = below >= p.height || below >= a.top ? a.bottom : a.top - p.height;
@@ -115,6 +117,10 @@ function positionPopup(anchor, popup) {
 }
 
 export function openPopup(anchor, popup, dotNet) {
+  // The anchor can be an element, or the id of one
+  if (typeof anchor === "string") {
+    anchor = document.getElementById(anchor);
+  }
   if (!anchor || !popup) {
     return;
   }

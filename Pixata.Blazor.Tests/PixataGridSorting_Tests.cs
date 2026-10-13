@@ -30,8 +30,11 @@ public class PixataGridSorting_Tests {
   ];
 
   [TestInitialize]
-  public void Initialise() =>
+  public void Initialise() {
     _ctx = new();
+    // The grid's dropdowns load a JavaScript module, which doesn't matter here
+    _ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+  }
 
   [TestCleanup]
   public void Cleanup() =>

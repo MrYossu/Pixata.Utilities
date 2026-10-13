@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using Pixata.Extensions.Grid;
 
 namespace Pixata.Blazor.Components.Grid;
 
 [CascadingTypeParameter(nameof(TItem))]
-public partial class PixataGrid<TItem> : IDisposable {
+public partial class PixataGrid<TItem> : IAsyncDisposable {
+  [Inject]
+  private IJSRuntime Js { get; set; } = null!;
+
   /// <summary>
   /// The items to show. If you change the collection without replacing it, call <see cref="Rebind"/>, unless it implements
   /// <see cref="INotifyCollectionChanged"/> (such as <see cref="System.Collections.ObjectModel.ObservableCollection{T}"/>), in
@@ -169,7 +174,7 @@ public partial class PixataGrid<TItem> : IDisposable {
   // no longer enough items to fill it, in which case the caller should raise PageChanged
   private bool ProcessData() {
     IEnumerable<TItem> data = _boundData ?? [];
-    GridRequest request = Pageable ? new() { Page = _page, PageSize = _pageSize, Sorts = _sorts } : new() { Sorts = _sorts };
+    GridRequest request = new() { Page = Pageable ? _page : 1, PageSize = Pageable ? _pageSize : 0, Sorts = _sorts, Filters = CurrentFilters, Search = _search };
     GridResult<TItem> result = data.ToGridResult(request);
     bool moved = false;
     if (Pageable && _pageSize > 0) {
@@ -294,9 +299,24 @@ public partial class PixataGrid<TItem> : IDisposable {
     }
   }
 
-  public void Dispose() {
+  protected override async Task OnAfterRenderAsync(bool firstRender) =>
+    await OpenFilterMenuPopup();
+
+  public async ValueTask DisposeAsync() {
     _disposed = true;
     Unsubscribe();
+    foreach (CancellationTokenSource cancel in _filterDebounce.Values) {
+      await cancel.CancelAsync();
+    }
+    if (_module is not null) {
+      try {
+        await CloseFilterMenu();
+        await _module.DisposeAsync();
+      } catch (JSDisconnectedException) {
+        // The circuit has gone
+      }
+    }
+    _self?.Dispose();
     GC.SuppressFinalize(this);
   }
 }

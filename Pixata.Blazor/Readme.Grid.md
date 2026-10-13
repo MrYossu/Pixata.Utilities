@@ -51,6 +51,8 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `Page` | `int` | The current page, starting from 1. Can be two-way bound |
 | `Sortable` | `bool` | Lets the user sort by clicking a column header. See [sorting](#sorting) |
 | `SortMode` | `PixataGridSortMode` | `Single` (the default) or `Multiple` |
+| `FilterMode` | `PixataGridFilterMode` | `None` (the default), `FilterRow` or `FilterMenu`. See [filtering](#filtering) |
+| `GridToolBarTemplate` | `RenderFragment` | Content for a toolbar above the grid, such as a [search box](#search-box) |
 
 ## Column parameters
 
@@ -65,6 +67,10 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `Class` | `string` | A CSS class for the column's data cells |
 | `HeaderClass` | `string` | A CSS class for the column's header cell |
 | `Sortable` | `bool` | Set to `false` to stop the user sorting by this column. Defaults to `true`, but only matters if the grid is `Sortable` |
+| `Filterable` | `bool` | Set to `false` to stop the user filtering by this column. Defaults to `true` |
+| `FilterMenuType` | `PixataGridFilterMenuType` | `Menu` (two conditions, the default) or `CheckBoxList` |
+| `DefaultFilterOperator` | `GridFilterOperator?` | The operator the filter starts with. Defaults to Contains for text, and Is equal to for everything else |
+| `FilterCellTemplate`, `FilterMenuTemplate` | `RenderFragment<PixataGridFilterTemplateContext>` | Your own filter UI. See [custom filters](#custom-filters) |
 
 If you don't set a `Title`, the grid uses the `[Display(Name = "...")]` attribute on the property if there is one. If not, it uses the field name split into words with `SplitCamelCase()`, so `DateOfBirth` becomes "Date of birth" (for a nested field, it uses the last part of the path). **This differs from Telerik on purpose**, as Telerik shows the field name unchanged.
 
@@ -137,6 +143,73 @@ As in Telerik's grid...
 - A nested field such as "Address.City" sorts safely when part of the path is null. Those rows count as null, which comes first in ascending order
 
 Setting the initial sort from code will be possible through the grid's state, when that's added.
+
+## Filtering
+
+Set `FilterMode` to choose how the user filters...
+
+- `FilterRow` adds a row under the headers, with an editor for each column. Text and numbers are filtered a moment after the user stops typing, and the other editors filter straight away. The button next to each editor picks the operator (such as "Starts with"), and the one beside it clears the filter
+- `FilterMenu` puts a filter icon in each header. It opens a menu with two conditions joined by And or Or, which are applied when the user clicks Filter. Set a column's `FilterMenuType` to `CheckBoxList` for a list of the column's values to tick instead. The icon is coloured when the column has a filter
+
+```razor
+<PixataGrid Data="_people" FilterMode="PixataGridFilterMode.FilterMenu">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(Person.Name)" />
+    <PixataGridColumn Field="@nameof(Person.Department)" FilterMenuType="PixataGridFilterMenuType.CheckBoxList" />
+    <PixataGridColumn Field="@nameof(Person.Notes)" Filterable="false" />
+  </GridColumns>
+</PixataGrid>
+```
+
+The editor and the operators depend on the field's type, as in Telerik's grid...
+
+| Type | Editor | Operators |
+| --- | --- | --- |
+| Text | A text box | Is equal to, Is not equal to, Starts with, Contains (the default), Does not contain, Ends with, Is null, Is not null, Is empty, Is not empty, Has no value, Has value |
+| Numbers | A number box with up and down buttons | Is less than, Is less than or equal to, Is equal to, Is not equal to, Is greater than or equal to, Is greater than |
+| `DateTime` and `DateOnly` | A [date picker](Readme.DatePicker.md) | Is equal to, Is not equal to, Is after or equal to, Is after, Is before or equal to, Is before |
+| Enums | A dropdown of the values | Is equal to, Is not equal to |
+| `bool` | A dropdown of (All), is true and is false | None |
+
+Nullable numbers, dates and enums also get Is null and Is not null. Columns of other types can't be filtered unless you give them a template.
+
+As in Telerik's grid, text comparisons ignore case, and filtering (or searching) goes back to the first page.
+
+### Search box
+
+Put a `PixataGridSearchBox` in the grid's toolbar to let the user search. It shows the rows where any of the text columns contain what they type, ignoring case, and works alongside any column filters...
+
+```razor
+<PixataGrid Data="_people">
+  <GridToolBarTemplate>
+    <PixataGridSearchBox />
+  </GridToolBarTemplate>
+  <GridColumns>...</GridColumns>
+</PixataGrid>
+```
+
+| Parameter | Type | What it does |
+| --- | --- | --- |
+| `Fields` | `List<string>` | The fields to search. If not set, every text column in the grid is searched (including ones that can't be filtered) |
+| `Placeholder` | `string` | Defaults to "Search..." |
+| `DebounceDelay` | `int` | How long to wait after the last key press, in milliseconds. Defaults to 300 |
+| `Width` | `string` | Defaults to 140px |
+
+### Custom filters
+
+A column's `FilterCellTemplate` replaces its cell in the filter row, and `FilterMenuTemplate` replaces the conditions in its filter menu (the Filter and Clear buttons are still there). Both are given a `PixataGridFilterTemplateContext`, whose `Filter` is the column's `GridCompositeFilterDescriptor`. Add or change its descriptors, then call `FilterAsync()` to apply them, or `ClearFilterAsync()` to remove the filter...
+
+```razor
+<PixataGridColumn Field="@nameof(Person.Age)">
+  <FilterCellTemplate>
+    <button @onclick="async () => {
+      context.Filter.Filters.Clear();
+      context.Filter.Filters.Add(new(nameof(Person.Age), GridFilterOperator.IsGreaterThanOrEqualTo, 18));
+      await context.FilterAsync();
+    }">Adults</button>
+  </FilterCellTemplate>
+</PixataGridColumn>
+```
 
 ## Updating the data
 

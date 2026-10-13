@@ -137,6 +137,51 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Filtering</h4>
+
+<div class="pixata-blazor-grid-sample-options">
+  <label>
+    Filter mode
+    <select @bind="_filterMode">
+      <option value="row">Filter row</option>
+      <option value="menu">Filter menu</option>
+      <option value="checkbox">Filter menu with checkbox lists</option>
+    </select>
+  </label>
+</div>
+
+<p>Try the filter row, the filter menus and the search box (which searches the text columns). City can't be filtered, but it can be searched.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" FilterMode="@(_filterMode == "row" ? PixataGridFilterMode.FilterRow : PixataGridFilterMode.FilterMenu)" Pageable="true" PageSize="5" Sortable="true">
+  <GridToolBarTemplate>
+    <PixataGridSearchBox />
+  </GridToolBarTemplate>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" FilterMenuType="@PixataFilterMenuType" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" FilterMenuType="@PixataFilterMenuType" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" FilterMenuType="@PixataFilterMenuType" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" FilterMenuType="@PixataFilterMenuType" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" FilterMenuType="@PixataFilterMenuType" />
+    <PixataGridColumn Field="Address.City" Title="City" Filterable="false" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" FilterMode="@(_filterMode == "row" ? GridFilterMode.FilterRow : GridFilterMode.FilterMenu)" Pageable="true" PageSize="5" Sortable="true">
+  <GridToolBarTemplate>
+    <GridSearchBox />
+  </GridToolBarTemplate>
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" FilterMenuType="@TelerikFilterMenuType" />
+    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" FilterMenuType="@TelerikFilterMenuType" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" FilterMenuType="@TelerikFilterMenuType" />
+    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" FilterMenuType="@TelerikFilterMenuType" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" FilterMenuType="@TelerikFilterMenuType" />
+    <GridColumn Field="Address.City" Title="City" Filterable="false" />
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -166,6 +211,13 @@
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
   private bool _multipleSort;
+  private string _filterMode = "row";
+
+  private PixataGridFilterMenuType PixataFilterMenuType =>
+    _filterMode == "checkbox" ? PixataGridFilterMenuType.CheckBoxList : PixataGridFilterMenuType.Menu;
+
+  private FilterMenuType TelerikFilterMenuType =>
+    _filterMode == "checkbox" ? FilterMenuType.CheckBoxList : FilterMenuType.Menu;
   private int _pageSize = 3;
   private int _page = 1;
   private readonly List<int?> _pageSizes = [3, 5, 10, null];
