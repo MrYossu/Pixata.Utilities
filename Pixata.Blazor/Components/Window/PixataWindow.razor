@@ -302,7 +302,13 @@
       _height = Height;
     }
     if (Visible && !_wasVisible) {
+      // Opened again: forget where the user moved or resized it to last time, and start from the parameters (which hold the
+      // user's changes if they are bound)
       _moved = false;
+      _top = Top;
+      _left = Left;
+      _width = Width;
+      _height = Height;
     }
     _wasVisible = Visible;
   }

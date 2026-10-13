@@ -356,6 +356,33 @@ public class Window_Tests {
   }
 
   [TestMethod]
+  public async Task PixataWindow_MovedAndResizedThenClosed_ReopensWhereItsParametersSay() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataWindow> cut = RenderWindow(context, p => {
+      p.Add(c => c.Top, "10px");
+      p.Add(c => c.Left, "20px");
+      p.Add(c => c.Width, "300px");
+    });
+    await cut.InvokeAsync(() => cut.Instance.OnWindowResized(120, 80, 400, 250));
+    Assert.AreEqual("left:120px;top:80px;width:400px;min-width:120px;height:250px;min-height:100px;", Style(cut));
+    cut.Render(p => p.Add(c => c.Visible, false));
+    cut.Render(p => p.Add(c => c.Visible, true));
+    Assert.AreEqual("left:20px;top:10px;width:300px;min-width:120px;min-height:100px;", Style(cut));
+  }
+
+  [TestMethod]
+  public async Task PixataWindow_CentredMovedThenClosed_ReopensInTheMiddle() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataWindow> cut = RenderWindow(context);
+    await cut.InvokeAsync(() => cut.Instance.OnWindowMoved(120, 80));
+    Assert.IsFalse(cut.Find(".pixata-blazor-window").ClassName!.Contains("centred"));
+    cut.Render(p => p.Add(c => c.Visible, false));
+    cut.Render(p => p.Add(c => c.Visible, true));
+    StringAssert.Contains(cut.Find(".pixata-blazor-window").ClassName, "pixata-blazor-window-centred");
+    Assert.IsFalse(Style(cut).Contains("left:"));
+  }
+
+  [TestMethod]
   public async Task PixataWindow_ResizedByTheUser_ReportsTheNewSize() {
     using BunitContext context = PixataTestContext.Create();
     List<string> widths = [];
