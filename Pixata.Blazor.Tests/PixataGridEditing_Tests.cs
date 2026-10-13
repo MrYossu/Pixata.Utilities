@@ -113,7 +113,7 @@ public class PixataGridEditing_Tests {
     Person original = _people[0];
 
     CommandButton(Row(grid, 0), "Edit").Click();
-    Row(grid, 0).QuerySelector("input")!.Change("Alicia");
+    Row(grid, 0).QuerySelector("input")!.Input("Alicia");
     Assert.AreEqual("Alice", original.Name);
     CommandButton(Row(grid, 0), "Save").Click();
 
@@ -128,7 +128,7 @@ public class PixataGridEditing_Tests {
     IRenderedComponent<PixataGrid<Person>> grid = Render();
 
     CommandButton(Row(grid, 0), "Edit").Click();
-    Row(grid, 0).QuerySelector("input")!.Change("");
+    Row(grid, 0).QuerySelector("input")!.Input("");
     CommandButton(Row(grid, 0), "Save").Click();
 
     Assert.AreEqual(0, _events.Count);
@@ -142,7 +142,7 @@ public class PixataGridEditing_Tests {
     IRenderedComponent<PixataGrid<Person>> grid = Render();
 
     CommandButton(Row(grid, 1), "Edit").Click();
-    Row(grid, 1).QuerySelector("input")!.Change("Robert");
+    Row(grid, 1).QuerySelector("input")!.Input("Robert");
     CommandButton(Row(grid, 1), "Cancel").Click();
 
     CollectionAssert.AreEqual(new[] { "cancel Robert" }, _events);
@@ -157,7 +157,7 @@ public class PixataGridEditing_Tests {
     grid.Find(".pixata-blazor-grid-toolbar button").Click();
     Assert.IsTrue(Row(grid, 0).ClassList.Contains("pixata-blazor-grid-edit-row"));
     Assert.AreEqual(3, grid.FindAll("tbody tr").Count);
-    Row(grid, 0).QuerySelector("input")!.Change("Carol");
+    Row(grid, 0).QuerySelector("input")!.Input("Carol");
     CommandButton(Row(grid, 0), "Save").Click();
 
     CollectionAssert.AreEqual(new[] { "create Carol" }, _events);
@@ -207,7 +207,7 @@ public class PixataGridEditing_Tests {
     IElement window = grid.Find(".pixata-blazor-grid-popup-edit");
     Assert.AreEqual("Edit", window.QuerySelector(".pixata-blazor-window-title")!.TextContent.Trim());
     CollectionAssert.AreEqual(new[] { "Name", "Age", "Code" }, window.QuerySelectorAll(".pixata-blazor-form-label").Select(l => l.TextContent.Trim()).ToArray());
-    window.QuerySelector(".pixata-blazor-grid-textbox input")!.Change("Robert");
+    window.QuerySelector(".pixata-blazor-grid-textbox input")!.Input("Robert");
     grid.FindAll(".pixata-blazor-grid-popup-edit .pixata-blazor-window-actions button").Single(b => b.TextContent.Trim() == "Update").Click();
 
     CollectionAssert.AreEqual(new[] { "update Robert" }, _events);

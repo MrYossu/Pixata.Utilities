@@ -147,3 +147,47 @@ export function closePopup(popup) {
     popups.delete(popup);
   }
 }
+
+// Focuses the first editor inside an element, such as a grid cell that has just started being edited
+export function focusIn(id) {
+  const element = document.getElementById(id);
+  const target = element?.querySelector("input:not([type=hidden]), textarea, select, button, [tabindex]:not([tabindex='-1'])");
+  if (target) {
+    target.focus();
+    if (typeof target.select === "function" && target.type !== "checkbox") {
+      target.select();
+    }
+  }
+}
+
+const outsideWatchers = new Map();
+
+// Calls back when the user presses outside an element, such as the grid cell being edited, and stops Tab moving the focus
+// out of it, so the grid can move to the next cell instead
+export function watchOutside(id, dotNet, method) {
+  unwatchOutside(id);
+  const pointerDown = e => {
+    const element = document.getElementById(id);
+    if (!element || !element.contains(e.target)) {
+      dotNet.invokeMethodAsync(method);
+    }
+  };
+  const keyDown = e => {
+    const element = document.getElementById(id);
+    if (e.key === "Tab" && element && element.contains(e.target)) {
+      e.preventDefault();
+    }
+  };
+  document.addEventListener("pointerdown", pointerDown, true);
+  document.addEventListener("keydown", keyDown, true);
+  outsideWatchers.set(id, { pointerDown, keyDown });
+}
+
+export function unwatchOutside(id) {
+  const watcher = outsideWatchers.get(id);
+  if (watcher) {
+    document.removeEventListener("pointerdown", watcher.pointerDown, true);
+    document.removeEventListener("keydown", watcher.keyDown, true);
+    outsideWatchers.delete(id);
+  }
+}

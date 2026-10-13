@@ -304,6 +304,7 @@
     <select @bind="_editMode">
       <option value="inline">Inline</option>
       <option value="popup">Popup</option>
+      <option value="incell">In cell</option>
     </select>
   </label>
 </div>
@@ -312,7 +313,7 @@
 
 <p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid TItem="GridSampleEditableEmployee" Data="_pixataEditable" Size="_size" Pageable="true" PageSize="5" ConfirmDelete="true"
-            EditMode="@(_editMode == "popup" ? PixataGridEditMode.Popup : PixataGridEditMode.Inline)"
+            EditMode="@PixataEditMode"
             OnCreate="PixataCreate" OnUpdate="PixataUpdate" OnDelete="PixataDelete">
   <GridToolBarTemplate>
     <PixataGridCommandButton Command="Add" Icon="PixataGridIcon.Plus">Add employee</PixataGridCommandButton>
@@ -336,7 +337,7 @@
 
 <p class="pixata-blazor-grid-sample-label">Telerik grid</p>
 <TelerikGrid Data="_telerikEditable" Size="@TelerikSize" Pageable="true" PageSize="5" ConfirmDelete="true"
-             EditMode="@(_editMode == "popup" ? GridEditMode.Popup : GridEditMode.Inline)"
+             EditMode="@TelerikEditMode"
              OnCreate="TelerikCreate" OnUpdate="TelerikUpdate" OnDelete="TelerikDelete">
   <GridToolBarTemplate>
     <GridCommandButton Command="Add" Icon="@SvgIcon.Plus">Add employee</GridCommandButton>
@@ -397,6 +398,18 @@
   private bool _empty;
   private bool _multipleSort;
   private string _editMode = "inline";
+
+  private GridEditMode TelerikEditMode => _editMode switch {
+    "popup" => GridEditMode.Popup,
+    "incell" => GridEditMode.Incell,
+    _ => GridEditMode.Inline
+  };
+
+  private PixataGridEditMode PixataEditMode => _editMode switch {
+    "popup" => PixataGridEditMode.Popup,
+    "incell" => PixataGridEditMode.InCell,
+    _ => PixataGridEditMode.Inline
+  };
   private List<GridSampleEditableEmployee> _telerikEditable = GridSampleEditableEmployee.Some();
   private List<GridSampleEditableEmployee> _pixataEditable = GridSampleEditableEmployee.Some();
 

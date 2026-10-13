@@ -63,7 +63,7 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `SelectedItems` | `IEnumerable<TItem>` | The selected rows. Can be two-way bound |
 | `SelectedCells` | `IEnumerable<PixataGridSelectedCell<TItem>>` | The selected cells, when selecting cells. Can be two-way bound |
 | `ItemKey` | `Func<TItem, object?>` | Gets a key (such as the id) used to match selected items, instead of `Equals` |
-| `EditMode` | `PixataGridEditMode` | `None` (the default), `Inline` or `Popup`. See [editing](#editing) |
+| `EditMode` | `PixataGridEditMode` | `None` (the default), `Inline`, `Popup` or `InCell`. See [editing](#editing) |
 | `OnAdd`, `OnCreate`, `OnEdit`, `OnUpdate`, `OnDelete`, `OnCancel` | `EventCallback<PixataGridCommandEventArgs<TItem>>` | The editing events |
 | `OnModelInit` | `Func<TItem>` | Creates a new item, if `TItem` has no parameterless constructor |
 | `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
@@ -386,6 +386,17 @@ As in Telerik's grid...
 - With `OnRead`, the grid reads the data again after a change. With `Data`, it re-reads your collection
 - The editors depend on the field's type: a text box for text, a number box, a date picker, a checkbox for `bool`, and a dropdown for enums. Columns that aren't editable show their value
 - Edited items are validated with their data annotations before they're saved. In inline mode, an invalid editor gets a red border, with the message in its tooltip. In the popup, the message is shown under the editor. To use FluentValidation (or turn validation off), add `<PixataGridValidationSettings>` to the grid's `GridSettings`, with `<ValidatorTemplate><FluentValidationValidator /></ValidatorTemplate>` (or `Enabled="false"`)
+
+### Editing a cell at a time
+
+With `EditMode="PixataGridEditMode.InCell"`, clicking a cell edits just that cell, and the keyboard works as in Telerik's grid (and a spreadsheet)...
+
+- Tab and Shift+Tab save the cell and move to the next or previous editable cell, carrying on into the next or previous row
+- Enter saves the cell and moves to the same column in the next row
+- Escape cancels the change
+- Clicking anywhere else saves the cell
+
+Each cell is saved with `OnUpdate`, whose `args.Field` and `args.Value` say which field changed. A value that fails validation keeps the cell open (with a red border) until it's fixed or cancelled. Add puts a new row at the top with its first editable cell open; the user can move around it with Tab, and it's created (with `OnCreate`) when they press Enter or click elsewhere.
 
 ### Command buttons
 

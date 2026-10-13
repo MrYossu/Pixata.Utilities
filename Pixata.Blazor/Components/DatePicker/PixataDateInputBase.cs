@@ -185,7 +185,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
 
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (firstRender) {
-      _module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/pixata-blazor.js");
+      _module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       _dotNet = DotNetObjectReference.Create(this);
       await _module.InvokeVoidAsync("initDateInput", InputElement, _dotNet);
       _initialised = true;

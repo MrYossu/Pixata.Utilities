@@ -318,7 +318,7 @@ public partial class PixataGrid<TItem> {
     }
     _menuJustOpened = false;
     try {
-      _module ??= await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/pixata-blazor.js");
+      _module ??= await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       _self ??= DotNetObjectReference.Create(this);
       await _module.InvokeVoidAsync("openPopup", MenuAnchorId(_menuColumn), _menuPopup, _self);
     } catch (JSException) {

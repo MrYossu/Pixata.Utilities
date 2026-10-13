@@ -115,8 +115,15 @@
               </tr>
             } else if (_editing && _isNew && EditMode == PixataGridEditMode.Inline && _editItem is not null) {
               @EditRow(_editItem, columns)
+            } else if (IsNewInCellRow) {
+              <tr class="pixata-blazor-grid-row pixata-blazor-grid-edit-row">
+                @foreach (PixataGridColumn<TItem> column in columns) {
+                  @InCellCell(_editItem!, column)
+                }
+                @Validator
+              </tr>
             }
-            @if (_readError is null && _items.Count == 0 && !(_editing && _isNew && EditMode == PixataGridEditMode.Inline)) {
+            @if (_readError is null && _items.Count == 0 && !(_editing && _isNew && EditMode is PixataGridEditMode.Inline or PixataGridEditMode.InCell)) {
               <tr class="pixata-blazor-grid-norecords">
                 <td class="pixata-blazor-grid-td" colspan="@Math.Max(columns.Count, 1)">
                   @if (NoDataTemplate is null) {
@@ -141,8 +148,15 @@
                   @EditRow(_editItem!, columns)
                 } else {
                   bool rowSelected = SelectionType == PixataGridSelectionType.Row && IsSelected(item);
-                  <tr class="@Css.Join(RowClass(item, i), rowSelected ? "pixata-blazor-grid-selected" : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
+                  <tr class="@Css.Join(RowClass(item, i), rowSelected ? "pixata-blazor-grid-selected" : null, IsInCellRow(item) ? "pixata-blazor-grid-edit-row" : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
+                    @if (IsInCellRow(item)) {
+                      @Validator
+                    }
                     @foreach (PixataGridColumn<TItem> column in columns) {
+                      if (IsCellEditing(item, column)) {
+                        @InCellCell(_editItem!, column)
+                        continue;
+                      }
                       <td class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, column is PixataGridCommandColumn<TItem> ? "pixata-blazor-grid-command-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null)"
                           @onclick="e => CellClicked(item, column, e)"
                           @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, column.Field)"
@@ -233,11 +247,40 @@
                       PageChanged="OnPageChanged"
                       PageSizeChanged="OnPageSizeChanged" />;
 
-  // A click raises OnRowClick, and then selects the row or cell
+  // A click raises OnRowClick, and then selects the row or cell, or starts editing it
   private async Task CellClicked(TItem item, PixataGridColumn<TItem> column, MouseEventArgs e) {
     await RowClicked(OnRowClick, item, e, column.Field);
     await RowSelectionClick(item, e);
     await CellSelectionClick(item, column, e);
+    if (EditMode == PixataGridEditMode.InCell && column is not PixataGridCommandColumn<TItem> and not PixataGridCheckboxColumn<TItem>) {
+      await StartCellEdit(item, column);
+    }
+  }
+
+  // A cell of the row being edited a cell at a time. The cell being edited shows its editor; clicking another one moves there
+  private RenderFragment InCellCell(TItem editItem, PixataGridColumn<TItem> column) {
+    if (column is PixataGridCommandColumn<TItem> commandColumn) {
+      return
+        @<td class="@Css.Join(column.CellClass, "pixata-blazor-grid-command-cell")">
+          <CascadingValue Value="RowContext(_isNew ? editItem : _originalEditItem!)">
+            @commandColumn.ChildContent
+          </CascadingValue>
+        </td>;
+    }
+    if (column.Field is not null && column.Field == _editField) {
+      return
+        @<td id="@EditCellId" class="@Css.Join(column.CellClass, "pixata-blazor-grid-edit-cell")" @onkeydown="EditCellKeyDown">
+          @Editor(column, editItem)
+        </td>;
+    }
+    return
+      @<td class="@column.CellClass" @onclick="() => StartCellEdit(_isNew ? editItem : _originalEditItem!, column)">
+        @if (column.Template is null) {
+          @column.CellText(editItem)
+        } else {
+          @column.Template(editItem)
+        }
+      </td>;
   }
 
   // A row being edited inline. The validator is keyed on the edit context, so a new one is created for each edit
@@ -262,11 +305,11 @@
     </tr>;
 
   private RenderFragment Validator =>
-    @<CascadingValue Value="_editContext" IsFixed="false">
+    @<CascadingValue @key="_editContext" Value="_editContext" IsFixed="true">
       @if (ValidationSettings?.ValidatorTemplate is not null) {
         @ValidationSettings.ValidatorTemplate
       } else if (ValidationSettings?.Enabled ?? true) {
-        <DataAnnotationsValidator @key="_editContext" />
+        <DataAnnotationsValidator />
       }
     </CascadingValue>;
 
@@ -298,11 +341,11 @@
         </span>,
       PixataGridEditorType.TextArea =>
         @<span class="@Css.Join("pixata-blazor-grid-textbox", "pixata-blazor-grid-textarea", invalid)" title="@message">
-          <textarea class="pixata-blazor-grid-input-inner" aria-label="@label" aria-invalid="@(message is null ? null : "true")" @onchange="e => SetEditValue(column, e.Value?.ToString())">@(value as string)</textarea>
+          <textarea class="pixata-blazor-grid-input-inner" aria-label="@label" aria-invalid="@(message is null ? null : "true")" @oninput="e => SetEditValue(column, e.Value?.ToString())">@(value as string)</textarea>
         </span>,
       _ =>
         @<span class="@Css.Join("pixata-blazor-grid-textbox", invalid)" title="@message">
-          <input class="pixata-blazor-grid-input-inner" type="text" value="@(Convert.ToString(value, CultureInfo.CurrentCulture))" aria-label="@label" aria-invalid="@(message is null ? null : "true")" @onchange="e => SetEditValue(column, e.Value?.ToString())" />
+          <input class="pixata-blazor-grid-input-inner" type="text" value="@(Convert.ToString(value, CultureInfo.CurrentCulture))" aria-label="@label" aria-invalid="@(message is null ? null : "true")" @oninput="e => SetEditValue(column, e.Value?.ToString())" />
         </span>
     };
   }

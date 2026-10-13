@@ -375,8 +375,10 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     }
   }
 
-  protected override async Task OnAfterRenderAsync(bool firstRender) =>
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
     await OpenFilterMenuPopup();
+    await AfterInCellRender();
+  }
 
   public async ValueTask DisposeAsync() {
     _disposed = true;

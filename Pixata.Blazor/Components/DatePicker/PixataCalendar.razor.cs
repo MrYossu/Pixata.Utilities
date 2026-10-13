@@ -120,7 +120,7 @@ public partial class PixataCalendar : IAsyncDisposable {
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (firstRender) {
       try {
-        _module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/pixata-blazor.js");
+        _module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
         await _module.InvokeVoidAsync("preventNavigationKeys", _table);
       } catch (JSDisconnectedException) {
         // The page has gone

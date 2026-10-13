@@ -153,7 +153,7 @@ public partial class PixataGrid<TItem> {
     _editing ? _editItem : default;
 
   private bool IsEditing(TItem item) =>
-    _editing && !_isNew && EditMode != PixataGridEditMode.Popup && SameItem(item, _originalEditItem);
+    _editing && !_isNew && EditMode == PixataGridEditMode.Inline && SameItem(item, _originalEditItem);
 
   private PixataGridRowContext<TItem> RowContext(TItem item) =>
     new(item, _editing && SameItem(item, _isNew ? _editItem : _originalEditItem), _isNew && _editing && SameItem(item, _editItem));
@@ -169,8 +169,14 @@ public partial class PixataGrid<TItem> {
       case "Edit" when item is not null:
         await StartEdit(item);
         break;
+      case "Save" when EditMode == PixataGridEditMode.InCell:
+        await LeaveRow();
+        break;
       case "Save":
         await Save();
+        break;
+      case "Cancel" when EditMode == PixataGridEditMode.InCell:
+        await CancelCellEdit();
         break;
       case "Cancel":
         await CancelEdit();
@@ -195,6 +201,11 @@ public partial class PixataGrid<TItem> {
       return;
     }
     BeginEditing(item, default, true);
+    if (EditMode == PixataGridEditMode.InCell) {
+      // In in-cell mode, the new row opens with its first editable cell being edited
+      _editField = EditableColumns.FirstOrDefault()?.Field;
+      _focusEditCell = true;
+    }
   }
 
   private static TItem NewItem() {
@@ -236,6 +247,8 @@ public partial class PixataGrid<TItem> {
     _originalEditItem = default;
     _isNew = false;
     _editContext = null;
+    _editField = null;
+    _ = StopWatchingOutside();
   }
 
   private async Task Save() {
