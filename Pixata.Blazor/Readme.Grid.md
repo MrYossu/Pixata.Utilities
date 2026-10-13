@@ -59,6 +59,10 @@ Telerik's column component is called `GridColumn`. If ours were too, any app tha
 | `LoaderTemplate` | `RenderFragment` | What the loading indicator shows, in place of the dots |
 | `OnRowRender` | `Action<PixataGridRowRenderEventArgs<TItem>>` | Lets you set a CSS class on each row |
 | `OnRowClick`, `OnRowDoubleClick`, `OnRowContextMenu` | `EventCallback<PixataGridRowClickEventArgs<TItem>>` | Fire when the user clicks, double-clicks or right-clicks a row |
+| `SelectionMode` | `PixataGridSelectionMode` | `None` (the default), `Single` or `Multiple`. See [selection](#selection) |
+| `SelectedItems` | `IEnumerable<TItem>` | The selected rows. Can be two-way bound |
+| `SelectedCells` | `IEnumerable<PixataGridSelectedCell<TItem>>` | The selected cells, when selecting cells. Can be two-way bound |
+| `ItemKey` | `Func<TItem, object?>` | Gets a key (such as the id) used to match selected items, instead of `Equals` |
 
 ## Column parameters
 
@@ -293,6 +297,50 @@ A column's `Template` replaces the formatted value in each cell. Unlike Telerik'
 `OnRowClick`, `OnRowDoubleClick` and `OnRowContextMenu` give you the item, the mouse event (for its position, to show a context menu), and the field of the column that was clicked. When `OnRowContextMenu` is handled, the browser's own menu isn't shown.
 
 >If you pass a method rather than a lambda to one of these events, give the grid's `TItem` (and a column's, for `OnCellRender`), as Razor can't work out the type from a method.
+
+## Selection
+
+Set `SelectionMode` to `Single` or `Multiple`, and bind `SelectedItems`...
+
+```razor
+<PixataGrid Data="_people" SelectionMode="PixataGridSelectionMode.Multiple" @bind-SelectedItems="_selected">
+  <GridColumns>
+    <PixataGridCheckboxColumn />
+    <PixataGridColumn Field="@nameof(Person.Name)" />
+  </GridColumns>
+</PixataGrid>
+```
+
+As in Telerik's grid, clicking a row selects just that row, Ctrl+click adds or removes a row, and Shift+click selects the rows between it and the last row clicked. In multiple mode, the user can also press on a row and drag over others. The selection is kept as the user moves between pages, sorts and filters.
+
+Selected items are matched with `Equals`. If your items are recreated (for example, read from a database again with `OnRead`), either override `Equals` in your class, use a record, or set `ItemKey`, such as `ItemKey="person => person.Id"`.
+
+### Checkbox column
+
+`PixataGridCheckboxColumn` adds a column of checkboxes, which add and remove rows without affecting the others. Its parameters are...
+
+| Parameter | Type | What it does |
+| --- | --- | --- |
+| `SelectAll` | `bool` | Shows a box in the header that selects (or deselects) all the rows. Only in multiple mode. Defaults to `true`. It shows a dash when only some rows are selected |
+| `SelectAllMode` | `PixataGridSelectAllMode` | `Current` (the default) selects the rows on the current page. `All` selects every row that passes the filters (with `OnRead`, the grid only has the current page) |
+| `CheckBoxOnlySelection` | `bool` | When `true`, clicking a row doesn't select it, only its checkbox does |
+
+It's 65px wide unless you give it a `Width`, as in Telerik's grid.
+
+### Selecting cells
+
+To select cells rather than rows, set the selection type in the grid's settings, and bind `SelectedCells`. Each `PixataGridSelectedCell<TItem>` has the row's `DataItem` and the `ColumnField`. Clicking, Ctrl, Shift and dragging work as for rows, with Shift and dragging selecting a rectangle...
+
+```razor
+<PixataGrid Data="_people" SelectionMode="PixataGridSelectionMode.Multiple" @bind-SelectedCells="_cells">
+  <GridSettings>
+    <PixataGridSelectionSettings SelectionType="PixataGridSelectionType.Cell" />
+  </GridSettings>
+  ...
+</PixataGrid>
+```
+
+`PixataGridSelectionSettings` also has `DragToSelect` (default `true`), to turn off selecting by dragging.
 
 ## Supplying the data with OnRead
 

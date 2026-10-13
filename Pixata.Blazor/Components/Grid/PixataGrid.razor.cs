@@ -191,6 +191,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   }
 
   protected override async Task OnParametersSetAsync() {
+    SyncSelectionParameters();
     if (Page != _lastPageParameter) {
       _page = Math.Max(Page, 1);
       _lastPageParameter = Page;

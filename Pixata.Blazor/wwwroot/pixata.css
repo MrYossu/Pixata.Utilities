@@ -1611,6 +1611,29 @@
   z-index: 2;
 }
 
+/* Selected rows and cells, tinted with the accent colour as in Telerik's grid */
+.pixata-blazor-grid-row.pixata-blazor-grid-selected > .pixata-blazor-grid-td,
+.pixata-blazor-grid-td.pixata-blazor-grid-selected {
+  background-color: color-mix(in srgb, var(--pixata-grid-primary) 25%, transparent);
+}
+
+/* Dragging to select shouldn't select the text as well */
+.pixata-blazor-grid-drag-select .pixata-blazor-grid-table tbody {
+  user-select: none;
+}
+
+.pixata-blazor-grid-checkbox-cell .pixata-blazor-checkbox {
+  vertical-align: middle;
+}
+
+/* A "select all" box when only some rows are selected. It's drawn with a class rather than the indeterminate property, which
+   can only be set from JavaScript */
+.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate {
+  border-color: var(--pixata-grid-border-color);
+  background-color: var(--pixata-grid-input-bg);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff6358' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M4,8 h8'/%3e%3c/svg%3e");
+}
+
 .pixata-blazor-grid-error .pixata-blazor-grid-td {
   color: var(--pixata-grid-error-color);
 }

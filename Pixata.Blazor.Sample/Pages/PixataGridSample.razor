@@ -255,6 +255,46 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Selection</h4>
+
+<p>Click a row to select it, Ctrl+click to add or remove one, and Shift+click to select a range, or press on a row and drag. The checkbox column selects rows too, and its header selects all the rows on the page. The selection is kept as you move between pages.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Pageable="true" PageSize="5" SelectionMode="PixataGridSelectionMode.Multiple" @bind-SelectedItems="_pixataSelected">
+  <GridColumns>
+    <PixataGridCheckboxColumn />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
+  </GridColumns>
+</PixataGrid>
+<p>Selected: @string.Join(", ", _pixataSelected.Select(e => e.FirstName))</p>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5" SelectionMode="GridSelectionMode.Multiple" @bind-SelectedItems="_telerikSelected">
+  <GridColumns>
+    <GridCheckboxColumn SelectAll="true" />
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
+  </GridColumns>
+</TelerikGrid>
+<p>Selected: @string.Join(", ", _telerikSelected.Select(e => e.FirstName))</p>
+
+<p>With <code>SelectionType</code> set to <code>Cell</code>, the user selects cells instead, by clicking (with Ctrl and Shift as for rows) or by dragging out a rectangle.</p>
+
+<PixataGrid Data="Data" Size="_size" Pageable="true" PageSize="5" SelectionMode="PixataGridSelectionMode.Multiple" @bind-SelectedCells="_selectedCells">
+  <GridSettings>
+    <PixataGridSelectionSettings SelectionType="PixataGridSelectionType.Cell" />
+  </GridSettings>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
+  </GridColumns>
+</PixataGrid>
+<p>Selected cells: @string.Join(", ", _selectedCells.Select(c => $"{c.DataItem.FirstName}'s {c.ColumnField}"))</p>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -293,6 +333,9 @@
   private PixataGridSize _size = PixataGridSize.Medium;
   private bool _empty;
   private bool _multipleSort;
+  private IEnumerable<GridSampleEmployee> _telerikSelected = [];
+  private IEnumerable<GridSampleEmployee> _pixataSelected = [];
+  private IEnumerable<PixataGridSelectedCell<GridSampleEmployee>> _selectedCells = [];
   private string _rowEvent = "Click a row in the PixataGrid";
 
   private static void PixataRowRender(PixataGridRowRenderEventArgs<GridSampleEmployee> args) =>

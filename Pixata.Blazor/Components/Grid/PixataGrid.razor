@@ -13,7 +13,7 @@
     @{
       List<PixataGridColumn<TItem>> columns = RenderedColumns();
     }
-    <div class="@GridClass" style="@GridStyle" id="@_gridId">
+    <div class="@Css.Join(GridClass, DragToSelect ? "pixata-blazor-grid-drag-select" : null)" style="@GridStyle" id="@_gridId" @onmouseup="DragEnd">
       @if (GridToolBarTemplate is not null) {
         <div class="pixata-blazor-grid-toolbar" role="toolbar" aria-label="Grid toolbar">
           @GridToolBarTemplate
@@ -32,6 +32,18 @@
           <thead class="pixata-blazor-grid-thead">
             <tr>
               @foreach (PixataGridColumn<TItem> column in columns) {
+                if (column is PixataGridCheckboxColumn<TItem> checkboxColumn) {
+                  <th class="@Css.Join(column.HeaderCellClass, "pixata-blazor-grid-checkbox-cell")" scope="col">
+                    @if (checkboxColumn.SelectAll && SelectionMode == PixataGridSelectionMode.Multiple) {
+                      <input type="checkbox"
+                             class="@Css.Join("pixata-blazor-checkbox", !AllSelected(checkboxColumn) && SomeSelected(checkboxColumn) ? "pixata-blazor-checkbox-indeterminate" : null)"
+                             checked="@AllSelected(checkboxColumn)"
+                             aria-label="Select all rows"
+                             @onclick="() => SelectAllClicked(checkboxColumn)" />
+                    }
+                  </th>
+                  continue;
+                }
                 bool sortable = CanSort(column);
                 GridSortDescriptor? sort = sortable ? SortFor(column) : null;
                 bool menu = FilterMode == PixataGridFilterMode.FilterMenu && CanFilter(column);
@@ -123,14 +135,24 @@
                     @RowTemplate(item)
                   </tr>
                 } else {
-                  <tr class="@RowClass(item, i)">
+                  bool rowSelected = SelectionType == PixataGridSelectionType.Row && IsSelected(item);
+                  <tr class="@Css.Join(RowClass(item, i), rowSelected ? "pixata-blazor-grid-selected" : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
                     @foreach (PixataGridColumn<TItem> column in columns) {
-                      <td class="@column.CellClassFor(item)"
-                          @onclick="e => RowClicked(OnRowClick, item, e, column.Field)"
+                      <td class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null)"
+                          @onclick="e => CellClicked(item, column, e)"
                           @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, column.Field)"
                           @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, column.Field)"
-                          @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate">
-                        @if (column.Template is null) {
+                          @oncontextmenu:preventDefault="OnRowContextMenu.HasDelegate"
+                          @onmousedown="e => DragStart(item, column, e)"
+                          @onmouseover="e => DragOver(item, column, e)">
+                        @if (column is PixataGridCheckboxColumn<TItem>) {
+                          <input type="checkbox"
+                                 class="pixata-blazor-checkbox"
+                                 checked="@IsSelected(item)"
+                                 aria-label="Select a row"
+                                 @onclick="() => CheckboxClicked(item)"
+                                 @onclick:stopPropagation="true" />
+                        } else if (column.Template is null) {
                           @column.CellText(item)
                         } else {
                           @column.Template(item)
@@ -183,6 +205,13 @@
                       Adaptive="@(PagerSettings?.Adaptive ?? true)"
                       PageChanged="OnPageChanged"
                       PageSizeChanged="OnPageSizeChanged" />;
+
+  // A click raises OnRowClick, and then selects the row or cell
+  private async Task CellClicked(TItem item, PixataGridColumn<TItem> column, MouseEventArgs e) {
+    await RowClicked(OnRowClick, item, e, column.Field);
+    await RowSelectionClick(item, e);
+    await CellSelectionClick(item, column, e);
+  }
 
   private static readonly RenderFragment FilterIcon =
     @<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2h14l-5.5 6.5V14l-3-2V8.5z" /></svg>;
