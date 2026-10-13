@@ -163,11 +163,11 @@ The grid's colours, borders and spacing match Telerik's Default theme. To change
 
 | Property | Default | What it sets |
 | --- | --- | --- |
-| `--pixata-ui-font-size` | `.875rem` | The font size |
-| `--pixata-ui-line-height` | `1.4285` | The line height (20px with the default font size) |
-| `--pixata-ui-color` | `#3d3d3d` | The text colour |
-| `--pixata-ui-bg` | `#fff` | The background |
-| `--pixata-ui-border-color` | `rgba(0, 0, 0, .08)` | The outer border and the lines between columns |
+| `--pixata-grid-font-size` | `.875rem` | The font size |
+| `--pixata-grid-line-height` | `1.4285` | The line height (20px with the default font size) |
+| `--pixata-grid-color` | `#3d3d3d` | The text colour |
+| `--pixata-grid-bg` | `#fff` | The background |
+| `--pixata-grid-border-color` | `rgba(0, 0, 0, .08)` | The outer border and the lines between columns |
 | `--pixata-grid-header-bg` | `#fafafa` | The header background |
 | `--pixata-grid-alt-row-bg` | `rgba(61, 61, 61, .05)` | The background of every other row |
 | `--pixata-grid-hover-bg` | `rgba(61, 61, 61, .11)` | The background of the row under the mouse |

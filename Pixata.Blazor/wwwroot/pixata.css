@@ -51,23 +51,23 @@
   --pixata-focus-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
   --pixata-transition: .15s ease-in-out;
   /* The grid's own values match Telerik's Default theme rather than Bootstrap, so a PixataGrid looks like a Telerik grid */
-  --pixata-ui-font-size: .875rem;
-  --pixata-ui-line-height: 1.4285;
-  --pixata-ui-color: #3d3d3d;
-  --pixata-ui-bg: #fff;
-  --pixata-ui-border-color: rgba(0, 0, 0, .08);
+  --pixata-grid-font-size: .875rem;
+  --pixata-grid-line-height: 1.4285;
+  --pixata-grid-color: #3d3d3d;
+  --pixata-grid-bg: #fff;
+  --pixata-grid-border-color: rgba(0, 0, 0, .08);
   --pixata-grid-header-bg: #fafafa;
   --pixata-grid-alt-row-bg: rgba(61, 61, 61, .05);
   --pixata-grid-hover-bg: rgba(61, 61, 61, .11);
-  --pixata-ui-primary: #ff6358;
-  --pixata-ui-primary-hover: #ea5a51;
-  --pixata-ui-primary-color: #fff;
-  --pixata-ui-input-bg: #fff;
-  --pixata-ui-picker-bg: #f5f5f5;
-  --pixata-ui-picker-hover-bg: #ebebeb;
-  --pixata-ui-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
-  --pixata-ui-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
-  --pixata-ui-border-radius: 4px;
+  --pixata-grid-primary: #ff6358;
+  --pixata-grid-primary-hover: #ea5a51;
+  --pixata-grid-primary-color: #fff;
+  --pixata-grid-input-bg: #fff;
+  --pixata-grid-picker-bg: #f5f5f5;
+  --pixata-grid-picker-hover-bg: #ebebeb;
+  --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
+  --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-grid-border-radius: 4px;
 }
 
 /*
@@ -455,11 +455,11 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  border: 1px solid var(--pixata-ui-border-color);
-  font-size: var(--pixata-ui-font-size);
-  line-height: var(--pixata-ui-line-height);
-  color: var(--pixata-ui-color);
-  background-color: var(--pixata-ui-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  font-size: var(--pixata-grid-font-size);
+  line-height: var(--pixata-grid-line-height);
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-bg);
 }
 
 /*
@@ -490,7 +490,7 @@
   text-overflow: ellipsis;
   text-align: start;
   font-weight: inherit;
-  border: 0 solid var(--pixata-ui-border-color);
+  border: 0 solid var(--pixata-grid-border-color);
   border-inline-start-width: 1px;
 }
 
@@ -572,7 +572,7 @@
   width: 16px;
   height: 16px;
   margin-inline-start: 7px;
-  color: var(--pixata-ui-primary);
+  color: var(--pixata-grid-primary);
 }
 
 .pixata-blazor-grid-sort-icon svg {
@@ -588,7 +588,7 @@
   margin: 2px 0 0 -2px;
   font-size: 12px;
   line-height: normal;
-  color: var(--pixata-ui-primary);
+  color: var(--pixata-grid-primary);
 }
 
 .pixata-blazor-visually-hidden {
@@ -638,7 +638,7 @@
   min-width: 30px;
   padding: .25rem .5rem;
   border: 1px solid transparent;
-  border-radius: var(--pixata-ui-border-radius);
+  border-radius: var(--pixata-grid-border-radius);
   background: none;
   color: inherit;
   font: inherit;
@@ -717,14 +717,14 @@
   gap: .875rem;
   padding: .5rem;
   white-space: nowrap;
-  color: var(--pixata-ui-color);
+  color: var(--pixata-grid-color);
   background-color: var(--pixata-grid-header-bg);
-  border-top: 1px solid var(--pixata-ui-border-color);
+  border-top: 1px solid var(--pixata-grid-border-color);
 }
 
 .pixata-blazor-grid > .pixata-blazor-grid-pager-container:first-child .pixata-blazor-grid-pager {
   border-top: 0;
-  border-bottom: 1px solid var(--pixata-ui-border-color);
+  border-bottom: 1px solid var(--pixata-grid-border-color);
 }
 
 .pixata-blazor-grid-pager-adaptive {
@@ -742,7 +742,7 @@
 }
 
 .pixata-blazor-grid-pager-number {
-  color: var(--pixata-ui-primary);
+  color: var(--pixata-grid-primary);
 }
 
 .pixata-blazor-grid-pager-number.pixata-blazor-grid-selected {
@@ -767,9 +767,9 @@
 .pixata-blazor-grid-pager-input-box {
   width: 5em;
   padding: .25rem .5rem;
-  border: 1px solid var(--pixata-ui-border-color);
-  border-radius: var(--pixata-ui-border-radius);
-  background-color: var(--pixata-ui-input-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+  background-color: var(--pixata-grid-input-bg);
   color: inherit;
   font: inherit;
   line-height: inherit;
@@ -777,7 +777,7 @@
 
 .pixata-blazor-grid-pager-input-box:focus {
   outline: none;
-  box-shadow: var(--pixata-ui-focus-shadow);
+  box-shadow: var(--pixata-grid-focus-shadow);
 }
 
 .pixata-blazor-grid-pager-info {
@@ -827,9 +827,9 @@
   align-items: stretch;
   width: 100%;
   padding: 0;
-  border: 1px solid var(--pixata-ui-border-color);
-  border-radius: var(--pixata-ui-border-radius);
-  background-color: var(--pixata-ui-picker-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  border-radius: var(--pixata-grid-border-radius);
+  background-color: var(--pixata-grid-picker-bg);
   color: inherit;
   font: inherit;
   line-height: inherit;
@@ -838,7 +838,7 @@
 }
 
 .pixata-blazor-grid-dropdown-button:hover {
-  background-color: var(--pixata-ui-picker-hover-bg);
+  background-color: var(--pixata-grid-picker-hover-bg);
 }
 
 .pixata-blazor-grid-dropdown-button:focus {
@@ -847,7 +847,7 @@
 
 .pixata-blazor-grid-dropdown-button:focus-visible,
 .pixata-blazor-grid-dropdown-open .pixata-blazor-grid-dropdown-button {
-  box-shadow: var(--pixata-ui-focus-shadow);
+  box-shadow: var(--pixata-grid-focus-shadow);
 }
 
 .pixata-blazor-grid-dropdown-text {
@@ -890,10 +890,10 @@
   padding: 0;
   overflow-y: auto;
   list-style: none;
-  color: var(--pixata-ui-color);
-  background-color: var(--pixata-ui-input-bg);
-  border: 1px solid var(--pixata-ui-border-color);
-  box-shadow: var(--pixata-ui-popup-shadow);
+  color: var(--pixata-grid-color);
+  background-color: var(--pixata-grid-input-bg);
+  border: 1px solid var(--pixata-grid-border-color);
+  box-shadow: var(--pixata-grid-popup-shadow);
 }
 
 .pixata-blazor-grid-dropdown-item {
@@ -911,12 +911,12 @@
 }
 
 .pixata-blazor-grid-dropdown-item.pixata-blazor-grid-dropdown-selected {
-  color: var(--pixata-ui-primary-color);
-  background-color: var(--pixata-ui-primary);
+  color: var(--pixata-grid-primary-color);
+  background-color: var(--pixata-grid-primary);
 }
 
 .pixata-blazor-grid-dropdown-item.pixata-blazor-grid-dropdown-selected:hover {
-  background-color: var(--pixata-ui-primary-hover);
+  background-color: var(--pixata-grid-primary-hover);
 }
 
 /* ---------- Spinner ---------- */
