@@ -89,6 +89,7 @@ public partial class PixataChart : IAsyncDisposable {
   private IJSObjectReference? _module;
   private DotNetObjectReference<PixataChart>? _dotNetReference;
   private int _handle;
+  private bool _attaching;
   private bool _disposed;
   private bool _measuring;
 
@@ -264,19 +265,31 @@ public partial class PixataChart : IAsyncDisposable {
       return;
     }
     if (firstRender) {
+      AttachResult? result = null;
+      bool failed = false;
+      _attaching = true;
       try {
         _module = await Js.InvokeAsync<IJSObjectReference>("import", ModulePath);
         _dotNetReference = DotNetObjectReference.Create(this);
-        AttachResult? result = await _module.InvokeAsync<AttachResult?>("attach", _element, _plot, _dotNetReference);
-        if (result is not null) {
-          _handle = result.Id;
-          if (SetSize(result.ChartWidth, result.Width, result.Height)) {
-            StateHasChanged();
-            return;
-          }
-        }
+        result = await _module.InvokeAsync<AttachResult?>("attach", _element, _plot, _dotNetReference);
+        _handle = result?.Id ?? 0;
       }
       catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or InvalidOperationException or JSException) {
+        failed = true;
+      }
+      finally {
+        _attaching = false;
+      }
+      if (_disposed) {
+        // The chart was removed while the script was loading or attaching, and DisposeAsync left the cleaning up to this
+        await DisposeAsync();
+        return;
+      }
+      if (failed) {
+        return;
+      }
+      if (result is not null && SetSize(result.ChartWidth, result.Width, result.Height)) {
+        StateHasChanged();
         return;
       }
     }
@@ -679,6 +692,10 @@ public partial class PixataChart : IAsyncDisposable {
 
   public async ValueTask DisposeAsync() {
     _disposed = true;
+    if (_attaching) {
+      // OnAfterRenderAsync detaches the chart once the script has answered
+      return;
+    }
     try {
       if (_module is not null) {
         if (_handle != 0) {

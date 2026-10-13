@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
@@ -1091,6 +1092,26 @@ public class Chart_Tests {
     IElement[] titles = [.. cut.FindAll("text.pixata-blazor-chart-axis-title")];
     double X(string text) => double.Parse(titles.Single(t => t.TextContent == text).GetAttribute("x")!, CultureInfo.InvariantCulture);
     Assert.IsTrue(X("left") < X("right"), "The first declared axis is on the left again");
+  }
+
+  [TestMethod]
+  public async Task Chart_RemovedWhileItsScriptIsAttaching_IsDetachedWhenTheScriptAnswers() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule("./_content/Pixata.Blazor/Components/Chart/PixataChart.razor.js");
+    // attach() returns a private type, so its handler is set up by reflection
+    Type resultType = typeof(PixataChart).GetNestedType("AttachResult", BindingFlags.NonPublic)!;
+    MethodInfo setup = typeof(BunitJSInteropSetupExtensions).GetMethod(nameof(BunitJSInteropSetupExtensions.Setup), [typeof(BunitJSInterop), typeof(string), typeof(InvocationMatcher)])!.MakeGenericMethod(resultType);
+    object handler = setup.Invoke(null, [module, "attach", (InvocationMatcher)(_ => true)])!;
+    RenderChart(context, Component<PixataChartSeriesItems>(ColumnSeries("Amount", Sales())));
+    await context.DisposeComponentsAsync();
+    Assert.IsFalse(module.Invocations["detach"].Any());
+    object result = Activator.CreateInstance(resultType, true)!;
+    resultType.GetProperty("Id")!.SetValue(result, 5);
+    handler.GetType().GetMethod("SetResult")!.Invoke(handler, [result]);
+    for (int i = 0; i < 100 && !module.Invocations["detach"].Any(); i++) {
+      await Task.Delay(10);
+    }
+    Assert.IsTrue(module.Invocations["detach"].Any(i => Equals(i.Arguments[0], 5)), "The script's attachment is removed");
   }
 
   [TestMethod]
