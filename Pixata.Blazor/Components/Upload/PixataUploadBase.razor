@@ -1,0 +1,103 @@
+@namespace Pixata.Blazor.Components
+@typeparam TFileInfo where TFileInfo : PixataFileInfoBase
+
+@*
+  The markup shared by PixataFileSelect and PixataUpload: the select button and drop zone, and the file list. The derived
+  components fill in the parts that differ (the status, the actions for each file and the buttons underneath)
+*@
+<div @ref="_root" class="@RootClass" @attributes="AdditionalAttributes">
+  @SettingsContent
+  <div class="pixata-blazor-upload-dropzone">
+    <div class="pixata-blazor-upload-button-wrap">
+      <button @ref="_button" type="button" class="@ButtonClass" disabled="@(!Enabled)" aria-label="@ButtonAriaLabel"
+              aria-labelledby="@AriaLabelledBy" aria-describedby="@AriaDescribedBy" aria-expanded="@(_files.Count > 0 ? "true" : "false")"
+              aria-controls="@(_files.Count > 0 ? _listId : null)" @onkeydown="ButtonKeyDown">
+        @if (SelectFilesButtonTemplate is not null) {
+          @SelectFilesButtonTemplate
+        } else {
+          <span class="pixata-blazor-button-text">@Text.SelectFiles</span>
+        }
+      </button>
+      <input @ref="_input" type="file" id="@Id" class="pixata-blazor-upload-input" multiple="@Multiple" accept="@Accept" capture="@Capture"
+             disabled="@(!Enabled)" tabindex="-1" aria-hidden="true" title="" autocomplete="off" />
+    </div>
+    @HeaderStatus
+    <span class="pixata-blazor-upload-dropzone-hint">@DropZoneHint</span>
+  </div>
+  <ul class="pixata-blazor-upload-files" id="@_listId" role="list" hidden="@(_files.Count == 0)">
+    @for (int i = 0; i < _files.Count; i++) {
+      int index = i;
+      TFileInfo file = _files[i];
+      <li @key="file.Id" class="@FileClass(file)" data-index="@index" data-id="@file.Id" tabindex="-1" role="listitem"
+          aria-label="@FileAriaLabel(file)" @onkeydown="e => FileKeyDown(e, file, index)">
+        @if (FileTemplate is not null) {
+          @FileTemplate(new(file))
+        } else {
+          <div class="pixata-blazor-upload-file-single">
+            @if (FileProgress(file) is int progress) {
+              <div class="pixata-blazor-upload-progressbar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" aria-label="@file.Name">
+                <div class="pixata-blazor-upload-progressbar-value" style="@($"width:{progress}%")"></div>
+              </div>
+            }
+            <span class="pixata-blazor-upload-file-icon-wrapper">
+              <PixataIcon Icon="@PixataSvgIcons.ForFile(file.Extension)" Class="pixata-blazor-upload-file-icon" />
+            </span>
+            <div class="pixata-blazor-upload-file-info">
+              @if (FileInfoTemplate is not null) {
+                @FileInfoTemplate(new(file))
+              } else {
+                <span class="pixata-blazor-upload-file-name" title="@file.Name">@file.Name</span>
+                @if (FileMessage(file) is { } message) {
+                  <span class="@message.Class" aria-live="polite">@message.Text</span>
+                } else {
+                  <span class="pixata-blazor-upload-file-size" aria-live="polite">@FormatSize(file.Size)</span>
+                }
+              }
+            </div>
+            <div class="pixata-blazor-upload-actions">
+              @FileActions(file)
+            </div>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+  @Footer
+</div>
+
+@code {
+
+  /// <summary>
+  /// A small flat icon button for an action on a file (remove, cancel, retry and so on). It isn't in the tab order, as the
+  /// keyboard shortcuts on the file do the same jobs
+  /// </summary>
+  protected RenderFragment ActionButton(PixataSvgIcon icon, string label, string cssClass, Func<Task> action) =>
+    @<button type="button" class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, PixataThemeConstants.Button.Size.Small, true), "pixata-blazor-upload-action", cssClass)"
+             tabindex="-1" title="@label" aria-label="@label" disabled="@(!Enabled)" @onclick="action" @onclick:stopPropagation="true">
+      <PixataIcon Icon="@icon" />
+    </button>;
+
+  /// <summary>
+  /// The status shown next to the select button, in place of the drop hint
+  /// </summary>
+  protected RenderFragment StatusContent(PixataSvgIcon icon, string text, string cssClass) =>
+    @<div class="@PixataCss.Classes("pixata-blazor-upload-status", cssClass)" aria-live="polite">
+      <PixataIcon Icon="@icon" />
+      <span class="pixata-blazor-upload-status-text">@text</span>
+    </div>;
+
+  /// <summary>
+  /// The bar under the file list that holds buttons such as Clear and Upload
+  /// </summary>
+  protected RenderFragment ActionsBar(RenderFragment content) =>
+    @<div class="pixata-blazor-upload-actions-bar">@content</div>;
+
+  /// <summary>
+  /// A button in the bar under the file list
+  /// </summary>
+  protected RenderFragment FooterButton(string text, string themeColour, string cssClass, Func<Task> action) =>
+    @<button type="button" class="@PixataCss.Classes(PixataCss.Button(themeColour, null, null, null), cssClass)" disabled="@(!Enabled)" @onclick="action">
+      <span class="pixata-blazor-button-text">@text</span>
+    </button>;
+
+}

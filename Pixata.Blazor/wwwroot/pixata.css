@@ -1828,6 +1828,368 @@
 
 /* ========== PixataFileSelect and PixataUpload ========== */
 
+/*
+  PixataFileSelect and PixataUpload share their markup: pixata-blazor-upload (plus pixata-blazor-fileselect for the file
+  select) holds the drop zone (pixata-blazor-upload-dropzone: the select button, and the hint or upload status), the file
+  list (pixata-blazor-upload-files) and, for an upload that doesn't start by itself, the Clear and Upload buttons
+  (pixata-blazor-upload-actions-bar). Each file is a pixata-blazor-upload-file, with -progress, -success, -error,
+  -invalid or -paused added for its state. PixataDropZone is pixata-blazor-external-dropzone
+*/
+:root {
+  --pixata-blazor-upload-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-upload-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-upload-dropzone-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-upload-dropzone-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, var(--pixata-blazor-surface-alt-bg));
+  --pixata-blazor-upload-button-min-width: 7em;
+  --pixata-blazor-upload-files-max-height: 300px;
+  --pixata-blazor-upload-file-icon-size: 2rem;
+  --pixata-blazor-upload-file-icon-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-upload-progress-height: 2px;
+  --pixata-blazor-upload-progress-bg: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-upload-progress-color: var(--pixata-blazor-info);
+  --pixata-blazor-upload-success-color: color-mix(in srgb, var(--pixata-blazor-success) 85%, #000);
+  --pixata-blazor-upload-error-color: color-mix(in srgb, var(--pixata-blazor-error) 85%, #000);
+  --pixata-blazor-upload-invalid-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-dropzone-height: 220px;
+  --pixata-blazor-dropzone-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-dropzone-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-dropzone-icon-size: 3rem;
+  --pixata-blazor-dropzone-icon-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-dropzone-hover-color: var(--pixata-blazor-primary);
+}
+
+.pixata-blazor-upload {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  overflow: clip;
+  border: 1px solid var(--pixata-blazor-upload-border-color);
+  background-color: var(--pixata-blazor-upload-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  text-align: start;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-upload *,
+.pixata-blazor-upload *::before,
+.pixata-blazor-upload *::after {
+  box-sizing: border-box;
+}
+
+/* When disabled, the buttons are greyed out, but the file list can still be read and scrolled */
+.pixata-blazor-upload-disabled .pixata-blazor-upload-dropzone {
+  pointer-events: none;
+}
+
+/* The bar at the top, holding the select button and the hint (or the upload status) */
+.pixata-blazor-upload-dropzone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  background-color: var(--pixata-blazor-upload-dropzone-bg);
+  transition: background-color var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-upload-drag-hover .pixata-blazor-upload-dropzone {
+  background-color: var(--pixata-blazor-upload-dropzone-hover-bg);
+}
+
+/* The real file input covers the button, so a click or tap goes straight to the browser's file picker */
+.pixata-blazor-upload-button-wrap {
+  position: relative;
+  flex: none;
+}
+
+.pixata-blazor-upload-button {
+  min-width: var(--pixata-blazor-upload-button-min-width);
+}
+
+.pixata-blazor-upload-input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0;
+}
+
+.pixata-blazor-upload-input::-webkit-file-upload-button {
+  cursor: pointer;
+}
+
+.pixata-blazor-upload-input:disabled {
+  visibility: hidden;
+}
+
+/* The input hides the button from the mouse, so the button's hover and pressed looks come from the wrapper */
+.pixata-blazor-upload-button-wrap:hover .pixata-blazor-upload-button:not(:disabled) {
+  background-color: var(--pixata-blazor-button-hover-bg);
+}
+
+.pixata-blazor-upload-button-wrap:active .pixata-blazor-upload-button:not(:disabled) {
+  background-color: var(--pixata-blazor-button-active-bg);
+}
+
+.pixata-blazor-upload-dropzone-hint {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pixata-blazor-subtle-color);
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-upload-status {
+  display: flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+  color: var(--pixata-blazor-subtle-color);
+  white-space: nowrap;
+}
+
+/* The status replaces the hint, except while files are being dragged over the page */
+.pixata-blazor-upload-status + .pixata-blazor-upload-dropzone-hint,
+.pixata-blazor-upload-drag-active .pixata-blazor-upload-status {
+  display: none;
+}
+
+.pixata-blazor-upload-drag-active .pixata-blazor-upload-status + .pixata-blazor-upload-dropzone-hint {
+  display: block;
+}
+
+/* The file list */
+.pixata-blazor-upload-files {
+  max-height: var(--pixata-blazor-upload-files-max-height);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--pixata-blazor-upload-border-color);
+  list-style: none;
+}
+
+.pixata-blazor-upload-files[hidden] {
+  display: none;
+}
+
+.pixata-blazor-upload-file {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2 + 2px);
+  border-bottom: 1px solid var(--pixata-blazor-upload-border-color);
+  outline: none;
+}
+
+.pixata-blazor-upload-file:last-child {
+  border-bottom: 0;
+}
+
+.pixata-blazor-upload-file:focus-visible {
+  box-shadow: var(--pixata-blazor-focus-ring);
+}
+
+.pixata-blazor-upload-file-single {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+}
+
+.pixata-blazor-upload-file-icon-wrapper {
+  display: inline-flex;
+  flex: none;
+  color: var(--pixata-blazor-upload-file-icon-color);
+}
+
+.pixata-blazor-upload-file-icon {
+  width: var(--pixata-blazor-upload-file-icon-size);
+  height: var(--pixata-blazor-upload-file-icon-size);
+}
+
+.pixata-blazor-upload-file-icon svg {
+  stroke-width: 1.25;
+}
+
+.pixata-blazor-upload-file-info {
+  display: block;
+  flex: 1 0 0;
+  min-width: 0;
+  min-height: var(--pixata-blazor-upload-file-icon-size);
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * 2);
+  overflow: hidden;
+}
+
+.pixata-blazor-upload-file-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-upload-file-size,
+.pixata-blazor-upload-file-validation-message {
+  display: block;
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1rem;
+}
+
+.pixata-blazor-upload-file-success .pixata-blazor-upload-file-validation-message {
+  color: var(--pixata-blazor-upload-success-color);
+}
+
+.pixata-blazor-upload-file-error .pixata-blazor-upload-file-validation-message {
+  color: var(--pixata-blazor-upload-error-color);
+}
+
+.pixata-blazor-upload-file-invalid .pixata-blazor-upload-file-validation-message {
+  color: var(--pixata-blazor-upload-invalid-color);
+}
+
+/* The file's buttons (remove, cancel, retry, pause and resume) and its percentage while it uploads */
+.pixata-blazor-upload-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-upload-action:focus-visible {
+  box-shadow: 0 0 0 2px var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-upload-pct {
+  margin: 0 var(--pixata-blazor-spacing);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The progress bar along the bottom of a file, while it uploads */
+.pixata-blazor-upload-progressbar {
+  position: absolute;
+  inset-inline: calc(var(--pixata-blazor-spacing) * 2);
+  bottom: var(--pixata-blazor-spacing);
+  height: var(--pixata-blazor-upload-progress-height);
+  overflow: hidden;
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-upload-progress-bg);
+}
+
+.pixata-blazor-upload-progressbar-value {
+  height: 100%;
+  background-color: var(--pixata-blazor-upload-progress-color);
+  transition: width var(--pixata-blazor-transition);
+}
+
+/* The Upload and Clear buttons under the list */
+.pixata-blazor-upload-actions-bar {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-top: 1px solid var(--pixata-blazor-upload-border-color);
+}
+
+/* PixataDropZone, a separate area to drop files on */
+.pixata-blazor-external-dropzone {
+  box-sizing: border-box;
+  display: flex;
+  flex-flow: row nowrap;
+  height: var(--pixata-blazor-dropzone-height);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+}
+
+.pixata-blazor-dropzone-inner {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border: 1px solid var(--pixata-blazor-dropzone-border-color);
+  background-color: var(--pixata-blazor-dropzone-bg);
+  color: var(--pixata-blazor-text-color);
+  text-align: center;
+  transition: background-color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-dropzone-icon {
+  width: var(--pixata-blazor-dropzone-icon-size);
+  height: var(--pixata-blazor-dropzone-icon-size);
+  margin-bottom: calc(var(--pixata-blazor-spacing) * 6);
+  color: var(--pixata-blazor-dropzone-icon-color);
+  transition: color var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-dropzone-hint {
+  margin-bottom: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-dropzone-note {
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+/* While files are dragged over the page the drop zone's border is dashed, and while they're over it, the icon is coloured */
+.pixata-blazor-external-dropzone-active .pixata-blazor-dropzone-inner {
+  border-style: dashed;
+  border-color: var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-external-dropzone-hover .pixata-blazor-dropzone-inner {
+  border-color: var(--pixata-blazor-dropzone-hover-color);
+}
+
+.pixata-blazor-external-dropzone-hover .pixata-blazor-dropzone-icon {
+  color: var(--pixata-blazor-dropzone-hover-color);
+}
+
+/* Phones: the hint gets out of the button's way, and there's more room to tap the file's buttons */
+@media (max-width: 480px) {
+  .pixata-blazor-upload-dropzone-hint {
+    font-size: var(--pixata-blazor-font-size-sm);
+  }
+
+  .pixata-blazor-external-dropzone {
+    height: auto;
+    min-height: calc(var(--pixata-blazor-dropzone-height) * .6);
+  }
+}
+
+@media (pointer: coarse) {
+  .pixata-blazor-upload-actions {
+    gap: var(--pixata-blazor-spacing);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-upload-dropzone,
+  .pixata-blazor-upload-progressbar-value,
+  .pixata-blazor-dropzone-inner,
+  .pixata-blazor-dropzone-icon {
+    transition: none;
+  }
+}
+
 /* ========== end of PixataFileSelect and PixataUpload ========== */
 
 /* ========== PixataDialog and PixataWindow ========== */

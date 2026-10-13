@@ -1,0 +1,391 @@
+@page "/FileUploadSample"
+@using System.IO
+@using Pixata.Blazor.Components
+@using Telerik.SvgIcons
+
+<SitePageTitle>File select and upload</SitePageTitle>
+
+<h3>File select and upload</h3>
+
+<p>
+  <code>PixataFileSelect</code> hands the files the user picks to your code, which reads them through each file's <code>Stream</code>.
+  <code>PixataUpload</code> has the browser post them to an endpoint (<code>SaveUrl</code>), showing the progress, and lets the user
+  cancel, retry, pause and resume. They share the file list and the validation. Each example below shows the Pixata component
+  next to the Telerik one, set up the same way. Drag files from your desktop onto either of them, or use the select button
+  (which opens the native picker, or the camera, on a phone).
+</p>
+<p>
+  The upload examples post to <code>@RoutesHelper.UploadSave</code> in this sample, which saves the files to a temp folder using
+  <code>ReceiveUpload()</code> from Pixata.AspNetCore. As this site is public, files over 5 MB are rejected, and files are
+  deleted after a few minutes. See the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.FileUpload.md">documentation</a>.
+</p>
+
+<ComponentComparison Title="File select">
+  <Description>
+    <p>
+      Pick some files. Only .png, .jpg, .txt and .pdf files up to 2 MB are allowed, so try something else to see the validation
+      messages. <code>OnSelect</code> reads each valid file's stream, and shows a preview of images. Use the arrow keys to move
+      through the list, and Delete to remove a file.
+    </p>
+  </Description>
+  <Pixata>
+    <PixataFileSelect AllowedExtensions="@_allowedExtensions" MaxFileSize="@(2 * 1024 * 1024)" OnSelect="@PixataFilesSelected" OnRemove="@PixataFileRemoved" />
+    @Previews(_pixataPreviews)
+    @EventLog(_pixataSelectLog)
+  </Pixata>
+  <Telerik>
+    <TelerikFileSelect AllowedExtensions="@_allowedExtensions" MaxFileSize="@(2 * 1024 * 1024)" OnSelect="@TelerikFilesSelected" OnRemove="@TelerikFileRemoved" />
+    @Previews(_telerikPreviews)
+    @EventLog(_telerikSelectLog)
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Upload">
+  <Description>
+    <p>
+      Files are uploaded as soon as they're picked. The server waits for 400ms before answering, so you can see the progress
+      and cancel an upload. The remove button on an uploaded file posts its name to <code>RemoveUrl</code>. The events are
+      listed underneath.
+    </p>
+  </Description>
+  <Pixata>
+    <PixataUpload SaveUrl="@RoutesHelper.UploadSaveWithDelay(400)" RemoveUrl="@RoutesHelper.UploadRemove" MaxFileSize="@(5 * 1024 * 1024)"
+                  OnSelect="@(e => Log(_pixataUploadLog, $"OnSelect: {Names(e.Files)}"))"
+                  OnUpload="@(e => Log(_pixataUploadLog, $"OnUpload: {Names(e.Files)}"))"
+                  OnSuccess="@(e => Log(_pixataUploadLog, $"OnSuccess ({e.Operation}): {Names(e.Files)}, {e.Request.Status}"))"
+                  OnError="@(e => Log(_pixataUploadLog, $"OnError ({e.Operation}): {Names(e.Files)}, {e.Request.Status} {e.Request.StatusText}"))"
+                  OnRemove="@(e => Log(_pixataUploadLog, $"OnRemove: {Names(e.Files)}"))"
+                  OnCancel="@(e => Log(_pixataUploadLog, $"OnCancel: {Names(e.Files)}"))" />
+    @EventLog(_pixataUploadLog)
+  </Pixata>
+  <Telerik>
+    <TelerikUpload SaveUrl="@RoutesHelper.UploadSaveWithDelay(400)" RemoveUrl="@RoutesHelper.UploadRemove" MaxFileSize="@(5 * 1024 * 1024)"
+                   OnSelect="@(e => Log(_telerikUploadLog, $"OnSelect: {Names(e.Files)}"))"
+                   OnUpload="@(e => Log(_telerikUploadLog, $"OnUpload: {Names(e.Files)}"))"
+                   OnSuccess="@(e => Log(_telerikUploadLog, $"OnSuccess ({e.Operation}): {Names(e.Files)}, {e.Request.Status}"))"
+                   OnError="@(e => Log(_telerikUploadLog, $"OnError ({e.Operation}): {Names(e.Files)}, {e.Request.Status} {e.Request.StatusText}"))"
+                   OnRemove="@(e => Log(_telerikUploadLog, $"OnRemove: {Names(e.Files)}"))"
+                   OnCancel="@(e => Log(_telerikUploadLog, $"OnCancel: {Names(e.Files)}"))" />
+    @EventLog(_telerikUploadLog)
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Uploading when the user is ready">
+  <Description>
+    <p>
+      With <code>AutoUpload="false"</code>, picked files wait for the Upload button. <code>OnUpload</code> adds a header and a form
+      field to each request, which is how you would send an authorisation token or the id of the record the file belongs to. The
+      buttons underneath call the component's methods.
+    </p>
+  </Description>
+  <Pixata>
+    <PixataUpload @ref="_pixataManual" SaveUrl="@RoutesHelper.UploadSave" AutoUpload="false" OnUpload="@PixataUploading"
+                  OnSuccess="@(e => Log(_pixataManualLog, $"Uploaded {Names(e.Files)}: {e.Request.ResponseText}"))"
+                  OnClear="@(e => Log(_pixataManualLog, $"OnClear: {e.Files.Count} file(s)"))" />
+    <div class="upload-sample-buttons">
+      <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="@(() => _pixataManual.OpenSelectFilesDialog())">OpenSelectFilesDialog()</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="@(() => _pixataManual.UploadFiles())">UploadFiles()</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="@(() => _pixataManual.ClearFiles())">ClearFiles()</button>
+    </div>
+    @EventLog(_pixataManualLog)
+  </Pixata>
+  <Telerik>
+    <TelerikUpload @ref="_telerikManual" SaveUrl="@RoutesHelper.UploadSave" AutoUpload="false" OnUpload="@TelerikUploading"
+                   OnSuccess="@(e => Log(_telerikManualLog, $"Uploaded {Names(e.Files)}: {e.Request.ResponseText}"))"
+                   OnClear="@(e => Log(_telerikManualLog, $"OnClear: {e.Files.Count} file(s)"))" />
+    <div class="upload-sample-buttons">
+      <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="@(() => _telerikManual.OpenSelectFilesDialog())">OpenSelectFilesDialog()</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="@(() => _telerikManual.UploadFiles())">UploadFiles()</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="@(() => _telerikManual.ClearFiles())">ClearFiles()</button>
+    </div>
+    @EventLog(_telerikManualLog)
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Chunked uploads">
+  <Description>
+    <p>
+      Files are sent in 64 KB chunks, and the server waits a quarter of a second after each one, so you can watch the progress,
+      and pause, resume or cancel the upload. Pick a file of a few hundred KB or more. <code>ReceiveUpload()</code> puts the chunks
+      back together on the server.
+    </p>
+  </Description>
+  <Pixata>
+    <PixataUpload SaveUrl="@RoutesHelper.UploadSaveWithDelay(250)" MaxFileSize="@(5 * 1024 * 1024)"
+                  OnProgress="@(e => _pixataChunkProgress = $"{e.Files[0].Name}: {e.Progress}%")"
+                  OnPause="@(e => Log(_pixataChunkLog, $"OnPause: {Names(e.Files)}"))"
+                  OnResume="@(e => Log(_pixataChunkLog, $"OnResume: {Names(e.Files)}"))"
+                  OnSuccess="@(e => Log(_pixataChunkLog, $"OnSuccess: {Names(e.Files)}"))">
+      <UploadSettings>
+        <PixataUploadChunkSettings Size="65536" Resumable="true" />
+      </UploadSettings>
+    </PixataUpload>
+    <p class="upload-sample-note">OnProgress: @_pixataChunkProgress</p>
+    @EventLog(_pixataChunkLog)
+  </Pixata>
+  <Telerik>
+    <TelerikUpload SaveUrl="@RoutesHelper.UploadSaveWithDelay(250)" MaxFileSize="@(5 * 1024 * 1024)"
+                   OnProgress="@(e => _telerikChunkProgress = $"{e.Files[0].Name}: {e.Progress}%")"
+                   OnPause="@(e => Log(_telerikChunkLog, $"OnPause: {Names(e.Files)}"))"
+                   OnResume="@(e => Log(_telerikChunkLog, $"OnResume: {Names(e.Files)}"))"
+                   OnSuccess="@(e => Log(_telerikChunkLog, $"OnSuccess: {Names(e.Files)}"))">
+      <UploadSettings>
+        <UploadChunkSettings Size="65536" Resumable="true" />
+      </UploadSettings>
+    </TelerikUpload>
+    <p class="upload-sample-note">OnProgress: @_telerikChunkProgress</p>
+    @EventLog(_telerikChunkLog)
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="When the server says no">
+  <Description>
+    <p>This one posts to an endpoint that always answers with a 500, so every upload fails. Use the retry button to try again.</p>
+  </Description>
+  <Pixata>
+    <PixataUpload SaveUrl="@RoutesHelper.UploadFail" OnError="@(e => Log(_pixataFailLog, $"OnError: {Names(e.Files)}, {e.Request.Status} {e.Request.StatusText}"))" />
+    @EventLog(_pixataFailLog)
+  </Pixata>
+  <Telerik>
+    <TelerikUpload SaveUrl="@RoutesHelper.UploadFail" OnError="@(e => Log(_telerikFailLog, $"OnError: {Names(e.Files)}, {e.Request.Status} {e.Request.StatusText}"))" />
+    @EventLog(_telerikFailLog)
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="A separate drop zone">
+  <Description>
+    <p>
+      <code>DropZoneId</code> links the component to a drop zone elsewhere on the page. Drag some files over the page to see the
+      drop zone light up.
+    </p>
+  </Description>
+  <Pixata>
+    <PixataDropZone Id="pixata-sample-dropzone" NoteText="Images only, up to 5 MB" />
+    <PixataUpload DropZoneId="pixata-sample-dropzone" SaveUrl="@RoutesHelper.UploadSave" AllowedExtensions="@_imageExtensions" MaxFileSize="@(5 * 1024 * 1024)" Accept="image/*" />
+  </Pixata>
+  <Telerik>
+    <TelerikDropZone Id="telerik-sample-dropzone" NoteText="Images only, up to 5 MB" />
+    <TelerikUpload DropZoneId="telerik-sample-dropzone" SaveUrl="@RoutesHelper.UploadSave" AllowedExtensions="@_imageExtensions" MaxFileSize="@(5 * 1024 * 1024)" Accept="image/*" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Initial files, one file at a time, and templates">
+  <Description>
+    <p>
+      <code>Files</code> shows files that are already on the server. <code>Multiple="false"</code> means a new file replaces the one
+      in the list. <code>FileInfoTemplate</code> replaces the name and size, and <code>SelectFilesButtonTemplate</code> the button's
+      content.
+    </p>
+  </Description>
+  <Pixata>
+    <PixataUpload SaveUrl="@RoutesHelper.UploadSave" RemoveUrl="@RoutesHelper.UploadRemove" Files="@_pixataInitialFiles" Multiple="false">
+      <SelectFilesButtonTemplate>
+        <PixataIcon Icon="@PixataSvgIcons.Upload" /> Choose a file
+      </SelectFilesButtonTemplate>
+      <FileInfoTemplate>
+        <strong>@context.File.Name</strong>
+        <small class="upload-sample-file-info">@context.File.Status, @(context.File.Size / 1024) KB</small>
+      </FileInfoTemplate>
+    </PixataUpload>
+  </Pixata>
+  <Telerik>
+    <TelerikUpload SaveUrl="@RoutesHelper.UploadSave" RemoveUrl="@RoutesHelper.UploadRemove" Files="@_telerikInitialFiles" Multiple="false">
+      <SelectFilesButtonTemplate>
+        <TelerikSvgIcon Icon="@SvgIcon.Upload" /> Choose a file
+      </SelectFilesButtonTemplate>
+      <FileInfoTemplate>
+        <strong>@context.File.Name</strong>
+        <small class="upload-sample-file-info">@context.File.Status, @(context.File.Size / 1024) KB</small>
+      </FileInfoTemplate>
+    </TelerikUpload>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Taking a photo on a phone">
+  <Description>
+    <p>
+      With <code>Accept="image/*"</code> and <code>Capture="environment"</code>, a phone opens its back camera rather than the file
+      picker. On a desktop browser this is just a file select limited to images.
+    </p>
+  </Description>
+  <Pixata>
+    <PixataFileSelect Accept="image/*" Capture="environment" Multiple="false" AllowedExtensions="@_imageExtensions" OnSelect="@PixataFilesSelected" />
+  </Pixata>
+  <Telerik>
+    <TelerikFileSelect Accept="image/*" Capture="environment" Multiple="false" AllowedExtensions="@_imageExtensions" OnSelect="@TelerikFilesSelected" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Disabled">
+  <Pixata>
+    <PixataUpload SaveUrl="@RoutesHelper.UploadSave" Enabled="false" Files="@_pixataDisabledFiles" />
+  </Pixata>
+  <Telerik>
+    <TelerikUpload SaveUrl="@RoutesHelper.UploadSave" Enabled="false" Files="@_telerikDisabledFiles" />
+  </Telerik>
+</ComponentComparison>
+
+<style>
+  .upload-sample-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .5rem;
+  }
+
+  .upload-sample-note {
+    margin: .5rem 0 0;
+    font-size: .875rem;
+  }
+
+  .upload-sample-file-info {
+    display: block;
+    color: #666;
+  }
+
+  .upload-sample-log {
+    max-height: 10rem;
+    overflow-y: auto;
+    margin: .5rem 0 0;
+    padding: .25rem .5rem;
+    background: #f8f8f8;
+    font-size: .75rem;
+    list-style: none;
+  }
+
+  .upload-sample-log:empty {
+    display: none;
+  }
+
+  .upload-sample-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .5rem;
+  }
+
+  .upload-sample-previews img {
+    max-width: 120px;
+    max-height: 90px;
+    border: 1px solid #ddd;
+  }
+</style>
+
+@code {
+  private readonly List<string> _allowedExtensions = [".png", ".jpg", ".jpeg", ".txt", ".pdf"];
+  private readonly List<string> _imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".heic"];
+
+  private readonly List<string> _pixataSelectLog = [];
+  private readonly List<string> _telerikSelectLog = [];
+  private readonly List<string> _pixataPreviews = [];
+  private readonly List<string> _telerikPreviews = [];
+  private readonly List<string> _pixataUploadLog = [];
+  private readonly List<string> _telerikUploadLog = [];
+  private readonly List<string> _pixataManualLog = [];
+  private readonly List<string> _telerikManualLog = [];
+  private readonly List<string> _pixataChunkLog = [];
+  private readonly List<string> _telerikChunkLog = [];
+  private readonly List<string> _pixataFailLog = [];
+  private readonly List<string> _telerikFailLog = [];
+  private string _pixataChunkProgress = "";
+  private string _telerikChunkProgress = "";
+  private PixataUpload _pixataManual = null!;
+  private TelerikUpload _telerikManual = null!;
+
+  private readonly List<PixataUploadFileInfo> _pixataInitialFiles = [
+    new() { Id = "contract", Name = "Contract.pdf", Size = 2 * 1024 * 1024 }
+  ];
+
+  private readonly List<UploadFileInfo> _telerikInitialFiles = [
+    new() { Id = "contract", Name = "Contract.pdf", Extension = ".pdf", Size = 2 * 1024 * 1024 }
+  ];
+
+  private readonly List<PixataUploadFileInfo> _pixataDisabledFiles = [
+    new() { Id = "photo", Name = "Photo.jpg", Size = 345678 }
+  ];
+
+  private readonly List<UploadFileInfo> _telerikDisabledFiles = [
+    new() { Id = "photo", Name = "Photo.jpg", Extension = ".jpg", Size = 345678 }
+  ];
+
+  private async Task PixataFilesSelected(PixataFileSelectEventArgs args) {
+    foreach (PixataFileSelectFileInfo file in args.Files) {
+      if (!file.IsValid) {
+        Log(_pixataSelectLog, $"{file.Name} isn't valid, so it wasn't read");
+        continue;
+      }
+      using MemoryStream copy = new();
+      await file.Stream!.CopyToAsync(copy);
+      Log(_pixataSelectLog, $"Read {copy.Length:N0} bytes from {file.Name}");
+      AddPreview(_pixataPreviews, file.ContentType, copy);
+    }
+  }
+
+  private void PixataFileRemoved(PixataFileSelectEventArgs args) =>
+    Log(_pixataSelectLog, $"OnRemove: {string.Join(", ", args.Files.Select(f => f.Name))}");
+
+  private async Task TelerikFilesSelected(FileSelectEventArgs args) {
+    foreach (FileSelectFileInfo file in args.Files) {
+      if (file.InvalidExtension || file.InvalidMaxFileSize || file.InvalidMinFileSize) {
+        Log(_telerikSelectLog, $"{file.Name} isn't valid, so it wasn't read");
+        continue;
+      }
+      using MemoryStream copy = new();
+      await file.Stream.CopyToAsync(copy);
+      Log(_telerikSelectLog, $"Read {copy.Length:N0} bytes from {file.Name}");
+      AddPreview(_telerikPreviews, file.Extension.ToLowerInvariant() switch { ".png" => "image/png", ".jpg" or ".jpeg" => "image/jpeg", _ => "" }, copy);
+    }
+  }
+
+  private void TelerikFileRemoved(FileSelectEventArgs args) =>
+    Log(_telerikSelectLog, $"OnRemove: {string.Join(", ", args.Files.Select(f => f.Name))}");
+
+  private static void AddPreview(List<string> previews, string contentType, MemoryStream copy) {
+    if (contentType.StartsWith("image/") && copy.Length < 2 * 1024 * 1024) {
+      previews.Insert(0, $"data:{contentType};base64,{Convert.ToBase64String(copy.ToArray())}");
+      if (previews.Count > 4) {
+        previews.RemoveAt(previews.Count - 1);
+      }
+    }
+  }
+
+  private void PixataUploading(PixataUploadEventArgs args) {
+    args.RequestHeaders["X-Sample"] = "Pixata";
+    args.RequestData["description"] = $"Uploaded from the sample at {DateTime.Now:T}";
+    Log(_pixataManualLog, $"OnUpload: {Names(args.Files)}, added a header and a form field");
+  }
+
+  private void TelerikUploading(UploadEventArgs args) {
+    args.RequestHeaders["X-Sample"] = "Telerik";
+    args.RequestData["description"] = $"Uploaded from the sample at {DateTime.Now:T}";
+    Log(_telerikManualLog, $"OnUpload: {Names(args.Files)}, added a header and a form field");
+  }
+
+  private static string Names(IEnumerable<PixataUploadFileInfo> files) =>
+    string.Join(", ", files.Select(f => f.Name));
+
+  private static string Names(IEnumerable<UploadFileInfo> files) =>
+    string.Join(", ", files.Select(f => f.Name));
+
+  private static void Log(List<string> log, string entry) {
+    log.Insert(0, $"{DateTime.Now:T} {entry}");
+    if (log.Count > 30) {
+      log.RemoveAt(log.Count - 1);
+    }
+  }
+
+  private static RenderFragment EventLog(List<string> entries) =>
+    @<ul class="upload-sample-log">
+      @foreach (string entry in entries) {
+        <li>@entry</li>
+      }
+    </ul>;
+
+  private static RenderFragment Previews(List<string> previews) =>
+    @<div class="upload-sample-previews">
+      @foreach (string preview in previews) {
+        <img src="@preview" alt="A preview of a file that was read" />
+      }
+    </div>;
+
+}
