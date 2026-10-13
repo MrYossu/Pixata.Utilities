@@ -1,0 +1,25 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@inherits PixataSchedulerToolBarToolBase<TItem>
+
+@* The toolbar's Today, previous and next buttons *@
+<button type="button"
+        class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null), "pixata-blazor-scheduler-today-button")"
+        title="@Owner.Text.Today"
+        @onclick="Owner.GoToToday">@Owner.Text.Today</button>
+<span class="pixata-blazor-scheduler-navigation" role="group">
+  <button type="button"
+          class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null, true), "pixata-blazor-scheduler-previous")"
+          title="@Owner.Text.Previous"
+          aria-label="@Owner.Text.Previous"
+          @onclick="() => Owner.Navigate(-1)">
+    <PixataIcon Icon="PixataSvgIcons.ChevronLeft" />
+  </button>
+  <button type="button"
+          class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null, true), "pixata-blazor-scheduler-next")"
+          title="@Owner.Text.Next"
+          aria-label="@Owner.Text.Next"
+          @onclick="() => Owner.Navigate(1)">
+    <PixataIcon Icon="PixataSvgIcons.ChevronRight" />
+  </button>
+</span>
