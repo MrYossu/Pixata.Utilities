@@ -1,0 +1,193 @@
+@namespace Pixata.Blazor.Components
+@using System.ComponentModel
+@using Microsoft.JSInterop
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@inject IJSRuntime Js
+
+@*
+  The Insert table tool in PixataEditor's toolbar, which drops down a grid for choosing the size of the table. Used by
+  PixataEditor; you don't need to use it yourself. The button keeps the focus while the grid is open: the arrow keys change
+  the size, Enter inserts the table, and the size is announced through aria-activedescendant
+*@
+<span class="pixata-blazor-editor-table-wrapper">
+  <button @ref="_button"
+          type="button"
+          id="@_id"
+          class="@PixataCss.Classes(PixataCss.Button(null, null, null, null, Tool.ChildContent is null), "pixata-blazor-editor-tool", "pixata-blazor-editor-tool-insert-table", _open ? "pixata-blazor-selected" : null, Tool.Class)"
+          title="@Tool.Title"
+          role="combobox"
+          aria-label="@Tool.Title"
+          aria-haspopup="grid"
+          aria-expanded="@(_open ? "true" : "false")"
+          aria-controls="@(_open ? GridId : null)"
+          aria-activedescendant="@(_open ? CellId(_rows - 1, _columns - 1) : null)"
+          disabled="@(!Enabled)"
+          data-pixata-editor-tool
+          @onmousedown:preventDefault
+          @onclick="Toggle"
+          @onkeydown="KeyDown"
+          @onkeydown:stopPropagation="_open">
+    @if (Tool.ChildContent is not null) {
+      @Tool.ChildContent
+    } else {
+      <PixataIcon Icon="Tool.Icon" />
+    }
+  </button>
+  <PixataPopup Visible="_open"
+               AnchorElement="_button"
+               MatchAnchorWidth="false"
+               OnOutsideClick="Close"
+               Class="pixata-blazor-editor-table-popup">
+    <div class="pixata-blazor-editor-table-picker" style="@($"--pixata-blazor-editor-table-columns: {MaxColumns};")">
+      <div id="@GridId" role="grid" aria-label="@Tool.Title" class="pixata-blazor-editor-table-grid" @onmouseleave="() => _hovering = false">
+        @for (int row = 1; row <= MaxRows; row++) {
+          int r = row;
+          <div role="row" class="pixata-blazor-editor-table-row">
+            @for (int column = 1; column <= MaxColumns; column++) {
+              int c = column;
+              bool selected = r <= _rows && c <= _columns;
+              <div id="@CellId(r - 1, c - 1)"
+                   class="@PixataCss.Classes("pixata-blazor-editor-table-cell", selected ? "pixata-blazor-selected" : null)"
+                   role="gridcell"
+                   aria-label="@SizeText(r, c)"
+                   aria-selected="@(selected ? "true" : "false")"
+                   @onmousedown:preventDefault
+                   @onmouseenter="() => Hover(r, c)"
+                   @onclick="() => Insert(r, c)"></div>
+            }
+          </div>
+        }
+      </div>
+      <div class="pixata-blazor-editor-table-size" aria-hidden="true">@(_hovering || _keyboard ? SizeText(_rows, _columns) : Tool.Title)</div>
+    </div>
+  </PixataPopup>
+</span>
+
+@code {
+
+  [CascadingParameter]
+  private PixataEditor Editor { get; set; } = null!;
+
+  [Parameter, EditorRequired]
+  public PixataEditorInsertTable Tool { get; set; } = null!;
+
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  /// <summary>
+  /// True when the tool is in the toolbar's overflow menu, which closes when a table is inserted
+  /// </summary>
+  [Parameter]
+  public bool InOverflow { get; set; }
+
+  private static readonly string[] HandledKeys = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Alt+ArrowDown", "Alt+ArrowUp", "Home", "End", "Enter", " "];
+
+  private readonly string _id = $"pixata-editor-table-{Guid.NewGuid():N}";
+  private ElementReference _button;
+  private bool _open;
+  private bool _keysAttached;
+  private bool _hovering;
+  private bool _keyboard;
+  private int _rows = 1;
+  private int _columns = 1;
+
+  private string GridId => $"{_id}-grid";
+
+  private string CellId(int row, int column) =>
+    $"{_id}-{row}-{column}";
+
+  private int MaxRows => Math.Clamp(Tool.Rows, 1, 20);
+
+  private int MaxColumns => Math.Clamp(Tool.Columns, 1, 20);
+
+  private static string SizeText(int rows, int columns) =>
+    $"{rows} × {columns} table";
+
+  protected override void OnParametersSet() {
+    if (!Enabled) {
+      _open = false;
+    }
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (!_keysAttached && Enabled) {
+      _keysAttached = true;
+      await PixataJs.InvokeVoid(Js, "preventDefaultKeys", _button, HandledKeys);
+    }
+  }
+
+  private void Toggle() {
+    if (_open) {
+      _open = false;
+    } else {
+      Open(false);
+    }
+  }
+
+  private void Open(bool keyboard) {
+    _open = true;
+    _rows = 1;
+    _columns = 1;
+    _hovering = false;
+    _keyboard = keyboard;
+  }
+
+  private void Close() =>
+    _open = false;
+
+  private void Hover(int rows, int columns) {
+    _rows = rows;
+    _columns = columns;
+    _hovering = true;
+  }
+
+  private async Task Insert(int rows, int columns) {
+    _open = false;
+    await Editor.ExecuteTool(new PixataEditorTableCommandArgs(rows, columns), InOverflow);
+  }
+
+  private async Task KeyDown(KeyboardEventArgs e) {
+    if (!_open) {
+      if (e.Key is "ArrowDown" or "Enter" or " ") {
+        Open(true);
+      }
+      return;
+    }
+    _keyboard = true;
+    switch (e.Key) {
+      case "Escape":
+      case "Tab":
+        _open = false;
+        break;
+      case "ArrowDown" when e.AltKey:
+      case "ArrowUp" when e.AltKey:
+        _open = false;
+        break;
+      case "ArrowRight":
+        _columns = Math.Min(MaxColumns, _columns + 1);
+        break;
+      case "ArrowLeft":
+        _columns = Math.Max(1, _columns - 1);
+        break;
+      case "ArrowDown":
+        _rows = Math.Min(MaxRows, _rows + 1);
+        break;
+      case "ArrowUp":
+        _rows = Math.Max(1, _rows - 1);
+        break;
+      case "Home":
+        _rows = 1;
+        _columns = 1;
+        break;
+      case "End":
+        _rows = MaxRows;
+        _columns = MaxColumns;
+        break;
+      case "Enter":
+      case " ":
+        await Insert(_rows, _columns);
+        break;
+    }
+  }
+
+}

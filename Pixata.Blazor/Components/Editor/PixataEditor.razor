@@ -1,0 +1,220 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataInputBase<string>
+@implements IAsyncDisposable
+
+<div @ref="_element" class="@RootClass" style="@RootStyle" @attributes="AdditionalAttributes">
+  <CascadingValue Value="this" IsFixed="true">
+    @EditorSettings
+    @if (_tools.Count > 0) {
+      <div @ref="_toolbar"
+           class="@PixataCss.Classes("pixata-blazor-editor-toolbar", Adaptive ? "pixata-blazor-editor-toolbar-adaptive" : null)"
+           role="toolbar"
+           aria-label="Formatting"
+           aria-controls="@ContentId">
+        @for (int i = 0; i < _tools.Count; i++) {
+          bool hidden = Adaptive && i >= _visibleToolCount;
+          <div class="@PixataCss.Classes("pixata-blazor-editor-toolbar-item", hidden ? "pixata-blazor-editor-toolbar-item-hidden" : null)"
+               aria-hidden="@(hidden ? "true" : null)"
+               inert="@hidden">
+            @RenderTool(_tools[i], false)
+          </div>
+        }
+        @if (Adaptive) {
+          <div class="@PixataCss.Classes("pixata-blazor-editor-toolbar-overflow", Overflowing ? null : "pixata-blazor-editor-toolbar-overflow-hidden")"
+               aria-hidden="@(Overflowing ? null : "true")">
+            <button @ref="_overflowButton"
+                    type="button"
+                    class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null, true), "pixata-blazor-editor-tool", "pixata-blazor-editor-toolbar-overflow-button", _overflowOpen ? "pixata-blazor-selected" : null)"
+                    title="More tools"
+                    aria-label="More tools"
+                    aria-haspopup="true"
+                    aria-expanded="@(_overflowOpen ? "true" : "false")"
+                    aria-controls="@(_overflowOpen ? OverflowId : null)"
+                    disabled="@(!Overflowing)"
+                    data-pixata-editor-tool
+                    @onmousedown:preventDefault
+                    @onclick="ToggleOverflow"
+                    @onkeydown="OverflowKeyDown"
+                    @onkeydown:stopPropagation="_overflowOpen">
+              <PixataIcon Icon="PixataSvgIcons.MoreVertical" />
+            </button>
+            <PixataPopup Visible="_overflowOpen && Overflowing"
+                         AnchorElement="_overflowButton"
+                         Align="end"
+                         MatchAnchorWidth="false"
+                         OnOutsideClick="CloseOverflow"
+                         Id="@OverflowId"
+                         Role="group"
+                         AriaLabel="More tools"
+                         Class="pixata-blazor-editor-overflow-popup">
+              <div @ref="_overflowContent" class="pixata-blazor-editor-overflow-tools" @onkeydown="OverflowContentKeyDown" @onkeydown:stopPropagation>
+                @for (int i = Math.Max(0, _visibleToolCount); i < _tools.Count; i++) {
+                  <div class="pixata-blazor-editor-toolbar-item">
+                    @RenderTool(_tools[i], true)
+                  </div>
+                }
+              </div>
+            </PixataPopup>
+          </div>
+        }
+      </div>
+    }
+    <div class="pixata-blazor-editor-content">
+      @if (!_ready) {
+        <div class="pixata-blazor-editor-document pixata-blazor-editor-prerender" aria-hidden="true">@((MarkupString)_sanitisedValue)</div>
+      }
+      @if (EditMode == PixataEditorEditMode.Iframe) {
+        <iframe @key="PixataEditorEditMode.Iframe"
+                @ref="_mount"
+                id="@ContentId"
+                class="@PixataCss.Classes("pixata-blazor-editor-iframe", _ready ? null : "pixata-blazor-editor-loading")"
+                title="@ContentLabel"></iframe>
+      } else {
+        <div @key="PixataEditorEditMode.Div" @ref="_mount" class="@PixataCss.Classes("pixata-blazor-editor-mount", _ready ? null : "pixata-blazor-editor-loading")"></div>
+      }
+    </div>
+    @if (_dialog != EditorDialog.None) {
+      <div class="pixata-blazor-editor-dialog-overlay"></div>
+      <div @ref="_dialogElement"
+           class="pixata-blazor-editor-dialog"
+           style="@DialogStyle"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="@DialogTitleId"
+           @onkeydown="DialogKeyDown"
+           @onkeydown:stopPropagation>
+        <div class="pixata-blazor-editor-dialog-titlebar">
+          <span id="@DialogTitleId" class="pixata-blazor-editor-dialog-title">@_dialogTitle</span>
+          <button type="button"
+                  class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null, true), "pixata-blazor-editor-dialog-close")"
+                  title="Close"
+                  aria-label="Close"
+                  @onclick="CloseDialog">
+            <PixataIcon Icon="PixataSvgIcons.X" />
+          </button>
+        </div>
+        <form class="pixata-blazor-editor-dialog-form" @onsubmit="SubmitDialog">
+          <div class="pixata-blazor-editor-dialog-content">
+            @switch (_dialog) {
+              case EditorDialog.Link:
+                @Field("href", "Web address", () => _linkHref, v => _linkHref = v, "url")
+                @Field("text", "Text", () => _linkText, v => _linkText = v)
+                @Field("title", "Tooltip", () => _linkTitle, v => _linkTitle = v)
+                <label class="pixata-blazor-editor-dialog-checkbox">
+                  <input type="checkbox" @bind="_linkNewWindow" />
+                  <span>Open in a new window</span>
+                </label>
+                break;
+              case EditorDialog.Image:
+                @Field("src", "Web address", () => _imageSrc, v => _imageSrc = v, "url")
+                @Field("alt", "Alternative text", () => _imageAlt, v => _imageAlt = v)
+                <div class="pixata-blazor-editor-dialog-row">
+                  @Field("width", "Width (px)", () => _imageWidth, v => _imageWidth = v, "numeric")
+                  @Field("height", "Height (px)", () => _imageHeight, v => _imageHeight = v, "numeric")
+                </div>
+                break;
+              case EditorDialog.Html:
+                <label class="pixata-blazor-sr-only" for="@FieldId("html")">HTML</label>
+                <textarea id="@FieldId("html")"
+                          class="pixata-blazor-editor-html-source"
+                          spellcheck="false"
+                          @bind="_html"></textarea>
+                break;
+            }
+            @if (_dialogError is not null) {
+              <div id="@DialogErrorId" class="pixata-blazor-editor-dialog-error" role="alert">@_dialogError</div>
+            }
+          </div>
+          <div class="pixata-blazor-editor-dialog-actions">
+            <button type="submit"
+                    class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null)"
+                    disabled="@(!DialogCanSubmit)">
+              @DialogSubmitText
+            </button>
+            <button type="button" class="@PixataCss.Button(null, null, null, null)" @onclick="CloseDialog">Cancel</button>
+          </div>
+        </form>
+      </div>
+    }
+  </CascadingValue>
+</div>
+
+@code {
+
+  private RenderFragment RenderTool(PixataEditorTool tool, bool overflow) => __builder => {
+    switch (tool) {
+      case PixataEditorButtonGroup group:
+        <div class="@PixataCss.Classes("pixata-blazor-button-group", "pixata-blazor-editor-toolbar-group", group.Class)" role="group">
+          @foreach (PixataEditorButtonTool button in group.Tools) {
+            @RenderButton(button, overflow, group.Enabled)
+          }
+        </div>
+        break;
+      case PixataEditorButtonTool button:
+        @RenderButton(button, overflow, true)
+        break;
+      case PixataEditorDropDownListTool dropDown:
+        <PixataEditorToolbarDropDown Tool="dropDown"
+                                     Value="@ToolValue(dropDown.CommandName)"
+                                     Enabled="ToolEnabled(dropDown.CommandName, dropDown.Enabled)"
+                                     InOverflow="overflow" />
+        break;
+      case PixataEditorColorTool colour:
+        <PixataEditorToolbarColourPicker Tool="colour"
+                                         Value="@ToolValue(colour.CommandName)"
+                                         Enabled="ToolEnabled(colour.CommandName, colour.Enabled)"
+                                         InOverflow="overflow" />
+        break;
+      case PixataEditorCustomTool custom:
+        <span class="pixata-blazor-editor-custom-tool">
+          <CascadingValue Name="@CustomToolNameKey" Value="custom.Name">
+            @EditorCustomTools
+          </CascadingValue>
+        </span>
+        break;
+    }
+  };
+
+  private RenderFragment RenderButton(PixataEditorButtonTool button, bool overflow, bool groupEnabled) => __builder => {
+    bool enabled = ToolEnabled(button.CommandName, button.Enabled && groupEnabled);
+    if (button is PixataEditorInsertTable table) {
+      <PixataEditorToolbarTablePicker Tool="table" Enabled="enabled" InOverflow="overflow" />
+      return;
+    }
+    bool toggle = button is PixataEditorToggleButtonTool;
+    bool active = toggle && IsActive(button.CommandName);
+    <button type="button"
+            class="@PixataCss.Classes(PixataCss.Button(null, null, null, null, button.ChildContent is null), "pixata-blazor-editor-tool", $"pixata-blazor-editor-tool-{Kebab(button.CommandName)}", active ? "pixata-blazor-selected" : null, button.Class)"
+            title="@button.Title"
+            aria-label="@button.Title"
+            aria-pressed="@(toggle ? (active ? "true" : "false") : null)"
+            aria-haspopup="@(button is PixataEditorDialogTool ? "dialog" : null)"
+            disabled="@(!enabled)"
+            data-pixata-editor-tool
+            @onmousedown:preventDefault
+            @onclick="() => ClickButton(button, overflow)">
+      @if (button.ChildContent is not null) {
+        @button.ChildContent
+      } else {
+        <PixataIcon Icon="button.Icon" />
+      }
+    </button>
+  };
+
+  private RenderFragment Field(string name, string label, Func<string> get, Action<string> set, string? inputMode = null) => __builder => {
+    <div class="pixata-blazor-editor-dialog-field">
+      <label class="pixata-blazor-editor-dialog-label" for="@FieldId(name)">@label</label>
+      <span class="@PixataCss.Input(null, null, null)">
+        <input id="@FieldId(name)"
+               class="pixata-blazor-input-inner"
+               type="text"
+               inputmode="@inputMode"
+               autocomplete="off"
+               aria-describedby="@(_dialogError is null ? null : DialogErrorId)"
+               value="@get()"
+               @oninput="e => FieldInput(set, e)" />
+      </span>
+    </div>
+  };
+
+}

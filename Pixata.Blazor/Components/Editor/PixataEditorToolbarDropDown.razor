@@ -1,0 +1,193 @@
+@namespace Pixata.Blazor.Components
+@using System.ComponentModel
+@using Microsoft.JSInterop
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@inject IJSRuntime Js
+
+@*
+  A drop-down list in PixataEditor's toolbar (the format, font and font size tools). Used by PixataEditor; you don't need
+  to use it yourself. The button keeps the focus while the list is open, and the highlighted item is announced through
+  aria-activedescendant, as in a combo box
+*@
+<span class="pixata-blazor-editor-dropdown-wrapper">
+  <button @ref="_button"
+          type="button"
+          id="@_id"
+          class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-editor-dropdown", _open ? "pixata-blazor-focus" : null, PixataCss.Disabled(Enabled), Tool.Class)"
+          style="@(string.IsNullOrWhiteSpace(Tool.Width) ? null : $"width: {Tool.Width};")"
+          title="@Tool.Title"
+          role="combobox"
+          aria-label="@Tool.Title"
+          aria-haspopup="listbox"
+          aria-expanded="@(_open ? "true" : "false")"
+          aria-controls="@(_open ? ListId : null)"
+          aria-activedescendant="@(_open && _focused >= 0 ? ItemId(_focused) : null)"
+          disabled="@(!Enabled)"
+          data-pixata-editor-tool
+          @onmousedown:preventDefault
+          @onclick="Toggle"
+          @onkeydown="KeyDown"
+          @onkeydown:stopPropagation="_open">
+    <span class="pixata-blazor-input-inner">@Text</span>
+    <span class="pixata-blazor-input-button" aria-hidden="true">
+      <PixataIcon Icon="PixataSvgIcons.CaretDown" />
+    </span>
+  </button>
+  <PixataPopup Visible="_open"
+               AnchorElement="_button"
+               OnOutsideClick="Close"
+               Settings="_popupSettings"
+               Class="pixata-blazor-editor-dropdown-popup">
+    <div class="pixata-blazor-popup-content">
+      <ul id="@ListId" class="pixata-blazor-list" role="listbox" aria-label="@Tool.Title">
+        @for (int i = 0; i < Tool.Data.Count; i++) {
+          int index = i;
+          PixataEditorDropDownListItem item = Tool.Data[i];
+          bool selected = index == SelectedIndex;
+          <li id="@ItemId(index)"
+              class="@PixataCss.Classes("pixata-blazor-list-item", "pixata-blazor-editor-dropdown-item", index == _focused ? "pixata-blazor-focus" : null, selected ? "pixata-blazor-selected" : null)"
+              role="option"
+              aria-selected="@(selected ? "true" : "false")"
+              @onmousedown:preventDefault
+              @onclick="() => Choose(index)">
+            @if (Tool.CommandName == PixataEditorCommands.Format) {
+              <span class="@($"pixata-blazor-editor-format-preview pixata-blazor-editor-format-{item.Value}")">@item.Text</span>
+            } else if (Tool.CommandName == PixataEditorCommands.FontFamily) {
+              <span style="@($"font-family: {PixataHtmlSanitiser.SafeCssValue(item.Value)};")">@item.Text</span>
+            } else {
+              @item.Text
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  </PixataPopup>
+</span>
+
+@code {
+
+  [CascadingParameter]
+  private PixataEditor Editor { get; set; } = null!;
+
+  [Parameter, EditorRequired]
+  public PixataEditorDropDownListTool Tool { get; set; } = null!;
+
+  /// <summary>
+  /// The value at the selection, eg h2 or a font family
+  /// </summary>
+  [Parameter]
+  public string? Value { get; set; }
+
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  /// <summary>
+  /// True when the tool is in the toolbar's overflow menu, which closes when an item is chosen
+  /// </summary>
+  [Parameter]
+  public bool InOverflow { get; set; }
+
+  private static readonly string[] HandledKeys = ["ArrowDown", "ArrowUp", "Alt+ArrowDown", "Alt+ArrowUp", "Home", "End", "Enter", " "];
+
+  private readonly string _id = $"pixata-editor-dropdown-{Guid.NewGuid():N}";
+  private ElementReference _button;
+  private bool _open;
+  private int _focused = -1;
+  private bool _keysAttached;
+  private PixataPopupSettings _popupSettings = new();
+
+  private string ListId => $"{_id}-list";
+
+  private string ItemId(int index) =>
+    $"{_id}-item-{index}";
+
+  private int SelectedIndex =>
+    Value is null ? -1 : Tool.Data.FindIndex(i => Same(i.Value, Value));
+
+  private string Text =>
+    SelectedIndex >= 0 ? Tool.Data[SelectedIndex].Text : Tool.DefaultText ?? Tool.Title ?? "";
+
+  // Font families come back from the browser with its own quoting and spacing, so compare them loosely
+  private static bool Same(string a, string b) =>
+    Normalise(a) == Normalise(b);
+
+  private static string Normalise(string value) =>
+    new(value.Where(c => c is not (' ' or '"' or '\'')).Select(char.ToLowerInvariant).ToArray());
+
+  protected override void OnParametersSet() {
+    if (_popupSettings.Width != Tool.PopupWidth || _popupSettings.Height != Tool.PopupHeight) {
+      _popupSettings = new() { Width = Tool.PopupWidth, Height = Tool.PopupHeight };
+    }
+    if (!Enabled) {
+      _open = false;
+    }
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (!_keysAttached && Enabled) {
+      _keysAttached = true;
+      await PixataJs.InvokeVoid(Js, "preventDefaultKeys", _button, HandledKeys);
+    }
+  }
+
+  private void Toggle() {
+    if (_open) {
+      _open = false;
+    } else {
+      Open();
+    }
+  }
+
+  private void Open() {
+    _open = true;
+    _focused = Math.Max(0, SelectedIndex);
+  }
+
+  private void Close() =>
+    _open = false;
+
+  private async Task Choose(int index) {
+    _open = false;
+    PixataEditorDropDownListItem item = Tool.Data[index];
+    await Editor.ExecuteTool(new PixataEditorFormatCommandArgs(Tool.CommandName, item.Value), InOverflow);
+  }
+
+  private async Task KeyDown(KeyboardEventArgs e) {
+    int count = Tool.Data.Count;
+    if (!_open) {
+      if (e.Key is "ArrowDown" or "ArrowUp" or "Enter" or " ") {
+        Open();
+      }
+      return;
+    }
+    switch (e.Key) {
+      case "Escape":
+      case "Tab":
+        _open = false;
+        break;
+      case "ArrowDown" when e.AltKey:
+      case "ArrowUp" when e.AltKey:
+        _open = false;
+        break;
+      case "ArrowDown":
+        _focused = Math.Min(count - 1, _focused + 1);
+        break;
+      case "ArrowUp":
+        _focused = Math.Max(0, _focused - 1);
+        break;
+      case "Home":
+        _focused = 0;
+        break;
+      case "End":
+        _focused = count - 1;
+        break;
+      case "Enter":
+      case " ":
+        if (_focused >= 0 && _focused < count) {
+          await Choose(_focused);
+        }
+        break;
+    }
+  }
+
+}
