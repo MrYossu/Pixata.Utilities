@@ -318,12 +318,23 @@ public abstract partial class PixataUploadBase<TFileInfo> : ComponentBase, IAsyn
   /// <param name="onProgress">Called as an upload progresses, with the percentage sent</param>
   /// <param name="requestId">The id to give the request, so it can be paused, resumed or cancelled</param>
   private protected async Task<PixataUploadBrowserResult> Send(PixataUploadBrowserRequest request, Func<int, Task>? onProgress, string requestId) {
+    if (_disposed) {
+      // The browser has forgotten the component, so it would never say the request had finished
+      return PixataUploadBrowserResult.CancelledResult;
+    }
     if (_jsId == 0) {
       return new() { StatusText = "The component isn't ready yet" };
     }
     PendingRequest pending = new(onProgress);
     _requests[requestId] = pending;
-    await PixataUploadJs.InvokeVoid(JS, "send", _jsId, requestId, request);
+    try {
+      await PixataUploadJs.InvokeVoid(JS, "send", _jsId, requestId, request);
+    }
+    catch (JSException ex) {
+      // The browser wouldn't send it, eg because a header name or the URL isn't valid
+      _requests.Remove(requestId);
+      return new() { StatusText = ex.Message };
+    }
     return await pending.Completion.Task;
   }
 
@@ -399,6 +410,9 @@ public abstract partial class PixataUploadBase<TFileInfo> : ComponentBase, IAsyn
       return;
     }
     await ForgetFiles(picked.Except(files));
+    if (files.Count == 0) {
+      return;
+    }
     if (!Multiple) {
       await ClearFiles();
       files = files.Take(1).ToList();

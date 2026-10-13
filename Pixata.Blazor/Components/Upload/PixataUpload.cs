@@ -164,7 +164,9 @@ public class PixataUpload : PixataUploadBase<PixataUploadFileInfo> {
     if (file is { Status: PixataUploadFileStatus.Uploading or PixataUploadFileStatus.Paused, RequestId: { } requestId }) {
       PixataUploadCancelEventArgs args = new() { Files = [file] };
       await OnCancel.InvokeAsync(args);
-      if (args.IsCancelled) {
+      // The upload may have finished (or failed) while the handler ran, in which case there's nothing left to cancel, and
+      // a file that is on the server now has to be removed instead
+      if (args.IsCancelled || file.RequestId != requestId) {
         return;
       }
       await CallBrowser("cancel", requestId);
