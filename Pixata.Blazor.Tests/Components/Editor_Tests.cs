@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -320,6 +321,18 @@ public class Editor_Tests {
     Assert.AreEqual(1, Calls(module, "destroy").Single().Arguments[0]);
   }
 
+  [TestMethod]
+  public async Task DisposeAsync_WhileTheEditorIsBeingCreated_DestroysItOnceItHasBeenCreated() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    JSRuntimeInvocationHandler<int> create = module.Setup<int>("create", _ => true);
+    IRenderedComponent<PixataEditor> cut = context.Render<PixataEditor>();
+    await cut.InvokeAsync(async () => await cut.Instance.DisposeAsync());
+    Assert.AreEqual(0, module.Invocations["destroy"].Count);
+    await cut.InvokeAsync(() => create.SetResult(3));
+    cut.WaitForAssertion(() => Assert.AreEqual(3, Calls(module, "destroy").Single().Arguments[0]));
+  }
+
   // Drop-downs, colour pickers and the table picker
 
   [TestMethod]
@@ -507,6 +520,23 @@ public class Editor_Tests {
     Assert.IsTrue(module.Invocations["focus"].Count > 0);
   }
 
+  [TestMethod]
+  public async Task Dialog_Escape_PutsTheFocusBackInTheDocument_OnceTheDialogHasReleasedIt() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = SetupModule(context);
+    module.Setup<int>("trapFocus", _ => true).SetResult(7);
+    JSRuntimeInvocationHandler release = module.SetupVoid("releaseFocus", _ => true);
+    IRenderedComponent<PixataEditor> cut = context.Render<PixataEditor>();
+    cut.Find("button[aria-label='Insert link']").Click();
+    cut.Find("[role=dialog]").KeyDown(new KeyboardEventArgs { Key = "Escape" });
+    Assert.AreEqual(0, cut.FindAll("[role=dialog]").Count);
+    Assert.AreEqual(7, Calls(module, "releaseFocus").Single().Arguments[0]);
+    Assert.AreEqual(0, module.Invocations["focus"].Count);
+    // Before, the focus only went back at the editor's next render, whenever that was, taking it from wherever it had gone
+    await cut.InvokeAsync(release.SetVoidResult);
+    cut.WaitForAssertion(() => Assert.AreEqual(1, module.Invocations["focus"].Count));
+  }
+
   // Custom tools and settings
 
   [TestMethod]
@@ -663,6 +693,28 @@ public class Editor_Tests {
   [DataRow("<ol start=\"3\" type=\"a\"><li>Hi</li></ol>", "<ol start=\"3\" type=\"a\"><li>Hi</li></ol>")]
   [DataRow("<p>Non breaking</p>", "<p>Non&nbsp;breaking</p>")]
   public void Sanitise_KeepsFormattingAndRemovesAnythingUnsafe(string html, string expected) =>
+    Assert.AreEqual(expected, PixataHtmlSanitiser.Sanitise(html));
+
+  [TestMethod]
+  public void Sanitise_TakesLinearTime_WithManyAttributesOrStrayEndTags() {
+    // Before, each attribute was checked against all those before it, and each end tag searched the open elements, so
+    // inputs like these took tens of seconds
+    string attributes = $"<p {string.Join(" ", Enumerable.Range(0, 50_000).Select(i => $"a{i}"))}>Hi</p>";
+    string strayEndTags = $"{string.Concat(Enumerable.Repeat("<b>", 50_000))}Hi{string.Concat(Enumerable.Repeat("</i>", 50_000))}";
+    Stopwatch watch = Stopwatch.StartNew();
+    string sanitisedAttributes = PixataHtmlSanitiser.Sanitise(attributes);
+    string sanitisedEndTags = PixataHtmlSanitiser.Sanitise(strayEndTags);
+    watch.Stop();
+    Assert.AreEqual("<p>Hi</p>", sanitisedAttributes);
+    Assert.AreEqual($"{string.Concat(Enumerable.Repeat("<b>", 50_000))}Hi{string.Concat(Enumerable.Repeat("</b>", 50_000))}", sanitisedEndTags);
+    Assert.IsTrue(watch.ElapsedMilliseconds < 2000, $"Sanitising took {watch.ElapsedMilliseconds}ms");
+  }
+
+  [TestMethod]
+  [DataRow("<p><b>One</p>Two</b>", "<p><b>One</b></p>Two")]
+  [DataRow("<b><i>One</b>Two</i>", "<b><i>One</i></b>Two")]
+  [DataRow("<ul><li>One<li>Two</ul>", "<ul><li>One<li>Two</li></li></ul>")]
+  public void Sanitise_MisnestedEndTags_CloseWhatIsOpen(string html, string expected) =>
     Assert.AreEqual(expected, PixataHtmlSanitiser.Sanitise(html));
 
   [TestMethod]
