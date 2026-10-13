@@ -48,7 +48,7 @@ A tab's content can go straight inside the `PixataTab`, as above, or in a `<Cont
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `ActiveTabId` | `string?` | `null` | The `Id` of the selected tab. Use `@bind-ActiveTabId` for two-way binding. |
-| `ActiveTabIdChanged` | `EventCallback<string>` | | Raised when the user selects another tab, or the selected tab is closed or removed (in which case its neighbour is selected). |
+| `ActiveTabIdChanged` | `EventCallback<string>` | | Raised when the user selects another tab, or the selected tab is closed, hidden or removed (in which case its neighbour is selected). |
 | `TabPosition` | `PixataTabPosition` | `Top` | Where the tabs go: `Top`, `Bottom`, `Left` or `Right` of the content. |
 | `TabAlignment` | `PixataTabStripTabAlignment` | `Start` | How the tabs line up: `Start`, `End`, `Center`, `Justify` (spread out with space between them) or `Stretched` (sharing the whole width). |
 | `PersistTabContent` | `bool` | `false` | When false, only the selected tab's content is rendered, so it is created afresh each time the tab is selected. When true, a tab's content is kept (hidden) once it has been shown, so anything the user typed survives switching tabs. |
@@ -126,7 +126,7 @@ If your tabs come from a collection, remove the closed one from the collection i
 
 ## Adding and removing tabs
 
-Tabs can be added and removed at any time, with `@if`, `@foreach` or by changing `Visible`. Tabs are always shown in the order they are declared, even when one is added between existing ones. Give tabs generated in a loop a `@key`, so Blazor keeps each tab's content with the right tab.
+Tabs can be added, removed and moved at any time, with `@if`, `@foreach` or by changing `Visible`. Tabs are always shown in the order they are declared, even when one is added between existing ones, or the collection a `@foreach` loops over is sorted. Give tabs generated in a loop a `@key`, so Blazor keeps each tab's content (and, with `PersistTabContent`, its state) with the right tab.
 
 If the selected tab is removed or hidden, its neighbour is selected and `ActiveTabIdChanged` is raised.
 

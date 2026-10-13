@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components;
@@ -17,13 +18,21 @@ public class TabStrip_Tests {
   private record TabSpec(string Id, bool Disabled = false, bool Visible = true, bool Closeable = false);
 
   /// <summary>
-  /// The tabs as a render fragment, the way a @foreach in a page would declare them
+  /// The tabs as a render fragment, the way a keyed @foreach in a page would declare them
   /// </summary>
   private static RenderFragment Tabs(params TabSpec[] tabs) =>
+    Tabs(true, tabs);
+
+  /// <summary>
+  /// The tabs as a render fragment, the way a @foreach in a page would declare them, with or without a @key
+  /// </summary>
+  private static RenderFragment Tabs(bool keyed, params TabSpec[] tabs) =>
     builder => {
       foreach (TabSpec tab in tabs) {
         builder.OpenComponent<PixataTab>(0);
-        builder.SetKey(tab.Id);
+        if (keyed) {
+          builder.SetKey(tab.Id);
+        }
         builder.AddAttribute(1, nameof(PixataTab.Id), tab.Id);
         builder.AddAttribute(2, nameof(PixataTab.Title), $"Title {tab.Id}");
         builder.AddAttribute(3, nameof(PixataTab.Disabled), tab.Disabled);
@@ -417,6 +426,164 @@ public class TabStrip_Tests {
     string[] panelOrder = [.. cut.FindAll("[data-pixata-tab-panel]").Select(e => e.GetAttribute("data-pixata-tab-panel")!)];
     cut.InvokeAsync(() => tabOrder.SetResult(panelOrder));
     cut.WaitForAssertion(() => CollectionAssert.AreEqual(new[] { "Title a", "Title b", "Title c" }, HeaderTitles(cut)));
+  }
+
+  [TestMethod]
+  public void TabsMovedInAKeyedForeach_AreShownInTheirNewOrder() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    JSRuntimeInvocationHandler<string[]?> tabOrder = module.Setup<string[]?>("tabOrder", _ => true);
+    IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(Specs("a", "b", "c")), "b");
+    cut.Render(p => p.Add(c => c.ChildContent, Tabs(Specs("c", "a", "b"))));
+    // The moved tabs aren't registered again, so are shown in their old order until the page tells the tab strip their new one
+    string[] panelOrder = [.. cut.FindAll("[data-pixata-tab-panel]").Select(e => e.GetAttribute("data-pixata-tab-panel")!)];
+    cut.InvokeAsync(() => tabOrder.SetResult(panelOrder));
+    cut.WaitForAssertion(() => CollectionAssert.AreEqual(new[] { "Title c", "Title a", "Title b" }, HeaderTitles(cut)));
+    Assert.AreEqual("Title b", ActiveHeader(cut).TextContent.Trim());
+    Assert.AreEqual("Content b", VisiblePanelText(cut));
+  }
+
+  [TestMethod]
+  public void HidingTheActiveTab_SelectsItsNeighbourAndRaisesActiveTabIdChanged() {
+    using BunitContext context = PixataTestContext.Create();
+    List<string> changes = [];
+    IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(Specs("a", "b", "c")), "b", p => p.Add(c => c.ActiveTabIdChanged, (string id) => changes.Add(id)));
+    cut.Render(p => p.Add(c => c.ChildContent, Tabs(new TabSpec("a"), new TabSpec("b", Visible: false), new TabSpec("c"))));
+    Assert.AreEqual("Content c", VisiblePanelText(cut));
+    CollectionAssert.AreEqual(new[] { "c" }, changes);
+    // Showing the tab again doesn't select it
+    cut.Render(p => p.Add(c => c.ChildContent, Tabs(Specs("a", "b", "c"))));
+    Assert.AreEqual("Content c", VisiblePanelText(cut));
+    CollectionAssert.AreEqual(new[] { "c" }, changes);
+  }
+
+  [TestMethod]
+  public void RemovingTheActiveTabFromAForeachWithoutAKey_SelectsTheNextTabAndRaisesActiveTabIdChanged() {
+    using BunitContext context = PixataTestContext.Create();
+    List<string> changes = [];
+    IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(false, Specs("a", "b", "c")), "b", p => p.Add(c => c.ActiveTabIdChanged, (string id) => changes.Add(id)));
+    cut.Render(p => p.Add(c => c.ChildContent, Tabs(false, Specs("a", "c"))));
+    CollectionAssert.AreEqual(new[] { "Title a", "Title c" }, HeaderTitles(cut));
+    Assert.AreEqual("Title c", ActiveHeader(cut).TextContent.Trim());
+    Assert.AreEqual("Content c", VisiblePanelText(cut));
+    CollectionAssert.AreEqual(new[] { "c" }, changes);
+  }
+
+  [TestMethod]
+  public void RemovingAnInactiveTabFromAForeachWithoutAKey_LeavesTheActiveTabAlone() {
+    using BunitContext context = PixataTestContext.Create();
+    List<string> changes = [];
+    IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(false, Specs("a", "b", "c")), "b", p => p.Add(c => c.ActiveTabIdChanged, (string id) => changes.Add(id)));
+    cut.Render(p => p.Add(c => c.ChildContent, Tabs(false, Specs("b", "c"))));
+    Assert.AreEqual("Content b", VisiblePanelText(cut));
+    Assert.AreEqual(0, changes.Count);
+  }
+
+  /// <summary>
+  /// Declares a tab whose header and content show a value worked out when the host renders, as a page might in a @foreach
+  /// </summary>
+  private class HeaderTemplateHost : ComponentBase {
+    public int Count { get; private set; }
+
+    public void Increment() {
+      Count++;
+      StateHasChanged();
+    }
+
+    protected override void BuildRenderTree(RenderTreeBuilder builder) {
+      string text = $"Count {Count}";
+      builder.OpenComponent<PixataTabStrip>(0);
+      builder.AddAttribute(1, nameof(PixataTabStrip.ChildContent), (RenderFragment)(tabs => {
+        tabs.OpenComponent<PixataTab>(0);
+        tabs.AddAttribute(1, nameof(PixataTab.HeaderTemplate), (RenderFragment)(header => header.AddContent(0, text)));
+        tabs.AddAttribute(2, nameof(PixataTab.Content), (RenderFragment)(content => content.AddContent(0, $"Content {text}")));
+        tabs.CloseComponent();
+      }));
+      builder.CloseComponent();
+    }
+  }
+
+  [TestMethod]
+  public void HeaderTemplate_ShowsWhatTheParentRenderedLast() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<HeaderTemplateHost> cut = context.Render<HeaderTemplateHost>();
+    Assert.AreEqual("Count 0", cut.Find("[role=tab]").TextContent.Trim());
+    cut.InvokeAsync(cut.Instance.Increment);
+    Assert.AreEqual("Count 1", cut.Find("[role=tab]").TextContent.Trim());
+    Assert.AreEqual("Content Count 1", cut.Find("[role=tabpanel]").TextContent.Trim());
+  }
+
+  /// <summary>
+  /// A component with state of its own, to show whether a tab's content is kept or created again
+  /// </summary>
+  private class Clicker : ComponentBase {
+    private int _clicks;
+
+    protected override void BuildRenderTree(RenderTreeBuilder builder) {
+      builder.OpenElement(0, "button");
+      builder.AddAttribute(1, "class", "clicker");
+      builder.AddAttribute(2, "onclick", EventCallback.Factory.Create(this, () => _clicks++));
+      builder.AddContent(3, _clicks);
+      builder.CloseElement();
+    }
+  }
+
+  private static RenderFragment ClickerTabs(params string[] ids) =>
+    builder => {
+      foreach (string id in ids) {
+        builder.OpenComponent<PixataTab>(0);
+        builder.SetKey(id);
+        builder.AddAttribute(1, nameof(PixataTab.Id), id);
+        builder.AddAttribute(2, nameof(PixataTab.Title), id);
+        builder.AddAttribute(3, nameof(PixataTab.ChildContent), (RenderFragment)(content => {
+          content.OpenComponent<Clicker>(0);
+          content.CloseComponent();
+        }));
+        builder.CloseComponent();
+      }
+    };
+
+  private static string ActiveClicks(IRenderedComponent<PixataTabStrip> cut) =>
+    cut.Find("[role=tabpanel]:not([hidden]) .clicker").TextContent;
+
+  [TestMethod]
+  public void PersistTabContent_KeepsTheStateOfTheComponentsInATab() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataTabStrip> cut = Render(context, ClickerTabs("a", "b"), "a", p => p.Add(c => c.PersistTabContent, true));
+    cut.Find("[role=tabpanel]:not([hidden]) .clicker").Click();
+    cut.Find("[role=tabpanel]:not([hidden]) .clicker").Click();
+    Assert.AreEqual("2", ActiveClicks(cut));
+    cut.FindAll("[role=tab]")[1].Click();
+    Assert.AreEqual("0", ActiveClicks(cut));
+    cut.FindAll("[role=tab]")[0].Click();
+    Assert.AreEqual("2", ActiveClicks(cut));
+    // The state stays with its tab when tabs are added before it and moved
+    cut.Render(p => p.Add(c => c.ChildContent, ClickerTabs("new", "b", "a")));
+    Assert.AreEqual("2", ActiveClicks(cut));
+  }
+
+  [TestMethod]
+  public void WithoutPersistTabContent_ATabsComponentsStartAfreshEachTimeItIsSelected() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataTabStrip> cut = Render(context, ClickerTabs("a", "b"), "a");
+    cut.Find("[role=tabpanel]:not([hidden]) .clicker").Click();
+    Assert.AreEqual("1", ActiveClicks(cut));
+    cut.FindAll("[role=tab]")[1].Click();
+    cut.FindAll("[role=tab]")[0].Click();
+    Assert.AreEqual("0", ActiveClicks(cut));
+  }
+
+  [TestMethod]
+  public void ChangingTabPosition_ReattachesTheScrollScriptForTheNewDirection() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    module.Setup<int>("attach", _ => true).SetResult(5);
+    module.SetupVoid("detach", _ => true).SetVoidResult();
+    IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(Specs("a")), more: p => p.Add(c => c.Scrollable, true));
+    Assert.AreEqual(false, module.Invocations.Single(i => i.Identifier == "attach").Arguments[2]);
+    cut.Render(p => p.Add(c => c.TabPosition, PixataTabPosition.Left));
+    Assert.IsTrue(module.Invocations.Any(i => i.Identifier == "detach" && (int)i.Arguments[0]! == 5));
+    Assert.AreEqual(true, module.Invocations.Last(i => i.Identifier == "attach").Arguments[2]);
   }
 
   [TestMethod]

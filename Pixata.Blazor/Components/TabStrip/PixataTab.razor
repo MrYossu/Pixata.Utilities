@@ -97,6 +97,9 @@
   private bool _visited;
   private bool _shown = true;
   private bool? _previousVisible;
+  private bool _wasActive;
+  private string _previousEffectiveId = "";
+  private PixataTemplateHost? _headerTemplateHost;
 
   /// <summary>
   /// The tab's <see cref="Id"/>, or the one generated for it
@@ -133,12 +136,27 @@
 
   internal bool IsDisposed { get; private set; }
 
+  /// <summary>
+  /// The tab's <see cref="HeaderTemplate"/>, for the tab strip to render in the tab's header. It is rendered by a host that
+  /// this tab refreshes when it is given a new template, as the tab strip renders the headers before the tabs are given their
+  /// new parameters
+  /// </summary>
+  internal RenderFragment HeaderContent =>
+    PixataTemplateHost.For(() => HeaderTemplate, host => _headerTemplateHost = host);
+
   protected override void OnInitialized() {
     if (TabStrip is null) {
       throw new InvalidOperationException($"{nameof(PixataTab)} must be inside a {nameof(PixataTabStrip)}");
     }
     TabStrip.AddTab(this);
     _registered = true;
+  }
+
+  public override Task SetParametersAsync(ParameterView parameters) {
+    // Remember whether this is the active tab, so OnParametersSet can tell if the new parameters change that
+    _wasActive = _registered && IsActive;
+    _previousEffectiveId = EffectiveId;
+    return base.SetParametersAsync(parameters);
   }
 
   protected override void OnParametersSet() {
@@ -149,8 +167,18 @@
     (string?, bool, bool, bool, string?, bool, string?) header = (Title, Disabled, _shown, Closeable, Class, HeaderTemplate is not null, Id);
     bool changed = header != _header;
     _header = header;
-    if (changed && _registered) {
-      TabStrip!.TabChanged();
+    if (_registered) {
+      if (_wasActive && (!_shown || EffectiveId != _previousEffectiveId)) {
+        // The active tab has been hidden, or has become a different tab (when tabs in a @foreach without a @key are removed,
+        // the tab components that are left are given the parameters of the tabs after them)
+        TabStrip!.ActiveTabChanged(this);
+      }
+      if (changed) {
+        TabStrip!.TabChanged();
+      }
+    }
+    if (HeaderTemplate is not null) {
+      _headerTemplateHost?.Refresh();
     }
   }
 

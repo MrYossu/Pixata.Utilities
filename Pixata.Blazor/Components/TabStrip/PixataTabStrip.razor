@@ -42,7 +42,7 @@
             @onclick="() => Select(tab)">
           <span class="pixata-blazor-tabstrip-link">
             @if (tab.HeaderTemplate is not null) {
-              @tab.HeaderTemplate
+              @tab.HeaderContent
             } else {
               <span class="pixata-blazor-tabstrip-link-text">@tab.Title</span>
             }
