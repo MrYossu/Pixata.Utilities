@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +19,19 @@ public static partial class UploadRequestExtensions {
 
   private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
+  // The characters that Windows doesn't allow in a file name. They are replaced on every platform, so a name is saved the
+  // same way wherever the server runs
+  private const string InvalidNameChars = "<>:\"/\\|?*";
+
+  // Names that Windows treats as devices rather than files, with or without an extension
+  private static readonly HashSet<string> ReservedNames = new([
+    "CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$", "CLOCK$", "COM¹", "COM²", "COM³", "LPT¹", "LPT²", "LPT³",
+    .. Enumerable.Range(0, 10).SelectMany(n => new[] { $"COM{n}", $"LPT{n}" })
+  ], StringComparer.OrdinalIgnoreCase);
+
+  // The longest name (in UTF-8 bytes) a file is saved under. File systems allow 255, and this leaves room for " (1)"
+  private const int MaxNameBytes = 200;
+
   /// <summary>
   /// Saves the file(s) posted in the request to <paramref name="folder"/>. A plain upload is saved straight away. A chunk of a
   /// chunked upload is written to a <c>.part</c> file, which is renamed to the file's own name when the last chunk arrives.
@@ -33,7 +48,14 @@ public static partial class UploadRequestExtensions {
     if (!request.HasFormContentType) {
       return UploadReceiveResult.Failed("The request isn't a form post");
     }
-    IFormCollection form = await request.ReadFormAsync(cancellationToken);
+    IFormCollection form;
+    try {
+      form = await request.ReadFormAsync(cancellationToken);
+    }
+    catch (InvalidDataException) {
+      // The form is bigger than the FormOptions limits allow
+      return UploadReceiveResult.Failed("The request is too big, or has too many parts");
+    }
     IReadOnlyList<IFormFile> files = form.Files.GetFiles(options.SaveField);
     if (files.Count == 0) {
       return UploadReceiveResult.Failed($"The request has no files in the '{options.SaveField}' field");
@@ -43,13 +65,15 @@ public static partial class UploadRequestExtensions {
     if (!string.IsNullOrWhiteSpace(metadataJson)) {
       return await ReceiveChunk(files[0], metadataJson, folder, options, cancellationToken);
     }
+    // Every file is checked before any is saved, so a request with one bad file doesn't leave the others behind
+    foreach (IFormFile file in files) {
+      if (Validate(Sanitise(file.FileName), file.Length, options) is { } error) {
+        return UploadReceiveResult.Failed(error);
+      }
+    }
     List<ReceivedFile> saved = [];
     foreach (IFormFile file in files) {
       string originalName = Sanitise(file.FileName);
-      string? error = Validate(originalName, file.Length, options);
-      if (error is not null) {
-        return UploadReceiveResult.Failed(error);
-      }
       // Written to a temporary file and then renamed, so that two requests saving files with the same name at the same time
       // don't trip over each other, and nobody sees a half-written file
       string temporaryPath = Path.Combine(folder, $"{Guid.NewGuid():N}{PartExtension}");
@@ -57,13 +81,16 @@ public static partial class UploadRequestExtensions {
         await using (FileStream target = new(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None)) {
           await file.CopyToAsync(target, cancellationToken);
         }
-        string path = TargetPath(folder, originalName, options);
-        File.Move(temporaryPath, path, true);
+        string path = MoveIntoPlace(temporaryPath, folder, TargetName(originalName, options), options.Overwrite);
         saved.Add(new(Path.GetFileName(path), originalName, path, file.Length, file.ContentType ?? ""));
       }
-      catch (IOException ex) {
+      catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) {
+        // The message isn't passed on, as it can include the server's folder names
+        return new() { Error = "The file couldn't be saved", Exception = ex, Files = saved };
+      }
+      finally {
+        // Only still there if something went wrong
         File.Delete(temporaryPath);
-        return UploadReceiveResult.Failed($"The file couldn't be saved: {ex.Message}");
       }
     }
     return new() { Files = saved };
@@ -111,8 +138,13 @@ public static partial class UploadRequestExtensions {
     int deleted = 0;
     foreach (string path in Directory.EnumerateFiles(folder, $"*{PartExtension}")) {
       if (File.GetLastWriteTimeUtc(path) < cutOff) {
-        File.Delete(path);
-        deleted++;
+        try {
+          File.Delete(path);
+          deleted++;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) {
+          // Still in use, so leave it for next time
+        }
       }
     }
     return deleted;
@@ -126,10 +158,10 @@ public static partial class UploadRequestExtensions {
     catch (JsonException) {
       chunk = null;
     }
-    if (chunk is null || chunk.TotalChunks < 1 || chunk.ChunkIndex < 0 || chunk.ChunkIndex >= chunk.TotalChunks) {
+    if (chunk is null || chunk.TotalChunks < 1 || chunk.ChunkIndex < 0 || chunk.ChunkIndex >= chunk.TotalChunks || chunk.FileSize < 0 || chunk.Offset < 0) {
       return UploadReceiveResult.Failed("The chunk metadata isn't valid");
     }
-    string fileId = SafeId().Replace(chunk.FileId, "");
+    string fileId = SafeId().Replace(chunk.FileId ?? "", "");
     if (fileId.Length == 0 || fileId.Length > 100) {
       return UploadReceiveResult.Failed("The chunk metadata doesn't have a valid file id", chunk);
     }
@@ -142,8 +174,9 @@ public static partial class UploadRequestExtensions {
     try {
       await WriteChunk(file, chunk, partPath, cancellationToken);
     }
-    catch (IOException ex) {
-      return UploadReceiveResult.Failed($"The chunk couldn't be saved: {ex.Message}", chunk);
+    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) {
+      // The message isn't passed on, as it can include the server's folder names
+      return new() { Error = "The chunk couldn't be saved", Exception = ex, Chunk = chunk };
     }
     catch (InvalidDataException ex) {
       File.Delete(partPath);
@@ -157,12 +190,12 @@ public static partial class UploadRequestExtensions {
       File.Delete(partPath);
       return UploadReceiveResult.Failed("The file is incomplete", chunk);
     }
-    string path = TargetPath(folder, originalName, options);
+    string path;
     try {
-      File.Move(partPath, path, true);
+      path = MoveIntoPlace(partPath, folder, TargetName(originalName, options), options.Overwrite);
     }
-    catch (IOException ex) {
-      return UploadReceiveResult.Failed($"The file couldn't be saved: {ex.Message}", chunk);
+    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) {
+      return new() { Error = "The file couldn't be saved", Exception = ex, Chunk = chunk };
     }
     string contentType = string.IsNullOrWhiteSpace(chunk.ContentType) ? file.ContentType ?? "" : chunk.ContentType;
     return new() { Chunk = chunk, Files = [new(Path.GetFileName(path), originalName, path, size, contentType)] };
@@ -200,34 +233,90 @@ public static partial class UploadRequestExtensions {
   private static string Dotted(string extension) =>
     extension.StartsWith('.') ? extension : $".{extension}";
 
-  private static string TargetPath(string folder, string originalName, UploadReceiveOptions options) {
-    string name = options.FileName is null ? originalName : Sanitise(options.FileName(originalName));
+  private static string TargetName(string originalName, UploadReceiveOptions options) =>
+    options.FileName is null ? originalName : Sanitise(options.FileName(originalName));
+
+  /// <summary>
+  /// Renames a finished file to its name in the folder. When not overwriting, the name is claimed first by creating an empty
+  /// file with it (which fails if the name is taken, even by a request doing the same thing at the same time), adding a
+  /// number to the name until that succeeds. Checking whether the name is free and then moving the file wouldn't do, as two
+  /// requests could both find the name free, and the second would overwrite the first
+  /// </summary>
+  /// <returns>The path the file was saved to</returns>
+  private static string MoveIntoPlace(string source, string folder, string name, bool overwrite) {
     string path = Path.Combine(folder, name);
-    if (!options.Overwrite) {
-      string stem = Path.GetFileNameWithoutExtension(name);
-      string extension = Path.GetExtension(name);
-      for (int n = 1; File.Exists(path); n++) {
-        path = Path.Combine(folder, $"{stem} ({n}){extension}");
-      }
-    }
     if (!IsInside(folder, path)) {
       throw new InvalidOperationException($"The file name '{name}' points outside the upload folder");
     }
+    if (!overwrite) {
+      string stem = Path.GetFileNameWithoutExtension(name);
+      string extension = Path.GetExtension(name);
+      for (int n = 1; ; n++) {
+        try {
+          new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None).Dispose();
+          break;
+        }
+        catch (IOException) when (File.Exists(path)) {
+          path = Path.Combine(folder, $"{stem} ({n}){extension}");
+        }
+      }
+    }
+    File.Move(source, path, true);
     return path;
   }
 
   /// <summary>
-  /// Reduces a name sent by the browser to a plain file name: no folders, no characters the file system rejects, never empty,
-  /// and never ending in <c>.part</c> (so it can't be mistaken for an unfinished chunked upload)
+  /// Reduces a name sent by the browser to a plain file name that is safe to save on any platform: no folders, no characters
+  /// that Windows rejects, no control or invisible formatting characters (such as the ones that reverse the text, to disguise
+  /// <c>exe.pdf</c> as <c>fdp.exe</c>), not one of the names Windows reserves for devices (eg <c>CON</c> or <c>nul.txt</c>),
+  /// at most 200 bytes long (keeping the extension), never empty, and never ending in <c>.part</c> (so it can't be mistaken
+  /// for an unfinished chunked upload)
   /// </summary>
   public static string Sanitise(string fileName) {
     string name = fileName.Replace('\\', '/').Split('/').Last();
-    char[] invalid = Path.GetInvalidFileNameChars();
-    name = new string(name.Select(c => invalid.Contains(c) || char.IsControl(c) ? '_' : c).ToArray()).Trim().TrimEnd('.');
+    StringBuilder cleaned = new(name.Length);
+    // Runes rather than chars, so a lone half of a surrogate pair becomes U+FFFD rather than an invalid name
+    foreach (Rune rune in name.EnumerateRunes()) {
+      cleaned.Append(IsInvalid(rune) ? "_" : rune.ToString());
+    }
+    name = Shorten(Trimmed(cleaned.ToString()));
     if (name.Length == 0) {
       return "file";
     }
+    if (ReservedNames.Contains(name.Split('.')[0].TrimEnd(' '))) {
+      name = $"_{name}";
+    }
     return name.EndsWith(PartExtension, StringComparison.OrdinalIgnoreCase) ? $"{name}_" : name;
+  }
+
+  private static bool IsInvalid(Rune rune) =>
+    Rune.IsControl(rune)
+    || (rune.IsAscii && InvalidNameChars.Contains((char)rune.Value))
+    // Zero-width joiners are formatting characters too, but are part of some scripts and emoji
+    || (Rune.GetUnicodeCategory(rune) == UnicodeCategory.Format && rune.Value is not (0x200C or 0x200D));
+
+  // Windows drops dots and spaces from the end of a name, so they're removed here, so the name is the same everywhere
+  private static string Trimmed(string name) =>
+    name.Trim().TrimEnd('.', ' ');
+
+  private static string Shorten(string name) {
+    if (Encoding.UTF8.GetByteCount(name) <= MaxNameBytes) {
+      return name;
+    }
+    string extension = Path.GetExtension(name);
+    if (Encoding.UTF8.GetByteCount(extension) > MaxNameBytes / 4) {
+      extension = "";
+    }
+    int budget = MaxNameBytes - Encoding.UTF8.GetByteCount(extension);
+    StringBuilder stem = new();
+    foreach (Rune rune in name[..^extension.Length].EnumerateRunes()) {
+      budget -= rune.Utf8SequenceLength;
+      if (budget < 0) {
+        break;
+      }
+      stem.Append(rune.ToString());
+    }
+    return Trimmed($"{Trimmed(stem.ToString())}{extension}");
   }
 
   private static bool IsInside(string folder, string path) {

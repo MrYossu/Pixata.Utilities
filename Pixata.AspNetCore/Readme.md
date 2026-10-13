@@ -92,9 +92,9 @@ app.MapPost(RoutesHelper.UploadSave, async (HttpRequest request) => {
 
 It saves each file in the `files` form field to the folder (creating it if need be), and...
 
-- **Sanitises the file names**, removing any folders and characters the file system won't accept, so a request can't write outside the folder. `UploadRequestExtensions.Sanitise()` is public, if you want to do the same elsewhere.
-- **Checks the extension and size again**, as the browser's checks can be bypassed. A rejected file isn't saved, and `Error` says why.
-- **Writes each file under a temporary name first**, and renames it when it's complete, so nobody sees a half-written file, and two requests saving files with the same name don't trip over each other.
+- **Sanitises the file names**, so a request can't write outside the folder, and the name is safe on any server: it removes any folders, replaces characters that Windows doesn't allow (on every platform, so a name is saved the same way wherever you run), control characters and invisible formatting characters (such as the ones that reverse text, used to disguise `fdp.exe` as `exe.pdf`), puts an underscore in front of names that Windows reserves for devices (`CON`, `nul.txt`, `COM1.pdf` and so on), and shortens names over 200 bytes, keeping the extension. `UploadRequestExtensions.Sanitise()` is public, if you want to do the same elsewhere.
+- **Checks the extension and size again**, as the browser's checks can be bypassed. A rejected file isn't saved, and `Error` says why. If a request holds several files, they are all checked before any is saved.
+- **Writes each file under a temporary name first**, and renames it when it's complete, so nobody sees a half-written file, and two requests saving files with the same name don't trip over each other (with `Overwrite` off, each gets its own name, even if they arrive at the same moment).
 - **Puts chunked uploads back together.** If the request has a `chunkMetadata` field (the JSON that `PixataUpload` sends with each chunk), the chunk is written to a `.part` file at its offset, and the file gets its real name when the last chunk arrives. A chunk sent twice overwrites itself rather than being added twice. `Files` is empty until the last chunk, and `Complete` is true once the file is saved.
 
 Return a 2xx response when `Success` is true (for every chunk, not just the last), and a 400 otherwise, so the component shows the file as uploaded or failed.
@@ -106,11 +106,11 @@ The options are...
 | `SaveField` | `files` | The form field that holds the file (or chunk) |
 | `MetadataField` | `chunkMetadata` | The form field that holds a chunk's JSON metadata |
 | `AllowedExtensions` | empty | The extensions accepted (the dot is optional, and case is ignored). Empty accepts any |
-| `MaxFileSize`, `MinFileSize` | null | The largest and smallest files accepted, in bytes. Null means no limit (other than the server's limit on request size) |
+| `MaxFileSize`, `MinFileSize` | null | The largest and smallest files accepted, in bytes. Null means no limit, other than the server's limit on request size, which doesn't limit a chunked upload, as each chunk is a separate request. So set `MaxFileSize` if you accept chunked uploads |
 | `Overwrite` | `true` | When false, a file with the same name as one already there is saved as eg `report (1).pdf` |
 | `FileName` | null | A `Func<string, string>` that chooses the name to save under, given the uploaded name (eg to add a GUID). Its result is sanitised too |
 
-The result has `Success`, `Complete`, `Error`, `Chunk` (the chunk's metadata, for a chunked upload) and `Files`, each of which is a `ReceivedFile` with the `FileName` it was saved under, the `OriginalFileName`, the full `Path`, the `Size` and the `ContentType`.
+The result has `Success`, `Complete`, `Error`, `Chunk` (the chunk's metadata, for a chunked upload) and `Files`, each of which is a `ReceivedFile` with the `FileName` it was saved under, the `OriginalFileName`, the full `Path`, the `Size` and the `ContentType`. If a file couldn't be written (eg the disk is full), `Error` just says so, as it's usually sent back to the browser, and `Exception` holds the exception for you to log.
 
 To delete files when the user removes them, point the component's `RemoveUrl` at an endpoint that calls `RemoveUploads()`. It deletes the files named in the `files` field from the folder (again, sanitising the names), and returns the names it deleted...
 
@@ -118,6 +118,8 @@ To delete files when the user removes them, point the component's `RemoveUrl` at
 app.MapPost(RoutesHelper.UploadRemove, async (HttpRequest request) =>
   Results.Ok(await request.RemoveUploads(uploadFolder)));
 ```
+
+The component sends the name the file had on the user's machine, so `RemoveUploads()` only suits a folder where files are saved under that name. If you set `FileName`, or turn `Overwrite` off, the file may have been saved under another name (and the one sent may belong to another upload), so keep track of the names yourself (eg send the saved name back from the save endpoint, and look it up in the remove endpoint). Bear in mind too that anyone who can post to the remove endpoint can delete any file in the folder whose name they can guess, so protect it, or use a folder per user.
 
 A chunked upload that is cancelled, or abandoned when the user closes the page, leaves a `.part` file behind. Call `UploadRequestExtensions.DeleteAbandonedChunks(uploadFolder, TimeSpan.FromHours(1))` now and then (eg from a background service) to delete the ones that haven't been written to for a while.
 
