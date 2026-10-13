@@ -51,6 +51,8 @@ public class Scheduler_Recurrence_Tests {
   [DataRow("FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1")]
   [DataRow("FREQ=YEARLY;BYMONTHDAY=14;BYMONTH=2")]
   [DataRow("FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,SU;WKST=SU")]
+  [DataRow("FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,SU;WKST=MO")]
+  [DataRow("FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,SU")]
   public void ToString_RoundTrips(string rule) =>
     Assert.AreEqual(rule, PixataRecurrenceRule.Parse(rule).ToString());
 
@@ -78,6 +80,13 @@ public class Scheduler_Recurrence_Tests {
     Assert.IsFalse(PixataRecurrenceRule.TryParse(rule, out PixataRecurrenceRule? result));
     Assert.IsNull(result);
   }
+
+  [TestMethod]
+  [DataRow("FREQ=DAILY;UNTIL=99991231")]
+  [DataRow("FREQ=DAILY;UNTIL=99991231T235959Z")]
+  public void Until_AtTheEndOfTheCalendar_MeansForEver(string rule) =>
+    AreDates(Occurrences(rule, new(2026, 10, 13, 9, 0, 0), new(2026, 10, 13), new(2026, 10, 15)),
+      "2026-10-13T09:00", "2026-10-14T09:00");
 
   [TestMethod]
   public void Clone_IsIndependent() {
@@ -151,6 +160,40 @@ public class Scheduler_Recurrence_Tests {
     AreDates(Occurrences("FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU;WKST=SU", new(1997, 8, 5, 9, 0, 0), new(1997, 1, 1), new(1998, 1, 1)),
       "1997-08-05T09:00", "1997-08-17T09:00", "1997-08-19T09:00", "1997-08-31T09:00");
 
+  // Without WKST, the week starts on the day given (the scheduler gives its first day of the week), so that every other week
+  // means the same as it does on the calendar the user sees
+  [TestMethod]
+  public void Weekly_WithoutWeekStart_UsesTheFirstDayOfTheWeekGiven() {
+    PixataRecurrenceRule rule = PixataRecurrenceRule.Parse("FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU");
+    Assert.IsNull(rule.WeekStart);
+    AreDates(rule.GetOccurrences(new(1997, 8, 5, 9, 0, 0), new(1997, 1, 1), new(1998, 1, 1), DayOfWeek.Sunday),
+      "1997-08-05T09:00", "1997-08-17T09:00", "1997-08-19T09:00", "1997-08-31T09:00");
+    AreDates(rule.GetOccurrences(new(1997, 8, 5, 9, 0, 0), new(1997, 1, 1), new(1998, 1, 1)),
+      "1997-08-05T09:00", "1997-08-10T09:00", "1997-08-19T09:00", "1997-08-24T09:00");
+  }
+
+  [TestMethod]
+  public void Weekly_WithWeekStart_IgnoresTheFirstDayOfTheWeekGiven() =>
+    AreDates(PixataRecurrenceRule.Parse("FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU;WKST=MO")
+        .GetOccurrences(new(1997, 8, 5, 9, 0, 0), new(1997, 1, 1), new(1998, 1, 1), DayOfWeek.Sunday),
+      "1997-08-05T09:00", "1997-08-10T09:00", "1997-08-19T09:00", "1997-08-24T09:00");
+
+  // A UTC UNTIL (as calendar apps write it) is in UTC, while the occurrences are in local time
+  [TestMethod]
+  public void Until_InUtc_IsComparedInLocalTime() {
+    TimeZoneInfo twoHoursAhead = TimeZoneInfo.CreateCustomTimeZone("Test+2", TimeSpan.FromHours(2), "Test+2", "Test+2");
+    PixataRecurrenceRule rule = PixataRecurrenceRule.Parse("FREQ=DAILY;UNTIL=20261015T073000Z");
+    // 07:30 UTC is 09:30 here, so the 09:00 occurrence on the 15th is in
+    AreDates(rule.GetOccurrences(new(2026, 10, 13, 9, 0, 0), new(2026, 10, 1), new(2026, 11, 1), null, twoHoursAhead),
+      "2026-10-13T09:00", "2026-10-14T09:00", "2026-10-15T09:00");
+    // A series in UTC is compared in UTC
+    AreDates(rule.GetOccurrences(new DateTime(2026, 10, 13, 9, 0, 0, DateTimeKind.Utc), new(2026, 10, 1), new(2026, 11, 1), null, twoHoursAhead),
+      "2026-10-13T09:00", "2026-10-14T09:00");
+    // And an UNTIL without a Z is already local
+    AreDates(PixataRecurrenceRule.Parse("FREQ=DAILY;UNTIL=20261015T073000").GetOccurrences(new(2026, 10, 13, 9, 0, 0), new(2026, 10, 1), new(2026, 11, 1), null, twoHoursAhead),
+      "2026-10-13T09:00", "2026-10-14T09:00");
+  }
+
   [TestMethod]
   public void FirstAppointment_IsAnOccurrenceEvenIfItDoesNotMatch() =>
     AreDates(Occurrences("FREQ=WEEKLY;BYDAY=MO;COUNT=2", new(2026, 10, 13, 9, 0, 0), new(2026, 10, 1), new(2026, 12, 1)),
@@ -213,9 +256,9 @@ public class Scheduler_Recurrence_Tests {
 
   [TestMethod]
   public void Create_KeepsTheIntervalAndEndOfThePreviousRule() {
-    PixataRecurrenceRule previous = PixataRecurrenceRule.Parse("FREQ=WEEKLY;INTERVAL=3;BYDAY=TU;COUNT=4");
+    PixataRecurrenceRule previous = PixataRecurrenceRule.Parse("FREQ=WEEKLY;INTERVAL=3;BYDAY=TU;COUNT=4;WKST=SU");
     PixataRecurrenceRule rule = PixataSchedulerRecurrenceEditing.Create(PixataRecurrenceFrequency.Monthly, new(2026, 10, 13), previous);
-    Assert.AreEqual("FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=13;COUNT=4", rule.ToString());
+    Assert.AreEqual("FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=13;COUNT=4;WKST=SU", rule.ToString());
   }
 
   [TestMethod]

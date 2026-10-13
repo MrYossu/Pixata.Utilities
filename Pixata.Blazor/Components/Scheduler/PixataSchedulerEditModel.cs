@@ -43,7 +43,7 @@ internal sealed class PixataSchedulerEditModel {
       HasDescription = PixataSchedulerItemFields.Has(item, fields.Description),
       HasIsAllDay = PixataSchedulerItemFields.Has(item, fields.IsAllDay),
       HasRecurrence = PixataSchedulerItemFields.Has(item, fields.RecurrenceRule),
-      IsException = fields.GetRecurrenceId(item) is { } id && !Equals(id, Guid.Empty) && !Equals(id, 0) && !Equals(id, "")
+      IsException = !PixataSchedulerItemFields.IsEmptyId(fields.GetRecurrenceId(item))
     };
     foreach (PixataSchedulerResource<TItem> resource in resources) {
       object? value = fields.GetField(item, resource.Field);
