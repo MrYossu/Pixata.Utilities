@@ -1,0 +1,99 @@
+@namespace Pixata.Blazor.Components
+
+@*
+  A separate area that files can be dropped on, for a PixataFileSelect or PixataUpload whose DropZoneId is this component's
+  Id. The component handling the files highlights it while files are dragged over the page and over it
+*@
+<div id="@Id" class="@PixataCss.Classes("pixata-blazor-external-dropzone", Enabled ? null : "pixata-blazor-disabled", Class)" style="@Style"
+     data-pixata-dragover-class="@DragOverClass" data-pixata-multiple="@(Multiple ? "true" : "false")" data-pixata-disabled="@(Enabled ? null : "true")"
+     @attributes="AdditionalAttributes">
+  @if (Template is not null) {
+    @Template
+  } else {
+    <div class="pixata-blazor-dropzone-inner">
+      <PixataIcon Icon="@PixataSvgIcons.Upload" Class="pixata-blazor-dropzone-icon" />
+      <span class="pixata-blazor-dropzone-hint">@(HintText ?? "Drag and drop files here to upload")</span>
+      @if (!string.IsNullOrWhiteSpace(NoteText)) {
+        <span class="pixata-blazor-dropzone-note">@NoteText</span>
+      }
+    </div>
+  }
+</div>
+
+@code {
+
+  /// <summary>
+  /// The element's id. Set the <c>DropZoneId</c> of a <see cref="PixataFileSelect"/> or <see cref="PixataUpload"/> to this
+  /// </summary>
+  [Parameter, EditorRequired]
+  public string Id { get; set; } = "";
+
+  /// <summary>
+  /// When false, the drop zone is greyed out and files dropped on it are ignored. Default true
+  /// </summary>
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  /// <summary>
+  /// When false, only the first of several files dropped at once is taken. Default true. The component handling the files
+  /// must allow several files too
+  /// </summary>
+  [Parameter]
+  public bool Multiple { get; set; } = true;
+
+  /// <summary>
+  /// The main text, in place of "Drag and drop files here to upload"
+  /// </summary>
+  [Parameter]
+  public string? HintText { get; set; }
+
+  /// <summary>
+  /// Smaller text under the hint, eg the kinds of file allowed
+  /// </summary>
+  [Parameter]
+  public string? NoteText { get; set; }
+
+  /// <summary>
+  /// Replaces the icon, hint and note with your own content
+  /// </summary>
+  [Parameter]
+  public RenderFragment? Template { get; set; }
+
+  /// <summary>
+  /// The height, eg <c>150px</c>. Default 220px (set by the <c>--pixata-blazor-dropzone-height</c> CSS variable)
+  /// </summary>
+  [Parameter]
+  public string? Height { get; set; }
+
+  /// <summary>
+  /// The width, eg <c>50%</c>. By default it fills its container
+  /// </summary>
+  [Parameter]
+  public string? Width { get; set; }
+
+  /// <summary>
+  /// Classes added while files are dragged over the drop zone, on top of <c>pixata-blazor-external-dropzone-hover</c>
+  /// </summary>
+  [Parameter]
+  public string? DragOverClass { get; set; }
+
+  /// <summary>
+  /// Extra CSS classes for the drop zone
+  /// </summary>
+  [Parameter]
+  public string? Class { get; set; }
+
+  /// <summary>
+  /// Any other attributes are rendered on the drop zone
+  /// </summary>
+  [Parameter(CaptureUnmatchedValues = true)]
+  public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+  private string? Style {
+    get {
+      string style = $"{(string.IsNullOrWhiteSpace(Height) ? "" : $"height:{Height};")}{(string.IsNullOrWhiteSpace(Width) ? "" : $"width:{Width};")}";
+      return style.Length == 0 ? null : style;
+    }
+  }
+
+}
