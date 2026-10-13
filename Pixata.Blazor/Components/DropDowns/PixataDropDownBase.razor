@@ -46,7 +46,9 @@
       @if (HeaderTemplate is not null) {
         <div class="pixata-blazor-list-header pixata-blazor-dropdown-header">@HeaderTemplate</div>
       }
-      <div @ref="_content" class="pixata-blazor-popup-content pixata-blazor-dropdown-content">
+      @* tabindex="-1" stops browsers that let the keyboard focus scrolling elements making the list a Tab stop, so the focus
+         stays in the component while the user moves through the list, and Tab leaves the component *@
+      <div @ref="_content" class="pixata-blazor-popup-content pixata-blazor-dropdown-content" tabindex="-1">
         @if (OptionCount == 0) {
           <div class="pixata-blazor-no-data pixata-blazor-dropdown-no-data">
             @if (Loading) {
