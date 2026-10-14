@@ -1,0 +1,80 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataMenuButtonBase
+
+@*
+  A button that opens a menu of actions. The items go in DropDownButtonItems, as PixataDropDownButtonItem components
+*@
+<div @ref="WrapperElement"
+     class="@PixataCss.Classes("pixata-blazor-dropdownbutton", IsOpen ? "pixata-blazor-dropdownbutton-open" : null, Class)"
+     @onkeydown:stopPropagation="IsOpen"
+     @attributes="AdditionalAttributes">
+  <button @ref="_button"
+          type="button"
+          id="@ButtonId"
+          class="@PixataCss.Classes(PixataCss.Button(ThemeColor, FillMode, Rounded, Size, IsIconOnly), "pixata-blazor-dropdownbutton-button")"
+          disabled="@(!Enabled)"
+          title="@Title"
+          tabindex="@TabIndex"
+          aria-haspopup="menu"
+          aria-expanded="@(IsOpen ? "true" : "false")"
+          aria-controls="@(IsOpen ? MenuId : null)"
+          aria-label="@AriaLabel"
+          aria-labelledby="@AriaLabelledBy"
+          aria-describedby="@AriaDescribedBy"
+          @onclick="HandleClick"
+          @onkeydown="@(args => HandleKeyDown(args, _button))">
+    <PixataIcon Icon="Icon" Class="pixata-blazor-dropdownbutton-icon" />
+    @if (DropDownButtonContent is not null) {
+      <span class="pixata-blazor-dropdownbutton-text">@DropDownButtonContent</span>
+    }
+    @if (ShowArrowButton) {
+      <span class="pixata-blazor-dropdownbutton-arrow" aria-hidden="true">
+        <PixataIcon Icon="PixataSvgIcons.ChevronDown" />
+      </span>
+    }
+  </button>
+  @RenderSettings(DropDownButtonSettings)
+  @RenderMenu(DropDownButtonItems)
+</div>
+
+@code {
+
+  /// <summary>
+  /// The content of the button, usually its text
+  /// </summary>
+  [Parameter]
+  public RenderFragment? DropDownButtonContent { get; set; }
+
+  /// <summary>
+  /// The items in the menu: <see cref="PixataDropDownButtonItem"/> components
+  /// </summary>
+  [Parameter]
+  public RenderFragment? DropDownButtonItems { get; set; }
+
+  /// <summary>
+  /// Holds a <see cref="PixataDropDownButtonPopupSettings"/>, to set the size of the menu. You can use
+  /// <see cref="PixataMenuButtonBase.PopupSettings"/> instead
+  /// </summary>
+  [Parameter]
+  public RenderFragment? DropDownButtonSettings { get; set; }
+
+  /// <summary>
+  /// Whether to show a down arrow after the content, to show that the button opens a menu
+  /// </summary>
+  [Parameter]
+  public bool ShowArrowButton { get; set; }
+
+  private ElementReference _button;
+
+  protected override ElementReference MainButtonElement =>
+    _button;
+
+  private bool IsIconOnly =>
+    DropDownButtonContent is null && !ShowArrowButton && Icon is not null;
+
+  private async Task HandleClick(MouseEventArgs args) {
+    await OnClick.InvokeAsync(args);
+    await Toggle(_button);
+  }
+
+}

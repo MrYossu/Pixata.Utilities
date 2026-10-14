@@ -1,0 +1,195 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataLayerBase
+
+@*
+  A modal dialog: a title, some content and a row of buttons, shown over a dimmed overlay. See PixataLayerBase for how it is
+  stacked and focused. The placeholder div is display: contents, and holds nothing else, as its child is moved to the end of
+  the body while the dialog is visible
+*@
+<div @ref="AnchorElement" class="pixata-blazor-layer-anchor">
+  @if (Visible) {
+    <div @ref="WrapperElement" class="pixata-blazor-dialog-wrapper">
+      <div class="pixata-blazor-overlay" @onclick="OverlayClick"></div>
+      <div @ref="LayerElement"
+           id="@ElementId"
+           class="@DialogClass"
+           style="@DialogStyle"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="@(HasTitle ? TitleId : null)"
+           aria-describedby="@ContentId"
+           tabindex="-1"
+           @attributes="AdditionalAttributes"
+           @onkeydown="HandleKeyDown"
+           @onkeydown:stopPropagation="true">
+        @if (HasTitlebar) {
+          <div class="pixata-blazor-dialog-titlebar">
+            <span class="pixata-blazor-dialog-title" id="@TitleId">
+              @if (DialogTitle is not null) {
+                @DialogTitle
+              } else {
+                @Title
+              }
+            </span>
+            @if (ShowCloseButton) {
+              <div class="pixata-blazor-dialog-titlebar-actions">
+                <button type="button"
+                        class="@CloseButtonClass"
+                        title="@Texts.Close"
+                        aria-label="@Texts.Close"
+                        @onclick="Close">
+                  <PixataIcon Icon="PixataSvgIcons.X" />
+                </button>
+              </div>
+            }
+          </div>
+        }
+        <div class="pixata-blazor-dialog-content" id="@ContentId">
+          @DialogContent
+        </div>
+        @if (DialogButtons is not null) {
+          <div class="@ActionsClass">
+            @DialogButtons
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+@code {
+
+  /// <summary>
+  /// The title, shown as plain text in the titlebar. Ignored if <see cref="DialogTitle"/> is set
+  /// </summary>
+  [Parameter]
+  public string? Title { get; set; }
+
+  /// <summary>
+  /// The title as markup (eg with an icon). Takes precedence over <see cref="Title"/>
+  /// </summary>
+  [Parameter]
+  public RenderFragment? DialogTitle { get; set; }
+
+  /// <summary>
+  /// The body of the dialog. It scrolls if it is taller than the dialog
+  /// </summary>
+  [Parameter]
+  public RenderFragment? DialogContent { get; set; }
+
+  /// <summary>
+  /// The buttons along the bottom of the dialog, laid out as <see cref="ButtonsLayout"/> says
+  /// </summary>
+  [Parameter]
+  public RenderFragment? DialogButtons { get; set; }
+
+  /// <summary>
+  /// Whether there's a close button in the titlebar. True by default. When there isn't one, Esc doesn't close the dialog
+  /// either, unless you set <see cref="CloseOnEscape"/>
+  /// </summary>
+  [Parameter]
+  public bool ShowCloseButton { get; set; } = true;
+
+  /// <summary>
+  /// Whether pressing Esc closes the dialog. Null (the default) means it does if the dialog has a close button
+  /// </summary>
+  [Parameter]
+  public bool? CloseOnEscape { get; set; }
+
+  /// <summary>
+  /// Whether clicking (or tapping) the overlay around the dialog closes it. False by default
+  /// </summary>
+  [Parameter]
+  public bool CloseOnOverlayClick { get; set; }
+
+  /// <summary>
+  /// The dialog's width as a CSS length, eg <c>400px</c> or <c>50vw</c>. By default it fits its content. On a phone, dialogs
+  /// take the full width of the screen
+  /// </summary>
+  [Parameter]
+  public string? Width { get; set; }
+
+  /// <summary>
+  /// The dialog's height as a CSS length. By default it fits its content. Either way, it is never taller than the viewport,
+  /// and the content scrolls if need be
+  /// </summary>
+  [Parameter]
+  public string? Height { get; set; }
+
+  /// <summary>
+  /// How the <see cref="DialogButtons"/> are laid out. <see cref="PixataDialogButtonsLayout.Stretch"/> by default
+  /// </summary>
+  [Parameter]
+  public PixataDialogButtonsLayout ButtonsLayout { get; set; } = PixataDialogButtonsLayout.Stretch;
+
+  /// <summary>
+  /// Colours the titlebar with one of the <see cref="PixataThemeConstants.ThemeColor"/> values, eg <c>primary</c> or
+  /// <c>error</c>. By default it has the plain surface colour
+  /// </summary>
+  [Parameter]
+  public string? ThemeColor { get; set; }
+
+  /// <summary>
+  /// A CSS selector for the element to focus when the dialog opens, eg <c>#first-name</c>. By default the first element that
+  /// can take the focus is focused (or the dialog itself, if there isn't one)
+  /// </summary>
+  [Parameter]
+  public string? FocusedElementSelector { get; set; }
+
+  /// <summary>
+  /// Re-renders the dialog, eg after changing something its content shows that it doesn't know about
+  /// </summary>
+  public void Refresh() =>
+    _ = InvokeAsync(StateHasChanged);
+
+  private string TitleId => $"{ElementId}-title";
+
+  private string ContentId => $"{ElementId}-content";
+
+  private bool HasTitle =>
+    DialogTitle is not null || !string.IsNullOrEmpty(Title);
+
+  private bool HasTitlebar =>
+    HasTitle || ShowCloseButton;
+
+  private string DialogClass =>
+    PixataCss.Classes("pixata-blazor-dialog",
+      string.IsNullOrWhiteSpace(ThemeColor) || ThemeColor == PixataThemeConstants.ThemeColor.Base ? null : $"pixata-blazor-dialog-{ThemeColor}",
+      Class);
+
+  private string? DialogStyle {
+    get {
+      string style = $"{(string.IsNullOrWhiteSpace(Width) ? "" : $"--pixata-blazor-dialog-width:{Width};")}{(string.IsNullOrWhiteSpace(Height) ? "" : $"--pixata-blazor-dialog-height:{Height};")}";
+      return style == "" ? null : style;
+    }
+  }
+
+  private string ActionsClass =>
+    PixataCss.Classes("pixata-blazor-dialog-actions", $"pixata-blazor-dialog-actions-{ButtonsLayout.ToString().ToLowerInvariant()}");
+
+  private static string CloseButtonClass =>
+    PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, PixataThemeConstants.Button.FillMode.Flat, null, PixataThemeConstants.Button.Size.Small, true),
+      "pixata-blazor-dialog-titlebar-action");
+
+  private protected override PixataLayerOptions LayerOptions =>
+    new("dialog", true, FocusedElementSelector, true, false, false, null);
+
+  private bool ClosesOnEscape =>
+    CloseOnEscape ?? ShowCloseButton;
+
+  private async Task HandleKeyDown(KeyboardEventArgs e) {
+    if (e.Key == "Escape" && ClosesOnEscape) {
+      await Close();
+    }
+  }
+
+  protected override Task HandleEscape() =>
+    ClosesOnEscape ? Close() : Task.CompletedTask;
+
+  private async Task OverlayClick() {
+    if (CloseOnOverlayClick) {
+      await Close();
+    }
+  }
+
+}

@@ -1,0 +1,49 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@typeparam TValue
+@inherits PixataSingleSelectBase<TItem, TValue>
+
+@*
+  A list the user picks one item from. The selected item is shown in a button-like box; clicking it (or pressing Alt+Down,
+  Enter or Space) opens the list
+*@
+<span @ref="Element"
+      @attributes="AdditionalAttributes"
+      id="@Id"
+      class="@MainClasses("pixata-blazor-picker")"
+      style="@WidthStyle"
+      tabindex="@(Enabled ? (TabIndex ?? 0) : -1)"
+      role="combobox"
+      aria-haspopup="listbox"
+      aria-expanded="@AriaExpanded"
+      aria-controls="@(IsOpen ? ListId : null)"
+      aria-activedescendant="@(ShowPopupFilter ? null : ActiveDescendant)"
+      aria-label="@AriaLabel"
+      aria-labelledby="@AriaLabelledBy"
+      aria-describedby="@AriaDescribedBy"
+      aria-disabled="@(Enabled ? null : "true")"
+      aria-readonly="@(ReadOnly ? "true" : null)"
+      aria-invalid="@(IsInvalid ? "true" : null)"
+      aria-busy="@(Loading ? "true" : null)"
+      data-pixata-dropdown="@Uid"
+      @onclick="HandleClick"
+      @onkeydown="HandleKeyDown"
+      @onkeydown:stopPropagation="IsOpen">
+  <span class="pixata-blazor-input-inner pixata-blazor-dropdownlist-value">
+    @if (HasSelectedItem && ValueTemplate is not null) {
+      @ValueTemplate(SelectedItem!)
+    } else {
+      <span class="@PixataCss.Classes("pixata-blazor-input-value-text", HasSelectedItem ? null : "pixata-blazor-dropdownlist-default-text")">@DisplayText</span>
+    }
+  </span>
+  @LoadingFragment
+  @if (ShowClearButton && HasSelectedItem && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-clear-value" role="button" aria-label="Clear" title="Clear" @onclick="HandleClear" @onclick:stopPropagation="true">
+      <PixataIcon Icon="@PixataSvgIcons.X" />
+    </span>
+  }
+  <span class="pixata-blazor-input-button pixata-blazor-dropdownlist-button" aria-hidden="true">
+    <PixataIcon Icon="@PixataSvgIcons.ChevronDown" />
+  </span>
+</span>
+@PopupFragment

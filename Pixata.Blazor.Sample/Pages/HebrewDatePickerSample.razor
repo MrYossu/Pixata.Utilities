@@ -58,66 +58,49 @@
             <label class="form-label mb-0">Input display</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="btn-group btn-group-sm" role="group">
-              @foreach (DateInputDisplay val in Enum.GetValues<DateInputDisplay>()) {
-                <input type="radio" class="btn-check" name="inputDisplay" id="inputDisplay_@val" checked="@(_inputDisplay == val)" @onchange="() => _inputDisplay = val" />
-                <label class="btn btn-outline-secondary" for="inputDisplay_@val">@val</label>
-              }
-            </div>
+            <PixataRadioGroup Data="Enum.GetValues<DateInputDisplay>()" @bind-Value="_inputDisplay" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Input display" />
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Show secondary dates in cells</label>
+            <label class="form-label mb-0" for="showGregorianDates">Show secondary dates in cells</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="showGregorianDates" @bind="_showSecondaryDates" />
-            </div>
+            <PixataSwitch Id="showGregorianDates" @bind-Value="_showSecondaryDates" />
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Gregorian primary</label>
+            <label class="form-label mb-0" for="gregorianPrimary">Gregorian primary</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="gregorianPrimary" @bind="_gregorianPrimary" />
-            </div>
+            <PixataSwitch Id="gregorianPrimary" @bind-Value="_gregorianPrimary" />
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Show tooltips</label>
+            <label class="form-label mb-0" for="showTooltips">Show tooltips</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="showTooltips" @bind="_showTooltips" />
-            </div>
+            <PixataSwitch Id="showTooltips" @bind-Value="_showTooltips" />
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Show diagnostics</label>
+            <label class="form-label mb-0" for="showDiagnostics">Show diagnostics</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="showDiagnostics" @bind="_showDiagnostics" />
-            </div>
+            <PixataSwitch Id="showDiagnostics" @bind-Value="_showDiagnostics" />
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Open on right</label>
+            <label class="form-label mb-0" for="openOnRight">Open on right</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="openOnRight" @bind="_openOnRight" />
-            </div>
+            <PixataSwitch Id="openOnRight" @bind-Value="_openOnRight" />
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Open on focus</label>
+            <label class="form-label mb-0" for="openOnFocus">Open on focus</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="openOnFocus" @bind="_openOnFocus" />
-            </div>
+            <PixataSwitch Id="openOnFocus" @bind-Value="_openOnFocus" />
           </div>
         </div>
 
@@ -141,12 +124,10 @@
         <h6 class="text-muted text-uppercase mb-2" style="font-size: .7rem; letter-spacing: .05em;">Shabbos &amp; Yom Tov</h6>
         <div class="row g-2 mb-3 align-items-center">
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Highlight Shabbos / Yom Tov</label>
+            <label class="form-label mb-0" for="includeShabbosOrYomTov">Highlight Shabbos / Yom Tov</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="includeShabbosOrYomTov" @bind="_includeShabbosOrYomTov" />
-            </div>
+            <PixataSwitch Id="includeShabbosOrYomTov" @bind-Value="_includeShabbosOrYomTov" />
           </div>
 
           <div class="col-sm-4 col-md-3">
@@ -161,12 +142,10 @@
           </div>
 
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Highlight other non-work days</label>
+            <label class="form-label mb-0" for="includeOtherNonWorkDays">Highlight other non-work days</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="includeOtherNonWorkDays" @bind="_includeOtherNonWorkDays" />
-            </div>
+            <PixataSwitch Id="includeOtherNonWorkDays" @bind-Value="_includeOtherNonWorkDays" />
           </div>
 
           <div class="col-sm-4 col-md-3">
@@ -184,12 +163,10 @@
         <h6 class="text-muted text-uppercase mb-2" style="font-size: .7rem; letter-spacing: .05em;">Bank Holidays</h6>
         <div class="row g-2 mb-3 align-items-center">
           <div class="col-sm-4 col-md-3">
-            <label class="form-label mb-0">Highlight bank holidays</label>
+            <label class="form-label mb-0" for="includeBankHolidays">Highlight bank holidays</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="includeBankHolidays" @bind="_includeBankHolidays" />
-            </div>
+            <PixataSwitch Id="includeBankHolidays" @bind-Value="_includeBankHolidays" />
           </div>
 
           <div class="col-sm-4 col-md-3">
@@ -207,12 +184,7 @@
             <label class="form-label mb-0">Clash priority</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <div class="btn-group btn-group-sm" role="group">
-              @foreach (BankHolidayClashPriority val in Enum.GetValues<BankHolidayClashPriority>()) {
-                <input type="radio" class="btn-check" name="clashPriority" id="clashPriority_@val" checked="@(_clashPriority == val)" @onchange="() => _clashPriority = val" />
-                <label class="btn btn-outline-secondary" for="clashPriority_@val">@val</label>
-              }
-            </div>
+            <PixataRadioGroup Data="Enum.GetValues<BankHolidayClashPriority>()" @bind-Value="_clashPriority" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Clash priority" />
           </div>
         </div>
 

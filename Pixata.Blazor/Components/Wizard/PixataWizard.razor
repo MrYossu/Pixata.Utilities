@@ -1,0 +1,115 @@
+@namespace Pixata.Blazor.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+@*
+  Takes the user through a series of steps, one at a time, with a stepper showing where they are and buttons to move on and
+  back. Declare the steps with PixataWizardStep components inside WizardSteps. They register themselves here
+*@
+<div id="@Id"
+     class="@RootClass"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+  <CascadingValue Value="this" IsFixed="true" @key="_generation">
+    @WizardSteps
+    @WizardSettings
+  </CascadingValue>
+  @{
+    List<PixataWizardStep> visibleSteps = VisibleSteps;
+    PixataWizardStep? currentStep = CurrentStep;
+  }
+  <div class="pixata-blazor-wizard-layout">
+    <CascadingValue Value="this" Name="@StepperCascadeName" IsFixed="true">
+      <PixataStepper Value="@(currentStep is null ? 0 : visibleSteps.IndexOf(currentStep))"
+                     ValueChanged="StepperValueChanged"
+                     Orientation="@(IsVertical ? PixataStepperOrientation.Vertical : PixataStepperOrientation.Horizontal)"
+                     StepType="@StepType"
+                     Linear="@Linear"
+                     OptionalText="@OptionalText"
+                     CollapsedTextFormat="@PagerTextFormat"
+                     Class="pixata-blazor-wizard-stepper">
+        <StepperSteps>
+          @foreach (PixataWizardStep step in visibleSteps) {
+            <PixataStepperStep @key="step"
+                               Label="@step.Label"
+                               Text="@step.Text"
+                               Icon="@step.Icon"
+                               Disabled="@step.Disabled"
+                               Optional="@step.Optional"
+                               Valid="@step.EffectiveValid"
+                               Class="@step.Class"
+                               Template="@step.StepTemplate"
+                               AriaControls="@PanelId"
+                               OnChange="StepperChanging" />
+          }
+        </StepperSteps>
+      </PixataStepper>
+    </CascadingValue>
+    <div class="pixata-blazor-wizard-steps">
+      @if (currentStep is not null) {
+        EditContext? stepContext = StepEditContext(currentStep);
+        <div @ref="_panel"
+             id="@PanelId"
+             class="pixata-blazor-wizard-step"
+             role="tabpanel"
+             tabindex="0"
+             aria-label="@PagerText">
+          @* Keyed so each step's content starts afresh, but by index, not by step, so the content survives the steps being
+             created again (see AddStep). The buttons aren't keyed, so a button keeps the focus when it is clicked *@
+          <div @key="_steps.IndexOf(currentStep)" @ref="_content" class="pixata-blazor-wizard-content">
+            @if (stepContext is null) {
+              @ContentHost(currentStep)
+            } else if (CascadedEditContext is null) {
+              <EditForm EditContext="stepContext" OnSubmit="SubmitStep" class="pixata-blazor-wizard-form">
+                @ContentHost(currentStep)
+                @* Browsers only submit a form with more than one text box when Enter is pressed if it has a submit button *@
+                <button type="submit" class="pixata-blazor-sr-only" tabindex="-1" aria-hidden="true"></button>
+              </EditForm>
+            } else {
+              @* The wizard is already inside a form, and forms can't be nested, so the step just gets its own edit context *@
+              <CascadingValue Value="stepContext" IsFixed="true" @key="stepContext">
+                @ContentHost(currentStep)
+              </CascadingValue>
+            }
+          </div>
+          <div class="pixata-blazor-wizard-buttons">
+            <span class="pixata-blazor-wizard-buttons-start">
+              @if (ShowPager) {
+                <span class="pixata-blazor-wizard-pager">@PagerText</span>
+              }
+            </span>
+            <span class="pixata-blazor-wizard-buttons-end">
+              @if (WizardButtons is not null) {
+                @WizardButtons(this)
+              } else {
+                @if (!IsFirstStep) {
+                  <button type="button"
+                          class="@PixataCss.Classes(PixataCss.Button(null, null, null, null), "pixata-blazor-wizard-previous")"
+                          @onclick="PreviousClicked">
+                    @PreviousText
+                  </button>
+                }
+                @if (IsLastStep) {
+                  <button @ref="_doneButton"
+                          type="button"
+                          class="@PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null), "pixata-blazor-wizard-done")"
+                          @onclick="Finish">
+                    @DoneText
+                  </button>
+                } else {
+                  <button @ref="_nextButton"
+                          type="button"
+                          class="@PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null), "pixata-blazor-wizard-next")"
+                          @onclick="NextClicked">
+                    @NextText
+                  </button>
+                }
+              }
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

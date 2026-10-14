@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Extensions.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -56,7 +55,7 @@ public class PixataGridGrouping_Tests {
     b => b.AddContent(0, text);
 
   private IRenderedComponent<PixataGrid<Person>> Render(bool aggregates = false, RenderFragment<PixataGridGroupTemplateContext>? teamHeader = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, People)
         .Add(g => g.Groupable, true)
         .Add(g => g.GridColumns, b => {
@@ -81,14 +80,14 @@ public class PixataGridGrouping_Tests {
     });
 
   // Each row as its type and text, such as "group:Team: A" or "row:2"
-  private static List<string> Rows(IRenderedFragment grid) =>
+  private static List<string> Rows<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("tbody tr").Select(tr => tr.ClassList.Contains("pixata-blazor-grid-group-row")
       ? $"group:{tr.TextContent.Trim()}"
       : tr.ClassList.Contains("pixata-blazor-grid-group-footer")
         ? $"footer:{string.Concat(tr.Children.Select(c => c.TextContent.Trim()))}"
         : $"row:{tr.Children.First(c => !c.ClassList.Contains("pixata-blazor-grid-group-cell")).TextContent.Trim()}")];
 
-  private static List<string> Chips(IRenderedFragment grid) =>
+  private static List<string> Chips<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll(".pixata-blazor-grid-group-chip").Select(c => c.TextContent.Trim())];
 
   [TestMethod]
@@ -103,7 +102,7 @@ public class PixataGridGrouping_Tests {
 
   [TestMethod]
   public void NotGroupable_HasNoPanelAndHeadersCannotBeDragged() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People)
       .Add(g => g.GridColumns, b => Column(b, nameof(Person.Team))));
 
@@ -178,7 +177,7 @@ public class PixataGridGrouping_Tests {
   [TestMethod]
   public void Aggregates_CoverAllTheDataNotJustThePage() {
     IRenderedComponent<PixataGrid<Person>> grid = Render(true);
-    grid.SetParametersAndRender(p => p.Add(g => g.Pageable, true).Add(g => g.PageSize, 2));
+    grid.Render(p => p.Add(g => g.Pageable, true).Add(g => g.PageSize, 2));
 
     Assert.AreEqual(2, grid.FindAll("tbody tr").Count);
     Assert.AreEqual("Sum 150, max 50", grid.Find("tfoot").TextContent.Trim());
@@ -187,7 +186,7 @@ public class PixataGridGrouping_Tests {
   [TestMethod]
   public void PagingInTheMiddleOfAGroup_StillAggregatesTheWholeGroup() {
     IRenderedComponent<PixataGrid<Person>> grid = Render(true);
-    grid.SetParametersAndRender(p => p.Add(g => g.Pageable, true).Add(g => g.PageSize, 3));
+    grid.Render(p => p.Add(g => g.Pageable, true).Add(g => g.PageSize, 3));
     grid.InvokeAsync(() => grid.Instance.GroupBy(nameof(Person.Team)));
 
     // The page has team A's two people and the first of team B's
@@ -260,7 +259,7 @@ public class PixataGridGrouping_Tests {
   [TestMethod]
   public void OnRead_IsAskedForTheGroupsAndAggregates_AndUsesTheResultsGroups() {
     List<GridRequest> requests = [];
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Person>>(this, args => {
         requests.Add(args.Request);
         args.SetResult(People.ToGridResult(args.Request));
@@ -292,7 +291,7 @@ public class PixataGridGrouping_Tests {
 
   [TestMethod]
   public void OnRead_WithoutGroupsInTheResult_GroupsThePage() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Person>>(this, args => {
         GridResult<Person> result = People.ToGridResult(args.Request);
         args.Data = result.Data;
@@ -313,7 +312,7 @@ public class PixataGridGrouping_Tests {
   public void Grouping_GoesBackToTheFirstPage() {
     int? pageChanged = null;
     IRenderedComponent<PixataGrid<Person>> grid = Render();
-    grid.SetParametersAndRender(p => p
+    grid.Render(p => p
       .Add(g => g.Pageable, true)
       .Add(g => g.PageSize, 2)
       .Add(g => g.Page, 2)

@@ -1,0 +1,146 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@implements IHandleEvent
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@using System.ComponentModel
+@using System.Globalization
+
+@* The day, multi-day and week views of a PixataScheduler. Used by the scheduler; not for use on its own *@
+@if (Scheduler.Model<PixataSchedulerTimeGridModel<TItem>>() is { } model && Scheduler.ActiveView is PixataSchedulerDayViewBase<TItem> view && model.Blocks.Count > 0) {
+  int columnCount = model.Blocks[0].Columns.Count;
+  bool horizontalGroups = Scheduler.IsGrouped && !model.Vertical;
+  <div class="pixata-blazor-scheduler-grid pixata-blazor-scheduler-time-grid" style="@($"--pixata-blazor-scheduler-column-count:{columnCount};")">
+    <div class="pixata-blazor-scheduler-head">
+      @if (horizontalGroups) {
+        @foreach (List<(PixataSchedulerGroupLevel Level, int Span)> row in PixataSchedulerModelBuilder.GroupHeaders(model.Groups)) {
+          <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-group-row">
+            <div class="pixata-blazor-scheduler-side-cell"></div>
+            <div class="pixata-blazor-scheduler-cells">
+              @foreach ((PixataSchedulerGroupLevel level, int span) in row) {
+                <div class="pixata-blazor-scheduler-cell pixata-blazor-scheduler-group-cell" style="@($"grid-column:span {span * model.Days.Count};")">
+                  @Scheduler.RenderGroupHeader(level)
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+      <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-date-row">
+        <div class="pixata-blazor-scheduler-side-cell"></div>
+        <div class="pixata-blazor-scheduler-cells">
+          @foreach (PixataSchedulerColumn column in model.Blocks[0].Columns) {
+            <div class="@PixataCss.Classes("pixata-blazor-scheduler-cell", "pixata-blazor-scheduler-date-cell", column.Day == DateTime.Today ? "pixata-blazor-scheduler-today" : null)">
+              @if (view.DateHeaderTemplate is not null) {
+                @view.DateHeaderTemplate(column.Day)
+              } else {
+                @DateHeader(column.Day)
+              }
+            </div>
+          }
+        </div>
+      </div>
+      @if (!model.Vertical && model.ShowAllDayRow) {
+        @AllDayRow(model, model.Blocks[0], view)
+      }
+    </div>
+    @foreach (PixataSchedulerTimeBlock<TItem> block in model.Blocks) {
+      @if (block.Group is { } group) {
+        <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-group-band">
+          @foreach (PixataSchedulerGroupLevel level in group.Levels) {
+            <span class="pixata-blazor-scheduler-group-band-item">@Scheduler.RenderGroupHeader(level)</span>
+          }
+        </div>
+        @if (model.ShowAllDayRow) {
+          @AllDayRow(model, block, view)
+        }
+      }
+      <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-time-body">
+        <div class="pixata-blazor-scheduler-side-cell pixata-blazor-scheduler-times">
+          @for (int d = 0; d < model.Divisions.Count; d += model.DivisionsPerSlot) {
+            int span = Math.Min(model.DivisionsPerSlot, model.Divisions.Count - d);
+            <div class="pixata-blazor-scheduler-time-cell" style="@($"--pixata-blazor-scheduler-span:{span};")">
+              <span>@PixataSchedulerDates.Time(DateTime.Today + model.Divisions[d], Scheduler.CurrentCulture)</span>
+            </div>
+          }
+        </div>
+        <div class="pixata-blazor-scheduler-cells">
+          @for (int c = 0; c < block.Columns.Count; c++) {
+            PixataSchedulerColumn column = block.Columns[c];
+            List<PixataSchedulerBox<TItem>> boxes = block.Boxes[c];
+            <div class="@PixataCss.Classes("pixata-blazor-scheduler-day-column", column.Day == DateTime.Today ? "pixata-blazor-scheduler-today" : null)">
+              @for (int d = 0; d < model.Divisions.Count; d++) {
+                DateTime start = column.Day + model.Divisions[d];
+                PixataSchedulerSlot slot = new(start, start + model.Division, false, column.Group.Index);
+                bool slotEnd = (d + 1) % model.DivisionsPerSlot == 0 || d == model.Divisions.Count - 1;
+                @Scheduler.RenderSlot(slot,
+                  PixataCss.Classes(Scheduler.IsWorkTime(view, start) ? null : "pixata-blazor-scheduler-nonwork", slotEnd ? "pixata-blazor-scheduler-slot-end" : null),
+                  view.SlotTemplate is null ? null : view.SlotTemplate(new() { Start = slot.Start, End = slot.End, Resources = column.Group.Resources }))
+              }
+              @if (c == 0 && ScrollIndex(model, view) is > 0 and int scrollIndex) {
+                <span class="pixata-blazor-scheduler-scroll-mark" data-pixata-scroll-to="true" style="@($"--pixata-blazor-scheduler-span:{scrollIndex};")"></span>
+              }
+              <div class="pixata-blazor-scheduler-event-layer">
+                @foreach (PixataSchedulerBox<TItem> box in boxes) {
+                  @Scheduler.RenderAppointment(box.Item, new(PixataSchedulerEventPlacement.Vertical,
+                    PixataSchedulerRendering.BoxStyle(box.Top, box.Height, box.Lane, box.Lanes), false, box.ContinuesBefore, box.ContinuesAfter))
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
+
+@code {
+
+  [Parameter, EditorRequired]
+  public PixataScheduler<TItem> Scheduler { get; set; } = null!;
+
+  // Events are handled by the scheduler, so that it renders again (and this with it)
+  Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg) =>
+    ((IHandleEvent)Scheduler).HandleEventAsync(callback, arg);
+
+  // Where the view scrolls to when it is shown: the division holding the start of the working day
+  private static int ScrollIndex(PixataSchedulerTimeGridModel<TItem> model, PixataSchedulerDayViewBase<TItem> view) =>
+    model.Divisions.FindLastIndex(t => t <= view.WorkDayStart.TimeOfDay);
+
+  private RenderFragment DateHeader(DateTime day) {
+    CultureInfo culture = Scheduler.CurrentCulture;
+    string dayName = culture.DateTimeFormat.GetAbbreviatedDayName(day.DayOfWeek);
+    string label = day.ToString(culture.DateTimeFormat.LongDatePattern, culture);
+    return @<text>
+      @if (Scheduler.CanDrillDown) {
+        <button type="button" class="pixata-blazor-scheduler-date-link" aria-label="@label" @onclick="() => Scheduler.DrillDown(day)">
+          <span class="pixata-blazor-scheduler-day-name">@dayName</span>
+          <span class="pixata-blazor-scheduler-day-number">@day.Day.ToString(culture)</span>
+        </button>
+      } else {
+        <span class="pixata-blazor-scheduler-date-text" aria-label="@label">
+          <span class="pixata-blazor-scheduler-day-name">@dayName</span>
+          <span class="pixata-blazor-scheduler-day-number">@day.Day.ToString(culture)</span>
+        </span>
+      }
+    </text>;
+  }
+
+  private RenderFragment AllDayRow(PixataSchedulerTimeGridModel<TItem> model, PixataSchedulerTimeBlock<TItem> block, PixataSchedulerDayViewBase<TItem> view) =>
+    @<div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-all-day-row" style="@($"--pixata-blazor-scheduler-bar-rows:{block.AllDayRows};")">
+      <div class="pixata-blazor-scheduler-side-cell pixata-blazor-scheduler-all-day-label">@Scheduler.Text.AllDay</div>
+      <div class="pixata-blazor-scheduler-cells">
+        @foreach (PixataSchedulerColumn column in block.Columns) {
+          PixataSchedulerSlot slot = new(column.Day, column.Day.AddDays(1), true, column.Group.Index);
+          @Scheduler.RenderSlot(slot, null,
+            view.AllDaySlotTemplate is null ? null : view.AllDaySlotTemplate(new() { Start = slot.Start, End = slot.End, Resources = column.Group.Resources }))
+        }
+        <div class="pixata-blazor-scheduler-bar-layer">
+          @foreach (PixataSchedulerBar<TItem> bar in block.AllDayBars) {
+            @Scheduler.RenderAppointment(bar.Item, new(PixataSchedulerEventPlacement.Horizontal,
+              PixataSchedulerRendering.BarStyle(bar.Start, bar.Width, bar.Row), true, bar.ContinuesBefore, bar.ContinuesAfter))
+          }
+        </div>
+      </div>
+    </div>;
+
+}

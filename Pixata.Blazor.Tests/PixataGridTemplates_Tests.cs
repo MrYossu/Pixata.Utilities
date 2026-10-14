@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Extensions.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -33,7 +32,7 @@ public class PixataGridTemplates_Tests {
     _ctx.Dispose();
 
   private IRenderedComponent<PixataGrid<Person>> Render(Action<ComponentParameterCollectionBuilder<PixataGrid<Person>>>? grid = null, Action<RenderTreeBuilder>? ageColumn = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, People)
         .Add(g => g.GridColumns, b => {
           b.OpenComponent<PixataGridColumn<Person>>(0);
@@ -73,7 +72,7 @@ public class PixataGridTemplates_Tests {
       p => p.Add(g => g.OnRowRender, args => args.Class = args.Item.Name == "Bob" ? "bob" : null),
       b => b.AddAttribute(12, "OnCellRender", (Action<PixataGridCellRenderEventArgs<Person>>)(args => args.Class = (int)args.Value! > 50 ? "old" : null)));
 
-    IRefreshableElementCollection<IElement> rows = grid.FindAll("tbody tr");
+    IReadOnlyList<IElement> rows = grid.FindAll("tbody tr");
     Assert.IsFalse(rows[0].ClassList.Contains("bob"));
     Assert.IsTrue(rows[1].ClassList.Contains("bob"));
     Assert.IsFalse(rows[0].QuerySelectorAll("td")[1].ClassList.Contains("old"));
@@ -111,7 +110,7 @@ public class PixataGridTemplates_Tests {
   public void LoaderTemplate_ReplacesTheDots() {
     TaskCompletionSource slow = new();
     int call = 0;
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Person>>(this, async args => {
         call++;
         if (call == 2) {

@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Extensions.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -65,7 +64,7 @@ public class PixataGridFiltering_Tests {
   }
 
   private IRenderedComponent<PixataGrid<Person>> Render(PixataGridFilterMode mode, RenderFragment? toolbar = null, Action<RenderTreeBuilder, string, int>? extra = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, People())
         .Add(g => g.FilterMode, mode)
         .Add(g => g.GridColumns, b => Columns(b, extra));
@@ -74,13 +73,13 @@ public class PixataGridFiltering_Tests {
       }
     });
 
-  private static string Names(IRenderedFragment grid) =>
+  private static string Names<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     string.Join(",", grid.FindAll("tbody tr").Select(tr => tr.QuerySelector("td")!.TextContent.Trim()));
 
-  private static IElement FilterCell(IRenderedFragment grid, int column) =>
+  private static IElement FilterCell<TComponent>(IRenderedComponent<TComponent> grid, int column) where TComponent : IComponent =>
     grid.FindAll(".pixata-blazor-grid-filter-cell")[column];
 
-  private static void Pick(IRenderedFragment grid, IElement dropdown, string text) {
+  private static void Pick<TComponent>(IRenderedComponent<TComponent> grid, IElement dropdown, string text) where TComponent : IComponent {
     dropdown.QuerySelector(".pixata-blazor-grid-dropdown-button")!.Click();
     grid.FindAll(".pixata-blazor-grid-dropdown-item").Single(li => li.TextContent.Trim() == text).Click();
   }
@@ -173,7 +172,7 @@ public class PixataGridFiltering_Tests {
 
   [TestMethod]
   public void FilterMenu_ClickingTheIconDoesntSort() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.Sortable, true)
       .Add(g => g.FilterMode, PixataGridFilterMode.FilterMenu)
@@ -233,7 +232,7 @@ public class PixataGridFiltering_Tests {
   [TestMethod]
   public void Filtering_GoesBackToTheFirstPage() {
     int page = 0;
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.Pageable, true)
       .Add(g => g.PageSize, 1)

@@ -1,0 +1,486 @@
+@page "/SchedulerSample"
+@using System.Globalization
+@using Pixata.Blazor.Components
+@using Pixata.Blazor.Sample.Models
+
+<SitePageTitle>Scheduler</SitePageTitle>
+
+@* The schedulers are wide, so on this page the Pixata and Telerik columns always sit one above the other *@
+<style>
+  .scheduler-sample .component-comparison-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scheduler-sample-log {
+    max-height: 12rem;
+    margin: 0 0 2rem;
+    padding: .5rem .75rem;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    background: #fafafa;
+    font-size: .8rem;
+    list-style: none;
+  }
+
+  .scheduler-sample-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: .75rem;
+  }
+
+  .scheduler-sample-important {
+    outline: 2px dashed rgba(0, 0, 0, .45);
+    outline-offset: -2px;
+  }
+
+  .scheduler-sample-lunch {
+    background-image: repeating-linear-gradient(45deg, transparent 0 6px, rgba(255, 193, 7, .18) 6px 12px);
+  }
+
+  .scheduler-sample-template-title {
+    font-weight: 600;
+  }
+
+  .scheduler-sample-template-description {
+    display: block;
+    opacity: .85;
+    white-space: normal;
+  }
+
+  .scheduler-sample-date-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+  }
+
+  .scheduler-sample-form {
+    display: grid;
+    gap: .5rem;
+  }
+
+  .scheduler-sample-form label {
+    display: grid;
+    gap: .125rem;
+  }
+
+  .scheduler-sample-form input,
+  .scheduler-sample-form textarea {
+    padding: .25rem .5rem;
+    border: 1px solid #ccc;
+    border-radius: .25rem;
+    font: inherit;
+  }
+</style>
+
+<div class="scheduler-sample">
+  <h3>Scheduler</h3>
+
+  <p>
+    Each scheduler below has its own copy of the appointments, so you can change one without changing the other. Double-click
+    a slot (or select it and press Enter) to add an appointment, double-click an appointment to edit it, drag it to move it,
+    and drag its edges to resize it. On a touch screen, tap an appointment to select it before dragging it.
+  </p>
+
+  <ComponentComparison Title="Views, editing, dragging and recurrence">
+    <Description>
+      The day, week, multi-day, month, timeline and agenda views, with appointments coloured by room. "Morning run" repeats
+      every weekday (one occurrence has been moved), and "Team lunch" is on the last Friday of each month. "Fire drill" is
+      read-only. Use the toolbar to change the view and date, or the keyboard: Page Up and Page Down move between periods,
+      T goes to today, and the arrow keys move the selected slot.
+    </Description>
+    <Pixata>
+      <PixataScheduler Data="@_pixataData" @bind-Date="@_pixataDate" @bind-View="@_pixataView" Height="600px"
+                       AllowCreate="true" AllowUpdate="true" AllowDelete="true"
+                       OnCreate="@(args => Create(_pixataData, args.Item, "Pixata"))"
+                       OnUpdate="@(args => Update(_pixataData, args.Item, args.EditMode.ToString(), "Pixata"))"
+                       OnDelete="@(args => Delete(_pixataData, args.Item, args.EditMode.ToString(), "Pixata"))"
+                       OnItemClick="@(args => Log("Pixata", $"OnItemClick: {((SchedulerSampleAppointment)args.Item).Title}"))">
+        <SchedulerResources>
+          <PixataSchedulerResource Field="@nameof(SchedulerSampleAppointment.Room)" Title="Room" Data="@_rooms" />
+        </SchedulerResources>
+        <SchedulerViews>
+          <PixataSchedulerDayView StartTime="@_dayStart" />
+          <PixataSchedulerWeekView StartTime="@_dayStart" />
+          <PixataSchedulerMultiDayView StartTime="@_dayStart" NumberOfDays="3" />
+          <PixataSchedulerMonthView />
+          <PixataSchedulerTimelineView StartTime="@_dayStart" />
+          <PixataSchedulerAgendaView />
+        </SchedulerViews>
+      </PixataScheduler>
+    </Pixata>
+    <Telerik>
+      <TelerikScheduler Data="@_telerikData" @bind-Date="@_telerikDate" @bind-View="@_telerikView" Height="600px"
+                        AllowCreate="true" AllowUpdate="true" AllowDelete="true"
+                        OnCreate="@(args => Create(_telerikData, args.Item, "Telerik"))"
+                        OnUpdate="@(args => Update(_telerikData, args.Item, args.EditMode.ToString(), "Telerik"))"
+                        OnDelete="@(args => Delete(_telerikData, args.Item, args.EditMode.ToString(), "Telerik"))"
+                        OnItemClick="@(args => Log("Telerik", $"OnItemClick: {((SchedulerSampleAppointment)args.Item).Title}"))">
+        <SchedulerResources>
+          <SchedulerResource Field="@nameof(SchedulerSampleAppointment.Room)" Title="Room" Data="@_rooms" />
+        </SchedulerResources>
+        <SchedulerViews>
+          <SchedulerDayView StartTime="@_dayStart" />
+          <SchedulerWeekView StartTime="@_dayStart" />
+          <SchedulerMultiDayView StartTime="@_dayStart" NumberOfDays="3" />
+          <SchedulerMonthView />
+          <SchedulerTimelineView StartTime="@_dayStart" />
+          <SchedulerAgendaView />
+        </SchedulerViews>
+      </TelerikScheduler>
+    </Telerik>
+  </ComponentComparison>
+
+  <h5>Events</h5>
+  <ul class="scheduler-sample-log" aria-live="polite">
+    @foreach (string entry in _log) {
+      <li>@entry</li>
+    }
+    @if (_log.Count == 0) {
+      <li>Changes made in the schedulers on this page appear here</li>
+    }
+  </ul>
+
+  <ComponentComparison Title="Resources and grouping">
+    <Description>
+      Appointments grouped by room, in the week and timeline views. Drag an appointment from one room to another to change its
+      room. The edit form has a drop-down list for each resource.
+    </Description>
+    <Pixata>
+      <div class="scheduler-sample-toggles">
+        <button type="button" class="@PixataCss.Button(null, null, null, null)" @onclick="@(() => _pixataVertical = !_pixataVertical)">
+          @(_pixataVertical ? "Group horizontally" : "Group vertically")
+        </button>
+      </div>
+      <PixataScheduler Data="@_pixataGroupedData" @bind-Date="@_pixataGroupedDate" Height="560px"
+                       AllowCreate="true" AllowUpdate="true" AllowDelete="true"
+                       OnCreate="@(args => Create(_pixataGroupedData, args.Item, "Pixata"))"
+                       OnUpdate="@(args => Update(_pixataGroupedData, args.Item, args.EditMode.ToString(), "Pixata"))"
+                       OnDelete="@(args => Delete(_pixataGroupedData, args.Item, args.EditMode.ToString(), "Pixata"))">
+        <SchedulerResources>
+          <PixataSchedulerResource Field="@nameof(SchedulerSampleAppointment.Room)" Title="Room" Data="@_rooms" />
+          <PixataSchedulerResource Field="@nameof(SchedulerSampleAppointment.Manager)" Title="Manager" Data="@_managers" />
+        </SchedulerResources>
+        <SchedulerSettings>
+          <PixataSchedulerGroupSettings Resources="@_groupBy" Orientation="@(_pixataVertical ? PixataSchedulerGroupOrientation.Vertical : PixataSchedulerGroupOrientation.Horizontal)" />
+        </SchedulerSettings>
+        <SchedulerViews>
+          <PixataSchedulerWeekView StartTime="@_dayStart" EndTime="@_dayEnd" />
+          <PixataSchedulerTimelineView StartTime="@_dayStart" EndTime="@_dayEnd" ColumnWidth="80" />
+        </SchedulerViews>
+      </PixataScheduler>
+    </Pixata>
+    <Telerik>
+      <div class="scheduler-sample-toggles">
+        <TelerikButton OnClick="@(() => _telerikVertical = !_telerikVertical)">
+          @(_telerikVertical ? "Group horizontally" : "Group vertically")
+        </TelerikButton>
+      </div>
+      <TelerikScheduler Data="@_telerikGroupedData" @bind-Date="@_telerikGroupedDate" Height="560px"
+                        AllowCreate="true" AllowUpdate="true" AllowDelete="true"
+                        OnCreate="@(args => Create(_telerikGroupedData, args.Item, "Telerik"))"
+                        OnUpdate="@(args => Update(_telerikGroupedData, args.Item, args.EditMode.ToString(), "Telerik"))"
+                        OnDelete="@(args => Delete(_telerikGroupedData, args.Item, args.EditMode.ToString(), "Telerik"))">
+        <SchedulerResources>
+          <SchedulerResource Field="@nameof(SchedulerSampleAppointment.Room)" Title="Room" Data="@_rooms" />
+          <SchedulerResource Field="@nameof(SchedulerSampleAppointment.Manager)" Title="Manager" Data="@_managers" />
+        </SchedulerResources>
+        <SchedulerSettings>
+          <SchedulerGroupSettings Resources="@_groupBy" Orientation="@(_telerikVertical ? SchedulerGroupOrientation.Vertical : SchedulerGroupOrientation.Horizontal)" />
+        </SchedulerSettings>
+        <SchedulerViews>
+          <SchedulerWeekView StartTime="@_dayStart" EndTime="@_dayEnd" />
+          <SchedulerTimelineView StartTime="@_dayStart" EndTime="@_dayEnd" ColumnWidth="80" />
+        </SchedulerViews>
+      </TelerikScheduler>
+    </Telerik>
+  </ComponentComparison>
+
+  <ComponentComparison Title="Templates and render events">
+    <Description>
+      An item template showing each appointment's description, a date header template, OnItemRender outlining the meetings,
+      and OnCellRender shading the lunch hour.
+    </Description>
+    <Pixata>
+      <PixataScheduler Data="@_pixataTemplateData" Date="@_today" Height="500px" OnItemRender="@ItemRender" OnCellRender="@CellRender">
+        <ItemTemplate>
+          <span class="scheduler-sample-template-title">@context.Title</span>
+          <span class="scheduler-sample-template-description">@context.Description</span>
+        </ItemTemplate>
+        <SchedulerViews>
+          <PixataSchedulerWeekView StartTime="@_dayStart" EndTime="@_dayEnd">
+            <DateHeaderTemplate>
+              <span class="scheduler-sample-date-header">
+                <strong>@context.ToString("ddd")</strong>
+                <span>@context.ToString("d MMM")</span>
+              </span>
+            </DateHeaderTemplate>
+          </PixataSchedulerWeekView>
+        </SchedulerViews>
+      </PixataScheduler>
+    </Pixata>
+    <Telerik>
+      <TelerikScheduler Data="@_telerikTemplateData" Date="@_today" Height="500px" OnItemRender="@ItemRender" OnCellRender="@CellRender">
+        <ItemTemplate>
+          @{
+            SchedulerSampleAppointment appointment = (SchedulerSampleAppointment)context;
+          }
+          <span class="scheduler-sample-template-title">@appointment.Title</span>
+          <span class="scheduler-sample-template-description">@appointment.Description</span>
+        </ItemTemplate>
+        <SchedulerViews>
+          <SchedulerWeekView StartTime="@_dayStart" EndTime="@_dayEnd">
+            <DateHeaderTemplate>
+              <span class="scheduler-sample-date-header">
+                <strong>@context.ToString("ddd")</strong>
+                <span>@context.ToString("d MMM")</span>
+              </span>
+            </DateHeaderTemplate>
+          </SchedulerWeekView>
+        </SchedulerViews>
+      </TelerikScheduler>
+    </Telerik>
+  </ComponentComparison>
+
+  <ComponentComparison Title="Culture and a custom edit form">
+    <Description>
+      The Pixata scheduler takes its day and month names, date formats and first day of the week from its Culture parameter
+      (French here), and its text from Messages, and has a custom edit form (double-click an appointment to see it). The
+      Telerik scheduler takes its culture from the app and its text from the app's localisation service, so it is shown with
+      its built-in form and a custom title.
+    </Description>
+    <Pixata>
+      <PixataScheduler Data="@_pixataCultureData" Date="@_today" View="PixataSchedulerView.Month" Height="600px"
+                       Culture="@_french" Messages="@_frenchMessages"
+                       AllowCreate="true" AllowUpdate="true" AllowDelete="true"
+                       OnCreate="@(args => Create(_pixataCultureData, args.Item, "Pixata"))"
+                       OnUpdate="@(args => Update(_pixataCultureData, args.Item, args.EditMode.ToString(), "Pixata"))"
+                       OnDelete="@(args => Delete(_pixataCultureData, args.Item, args.EditMode.ToString(), "Pixata"))">
+        <SchedulerSettings>
+          <PixataSchedulerPopupEditSettings Width="26rem" Title="Rendez-vous" />
+          <PixataSchedulerPopupEditFormSettings>
+            <FormTemplate>
+              <div class="scheduler-sample-form">
+                <label>
+                  Titre
+                  <InputText @bind-Value="context.Item.Title" />
+                </label>
+                <ValidationMessage For="() => context.Item.Title" />
+                <label>
+                  Début
+                  <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="context.Item.Start" />
+                </label>
+                <label>
+                  Fin
+                  <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="context.Item.End" />
+                </label>
+                <ValidationMessage For="() => context.Item.End" />
+                <label>
+                  Description
+                  <InputTextArea @bind-Value="context.Item.Description" rows="3" />
+                </label>
+              </div>
+            </FormTemplate>
+          </PixataSchedulerPopupEditFormSettings>
+        </SchedulerSettings>
+        <SchedulerViews>
+          <PixataSchedulerDayView StartTime="@_dayStart" />
+          <PixataSchedulerWeekView StartTime="@_dayStart" />
+          <PixataSchedulerMonthView />
+          <PixataSchedulerAgendaView />
+        </SchedulerViews>
+      </PixataScheduler>
+    </Pixata>
+    <Telerik>
+      <TelerikScheduler Data="@_telerikCultureData" Date="@_today" View="SchedulerView.Month" Height="600px"
+                        AllowCreate="true" AllowUpdate="true" AllowDelete="true"
+                        OnCreate="@(args => Create(_telerikCultureData, args.Item, "Telerik"))"
+                        OnUpdate="@(args => Update(_telerikCultureData, args.Item, args.EditMode.ToString(), "Telerik"))"
+                        OnDelete="@(args => Delete(_telerikCultureData, args.Item, args.EditMode.ToString(), "Telerik"))">
+        <SchedulerSettings>
+          <SchedulerPopupEditSettings Width="26rem" Title="Appointment" />
+        </SchedulerSettings>
+        <SchedulerViews>
+          <SchedulerDayView StartTime="@_dayStart" />
+          <SchedulerWeekView StartTime="@_dayStart" />
+          <SchedulerMonthView />
+          <SchedulerAgendaView />
+        </SchedulerViews>
+      </TelerikScheduler>
+    </Telerik>
+  </ComponentComparison>
+</div>
+
+@code {
+
+  private static readonly DateTime Today = DateTime.Today;
+
+  private readonly DateTime _today = Today;
+  private readonly DateTime _dayStart = new(2000, 1, 1, 8, 0, 0);
+  private readonly DateTime _dayEnd = new(2000, 1, 1, 19, 0, 0);
+
+  private DateTime _pixataDate = Today;
+  private DateTime _telerikDate = Today;
+  private PixataSchedulerView _pixataView = PixataSchedulerView.Week;
+  private SchedulerView _telerikView = SchedulerView.Week;
+
+  private DateTime _pixataGroupedDate = Today;
+  private DateTime _telerikGroupedDate = Today;
+  private bool _pixataVertical;
+  private bool _telerikVertical;
+  private readonly List<string> _groupBy = [nameof(SchedulerSampleAppointment.Room)];
+
+  private readonly CultureInfo _french = CultureInfo.GetCultureInfo("fr-FR");
+
+  private readonly PixataSchedulerMessages _frenchMessages = new() {
+    Today = "Aujourd'hui",
+    Previous = "Précédent",
+    Next = "Suivant",
+    NewEvent = "Nouveau",
+    ChooseDate = "Choisir une date",
+    SelectView = "Choisir une vue",
+    DayView = "Jour",
+    WeekView = "Semaine",
+    MonthView = "Mois",
+    AgendaView = "Agenda",
+    AllDay = "journée",
+    MoreEventsFormat = "{0} de plus",
+    ShowWorkHours = "Heures de bureau",
+    ShowFullDay = "Journée entière",
+    Date = "Date",
+    Time = "Heure",
+    Event = "Rendez-vous",
+    Save = "Enregistrer",
+    Cancel = "Annuler",
+    Delete = "Supprimer",
+    DeleteEvent = "Supprimer",
+    Close = "Fermer",
+    TitleRequired = "Le titre est obligatoire",
+    EndBeforeStart = "La fin doit être après le début",
+    EditRecurringTitle = "Modifier un rendez-vous périodique",
+    EditRecurringText = "Voulez-vous modifier cette occurrence ou toute la série ?",
+    EditOccurrence = "Cette occurrence",
+    EditSeries = "Toute la série",
+    DeleteRecurringTitle = "Supprimer un rendez-vous périodique",
+    DeleteRecurringText = "Voulez-vous supprimer cette occurrence ou toute la série ?",
+    DeleteOccurrence = "Cette occurrence",
+    DeleteSeries = "Toute la série",
+    MoveRecurringTitle = "Déplacer un rendez-vous périodique",
+    MoveRecurringText = "Voulez-vous déplacer cette occurrence ou toute la série ?",
+    MoveOccurrence = "Cette occurrence",
+    MoveSeries = "Toute la série"
+  };
+
+  private readonly List<SchedulerSampleResource> _rooms = [
+    new() { Text = "Small room", Value = "small", Color = "#6eb3fa" },
+    new() { Text = "Big room", Value = "big", Color = "#f58a8a" }
+  ];
+
+  private readonly List<SchedulerSampleResource> _managers = [
+    new() { Text = "Alex", Value = "alex" },
+    new() { Text = "Bobbie", Value = "bobbie" }
+  ];
+
+  private readonly List<SchedulerSampleAppointment> _pixataData = SampleData();
+  private List<SchedulerSampleAppointment> _telerikData = SampleData();
+  private readonly List<SchedulerSampleAppointment> _pixataGroupedData = SampleData();
+  private List<SchedulerSampleAppointment> _telerikGroupedData = SampleData();
+  private readonly List<SchedulerSampleAppointment> _pixataTemplateData = SampleData();
+  private readonly List<SchedulerSampleAppointment> _telerikTemplateData = SampleData();
+  private readonly List<SchedulerSampleAppointment> _pixataCultureData = SampleData();
+  private List<SchedulerSampleAppointment> _telerikCultureData = SampleData();
+
+  private readonly List<string> _log = [];
+
+  // The same appointments for every scheduler, around the current week
+  private static List<SchedulerSampleAppointment> SampleData() {
+    DateTime monday = Today.AddDays(-(((int)Today.DayOfWeek + 6) % 7));
+    DateTime lunchStart = new DateTime(Today.Year, Today.Month, 1).AddMonths(-3);
+    lunchStart = lunchStart.AddMonths(1).AddDays(-1);
+    while (lunchStart.DayOfWeek != DayOfWeek.Friday) {
+      lunchStart = lunchStart.AddDays(-1);
+    }
+    SchedulerSampleAppointment run = new() {
+      Title = "Morning run",
+      Description = "Round the park",
+      Start = monday.AddDays(-7).AddHours(9),
+      End = monday.AddDays(-7).AddHours(9.5),
+      RecurrenceRule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+      RecurrenceExceptions = [monday.AddDays(1).AddHours(9)]
+    };
+    return [
+      new() { Title = "Board meeting", Description = "Quarterly results", Start = monday.AddDays(2).AddHours(10), End = monday.AddDays(2).AddHours(11.5), Room = "big", Manager = "alex" },
+      new() { Title = "Vet visit", Description = "Annual check-up", Start = monday.AddHours(11.5), End = monday.AddHours(12) },
+      new() { Title = "Planning", Description = "Next sprint", Start = monday.AddDays(2).AddHours(10.5), End = monday.AddDays(2).AddHours(12.75), Room = "small", Manager = "bobbie" },
+      new() { Title = "Code review", Description = "The scheduler", Start = monday.AddDays(2).AddHours(11), End = monday.AddDays(2).AddHours(12), Room = "small", Manager = "alex" },
+      new() { Title = "Trip to Hawaii", Description = "Holiday", Start = monday.AddDays(1), End = monday.AddDays(4), IsAllDay = true },
+      new() { Title = "Conference", Description = "Blazor Days", Start = monday.AddDays(3), End = monday.AddDays(4), IsAllDay = true, Room = "big", Manager = "bobbie" },
+      new() { Title = "Fire drill", Description = "Read-only", Start = monday.AddDays(1).AddHours(15), End = monday.AddDays(1).AddHours(15.5), ReadOnly = true, Room = "big" },
+      new() { Title = "Server upgrade", Description = "Overnight", Start = monday.AddDays(3).AddHours(22), End = monday.AddDays(4).AddHours(6), Room = "small" },
+      new() { Title = "Team lunch", Description = "Last Friday of the month", Start = lunchStart.AddHours(12), End = lunchStart.AddHours(13), RecurrenceRule = "FREQ=MONTHLY;BYDAY=-1FR", Room = "big", Manager = "alex" },
+      run,
+      new() { Title = "Morning run (early)", Description = "Moved for the trip", Start = monday.AddDays(1).AddHours(7.5), End = monday.AddDays(1).AddHours(8), RecurrenceId = run.Id }
+    ];
+  }
+
+  private void Log(string scheduler, string text) {
+    _log.Insert(0, $"{DateTime.Now:HH:mm:ss} {scheduler}: {text}");
+    if (_log.Count > 20) {
+      _log.RemoveAt(_log.Count - 1);
+    }
+  }
+
+  private void Create(List<SchedulerSampleAppointment> data, object item, string scheduler) {
+    SchedulerSampleAppointment appointment = (SchedulerSampleAppointment)item;
+    data.Add(appointment);
+    Log(scheduler, $"OnCreate: {appointment.Title}{(appointment.RecurrenceId is null ? "" : " (an exception to a series)")}");
+    Refresh(data);
+  }
+
+  private void Update(List<SchedulerSampleAppointment> data, object item, string editMode, string scheduler) {
+    SchedulerSampleAppointment appointment = (SchedulerSampleAppointment)item;
+    int index = data.FindIndex(a => a.Id == appointment.Id);
+    if (index >= 0) {
+      data[index] = appointment;
+    }
+    Log(scheduler, $"OnUpdate ({editMode}): {appointment.Title}, {appointment.Start:g} - {appointment.End:g}");
+    Refresh(data);
+  }
+
+  private void Delete(List<SchedulerSampleAppointment> data, object item, string editMode, string scheduler) {
+    SchedulerSampleAppointment appointment = (SchedulerSampleAppointment)item;
+    // Deleting a series deletes its exceptions too
+    data.RemoveAll(a => a.Id == appointment.Id || (appointment.RecurrenceRule is not null && a.RecurrenceId == appointment.Id));
+    Log(scheduler, $"OnDelete ({editMode}): {appointment.Title}");
+    Refresh(data);
+  }
+
+  // The Telerik scheduler only notices changes when it is given a new collection
+  private void Refresh(List<SchedulerSampleAppointment> data) {
+    if (ReferenceEquals(data, _telerikData)) {
+      _telerikData = [.. data];
+    } else if (ReferenceEquals(data, _telerikGroupedData)) {
+      _telerikGroupedData = [.. data];
+    } else if (ReferenceEquals(data, _telerikCultureData)) {
+      _telerikCultureData = [.. data];
+    }
+  }
+
+  private static bool IsMeeting(object item) =>
+    ((SchedulerSampleAppointment)item).Title.Contains("meeting", StringComparison.OrdinalIgnoreCase);
+
+  private static void ItemRender(PixataSchedulerItemRenderEventArgs args) =>
+    args.Class = IsMeeting(args.Item) ? "scheduler-sample-important" : null;
+
+  private static void ItemRender(SchedulerItemRenderEventArgs args) =>
+    args.Class = IsMeeting(args.Item) ? "scheduler-sample-important" : null;
+
+  private static void CellRender(PixataSchedulerCellRenderEventArgs args) =>
+    args.Class = !args.IsAllDay && args.Start.Hour == 12 ? "scheduler-sample-lunch" : null;
+
+  private static void CellRender(SchedulerCellRenderEventArgs args) =>
+    args.Class = !args.IsAllDay && args.Start.Hour == 12 ? "scheduler-sample-lunch" : null;
+
+}

@@ -1,0 +1,137 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@implements IHandleEvent
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@using System.ComponentModel
+@using System.Globalization
+
+@* The fields of a PixataScheduler's built-in edit form. Used by the scheduler; not for use on its own *@
+@if (Scheduler.EditModel is { } model && Scheduler.EditFormContext is { } context) {
+  string dateType = model.IsAllDay ? "date" : "datetime-local";
+  <div class="pixata-blazor-scheduler-form">
+    <div class="pixata-blazor-scheduler-form-field">
+      <label class="pixata-blazor-scheduler-form-label" for="@($"{_id}-title")">@Scheduler.Text.Title</label>
+      <div class="pixata-blazor-scheduler-form-value">
+        <span class="@InputClass(context, model, nameof(model.Title))">
+          <input id="@($"{_id}-title")" class="pixata-blazor-input-inner" value="@model.Title" aria-invalid="@Invalid(context, model, nameof(model.Title))"
+                 @onchange='args => Set(nameof(model.Title), () => model.Title = args.Value?.ToString() ?? "")' />
+        </span>
+        <ValidationMessage For="() => model.Title" />
+      </div>
+    </div>
+    <div class="pixata-blazor-scheduler-form-field">
+      <label class="pixata-blazor-scheduler-form-label" for="@($"{_id}-start")">@Scheduler.Text.Start</label>
+      <div class="pixata-blazor-scheduler-form-value">
+        <span class="@InputClass(context, model, nameof(model.Start))">
+          <input id="@($"{_id}-start")" type="@dateType" class="pixata-blazor-input-inner" value="@Format(model.Start, model.IsAllDay)"
+                 @onchange="args => SetDate(args, nameof(model.Start), model.SetStart)" />
+        </span>
+        <ValidationMessage For="() => model.Start" />
+      </div>
+    </div>
+    <div class="pixata-blazor-scheduler-form-field">
+      <label class="pixata-blazor-scheduler-form-label" for="@($"{_id}-end")">@Scheduler.Text.End</label>
+      <div class="pixata-blazor-scheduler-form-value">
+        <span class="@InputClass(context, model, nameof(model.End))">
+          <input id="@($"{_id}-end")" type="@dateType" class="pixata-blazor-input-inner" value="@Format(model.End, model.IsAllDay)" aria-invalid="@Invalid(context, model, nameof(model.End))"
+                 @onchange="args => SetDate(args, nameof(model.End), value => model.End = value)" />
+        </span>
+        <ValidationMessage For="() => model.End" />
+      </div>
+    </div>
+    @if (model.HasIsAllDay) {
+      <div class="pixata-blazor-scheduler-form-field">
+        <span class="pixata-blazor-scheduler-form-label"></span>
+        <div class="pixata-blazor-scheduler-form-value">
+          <label class="pixata-blazor-scheduler-checkbox-label">
+            <input type="checkbox" class="pixata-blazor-scheduler-checkbox" checked="@model.IsAllDay"
+                   @onchange="args => Set(nameof(model.IsAllDay), () => model.SetAllDay(args.Value is true, Scheduler.DefaultStartTime, Scheduler.DefaultLength))" />
+            @Scheduler.Text.AllDayEvent
+          </label>
+        </div>
+      </div>
+    }
+    @if (Scheduler.EditShowsRecurrence) {
+      <div class="pixata-blazor-scheduler-form-field">
+        <span class="pixata-blazor-scheduler-form-label">@Scheduler.Text.Repeat</span>
+        <div class="pixata-blazor-scheduler-form-value">
+          <PixataSchedulerRecurrenceEditor Rule="@model.RecurrenceRule"
+                                           RuleChanged="rule => Set(nameof(model.RecurrenceRule), () => model.RecurrenceRule = rule)"
+                                           Start="model.Start"
+                                           Culture="Scheduler.CurrentCulture"
+                                           FirstDayOfWeek="Scheduler.WeekStart"
+                                           Messages="Scheduler.Text" />
+        </div>
+      </div>
+    }
+    @if (model.HasDescription) {
+      <div class="pixata-blazor-scheduler-form-field">
+        <label class="pixata-blazor-scheduler-form-label" for="@($"{_id}-description")">@Scheduler.Text.Description</label>
+        <div class="pixata-blazor-scheduler-form-value">
+          <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-textarea")">
+            <textarea id="@($"{_id}-description")" class="pixata-blazor-input-inner" rows="3" value="@model.Description"
+                      @onchange='args => Set(nameof(model.Description), () => model.Description = args.Value?.ToString() ?? "")'></textarea>
+          </span>
+        </div>
+      </div>
+    }
+    @for (int r = 0; r < Scheduler.Resources.Count; r++) {
+      PixataSchedulerResource<TItem> resource = Scheduler.Resources[r];
+      string resourceField = resource.Field;
+      string selected = model.Resources.TryGetValue(resourceField, out string? key) ? key : "";
+      string id = $"{_id}-resource-{r}";
+      <div class="pixata-blazor-scheduler-form-field">
+        <label class="pixata-blazor-scheduler-form-label" for="@id">
+          <PixataIcon Icon="resource.Icon" />
+          @(resource.Title ?? resource.Field)
+        </label>
+        <div class="pixata-blazor-scheduler-form-value">
+          <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-select")">
+            <select id="@id" class="pixata-blazor-input-inner"
+                    @onchange='args => Set(resourceField, () => model.Resources[resourceField] = args.Value?.ToString() ?? "")'>
+              <option value="" selected="@(selected == "")">@Scheduler.Text.NoResource</option>
+              @for (int i = 0; i < resource.Items.Count; i++) {
+                string value = i.ToString(CultureInfo.InvariantCulture);
+                <option value="@value" selected="@(selected == value)">@resource.Items[i].Text</option>
+              }
+            </select>
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+@code {
+
+  [Parameter, EditorRequired]
+  public PixataScheduler<TItem> Scheduler { get; set; } = null!;
+
+  private readonly string _id = $"pixata-scheduler-form-{Guid.NewGuid():N}";
+
+  // Events are handled by the scheduler, so that it renders again (and this with it)
+  Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg) =>
+    ((IHandleEvent)Scheduler).HandleEventAsync(callback, arg);
+
+  private static string Format(DateTime value, bool isAllDay) =>
+    value.ToString(isAllDay ? "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm", CultureInfo.InvariantCulture);
+
+  private static string InputClass(EditContext context, object model, string field) =>
+    PixataCss.Classes(PixataCss.Input(null, null, null), context.GetValidationMessages(new FieldIdentifier(model, field)).Any() ? "pixata-blazor-invalid" : null);
+
+  private static string? Invalid(EditContext context, object model, string field) =>
+    context.GetValidationMessages(new FieldIdentifier(model, field)).Any() ? "true" : null;
+
+  private void Set(string field, Action change) {
+    change();
+    Scheduler.EditFieldChanged(field);
+  }
+
+  private void SetDate(ChangeEventArgs args, string field, Action<DateTime> change) {
+    string[] formats = ["yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.fff", "yyyy-MM-dd"];
+    if (DateTime.TryParseExact(args.Value?.ToString(), formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime value)) {
+      Set(field, () => change(value));
+    }
+  }
+
+}

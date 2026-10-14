@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -37,7 +36,7 @@ public class PixataGridDetail_Tests {
   }
 
   private IRenderedComponent<PixataGrid<Person>> RenderWithDetails(Action<ComponentParameterCollectionBuilder<PixataGrid<Person>>>? more = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, People)
         .Add(g => g.DetailTemplate, person => b => b.AddContent(0, $"Details of {person.Name}"))
         .Add(g => g.GridColumns, b => {
@@ -59,7 +58,7 @@ public class PixataGridDetail_Tests {
 
   [TestMethod]
   public void WithoutADetailTemplate_ThereIsNoExpandColumn() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People)
       .Add(g => g.GridColumns, b => Column<PixataGridColumn<Person>>(b, nameof(Person.Id))));
 
@@ -117,7 +116,7 @@ public class PixataGridDetail_Tests {
   // ---------- Dragging rows ----------
 
   private IRenderedComponent<PixataGrid<Person>> RenderDraggable(Action<PixataGridRowDropEventArgs<Person>> dropped, bool multiple = false) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People)
       .Add(g => g.RowDraggable, true)
       .Add(g => g.SelectionMode, multiple ? PixataGridSelectionMode.Multiple : PixataGridSelectionMode.None)
@@ -138,7 +137,7 @@ public class PixataGridDetail_Tests {
 
   [TestMethod]
   public void RowDraggable_WithoutADragColumn_AddsOneAtTheStart() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People)
       .Add(g => g.RowDraggable, true)
       .Add(g => g.GridColumns, b => Column<PixataGridColumn<Person>>(b, nameof(Person.Name))));
@@ -193,7 +192,7 @@ public class PixataGridDetail_Tests {
   public void DraggingASelectedRow_DragsAllTheSelectedRows() {
     PixataGridRowDropEventArgs<Person>? drop = null;
     IRenderedComponent<PixataGrid<Person>> grid = RenderDraggable(args => drop = args, true);
-    grid.SetParametersAndRender(p => p.Add(g => g.SelectedItems, [People[0], People[2]]));
+    grid.Render(p => p.Add(g => g.SelectedItems, [People[0], People[2]]));
 
     grid.InvokeAsync(() => grid.Instance.RowDrop(2, null, -1, "After"));
 

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -41,7 +40,7 @@ public class PixataGridInCell_Tests {
     _ctx.Dispose();
 
   private IRenderedComponent<PixataGrid<Person>> Render() =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, _people)
       .Add(g => g.EditMode, PixataGridEditMode.InCell)
       .Add(g => g.OnUpdate, args => {
@@ -68,11 +67,11 @@ public class PixataGridInCell_Tests {
         b.CloseComponent();
       }));
 
-  private static IElement Cell(IRenderedFragment grid, int row, int column) =>
+  private static IElement Cell<TComponent>(IRenderedComponent<TComponent> grid, int row, int column) where TComponent : IComponent =>
     grid.FindAll("tbody tr")[row].QuerySelectorAll("td")[column];
 
-  private static string EditingCell(IRenderedFragment grid) {
-    IRefreshableElementCollection<IElement> rows = grid.FindAll("tbody tr");
+  private static string EditingCell<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent {
+    IReadOnlyList<IElement> rows = grid.FindAll("tbody tr");
     for (int r = 0; r < rows.Count; r++) {
       IHtmlCollection<IElement> cells = rows[r].QuerySelectorAll("td");
       for (int c = 0; c < cells.Length; c++) {

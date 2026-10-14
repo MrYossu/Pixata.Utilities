@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using AngleSharp.Dom;
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -41,7 +41,7 @@ public class PixataGridSorting_Tests {
     _ctx.Dispose();
 
   private IRenderedComponent<PixataGrid<Person>> Render(PixataGridSortMode mode = PixataGridSortMode.Single, bool sortable = true, bool ageSortable = true) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.Sortable, sortable)
       .Add(g => g.SortMode, mode)
@@ -58,10 +58,10 @@ public class PixataGridSorting_Tests {
         b.CloseComponent();
       }));
 
-  private static string Names(IRenderedFragment grid) =>
+  private static string Names<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     string.Join(",", grid.FindAll("tbody tr").Select(tr => tr.QuerySelector("td")!.TextContent.Trim()));
 
-  private static IElement Header(IRenderedFragment grid, string title) =>
+  private static IElement Header<TComponent>(IRenderedComponent<TComponent> grid, string title) where TComponent : IComponent =>
     grid.FindAll("th").Single(th => th.QuerySelector(".pixata-blazor-grid-column-title")!.TextContent.Trim() == title);
 
   [TestMethod]

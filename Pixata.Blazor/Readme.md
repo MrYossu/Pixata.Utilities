@@ -32,6 +32,18 @@ The documentation is split over the following pages...
 | [Helpers and services](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Helpers.md) | `PersistentStateHelper`, `TemplateHelper`, `MessageBroker`, `PasswordOptionsHelper`, `ScrollStateService`, `PixataBaseClientService` and `TryGetQueryString()` |
 | [Payload encryption](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Encryption.md) | Client-side setup for encrypting API traffic between a WASM app and an ASP.NET Core server |
 | [Declarative control flow](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ControlFlow.md) | `If`, `Switch` and `ForEach`, which replace the Razor `@if`, `@switch` and `@foreach` statements |
+| [Drop-downs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md) | `PixataComboBox`, `PixataDropDownList` and `PixataMultiSelect` |
+| [Tab strip](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TabStrip.md) | `PixataTabStrip` and `PixataTab` |
+| [Editor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Editor.md) | `PixataEditor`, a rich (HTML) text editor |
+| [File select and upload](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.FileUpload.md) | `PixataFileSelect`, which hands the chosen files to your code, and `PixataUpload`, which posts them to an endpoint |
+| [Dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) | `PixataDialog`, and the alert, confirm and prompt dialogs you can show from code |
+| [Window](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Window.md) | `PixataWindow`, a floating window that can be moved, resized, minimised and maximised |
+| [Wizard and stepper](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Wizard.md) | `PixataWizard` and `PixataStepper` |
+| [Radio group](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.RadioGroup.md) | `PixataRadioGroup` |
+| [Switch](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Switch.md) | `PixataSwitch`, a toggle switch for booleans |
+| [Charts](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Charts.md) | `PixataChart`, with column, line and pie series |
+| [Buttons](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md) | `PixataDropDownButton` and `PixataSplitButton` |
+| [Scheduler](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Scheduler.md) | `PixataScheduler`, for showing and editing appointments in day, multi-day, week, month, timeline and agenda views |
 
 ## Registering dependencies
 
@@ -49,6 +61,8 @@ This registers the following services (all from this package)...
 | `NotificationHelper` | The [notifications](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md) ([sample page](https://test.pixata.co.uk/Notifications)) |
 | `PasswordOptionsHelper` | Showing the user your Identity password requirements |
 | `PersistentStateHelper<T>` | Avoiding hitting the database twice when a page loads. Used by the [`ApiResponseView`](https://test.pixata.co.uk/ApiResponseViewRegular), but can be used independently |
+| `PixataDialogFactory` | The [alert, confirm and prompt dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) you show from code ([sample page](https://test.pixata.co.uk/DialogsSample)). It also needs `<PixataDialogHost />` in your layout, as described below |
+| `PixataDialogTexts` | The button text and tooltips used by the dialogs and windows (OK, Cancel, Close and so on). Register your own instance before calling `AddPixataBlazor()` to translate them |
 | `ScrollStateService` | The `VirtualiseWithState` component |
 | `TemplateHelper` | Building templates for grids and other templated components ([sample page](https://test.pixata.co.uk/TelerikGrid)) |
 
@@ -65,6 +79,18 @@ It is a good idea to add this line **after** your own service registrations, as 
 This isn't actually a problem, but removing the duplicate registration will keep the code file a bit cleaner.
 
 The audit viewer and the payload encryption have their own registration methods, as most apps don't want them. See the pages listed above.
+
+### The dialog host
+
+If you want to show the alert, confirm and prompt dialogs from code (with `PixataDialogFactory`), add the host component to your layout, inside an interactively rendered component...
+
+```razor
+@using Pixata.Blazor.Components
+
+<PixataDialogHost />
+```
+
+If you ask for one of these dialogs without a host on the page, you get an exception telling you to add it. If your layout is rendered statically and only some pages are interactive, put the host in those pages instead, as it has to share a DI scope with the code that shows the dialogs. See [Dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) for more.
 
 ## Styling
 

@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -52,15 +51,15 @@ public class PixataGridColumns_Tests {
     };
 
   private IRenderedComponent<PixataGrid<Person>> Render(RenderFragment columns, Action<ComponentParameterCollectionBuilder<PixataGrid<Person>>>? more = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, People).Add(g => g.GridColumns, columns);
       more?.Invoke(p);
     });
 
-  private static List<string> Titles(IRenderedFragment grid) =>
+  private static List<string> Titles<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("thead tr:first-child th").Select(th => th.TextContent.Trim())];
 
-  private static List<string> FirstRow(IRenderedFragment grid) =>
+  private static List<string> FirstRow<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("tbody tr:first-child td").Select(td => td.TextContent.Trim())];
 
   // ---------- Multi-column headers ----------
@@ -112,7 +111,7 @@ public class PixataGridColumns_Tests {
       Column(nameof(Person.Last), ("Width", "120px"), ("Locked", true)),
       Column(nameof(Person.Age), ("Width", "100px"), ("Locked", true))));
 
-    IRefreshableElementCollection<IElement> cells = grid.FindAll("tbody tr:first-child td");
+    IReadOnlyList<IElement> cells = grid.FindAll("tbody tr:first-child td");
     Assert.AreEqual("inset-inline-start: 0px; inset-inline-end: 220px;", cells[0].GetAttribute("style"));
     Assert.IsNull(cells[1].GetAttribute("style"));
     Assert.AreEqual("inset-inline-start: 80px; inset-inline-end: 100px;", cells[2].GetAttribute("style"));
@@ -186,7 +185,7 @@ public class PixataGridColumns_Tests {
   public void Reorderable_MarksTheHeadersThatCanBeMoved() {
     IRenderedComponent<PixataGrid<Person>> grid = Render(Columns(Column(nameof(Person.Id)), Column(nameof(Person.First), ("Reorderable", false))), p => p.Add(g => g.Reorderable, true));
 
-    IRefreshableElementCollection<IElement> headers = grid.FindAll("thead th");
+    IReadOnlyList<IElement> headers = grid.FindAll("thead th");
     Assert.IsNotNull(headers[0].GetAttribute("data-pixata-reorder-key"));
     Assert.IsNull(headers[1].GetAttribute("data-pixata-reorder-key"));
   }
@@ -247,13 +246,13 @@ public class PixataGridColumns_Tests {
       b.CloseComponent();
     };
 
-  private static void OpenMenu(IRenderedFragment grid, int column) =>
+  private static void OpenMenu<TComponent>(IRenderedComponent<TComponent> grid, int column) where TComponent : IComponent =>
     grid.FindAll("thead th:not(.pixata-blazor-grid-group-cell)")[column].QuerySelector(".pixata-blazor-grid-column-menu-button")!.Click();
 
-  private static List<string> MenuItems(IRenderedFragment grid) =>
+  private static List<string> MenuItems<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll(".pixata-blazor-grid-column-menu .pixata-blazor-grid-columnmenu-item").Select(i => i.TextContent.Trim() + (i.GetAttribute("aria-disabled") is null ? "" : " (disabled)"))];
 
-  private static void ClickItem(IRenderedFragment grid, string text) =>
+  private static void ClickItem<TComponent>(IRenderedComponent<TComponent> grid, string text) where TComponent : IComponent =>
     grid.FindAll(".pixata-blazor-grid-column-menu .pixata-blazor-grid-columnmenu-item").First(i => i.TextContent.Trim() == text).Click();
 
   [TestMethod]
@@ -312,7 +311,7 @@ public class PixataGridColumns_Tests {
     OpenMenu(grid, 0);
     ClickItem(grid, "Columns");
 
-    IRefreshableElementCollection<IElement> choices = grid.FindAll(".pixata-blazor-grid-column-list-item");
+    IReadOnlyList<IElement> choices = grid.FindAll(".pixata-blazor-grid-column-list-item");
     CollectionAssert.AreEqual(new[] { "Id", "First", "Age" }, choices.Select(c => c.TextContent.Trim()).ToArray());
 
     grid.FindAll(".pixata-blazor-grid-column-list-item input")[1].Change(false);

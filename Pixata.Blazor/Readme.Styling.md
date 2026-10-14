@@ -31,6 +31,24 @@ The full list (including `--pixata-label-font-size`, `--pixata-label-font-weight
 
 The classes used by those components all start with `pixata-blazor-`, followed by the component name where they're specific to one component (such as `pixata-blazor-grid-pager`), so you can target them in your own CSS without clashing with anything else.
 
+## The newer components
+
+The components added in v4.6.0 (the drop-downs, tab strip, editor, file upload, dialogs, window, wizard and stepper, radio group, switch, chart, drop-down and split buttons, and scheduler) have their own look, and their own set of custom properties, all starting with `--pixata-blazor-`. Their classes start with `pixata-blazor-`, and the component-specific ones include the component's name, eg `pixata-blazor-window-titlebar`.
+
+They are restyled the same way. Override the variables after the link above, either on `:root`, or on any element to restyle just the components inside it...
+
+```css
+:root {
+  --pixata-blazor-primary: #6f42c1;
+  --pixata-blazor-primary-hover: #59359a;
+  --pixata-blazor-border-radius: 0;
+}
+```
+
+The ones they all share (the font, the text and background colours, a set for each theme colour, borders, inputs, popups and the focus ring) are at the start of the components section of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and each component's documentation page lists the ones that are specific to that component.
+
+Dialogs and windows are moved to the end of the page when they open, so variables set on a container don't reach them. Set theirs on `:root`, or on a class you give them through their `Class` parameter.
+
 ## If you were styling the components yourself
 
 The class names in the rendered markup have changed, so if you had CSS of your own targetting them, you'll need to update your selectors. The mapping is a simple one...

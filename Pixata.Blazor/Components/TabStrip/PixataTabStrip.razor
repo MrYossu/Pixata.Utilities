@@ -1,0 +1,94 @@
+@namespace Pixata.Blazor.Components
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+@*
+  A set of tabs, each showing its own content. Declare the tabs as PixataTab components inside it. The tab list is drawn
+  here from the registered tabs, and each tab renders its own content panel where it was declared
+*@
+<div @ref="_root"
+     id="@Id"
+     class="@RootClass"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+  <div class="pixata-blazor-tabstrip-items-wrapper">
+    @if (ShowScrollButtons && ScrollButtonsPosition is PixataTabStripScrollButtonsPosition.Split or PixataTabStripScrollButtonsPosition.Start) {
+      @ScrollButton(-1)
+    }
+    @if (ShowScrollButtons && ScrollButtonsPosition == PixataTabStripScrollButtonsPosition.Start) {
+      @ScrollButton(1)
+    }
+    <ul @ref="_list"
+        class="@PixataCss.Classes("pixata-blazor-tabstrip-items", $"pixata-blazor-tabstrip-items-{TabAlignment.ToString().ToLowerInvariant()}")"
+        role="tablist"
+        aria-orientation="@(IsVertical ? "vertical" : "horizontal")"
+        @onkeydown="KeyDown">
+      @{
+        PixataTab? activeTab = ActiveTab;
+      }
+      @foreach (PixataTab tab in _tabs.Where(t => t.IsShown)) {
+        bool active = tab == activeTab;
+        <li @key="tab"
+            @ref="tab.HeaderElement"
+            id="@tab.HeaderDomId"
+            class="@PixataCss.Classes("pixata-blazor-tabstrip-item", active ? "pixata-blazor-active" : null, tab.Disabled ? "pixata-blazor-disabled" : null, tab.Class)"
+            role="tab"
+            aria-selected="@(active ? "true" : "false")"
+            aria-controls="@tab.PanelDomId"
+            aria-disabled="@(tab.Disabled ? "true" : null)"
+            tabindex="@(active ? "0" : "-1")"
+            data-tab-id="@tab.EffectiveId"
+            @onclick="() => Select(tab)">
+          <span class="pixata-blazor-tabstrip-link">
+            @if (tab.HeaderTemplate is not null) {
+              @tab.HeaderContent
+            } else {
+              <span class="pixata-blazor-tabstrip-link-text">@tab.Title</span>
+            }
+          </span>
+          @if (tab.Closeable) {
+            <span class="pixata-blazor-tabstrip-item-actions">
+              <button type="button"
+                      class="@PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, PixataThemeConstants.Button.FillMode.Flat, PixataThemeConstants.Button.Rounded.Medium, PixataThemeConstants.Button.Size.Small, true), "pixata-blazor-tabstrip-close")"
+                      tabindex="-1"
+                      aria-label="@CloseButtonLabel"
+                      title="@CloseButtonLabel"
+                      disabled="@tab.Disabled"
+                      @onclick="() => Close(tab, false)"
+                      @onclick:stopPropagation="true">
+                <PixataIcon Icon="PixataSvgIcons.X" />
+              </button>
+            </span>
+          }
+        </li>
+      }
+    </ul>
+    @if (ShowScrollButtons && ScrollButtonsPosition == PixataTabStripScrollButtonsPosition.End) {
+      @ScrollButton(-1)
+    }
+    @if (ShowScrollButtons && ScrollButtonsPosition is PixataTabStripScrollButtonsPosition.Split or PixataTabStripScrollButtonsPosition.End) {
+      @ScrollButton(1)
+    }
+    @if (TabStripSuffixTemplate is not null) {
+      <div class="pixata-blazor-tabstrip-actions">@TabStripSuffixTemplate</div>
+    }
+  </div>
+  <CascadingValue Value="this" IsFixed="true">
+    @ChildContent
+  </CascadingValue>
+</div>
+
+@code {
+
+  private RenderFragment ScrollButton(int direction) =>
+    @<button type="button"
+             class="@PixataCss.Classes(PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, PixataThemeConstants.Button.FillMode.Flat, PixataThemeConstants.Button.Rounded.None, Size, true), "pixata-blazor-tabstrip-scroll-button", direction < 0 ? "pixata-blazor-tabstrip-prev" : "pixata-blazor-tabstrip-next")"
+             tabindex="-1"
+             aria-hidden="true"
+             disabled="@(direction < 0 ? !_canScrollBack : !_canScrollForward)"
+             @onclick="() => Scroll(direction)">
+      <PixataIcon Icon="@(IsVertical ? (direction < 0 ? PixataSvgIcons.ChevronUp : PixataSvgIcons.ChevronDown) : (direction < 0 ? PixataSvgIcons.ChevronLeft : PixataSvgIcons.ChevronRight))" />
+    </button>;
+
+}

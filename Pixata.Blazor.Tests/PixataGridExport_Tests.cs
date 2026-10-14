@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Blazor.Grid.Excel;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -52,7 +51,7 @@ public class PixataGridExport_Tests {
   }
 
   private IRenderedComponent<PixataGrid<Person>> Render(RenderFragment? export = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, People)
         .Add(g => g.Pageable, true)
         .Add(g => g.PageSize, 5)

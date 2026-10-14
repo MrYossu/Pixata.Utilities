@@ -1,0 +1,35 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@inherits PixataSchedulerToolBarToolBase<TItem>
+
+@*
+  The toolbar's view switcher: a row of buttons, which turns into a drop-down list when the toolbar is narrow (eg on a
+  phone)
+*@
+<span class="pixata-blazor-scheduler-views">
+  <span class="pixata-blazor-scheduler-views-buttons" role="group" aria-label="@Owner.Text.SelectView">
+    @foreach (PixataSchedulerViewBase<TItem> view in Owner.AvailableViews) {
+      PixataSchedulerView value = view.View;
+      bool selected = value == Owner.CurrentView;
+      <button type="button"
+              class="@PixataCss.Classes("pixata-blazor-scheduler-view-button", selected ? "pixata-blazor-selected" : null)"
+              aria-pressed="@(selected ? "true" : "false")"
+              @onclick="() => Owner.ChangeView(value)">@Owner.ViewName(value)</button>
+    }
+  </span>
+  <span class="pixata-blazor-scheduler-views-select-wrapper">
+    <select class="pixata-blazor-scheduler-views-select" aria-label="@Owner.Text.SelectView" @onchange="Select">
+      @foreach (PixataSchedulerViewBase<TItem> view in Owner.AvailableViews) {
+        <option value="@view.View" selected="@(view.View == Owner.CurrentView)">@Owner.ViewName(view.View)</option>
+      }
+    </select>
+    <PixataIcon Icon="PixataSvgIcons.ChevronDown" Class="pixata-blazor-scheduler-views-select-icon" />
+  </span>
+</span>
+
+@code {
+
+  private Task Select(ChangeEventArgs args) =>
+    Enum.TryParse(args.Value?.ToString(), out PixataSchedulerView view) ? Owner.ChangeView(view) : Task.CompletedTask;
+
+}

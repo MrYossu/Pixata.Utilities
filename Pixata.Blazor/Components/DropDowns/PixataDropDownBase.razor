@@ -1,0 +1,174 @@
+@namespace Pixata.Blazor.Components
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@typeparam TItem
+@typeparam TValue
+@typeparam TBound
+@inherits PixataInputBase<TBound>
+
+@*
+  The popup and list shared by PixataDropDownList, PixataComboBox and PixataMultiSelect. Each of them renders its own element,
+  then PopupFragment after it
+*@
+
+@code {
+
+  /// <summary>
+  /// The popup holding the list, rendered after the component's own element
+  /// </summary>
+  private protected RenderFragment PopupFragment => __builder => {
+    <PixataPopup Visible="@IsOpen"
+                 AnchorElement="@Element"
+                 Settings="@PopupSettings"
+                 Id="@PopupId"
+                 Class="@PixataCss.Classes("pixata-blazor-dropdown-popup", $"pixata-blazor-{ComponentName}-popup", SizeClass)"
+                 OnOutsideClick="@HandleOutsideClick"
+                 data-pixata-dropdown="@Uid">
+      @if (ShowPopupFilter) {
+        <div class="pixata-blazor-dropdown-filter">
+          <span class="@PixataCss.Classes(PixataCss.Input(Size, Rounded, null), "pixata-blazor-dropdown-filter-box")">
+            <PixataIcon Icon="@PixataSvgIcons.Search" Class="pixata-blazor-dropdown-filter-icon" />
+            <input @ref="_filterInput"
+                   type="text"
+                   class="pixata-blazor-input-inner"
+                   role="searchbox"
+                   autocomplete="off"
+                   aria-label="Filter"
+                   aria-autocomplete="list"
+                   aria-controls="@ListId"
+                   aria-activedescendant="@ActiveDescendant"
+                   placeholder="@PopupFilterPlaceholder"
+                   @oninput="HandlePopupFilterInput"
+                   @onkeydown="HandlePopupFilterKeyDown"
+                   @onkeydown:stopPropagation="true" />
+          </span>
+        </div>
+      }
+      @if (HeaderTemplate is not null) {
+        <div class="pixata-blazor-list-header pixata-blazor-dropdown-header">@HeaderTemplate</div>
+      }
+      @* tabindex="-1" stops browsers that let the keyboard focus scrolling elements making the list a Tab stop, so the focus
+         stays in the component while the user moves through the list, and Tab leaves the component *@
+      <div @ref="_content" class="pixata-blazor-popup-content pixata-blazor-dropdown-content" tabindex="-1">
+        @if (OptionCount == 0) {
+          <div class="pixata-blazor-no-data pixata-blazor-dropdown-no-data">
+            @if (Loading) {
+              <span class="pixata-blazor-dropdown-loading" role="status" aria-label="Loading"></span>
+            } else if (NoDataTemplate is not null) {
+              @NoDataTemplate
+            } else {
+              <text>No data found.</text>
+            }
+          </div>
+        } else {
+          <ul class="pixata-blazor-list pixata-blazor-dropdown-list"
+              role="listbox"
+              id="@ListId"
+              aria-multiselectable="@(Multiple ? "true" : null)"
+              aria-label="@AriaLabel">
+            @for (int position = 0; position < LeadingCount; position++) {
+              @LeadingOptionFragment(position)
+            }
+            @if (RemoteVirtual) {
+              <Virtualize @ref="_virtualize" TItem="Row" ItemsProvider="ProvideRows" ItemSize="@((float)ItemHeight)" OverscanCount="4" SpacerElement="li" Context="row">
+                <ItemContent>@RowFragment(row)</ItemContent>
+                <Placeholder Context="placeholder">
+                  <li class="pixata-blazor-list-item pixata-blazor-dropdown-item pixata-blazor-dropdown-placeholder" style="@RowStyle" aria-hidden="true"></li>
+                </Placeholder>
+              </Virtualize>
+            } else if (IsVirtual) {
+              <Virtualize TItem="Row" Items="@_rows" ItemSize="@((float)ItemHeight)" OverscanCount="4" SpacerElement="li" Context="row">
+                @RowFragment(row)
+              </Virtualize>
+            } else {
+              @foreach (Row row in _rows) {
+                @RowFragment(row)
+              }
+            }
+          </ul>
+        }
+      </div>
+      @if (FooterTemplate is not null) {
+        <div class="pixata-blazor-list-footer pixata-blazor-dropdown-footer">@FooterTemplate</div>
+      }
+    </PixataPopup>
+  };
+
+  /// <summary>
+  /// An item or a group header
+  /// </summary>
+  private RenderFragment<Row> RowFragment => row => __builder => {
+    if (row.Index < 0) {
+      <li class="pixata-blazor-list-group-header pixata-blazor-dropdown-group-header" role="presentation" style="@RowStyle">@row.Group</li>
+    } else {
+      TItem item = row.Item!;
+      int position = LeadingCount + row.Index;
+      bool selected = IsItemSelected(item);
+      <li id="@OptionId(position)"
+          role="option"
+          aria-selected="@(selected ? "true" : "false")"
+          class="@PixataCss.Classes("pixata-blazor-list-item", "pixata-blazor-dropdown-item", selected ? "pixata-blazor-selected" : null, position == FocusedPosition ? "pixata-blazor-focus" : null)"
+          style="@RowStyle"
+          @onclick="() => HandleOptionClick(position)">
+        @if (ShowCheckBoxes) {
+          @CheckBoxFragment(selected)
+        }
+        @if (ItemTemplate is not null) {
+          @ItemTemplate(item)
+        } else {
+          string text = TextOf(item);
+          <span class="pixata-blazor-dropdown-item-text" title="@text">@text</span>
+        }
+      </li>
+    }
+  };
+
+  /// <summary>
+  /// An option above the items: the drop-down list's default text, a custom value, or "Select all"
+  /// </summary>
+  private RenderFragment<int> LeadingOptionFragment => position => __builder => {
+    LeadingOption option = LeadingOptions[position];
+    bool? selected = LeadingOptionSelected(option);
+    string optionClass = option switch {
+      LeadingOption.OptionLabel => "pixata-blazor-dropdown-option-label",
+      LeadingOption.CustomValue => "pixata-blazor-dropdown-custom-value",
+      _ => "pixata-blazor-dropdown-select-all pixata-blazor-dropdown-sticky"
+    };
+    <li id="@OptionId(position)"
+        role="option"
+        aria-selected="@(selected == true ? "true" : "false")"
+        class="@PixataCss.Classes("pixata-blazor-list-item", optionClass, selected == true && option != LeadingOption.SelectAll ? "pixata-blazor-selected" : null, position == FocusedPosition ? "pixata-blazor-focus" : null)"
+        style="@RowStyle"
+        @onclick="() => HandleOptionClick(position)">
+      @if (option == LeadingOption.SelectAll && ShowCheckBoxes) {
+        @CheckBoxFragment(selected)
+      }
+      @if (option == LeadingOption.CustomValue) {
+        <PixataIcon Icon="@PixataSvgIcons.Plus" Class="pixata-blazor-dropdown-custom-value-icon" />
+      }
+      <span class="pixata-blazor-dropdown-item-text">@LeadingOptionText(option)</span>
+    </li>
+  };
+
+  /// <summary>
+  /// A checkbox (drawn, not an input, as the option itself is what gets chosen): ticked, empty, or partly ticked (null)
+  /// </summary>
+  private RenderFragment<bool?> CheckBoxFragment => isChecked => __builder => {
+    <span class="@PixataCss.Classes("pixata-blazor-dropdown-checkbox", isChecked == true ? "pixata-blazor-checked" : null, isChecked is null ? "pixata-blazor-indeterminate" : null)" aria-hidden="true">
+      @if (isChecked == true) {
+        <PixataIcon Icon="@PixataSvgIcons.Check" />
+      } else if (isChecked is null) {
+        <PixataIcon Icon="@PixataSvgIcons.Minus" />
+      }
+    </span>
+  };
+
+  /// <summary>
+  /// The spinner shown in the component while <c>OnRead</c> is fetching data
+  /// </summary>
+  private protected RenderFragment LoadingFragment => __builder => {
+    if (Loading) {
+      <span class="pixata-blazor-dropdown-loading" role="status" aria-label="Loading"></span>
+    }
+  };
+
+}

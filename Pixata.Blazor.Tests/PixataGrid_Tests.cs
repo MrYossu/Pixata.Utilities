@@ -6,9 +6,9 @@ using System.Globalization;
 using System.Linq;
 using AngleSharp.Dom;
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -66,15 +66,15 @@ public class PixataGrid_Tests {
     CultureInfo.CurrentCulture = _culture;
   }
 
-  private static string[] Headers(IRenderedFragment grid) =>
+  private static string[] Headers<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("th").Select(th => th.TextContent.Trim())];
 
-  private static string[][] Cells(IRenderedFragment grid) =>
+  private static string[][] Cells<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("tbody tr").Select(tr => tr.QuerySelectorAll("td").Select(td => td.TextContent.Trim()).ToArray())];
 
   [TestMethod]
   public void PixataGrid_DeclaredColumns_RenderHeadersAndCellsInOrder() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.GridColumns, b => {
         b.OpenComponent<PixataGridColumn<Person>>(0);
@@ -122,7 +122,7 @@ public class PixataGrid_Tests {
 
   [TestMethod]
   public void PixataGrid_ColumnNotVisible_IsNotRendered() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.GridColumns, b => {
         b.OpenComponent<PixataGridColumn<Person>>(0);
@@ -140,7 +140,7 @@ public class PixataGrid_Tests {
 
   [TestMethod]
   public void PixataGrid_ColumnSettings_SetClassesAndWidth() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.GridColumns, b => {
         b.OpenComponent<PixataGridColumn<Person>>(0);
@@ -161,7 +161,7 @@ public class PixataGrid_Tests {
 
   [TestMethod]
   public void PixataGrid_AutoGenerateColumns_SkipsComplexAndExcludedProperties() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.AutoGenerateColumns, true));
 
@@ -171,7 +171,7 @@ public class PixataGrid_Tests {
 
   [TestMethod]
   public void PixataGrid_AutoGenerateColumns_GoAfterDeclaredOnesUnlessPlaced() {
-    IRenderedComponent<PixataGrid<Person>> after = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> after = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.AutoGenerateColumns, true)
       .Add(g => g.GridColumns, b => {
@@ -179,7 +179,7 @@ public class PixataGrid_Tests {
         b.AddAttribute(1, "Field", "Address.City");
         b.CloseComponent();
       }));
-    IRenderedComponent<PixataGrid<Person>> placed = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> placed = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.AutoGenerateColumns, true)
       .Add(g => g.GridColumns, b => {
@@ -199,7 +199,7 @@ public class PixataGrid_Tests {
   [TestMethod]
   public void PixataGrid_NoData_ShowsDefaultMessageOrTemplate() {
     IRenderedComponent<PixataGrid<Person>> plain = RenderWithColumns([], ("Field", nameof(Person.FirstName), null, null));
-    IRenderedComponent<PixataGrid<Person>> templated = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> templated = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, [])
       .Add(g => g.NoDataTemplate, b => b.AddContent(0, "Nobody here")));
 
@@ -209,7 +209,7 @@ public class PixataGrid_Tests {
 
   [TestMethod]
   public void PixataGrid_GridSettings_SetClassesAndStyle() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.Size, PixataGridSize.Small)
       .Add(g => g.Class, "mine")
@@ -226,7 +226,7 @@ public class PixataGrid_Tests {
   public void PixataGrid_AlternateRows_GetAltClass() {
     IRenderedComponent<PixataGrid<Person>> grid = RenderWithColumns(("Field", nameof(Person.FirstName), null, null));
 
-    IRefreshableElementCollection<IElement> rows = grid.FindAll("tbody tr");
+    IReadOnlyList<IElement> rows = grid.FindAll("tbody tr");
     Assert.IsFalse(rows[0].ClassList.Contains("pixata-blazor-grid-alt-row"));
     Assert.IsTrue(rows[1].ClassList.Contains("pixata-blazor-grid-alt-row"));
   }
@@ -258,13 +258,13 @@ public class PixataGrid_Tests {
 
   [TestMethod]
   public void PixataGridColumn_OutsideAGrid_Throws() =>
-    Assert.ThrowsException<InvalidOperationException>(() => _ctx.RenderComponent<PixataGridColumn<Person>>());
+    Assert.ThrowsException<InvalidOperationException>(() => _ctx.Render<PixataGridColumn<Person>>());
 
   private IRenderedComponent<PixataGrid<Person>> RenderWithColumns(params (string Name, string Value, string? Name2, string? Value2)[] columns) =>
     RenderWithColumns(People(), columns);
 
   private IRenderedComponent<PixataGrid<Person>> RenderWithColumns(IEnumerable<Person> data, params (string Name, string Value, string? Name2, string? Value2)[] columns) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, data)
       .Add(g => g.GridColumns, b => {
         int seq = 0;

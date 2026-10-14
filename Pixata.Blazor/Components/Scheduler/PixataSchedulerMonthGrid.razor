@@ -1,0 +1,116 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@implements IHandleEvent
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@using System.ComponentModel
+@using System.Globalization
+
+@* The month view of a PixataScheduler. Used by the scheduler; not for use on its own *@
+@if (Scheduler.Model<PixataSchedulerMonthModel<TItem>>() is { } model && Scheduler.ActiveView is PixataSchedulerMonthView<TItem> view && model.Blocks.Count > 0
+     && model.Blocks[0].Weeks.Count > 0) {
+  CultureInfo culture = Scheduler.CurrentCulture;
+  List<PixataSchedulerColumn> firstWeek = model.Blocks[0].Weeks[0].Columns;
+  bool horizontalGroups = Scheduler.IsGrouped && !model.Vertical;
+  int month = Scheduler.CurrentDate.Month;
+  <div class="pixata-blazor-scheduler-grid pixata-blazor-scheduler-month-grid"
+       style="@($"--pixata-blazor-scheduler-column-count:{firstWeek.Count};--pixata-blazor-scheduler-items-per-slot:{model.ItemsPerSlot};")">
+    <div class="pixata-blazor-scheduler-head">
+      @if (horizontalGroups) {
+        @foreach (List<(PixataSchedulerGroupLevel Level, int Span)> row in PixataSchedulerModelBuilder.GroupHeaders(model.Groups)) {
+          <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-group-row">
+            <div class="pixata-blazor-scheduler-cells">
+              @foreach ((PixataSchedulerGroupLevel level, int span) in row) {
+                <div class="pixata-blazor-scheduler-cell pixata-blazor-scheduler-group-cell" style="@($"grid-column:span {span * 7};")">
+                  @Scheduler.RenderGroupHeader(level)
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+      <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-date-row">
+        <div class="pixata-blazor-scheduler-cells">
+          @foreach (PixataSchedulerColumn column in firstWeek) {
+            <div class="pixata-blazor-scheduler-cell pixata-blazor-scheduler-date-cell">
+              @if (view.DateHeaderTemplate is not null) {
+                @view.DateHeaderTemplate(column.Day)
+              } else {
+                <span class="pixata-blazor-scheduler-day-name-long">@culture.DateTimeFormat.GetDayName(column.Day.DayOfWeek)</span>
+                <span class="pixata-blazor-scheduler-day-name-short" aria-hidden="true">@culture.DateTimeFormat.GetAbbreviatedDayName(column.Day.DayOfWeek)</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    @foreach (PixataSchedulerMonthBlock<TItem> block in model.Blocks) {
+      @if (block.Group is { } group) {
+        <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-group-band">
+          @foreach (PixataSchedulerGroupLevel level in group.Levels) {
+            <span class="pixata-blazor-scheduler-group-band-item">@Scheduler.RenderGroupHeader(level)</span>
+          }
+        </div>
+      }
+      @foreach (PixataSchedulerMonthWeek<TItem> week in block.Weeks) {
+        <div class="pixata-blazor-scheduler-row pixata-blazor-scheduler-month-week">
+          <div class="pixata-blazor-scheduler-cells">
+            @for (int c = 0; c < week.Columns.Count; c++) {
+              PixataSchedulerColumn column = week.Columns[c];
+              PixataSchedulerSlot slot = new(column.Day, column.Day.AddDays(1), true, column.Group.Index);
+              int more = week.More[c];
+              @Scheduler.RenderSlot(slot,
+                PixataCss.Classes("pixata-blazor-scheduler-month-day", column.Day.Month == month ? null : "pixata-blazor-scheduler-other-month",
+                  column.Day == DateTime.Today ? "pixata-blazor-scheduler-today" : null),
+                DayContent(column, slot, more, view))
+            }
+            <div class="pixata-blazor-scheduler-bar-layer">
+              @foreach (PixataSchedulerBar<TItem> bar in week.Bars) {
+                @Scheduler.RenderAppointment(bar.Item, new(PixataSchedulerEventPlacement.Horizontal,
+                  PixataSchedulerRendering.BarStyle(bar.Start, bar.Width, bar.Row), false, bar.ContinuesBefore, bar.ContinuesAfter))
+              }
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+}
+
+@code {
+
+  [Parameter, EditorRequired]
+  public PixataScheduler<TItem> Scheduler { get; set; } = null!;
+
+  // Events are handled by the scheduler, so that it renders again (and this with it)
+  Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg) =>
+    ((IHandleEvent)Scheduler).HandleEventAsync(callback, arg);
+
+  private RenderFragment DayContent(PixataSchedulerColumn column, PixataSchedulerSlot slot, int more, PixataSchedulerMonthView<TItem> view) {
+    CultureInfo culture = Scheduler.CurrentCulture;
+    DateTime day = column.Day;
+    string label = day.ToString(culture.DateTimeFormat.LongDatePattern, culture);
+    return @<text>
+      <span class="pixata-blazor-scheduler-month-day-header">
+        @if (Scheduler.CanDrillDown) {
+          <button type="button" class="pixata-blazor-scheduler-date-link" tabindex="-1" aria-label="@label"
+                  @onclick="() => Scheduler.DrillDown(day)" @onclick:stopPropagation="true" @ondblclick:stopPropagation="true">@day.ToString("dd", culture)</button>
+        } else {
+          <span class="pixata-blazor-scheduler-date-text" aria-label="@label">@day.ToString("dd", culture)</span>
+        }
+      </span>
+      @if (view.SlotTemplate is not null) {
+        @view.SlotTemplate(new() { Start = slot.Start, End = slot.End, Resources = column.Group.Resources })
+      }
+      @if (more > 0) {
+        string text = string.Format(culture, Scheduler.Text.MoreEventsFormat, more);
+        @if (Scheduler.CanDrillDown) {
+          <button type="button" class="pixata-blazor-scheduler-more" @onclick="() => Scheduler.DrillDown(day)"
+                  @onclick:stopPropagation="true" @ondblclick:stopPropagation="true">@text</button>
+        } else {
+          <span class="pixata-blazor-scheduler-more">@text</span>
+        }
+      }
+    </text>;
+  }
+
+}

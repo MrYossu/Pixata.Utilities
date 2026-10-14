@@ -1,0 +1,47 @@
+@namespace Pixata.Blazor.Components
+
+@*
+  Renders an icon passed to a component's Icon parameter: a PixataSvgIcon is drawn as inline SVG, and a string is treated as
+  the CSS class(es) of an icon font (eg "fas fa-save"), so you can use whichever icon library your app already has
+*@
+@switch (Icon) {
+  case PixataSvgIcon svg:
+    <span class="@PixataCss.Classes("pixata-blazor-icon", "pixata-blazor-svg-icon", $"pixata-blazor-svg-icon-{svg.Name}", SizeClass, Class)" aria-hidden="@(Title is null ? "true" : null)" title="@Title">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="@svg.ViewBox" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+        @((MarkupString)svg.Content)
+      </svg>
+    </span>
+    break;
+  case string css when !string.IsNullOrWhiteSpace(css):
+    <span class="@PixataCss.Classes("pixata-blazor-icon", "pixata-blazor-font-icon", css, SizeClass, Class)" aria-hidden="@(Title is null ? "true" : null)" title="@Title"></span>
+    break;
+}
+
+@code {
+
+  /// <summary>
+  /// A <see cref="PixataSvgIcon"/> (see <see cref="PixataSvgIcons"/> for the built-in ones), or the CSS class(es) for an icon
+  /// font. Nothing is rendered if this is null
+  /// </summary>
+  [Parameter]
+  public object? Icon { get; set; }
+
+  /// <summary>
+  /// <c>sm</c> (12px), <c>md</c> (16px, the default), <c>lg</c> (20px) or <c>xl</c> (24px)
+  /// </summary>
+  [Parameter]
+  public string? Size { get; set; }
+
+  [Parameter]
+  public string? Class { get; set; }
+
+  /// <summary>
+  /// A tooltip. When set, the icon is announced by screen readers; otherwise it is hidden from them as decoration
+  /// </summary>
+  [Parameter]
+  public string? Title { get; set; }
+
+  private string? SizeClass =>
+    string.IsNullOrWhiteSpace(Size) ? null : $"pixata-blazor-icon-{Size}";
+
+}

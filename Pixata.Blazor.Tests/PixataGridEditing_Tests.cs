@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -50,7 +49,7 @@ public class PixataGridEditing_Tests {
   }
 
   private IRenderedComponent<PixataGrid<Person>> Render(PixataGridEditMode mode = PixataGridEditMode.Inline, bool confirmDelete = false, Action<ComponentParameterCollectionBuilder<PixataGrid<Person>>>? extra = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, _people)
         .Add(g => g.EditMode, mode)
         .Add(g => g.ConfirmDelete, confirmDelete)
@@ -89,7 +88,7 @@ public class PixataGridEditing_Tests {
   private static IElement CommandButton(IElement row, string text) =>
     row.QuerySelectorAll("button").Single(b => b.TextContent.Trim() == text);
 
-  private static IElement Row(IRenderedFragment grid, int index) =>
+  private static IElement Row<TComponent>(IRenderedComponent<TComponent> grid, int index) where TComponent : IComponent =>
     grid.FindAll("tbody tr")[index];
 
   [TestMethod]
@@ -234,7 +233,7 @@ public class PixataGridEditing_Tests {
   [TestMethod]
   public void CustomCommand_GetsTheRowsItem() {
     string? clicked = null;
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, _people)
       .Add(g => g.GridColumns, b => {
         b.OpenComponent<PixataGridCommandColumn<Person>>(0);

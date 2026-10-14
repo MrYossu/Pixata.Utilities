@@ -1,0 +1,321 @@
+@page "/WindowSample"
+@using Pixata.Blazor.Components
+
+<h3>Window</h3>
+
+<p>
+  <code>PixataWindow</code> next to <code>TelerikWindow</code>. See
+  <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Window.md">the documentation</a>.
+  Drag a window by its titlebar and resize it by its edges and corners, with a mouse or a finger. When the window itself has
+  the focus (click its titlebar, or Tab to it), the arrow keys move it, Ctrl and the arrow keys resize it, Alt+Up and Alt+Down
+  maximise, minimise and restore it, and Esc closes it.
+</p>
+
+<ComponentComparison Title="A window with actions and a footer">
+  <Description>
+    Non-modal, with the built-in Minimize, Maximize and Close actions, and two-way binding of <code>Visible</code>,
+    <code>State</code>, <code>Top</code>, <code>Left</code>, <code>Width</code> and <code>Height</code>, so you can see them
+    change as you move and resize it.
+  </Description>
+  <Pixata>
+    <button type="button" class="@BaseButton" @onclick="() => _basicPixata = !_basicPixata">Toggle the window</button>
+    <PixataWindow @bind-Visible="_basicPixata"
+                  @bind-State="_basicPixataState"
+                  @bind-Top="_basicPixataTop"
+                  @bind-Left="_basicPixataLeft"
+                  @bind-Width="_basicPixataWidth"
+                  @bind-Height="_basicPixataHeight">
+      <WindowTitle>Customer details</WindowTitle>
+      <WindowActions>
+        <PixataWindowAction Name="Minimize" />
+        <PixataWindowAction Name="Maximize" />
+        <PixataWindowAction Name="Close" />
+      </WindowActions>
+      <WindowContent>
+        <p><strong>Fred Bloggs</strong></p>
+        <p>12 High Street, Anytown</p>
+        <p>Customer since 2019. 14 orders, the last one three weeks ago.</p>
+      </WindowContent>
+      <WindowFooter>
+        <button type="button" class="@BaseButton" @onclick="() => _basicPixata = false">Close</button>
+        <button type="button" class="@PrimaryButton" @onclick="() => _basicPixata = false">Save</button>
+      </WindowFooter>
+    </PixataWindow>
+    <p class="window-sample-result">
+      Visible: @_basicPixata, State: @_basicPixataState<br />
+      Top: @_basicPixataTop, Left: @_basicPixataLeft, Width: @_basicPixataWidth, Height: @(_basicPixataHeight ?? "(auto)")
+    </p>
+  </Pixata>
+  <Telerik>
+    <TelerikButton OnClick="() => _basicTelerik = !_basicTelerik">Toggle the window</TelerikButton>
+    <TelerikWindow @bind-Visible="_basicTelerik"
+                   @bind-State="_basicTelerikState"
+                   @bind-Top="_basicTelerikTop"
+                   @bind-Left="_basicTelerikLeft"
+                   @bind-Width="_basicTelerikWidth"
+                   @bind-Height="_basicTelerikHeight">
+      <WindowTitle>Customer details</WindowTitle>
+      <WindowActions>
+        <WindowAction Name="Minimize" />
+        <WindowAction Name="Maximize" />
+        <WindowAction Name="Close" />
+      </WindowActions>
+      <WindowContent>
+        <p><strong>Fred Bloggs</strong></p>
+        <p>12 High Street, Anytown</p>
+        <p>Customer since 2019. 14 orders, the last one three weeks ago.</p>
+      </WindowContent>
+      <WindowFooter>
+        <TelerikButton OnClick="() => _basicTelerik = false">Close</TelerikButton>
+        <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="() => _basicTelerik = false">Save</TelerikButton>
+      </WindowFooter>
+    </TelerikWindow>
+    <p class="window-sample-result">
+      Visible: @_basicTelerik, State: @_basicTelerikState<br />
+      Top: @_basicTelerikTop, Left: @_basicTelerikLeft, Width: @_basicTelerikWidth, Height: @(_basicTelerikHeight ?? "(auto)")
+    </p>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="A modal window">
+  <Description>
+    <code>Modal="true"</code> dims the page and keeps the focus inside the window, and <code>CloseOnOverlayClick="true"</code>
+    closes it when you click the overlay. It has no <code>Top</code> or <code>Left</code>, so it opens in the middle of the
+    screen, and isn't resizable.
+  </Description>
+  <Pixata>
+    <button type="button" class="@BaseButton" @onclick="() => _modalPixata = true">Open the modal window</button>
+    <PixataWindow @bind-Visible="_modalPixata" Modal="true" CloseOnOverlayClick="true" Resizable="false" Width="400px">
+      <WindowTitle>Change password</WindowTitle>
+      <WindowActions>
+        <PixataWindowAction Name="Close" />
+      </WindowActions>
+      <WindowContent>
+        <p><label>Current password<br /><input type="password" /></label></p>
+        <p><label>New password<br /><input type="password" /></label></p>
+      </WindowContent>
+      <WindowFooter>
+        <button type="button" class="@PrimaryButton" @onclick="() => _modalPixata = false">Change</button>
+      </WindowFooter>
+    </PixataWindow>
+  </Pixata>
+  <Telerik>
+    <TelerikButton OnClick="() => _modalTelerik = true">Open the modal window</TelerikButton>
+    <TelerikWindow @bind-Visible="_modalTelerik" Modal="true" CloseOnOverlayClick="true" Resizable="false" Width="400px">
+      <WindowTitle>Change password</WindowTitle>
+      <WindowActions>
+        <WindowAction Name="Close" />
+      </WindowActions>
+      <WindowContent>
+        <p><label>Current password<br /><input type="password" /></label></p>
+        <p><label>New password<br /><input type="password" /></label></p>
+      </WindowContent>
+      <WindowFooter>
+        <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="() => _modalTelerik = false">Change</TelerikButton>
+      </WindowFooter>
+    </TelerikWindow>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Several windows">
+  <Description>
+    Three windows open at once. Click (or tap, or Tab into) one to bring it to the front.
+  </Description>
+  <Pixata>
+    <button type="button" class="@BaseButton" @onclick="() => ShowSeveral(true)">Open three windows</button>
+    @for (int i = 0; i < Notes.Length; i++) {
+      int index = i;
+      <PixataWindow Visible="_severalPixata[index]" VisibleChanged="v => _severalPixata[index] = v" Top="@($"{140 + index * 60}px")" Left="@($"{280 + index * 80}px")" Width="260px">
+        <WindowTitle>@Notes[index].Title</WindowTitle>
+        <WindowActions>
+          <PixataWindowAction Name="Close" />
+        </WindowActions>
+        <WindowContent>@Notes[index].Text</WindowContent>
+      </PixataWindow>
+    }
+  </Pixata>
+  <Telerik>
+    <TelerikButton OnClick="() => ShowSeveral(false)">Open three windows</TelerikButton>
+    @for (int i = 0; i < Notes.Length; i++) {
+      int index = i;
+      <TelerikWindow Visible="_severalTelerik[index]" VisibleChanged="v => _severalTelerik[index] = v" Top="@($"{140 + index * 60}px")" Left="@($"{680 + index * 80}px")" Width="260px">
+        <WindowTitle>@Notes[index].Title</WindowTitle>
+        <WindowActions>
+          <WindowAction Name="Close" />
+        </WindowActions>
+        <WindowContent>@Notes[index].Text</WindowContent>
+      </TelerikWindow>
+    }
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Keeping a window inside an element">
+  <Description>
+    <code>ContainmentSelector</code> keeps the window inside the grey box: it can't be dragged out of it, <code>Top</code> and
+    <code>Left</code> are measured from it, and maximising the window fills the box rather than the screen.
+  </Description>
+  <Pixata>
+    <button type="button" class="@BaseButton" @onclick="() => _containedPixata = !_containedPixata">Toggle the window</button>
+    <div id="pixata-workspace" class="window-sample-workspace">
+      <PixataWindow @bind-Visible="_containedPixata" ContainmentSelector="#pixata-workspace" Top="20px" Left="20px" Width="240px">
+        <WindowTitle>Contained</WindowTitle>
+        <WindowActions>
+          <PixataWindowAction Name="Maximize" />
+          <PixataWindowAction Name="Close" />
+        </WindowActions>
+        <WindowContent>Try dragging me out of the box.</WindowContent>
+      </PixataWindow>
+    </div>
+  </Pixata>
+  <Telerik>
+    <TelerikButton OnClick="() => _containedTelerik = !_containedTelerik">Toggle the window</TelerikButton>
+    <div id="telerik-workspace" class="window-sample-workspace">
+      <TelerikWindow @bind-Visible="_containedTelerik" ContainmentSelector="#telerik-workspace" Top="20px" Left="20px" Width="240px">
+        <WindowTitle>Contained</WindowTitle>
+        <WindowActions>
+          <WindowAction Name="Maximize" />
+          <WindowAction Name="Close" />
+        </WindowActions>
+        <WindowContent>Try dragging me out of the box.</WindowContent>
+      </TelerikWindow>
+    </div>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Custom actions, size limits and methods">
+  <Description>
+    A custom titlebar action (the refresh button), <code>MinWidth</code>, <code>MaxWidth</code>, <code>MinHeight</code> and
+    <code>MaxHeight</code> limiting the resizing, <code>PersistContent</code> keeping the text box's contents while minimised,
+    and buttons that minimise, maximise and restore the window. The Pixata buttons call its <code>Minimize()</code>,
+    <code>Maximize()</code> and <code>Restore()</code> methods (setting <code>State</code> works too), while the Telerik ones
+    set <code>State</code>, as the Telerik window has no such methods. The Pixata window also has a <code>ThemeColor</code>.
+  </Description>
+  <Pixata>
+    <div class="window-sample-buttons">
+      <button type="button" class="@BaseButton" @onclick="() => _customPixata = true">Open</button>
+      <button type="button" class="@BaseButton" @onclick="() => _customPixataWindow.Minimize()">Minimize()</button>
+      <button type="button" class="@BaseButton" @onclick="() => _customPixataWindow.Maximize()">Maximize()</button>
+      <button type="button" class="@BaseButton" @onclick="() => _customPixataWindow.Restore()">Restore()</button>
+    </div>
+    <PixataWindow @ref="_customPixataWindow"
+                  @bind-Visible="_customPixata"
+                  Top="160px"
+                  Left="320px"
+                  Width="320px"
+                  MinWidth="240px"
+                  MaxWidth="560px"
+                  MinHeight="160px"
+                  MaxHeight="400px"
+                  PersistContent="true"
+                  ThemeColor="@PixataThemeConstants.ThemeColor.Primary">
+      <WindowTitle>Refreshed @_refreshesPixata times</WindowTitle>
+      <WindowActions>
+        <PixataWindowAction Name="Refresh" Title="Refresh" Icon="PixataSvgIcons.Refresh" OnClick="() => _refreshesPixata++" />
+        <PixataWindowAction Name="Minimize" />
+        <PixataWindowAction Name="Maximize" />
+        <PixataWindowAction Name="Close" />
+      </WindowActions>
+      <WindowContent>
+        <p>Type something, minimise the window and restore it: it's still there.</p>
+        <input placeholder="Notes" />
+      </WindowContent>
+    </PixataWindow>
+  </Pixata>
+  <Telerik>
+    <div class="window-sample-buttons">
+      <TelerikButton OnClick="() => _customTelerik = true">Open</TelerikButton>
+      <TelerikButton OnClick="() => _customTelerikState = WindowState.Minimized">Minimised</TelerikButton>
+      <TelerikButton OnClick="() => _customTelerikState = WindowState.Maximized">Maximised</TelerikButton>
+      <TelerikButton OnClick="() => _customTelerikState = WindowState.Default">Default</TelerikButton>
+    </div>
+    <TelerikWindow @bind-Visible="_customTelerik"
+                   @bind-State="_customTelerikState"
+                   Top="160px"
+                   Left="720px"
+                   Width="320px"
+                   MinWidth="240px"
+                   MaxWidth="560px"
+                   MinHeight="160px"
+                   MaxHeight="400px"
+                   PersistContent="true">
+      <WindowTitle>Refreshed @_refreshesTelerik times</WindowTitle>
+      <WindowActions>
+        <WindowAction Name="Refresh" Title="Refresh" Icon="Telerik.SvgIcons.SvgIcon.ArrowRotateCw" OnClick="() => _refreshesTelerik++" />
+        <WindowAction Name="Minimize" />
+        <WindowAction Name="Maximize" />
+        <WindowAction Name="Close" />
+      </WindowActions>
+      <WindowContent>
+        <p>Type something, minimise the window and restore it: it's still there.</p>
+        <input placeholder="Notes" />
+      </WindowContent>
+    </TelerikWindow>
+  </Telerik>
+</ComponentComparison>
+
+<style>
+  .window-sample-result {
+    margin-top: .5rem;
+  }
+
+  .window-sample-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+
+  .window-sample-workspace {
+    position: relative;
+    height: 300px;
+    margin-top: .5rem;
+    border: 1px dashed #999;
+    background-color: #f3f3f3;
+  }
+</style>
+
+@code {
+
+  private static readonly string BaseButton = PixataCss.Button(null, null, null, null);
+  private static readonly string PrimaryButton = PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null);
+
+  private static readonly (string Title, string Text)[] Notes = [
+    ("Inbox", "3 unread messages"),
+    ("Calendar", "Meeting with the accountant at 2pm"),
+    ("Notes", "Remember to order more paper")
+  ];
+
+  private bool _basicPixata;
+  private PixataWindowState _basicPixataState;
+  private string _basicPixataTop = "120px";
+  private string _basicPixataLeft = "300px";
+  private string _basicPixataWidth = "360px";
+  private string? _basicPixataHeight;
+  private bool _basicTelerik;
+  private WindowState _basicTelerikState;
+  private string _basicTelerikTop = "120px";
+  private string _basicTelerikLeft = "700px";
+  private string _basicTelerikWidth = "360px";
+  private string? _basicTelerikHeight;
+
+  private bool _modalPixata;
+  private bool _modalTelerik;
+
+  private readonly bool[] _severalPixata = new bool[3];
+  private readonly bool[] _severalTelerik = new bool[3];
+
+  private bool _containedPixata;
+  private bool _containedTelerik;
+
+  private bool _customPixata;
+  private bool _customTelerik;
+  private PixataWindow _customPixataWindow = null!;
+  private WindowState _customTelerikState;
+  private int _refreshesPixata;
+  private int _refreshesTelerik;
+
+  private void ShowSeveral(bool pixata) {
+    bool[] visible = pixata ? _severalPixata : _severalTelerik;
+    Array.Fill(visible, true);
+  }
+
+}

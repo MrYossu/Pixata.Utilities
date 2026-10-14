@@ -1,0 +1,254 @@
+@namespace Pixata.Blazor.Components
+@using System.ComponentModel
+@using System.Globalization
+@using Microsoft.JSInterop
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@inject IJSRuntime Js
+
+@*
+  A colour picker in PixataEditor's toolbar (the text and background colour tools). Used by PixataEditor; you don't need to
+  use it yourself. The button keeps the focus while the palette is open: the arrow keys move around the palette, Enter
+  chooses the highlighted colour, and the highlighted swatch is announced through aria-activedescendant
+*@
+<span class="pixata-blazor-editor-colour-wrapper">
+  <button @ref="_button"
+          type="button"
+          id="@_id"
+          class="@PixataCss.Classes(PixataCss.Button(null, null, null, null), "pixata-blazor-editor-tool", "pixata-blazor-editor-colour-tool", $"pixata-blazor-editor-tool-{PixataEditor.Kebab(Tool.CommandName)}", _open ? "pixata-blazor-selected" : null, Tool.Class)"
+          title="@Tool.Title"
+          role="combobox"
+          aria-label="@Tool.Title"
+          aria-haspopup="grid"
+          aria-expanded="@(_open ? "true" : "false")"
+          aria-controls="@(_open ? GridId : null)"
+          aria-activedescendant="@(_open ? CellId(_focused) : null)"
+          disabled="@(!Enabled)"
+          data-pixata-editor-tool
+          @onmousedown:preventDefault
+          @onclick="Toggle"
+          @onkeydown="KeyDown"
+          @onkeydown:stopPropagation="_open">
+    <span class="pixata-blazor-editor-colour-icon">
+      <PixataIcon Icon="Tool.Icon" />
+      <span class="@PixataCss.Classes("pixata-blazor-editor-colour-bar", Shown is null ? "pixata-blazor-editor-colour-none" : null)"
+            style="@(Shown is null ? null : $"background-color: {Shown};")"></span>
+    </span>
+    <span class="pixata-blazor-editor-colour-caret" aria-hidden="true">
+      <PixataIcon Icon="PixataSvgIcons.CaretDown" />
+    </span>
+  </button>
+  <PixataPopup Visible="_open"
+               AnchorElement="_button"
+               MatchAnchorWidth="false"
+               OnOutsideClick="Close"
+               Class="pixata-blazor-editor-colour-popup">
+    <div class="pixata-blazor-editor-palette" style="@($"--pixata-blazor-editor-palette-columns: {Columns};")">
+      <div id="@CellId(-1)"
+           class="@PixataCss.Classes("pixata-blazor-editor-palette-clear", _focused == -1 ? "pixata-blazor-focus" : null)"
+           role="button"
+           aria-label="No colour"
+           @onmousedown:preventDefault
+           @onclick="() => Choose(-1)">
+        <span class="pixata-blazor-editor-colour-swatch pixata-blazor-editor-colour-none" aria-hidden="true"></span>
+        <span>No colour</span>
+      </div>
+      <div id="@GridId" role="grid" aria-label="@Tool.Title" class="pixata-blazor-editor-palette-grid">
+        @for (int row = 0; row * Columns < _colours.Count; row++) {
+          <div role="row" class="pixata-blazor-editor-palette-row">
+            @for (int column = 0; column < Columns && row * Columns + column < _colours.Count; column++) {
+              int index = row * Columns + column;
+              string colour = _colours[index];
+              bool selected = index == SelectedIndex;
+              <div id="@CellId(index)"
+                   class="@PixataCss.Classes("pixata-blazor-editor-palette-cell", index == _focused ? "pixata-blazor-focus" : null, selected ? "pixata-blazor-selected" : null)"
+                   role="gridcell"
+                   title="@colour"
+                   aria-label="@colour"
+                   aria-selected="@(selected ? "true" : "false")"
+                   style="@($"background-color: {colour};")"
+                   @onmousedown:preventDefault
+                   @onclick="() => Choose(index)"></div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </PixataPopup>
+</span>
+
+@code {
+
+  [CascadingParameter]
+  private PixataEditor Editor { get; set; } = null!;
+
+  [Parameter, EditorRequired]
+  public PixataEditorColorTool Tool { get; set; } = null!;
+
+  /// <summary>
+  /// The colour at the selection, as the browser reports it (eg <c>rgb(230, 25, 25)</c>), or null
+  /// </summary>
+  [Parameter]
+  public string? Value { get; set; }
+
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  /// <summary>
+  /// True when the tool is in the toolbar's overflow menu, which closes when a colour is chosen
+  /// </summary>
+  [Parameter]
+  public bool InOverflow { get; set; }
+
+  private static readonly string[] HandledKeys = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Alt+ArrowDown", "Alt+ArrowUp", "Home", "End", "Enter", " "];
+
+  private readonly string _id = $"pixata-editor-colour-{Guid.NewGuid():N}";
+  private ElementReference _button;
+  private bool _open;
+  private int _focused;
+  private bool _keysAttached;
+  private string? _chosen;
+  private IEnumerable<string>? _coloursFrom;
+  private List<string> _colours = [];
+
+  private string GridId => $"{_id}-grid";
+
+  private string CellId(int index) =>
+    index < 0 ? $"{_id}-clear" : $"{_id}-cell-{index}";
+
+  private int Columns => Math.Max(1, Tool.Columns);
+
+  // The colour shown under the icon: the selection's, else the last one chosen, else the tool's starting value
+  private string? Shown =>
+    Safe(Value) ?? Safe(_chosen) ?? Safe(Tool.Value);
+
+  private int SelectedIndex {
+    get {
+      string? value = Hex(Value);
+      return value is null ? -1 : _colours.FindIndex(c => Hex(c) == value);
+    }
+  }
+
+  private static string? Safe(string? colour) =>
+    string.IsNullOrWhiteSpace(colour) ? null : PixataHtmlSanitiser.SafeCssValue(colour);
+
+  // The browser reports colours as rgb(...) while palettes usually use #rrggbb, so compare them as #rrggbb
+  internal static string? Hex(string? colour) {
+    if (string.IsNullOrWhiteSpace(colour)) {
+      return null;
+    }
+    string value = colour.Trim().ToLowerInvariant();
+    if (value.StartsWith('#')) {
+      string digits = value[1..];
+      if (digits.Length is 3 or 4) {
+        digits = string.Concat(digits[..3].Select(c => $"{c}{c}"));
+      } else if (digits.Length == 8) {
+        digits = digits[..6];
+      }
+      return digits.Length == 6 && digits.All(Uri.IsHexDigit) ? $"#{digits}" : null;
+    }
+    if (value.StartsWith("rgb")) {
+      int open = value.IndexOf('(');
+      int close = value.IndexOf(')');
+      if (open < 0 || close < open) {
+        return null;
+      }
+      string[] parts = value[(open + 1)..close].Split([',', ' ', '/'], StringSplitOptions.RemoveEmptyEntries);
+      if (parts.Length < 3) {
+        return null;
+      }
+      int[] channels = new int[3];
+      for (int i = 0; i < 3; i++) {
+        if (!double.TryParse(parts[i], NumberStyles.Float, CultureInfo.InvariantCulture, out double channel)) {
+          return null;
+        }
+        channels[i] = (int)Math.Round(Math.Clamp(channel, 0, 255));
+      }
+      return $"#{channels[0]:x2}{channels[1]:x2}{channels[2]:x2}";
+    }
+    return value;
+  }
+
+  protected override void OnParametersSet() {
+    if (!ReferenceEquals(_coloursFrom, Tool.Colors)) {
+      _coloursFrom = Tool.Colors;
+      _colours = (Tool.Colors ?? []).Select(Safe).OfType<string>().ToList();
+    }
+    if (!Enabled) {
+      _open = false;
+    }
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (!_keysAttached && Enabled) {
+      _keysAttached = true;
+      await PixataJs.InvokeVoid(Js, "preventDefaultKeys", _button, HandledKeys);
+    }
+  }
+
+  private void Toggle() {
+    if (_open) {
+      _open = false;
+    } else {
+      Open();
+    }
+  }
+
+  private void Open() {
+    _open = true;
+    _focused = SelectedIndex >= 0 ? SelectedIndex : _colours.Count > 0 ? 0 : -1;
+  }
+
+  private void Close() =>
+    _open = false;
+
+  private async Task Choose(int index) {
+    _open = false;
+    string colour = index >= 0 && index < _colours.Count ? _colours[index] : "";
+    _chosen = colour == "" ? null : colour;
+    await Editor.ExecuteTool(new PixataEditorFormatCommandArgs(Tool.CommandName, colour), InOverflow);
+  }
+
+  private async Task KeyDown(KeyboardEventArgs e) {
+    if (!_open) {
+      if (e.Key is "ArrowDown" or "Enter" or " ") {
+        Open();
+      }
+      return;
+    }
+    int count = _colours.Count;
+    int columns = Columns;
+    switch (e.Key) {
+      case "Escape":
+      case "Tab":
+        _open = false;
+        break;
+      case "ArrowDown" when e.AltKey:
+      case "ArrowUp" when e.AltKey:
+        _open = false;
+        break;
+      case "ArrowRight":
+        _focused = Math.Min(count - 1, _focused + 1);
+        break;
+      case "ArrowLeft":
+        _focused = Math.Max(-1, _focused - 1);
+        break;
+      case "ArrowDown":
+        _focused = _focused < 0 ? 0 : _focused + columns < count ? _focused + columns : _focused;
+        break;
+      case "ArrowUp":
+        _focused = _focused - columns >= 0 ? _focused - columns : -1;
+        break;
+      case "Home":
+        _focused = e.CtrlKey || _focused < 0 ? -1 : _focused - _focused % columns;
+        break;
+      case "End":
+        _focused = e.CtrlKey || _focused < 0 ? count - 1 : Math.Min(count - 1, _focused - _focused % columns + columns - 1);
+        break;
+      case "Enter":
+      case " ":
+        await Choose(_focused);
+        break;
+    }
+  }
+
+}

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Extensions.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -43,7 +42,7 @@ public class PixataGridVirtual_Tests {
     };
 
   private IRenderedComponent<PixataGrid<Item>> Render(Action<ComponentParameterCollectionBuilder<PixataGrid<Item>>>? more = null, RenderFragment? columns = null, double? rowHeight = 36) =>
-    _ctx.RenderComponent<PixataGrid<Item>>(p => {
+    _ctx.Render<PixataGrid<Item>>(p => {
       p.Add(g => g.Data, Items)
         .Add(g => g.GridColumns, columns ?? Columns())
         .Add(g => g.ScrollMode, PixataGridScrollMode.Virtual)
@@ -54,10 +53,10 @@ public class PixataGridVirtual_Tests {
       more?.Invoke(p);
     });
 
-  private static List<string> Ids(IRenderedFragment grid) =>
+  private static List<string> Ids<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("tbody tr.pixata-blazor-grid-row").Select(tr => tr.Children[0].TextContent.Trim())];
 
-  private static List<string?> Spacers(IRenderedFragment grid) =>
+  private static List<string?> Spacers<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("tbody tr.pixata-blazor-grid-virtual-spacer").Select(tr => tr.GetAttribute("style"))];
 
   [TestMethod]
@@ -131,7 +130,7 @@ public class PixataGridVirtual_Tests {
   public void OnRead_AsksForTheRowsToRender_AndShowsPlaceholdersWhileWaiting() {
     List<GridRequest> requests = [];
     TaskCompletionSource? waiting = null;
-    IRenderedComponent<PixataGrid<Item>> grid = _ctx.RenderComponent<PixataGrid<Item>>(p => p
+    IRenderedComponent<PixataGrid<Item>> grid = _ctx.Render<PixataGrid<Item>>(p => p
       .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Item>>(this, async args => {
         requests.Add(args.Request);
         if (waiting is not null) {

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -31,7 +30,7 @@ public class PixataGridSelection_Tests {
 
   private IRenderedComponent<PixataGrid<Person>> Render(PixataGridSelectionMode mode, Action<IEnumerable<Person>> changed, bool checkboxColumn = false, bool checkboxOnly = false,
                                                         PixataGridSelectAllMode selectAllMode = PixataGridSelectAllMode.Current, IEnumerable<Person>? data = null, Func<Person, object?>? key = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, data ?? People())
         .Add(g => g.SelectionMode, mode)
         .Add(g => g.Pageable, true)
@@ -56,7 +55,7 @@ public class PixataGridSelection_Tests {
   private static string Selected(IEnumerable<Person> people) =>
     string.Join(",", people.Select(p => p.Name));
 
-  private static void ClickRow(IRenderedFragment grid, int row, MouseEventArgs? e = null) =>
+  private static void ClickRow<TComponent>(IRenderedComponent<TComponent> grid, int row, MouseEventArgs? e = null) where TComponent : IComponent =>
     grid.FindAll("tbody tr")[row].QuerySelectorAll("td").Last().Click(e ?? new MouseEventArgs());
 
   [TestMethod]
@@ -154,7 +153,7 @@ public class PixataGridSelection_Tests {
 
   [TestMethod]
   public void ItemKey_MatchesItemsThatAreNotTheSameObjects() {
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.SelectionMode, PixataGridSelectionMode.Multiple)
       .Add(g => g.SelectedItems, [new Person(2, "Someone else")])
@@ -171,7 +170,7 @@ public class PixataGridSelection_Tests {
   [TestMethod]
   public void CellSelection_ClickAndShiftSelectARectangle() {
     IEnumerable<PixataGridSelectedCell<Person>> cells = [];
-    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
       .Add(g => g.Data, People())
       .Add(g => g.SelectionMode, PixataGridSelectionMode.Multiple)
       .Add(g => g.SelectedCellsChanged, EventCallback.Factory.Create<IEnumerable<PixataGridSelectedCell<Person>>>(this, c => cells = c))

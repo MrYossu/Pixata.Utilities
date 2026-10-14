@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -36,7 +35,7 @@ public class PixataGridAccessibility_Tests {
   }
 
   private IRenderedComponent<PixataGrid<Person>> Render(Action<ComponentParameterCollectionBuilder<PixataGrid<Person>>>? more = null, IEnumerable<Person>? data = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, data ?? People)
         .Add(g => g.GridColumns, b => {
           Column(b, nameof(Person.Id));

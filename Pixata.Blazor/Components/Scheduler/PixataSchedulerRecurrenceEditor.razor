@@ -1,0 +1,258 @@
+@namespace Pixata.Blazor.Components
+@using System.Globalization
+
+@*
+  Edits a recurrence rule: how often an appointment repeats, on which days, and when it stops. Used by the scheduler's edit
+  form, and can be used in your own form template with @bind-Rule
+*@
+<div class="pixata-blazor-scheduler-recurrence-editor" role="group" aria-label="@Text.Repeat">
+  <span class="pixata-blazor-scheduler-segmented" role="group" aria-label="@Text.Repeat">
+    @foreach ((PixataRecurrenceFrequency? frequency, string label) in Frequencies) {
+      bool selected = _rule?.Frequency == frequency || (_rule is null && frequency is null);
+      <button type="button"
+              class="@PixataCss.Classes("pixata-blazor-scheduler-segmented-button", selected ? "pixata-blazor-selected" : null)"
+              aria-pressed="@(selected ? "true" : "false")"
+              @onclick="() => SetFrequency(frequency)">@label</button>
+    }
+  </span>
+  @if (_rule is { } rule) {
+    <div class="pixata-blazor-scheduler-recurrence-row">
+      <label class="pixata-blazor-scheduler-recurrence-label" for="@($"{_id}-interval")">@Text.RepeatEvery</label>
+      <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-number-input")">
+        <input id="@($"{_id}-interval")" type="number" min="1" inputmode="numeric" class="pixata-blazor-input-inner"
+               value="@rule.Interval" @onchange="args => Change(r => r.Interval = Number(args, r.Interval, 1, 999))" />
+      </span>
+      <span>@IntervalUnit(rule.Frequency)</span>
+    </div>
+    @switch (rule.Frequency) {
+      case PixataRecurrenceFrequency.Weekly:
+        <div class="pixata-blazor-scheduler-recurrence-row">
+          <span class="pixata-blazor-scheduler-recurrence-label" id="@($"{_id}-days")">@Text.RepeatOn</span>
+          <span class="pixata-blazor-scheduler-segmented pixata-blazor-scheduler-recurrence-days" role="group" aria-labelledby="@($"{_id}-days")">
+            @foreach (DayOfWeek day in WeekDays) {
+              bool selected = rule.ByDay.Any(d => d.Day == day);
+              <button type="button"
+                      class="@PixataCss.Classes("pixata-blazor-scheduler-segmented-button", selected ? "pixata-blazor-selected" : null)"
+                      aria-pressed="@(selected ? "true" : "false")"
+                      aria-label="@CurrentCulture.DateTimeFormat.GetDayName(day)"
+                      @onclick="() => Change(r => PixataSchedulerRecurrenceEditing.ToggleDay(r, day))">@CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(day)</button>
+            }
+          </span>
+        </div>
+        break;
+      case PixataRecurrenceFrequency.Monthly:
+      case PixataRecurrenceFrequency.Yearly:
+        bool yearly = rule.Frequency == PixataRecurrenceFrequency.Yearly;
+        bool monthDay = PixataSchedulerRecurrenceEditing.UsesMonthDay(rule);
+        PixataRecurrenceOrdinalDay ordinal = PixataSchedulerRecurrenceEditing.OrdinalDay(rule) ?? new(1, PixataRecurrenceDay.Code(Start.DayOfWeek));
+        int month = rule.ByMonth.Count > 0 ? rule.ByMonth[0] : Start.Month;
+        <div class="pixata-blazor-scheduler-recurrence-row" role="radiogroup" aria-label="@Text.RepeatOn">
+          <span class="pixata-blazor-scheduler-recurrence-label">@Text.RepeatOn</span>
+          <span class="pixata-blazor-scheduler-recurrence-options">
+            <span class="pixata-blazor-scheduler-recurrence-option">
+              <label class="pixata-blazor-scheduler-radio-label">
+                <input type="radio" name="@($"{_id}-on")" checked="@monthDay" aria-label="@(yearly ? Text.RepeatOn : null)" @onchange="() => Change(r => PixataSchedulerRecurrenceEditing.SetMonthDay(r, Start.Day))" />
+                @(yearly ? "" : Text.OnDay)
+              </label>
+              @if (yearly) {
+                @MonthSelect(month, !monthDay, $"{_id}-month-day")
+              }
+              <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-number-input", PixataCss.Disabled(monthDay))">
+                <input type="number" min="1" max="31" inputmode="numeric" class="pixata-blazor-input-inner" disabled="@(!monthDay)" aria-label="@Text.OnDay"
+                       value="@(rule.ByMonthDay.Count > 0 ? rule.ByMonthDay[0] : Start.Day)"
+                       @onchange="args => Change(r => PixataSchedulerRecurrenceEditing.SetMonthDay(r, Number(args, Start.Day, 1, 31)))" />
+              </span>
+            </span>
+            <span class="pixata-blazor-scheduler-recurrence-option">
+              <label class="pixata-blazor-scheduler-radio-label">
+                <input type="radio" name="@($"{_id}-on")" checked="@(!monthDay)" @onchange="() => Change(r => PixataSchedulerRecurrenceEditing.SetOrdinalDay(r, ordinal))" />
+                @Text.OnThe
+              </label>
+              <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-select", PixataCss.Disabled(!monthDay))">
+                <select class="pixata-blazor-input-inner" disabled="@monthDay" aria-label="@Text.OnThe"
+                        @onchange="args => Change(r => PixataSchedulerRecurrenceEditing.SetOrdinalDay(r, ordinal with { Ordinal = Number(args, 1, -1, 4) }))">
+                  @foreach (int value in Ordinals) {
+                    <option value="@value" selected="@(value == ordinal.Ordinal)">@PixataSchedulerRecurrenceEditing.OrdinalText(value, CurrentCulture, Text)</option>
+                  }
+                </select>
+              </span>
+              <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-select", PixataCss.Disabled(!monthDay))">
+                <select class="pixata-blazor-input-inner" disabled="@monthDay" aria-label="@Text.RepeatOn"
+                        @onchange="args => Change(r => PixataSchedulerRecurrenceEditing.SetOrdinalDay(r, ordinal with { Kind = args.Value?.ToString() ?? ordinal.Kind }))">
+                  @foreach ((string value, string label) in DayKinds) {
+                    <option value="@value" selected="@(value == ordinal.Kind)">@label</option>
+                  }
+                </select>
+              </span>
+              @if (yearly) {
+                <span>@Text.Of</span>
+                @MonthSelect(month, monthDay, $"{_id}-month-ordinal")
+              }
+            </span>
+          </span>
+        </div>
+        break;
+    }
+    <div class="pixata-blazor-scheduler-recurrence-row" role="radiogroup" aria-label="@Text.Ends">
+      <span class="pixata-blazor-scheduler-recurrence-label">@Text.Ends</span>
+      <span class="pixata-blazor-scheduler-recurrence-options">
+        <span class="pixata-blazor-scheduler-recurrence-option">
+          <label class="pixata-blazor-scheduler-radio-label">
+            <input type="radio" name="@($"{_id}-end")" checked="@(rule.Count is null && rule.Until is null)" @onchange="() => Change(PixataSchedulerRecurrenceEditing.EndNever)" />
+            @Text.EndsNever
+          </label>
+        </span>
+        <span class="pixata-blazor-scheduler-recurrence-option">
+          <label class="pixata-blazor-scheduler-radio-label">
+            <input type="radio" name="@($"{_id}-end")" checked="@(rule.Count is not null)" @onchange="() => Change(r => PixataSchedulerRecurrenceEditing.EndAfter(r, r.Count ?? 10))" />
+            @Text.EndsAfter
+          </label>
+          <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-number-input", PixataCss.Disabled(rule.Count is not null))">
+            <input type="number" min="1" inputmode="numeric" class="pixata-blazor-input-inner" disabled="@(rule.Count is null)" aria-label="@Text.Occurrences"
+                   value="@(rule.Count ?? 10)" @onchange="args => Change(r => PixataSchedulerRecurrenceEditing.EndAfter(r, Number(args, r.Count ?? 10, 1, 9999)))" />
+          </span>
+          <span>@Text.Occurrences</span>
+        </span>
+        <span class="pixata-blazor-scheduler-recurrence-option">
+          <label class="pixata-blazor-scheduler-radio-label">
+            <input type="radio" name="@($"{_id}-end")" checked="@(rule.Until is not null)" @onchange="() => Change(r => PixataSchedulerRecurrenceEditing.EndOn(r, r.Until ?? DefaultUntil))" />
+            @Text.EndsOn
+          </label>
+          <span class="@PixataCss.Classes(PixataCss.Input(null, null, null), PixataCss.Disabled(rule.Until is not null))">
+            <input type="date" class="pixata-blazor-input-inner" disabled="@(rule.Until is null)" aria-label="@Text.EndsOn"
+                   value="@((rule.Until ?? DefaultUntil).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                   @onchange="args => Change(r => PixataSchedulerRecurrenceEditing.EndOn(r, Date(args) ?? r.Until ?? DefaultUntil))" />
+          </span>
+        </span>
+      </span>
+    </div>
+    <div class="pixata-blazor-scheduler-recurrence-summary" aria-live="polite">@PixataSchedulerRecurrenceEditing.Describe(rule, CurrentCulture, Text)</div>
+  }
+</div>
+
+@code {
+
+  private static readonly PixataSchedulerMessages DefaultMessages = new();
+  private static readonly int[] Ordinals = [1, 2, 3, 4, -1];
+
+  /// <summary>
+  /// The rule, eg <c>FREQ=WEEKLY;BYDAY=MO,WE</c>, or null for an appointment that doesn't repeat
+  /// </summary>
+  [Parameter]
+  public string? Rule { get; set; }
+
+  [Parameter]
+  public EventCallback<string?> RuleChanged { get; set; }
+
+  /// <summary>
+  /// The start of the series, which sets the defaults when the user picks a frequency
+  /// </summary>
+  [Parameter]
+  public DateTime Start { get; set; } = DateTime.Today;
+
+  /// <summary>
+  /// The culture for day and month names. Defaults to the current culture
+  /// </summary>
+  [Parameter]
+  public CultureInfo? Culture { get; set; }
+
+  /// <summary>
+  /// The first day of the week, for the order of the days. Defaults to the culture's
+  /// </summary>
+  [Parameter]
+  public DayOfWeek? FirstDayOfWeek { get; set; }
+
+  /// <summary>
+  /// The text the editor shows, for translation
+  /// </summary>
+  [Parameter]
+  public PixataSchedulerMessages? Messages { get; set; }
+
+  private readonly string _id = $"pixata-recurrence-{Guid.NewGuid():N}";
+  private PixataRecurrenceRule? _rule;
+  private string? _lastRule;
+  private bool _initialised;
+
+  private CultureInfo CurrentCulture => Culture ?? CultureInfo.CurrentCulture;
+
+  private PixataSchedulerMessages Text => Messages ?? DefaultMessages;
+
+  private DateTime DefaultUntil => Start.Date.AddMonths(3);
+
+  private IEnumerable<DayOfWeek> WeekDays {
+    get {
+      DayOfWeek first = FirstDayOfWeek ?? CurrentCulture.DateTimeFormat.FirstDayOfWeek;
+      return Enumerable.Range(0, 7).Select(i => (DayOfWeek)(((int)first + i) % 7));
+    }
+  }
+
+  private IEnumerable<(PixataRecurrenceFrequency? Frequency, string Label)> Frequencies => [
+    (null, Text.RepeatNever),
+    (PixataRecurrenceFrequency.Daily, Text.RepeatDaily),
+    (PixataRecurrenceFrequency.Weekly, Text.RepeatWeekly),
+    (PixataRecurrenceFrequency.Monthly, Text.RepeatMonthly),
+    (PixataRecurrenceFrequency.Yearly, Text.RepeatYearly)
+  ];
+
+  private IEnumerable<(string Value, string Label)> DayKinds =>
+    [
+      (PixataSchedulerRecurrenceEditing.AnyDay, Text.AnyDay),
+      (PixataSchedulerRecurrenceEditing.Weekday, Text.Weekday),
+      (PixataSchedulerRecurrenceEditing.WeekendDay, Text.WeekendDay),
+      .. WeekDays.Select(d => (PixataRecurrenceDay.Code(d), CurrentCulture.DateTimeFormat.GetDayName(d)))
+    ];
+
+  protected override void OnParametersSet() {
+    if (!_initialised || Rule != _lastRule) {
+      _initialised = true;
+      _lastRule = Rule;
+      _rule = PixataRecurrenceRule.TryParse(Rule, out PixataRecurrenceRule? rule) ? rule : null;
+    }
+  }
+
+  private string IntervalUnit(PixataRecurrenceFrequency frequency) =>
+    frequency switch {
+      PixataRecurrenceFrequency.Daily => Text.Days,
+      PixataRecurrenceFrequency.Weekly => Text.Weeks,
+      PixataRecurrenceFrequency.Monthly => Text.Months,
+      _ => Text.Years
+    };
+
+  private RenderFragment MonthSelect(int month, bool disabled, string id) =>
+    @<span class="@PixataCss.Classes(PixataCss.Input(null, null, null), "pixata-blazor-scheduler-select", PixataCss.Disabled(!disabled))">
+      <select id="@id" class="pixata-blazor-input-inner" disabled="@disabled" aria-label="@Text.Months"
+              @onchange="args => Change(r => r.ByMonth = [Number(args, month, 1, 12)])">
+        @for (int m = 1; m <= 12; m++) {
+          <option value="@m" selected="@(m == month)">@CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
+        }
+      </select>
+    </span>;
+
+  private async Task SetFrequency(PixataRecurrenceFrequency? frequency) {
+    if (frequency == _rule?.Frequency) {
+      return;
+    }
+    _rule = frequency is { } value ? PixataSchedulerRecurrenceEditing.Create(value, Start, _rule) : null;
+    await Notify();
+  }
+
+  private async Task Change(Action<PixataRecurrenceRule> change) {
+    if (_rule is null) {
+      return;
+    }
+    change(_rule);
+    await Notify();
+  }
+
+  private async Task Notify() {
+    _lastRule = _rule?.ToString();
+    await RuleChanged.InvokeAsync(_lastRule);
+  }
+
+  private static int Number(ChangeEventArgs args, int fallback, int min, int max) =>
+    int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) && value >= min && value <= max ? value : fallback;
+
+  private static DateTime? Date(ChangeEventArgs args) =>
+    DateTime.TryParseExact(args.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date) ? date : null;
+
+}

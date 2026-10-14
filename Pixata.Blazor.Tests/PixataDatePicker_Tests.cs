@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -31,14 +30,14 @@ public class PixataDatePicker_Tests {
     CultureInfo.CurrentCulture = _culture;
   }
 
-  private static IElement Day(IRenderedFragment calendar, string day) =>
+  private static IElement Day<TComponent>(IRenderedComponent<TComponent> calendar, string day) where TComponent : IComponent =>
     calendar.FindAll("td.pixata-blazor-calendar-td:not(.pixata-blazor-calendar-other-month)").First(td => td.TextContent.Trim() == day);
 
   // ---------- Calendar ----------
 
   [TestMethod]
   public void Calendar_ShowsSixWeeksStartingOnTheCulturesFirstDay() {
-    IRenderedComponent<PixataCalendar> calendar = _ctx.RenderComponent<PixataCalendar>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
+    IRenderedComponent<PixataCalendar> calendar = _ctx.Render<PixataCalendar>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
 
     Assert.AreEqual("October 2026", calendar.Find(".pixata-blazor-calendar-title").TextContent.Trim());
     Assert.AreEqual(6, calendar.FindAll("tbody tr").Count);
@@ -51,7 +50,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void Calendar_ClickingADay_RaisesValueChanged() {
     DateTime? picked = null;
-    IRenderedComponent<PixataCalendar> calendar = _ctx.RenderComponent<PixataCalendar>(p => p
+    IRenderedComponent<PixataCalendar> calendar = _ctx.Render<PixataCalendar>(p => p
       .Add(c => c.Value, new DateTime(2026, 10, 13))
       .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateTime>(this, d => picked = d)));
 
@@ -62,7 +61,7 @@ public class PixataDatePicker_Tests {
 
   [TestMethod]
   public void Calendar_TitleGoesUpAndCellsGoBackDown() {
-    IRenderedComponent<PixataCalendar> calendar = _ctx.RenderComponent<PixataCalendar>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
+    IRenderedComponent<PixataCalendar> calendar = _ctx.Render<PixataCalendar>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
 
     calendar.Find(".pixata-blazor-calendar-title").Click();
     Assert.AreEqual("2026", calendar.Find(".pixata-blazor-calendar-title").TextContent.Trim());
@@ -81,7 +80,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void Calendar_DatesOutsideTheRangeOrDisabled_CantBePicked() {
     DateTime? picked = null;
-    IRenderedComponent<PixataCalendar> calendar = _ctx.RenderComponent<PixataCalendar>(p => p
+    IRenderedComponent<PixataCalendar> calendar = _ctx.Render<PixataCalendar>(p => p
       .Add(c => c.Value, new DateTime(2026, 10, 13))
       .Add(c => c.Min, new DateTime(2026, 10, 5))
       .Add(c => c.Max, new DateTime(2026, 10, 25))
@@ -101,7 +100,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void Calendar_Keyboard_MovesAndSelects() {
     DateTime? picked = null;
-    IRenderedComponent<PixataCalendar> calendar = _ctx.RenderComponent<PixataCalendar>(p => p
+    IRenderedComponent<PixataCalendar> calendar = _ctx.Render<PixataCalendar>(p => p
       .Add(c => c.Value, new DateTime(2026, 10, 31))
       .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateTime>(this, d => picked = d)));
     IElement table = calendar.Find("table");
@@ -117,7 +116,7 @@ public class PixataDatePicker_Tests {
 
   [TestMethod]
   public void Calendar_WeekNumbers_AreIso8601() {
-    IRenderedComponent<PixataCalendar> calendar = _ctx.RenderComponent<PixataCalendar>(p => p
+    IRenderedComponent<PixataCalendar> calendar = _ctx.Render<PixataCalendar>(p => p
       .Add(c => c.Value, new DateTime(2026, 1, 1))
       .Add(c => c.ShowWeekNumbers, true));
 
@@ -130,7 +129,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void DateInput_TypingACompleteDate_RaisesValueChanged() {
     DateTime? value = null;
-    IRenderedComponent<PixataDateInput<DateTime?>> input = _ctx.RenderComponent<PixataDateInput<DateTime?>>(p => p
+    IRenderedComponent<PixataDateInput<DateTime?>> input = _ctx.Render<PixataDateInput<DateTime?>>(p => p
       .Add(c => c.Format, "dd/MM/yyyy")
       .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateTime?>(this, d => value = d)));
 
@@ -144,7 +143,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void DateInput_ClearingAPart_MakesANullableValueNull() {
     DateTime? value = new DateTime(2026, 3, 1);
-    IRenderedComponent<PixataDateInput<DateTime?>> input = _ctx.RenderComponent<PixataDateInput<DateTime?>>(p => p
+    IRenderedComponent<PixataDateInput<DateTime?>> input = _ctx.Render<PixataDateInput<DateTime?>>(p => p
       .Add(c => c.Value, value)
       .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateTime?>(this, d => value = d)));
 
@@ -156,7 +155,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void DateInput_ClearingAPart_KeepsANonNullableValueAndShowsInvalid() {
     int changes = 0;
-    IRenderedComponent<PixataDateInput<DateTime>> input = _ctx.RenderComponent<PixataDateInput<DateTime>>(p => p
+    IRenderedComponent<PixataDateInput<DateTime>> input = _ctx.Render<PixataDateInput<DateTime>>(p => p
       .Add(c => c.Value, new DateTime(2026, 3, 1))
       .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateTime>(this, _ => changes++)));
 
@@ -170,7 +169,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void DateInput_DateOnly_IsSupported() {
     DateOnly value = new(2026, 3, 1);
-    IRenderedComponent<PixataDateInput<DateOnly>> input = _ctx.RenderComponent<PixataDateInput<DateOnly>>(p => p
+    IRenderedComponent<PixataDateInput<DateOnly>> input = _ctx.Render<PixataDateInput<DateOnly>>(p => p
       .Add(c => c.Value, value)
       .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateOnly>(this, d => value = d)));
 
@@ -183,13 +182,13 @@ public class PixataDatePicker_Tests {
 
   [TestMethod]
   public void DateInput_OtherTypes_Throw() =>
-    Assert.ThrowsException<InvalidOperationException>(() => _ctx.RenderComponent<PixataDateInput<string>>());
+    Assert.ThrowsException<InvalidOperationException>(() => _ctx.Render<PixataDateInput<string>>());
 
   [TestMethod]
   public void DateInput_OnChange_FiresOnBlurOnlyWhenTheValueChanged() {
     int changes = 0;
     DateTime value = new(2026, 3, 1);
-    IRenderedComponent<PixataDateInput<DateTime>> input = _ctx.RenderComponent<PixataDateInput<DateTime>>(p => p
+    IRenderedComponent<PixataDateInput<DateTime>> input = _ctx.Render<PixataDateInput<DateTime>>(p => p
       .Add(c => c.Value, value)
       .Add(c => c.OnChange, EventCallback.Factory.Create<object?>(this, _ => changes++)));
 
@@ -209,7 +208,7 @@ public class PixataDatePicker_Tests {
     EditContext context = new(model);
     bool notified = false;
     context.OnFieldChanged += (_, e) => notified = e.FieldIdentifier.FieldName == nameof(Model.Due);
-    IRenderedComponent<PixataDateInput<DateTime?>> input = _ctx.RenderComponent<PixataDateInput<DateTime?>>(p => p
+    IRenderedComponent<PixataDateInput<DateTime?>> input = _ctx.Render<PixataDateInput<DateTime?>>(p => p
       .AddCascadingValue(context)
       .Add(c => c.Value, model.Due)
       .Add(c => c.ValueExpression, () => model.Due)
@@ -230,7 +229,7 @@ public class PixataDatePicker_Tests {
   [TestMethod]
   public void DatePicker_ButtonOpensTheCalendarAndPickingADateClosesIt() {
     DateTime? value = new DateTime(2026, 10, 13);
-    IRenderedComponent<PixataDatePicker<DateTime?>> picker = _ctx.RenderComponent<PixataDatePicker<DateTime?>>(p => p
+    IRenderedComponent<PixataDatePicker<DateTime?>> picker = _ctx.Render<PixataDatePicker<DateTime?>>(p => p
       .Add(c => c.Value, value)
       .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateTime?>(this, d => value = d)));
 
@@ -246,7 +245,7 @@ public class PixataDatePicker_Tests {
 
   [TestMethod]
   public void DatePicker_AltDownOpensAndEscapeCloses() {
-    IRenderedComponent<PixataDatePicker<DateTime>> picker = _ctx.RenderComponent<PixataDatePicker<DateTime>>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
+    IRenderedComponent<PixataDatePicker<DateTime>> picker = _ctx.Render<PixataDatePicker<DateTime>>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
 
     picker.Find("input").KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "ArrowDown", AltKey = true });
     Assert.AreEqual(1, picker.FindAll(".pixata-blazor-datepicker-popup").Count);
@@ -257,10 +256,10 @@ public class PixataDatePicker_Tests {
 
   [TestMethod]
   public void DatePicker_ClearButton_OnlyForNullableValues() {
-    IRenderedComponent<PixataDatePicker<DateTime?>> nullable = _ctx.RenderComponent<PixataDatePicker<DateTime?>>(p => p
+    IRenderedComponent<PixataDatePicker<DateTime?>> nullable = _ctx.Render<PixataDatePicker<DateTime?>>(p => p
       .Add(c => c.Value, new DateTime(2026, 10, 13))
       .Add(c => c.ShowClearButton, true));
-    IRenderedComponent<PixataDatePicker<DateTime>> notNullable = _ctx.RenderComponent<PixataDatePicker<DateTime>>(p => p
+    IRenderedComponent<PixataDatePicker<DateTime>> notNullable = _ctx.Render<PixataDatePicker<DateTime>>(p => p
       .Add(c => c.Value, new DateTime(2026, 10, 13))
       .Add(c => c.ShowClearButton, true));
 

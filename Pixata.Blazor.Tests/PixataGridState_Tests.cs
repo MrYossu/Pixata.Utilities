@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Extensions.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -49,7 +48,7 @@ public class PixataGridState_Tests {
     };
 
   private IRenderedComponent<PixataGrid<Person>> Render(Action<ComponentParameterCollectionBuilder<PixataGrid<Person>>>? more = null) =>
-    _ctx.RenderComponent<PixataGrid<Person>>(p => {
+    _ctx.Render<PixataGrid<Person>>(p => {
       p.Add(g => g.Data, People)
         .Add(g => g.GridColumns, Columns)
         .Add(g => g.Pageable, true)
@@ -60,11 +59,11 @@ public class PixataGridState_Tests {
       more?.Invoke(p);
     });
 
-  private static List<string> Titles(IRenderedFragment grid) =>
+  private static List<string> Titles<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : Microsoft.AspNetCore.Components.IComponent =>
     [.. grid.FindAll("thead tr:first-child th:not(.pixata-blazor-grid-group-cell)").Select(th => th.QuerySelector(".pixata-blazor-grid-column-title")!.TextContent.Trim())];
 
   // The ids of the rows, wherever the Id column is
-  private static List<string> Ids(IRenderedFragment grid) {
+  private static List<string> Ids<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : Microsoft.AspNetCore.Components.IComponent {
     int column = grid.FindAll("thead tr:first-child th").ToList().FindIndex(th => th.QuerySelector(".pixata-blazor-grid-column-title")?.TextContent.Trim() == "Id");
     return [.. grid.FindAll("tbody tr.pixata-blazor-grid-row").Select(tr => tr.Children[column].TextContent.Trim())];
   }

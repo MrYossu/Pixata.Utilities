@@ -9,7 +9,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Extensions;
 using Pixata.Extensions.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -32,7 +31,7 @@ public class PixataGridOnRead_Tests {
     _ctx.Dispose();
 
   private IRenderedComponent<PixataGrid<Item>> Render(Func<PixataGridReadEventArgs<Item>, Task> onRead, int page = 1) =>
-    _ctx.RenderComponent<PixataGrid<Item>>(p => p
+    _ctx.Render<PixataGrid<Item>>(p => p
       .Add(g => g.OnRead, EventCallback.Factory.Create(this, onRead))
       .Add(g => g.Pageable, true)
       .Add(g => g.PageSize, 5)
@@ -47,7 +46,7 @@ public class PixataGridOnRead_Tests {
         b.CloseComponent();
       }));
 
-  private static string Ids(IRenderedFragment grid) =>
+  private static string Ids<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : Microsoft.AspNetCore.Components.IComponent =>
     string.Join(",", grid.FindAll("tbody tr").Select(tr => tr.QuerySelector("td")!.TextContent.Trim()));
 
   [TestMethod]
@@ -94,7 +93,7 @@ public class PixataGridOnRead_Tests {
       return Task.CompletedTask;
     });
 
-    grid.SetParametersAndRender(p => p.Add(g => g.Size, PixataGridSize.Small));
+    grid.Render(p => p.Add(g => g.Size, PixataGridSize.Small));
 
     Assert.AreEqual(1, calls);
   }
@@ -180,7 +179,7 @@ public class PixataGridOnRead_Tests {
 
   [TestMethod]
   public void DataAndOnRead_Throws() =>
-    Assert.ThrowsException<InvalidOperationException>(() => _ctx.RenderComponent<PixataGrid<Item>>(p => p
+    Assert.ThrowsException<InvalidOperationException>(() => _ctx.Render<PixataGrid<Item>>(p => p
       .Add(g => g.Data, Items)
       .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Item>>(this, _ => { }))));
 }

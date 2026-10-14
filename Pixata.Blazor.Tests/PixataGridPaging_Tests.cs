@@ -5,7 +5,6 @@ using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
-using BunitContext = Bunit.TestContext;
 
 namespace Pixata.Blazor.Tests;
 
@@ -33,7 +32,7 @@ public class PixataGridPaging_Tests {
                                                       PixataGridPagerPosition position = PixataGridPagerPosition.Bottom,
                                                       bool pageable = true, IEnumerable<Item>? data = null,
                                                       EventCallback<int>? pageChanged = null, EventCallback<int>? pageSizeChanged = null) =>
-    _ctx.RenderComponent<PixataGrid<Item>>(p => {
+    _ctx.Render<PixataGrid<Item>>(p => {
       p.Add(g => g.Data, data ?? Items)
         .Add(g => g.Pageable, pageable)
         .Add(g => g.PageSize, pageSize)
@@ -59,13 +58,13 @@ public class PixataGridPaging_Tests {
       }
     });
 
-  private static string[] Ids(IRenderedFragment grid) =>
+  private static string[] Ids<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll("tbody td").Select(td => td.TextContent.Trim())];
 
-  private static string[] PageButtons(IRenderedFragment grid) =>
+  private static string[] PageButtons<TComponent>(IRenderedComponent<TComponent> grid) where TComponent : IComponent =>
     [.. grid.FindAll(".pixata-blazor-grid-pager-number").Select(b => b.TextContent.Trim())];
 
-  private static IElement Nav(IRenderedFragment grid, string title) =>
+  private static IElement Nav<TComponent>(IRenderedComponent<TComponent> grid, string title) where TComponent : IComponent =>
     grid.FindAll(".pixata-blazor-grid-pager-nav").Single(b => b.GetAttribute("title") == title);
 
   [TestMethod]
