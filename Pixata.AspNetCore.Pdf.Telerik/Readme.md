@@ -6,6 +6,8 @@ A PDF converter for the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/) is available for this project.
 
+>**Version 1.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
+
 ## Setup
 
 In `Program.cs`...

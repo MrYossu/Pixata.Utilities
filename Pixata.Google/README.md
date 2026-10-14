@@ -8,6 +8,8 @@ Note that the Google logo is &copy;Google, and is used without permission. I hop
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available for this project.
 
+>**Version 2.9.4** references a patched version of `System.IdentityModel.Tokens.Jwt`, as the one pulled in by `Google.Apis.Auth` had a known vulnerability ([GHSA-59j7-ghrg-fj52](https://github.com/advisories/GHSA-59j7-ghrg-fj52)). No code changes.
+
 ## Setting up Google authentication
 
 In order to use the package, you will need to set up authorisation with Google. **Note** that this package assumes you are doing server-to-server communication with Google, meaning that your app uses a pre-defined Google account, and the user does not need to know anything about it. If you want to use the user's Google account (ie have them sign in to Google to use your app), then you would need to use a slightly different method of authentication. It wouldn't be hard to add code to do that, but as I do't have the need for it, I haven't done it yet. If you need this approach, please [open an issue](https://github.com/MrYossu/Pixata.Utilities/issues) and ask. No promises, but I'll see what I can do!

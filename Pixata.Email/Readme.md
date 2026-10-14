@@ -6,6 +6,8 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
+>**Version 3.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
+
 # Breaking changes
 
 >**Version 3.0.0** changes how the connection to the SMTP server is secured. `SmtpSettings` has a new `SocketOptions` property (a MailKit `SecureSocketOptions`), and `UseSsl` is now a `bool?` marked `[Obsolete]`. If you set neither, the service uses implicit TLS on port 465 and *required* STARTTLS on any other port, where it used to try implicit TLS everywhere (which failed on port 587). See [securing the connection](#securing-the-connection) below.

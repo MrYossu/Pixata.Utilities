@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>2.9.3</Version>
-    <AssemblyVersion>2.9.3</AssemblyVersion>
-    <FileVersion>2.9.3</FileVersion>
+    <Version>2.9.4</Version>
+    <AssemblyVersion>2.9.4</AssemblyVersion>
+    <FileVersion>2.9.4</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Google</Product>
@@ -23,6 +23,8 @@
     <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.62.1" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.62.0.3155" />
     <PackageReference Include="LanguageExt.Core" Version="4.4.6" />
+    <!-- Pinned to a patched version: the one Google.Apis.Auth pulls in has a known vulnerability (GHSA-59j7-ghrg-fj52) -->
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.7.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 

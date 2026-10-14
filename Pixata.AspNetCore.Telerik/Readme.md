@@ -12,6 +12,8 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Telerik/) is 
 
 >**Version 2.0.0** references Telerik.UI.for.Blazor 15.0.1 (from nuget.org) rather than 12.3.0, to match version 15.0.0 of Pixata.Blazor.TelerikComponents. The API is unchanged. If your app is still on Telerik 12, stay on version 1.0.2 until you upgrade.
 
+>**Version 2.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
+
 ## Extension method to improve the performance of the Telerik Blazor grid
 Whilst the Telerik Blazor grid does an amazing job, it has its limitations. One of these is the way it computes aggregates. For large tables, this can be slow.
 

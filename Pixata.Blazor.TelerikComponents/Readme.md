@@ -8,6 +8,8 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents
 
 >Note that as of version 12.2.0, the major and minor package versions will correspond to the version of the Telerik.Blazor package that is required. The patch version will be used for updates to this package. The build number will indicate my own internal versioning. Thus, version 12.2.0 is based on the Telerik Blazor package version 12.2.x, where x is my own incremental build number.
 
+>**Version 15.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
+
 ## Breaking changes in version 15.0.0
 
 - **Telerik UI for Blazor 15.** This version references Telerik.UI.for.Blazor 15.0.1, which (unlike 12.x) is published on nuget.org, so you no longer need the private Telerik feed to restore it. If your app is still on Telerik 12, stay on version 12.3.20 of this package until you upgrade Telerik. Telerik 15 also needs Telerik.Licensing 1.9.1 or later.
