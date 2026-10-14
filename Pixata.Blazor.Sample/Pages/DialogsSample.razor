@@ -5,18 +5,17 @@
 <h3>Dialogs</h3>
 
 <p>
-  <code>PixataDialog</code> next to <code>TelerikDialog</code>, and the predefined alert, confirm and prompt dialogs from
-  <code>PixataDialogFactory</code> next to Telerik's <code>DialogFactory</code>. See
+  <code>PixataDialog</code>, and the predefined alert, confirm and prompt dialogs from <code>PixataDialogFactory</code>. See
   <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md">the documentation</a>.
   Try the keyboard too: the focus moves into a dialog when it opens, Tab stays inside it, Esc closes it, and the focus goes
   back to the button that opened it afterwards.
 </p>
 
-<ComponentComparison Title="A basic dialog">
+<ComponentSample Title="A basic dialog">
   <Description>
     A title, some content and a couple of buttons, with <code>@@bind-Visible</code>. The close button and Esc close it too.
   </Description>
-  <Pixata>
+  <ChildContent>
     <button type="button" class="@PrimaryButton" @onclick="() => _basicPixata = true">Delete customer</button>
     <PixataDialog @bind-Visible="_basicPixata" Title="Delete customer" Width="400px">
       <DialogContent>
@@ -28,23 +27,10 @@
       </DialogButtons>
     </PixataDialog>
     <p class="dialogs-sample-result">Visible: @_basicPixata. Result: @_basicPixataResult</p>
-  </Pixata>
-  <Telerik>
-    <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="() => _basicTelerik = true">Delete customer</TelerikButton>
-    <TelerikDialog @bind-Visible="_basicTelerik" Title="Delete customer" Width="400px">
-      <DialogContent>
-        <p>Are you sure you want to delete Fred Bloggs? His orders and invoices will be deleted too.</p>
-      </DialogContent>
-      <DialogButtons>
-        <TelerikButton OnClick="@(() => CloseBasic(false, "Cancelled"))">Cancel</TelerikButton>
-        <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="@(() => CloseBasic(false, "Deleted"))">Delete</TelerikButton>
-      </DialogButtons>
-    </TelerikDialog>
-    <p class="dialogs-sample-result">Visible: @_basicTelerik. Result: @_basicTelerikResult</p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Options">
+<ComponentSample Title="Options">
   <Description>
     <div class="dialogs-sample-options">
       <label><input type="checkbox" @bind="_showCloseButton" /> ShowCloseButton</label>
@@ -69,7 +55,7 @@
     </div>
     Without a close button, Esc doesn't close the dialog either. The ThemeColor colours the titlebar.
   </Description>
-  <Pixata>
+  <ChildContent>
     <button type="button" class="@BaseButton" @onclick="() => _optionsPixata = true">Open</button>
     <PixataDialog @bind-Visible="_optionsPixata"
                   Title="Options"
@@ -85,32 +71,16 @@
         <button type="button" class="@PrimaryButton" @onclick="() => _optionsPixata = false">OK</button>
       </DialogButtons>
     </PixataDialog>
-  </Pixata>
-  <Telerik>
-    <TelerikButton OnClick="() => _optionsTelerik = true">Open</TelerikButton>
-    <TelerikDialog @bind-Visible="_optionsTelerik"
-                   Title="Options"
-                   ShowCloseButton="_showCloseButton"
-                   CloseOnOverlayClick="_closeOnOverlayClick"
-                   ButtonsLayout="TelerikLayout">
-      <DialogContent>
-        <p>Change the options above and open the dialog again.</p>
-      </DialogContent>
-      <DialogButtons>
-        <TelerikButton OnClick="() => _optionsTelerik = false">Cancel</TelerikButton>
-        <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="() => _optionsTelerik = false">OK</TelerikButton>
-      </DialogButtons>
-    </TelerikDialog>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="A form, a title template, a fixed height and the focused element">
+<ComponentSample Title="A form, a title template, a fixed height and the focused element">
   <Description>
     An <code>EditForm</code> with validation inside the dialog, a <code>DialogTitle</code> with an icon,
     <code>Height="320px"</code> so the content scrolls, and <code>FocusedElementSelector</code> putting the focus in the
     email box. The dialog is still part of the page's component tree, so the form works as it would anywhere else.
   </Description>
-  <Pixata>
+  <ChildContent>
     <button type="button" class="@BaseButton" @onclick="OpenFormPixata">Edit contact</button>
     <PixataDialog @bind-Visible="_formPixata" Width="420px" Height="320px" FocusedElementSelector="#pixata-email">
       <DialogTitle>
@@ -132,39 +102,16 @@
       </DialogButtons>
     </PixataDialog>
     <p class="dialogs-sample-result">Saved: @_savedPixata</p>
-  </Pixata>
-  <Telerik>
-    <TelerikButton OnClick="OpenFormTelerik">Edit contact</TelerikButton>
-    <TelerikDialog @bind-Visible="_formTelerik" Width="420px" Height="320px" FocusedElementSelector="#telerik-email">
-      <DialogTitle>
-        <TelerikSvgIcon Icon="Telerik.SvgIcons.SvgIcon.Pencil" /> Edit contact
-      </DialogTitle>
-      <DialogContent>
-        <EditForm id="telerik-contact-form" Model="_contactTelerik" OnValidSubmit="() => SaveContact(false)">
-          <DataAnnotationsValidator />
-          <p><label>Name<br /><InputText @bind-Value="_contactTelerik.Name" /></label></p>
-          <ValidationMessage For="() => _contactTelerik.Name" />
-          <p><label>Email<br /><InputText id="telerik-email" @bind-Value="_contactTelerik.Email" /></label></p>
-          <ValidationMessage For="() => _contactTelerik.Email" />
-          <p>@LongText</p>
-        </EditForm>
-      </DialogContent>
-      <DialogButtons>
-        <TelerikButton OnClick="() => _formTelerik = false">Cancel</TelerikButton>
-        <TelerikButton ButtonType="ButtonType.Submit" form="telerik-contact-form" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Save</TelerikButton>
-      </DialogButtons>
-    </TelerikDialog>
-    <p class="dialogs-sample-result">Saved: @_savedTelerik</p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Stacked dialogs, and stopping a dialog closing">
+<ComponentSample Title="Stacked dialogs, and stopping a dialog closing">
   <Description>
     The first dialog opens a second one (and a predefined confirm dialog) on top of itself. Esc closes the one in front. The
     first dialog handles <code>VisibleChanged</code> itself rather than using <code>@@bind-Visible</code>: with "Unsaved
     changes" ticked, it asks before closing, and stays open if you say no.
   </Description>
-  <Pixata>
+  <ChildContent>
     <button type="button" class="@BaseButton" @onclick="() => _outerPixata = true">Open the first dialog</button>
     <PixataDialog Visible="_outerPixata" VisibleChanged="OuterPixataVisibleChanged" Title="First dialog" Width="460px">
       <DialogContent>
@@ -184,37 +131,16 @@
         <button type="button" class="@PrimaryButton" @onclick="() => OuterPixataVisibleChanged(false)">Close</button>
       </DialogButtons>
     </PixataDialog>
-  </Pixata>
-  <Telerik>
-    <TelerikButton OnClick="() => _outerTelerik = true">Open the first dialog</TelerikButton>
-    <TelerikDialog Visible="_outerTelerik" VisibleChanged="OuterTelerikVisibleChanged" Title="First dialog" Width="460px">
-      <DialogContent>
-        <p><label><input type="checkbox" @bind="_unsavedTelerik" /> Unsaved changes</label></p>
-        <p>
-          <TelerikButton OnClick="() => _innerTelerik = true">Open a second dialog</TelerikButton>
-          <TelerikButton OnClick="ConfirmFromTelerik">Confirm something</TelerikButton>
-        </p>
-        <p>@_stackedTelerikResult</p>
-        <TelerikDialog @bind-Visible="_innerTelerik" Title="Second dialog" Width="320px" CloseOnOverlayClick="true">
-          <DialogContent>
-            <p>This one is in front. Esc, the close button or a click on the overlay closes it, and leaves the first one open.</p>
-          </DialogContent>
-        </TelerikDialog>
-      </DialogContent>
-      <DialogButtons>
-        <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="() => OuterTelerikVisibleChanged(false)">Close</TelerikButton>
-      </DialogButtons>
-    </TelerikDialog>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Predefined dialogs">
+<ComponentSample Title="Predefined dialogs">
   <Description>
-    Called from code and awaited. The Pixata ones come from <code>@@inject PixataDialogFactory Dialogs</code> (with a
-    <code>&lt;PixataDialogHost /&gt;</code> in the layout), the Telerik ones from the <code>DialogFactory</code> cascaded by
-    <code>TelerikRootComponent</code>. The last button passes its own button text, as you would to translate them for one call.
+    Called from code and awaited. They come from <code>@@inject PixataDialogFactory Dialogs</code>, with a
+    <code>&lt;PixataDialogHost /&gt;</code> in the layout. The last button passes its own button text, as you would to
+    translate them for one call.
   </Description>
-  <Pixata>
+  <ChildContent>
     <div class="dialogs-sample-buttons">
       <button type="button" class="@BaseButton" @onclick="AlertPixata">Alert</button>
       <button type="button" class="@BaseButton" @onclick="ConfirmPixata">Confirm</button>
@@ -222,17 +148,8 @@
       <button type="button" class="@BaseButton" @onclick="YesNoPixata">Confirm with Yes/No</button>
     </div>
     <p class="dialogs-sample-result">@_predefinedPixataResult</p>
-  </Pixata>
-  <Telerik>
-    <div class="dialogs-sample-buttons">
-      <TelerikButton OnClick="AlertTelerik">Alert</TelerikButton>
-      <TelerikButton OnClick="ConfirmTelerik">Confirm</TelerikButton>
-      <TelerikButton OnClick="PromptTelerik">Prompt</TelerikButton>
-      <TelerikButton OnClick="YesNoTelerik">Confirm with Yes/No</TelerikButton>
-    </div>
-    <p class="dialogs-sample-result">@_predefinedTelerikResult</p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 <style>
   .dialogs-sample-options {
@@ -258,9 +175,6 @@
   [Inject]
   private PixataDialogFactory Dialogs { get; set; } = null!;
 
-  [CascadingParameter]
-  private DialogFactory TelerikDialogs { get; set; } = null!;
-
   private static readonly string BaseButton = PixataCss.Button(null, null, null, null);
   private static readonly string PrimaryButton = PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null);
 
@@ -277,51 +191,29 @@
     + "vehicula leo id leo vulputate, at viverra risus iaculis. Pellentesque condimentum mauris sapien, non rhoncus sem dictum vel.";
 
   private bool _basicPixata;
-  private bool _basicTelerik;
   private string _basicPixataResult = "";
-  private string _basicTelerikResult = "";
 
   private bool _optionsPixata;
-  private bool _optionsTelerik;
   private bool _showCloseButton = true;
   private bool _closeOnOverlayClick;
   private PixataDialogButtonsLayout _buttonsLayout = PixataDialogButtonsLayout.Stretch;
   private string _themeColor = "";
 
   private bool _formPixata;
-  private bool _formTelerik;
   private Contact _contactPixata = new();
-  private Contact _contactTelerik = new();
   private string _savedPixata = "";
-  private string _savedTelerik = "";
 
   private bool _outerPixata;
   private bool _innerPixata;
   private bool _unsavedPixata;
   private string _stackedPixataResult = "";
-  private bool _outerTelerik;
-  private bool _innerTelerik;
-  private bool _unsavedTelerik;
-  private string _stackedTelerikResult = "";
 
   private string _predefinedPixataResult = "";
-  private string _predefinedTelerikResult = "";
-
-  private DialogButtonsLayout TelerikLayout =>
-    _buttonsLayout switch {
-      PixataDialogButtonsLayout.Start => DialogButtonsLayout.Start,
-      PixataDialogButtonsLayout.Center => DialogButtonsLayout.Center,
-      PixataDialogButtonsLayout.End => DialogButtonsLayout.End,
-      _ => DialogButtonsLayout.Stretch
-    };
 
   private void CloseBasic(bool pixata, string result) {
     if (pixata) {
       _basicPixata = false;
       _basicPixataResult = result;
-    } else {
-      _basicTelerik = false;
-      _basicTelerikResult = result;
     }
   }
 
@@ -330,18 +222,10 @@
     _formPixata = true;
   }
 
-  private void OpenFormTelerik() {
-    _contactTelerik = new() { Name = "Fred Bloggs" };
-    _formTelerik = true;
-  }
-
   private void SaveContact(bool pixata) {
     if (pixata) {
       _savedPixata = $"{_contactPixata.Name} <{_contactPixata.Email}>";
       _formPixata = false;
-    } else {
-      _savedTelerik = $"{_contactTelerik.Name} <{_contactTelerik.Email}>";
-      _formTelerik = false;
     }
   }
 
@@ -352,18 +236,8 @@
     _outerPixata = visible;
   }
 
-  private async Task OuterTelerikVisibleChanged(bool visible) {
-    if (!visible && _unsavedTelerik && !await TelerikDialogs.ConfirmAsync("You have unsaved changes. Close anyway?", "Unsaved changes", "Close", "Keep editing")) {
-      return;
-    }
-    _outerTelerik = visible;
-  }
-
   private async Task ConfirmFromPixata() =>
     _stackedPixataResult = $"Confirmed: {await Dialogs.ConfirmAsync("Shown on top of the first dialog. OK?", "Confirm")}";
-
-  private async Task ConfirmFromTelerik() =>
-    _stackedTelerikResult = $"Confirmed: {await TelerikDialogs.ConfirmAsync("Shown on top of the first dialog. OK?", "Confirm")}";
 
   private async Task AlertPixata() {
     await Dialogs.AlertAsync("Your changes have been saved.", "Saved");
@@ -380,22 +254,6 @@
 
   private async Task YesNoPixata() =>
     _predefinedPixataResult = $"Confirm returned {await Dialogs.ConfirmAsync("Delete all 12 drafts?", "Delete drafts", "Yes", "No")}";
-
-  private async Task AlertTelerik() {
-    await TelerikDialogs.AlertAsync("Your changes have been saved.", "Saved");
-    _predefinedTelerikResult = "The alert was closed";
-  }
-
-  private async Task ConfirmTelerik() =>
-    _predefinedTelerikResult = $"Confirm returned {await TelerikDialogs.ConfirmAsync("Do you want to send the invoice now?", "Send invoice")}";
-
-  private async Task PromptTelerik() {
-    string? name = await TelerikDialogs.PromptAsync("What would you like to call the report?", "Save report", "Monthly sales");
-    _predefinedTelerikResult = name is null ? "Prompt returned null (cancelled)" : $"Prompt returned \"{name}\"";
-  }
-
-  private async Task YesNoTelerik() =>
-    _predefinedTelerikResult = $"Confirm returned {await TelerikDialogs.ConfirmAsync("Delete all 12 drafts?", "Delete drafts", "Yes", "No")}";
 
   private class Contact {
     [Required]

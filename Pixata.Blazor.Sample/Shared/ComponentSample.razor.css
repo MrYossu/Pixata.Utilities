@@ -1,0 +1,14 @@
+.component-sample {
+  margin-bottom: 2rem;
+}
+
+.component-sample-description {
+  margin-bottom: .75rem;
+}
+
+.component-sample-example {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: .25rem;
+}

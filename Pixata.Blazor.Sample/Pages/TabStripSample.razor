@@ -1,20 +1,18 @@
 @page "/TabStripSample"
 @using Pixata.Blazor.Components
-@using Telerik.SvgIcons
 
 <h3>Tab strip</h3>
 
 <p>
-  <code>PixataTabStrip</code> and <code>PixataTab</code>, next to the Telerik <code>TelerikTabStrip</code> and <code>TabStripTab</code>
-  configured the same way. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TabStrip.md">the documentation</a>.
+  <code>PixataTabStrip</code> and <code>PixataTab</code>. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TabStrip.md">the documentation</a>.
 </p>
 
-<ComponentComparison Title="Basic use">
+<ComponentSample Title="Basic use">
   <Description>
     Bound to <code>ActiveTabId</code>, with a disabled tab and a header template. Click a tab, or focus the tabs and use the
     arrow keys, Home and End.
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataTabStrip @bind-ActiveTabId="_pixataBasicTab">
       <PixataTab Id="general" Title="General">
         <p>The general settings go here.</p>
@@ -35,32 +33,10 @@
       </PixataTab>
     </PixataTabStrip>
     <p class="mt-2">Active tab: <strong>@_pixataBasicTab</strong></p>
-  </Pixata>
-  <Telerik>
-    <TelerikTabStrip @bind-ActiveTabId="_telerikBasicTab">
-      <TabStripTab Id="general" Title="General">
-        <p>The general settings go here.</p>
-      </TabStripTab>
-      <TabStripTab Id="advanced" Title="Advanced">
-        <p>The advanced settings go here.</p>
-      </TabStripTab>
-      <TabStripTab Id="disabled" Title="Disabled" Disabled="true">
-        <p>You can't get here.</p>
-      </TabStripTab>
-      <TabStripTab Id="inbox">
-        <HeaderTemplate>
-          <TelerikSvgIcon Icon="SvgIcon.InfoCircle" /> Inbox <span class="tab-badge">3</span>
-        </HeaderTemplate>
-        <Content>
-          <p>A tab with a header template.</p>
-        </Content>
-      </TabStripTab>
-    </TelerikTabStrip>
-    <p class="mt-2">Active tab: <strong>@_telerikBasicTab</strong></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Position, alignment and size">
+<ComponentSample Title="Position, alignment and size">
   <Description>
     <label>Position
       <select @bind="_position">
@@ -84,23 +60,16 @@
       </select>
     </label>
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataTabStrip TabPosition="_position" TabAlignment="_alignment" Size="@_size" Height="@(IsVertical ? "180px" : null)">
       <PixataTab Title="Paris">Paris is the capital of France.</PixataTab>
       <PixataTab Title="London">London is the capital of England.</PixataTab>
       <PixataTab Title="Sofia">Sofia is the capital of Bulgaria.</PixataTab>
     </PixataTabStrip>
-  </Pixata>
-  <Telerik>
-    <TelerikTabStrip TabPosition="TelerikPosition" TabAlignment="TelerikAlignment" Size="@TelerikSize" Height="@(IsVertical ? "180px" : null)">
-      <TabStripTab Title="Paris">Paris is the capital of France.</TabStripTab>
-      <TabStripTab Title="London">London is the capital of England.</TabStripTab>
-      <TabStripTab Title="Sofia">Sofia is the capital of Bulgaria.</TabStripTab>
-    </TelerikTabStrip>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Scrollable tabs">
+<ComponentSample Title="Scrollable tabs">
   <Description>
     When there are more tabs than fit, a scrollable tab strip keeps them on one line. Swipe the tabs on a phone, or use the
     scroll buttons.
@@ -119,31 +88,23 @@
       </select>
     </label>
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataTabStrip Scrollable="true" ScrollButtonsPosition="_scrollButtonsPosition" ScrollButtonsVisibility="_scrollButtonsVisibility" @bind-ActiveTabId="_pixataMonth">
       @foreach (string month in Months) {
         <PixataTab Id="@month" Title="@month">The figures for @month.</PixataTab>
       }
     </PixataTabStrip>
     <p class="mt-2">Active tab: <strong>@_pixataMonth</strong></p>
-  </Pixata>
-  <Telerik>
-    <TelerikTabStrip OverflowMode="TabStripOverflowMode.Scroll" ScrollButtonsPosition="TelerikScrollButtonsPosition" ScrollButtonsVisibility="TelerikScrollButtonsVisibility" @bind-ActiveTabId="_telerikMonth">
-      @foreach (string month in Months) {
-        <TabStripTab Id="@month" Title="@month">The figures for @month.</TabStripTab>
-      }
-    </TelerikTabStrip>
-    <p class="mt-2">Active tab: <strong>@_telerikMonth</strong></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Dynamic and closeable tabs">
+<ComponentSample Title="Dynamic and closeable tabs">
   <Description>
-    Tabs added, removed and moved at runtime. The tabs can be closed with their close buttons (or the Delete key). The Pixata tab strip
-    raises <code>OnTabClose</code>, which can cancel the close: try closing the "Pinned" tab. The Telerik tab strip has no such
-    event, so it uses the tab's <code>VisibleChanged</code>. The Pixata tab strip also has a suffix template with an add button.
+    Tabs added, removed and moved at runtime. The tabs can be closed with their close buttons (or the Delete key). The tab strip
+    raises <code>OnTabClose</code>, which can cancel the close: try closing the "Pinned" tab. It also has a suffix template with
+    an add button.
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataTabStrip Scrollable="true" @bind-ActiveTabId="_pixataDocument" OnTabClose="PixataTabClosing">
       <TabStripSuffixTemplate>
         <button type="button" class="pixata-blazor-button pixata-blazor-button-md pixata-blazor-rounded-md pixata-blazor-button-flat pixata-blazor-button-base pixata-blazor-icon-button" title="Add a document" @onclick="AddPixataDocument">
@@ -163,42 +124,22 @@
       <button class="btn btn-sm btn-outline-secondary" @onclick="() => _pixataDocuments.Reverse()">Reverse the tabs</button>
     </p>
     <p>Active tab: <strong>@_pixataDocument</strong>. @_pixataCloseMessage</p>
-  </Pixata>
-  <Telerik>
-    <TelerikTabStrip OverflowMode="TabStripOverflowMode.Scroll" @bind-ActiveTabId="_telerikDocument">
-      @foreach (string document in _telerikDocuments) {
-        <TabStripTab @key="document" Id="@document" Title="@document" Closeable="true" VisibleChanged="(bool visible) => TelerikTabVisibleChanged(document, visible)">Editing @document</TabStripTab>
-      }
-    </TelerikTabStrip>
-    <p class="mt-2">
-      <button class="btn btn-sm btn-outline-primary" @onclick="AddTelerikDocument">Add a tab</button>
-      <button class="btn btn-sm btn-outline-primary" @onclick="InsertTelerikDocument">Insert a tab second</button>
-      <button class="btn btn-sm btn-outline-secondary" @onclick="RemoveTelerikDocument" disabled="@(_telerikDocuments.Count == 0)">Remove the active tab</button>
-      <button class="btn btn-sm btn-outline-secondary" @onclick="() => _telerikDocuments.Reverse()">Reverse the tabs</button>
-    </p>
-    <p>Active tab: <strong>@_telerikDocument</strong></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Persisting tab content">
+<ComponentSample Title="Persisting tab content">
   <Description>
     Type something into the text boxes, switch tabs and come back. With <code>PersistTabContent</code> turned on, what you
     typed is still there, as the tab's content was kept rather than created afresh.
     <label class="ml-3"><input type="checkbox" @bind="_persist" /> PersistTabContent</label>
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataTabStrip PersistTabContent="_persist">
       <PixataTab Title="Name"><input placeholder="Type your name" /></PixataTab>
       <PixataTab Title="Address"><input placeholder="Type your address" /></PixataTab>
     </PixataTabStrip>
-  </Pixata>
-  <Telerik>
-    <TelerikTabStrip PersistTabContent="_persist">
-      <TabStripTab Title="Name"><input placeholder="Type your name" /></TabStripTab>
-      <TabStripTab Title="Address"><input placeholder="Type your address" /></TabStripTab>
-    </TelerikTabStrip>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 <style>
   .tab-badge {
@@ -218,44 +159,21 @@
   private static readonly string[] Months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   private string _pixataBasicTab = "advanced";
-  private string _telerikBasicTab = "advanced";
   private PixataTabPosition _position = PixataTabPosition.Top;
   private PixataTabStripTabAlignment _alignment = PixataTabStripTabAlignment.Start;
   private string _size = "md";
   private PixataTabStripScrollButtonsPosition _scrollButtonsPosition = PixataTabStripScrollButtonsPosition.Split;
   private PixataTabStripScrollButtonsVisibility _scrollButtonsVisibility = PixataTabStripScrollButtonsVisibility.Auto;
   private string _pixataMonth = "June";
-  private string _telerikMonth = "June";
   private bool _persist = true;
 
   private readonly List<string> _pixataDocuments = ["Pinned", "Report", "Letter", "Invoice"];
-  private readonly List<string> _telerikDocuments = ["Pinned", "Report", "Letter", "Invoice"];
   private string? _pixataDocument = "Report";
-  private string? _telerikDocument = "Report";
   private string _pixataCloseMessage = "";
   private int _documentNumber = 1;
 
   private bool IsVertical =>
     _position is PixataTabPosition.Left or PixataTabPosition.Right;
-
-  private TabPosition TelerikPosition =>
-    Enum.Parse<TabPosition>(_position.ToString());
-
-  private TabStripTabAlignment TelerikAlignment =>
-    Enum.Parse<TabStripTabAlignment>(_alignment.ToString());
-
-  private string TelerikSize =>
-    _size switch {
-      "sm" => ThemeConstants.TabStrip.Size.Small,
-      "lg" => ThemeConstants.TabStrip.Size.Large,
-      _ => ThemeConstants.TabStrip.Size.Medium
-    };
-
-  private TabStripScrollButtonsPosition TelerikScrollButtonsPosition =>
-    Enum.Parse<TabStripScrollButtonsPosition>(_scrollButtonsPosition.ToString());
-
-  private TabStripScrollButtonsVisibility TelerikScrollButtonsVisibility =>
-    Enum.Parse<TabStripScrollButtonsVisibility>(_scrollButtonsVisibility.ToString());
 
   private void PixataTabClosing(PixataTabStripTabCloseEventArgs args) {
     if (args.TabId == "Pinned") {
@@ -285,27 +203,4 @@
     }
   }
 
-  private void TelerikTabVisibleChanged(string document, bool visible) {
-    if (!visible) {
-      _telerikDocuments.Remove(document);
-    }
-  }
-
-  private void AddTelerikDocument() {
-    string document = $"Document {_documentNumber++}";
-    _telerikDocuments.Add(document);
-    _telerikDocument = document;
-  }
-
-  private void InsertTelerikDocument() {
-    string document = $"Document {_documentNumber++}";
-    _telerikDocuments.Insert(Math.Min(1, _telerikDocuments.Count), document);
-    _telerikDocument = document;
-  }
-
-  private void RemoveTelerikDocument() {
-    if (_telerikDocument is not null) {
-      _telerikDocuments.Remove(_telerikDocument);
-    }
-  }
 }

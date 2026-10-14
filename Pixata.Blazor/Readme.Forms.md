@@ -16,11 +16,11 @@ These wrap your own input controls, and lay out the label and the validation mes
 - `FormQuad` - a row with four input controls and labels
 - `FormName` - a row with title, first name and surname input controls and labels
 
-Sample usage of these is as follows (Telerik input controls used, but you can use any input controls you like)...
+Sample usage of these is as follows (you can use any input controls you like)...
 
 ```xml
 <FormSingle Label="Email" Id="Email" Required="true">
-  <TelerikTextBox @bind-Value="@user.Email" Id="Email" />
+  <InputText @bind-Value="@user.Email" Id="Email" />
   <ValidationMessage For="@(() => user.Email)" />
 </FormSingle>
 ```
@@ -40,18 +40,18 @@ The `FormName` component is very similar to `FormTriple`, except that the contro
           SalutationLabel="First name" SalutationId="FirstName" SalutationRequired="true"
           SurnameLabel="Surname" SurnameId="Surname" SurnameRequired="true">
   <Title>
-    <TelerikTextBox @bind-Value="@user.Title" Id="Title" />
+    <InputText @bind-Value="@user.Title" Id="Title" />
     <ValidationMessage For="@(() => user.Title)" />
   </Title>
   <Salutation>
     <div style="max-width: 300px">
-      <TelerikTextBox @bind-Value="@user.FirstName" Id="FirstName" />
+      <InputText @bind-Value="@user.FirstName" Id="FirstName" />
       <ValidationMessage For="@(() => user.FirstName)" />
     </div>
   </Salutation>
   <Surname>
     <div style="max-width: 300px">
-      <TelerikTextBox @bind-Value="@user.Surname" Id="Surname" />
+      <InputText @bind-Value="@user.Surname" Id="Surname" />
       <ValidationMessage For="@(() => user.Surname)" />
     </div>
   </Surname>

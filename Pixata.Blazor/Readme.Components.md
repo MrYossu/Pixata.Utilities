@@ -6,7 +6,7 @@ Some general components that I found useful.
 
 ## VirtualiseWithState
 
-I discovered the `<Virtualize>` component, which allows you to load data as it's needed, and have full flexibility over the display. This gives you the power and convenience of the virtualisation feature in the Telerik Blazor grid, but without your page looking too grid-like.
+I discovered the `<Virtualize>` component, which allows you to load data as it's needed, and have full flexibility over the display. This gives you the power and convenience of a virtualised grid, but without your page looking too grid-like.
 
 As with the grid, it's often desirable to save the state of the component, so that if the user navigates away and back, their previous state will be restored. That can all be done manually, but why bother when we can write a component to do it for us?
 
@@ -145,9 +145,9 @@ As every app I write uses Identity, there are certain basic auth-related tasks t
 
 ### Template helpers
 
->**Note:** The examples below use a `TelerikGrid`, merely because that's where I use this helper the most. However, it can be used with any component that allows you to specify a template.
+>**Note:** The examples below use a grid, merely because that's where I use this helper the most. However, it can be used with any component that allows you to specify a template.
 
-Without these methods, creating custom content for a grid cell in a `TelerikGrid` would look something like this...
+Without these methods, creating custom content for a grid cell would look something like this...
 
 ```xml
 <GridColumn Field="@nameof(InvestorOverview.Name)">

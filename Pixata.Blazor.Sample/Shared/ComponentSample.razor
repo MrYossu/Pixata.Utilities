@@ -1,0 +1,25 @@
+@*
+  One example on a sample page: a title, a description of what it shows, and the example itself in a box
+*@
+<section class="component-sample">
+  @if (!string.IsNullOrWhiteSpace(Title)) {
+    <h4>@Title</h4>
+  }
+  @if (Description is not null) {
+    <div class="component-sample-description">@Description</div>
+  }
+  <div class="component-sample-example">
+    @ChildContent
+  </div>
+</section>
+
+@code {
+  [Parameter]
+  public string? Title { get; set; }
+
+  [Parameter]
+  public RenderFragment? Description { get; set; }
+
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+}

@@ -2,47 +2,36 @@
 @using Pixata.Blazor.Components
 @using Pixata.Blazor.Sample.Models
 @using static Pixata.Blazor.Sample.Models.DropDownSampleData
-@using Telerik.DataSource
-@using Telerik.DataSource.Extensions
 
 <SitePageTitle>Drop-downs</SitePageTitle>
 
 <h3>Drop-downs</h3>
 
 <p>
-  <code>PixataDropDownList</code>, <code>PixataComboBox</code> and <code>PixataMultiSelect</code>, each next to its Telerik
-  equivalent. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md">the documentation</a>.
+  <code>PixataDropDownList</code>, <code>PixataComboBox</code> and <code>PixataMultiSelect</code>. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md">the documentation</a>.
 </p>
 
 <h4 class="mt-4">Drop-down list</h4>
 
-<ComponentComparison Title="Primitive data">
+<ComponentSample Title="Primitive data">
   <Description>A list of strings, with <code>DefaultText</code>. Tab to it and use the arrow keys, Home/End or type a letter, or press Alt+Down to open it.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataDropDownList Data="@Fruit" @bind-Value="@_fruit" DefaultText="Choose a fruit..." Width="250px" Id="pixata-ddl-fruit" />
     <p class="mt-2"><small>Value: @(_fruit ?? "(null)")</small></p>
-  </Pixata>
-  <Telerik>
-    <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" DefaultText="Choose a fruit..." Width="250px" Id="telerik-ddl-fruit" />
-    <p class="mt-2"><small>Value: @(_fruit ?? "(null)")</small></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Model data, filtering and grouping">
+<ComponentSample Title="Model data, filtering and grouping">
   <Description><code>TextField</code>, <code>ValueField</code> and <code>GroupField</code>, with <code>Filterable</code> and <code>FilterOperator="Contains"</code>.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataDropDownList Data="@Countries" TextField="Name" ValueField="Id" GroupField="Continent" @bind-Value="@_countryId" Filterable="true" FilterOperator="PixataStringFilterOperator.Contains" Width="250px" Id="pixata-ddl-country" />
     <p class="mt-2"><small>Value: @_countryId</small></p>
-  </Pixata>
-  <Telerik>
-    <TelerikDropDownList Data="@Countries" TextField="Name" ValueField="Id" GroupField="Continent" @bind-Value="@_countryId" Filterable="true" FilterOperator="StringFilterOperator.Contains" Width="250px" Id="telerik-ddl-country" />
-    <p class="mt-2"><small>Value: @_countryId</small></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Templates">
+<ComponentSample Title="Templates">
   <Description>Item, value, header, footer and no-data templates.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataDropDownList Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_templatedId" Filterable="true" Width="250px" Id="pixata-ddl-templates">
       <ItemTemplate><strong>@context.Name</strong>&nbsp;<small>(@context.Continent)</small></ItemTemplate>
       <ValueTemplate>@context.Name, @context.Continent</ValueTemplate>
@@ -50,21 +39,12 @@
       <FooterTemplate><div style="padding: 4px 8px;">@Countries.Count countries</div></FooterTemplate>
       <NoDataTemplate>No country matches that</NoDataTemplate>
     </PixataDropDownList>
-  </Pixata>
-  <Telerik>
-    <TelerikDropDownList Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_templatedId" Filterable="true" Width="250px" Id="telerik-ddl-templates">
-      <ItemTemplate><strong>@context.Name</strong>&nbsp;<small>(@context.Continent)</small></ItemTemplate>
-      <ValueTemplate>@context.Name, @context.Continent</ValueTemplate>
-      <HeaderTemplate><div style="padding: 4px 8px; font-weight: bold;">Countries</div></HeaderTemplate>
-      <FooterTemplate><div style="padding: 4px 8px;">@Countries.Count countries</div></FooterTemplate>
-      <NoDataTemplate>No country matches that</NoDataTemplate>
-    </TelerikDropDownList>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Sizes, fill modes and states">
+<ComponentSample Title="Sizes, fill modes and states">
   <Description><code>Size</code>, <code>FillMode</code>, <code>Rounded</code>, <code>Enabled</code> and <code>ReadOnly</code>. The Pixata one also has <code>ShowClearButton</code>.</Description>
-  <Pixata>
+  <ChildContent>
     <div style="display: grid; gap: 8px; max-width: 250px;">
       <PixataDropDownList Data="@Fruit" @bind-Value="@_fruit" Size="sm" DefaultText="Small" />
       <PixataDropDownList Data="@Fruit" @bind-Value="@_fruit" Size="lg" DefaultText="Large" />
@@ -75,61 +55,38 @@
       <PixataDropDownList Data="@Fruit" @bind-Value="@_fruit" ReadOnly="true" DefaultText="Read-only" />
       <PixataDropDownList Data="@Fruit" @bind-Value="@_fruit" ShowClearButton="true" DefaultText="Clear button" />
     </div>
-  </Pixata>
-  <Telerik>
-    <div style="display: grid; gap: 8px; max-width: 250px;">
-      <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" Size="sm" DefaultText="Small" />
-      <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" Size="lg" DefaultText="Large" />
-      <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" FillMode="outline" DefaultText="Outline" />
-      <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" FillMode="flat" DefaultText="Flat" />
-      <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" Rounded="full" DefaultText="Rounded full" />
-      <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" Enabled="false" DefaultText="Disabled" />
-      <TelerikDropDownList Data="@Fruit" @bind-Value="@_fruit" ReadOnly="true" DefaultText="Read-only" />
-    </div>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 <h4 class="mt-4">Combo box</h4>
 
-<ComponentComparison Title="Primitive data">
+<ComponentSample Title="Primitive data">
   <Description>Type to jump to a matching item, or pick one from the list. Enter or leaving the box keeps the item whose text was typed, or clears the value if there isn't one.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataComboBox Data="@Fruit" @bind-Value="@_comboFruit" Placeholder="Choose a fruit..." Width="250px" Id="pixata-combo-fruit" />
     <p class="mt-2"><small>Value: @(_comboFruit ?? "(null)")</small></p>
-  </Pixata>
-  <Telerik>
-    <TelerikComboBox Data="@Fruit" @bind-Value="@_comboFruit" Placeholder="Choose a fruit..." Width="250px" Id="telerik-combo-fruit" />
-    <p class="mt-2"><small>Value: @(_comboFruit ?? "(null)")</small></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Model data, filtering and grouping">
+<ComponentSample Title="Model data, filtering and grouping">
   <Description><code>Filterable</code> with <code>FilterOperator="Contains"</code>, so typing filters the list.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataComboBox Data="@Countries" TextField="Name" ValueField="Id" GroupField="Continent" @bind-Value="@_comboCountryId" Filterable="true" FilterOperator="PixataStringFilterOperator.Contains" Placeholder="Choose a country..." Width="250px" Id="pixata-combo-country" />
     <p class="mt-2"><small>Value: @_comboCountryId</small></p>
-  </Pixata>
-  <Telerik>
-    <TelerikComboBox Data="@Countries" TextField="Name" ValueField="Id" GroupField="Continent" @bind-Value="@_comboCountryId" Filterable="true" FilterOperator="StringFilterOperator.Contains" Placeholder="Choose a country..." Width="250px" Id="telerik-combo-country" />
-    <p class="mt-2"><small>Value: @_comboCountryId</small></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Custom values">
+<ComponentSample Title="Custom values">
   <Description><code>AllowCustom</code> lets the user type a fruit that isn't in the list.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataComboBox Data="@Fruit" @bind-Value="@_customFruit" AllowCustom="true" Placeholder="Any fruit..." Width="250px" Id="pixata-combo-custom" />
     <p class="mt-2"><small>Value: @(_customFruit ?? "(null)")</small></p>
-  </Pixata>
-  <Telerik>
-    <TelerikComboBox Data="@Fruit" @bind-Value="@_customFruit" AllowCustom="true" Placeholder="Any fruit..." Width="250px" Id="telerik-combo-custom" />
-    <p class="mt-2"><small>Value: @(_customFruit ?? "(null)")</small></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Sizes and states">
+<ComponentSample Title="Sizes and states">
   <Description><code>Size</code>, <code>FillMode</code>, <code>Enabled</code>, <code>ReadOnly</code> and <code>ShowClearButton="false"</code>.</Description>
-  <Pixata>
+  <ChildContent>
     <div style="display: grid; gap: 8px; max-width: 250px;">
       <PixataComboBox Data="@Fruit" @bind-Value="@_comboFruit" Size="sm" Placeholder="Small" />
       <PixataComboBox Data="@Fruit" @bind-Value="@_comboFruit" Size="lg" Placeholder="Large" />
@@ -138,121 +95,71 @@
       <PixataComboBox Data="@Fruit" @bind-Value="@_comboFruit" ReadOnly="true" Placeholder="Read-only" />
       <PixataComboBox Data="@Fruit" @bind-Value="@_comboFruit" ShowClearButton="false" Placeholder="No clear button" />
     </div>
-  </Pixata>
-  <Telerik>
-    <div style="display: grid; gap: 8px; max-width: 250px;">
-      <TelerikComboBox Data="@Fruit" @bind-Value="@_comboFruit" Size="sm" Placeholder="Small" />
-      <TelerikComboBox Data="@Fruit" @bind-Value="@_comboFruit" Size="lg" Placeholder="Large" />
-      <TelerikComboBox Data="@Fruit" @bind-Value="@_comboFruit" FillMode="outline" Placeholder="Outline" />
-      <TelerikComboBox Data="@Fruit" @bind-Value="@_comboFruit" Enabled="false" Placeholder="Disabled" />
-      <TelerikComboBox Data="@Fruit" @bind-Value="@_comboFruit" ReadOnly="true" Placeholder="Read-only" />
-      <TelerikComboBox Data="@Fruit" @bind-Value="@_comboFruit" ShowClearButton="false" Placeholder="No clear button" />
-    </div>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 <h4 class="mt-4">Multi-select</h4>
 
-<ComponentComparison Title="Model data with filtering">
+<ComponentSample Title="Model data with filtering">
   <Description>Pick items from the list, remove them with their &times; or Backspace.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_countryIds" Filterable="true" Placeholder="Choose countries..." Width="100%" Id="pixata-ms-countries" />
     <p class="mt-2"><small>Value: @string.Join(", ", _countryIds)</small></p>
-  </Pixata>
-  <Telerik>
-    <TelerikMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_countryIds" Filterable="true" Placeholder="Choose countries..." Width="100%" Id="telerik-ms-countries" />
-    <p class="mt-2"><small>Value: @string.Join(", ", _countryIds)</small></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Checkboxes, select all and staying open">
-  <Description><code>AutoClose="false"</code> keeps the list open while several items are chosen. The Pixata one has <code>EnableCheckBoxes</code> and <code>EnableSelectAll</code>; the Telerik one needs an item template for the checkboxes.</Description>
-  <Pixata>
+<ComponentSample Title="Checkboxes, select all and staying open">
+  <Description><code>AutoClose="false"</code> keeps the list open while several items are chosen. <code>EnableCheckBoxes</code> and <code>EnableSelectAll</code> add the checkboxes.</Description>
+  <ChildContent>
     <PixataMultiSelect Data="@Countries" TextField="Name" ValueField="Id" GroupField="Continent" @bind-Value="@_checkedIds" AutoClose="false" EnableCheckBoxes="true" EnableSelectAll="true" Filterable="true" FilterOperator="PixataStringFilterOperator.Contains" Placeholder="Choose countries..." Width="100%" Id="pixata-ms-checkboxes" />
-  </Pixata>
-  <Telerik>
-    <TelerikMultiSelect Data="@Countries" TextField="Name" ValueField="Id" GroupField="Continent" @bind-Value="@_checkedIds" AutoClose="false" Filterable="true" FilterOperator="StringFilterOperator.Contains" Placeholder="Choose countries..." Width="100%" Id="telerik-ms-checkboxes">
-      <ItemTemplate>
-        <input type="checkbox" class="k-checkbox k-checkbox-md" checked="@_checkedIds.Contains(context.Id)" tabindex="-1" />
-        @context.Name
-      </ItemTemplate>
-    </TelerikMultiSelect>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Summary tags">
+<ComponentSample Title="Summary tags">
   <Description><code>MaxAllowedTags="2"</code> shows two tags and counts the rest; <code>TagMode="Single"</code> shows one tag for everything.</Description>
-  <Pixata>
+  <ChildContent>
     <div style="display: grid; gap: 8px;">
       <PixataMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_summaryIds" MaxAllowedTags="2" Width="100%" />
       <PixataMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_summaryIds" TagMode="PixataMultiSelectTagMode.Single" Width="100%" />
     </div>
-  </Pixata>
-  <Telerik>
-    <div style="display: grid; gap: 8px;">
-      <TelerikMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_summaryIds" MaxAllowedTags="2" Width="100%" />
-      <TelerikMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_summaryIds" TagMode="MultiSelectTagMode.Single" Width="100%" />
-    </div>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Custom values and a minimum length">
+<ComponentSample Title="Custom values and a minimum length">
   <Description>The first allows custom fruit (type one and press Enter). The second only opens once two characters have been typed (<code>MinLength="2"</code>), and has an arrow button.</Description>
-  <Pixata>
+  <ChildContent>
     <div style="display: grid; gap: 8px;">
       <PixataMultiSelect Data="@Fruit" @bind-Value="@_customFruits" AllowCustom="true" Placeholder="Any fruit..." Width="100%" Id="pixata-ms-custom" />
       <PixataMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_minLengthIds" Filterable="true" MinLength="2" ShowArrowButton="true" Placeholder="Type two letters..." Width="100%" Id="pixata-ms-minlength" />
     </div>
-  </Pixata>
-  <Telerik>
-    <div style="display: grid; gap: 8px;">
-      <TelerikMultiSelect Data="@Fruit" @bind-Value="@_customFruits" AllowCustom="true" Placeholder="Any fruit..." Width="100%" Id="telerik-ms-custom" />
-      <TelerikMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_minLengthIds" Filterable="true" MinLength="2" ShowArrowButton="true" Placeholder="Type two letters..." Width="100%" Id="telerik-ms-minlength" />
-    </div>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 <h4 class="mt-4">Lots of data</h4>
 
-<ComponentComparison Title="Virtual scrolling">
+<ComponentSample Title="Virtual scrolling">
   <Description>5,000 products, with <code>ScrollMode="Virtual"</code>, so only the rows that can be seen are rendered.</Description>
-  <Pixata>
+  <ChildContent>
     <div style="display: grid; gap: 8px;">
       <PixataDropDownList Data="@Products" TextField="Name" ValueField="Id" @bind-Value="@_productId" ScrollMode="PixataDropDownScrollMode.Virtual" Filterable="true" DefaultText="Choose a product..." Width="100%" Id="pixata-ddl-virtual" />
       <PixataMultiSelect Data="@Products" TextField="Name" ValueField="Id" @bind-Value="@_productIds" ScrollMode="PixataDropDownScrollMode.Virtual" Filterable="true" AutoClose="false" Placeholder="Choose products..." Width="100%" Id="pixata-ms-virtual" />
     </div>
-  </Pixata>
-  <Telerik>
-    <div style="display: grid; gap: 8px;">
-      <TelerikDropDownList Data="@Products" TextField="Name" ValueField="Id" @bind-Value="@_productId" ScrollMode="DropDownScrollMode.Virtual" ItemHeight="28" PageSize="20" Filterable="true" DefaultText="Choose a product..." Width="100%" Id="telerik-ddl-virtual">
-        <DropDownListSettings><DropDownListPopupSettings Height="200px" /></DropDownListSettings>
-      </TelerikDropDownList>
-      <TelerikMultiSelect Data="@Products" TextField="Name" ValueField="Id" @bind-Value="@_productIds" ScrollMode="DropDownScrollMode.Virtual" ItemHeight="28" PageSize="20" Filterable="true" AutoClose="false" Placeholder="Choose products..." Width="100%" Id="telerik-ms-virtual">
-        <MultiSelectSettings><MultiSelectPopupSettings Height="200px" /></MultiSelectSettings>
-      </TelerikMultiSelect>
-    </div>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Reading the data from the server">
+<ComponentSample Title="Reading the data from the server">
   <Description><code>OnRead</code> with virtual scrolling, so the data is read a page at a time as the list scrolls, and again (after a pause) when the user types. Each read takes half a second, to show the loading indicator. <code>ValueMapper</code> finds the selected product when it hasn't been read yet.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataComboBox TItem="Product" TValue="int" TextField="Name" ValueField="Id" @bind-Value="@_serverProductId" OnRead="@ReadProducts" ValueMapper="@MapProduct" ScrollMode="PixataDropDownScrollMode.Virtual" Filterable="true" FilterOperator="PixataStringFilterOperator.Contains" Placeholder="Search products..." Width="100%" Id="pixata-combo-server" />
     <p class="mt-2"><small>Value: @_serverProductId. @_lastRead</small></p>
-  </Pixata>
-  <Telerik>
-    <TelerikComboBox TItem="Product" TValue="int" TextField="Name" ValueField="Id" @bind-Value="@_serverProductId" OnRead="@ReadTelerikProducts" ValueMapper="@MapProduct" ScrollMode="DropDownScrollMode.Virtual" ItemHeight="28" PageSize="20" Filterable="true" FilterOperator="StringFilterOperator.Contains" Placeholder="Search products..." Width="100%" Id="telerik-combo-server">
-      <ComboBoxSettings><ComboBoxPopupSettings Height="200px" /></ComboBoxSettings>
-    </TelerikComboBox>
-    <p class="mt-2"><small>Value: @_serverProductId</small></p>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 <h4 class="mt-4">Forms and events</h4>
 
-<ComponentComparison Title="Validation">
+<ComponentSample Title="Validation">
   <Description>In an <code>EditForm</code> with data annotations. Press Save without choosing anything to see the invalid state.</Description>
-  <Pixata>
+  <ChildContent>
     <EditForm Model="@_pixataForm" OnValidSubmit="@(() => _pixataSaved = true)">
       <DataAnnotationsValidator />
       <div class="mb-2">
@@ -275,36 +182,12 @@
         <span class="ms-2">Saved</span>
       }
     </EditForm>
-  </Pixata>
-  <Telerik>
-    <EditForm Model="@_telerikForm" OnValidSubmit="@(() => _telerikSaved = true)">
-      <DataAnnotationsValidator />
-      <div class="mb-2">
-        <label for="telerik-form-fruit" class="form-label">Fruit</label>
-        <TelerikDropDownList Data="@Fruit" @bind-Value="@_telerikForm.Fruit" DefaultText="Choose a fruit..." Id="telerik-form-fruit" Width="100%" />
-        <ValidationMessage For="@(() => _telerikForm.Fruit)" />
-      </div>
-      <div class="mb-2">
-        <label for="telerik-form-country" class="form-label">Country</label>
-        <TelerikComboBox Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_telerikForm.CountryId" Id="telerik-form-country" Width="100%" />
-        <ValidationMessage For="@(() => _telerikForm.CountryId)" />
-      </div>
-      <div class="mb-2">
-        <label for="telerik-form-countries" class="form-label">Countries visited</label>
-        <TelerikMultiSelect Data="@Countries" TextField="Name" ValueField="Id" @bind-Value="@_telerikForm.CountryIds" Id="telerik-form-countries" Width="100%" />
-        <ValidationMessage For="@(() => _telerikForm.CountryIds)" />
-      </div>
-      <button type="submit" class="btn btn-primary btn-sm">Save</button>
-      @if (_telerikSaved) {
-        <span class="ms-2">Saved</span>
-      }
-    </EditForm>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Events and methods">
+<ComponentSample Title="Events and methods">
   <Description><code>OnOpen</code>, <code>OnClose</code>, <code>OnChange</code>, <code>OnBlur</code> and <code>ValueChanged</code>, plus the <code>Open()</code> and <code>FocusAsync()</code> methods.</Description>
-  <Pixata>
+  <ChildContent>
     <PixataDropDownList @ref="_pixataEvents" Data="@Fruit" Value="@_eventFruit" ValueChanged="@((string v) => { _eventFruit = v; Log(_pixataLog, $"ValueChanged: {v}"); })" DefaultText="Choose a fruit..." Width="250px"
                         OnOpen="@(() => Log(_pixataLog, "OnOpen"))" OnClose="@(() => Log(_pixataLog, "OnClose"))" OnChange="@((object v) => Log(_pixataLog, $"OnChange: {v}"))" OnBlur="@(() => Log(_pixataLog, "OnBlur"))" />
     <div class="mt-2">
@@ -312,17 +195,8 @@
       <button class="btn btn-outline-secondary btn-sm" @onclick="@(() => _pixataEvents.FocusAsync())">FocusAsync()</button>
     </div>
     <pre class="mt-2 small" style="max-height: 10rem; overflow: auto;">@string.Join("\n", _pixataLog)</pre>
-  </Pixata>
-  <Telerik>
-    <TelerikDropDownList @ref="_telerikEvents" Data="@Fruit" Value="@_eventFruit" ValueChanged="@((string v) => { _eventFruit = v; Log(_telerikLog, $"ValueChanged: {v}"); })" DefaultText="Choose a fruit..." Width="250px"
-                         OnOpen="@(() => Log(_telerikLog, "OnOpen"))" OnClose="@(() => Log(_telerikLog, "OnClose"))" OnChange="@((object v) => Log(_telerikLog, $"OnChange: {v}"))" OnBlur="@(() => Log(_telerikLog, "OnBlur"))" />
-    <div class="mt-2">
-      <button class="btn btn-outline-secondary btn-sm" @onclick="@(() => _telerikEvents.Open())">Open()</button>
-      <button class="btn btn-outline-secondary btn-sm" @onclick="@(() => _telerikEvents.FocusAsync())">FocusAsync()</button>
-    </div>
-    <pre class="mt-2 small" style="max-height: 10rem; overflow: auto;">@string.Join("\n", _telerikLog)</pre>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 @code {
 
@@ -346,15 +220,11 @@
   private string _lastRead = "";
 
   private readonly FormModel _pixataForm = new();
-  private readonly FormModel _telerikForm = new();
   private bool _pixataSaved;
-  private bool _telerikSaved;
 
   private PixataDropDownList<string, string> _pixataEvents = null!;
-  private TelerikDropDownList<string, string> _telerikEvents = null!;
   private string? _eventFruit;
   private readonly List<string> _pixataLog = [];
-  private readonly List<string> _telerikLog = [];
 
   private async Task ReadProducts(PixataDropDownReadEventArgs args) {
     // Pretend this is a call to the server
@@ -363,13 +233,6 @@
     args.Data = args.Take > 0 ? matches.Skip(args.Skip).Take(args.Take).ToList() : matches;
     args.Total = matches.Count;
     _lastRead = $"Last read: filter \"{args.Filter}\", skip {args.Skip}, take {args.Take}, {matches.Count} matches.";
-  }
-
-  private async Task ReadTelerikProducts(ComboBoxReadEventArgs args) {
-    await Task.Delay(500);
-    DataSourceResult result = await Products.ToDataSourceResultAsync(args.Request);
-    args.Data = result.Data;
-    args.Total = result.Total;
   }
 
   private Task<Product> MapProduct(int id) =>

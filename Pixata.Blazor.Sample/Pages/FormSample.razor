@@ -1,4 +1,5 @@
 ﻿@page "/FormSample"
+@using Pixata.Blazor.Components
 @using Pixata.Blazor.Sample.Models
 
 <h1>Form components</h1>
@@ -16,8 +17,9 @@
                      @bind-ValueSurname="@_person.Surname" />
     <FormRowText PropertyName="@nameof(Person.Email)" @bind-Value="_person.Email" Icon="fas fa-at" />
     <FormRowCheckbox PropertyName="@nameof(Person.EmailConfirmed)" @bind-Checked="@_person.EmailConfirmed" Icon="fas fa-check" Caption="Email confirmed" />
-    <FormRowDateTelerik PropertyName="@nameof(Person.DateOfBirth)" @bind-Value="_person.DateOfBirth" Icon="fa fa-house-day" Caption="Date of birth" />
-    <FormRowTimeTelerik PropertyName="@nameof(Person.TeaTime)" @bind-Value="_person.TeaTime" Icon="fa fa-clock" />
+    <FormRowBlank PropertyName="@nameof(Person.DateOfBirth)" Caption="Date of birth" Icon="fa fa-house-day">
+      <PixataDatePicker @bind-Value="_person.DateOfBirth" Id="@nameof(Person.DateOfBirth)" />
+    </FormRowBlank>
     <FormRowDropdown PropertyName="@nameof(Person.FavouriteFoodId)" @bind-Value="@_person.FavouriteFoodId" Values="@_foods" Icon="fa fa-utensils" Caption="Fave food" />
     <FormRowDropdownEnum PropertyName="@nameof(Person.Pet)" @bind-Value="@_person.Pet" Icon="fa fa-paw" />
     <FormRowTextArea PropertyName="@nameof(Person.Notes)" @bind-Value="@_person.Notes" Icon="fab fa-itunes-note" />
@@ -26,7 +28,10 @@
       <div class="ml-1">Here is a picture of me... <img src="https://www.nuget.org/profiles/MrYossu/avatar?imageSize=32" alt="Mr Yossu" />... lovely, isn't it?</div>
     </FormRowBlank>
     <FormRowPlainText PropertyName="Plain text" Icon="fas fa-text" Value="this is some plain old text" />
-    <FormRowButtons CancelUrl="/" />
+    <div class="pixata-row pixata-justify-content-center-md">
+      <a href="/" class="pixata-btn pixata-btn-secondary pixata-mr-2">Cancel</a>
+      <button type="submit" class="pixata-btn pixata-btn-primary pixata-ml-2">Submit</button>
+    </div>
   </EditForm>
 </div>
 

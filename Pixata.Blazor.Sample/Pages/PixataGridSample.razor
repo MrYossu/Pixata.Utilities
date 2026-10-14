@@ -7,18 +7,13 @@
 @using Pixata.Blazor.Grid.Excel
 @using ClosedXML.Excel
 @using System.IO
-@using Telerik.DataSource
-@using Telerik.DataSource.Extensions
-@using Telerik.SvgIcons
 @inject GridSampleEmployeeService EmployeeService
 
 <SitePageTitle>Pixata grid</SitePageTitle>
 
 <h3>Pixata grid</h3>
 
-<p><code>PixataGrid</code> is a grid that looks and behaves like the Telerik Blazor grid, without needing Telerik. It is being built up in stages (see <a href="https://github.com/MrYossu/Pixata.Utilities/issues/49">issue #49</a>), so this page will grow as features are added.</p>
-
-<p>Each example shows a <code>PixataGrid</code> with a Telerik grid underneath it, bound to the same data with the same settings, so you can compare them.</p>
+<p><code>PixataGrid</code> is a data grid with paging, sorting, filtering, editing, grouping and much more. Each section below shows one of its features. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md">the documentation</a>.</p>
 
 <div class="pixata-blazor-grid-sample-options">
   <label>
@@ -37,9 +32,8 @@
 
 <h4>Declared columns</h4>
 
-<p>The First name column has a width, Date of birth gets its format from a <code>[DisplayFormat]</code> attribute, Salary has a <code>DisplayFormat</code> and is right-aligned, and City is a nested field (<code>Address.City</code>). Columns without a <code>Title</code> get one from a <code>[Display(Name)]</code> attribute, or else from the field name split into words (so <code>DateOfBirth</code> becomes "Date of birth"). Telerik doesn't split the field name, so its headers differ there on purpose.</p>
+<p>The First name column has a width, Date of birth gets its format from a <code>[DisplayFormat]</code> attribute, Salary has a <code>DisplayFormat</code> and is right-aligned, and City is a nested field (<code>Address.City</code>). Columns without a <code>Title</code> get one from a <code>[Display(Name)]</code> attribute, or else from the field name split into words (so <code>DateOfBirth</code> becomes "Date of birth").</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Height="300px">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="140px" />
@@ -51,21 +45,9 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Height="300px">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="140px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Email)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" TextAlign="ColumnTextAlign.Right" />
-    <GridColumn Field="Address.City" Title="City" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Paging</h4>
 
-<p>Both grids are bound to the same <code>Page</code> and <code>PageSize</code>, so moving one moves the other. The pager shows 5 page buttons at a time, and offers page sizes of 3, 5, 10 and All. Narrow the window to see the pager adapt.</p>
+<p>The grid's <code>Page</code> and <code>PageSize</code> are bound, so the page knows where it is. The pager shows 5 page buttons at a time, and offers page sizes of 3, 5, 10 and All. Narrow the window to see the pager adapt.</p>
 
 <div class="pixata-blazor-grid-sample-options">
   <label>
@@ -87,7 +69,6 @@
   <span>Page @_page, page size @_pageSize</span>
 </div>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Pageable="true" @bind-PageSize="_pageSize" @bind-Page="_page">
   <GridSettings>
     <PixataGridPagerSettings ButtonCount="5" PageSizes="@_pageSizes" InputType="_pagerInputType" Position="_pagerPosition" />
@@ -98,18 +79,6 @@
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)" />
   </GridColumns>
 </PixataGrid>
-
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" @bind-PageSize="_pageSize" @bind-Page="_page">
-  <GridSettings>
-    <GridPagerSettings ButtonCount="5" PageSizes="@_pageSizes" InputType="@TelerikInputType" Position="@TelerikPagerPosition" />
-  </GridSettings>
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Email)" />
-  </GridColumns>
-</TelerikGrid>
 
 <h4>Sorting</h4>
 
@@ -122,7 +91,6 @@
   </label>
 </div>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Sortable="true" SortMode="@(_multipleSort ? PixataGridSortMode.Multiple : PixataGridSortMode.Single)" Pageable="true" PageSize="5">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
@@ -133,18 +101,6 @@
     <PixataGridColumn Field="Address.City" Title="City" />
   </GridColumns>
 </PixataGrid>
-
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Sortable="true" SortMode="@(_multipleSort ? SortMode.Multiple : SortMode.Single)" Pageable="true" PageSize="5">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" TextAlign="ColumnTextAlign.Right" />
-    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" Sortable="false" Title="Manager (not sortable)" />
-    <GridColumn Field="Address.City" Title="City" />
-  </GridColumns>
-</TelerikGrid>
 
 <h4>Filtering</h4>
 
@@ -161,7 +117,6 @@
 
 <p>Try the filter row, the filter menus and the search box (which searches the text columns). City can't be filtered, but it can be searched.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" FilterMode="@(_filterMode == "row" ? PixataGridFilterMode.FilterRow : PixataGridFilterMode.FilterMenu)" Pageable="true" PageSize="5" Sortable="true">
   <GridToolBarTemplate>
     <PixataGridSearchBox />
@@ -176,26 +131,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" FilterMode="@(_filterMode == "row" ? GridFilterMode.FilterRow : GridFilterMode.FilterMenu)" Pageable="true" PageSize="5" Sortable="true">
-  <GridToolBarTemplate>
-    <GridSearchBox />
-  </GridToolBarTemplate>
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" FilterMenuType="@TelerikFilterMenuType" />
-    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" FilterMenuType="@TelerikFilterMenuType" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" FilterMenuType="@TelerikFilterMenuType" />
-    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" FilterMenuType="@TelerikFilterMenuType" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" FilterMenuType="@TelerikFilterMenuType" />
-    <GridColumn Field="Address.City" Title="City" Filterable="false" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Supplying the data with OnRead</h4>
 
-<p>These grids get their data from the sample app's database through <code>OnRead</code>, so only the page being shown is loaded. Each read is slowed down to 1.5 seconds, so you can see the loading indicator when you page, sort or filter (as in Telerik, it isn't shown for the first read). The PixataGrid uses <code>ToGridResultAsync()</code> from Pixata.AspNetCore, which runs the paging, sorting and filtering in the database.</p>
+<p>This grid gets its data from the sample app's database through <code>OnRead</code>, so only the page being shown is loaded. Each read is slowed down to 1.5 seconds, so you can see the loading indicator when you page, sort or filter (it isn't shown for the first read). It uses <code>ToGridResultAsync()</code> from Pixata.AspNetCore, which runs the paging, sorting and filtering in the database.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid TItem="GridSampleEmployee" OnRead="ReadEmployees" Size="_size" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
@@ -205,23 +144,12 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid TItem="GridSampleEmployee" OnRead="ReadEmployeesForTelerik" Size="@TelerikSize" Pageable="true" PageSize="5" Sortable="true" FilterMode="GridFilterMode.FilterRow">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
-    <GridColumn Field="Address.City" Title="City" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Templates and row events</h4>
 
 <p>The name is a template, the salary header has a template, managers' rows get a CSS class from <code>OnRowRender</code>, and salaries over 300,000 get one from <code>OnCellRender</code>. Click a row to see <code>OnRowClick</code>, or right-click it for <code>OnRowContextMenu</code>.</p>
 
 <p>@_rowEvent</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid TItem="GridSampleEmployee" Data="Data" Size="_size" Pageable="true" PageSize="5"
             OnRowRender="PixataRowRender"
             OnRowClick="RowClicked"
@@ -241,29 +169,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5"
-             OnRowRender="TelerikRowRender">
-  <GridColumns>
-    <GridColumn Title="Name">
-      <Template>
-        <strong>@((context as GridSampleEmployee)!.FirstName)</strong> @((context as GridSampleEmployee)!.Surname)
-      </Template>
-    </GridColumn>
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" OnCellRender="TelerikSalaryRender">
-      <HeaderTemplate>
-        Salary <em>(GBP)</em>
-      </HeaderTemplate>
-    </GridColumn>
-    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" Title="Manager" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Selection</h4>
 
 <p>Click a row to select it, Ctrl+click to add or remove one, and Shift+click to select a range, or press on a row and drag. The checkbox column selects rows too, and its header selects all the rows on the page. The selection is kept as you move between pages.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Pageable="true" PageSize="5" SelectionMode="PixataGridSelectionMode.Multiple" @bind-SelectedItems="_pixataSelected">
   <GridColumns>
     <PixataGridCheckboxColumn />
@@ -273,17 +182,6 @@
   </GridColumns>
 </PixataGrid>
 <p>Selected: @string.Join(", ", _pixataSelected.Select(e => e.FirstName))</p>
-
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5" SelectionMode="GridSelectionMode.Multiple" @bind-SelectedItems="_telerikSelected">
-  <GridColumns>
-    <GridCheckboxColumn SelectAll="true" />
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
-  </GridColumns>
-</TelerikGrid>
-<p>Selected: @string.Join(", ", _telerikSelected.Select(e => e.FirstName))</p>
 
 <p>With <code>SelectionType</code> set to <code>Cell</code>, the user selects cells instead, by clicking (with Ctrl and Shift as for rows) or by dragging out a rectangle.</p>
 
@@ -312,9 +210,8 @@
   </label>
 </div>
 
-<p>Each grid edits its own copy of the first 12 employees, so you can try them separately. First name is required (try saving without one), and the email address can't be changed.</p>
+<p>The grid edits its own copy of the first 12 employees. First name is required (try saving without one), and the email address can't be changed.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid TItem="GridSampleEditableEmployee" Data="_pixataEditable" Size="_size" Pageable="true" PageSize="5" ConfirmDelete="true"
             EditMode="@PixataEditMode"
             OnCreate="PixataCreate" OnUpdate="PixataUpdate" OnDelete="PixataDelete">
@@ -338,35 +235,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="_telerikEditable" Size="@TelerikSize" Pageable="true" PageSize="5" ConfirmDelete="true"
-             EditMode="@TelerikEditMode"
-             OnCreate="TelerikCreate" OnUpdate="TelerikUpdate" OnDelete="TelerikDelete">
-  <GridToolBarTemplate>
-    <GridCommandButton Command="Add" Icon="@SvgIcon.Plus">Add employee</GridCommandButton>
-  </GridToolBarTemplate>
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEditableEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEditableEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEditableEmployee.Email)" Editable="false" />
-    <GridColumn Field="@nameof(GridSampleEditableEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
-    <GridColumn Field="@nameof(GridSampleEditableEmployee.Salary)" DisplayFormat="{0:C2}" />
-    <GridColumn Field="@nameof(GridSampleEditableEmployee.IsManager)" />
-    <GridColumn Field="@nameof(GridSampleEditableEmployee.Pet)" />
-    <GridCommandColumn Width="180px">
-      <GridCommandButton Command="Edit" Icon="@SvgIcon.Pencil">Edit</GridCommandButton>
-      <GridCommandButton Command="Delete" Icon="@SvgIcon.Trash">Delete</GridCommandButton>
-      <GridCommandButton Command="Save" Icon="@SvgIcon.Save" ShowInEdit="true">Save</GridCommandButton>
-      <GridCommandButton Command="Cancel" Icon="@SvgIcon.Cancel" ShowInEdit="true">Cancel</GridCommandButton>
-    </GridCommandColumn>
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Grouping and aggregates</h4>
 
 <p>Drag a column header into the panel above the grid to group by it. The salary column has aggregates, shown in group footers and the grid's footer.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid @ref="_groupedGrid" Data="Data" Size="_size" Groupable="true" Pageable="true" PageSize="8">
   <GridAggregates>
     <PixataGridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Pixata.Extensions.Grid.GridAggregateType.Sum" />
@@ -387,32 +259,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Groupable="true" Pageable="true" PageSize="8" OnStateInit="@((GridStateEventArgs<GridSampleEmployee> args) => TelerikGroupInit(args))">
-  <GridAggregates>
-    <GridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Telerik.Blazor.GridAggregateType.Sum" />
-    <GridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Telerik.Blazor.GridAggregateType.Average" />
-    <GridAggregate Field="@nameof(GridSampleEmployee.FirstName)" Aggregate="@Telerik.Blazor.GridAggregateType.Count" />
-  </GridAggregates>
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)">
-      <FooterTemplate>Total: @context.Count</FooterTemplate>
-    </GridColumn>
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}">
-      <GroupFooterTemplate>Sum: @(((decimal?)context.Sum)?.ToString("C0"))</GroupFooterTemplate>
-      <FooterTemplate>Average: @(((decimal?)context.Average)?.ToString("C0"))</FooterTemplate>
-    </GridColumn>
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Resizing and reordering columns</h4>
 
 <p>Drag the edge of a header to resize its column, or double-click the edge to fit the column to its content. Drag a header onto another to move it. First name can't be made narrower than 80px, and salary can't be wider than 200px. Email can't be resized, and date of birth can't be moved.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Resizable="true" Reorderable="true" Pageable="true" PageSize="5" OnColumnResize="@((PixataGridColumnResizeEventArgs<GridSampleEmployee> args) => _columnEvent = $"{args.Column.HeaderText} resized to {args.Width}px")" OnColumnReorder="@((PixataGridColumnReorderEventArgs<GridSampleEmployee> args) => _columnEvent = $"{args.Column.HeaderText} moved from {args.OldIndex} to {args.NewIndex}")">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" MinResizableWidth="80" Id="first" />
@@ -424,22 +274,10 @@
 </PixataGrid>
 <p>@_columnEvent</p>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Resizable="true" Reorderable="true" Pageable="true" PageSize="5">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" MinResizableWidth="80" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="150px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Email)" Resizable="false" />
-    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" Reorderable="false" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" MaxResizableWidth="200" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Frozen columns</h4>
 
 <p>The grid is narrower than its columns, so it scrolls sideways. Id and first name are frozen on the left, salary on the right, and pet, in the middle, sticks to the left once it gets there.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Width="800px" Height="300px">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" Locked="true" />
@@ -453,25 +291,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Width="800px" Height="300px">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" Locked="true" />
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" Locked="true" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="200px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Email)" Width="300px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" Width="120px" Locked="true" />
-    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" Width="200px" DisplayFormat="{0:dd MMM yyyy}" />
-    <GridColumn Field="Address.City" Width="200px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" Width="150px" DisplayFormat="{0:C0}" Locked="true" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Multi-column headers</h4>
 
 <p>A column can contain other columns, which share a header above their own.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Sortable="true" Pageable="true" PageSize="5">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
@@ -496,36 +319,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Sortable="true" Pageable="true" PageSize="5">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
-    <GridColumn Title="Name">
-      <Columns>
-        <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-        <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-      </Columns>
-    </GridColumn>
-    <GridColumn Title="Details">
-      <Columns>
-        <GridColumn Field="@nameof(GridSampleEmployee.Email)" />
-        <GridColumn Title="Other">
-          <Columns>
-            <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-            <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
-          </Columns>
-        </GridColumn>
-      </Columns>
-    </GridColumn>
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Column menu</h4>
 
 <p>Each header has a menu for sorting, filtering, showing and hiding columns, freezing, grouping and moving. Email isn't in the column chooser, and pet has no menu.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" ShowColumnMenu="true" Sortable="true" FilterMode="PixataGridFilterMode.FilterMenu" Groupable="true" Reorderable="true" Resizable="true" Pageable="true" PageSize="5">
   <GridSettings>
     <PixataGridColumnMenuSettings Lockable="true" Groupable="true" Reorderable="true" />
@@ -539,25 +336,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" ShowColumnMenu="true" Sortable="true" FilterMode="GridFilterMode.FilterMenu" Groupable="true" Reorderable="true" Resizable="true" Pageable="true" PageSize="5">
-  <GridSettings>
-    <GridColumnMenuSettings Lockable="true" Groupable="true" Reorderable="true" />
-  </GridSettings>
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="150px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Email)" Width="250px" VisibleInColumnChooser="false" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" Width="120px" ShowColumnMenu="false" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" Width="150px" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>State</h4>
 
-<p>Sort, filter, group, page, resize or move columns, then click Save. Change things again, and Restore puts them back. Reset goes back to how the grid started. The line under each grid shows the last change reported by <code>OnStateChanged</code>.</p>
+<p>Sort, filter, group, page, resize or move columns, then click Save. Change things again, and Restore puts them back. Reset goes back to how the grid started. The line under the grid shows the last change reported by <code>OnStateChanged</code>.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <div class="pixata-blazor-grid-sample-options">
   <button type="button" class="pixata-btn pixata-btn-primary" @onclick="() => _pixataSavedState = _stateGrid!.GetState()">Save</button>
   <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="() => _stateGrid!.SetState(_pixataSavedState)" disabled="@(_pixataSavedState is null)">Restore</button>
@@ -574,28 +356,10 @@
 </PixataGrid>
 <p>Last change: @_pixataStateChange</p>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<div class="pixata-blazor-grid-sample-options">
-  <button type="button" class="pixata-btn pixata-btn-primary" @onclick="() => _telerikSavedState = _telerikStateGrid!.GetState()">Save</button>
-  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="() => _telerikStateGrid!.SetStateAsync(_telerikSavedState)" disabled="@(_telerikSavedState is null)">Restore</button>
-  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="() => _telerikStateGrid!.SetStateAsync(null)">Reset</button>
-</div>
-<TelerikGrid @ref="_telerikStateGrid" Data="Data" Size="@TelerikSize" Sortable="true" FilterMode="GridFilterMode.FilterRow" Groupable="true" Resizable="true" Reorderable="true" Pageable="true" PageSize="5"
-             OnStateChanged="@((GridStateEventArgs<GridSampleEmployee> args) => _telerikStateChange = args.PropertyName ?? "")">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-<p>Last change: @_telerikStateChange</p>
-
 <h4>Saving the state in local storage</h4>
 
 <p>This grid has a <code>StorageKey</code>, so its state is saved in the browser's local storage whenever it changes. Change it, then refresh the page.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" StorageKey="pixata-grid-sample-state" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow" Groupable="true" Resizable="true" Reorderable="true" Pageable="true" PageSize="5">
   <GridToolBarTemplate>
     <PixataGridSearchBox />
@@ -611,9 +375,8 @@
 
 <h4>Virtual scrolling</h4>
 
-<p>With <code>ScrollMode="Virtual"</code>, only the rows in view (plus a few) are rendered, and more are rendered as you scroll, rather than paging. The second pair of grids gets its rows through <code>OnRead</code>, slowed down to half a second, so placeholder rows show while they load.</p>
+<p>With <code>ScrollMode="Virtual"</code>, only the rows in view (plus a few) are rendered, and more are rendered as you scroll, rather than paging. The second grid gets its rows through <code>OnRead</code>, slowed down to half a second, so placeholder rows show while they load.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" ScrollMode="PixataGridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
@@ -624,7 +387,7 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid, with OnRead</p>
+<p class="pixata-blazor-grid-sample-label">With OnRead</p>
 <PixataGrid TItem="GridSampleEmployee" OnRead="ReadEmployeesVirtually" Size="_size" ScrollMode="PixataGridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
@@ -634,32 +397,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" ScrollMode="GridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true" FilterMode="GridFilterMode.FilterRow">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-
-<p class="pixata-blazor-grid-sample-label">Telerik grid, with OnRead</p>
-<TelerikGrid TItem="GridSampleEmployee" OnRead="ReadEmployeesVirtuallyForTelerik" Size="@TelerikSize" ScrollMode="GridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Virtual columns</h4>
 
 <p>With <code>ColumnVirtualization="true"</code>, only the columns in view are rendered. Every column needs a width. This grid has 30 columns.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" ColumnVirtualization="true" ScrollMode="PixataGridScrollMode.Virtual" Height="300px" RowHeight="36" PageSize="20" Width="800px">
   <GridColumns>
     @foreach ((string field, string title) in WideColumns) {
@@ -668,20 +409,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" ColumnVirtualization="true" ScrollMode="GridScrollMode.Virtual" Height="300px" RowHeight="36" PageSize="20" Width="800px">
-  <GridColumns>
-    @foreach ((string field, string title) in WideColumns) {
-      <GridColumn Field="@field" Title="@title" Width="150px" />
-    }
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Detail rows</h4>
 
-<p>Click the arrow at the start of a row to show its details, which here include another grid of the employees with the same pet. The line under each grid counts the rows expanded and collapsed.</p>
+<p>Click the arrow at the start of a row to show its details, which here include another grid of the employees with the same pet. The line under the grid counts the rows expanded and collapsed.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Pageable="true" PageSize="5"
             OnRowExpand="@((PixataGridRowExpandEventArgs<GridSampleEmployee> args) => _pixataExpands++)" OnRowCollapse="@((PixataGridRowCollapseEventArgs<GridSampleEmployee> args) => _pixataCollapses++)">
   <DetailTemplate>
@@ -703,36 +434,10 @@
 </PixataGrid>
 <p>Expanded @_pixataExpands times, collapsed @_pixataCollapses times</p>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5"
-             OnRowExpand="@((GridRowExpandEventArgs args) => _telerikExpands++)" OnRowCollapse="@((GridRowCollapseEventArgs args) => _telerikCollapses++)">
-  <DetailTemplate>
-    @{
-      GridSampleEmployee employee = (GridSampleEmployee)context;
-    }
-    <p><strong>@employee.FirstName @employee.Surname</strong>, @employee.Email, born @employee.DateOfBirth.ToString("d MMMM yyyy"), lives in @employee.Address.City</p>
-    <TelerikGrid Data="@(Data.Where(e => e.Pet == employee.Pet && e.Id != employee.Id).Take(3))" Size="@TelerikSize">
-      <GridColumns>
-        <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-        <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-        <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-      </GridColumns>
-    </TelerikGrid>
-  </DetailTemplate>
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-<p>Expanded @_telerikExpands times, collapsed @_telerikCollapses times</p>
-
 <h4>Dragging rows</h4>
 
 <p>Drag a row by its handle to move it within its grid, or into the other grid.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrids</p>
 <div class="pixata-blazor-grid-sample-pair">
   <PixataGrid @ref="_pixataDragLeft" Data="_pixataLeft" Size="_size" RowDraggable="true" SelectionMode="PixataGridSelectionMode.Multiple"
               OnRowDrop="@((PixataGridRowDropEventArgs<GridSampleEmployee> args) => PixataRowDrop(args, _pixataLeft))">
@@ -750,33 +455,14 @@
   </PixataGrid>
 </div>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grids</p>
-<div class="pixata-blazor-grid-sample-pair">
-  <TelerikGrid @ref="_telerikDragLeft" Data="_telerikLeft" Size="@TelerikSize" RowDraggable="true"
-               OnRowDrop="@((GridRowDropEventArgs<GridSampleEmployee> args) => TelerikRowDrop(args, _telerikLeft))">
-    <GridColumns>
-      <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-      <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    </GridColumns>
-  </TelerikGrid>
-  <TelerikGrid @ref="_telerikDragRight" Data="_telerikRight" Size="@TelerikSize" RowDraggable="true"
-               OnRowDrop="@((GridRowDropEventArgs<GridSampleEmployee> args) => TelerikRowDrop(args, _telerikRight))">
-    <GridColumns>
-      <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-      <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    </GridColumns>
-  </TelerikGrid>
-</div>
-
 <h4>Export</h4>
 
-<p>The toolbar buttons save the grid as a CSV or Excel file. The checkbox exports every row rather than just the page. The buttons under the grids show what each one exports, so they can be compared.</p>
+<p>The toolbar buttons save the grid as a CSV or Excel file. The checkbox exports every row rather than just the page. The button under the grid shows what it exports.</p>
 
 <div class="pixata-blazor-grid-sample-options">
   <label><input type="checkbox" @bind="_exportAllPages" /> Export all pages</label>
 </div>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid @ref="_exportGrid" Data="Data" Size="_size" Pageable="true" PageSize="5" Sortable="true">
   <GridToolBarTemplate>
     <PixataGridCommandButton Command="CsvExport" Icon="PixataGridIcon.FileCsv">Export to CSV</PixataGridCommandButton>
@@ -797,42 +483,17 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid @ref="_telerikExportGrid" Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5" Sortable="true">
-  <GridToolBarTemplate>
-    <GridCommandButton Command="CsvExport" Icon="@SvgIcon.FileCsv">Export to CSV</GridCommandButton>
-    <GridCommandButton Command="ExcelExport" Icon="@SvgIcon.FileExcel">Export to Excel</GridCommandButton>
-  </GridToolBarTemplate>
-  <GridExport>
-    <GridCsvExport FileName="telerik-grid-export" AllPages="_exportAllPages" />
-    <GridExcelExport FileName="telerik-grid-export" AllPages="_exportAllPages" />
-  </GridExport>
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-  </GridColumns>
-</TelerikGrid>
-
 <div class="pixata-blazor-grid-sample-options">
-  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="CompareExports">Compare the exports</button>
+  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="ShowExports">Show what's exported</button>
 </div>
-@if (_exportComparison is not null) {
-  <div class="pixata-blazor-grid-sample-pair">
-    <pre class="export-comparison">@_exportComparison.Value.Pixata</pre>
-    <pre class="export-comparison">@_exportComparison.Value.Telerik</pre>
-  </div>
+@if (_exports is not null) {
+  <pre class="export-comparison">@_exports</pre>
 }
 
 <h4>Keyboard navigation</h4>
 
 <p>With <code>Navigable="true"</code>, the grid is a single tab stop. Tab into it, then use the arrow keys, Home and End (with Ctrl for the first and last cells), Page Up and Page Down to page, Enter on a header to sort, Space to select a row, and Alt+Down on a header to open its menu.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" Navigable="true" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterMenu" SelectionMode="PixataGridSelectionMode.Multiple">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
@@ -842,21 +503,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" Navigable="true" Pageable="true" PageSize="5" Sortable="true" FilterMode="GridFilterMode.FilterMenu" SelectionMode="GridSelectionMode.Multiple">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Highlighting</h4>
 
 <p>The second and third rows are highlighted with <code>HighlightedItems</code>, and the first row's salary with <code>HighlightedCells</code>.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data.Take(5)" Size="_size" HighlightedItems="Data.Skip(1).Take(2)" HighlightedCells="_pixataHighlightedCells">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
@@ -865,20 +515,10 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data.Take(5)" Size="@TelerikSize" HighlightedItems="@(Data.Skip(1).Take(2).ToList())" HighlightedCells="_telerikHighlightedCells">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Translation and right to left</h4>
 
 <p>This grid is given Hebrew text through its <code>Messages</code> parameter, and is inside an element with <code>dir="rtl"</code>, so it is laid out from right to left. The first column is frozen, so it sticks on the right when the grid scrolls sideways.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <div dir="rtl">
   <PixataGrid Data="Data" Size="_size" Messages="HebrewMessages" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow" Groupable="true" Resizable="true" Width="700px">
     <GridColumns>
@@ -894,7 +534,6 @@
 
 <p>With <code>AdaptiveMode="Auto"</code>, on a screen 768px wide or less, the filter menu, column menu and popup editor fill the screen. Make the window narrow, or open the page on a phone, to see it.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data" Size="_size" AdaptiveMode="PixataGridAdaptiveMode.Auto" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterMenu" ShowColumnMenu="true">
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
@@ -903,24 +542,11 @@
   </GridColumns>
 </PixataGrid>
 
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data" Size="@TelerikSize" AdaptiveMode="AdaptiveMode.Auto" Pageable="true" PageSize="5" Sortable="true" FilterMode="GridFilterMode.FilterMenu" ShowColumnMenu="true">
-  <GridColumns>
-    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
-    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
-  </GridColumns>
-</TelerikGrid>
-
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
 
-<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
 <PixataGrid Data="Data.Take(5)" Size="_size" AutoGenerateColumns="true" />
-
-<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
-<TelerikGrid Data="Data.Take(5)" Size="@TelerikSize" AutoGenerateColumns="true" />
 
 <style>
   .pixata-blazor-grid-sample-options {
@@ -964,16 +590,10 @@
   private bool _empty;
   private bool _multipleSort;
 
-  private static void TelerikGroupInit(GridStateEventArgs<GridSampleEmployee> args) =>
-    args.GridState.GroupDescriptors = [new GroupDescriptor { Member = nameof(GridSampleEmployee.Pet), MemberType = typeof(Pets) }];
-
   private PixataGrid<GridSampleEmployee>? _groupedGrid;
   private string _columnEvent = "";
-  private int _telerikExpands;
   private List<PixataGridHighlightedCell<GridSampleEmployee>> _pixataHighlightedCells =>
     [new(Data.First(), nameof(GridSampleEmployee.Salary))];
-  private List<GridHighlightedCellDescriptor> _telerikHighlightedCells =>
-    [new() { ColumnField = nameof(GridSampleEmployee.Salary), DataItem = Data.First() }];
 
   // Some of the grid's text in Hebrew, to show translation
   private static readonly PixataGridMessages HebrewMessages = new() {
@@ -999,16 +619,14 @@
   };
   private bool _exportAllPages;
   private PixataGrid<GridSampleEmployee>? _exportGrid;
-  private TelerikGrid<GridSampleEmployee>? _telerikExportGrid;
-  private (string Pixata, string Telerik)? _exportComparison;
 
-  // What each grid exports: the CSV, then a summary of the Excel file
-  private async Task CompareExports() {
-    MemoryStream pixataCsv = (await _exportGrid!.ExportToCsv())!;
-    MemoryStream telerikCsv = await _telerikExportGrid!.ExportToCsvAsync();
-    MemoryStream pixataExcel = (await _exportGrid.ExportToExcel())!;
-    MemoryStream telerikExcel = await _telerikExportGrid.ExportToExcelAsync();
-    _exportComparison = ($"{Describe(pixataCsv)}\n{DescribeExcel(pixataExcel)}", $"{Describe(telerikCsv)}\n{DescribeExcel(telerikExcel)}");
+  private string? _exports;
+
+  // What the grid exports: the CSV, then a summary of the Excel file
+  private async Task ShowExports() {
+    MemoryStream csv = (await _exportGrid!.ExportToCsv())!;
+    MemoryStream excel = (await _exportGrid.ExportToExcel())!;
+    _exports = $"{Describe(csv)}\n{DescribeExcel(excel)}";
   }
 
   private static string Describe(MemoryStream stream) {
@@ -1049,34 +667,12 @@
     _pixataLeft = [.. _pixataLeft];
     _pixataRight = [.. _pixataRight];
   }
-  private int _telerikCollapses;
-  private TelerikGrid<GridSampleEmployee>? _telerikDragLeft;
-  private TelerikGrid<GridSampleEmployee>? _telerikDragRight;
-  private List<GridSampleEmployee> _telerikLeft = GridSampleEmployee.All().Take(5).ToList();
-  private List<GridSampleEmployee> _telerikRight = GridSampleEmployee.All().Skip(5).Take(5).ToList();
 
-  // Moves the dropped rows from the grid they came from to where they were dropped
-  private void TelerikRowDrop(GridRowDropEventArgs<GridSampleEmployee> args, List<GridSampleEmployee> source) {
-    List<GridSampleEmployee> destination = args.DestinationGrid == _telerikDragRight ? _telerikRight : _telerikLeft;
-    if (args.DestinationGrid is null) {
-      return;
-    }
-    foreach (GridSampleEmployee item in args.Items) {
-      source.Remove(item);
-    }
-    int index = args.DestinationItem is null ? destination.Count : destination.IndexOf(args.DestinationItem) + (args.DropPosition == GridRowDropPosition.After ? 1 : 0);
-    destination.InsertRange(Math.Clamp(index, 0, destination.Count), args.Items);
-    _telerikLeft = [.. _telerikLeft];
-    _telerikRight = [.. _telerikRight];
-  }
   private PixataGrid<GridSampleEmployee>? _stateGrid;
   private PixataGridState<GridSampleEmployee>? _pixataSavedState;
   private string _pixataStateChange = "";
-  private TelerikGrid<GridSampleEmployee>? _telerikStateGrid;
-  private GridState<GridSampleEmployee>? _telerikSavedState;
-  private string _telerikStateChange = "";
 
-  // Starts the PixataGrid grouped by pet, as the Telerik one is
+  // Starts the grid grouped by pet
   protected override void OnAfterRender(bool firstRender) {
     if (firstRender) {
       _groupedGrid?.GroupBy(nameof(GridSampleEmployee.Pet));
@@ -1085,18 +681,11 @@
 
   private string _editMode = "inline";
 
-  private GridEditMode TelerikEditMode => _editMode switch {
-    "popup" => GridEditMode.Popup,
-    "incell" => GridEditMode.Incell,
-    _ => GridEditMode.Inline
-  };
-
   private PixataGridEditMode PixataEditMode => _editMode switch {
     "popup" => PixataGridEditMode.Popup,
     "incell" => PixataGridEditMode.InCell,
     _ => PixataGridEditMode.Inline
   };
-  private List<GridSampleEditableEmployee> _telerikEditable = GridSampleEditableEmployee.Some();
   private List<GridSampleEditableEmployee> _pixataEditable = GridSampleEditableEmployee.Some();
 
   private void PixataCreate(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) {
@@ -1110,20 +699,6 @@
   private void PixataDelete(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) =>
     _pixataEditable.RemoveAll(e => e.Id == args.Item.Id);
 
-  private void TelerikCreate(GridCommandEventArgs args) {
-    GridSampleEditableEmployee employee = (GridSampleEditableEmployee)args.Item;
-    employee.Id = _telerikEditable.Max(e => e.Id) + 1;
-    _telerikEditable.Insert(0, employee);
-  }
-
-  private void TelerikUpdate(GridCommandEventArgs args) {
-    GridSampleEditableEmployee employee = (GridSampleEditableEmployee)args.Item;
-    _telerikEditable[_telerikEditable.FindIndex(e => e.Id == employee.Id)] = employee;
-  }
-
-  private void TelerikDelete(GridCommandEventArgs args) =>
-    _telerikEditable.RemoveAll(e => e.Id == ((GridSampleEditableEmployee)args.Item).Id);
-  private IEnumerable<GridSampleEmployee> _telerikSelected = [];
   private IEnumerable<GridSampleEmployee> _pixataSelected = [];
   private IEnumerable<PixataGridSelectedCell<GridSampleEmployee>> _selectedCells = [];
   private string _rowEvent = "Click a row in the PixataGrid";
@@ -1132,12 +707,6 @@
     args.Class = args.Item.IsManager ? "sample-manager-row" : null;
 
   private static void PixataSalaryRender(PixataGridCellRenderEventArgs<GridSampleEmployee> args) =>
-    args.Class = args.Value is decimal salary && salary > 300000 ? "sample-high-salary" : null;
-
-  private static void TelerikRowRender(GridRowRenderEventArgs args) =>
-    args.Class = ((GridSampleEmployee)args.Item).IsManager ? "sample-manager-row" : null;
-
-  private static void TelerikSalaryRender(GridCellRenderEventArgs args) =>
     args.Class = args.Value is decimal salary && salary > 300000 ? "sample-high-salary" : null;
 
   private void RowClicked(PixataGridRowClickEventArgs<GridSampleEmployee> args) =>
@@ -1152,32 +721,17 @@
   private async Task ReadEmployeesVirtually(PixataGridReadEventArgs<GridSampleEmployee> args) =>
     args.SetResult(await EmployeeService.Read(args.Request, TimeSpan.FromMilliseconds(500), args.CancellationToken));
 
-  private async Task ReadEmployeesVirtuallyForTelerik(GridReadEventArgs args) {
-    await Task.Delay(500);
-    DataSourceResult result = GridSampleEmployee.All().ToDataSourceResult(args.Request);
-    args.Data = result.Data;
-    args.Total = result.Total;
-  }
-
   // Thirty columns, going round the employee's fields
   private static readonly List<(string Field, string Title)> WideColumns = [.. Enumerable.Range(1, 30).Select(n => {
     string field = new[] { nameof(GridSampleEmployee.Id), nameof(GridSampleEmployee.FirstName), nameof(GridSampleEmployee.Surname), nameof(GridSampleEmployee.Email), nameof(GridSampleEmployee.Pet), nameof(GridSampleEmployee.Salary) }[(n - 1) % 6];
     return (field, $"{field} {n}");
   })];
 
-  private async Task ReadEmployeesForTelerik(GridReadEventArgs args) {
-    await Task.Delay(1500);
-    DataSourceResult result = GridSampleEmployee.All().ToDataSourceResult(args.Request);
-    args.Data = result.Data;
-    args.Total = result.Total;
-  }
   private string _filterMode = "row";
 
   private PixataGridFilterMenuType PixataFilterMenuType =>
     _filterMode == "checkbox" ? PixataGridFilterMenuType.CheckBoxList : PixataGridFilterMenuType.Menu;
 
-  private FilterMenuType TelerikFilterMenuType =>
-    _filterMode == "checkbox" ? FilterMenuType.CheckBoxList : FilterMenuType.Menu;
   private int _pageSize = 3;
   private int _page = 1;
   private readonly List<int?> _pageSizes = [3, 5, 10, null];
@@ -1187,14 +741,4 @@
   private List<GridSampleEmployee> Data =>
     _empty ? [] : _employees;
 
-  private string TelerikSize => _size switch {
-    PixataGridSize.Small => ThemeConstants.Grid.Size.Small,
-    _ => ThemeConstants.Grid.Size.Medium
-  };
-
-  private PagerInputType TelerikInputType =>
-    _pagerInputType == PixataGridPagerInputType.Input ? PagerInputType.Input : PagerInputType.Buttons;
-
-  private PagerPosition TelerikPagerPosition =>
-    _pagerPosition == PixataGridPagerPosition.Top ? PagerPosition.Top : PagerPosition.Bottom;
 }

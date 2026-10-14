@@ -133,7 +133,7 @@ Relative URIs are resolved against the `NavigationManager`'s base URI, and anyth
 
 ## TemplateHelper
 
-Are you fed up of writing code like this (sample from a Telerik grid, but it's the same for Microsoft's or anyone else's)...
+Are you fed up of writing code like this (it's the same for any grid that takes a template)...
 
 ```xml
 <GridColumn Field="@nameof(TransactionView.Amount)">

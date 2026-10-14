@@ -1,11 +1,14 @@
 ﻿@page "/SendEmail"
 @using Pixata.Email
-@inject PixataEmailService EmailService
+@inject PixataEmailServiceInterface EmailService
 
 <h1>Send an email</h1>
 <p>Note that if you want to copy this code, you'll need to set up your SmtpSettings as shown on <a href="https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Email">the GitHub page</a>.</p>
 
-<TelerikLoaderContainer Size="LoaderSize.Large" LoaderPosition="LoaderPosition.Start" LoaderType="LoaderType.ConvergingSpinner" Text="@Text" Visible="!string.IsNullOrWhiteSpace(Text)" />
+@if (!string.IsNullOrWhiteSpace(Text)) {
+  <Loader />
+  <p>@Text</p>
+}
 
 <p class="text-warning">@Msg</p>
 
@@ -18,7 +21,7 @@
     <FormRowTextArea PropertyName="@nameof(ContactModel.Body)" @bind-Value="TheContactModel.Body" Icon="@IconsHelper.DocumentUser" />
 
     <div class="row justify-content-md-center">
-      <TelerikButton ButtonType="ButtonType.Submit" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Send</TelerikButton>
+      <button type="submit" class="pixata-btn pixata-btn-primary">Send</button>
     </div>
   </EditForm>
 </div>

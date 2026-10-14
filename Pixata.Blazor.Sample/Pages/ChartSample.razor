@@ -12,13 +12,13 @@
   round its points with the arrow keys. Make the window narrow to see the labels turn and thin out and the legend move below.
 </p>
 
-<ComponentComparison Title="Columns with a line on a second axis">
+<ComponentSample Title="Columns with a line on a second axis">
   <Description>
     Two column series and a line series on a second value axis (on the right, because the category axis's
     <code>AxisCrossingValue</code> puts it past the last category), with axis titles, label formats and an explicit range on
     the second axis.
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataChart Height="360px">
       <PixataChartTitle Text="Sales and margin" />
       <PixataChartLegend Position="PixataChartLegendPosition.Bottom" />
@@ -45,36 +45,10 @@
         </PixataChartValueAxis>
       </PixataChartValueAxes>
     </PixataChart>
-  </Pixata>
-  <Telerik>
-    <TelerikChart Height="360px">
-      <ChartTitle Text="Sales and margin" />
-      <ChartLegend Position="ChartLegendPosition.Bottom" />
-      <ChartTooltip Visible="true" />
-      <ChartSeriesItems>
-        <ChartSeries Type="ChartSeriesType.Column" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" />
-        <ChartSeries Type="ChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
-        <ChartSeries Type="ChartSeriesType.Line" Name="Margin" Data="@_sales" Field="@nameof(MonthlySales.Margin)" CategoryField="@nameof(MonthlySales.Month)" Axis="margin" />
-      </ChartSeriesItems>
-      <ChartCategoryAxes>
-        <ChartCategoryAxis AxisCrossingValue="@(new object[] { 0, 100 })">
-          <ChartCategoryAxisTitle Text="Month" />
-        </ChartCategoryAxis>
-      </ChartCategoryAxes>
-      <ChartValueAxes>
-        <ChartValueAxis>
-          <ChartValueAxisTitle Text="Sales" />
-          <ChartValueAxisLabels Format="{0:C0}" />
-        </ChartValueAxis>
-        <ChartValueAxis Name="margin" Min="0" Max="0.4" Color="#78d237">
-          <ChartValueAxisLabels Format="{0:P0}" />
-        </ChartValueAxis>
-      </ChartValueAxes>
-    </TelerikChart>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Stacked columns, gap and spacing, shared tooltip">
+<ComponentSample Title="Stacked columns, gap and spacing, shared tooltip">
   <Description>
     <div class="chart-sample-controls">
       <label>Stack
@@ -90,7 +64,7 @@
     The stack settings go on the first series and apply to the others of the same type. The shared tooltip lists every
     series in the category.
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataChart Height="320px">
       <PixataChartTooltip Visible="true" Shared="true" />
       <PixataChartSeriesItems>
@@ -101,22 +75,10 @@
         <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Services" Data="@_sales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" />
       </PixataChartSeriesItems>
     </PixataChart>
-  </Pixata>
-  <Telerik>
-    <TelerikChart Height="320px">
-      <ChartTooltip Visible="true" Shared="true" />
-      <ChartSeriesItems>
-        <ChartSeries Type="ChartSeriesType.Column" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" Gap="@_gap" Spacing="@_spacing">
-          <ChartSeriesStack Enabled="@(_stack != "none")" Type="@(_stack == "stack100" ? ChartSeriesStackType.Stack100 : ChartSeriesStackType.Normal)" />
-        </ChartSeries>
-        <ChartSeries Type="ChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
-        <ChartSeries Type="ChartSeriesType.Column" Name="Services" Data="@_sales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" />
-      </ChartSeriesItems>
-    </TelerikChart>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Line styles, markers and missing values">
+<ComponentSample Title="Line styles, markers and missing values">
   <Description>
     <div class="chart-sample-controls">
       <label>Style
@@ -144,7 +106,7 @@
     </div>
     July's high is missing. The low series is drawn dashed.
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataChart Height="320px">
       <PixataChartTooltip Visible="true" />
       <PixataChartSeriesItems>
@@ -165,32 +127,10 @@
         </PixataChartValueAxis>
       </PixataChartValueAxes>
     </PixataChart>
-  </Pixata>
-  <Telerik>
-    <TelerikChart Height="320px">
-      <ChartTooltip Visible="true" />
-      <ChartSeriesItems>
-        <ChartSeries Type="ChartSeriesType.Line" Name="High" Data="@ChartSampleData.TemperatureHigh" Style="@((ChartSeriesStyle)(int)_lineStyle)" MissingValues="@((ChartSeriesMissingValues)(int)_missingValues)">
-          <ChartSeriesMarkers Type="@((ChartSeriesMarkersType)(int)_markerType)" />
-          <ChartSeriesLabels Visible="@_lineLabels" />
-        </ChartSeries>
-        <ChartSeries Type="ChartSeriesType.Line" Name="Low" Data="@ChartSampleData.TemperatureLow" Style="@((ChartSeriesStyle)(int)_lineStyle)" DashType="DashType.Dash">
-          <ChartSeriesMarkers Type="@((ChartSeriesMarkersType)(int)_markerType)" />
-        </ChartSeries>
-      </ChartSeriesItems>
-      <ChartCategoryAxes>
-        <ChartCategoryAxis Categories="@_months" />
-      </ChartCategoryAxes>
-      <ChartValueAxes>
-        <ChartValueAxis>
-          <ChartValueAxisLabels Format="{0}°" />
-        </ChartValueAxis>
-      </ChartValueAxes>
-    </TelerikChart>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Pie with labels, an exploded segment and a start angle">
+<ComponentSample Title="Pie with labels, an exploded segment and a start angle">
   <Description>
     <div class="chart-sample-controls">
       <label>Start angle <input type="range" min="0" max="360" step="15" @bind="_startAngle" @bind:event="oninput" /> @_startAngle°</label>
@@ -205,7 +145,7 @@
     The labels use the template <code>#= category #: #= format('{0:P0}', percentage) #</code>, and Safari's
     <code>Explode</code> field is true. Click a legend item to hide its segment.
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataChart Height="340px">
       <PixataChartTitle Text="Browser share" />
       <PixataChartLegend Position="@_legendPosition" />
@@ -216,22 +156,10 @@
         </PixataChartSeries>
       </PixataChartSeriesItems>
     </PixataChart>
-  </Pixata>
-  <Telerik>
-    <TelerikChart Height="340px">
-      <ChartTitle Text="Browser share" />
-      <ChartLegend Position="@((ChartLegendPosition)(int)_legendPosition)" />
-      <ChartTooltip Visible="true" />
-      <ChartSeriesItems>
-        <ChartSeries Type="ChartSeriesType.Pie" Data="@_browsers" Field="@nameof(MarketShare.Share)" CategoryField="@nameof(MarketShare.Browser)" ExplodeField="@nameof(MarketShare.Explode)" StartAngle="@_startAngle">
-          <ChartSeriesLabels Visible="true" Template="#= category #: #= kendo.format('{0:P0}', percentage) #" />
-        </ChartSeries>
-      </ChartSeriesItems>
-    </TelerikChart>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Events, templates and Refresh()">
+<ComponentSample Title="Events, templates and Refresh()">
   <Description>
     <div class="chart-sample-controls">
       <button type="button" @onclick="AddMonth">Add a month (in place) and call Refresh()</button>
@@ -244,7 +172,7 @@
       }
     </div>
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataChart @ref="_eventsChart" Height="320px" OnSeriesClick="@SeriesClicked" OnLegendItemClick="@LegendItemClicked">
       <PixataChartLegend Position="PixataChartLegendPosition.Top" />
       <PixataChartTooltip Visible="true">
@@ -260,32 +188,15 @@
         <PixataChartSeries Name="Services" Data="@_growingSales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" Color="#2d73f5" />
       </PixataChartSeriesItems>
     </PixataChart>
-  </Pixata>
-  <Telerik>
-    <TelerikChart @ref="_telerikEventsChart" Height="320px" OnSeriesClick="@TelerikSeriesClicked" OnLegendItemClick="@TelerikLegendItemClicked">
-      <ChartLegend Position="ChartLegendPosition.Top" />
-      <ChartTooltip Visible="true">
-        <Template>
-          <strong>@context.SeriesName</strong><br />
-          @context.Category: @(((context.DataItem as MonthlySales)?.Hardware)?.ToString("C0"))
-        </Template>
-      </ChartTooltip>
-      <ChartSeriesItems>
-        <ChartSeries Type="ChartSeriesType.Column" Name="Hardware" Data="@_growingSales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)">
-          <ChartSeriesLabels Visible="true" Template="#= value / 1000 #k" />
-        </ChartSeries>
-        <ChartSeries Type="ChartSeriesType.Column" Name="Services" Data="@_growingSales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" Color="#2d73f5" />
-      </ChartSeriesItems>
-    </TelerikChart>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
-<ComponentComparison Title="Long category names, minor grid lines and a fixed range">
+<ComponentSample Title="Long category names, minor grid lines and a fixed range">
   <Description>
     Twelve long category names. When they don't fit side by side they turn to -45 degrees, and on a narrow screen only every
     other (or third) one is shown. The value axis has a fixed maximum and minor grid lines.
   </Description>
-  <Pixata>
+  <ChildContent>
     <PixataChart Height="340px">
       <PixataChartLegend Visible="false" />
       <PixataChartTooltip Visible="true" Format="{0:N1}m" />
@@ -304,31 +215,8 @@
         </PixataChartValueAxis>
       </PixataChartValueAxes>
     </PixataChart>
-  </Pixata>
-  <Telerik>
-    <TelerikChart Height="340px">
-      <ChartLegend Visible="false" />
-      <ChartTooltip Visible="true" />
-      <ChartSeriesItems>
-        <ChartSeries Type="ChartSeriesType.Column" Name="Population" Data="@ChartSampleData.RegionValues" Color="#28b4c8" />
-      </ChartSeriesItems>
-      <ChartCategoryAxes>
-        <ChartCategoryAxis Categories="@_regions">
-          <ChartCategoryAxisMajorGridLines Visible="false" />
-          <ChartCategoryAxisLabels>
-            <ChartCategoryAxisLabelsRotation Angle="@("auto")" />
-          </ChartCategoryAxisLabels>
-        </ChartCategoryAxis>
-      </ChartCategoryAxes>
-      <ChartValueAxes>
-        <ChartValueAxis Max="12" MajorUnit="2">
-          <ChartValueAxisTitle Text="Millions" />
-          <ChartValueAxisMinorGridLines Visible="true" />
-        </ChartValueAxis>
-      </ChartValueAxes>
-    </TelerikChart>
-  </Telerik>
-</ComponentComparison>
+  </ChildContent>
+</ComponentSample>
 
 <style>
   .chart-sample-controls {
@@ -370,19 +258,12 @@
   private double _startAngle = 90;
   private PixataChartLegendPosition _legendPosition = PixataChartLegendPosition.Right;
   private PixataChart? _eventsChart;
-  private TelerikChart? _telerikEventsChart;
 
   private void SeriesClicked(PixataChartSeriesClickEventArgs args) =>
     _log.Add($"Pixata OnSeriesClick: {args.SeriesName}, {args.Category}, {args.Value:C0}");
 
   private void LegendItemClicked(PixataChartLegendItemClickEventArgs args) =>
     _log.Add($"Pixata OnLegendItemClick: {args.Text} (series {args.SeriesIndex}), now {(args.Visible ? "shown" : "hidden")}");
-
-  private void TelerikSeriesClicked(ChartSeriesClickEventArgs args) =>
-    _log.Add($"Telerik OnSeriesClick: {args.SeriesName}, {args.Category}");
-
-  private void TelerikLegendItemClicked(ChartLegendItemClickEventArgs args) =>
-    _log.Add($"Telerik OnLegendItemClick: {args.Text} (series {args.SeriesIndex})");
 
   private void AddMonth() {
     List<MonthlySales> all = ChartSampleData.Sales();
@@ -392,7 +273,6 @@
       _growingSales.RemoveRange(5, _growingSales.Count - 5);
     }
     _eventsChart?.Refresh();
-    _telerikEventsChart?.Refresh();
   }
 
 }
