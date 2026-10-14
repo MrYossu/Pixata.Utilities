@@ -137,6 +137,17 @@ public class PixataGridDetail_Tests {
   }
 
   [TestMethod]
+  public void RowDraggable_WithoutADragColumn_AddsOneAtTheStart() {
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.RenderComponent<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People)
+      .Add(g => g.RowDraggable, true)
+      .Add(g => g.GridColumns, b => Column<PixataGridColumn<Person>>(b, nameof(Person.Name))));
+
+    Assert.AreEqual(3, grid.FindAll("tbody td:first-child .pixata-blazor-grid-drag-handle").Count);
+    Assert.AreEqual("width: 36px", grid.Find("col").GetAttribute("style"));
+  }
+
+  [TestMethod]
   public void DroppingARow_DescribesTheDrop() {
     PixataGridRowDropEventArgs<Person>? drop = null;
     IRenderedComponent<PixataGrid<Person>> grid = RenderDraggable(args => drop = args);

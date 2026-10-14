@@ -181,6 +181,9 @@ public partial class PixataGrid<TItem> {
       case "Cancel":
         await CancelEdit();
         break;
+      case "CsvExport" or "ExcelExport":
+        await RunExportCommand(command);
+        break;
       case "Delete" when item is not null:
         if (ConfirmDelete) {
           _confirmDeleteItem = item;

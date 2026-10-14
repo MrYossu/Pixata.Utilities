@@ -60,6 +60,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Pixata.Blazor.Tests" />
+    <InternalsVisibleTo Include="Pixata.Blazor.Grid.Excel" />
   </ItemGroup>
 
 </Project>

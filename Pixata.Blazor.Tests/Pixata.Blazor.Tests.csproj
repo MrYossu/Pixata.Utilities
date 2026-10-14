@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
+    <ProjectReference Include="..\Pixata.Blazor.Grid.Excel\Pixata.Blazor.Grid.Excel.csproj" />
   </ItemGroup>
 
 </Project>

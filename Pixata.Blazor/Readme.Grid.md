@@ -69,6 +69,7 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
 | `Groupable` | `bool` | Shows a panel above the grid that the user can drag column headers into, to group the rows. See [grouping](#grouping-and-aggregates) |
 | `GridAggregates` | `RenderFragment` | The aggregates to calculate, as `PixataGridAggregate`s, for the footer templates |
+| `GridExport` | `RenderFragment` | Export settings, such as a `PixataGridCsvExport`. See [export](#export) |
 | `DetailTemplate` | `RenderFragment<TItem>` | Details for each row, shown when the user expands it. See [detail rows](#detail-rows) |
 | `OnRowExpand`, `OnRowCollapse` | `EventCallback<PixataGridRowExpandEventArgs<TItem>>`, `EventCallback<PixataGridRowCollapseEventArgs<TItem>>` | Fire when the user shows or hides a row's details |
 | `RowDraggable` | `bool` | Lets the user drag rows. See [dragging rows](#dragging-rows) |
@@ -512,12 +513,11 @@ Give the grid a `DetailTemplate`, and each row gets an arrow at its start that s
 
 ## Dragging rows
 
-Set `RowDraggable="true"` and add a `PixataGridDragColumn`, and the user can drag rows by the handle in that column, within the grid or into another grid. A line shows where a row will go, or the row it will be dropped on is tinted. The grid doesn't move anything itself, as only you know how your data is stored, so handle `OnRowDrop`...
+Set `RowDraggable="true"`, and the user can drag rows by a handle at the start of each row (add a `PixataGridDragColumn` among the columns to put the handles somewhere else), within the grid or into another grid. A line shows where a row will go, or the row it will be dropped on is tinted. The grid doesn't move anything itself, as only you know how your data is stored, so handle `OnRowDrop`...
 
 ```razor
 <PixataGrid @ref="_left" Data="_leftPeople" RowDraggable="true" OnRowDrop="@((PixataGridRowDropEventArgs<Person> args) => Dropped(args, _leftPeople))">
   <GridColumns>
-    <PixataGridDragColumn />
     <PixataGridColumn Field="@nameof(Person.Name)" />
   </GridColumns>
 </PixataGrid>
@@ -544,6 +544,33 @@ Set `RowDraggable="true"` and add a `PixataGridDragColumn`, and the user can dra
 | `DropPosition` | `Before`, `Over` or `After` the destination row: the top quarter of a row is before it, the bottom quarter after it, and the rest over it |
 
 Rows can only be dropped on the rows of a grid that is itself `RowDraggable`, with the same `TItem`. Dropped anywhere else in such a grid, they go after its rows. The dragging uses pointer events, so it works with touch as well as the mouse.
+
+## Export
+
+The grid can be saved as a CSV file, with a command button in the toolbar or from code. Excel export is in a separate package, [Pixata.Blazor.Grid.Excel](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Grid.Excel/Readme.md), so apps that don't need it don't carry its weight...
+
+```razor
+<PixataGrid @ref="_grid" Data="People" Pageable="true">
+  <GridToolBarTemplate>
+    <PixataGridCommandButton Command="CsvExport" Icon="PixataGridIcon.FileCsv">Export to CSV</PixataGridCommandButton>
+  </GridToolBarTemplate>
+  <GridExport>
+    <PixataGridCsvExport FileName="people" AllPages="true" />
+  </GridExport>
+  <GridColumns>...</GridColumns>
+</PixataGrid>
+```
+
+| Setting | Type | What it does |
+| --- | --- | --- |
+| `FileName` | `string` | The file name, without its extension. Defaults to "Grid" |
+| `AllPages` | `bool` | Exports all the rows (filtered and sorted as in the grid), rather than just the page shown. With `OnRead`, the handler is called with a request for all the rows (a `PageSize` of zero) |
+| `OnBeforeExport` | `EventCallback<PixataGridBeforeExportEventArgs<TItem>>` | Fires before the export, with the `Columns` (each with a `Field`, `Title`, `Width` and `DisplayFormat`) and `Data`, which you can change. Set `IsCancelled` to stop it |
+| `OnAfterExport` | `EventCallback<PixataGridAfterExportEventArgs>` | Fires after the export, with the file as a `Stream` |
+
+Without a `PixataGridCsvExport`, the `CsvExport` command still works, with the defaults. From code, `SaveAsCsvFile()` exports and has the browser save the file, and `ExportToCsv()` returns it as a `MemoryStream` (or null if `OnBeforeExport` cancelled it).
+
+The CSV has a heading row with the column titles, then a row for each item. Only columns that are shown and have a `Field` are exported, so command, checkbox and drag columns are left out. The values aren't formatted with the `DisplayFormat`, so the file can be read back accurately: numbers have a full stop for the decimal point and no thousands separators, true and false are written as TRUE and FALSE, and dates as the current culture writes them. Values with a comma, quote or line break are quoted. The file is UTF-8, with a byte order mark so Excel reads it correctly.
 
 ## Virtual scrolling
 

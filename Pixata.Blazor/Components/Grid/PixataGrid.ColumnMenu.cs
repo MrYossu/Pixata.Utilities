@@ -86,7 +86,7 @@ public partial class PixataGrid<TItem> {
 
   private bool HasColumnMenu(PixataGridColumn<TItem> column) =>
     ShowColumnMenu && column.ShowColumnMenu && !column.IsGroupColumn
-    && column is not PixataGridCommandColumn<TItem> and not PixataGridCheckboxColumn<TItem>;
+    && column is not PixataGridCommandColumn<TItem> and not PixataGridCheckboxColumn<TItem> and not PixataGridDragColumn<TItem>;
 
   private bool MenuSorts(PixataGridColumn<TItem> column) =>
     (ColumnMenuSettings?.Sortable ?? true) && CanSort(column);

@@ -41,6 +41,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Blazor.Grid.Excel
+    - name: Restore - Pixata.Blazor.Grid.Excel Dependencies
+      run: dotnet restore Pixata.Blazor.Grid.Excel/Pixata.Blazor.Grid.Excel.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.Blazor.Grid.Excel.csproj
+      run: dotnet build Pixata.Blazor.Grid.Excel/Pixata.Blazor.Grid.Excel.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.Blazor.TelerikComponents
     - name: Restore - Pixata.Blazor.TelerikComponents Dependencies
       run: dotnet restore Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configfile ./nuget.config

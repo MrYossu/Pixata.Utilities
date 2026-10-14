@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Pixata.Blazor.TelerikComponents\Pixata.Blazor.TelerikComponents.csproj" />
     <ProjectReference Include="..\Pixata.AspNetCore\Pixata.AspNetCore.csproj" />
     <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
+    <ProjectReference Include="..\Pixata.Blazor.Grid.Excel\Pixata.Blazor.Grid.Excel.csproj" />
     <ProjectReference Include="..\Pixata.Email\Pixata.Email.csproj" />
   </ItemGroup>
 

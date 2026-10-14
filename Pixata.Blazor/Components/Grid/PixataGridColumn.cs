@@ -326,6 +326,14 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
     return Css.Join(CellClass, args.Class);
   }
 
+  // The format for the values: DisplayFormat, or the [DisplayFormat] attribute
+  internal string? Format {
+    get {
+      Resolve();
+      return DisplayFormat ?? _attributeFormat;
+    }
+  }
+
   internal string CellText(TItem item) {
     Resolve();
     return FormatValue(_getter?.Invoke(item));

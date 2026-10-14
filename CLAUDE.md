@@ -37,6 +37,7 @@ Pixata.Extensions          — no project deps; the shared kernel
   ├── Pixata.Email         — MailKit wrapper
   └── Pixata.SimilarityChooser
 
+Pixata.Blazor.Grid.Excel         — Excel export for PixataGrid (ClosedXML), kept out of Pixata.Blazor
 Pixata.Blazor.TelerikComponents  — Telerik components, client-safe
 Pixata.AspNetCore.Telerik        — server half of the above (EF Core + SqlClient)
 Pixata.Google, Pixata.Functional, Pixata.Blazor.LanguageExtComponents — legacy/unmaintained (LanguageExt)

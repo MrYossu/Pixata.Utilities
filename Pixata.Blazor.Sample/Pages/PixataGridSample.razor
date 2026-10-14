@@ -4,6 +4,9 @@
 @using Pixata.Blazor.Sample.Models
 @using Pixata.Blazor.Sample.Data
 @using Pixata.Extensions.Grid
+@using Pixata.Blazor.Grid.Excel
+@using ClosedXML.Excel
+@using System.IO
 @using Telerik.DataSource
 @using Telerik.DataSource.Extensions
 @using Telerik.SvgIcons
@@ -734,7 +737,6 @@
   <PixataGrid @ref="_pixataDragLeft" Data="_pixataLeft" Size="_size" RowDraggable="true" SelectionMode="PixataGridSelectionMode.Multiple"
               OnRowDrop="@((PixataGridRowDropEventArgs<GridSampleEmployee> args) => PixataRowDrop(args, _pixataLeft))">
     <GridColumns>
-      <PixataGridDragColumn />
       <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
       <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
     </GridColumns>
@@ -742,7 +744,6 @@
   <PixataGrid @ref="_pixataDragRight" Data="_pixataRight" Size="_size" RowDraggable="true" SelectionMode="PixataGridSelectionMode.Multiple"
               OnRowDrop="@((PixataGridRowDropEventArgs<GridSampleEmployee> args) => PixataRowDrop(args, _pixataRight))">
     <GridColumns>
-      <PixataGridDragColumn />
       <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
       <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
     </GridColumns>
@@ -754,7 +755,6 @@
   <TelerikGrid @ref="_telerikDragLeft" Data="_telerikLeft" Size="@TelerikSize" RowDraggable="true"
                OnRowDrop="@((GridRowDropEventArgs<GridSampleEmployee> args) => TelerikRowDrop(args, _telerikLeft))">
     <GridColumns>
-      <GridDragColumn />
       <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
       <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
     </GridColumns>
@@ -762,12 +762,71 @@
   <TelerikGrid @ref="_telerikDragRight" Data="_telerikRight" Size="@TelerikSize" RowDraggable="true"
                OnRowDrop="@((GridRowDropEventArgs<GridSampleEmployee> args) => TelerikRowDrop(args, _telerikRight))">
     <GridColumns>
-      <GridDragColumn />
       <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
       <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
     </GridColumns>
   </TelerikGrid>
 </div>
+
+<h4>Export</h4>
+
+<p>The toolbar buttons save the grid as a CSV or Excel file. The checkbox exports every row rather than just the page. The buttons under the grids show what each one exports, so they can be compared.</p>
+
+<div class="pixata-blazor-grid-sample-options">
+  <label><input type="checkbox" @bind="_exportAllPages" /> Export all pages</label>
+</div>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid @ref="_exportGrid" Data="Data" Size="_size" Pageable="true" PageSize="5" Sortable="true">
+  <GridToolBarTemplate>
+    <PixataGridCommandButton Command="CsvExport" Icon="PixataGridIcon.FileCsv">Export to CSV</PixataGridCommandButton>
+    <PixataGridCommandButton Command="ExcelExport" Icon="PixataGridIcon.FileExcel">Export to Excel</PixataGridCommandButton>
+  </GridToolBarTemplate>
+  <GridExport>
+    <PixataGridCsvExport FileName="pixata-grid-export" AllPages="_exportAllPages" />
+    <PixataGridExcelExport FileName="pixata-grid-export" AllPages="_exportAllPages" />
+  </GridExport>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid @ref="_telerikExportGrid" Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5" Sortable="true">
+  <GridToolBarTemplate>
+    <GridCommandButton Command="CsvExport" Icon="@SvgIcon.FileCsv">Export to CSV</GridCommandButton>
+    <GridCommandButton Command="ExcelExport" Icon="@SvgIcon.FileExcel">Export to Excel</GridCommandButton>
+  </GridToolBarTemplate>
+  <GridExport>
+    <GridCsvExport FileName="telerik-grid-export" AllPages="_exportAllPages" />
+    <GridExcelExport FileName="telerik-grid-export" AllPages="_exportAllPages" />
+  </GridExport>
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+    <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+  </GridColumns>
+</TelerikGrid>
+
+<div class="pixata-blazor-grid-sample-options">
+  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="CompareExports">Compare the exports</button>
+</div>
+@if (_exportComparison is not null) {
+  <div class="pixata-blazor-grid-sample-pair">
+    <pre class="export-comparison">@_exportComparison.Value.Pixata</pre>
+    <pre class="export-comparison">@_exportComparison.Value.Telerik</pre>
+  </div>
+}
 
 <h4>Auto-generated columns</h4>
 
@@ -802,6 +861,13 @@
     gap: 1rem;
   }
 
+  .export-comparison {
+    max-height: 400px;
+    overflow: auto;
+    font-size: .75rem;
+    white-space: pre-wrap;
+  }
+
   .pixata-blazor-grid-sample-label {
     margin: 1rem 0 .25rem;
     font-weight: bold;
@@ -820,6 +886,37 @@
   private PixataGrid<GridSampleEmployee>? _groupedGrid;
   private string _columnEvent = "";
   private int _telerikExpands;
+  private bool _exportAllPages;
+  private PixataGrid<GridSampleEmployee>? _exportGrid;
+  private TelerikGrid<GridSampleEmployee>? _telerikExportGrid;
+  private (string Pixata, string Telerik)? _exportComparison;
+
+  // What each grid exports: the CSV, then a summary of the Excel file
+  private async Task CompareExports() {
+    MemoryStream pixataCsv = (await _exportGrid!.ExportToCsv())!;
+    MemoryStream telerikCsv = await _telerikExportGrid!.ExportToCsvAsync();
+    MemoryStream pixataExcel = (await _exportGrid.ExportToExcel())!;
+    MemoryStream telerikExcel = await _telerikExportGrid.ExportToExcelAsync();
+    _exportComparison = ($"{Describe(pixataCsv)}\n{DescribeExcel(pixataExcel)}", $"{Describe(telerikCsv)}\n{DescribeExcel(telerikExcel)}");
+  }
+
+  private static string Describe(MemoryStream stream) {
+    byte[] bytes = stream.ToArray();
+    bool bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+    return $"CSV ({bytes.Length} bytes, {(bom ? "with" : "without")} a BOM)\n{System.Text.Encoding.UTF8.GetString(bytes).TrimStart('\uFEFF')}";
+  }
+
+  private static string DescribeExcel(MemoryStream stream) {
+    using XLWorkbook workbook = new(new MemoryStream(stream.ToArray()));
+    IXLWorksheet sheet = workbook.Worksheets.First();
+    IXLRange used = sheet.RangeUsed()!;
+    System.Text.StringBuilder text = new($"Excel: sheet {sheet.Name}, {used.RowCount()} rows\n");
+    text.Append("Widths: ").AppendLine(string.Join(", ", Enumerable.Range(1, used.ColumnCount()).Select(c => sheet.Column(c).Width.ToString("0.#"))));
+    foreach (IXLRangeRow row in used.Rows().Take(3)) {
+      text.AppendLine(string.Join(" | ", row.Cells().Select(c => $"{c.Value} [{c.DataType}{(c.Style.NumberFormat.Format is { Length: > 0 } f ? " " + f : c.Style.DateFormat.Format is { Length: > 0 } d ? " " + d : "")}{(c.Style.Font.Bold ? " bold" : "")}]")));
+    }
+    return text.ToString();
+  }
   private int _pixataExpands;
   private int _pixataCollapses;
   private PixataGrid<GridSampleEmployee>? _pixataDragLeft;

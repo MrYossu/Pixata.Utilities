@@ -590,3 +590,18 @@ export function disposeRowDrag(gridId) {
   rowDrags.get(gridId)?.();
   rowDrags.delete(gridId);
 }
+
+// ---------- Saving files ----------
+
+// Has the browser save a file that .NET has sent as a stream
+export async function downloadFile(fileName, contentType, streamReference) {
+  const buffer = await streamReference.arrayBuffer();
+  const url = URL.createObjectURL(new Blob([buffer], { type: contentType }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}

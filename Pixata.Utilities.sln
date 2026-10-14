@@ -38,6 +38,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.AspNetCore.Telerik",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Blazor.Tests", "Pixata.Blazor.Tests\Pixata.Blazor.Tests.csproj", "{74F3DD71-AE47-400E-B6E8-F97E0A5B84F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Blazor.Grid.Excel", "Pixata.Blazor.Grid.Excel\Pixata.Blazor.Grid.Excel.csproj", "{97D445B8-F26A-46D7-9D19-5038D07EF18C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -192,6 +194,18 @@ Global
 		{74F3DD71-AE47-400E-B6E8-F97E0A5B84F4}.Release|x64.Build.0 = Release|Any CPU
 		{74F3DD71-AE47-400E-B6E8-F97E0A5B84F4}.Release|x86.ActiveCfg = Release|Any CPU
 		{74F3DD71-AE47-400E-B6E8-F97E0A5B84F4}.Release|x86.Build.0 = Release|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Debug|x64.Build.0 = Debug|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Debug|x86.Build.0 = Debug|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Release|x64.ActiveCfg = Release|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Release|x64.Build.0 = Release|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Release|x86.ActiveCfg = Release|Any CPU
+		{97D445B8-F26A-46D7-9D19-5038D07EF18C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

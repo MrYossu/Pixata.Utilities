@@ -65,6 +65,10 @@ public partial class PixataGrid<TItem> {
     if (AutoGenerateColumns && !generatedPlaced) {
       columns.AddRange(GeneratedColumns(null));
     }
+    // Draggable rows need handles, so if there's no column for them, one goes at the start
+    if (RowDraggable && !columns.Any(c => c is PixataGridDragColumn<TItem>)) {
+      columns.Insert(0, AutoDragColumn);
+    }
     return columns;
   }
 

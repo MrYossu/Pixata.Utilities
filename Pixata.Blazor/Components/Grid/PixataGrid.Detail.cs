@@ -83,6 +83,8 @@ public class PixataGridDragColumn<TItem> : PixataGridColumn<TItem> {
     Filterable = false;
     Editable = false;
     Groupable = false;
+    ShowColumnMenu = false;
+    VisibleInColumnChooser = false;
     Width ??= "36px";
 #pragma warning restore BL0005
     base.OnParametersSet();
@@ -123,6 +125,20 @@ public partial class PixataGrid<TItem> {
   public EventCallback<PixataGridRowDropEventArgs<TItem>> OnRowDrop { get; set; }
 
   private List<TItem> _expanded = [];
+
+#pragma warning disable BL0005 // The column isn't rendered, so its parameters are set here
+  private PixataGridDragColumn<TItem> AutoDragColumn { get; } = new() {
+    Width = "36px",
+    Sortable = false,
+    Filterable = false,
+    Editable = false,
+    Groupable = false,
+    Resizable = false,
+    Reorderable = false,
+    ShowColumnMenu = false,
+    VisibleInColumnChooser = false
+  };
+#pragma warning restore BL0005
   private bool _rowDragReady;
 
   // The grids on the page, so a row dragged from one can find the one it was dropped on
