@@ -1,35 +1,20 @@
 ﻿@if (IsContainer) {
-  <div class="pixata-d-flex @Id">
+  <div class="pixata-d-flex pixata-form-container">
     <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
       @if (Required) {
-        <label for="@Id" class="pixata-w-100">@Label <span class="pixata-text-danger">*</span></label>
+        <label for="@Id" class="pixata-form-label pixata-w-100">@Label <span class="pixata-text-danger">*</span></label>
       } else {
-        <label for="@Id" class="pixata-w-100">@Label</label>
+        <label for="@Id" class="pixata-form-label pixata-w-100">@Label</label>
       }
       @ChildContent
     </div>
   </div>
-  <style>
-    .@Id {
-      container-type: inline-size;
-    }
-
-      .@Id > div {
-        max-width: calc(50% - .5rem);
-      }
-
-    @@container (max-width: 429px) {
-      .@Id > div {
-        max-width: unset;
-      }
-    }
-  </style>
 } else {
   <div class="pixata-mt-3 pixata-position-relative">
     @if (Required) {
-      <label for="@Id">@Label <span class="pixata-text-danger">*</span></label>
+      <label for="@Id" class="pixata-form-label">@Label <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@Id">@Label</label>
+      <label for="@Id" class="pixata-form-label">@Label</label>
     }
     @ChildContent
   </div>
@@ -47,7 +32,7 @@
   [Parameter]
   public string Label { get; set; } = "";
   /// <summary>
-  /// If the element should not exceed 50% of larger size windows then set this to true. You MUST set the Id for this to work.
+  /// If the element should not exceed 50% of larger size windows then set this to true. Below a container width of 430px, it takes the full width.
   /// See <see href="https://mryossu.atlassian.net/wiki/spaces/SA/pages/21594114/Form+components#IsContainer">wiki for more info</see>
   /// </summary>
   [Parameter]

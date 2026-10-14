@@ -8,6 +8,12 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents
 
 >Note that as of version 12.2.0, the major and minor package versions will correspond to the version of the Telerik.Blazor package that is required. The patch version will be used for updates to this package. The build number will indicate my own internal versioning. Thus, version 12.2.0 is based on the Telerik Blazor package version 12.2.x, where x is my own incremental build number.
 
+## Breaking changes in version 15.0.0
+
+- **Telerik UI for Blazor 15.** This version references Telerik.UI.for.Blazor 15.0.1, which (unlike 12.x) is published on nuget.org, so you no longer need the private Telerik feed to restore it. If your app is still on Telerik 12, stay on version 12.3.20 of this package until you upgrade Telerik. Telerik 15 also needs Telerik.Licensing 1.9.1 or later.
+- **.NET 10.** The package now targets `net8.0` and `net10.0`, so .NET 10 apps no longer get .NET 8 assemblies.
+- **`LocalisationHelper.Values` is now `static`**, so the code below works as documented. If you created your own instance to set messages on, set them on `LocalisationHelper.Values` instead.
+
 ## The components
 
 ### TelerikGridWithState
@@ -68,7 +74,7 @@ LocalisationHelper.Values["DatePicker_Open"] = "Open Sesame";
 builder.Services.AddSingleton(typeof(ITelerikStringLocalizer), typeof(LocalisationHelper));
 ```
 
-As the class is static, you only need to do this once.
+As `Values` is static, you only need to do this once, and every instance that the DI container creates uses it. Before version 15.0.0, `Values` was an instance field, so this code didn't compile.
 
 You can see a list of all messages on ([Telerik's web site](https://www.telerik.com/blazor-ui/documentation/api/telerik.blazor.resources.messages)).
 

@@ -24,7 +24,7 @@ Namespace `Pixata.Extensions.Auditing.Attributes`...
 
 | Type | What it is |
 | --- | --- |
-| `NoAuditAttribute` | Applied to an entity class to keep it out of the audit trail. Used as `[NoAudit]` |
+| `NoAuditAttribute` | Applied to an entity class to keep it out of the audit trail, or (as of v2.21.0) to a property to have its value written as `Audit.HiddenValue` (`"(hidden)"`) instead of the real value. Used as `[NoAudit]` |
 
 Namespace `Pixata.Extensions.Auditing.Services`...
 

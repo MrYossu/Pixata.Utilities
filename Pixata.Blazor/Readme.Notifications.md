@@ -49,6 +49,8 @@ This is deliberately not configurable, as the whole point is that the user doesn
 
 Every notification has a close button, so the user can get rid of one early. If a second notification arrives with the same message as one already on screen, the older one is removed, so a repeated error doesn't stack up.
 
+As of v4.5.0, dismissing a notification cancels its timers, notifications sent in quick succession (a double-clicked save button, or a list of failures) are handled safely, and the area unsubscribes from the helper when it's disposed. Previously, removing a notification that had already gone threw an exception which, in Blazor Server, ended the circuit. Clicking the close button no longer counts as clicking the notification, and `OpenNotification` is now raised as described above.
+
 ## Using them for API errors
 
 An [`ApiResponseView`](Readme.ApiResponseView.md) can report its errors as notifications rather than as an inline message. Set this once in `Program.cs`...

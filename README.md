@@ -1,4 +1,4 @@
-# Pixata.Utilities [![Release status](https://github.com/MrYossu/Pixata.Utilities/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Arelease) [![Master status](https://github.com/MrYossu/Pixata.Utilities/workflows/master/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Amaster) ![Last commit to master](https://img.shields.io/github/last-commit/MrYossu/Pixata.Utilities/master)
+﻿# Pixata.Utilities [![Release status](https://github.com/MrYossu/Pixata.Utilities/workflows/release/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Arelease) [![Master status](https://github.com/MrYossu/Pixata.Utilities/workflows/master/badge.svg)](https://github.com/MrYossu/Pixata.Utilities/actions?query=workflow%3Amaster) ![Last commit to master](https://img.shields.io/github/last-commit/MrYossu/Pixata.Utilities/master)
 
 ![Pixata](https://github.com/MrYossu/Pixata.Utilities/raw/master/Borsalino.png "Pixata")
 
@@ -33,6 +33,18 @@ A small, but hopefully growing collectoin of utilities that I have found useful 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore).
+
+## Pixata.AspNetCore.Pdf.Telerik
+A PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Telerik Document Processing. As of Pixata.AspNetCore v2.0.0, PDF generation lives in its own package, so apps that don't generate PDFs don't deploy a PDF engine.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik).
+
+## Pixata.AspNetCore.Pdf.WkHtmlToPdf
+**Obsolete.** The wkhtmltopdf converter that Pixata.AspNetCore used before v2.0.0, kept so that apps can upgrade before moving their templates to Pixata.AspNetCore.Pdf.Telerik. It will be removed in a future release.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf).
 
 ## Pixata.Blazor
 Over the years since I started using Blazor, I (like many others) have developed some components that I find myself reusing regularly. This project contains those components.

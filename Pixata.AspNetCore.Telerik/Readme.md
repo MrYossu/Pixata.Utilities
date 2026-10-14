@@ -1,4 +1,4 @@
-# Pixata.AspNetCore.Telerik [![Pixata.AspNetCore.Telerik Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore.Telerik)](https://www.nuget.org/packages/Pixata.AspNetCore.Telerik/)
+﻿# Pixata.AspNetCore.Telerik [![Pixata.AspNetCore.Telerik Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore.Telerik)](https://www.nuget.org/packages/Pixata.AspNetCore.Telerik/)
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore.Telerik/CorbeilePleine.png "Pixata")
 
@@ -9,6 +9,8 @@ This package exists so that `Pixata.Blazor.TelerikComponents` doesn't need to ha
 Install this one in your **server** project, and `Pixata.Blazor.TelerikComponents` wherever your components live.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Telerik/) is available for this project.
+
+>**Version 2.0.0** references Telerik.UI.for.Blazor 15.0.1 (from nuget.org) rather than 12.3.0, to match version 15.0.0 of Pixata.Blazor.TelerikComponents. The API is unchanged. If your app is still on Telerik 12, stay on version 1.0.2 until you upgrade.
 
 ## Extension method to improve the performance of the Telerik Blazor grid
 Whilst the Telerik Blazor grid does an amazing job, it has its limitations. One of these is the way it computes aggregates. For large tables, this can be slow.

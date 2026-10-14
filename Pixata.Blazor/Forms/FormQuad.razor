@@ -1,49 +1,37 @@
-<div class="quad-element pixata-d-flex pixata-flex-wrap gap-col-3">
+<div class="pixata-form-quad quad-element pixata-d-flex pixata-flex-wrap pixata-gap-col-3 gap-col-3">
   <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (FirstRequired) {
-      <label for="@FirstId">@FirstLabel <span class="pixata-text-danger">*</span></label>
+      <label for="@FirstId" class="pixata-form-label">@FirstLabel <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@FirstId">@FirstLabel</label>
+      <label for="@FirstId" class="pixata-form-label">@FirstLabel</label>
     }
     @First
   </div>
   <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (SecondRequired) {
-      <label for="@SecondId">@SecondLabel <span class="pixata-text-danger">*</span></label>
+      <label for="@SecondId" class="pixata-form-label">@SecondLabel <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@SecondId">@SecondLabel</label>
+      <label for="@SecondId" class="pixata-form-label">@SecondLabel</label>
     }
     @Second
   </div>
   <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (ThirdRequired) {
-      <label for="@ThirdId">@ThirdLabel <span class="pixata-text-danger">*</span></label>
+      <label for="@ThirdId" class="pixata-form-label">@ThirdLabel <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@ThirdId">@ThirdLabel</label>
+      <label for="@ThirdId" class="pixata-form-label">@ThirdLabel</label>
     }
     @Third
   </div>
   <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-position-relative">
     @if (FourthRequired) {
-      <label for="@FourthId">@FourthLabel <span class="pixata-text-danger">*</span></label>
+      <label for="@FourthId" class="pixata-form-label">@FourthLabel <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@FourthId">@FourthLabel</label>
+      <label for="@FourthId" class="pixata-form-label">@FourthLabel</label>
     }
     @Fourth
   </div>
 </div>
-<style>
-  .quad-element > div {
-    width: calc(25% - 2rem);
-  }
-
-  .gap-col-3 {
-    -moz-column-gap: 1rem;
-    -ms-column-gap: 1rem;
-    -webkit-column-gap: 1rem;
-    column-gap: 1rem;
-  }
-</style>
 
 @code {
   /// <summary>

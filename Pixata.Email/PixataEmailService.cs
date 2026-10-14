@@ -28,7 +28,7 @@ namespace Pixata.Email {
     /// <param name="emailParameters">An EmailParameters object, which contains all the data for the email</param>
     /// <returns>Task&lt;ApiResponse&lt;Yunit&gt;&gt;</returns>
     public Task<ApiResponse<Yunit>> SendEmailAsync(EmailParameters emailParameters) =>
-      SendMessageAsync(CreateMailMessage(emailParameters), client => client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, SmtpSettings.UseSsl), includeExceptionType: true);
+      SendMessageAsync(CreateMailMessage(emailParameters), client => client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, SmtpSettings.EffectiveSocketOptions()), includeExceptionType: true);
 
     /// <summary>
     /// Send an email from the user specified in the settings to the email passed in. Allows multiple recipients and attachments
@@ -60,6 +60,8 @@ namespace Pixata.Email {
       };
       mm.From.Add(parameters.From ?? new MailboxAddress(SmtpSettings.FromName, SmtpSettings.FromEmail));
       parameters.Recipients.ForEach(r => mm.To.Add(r));
+      parameters.Cc.ForEach(r => mm.Cc.Add(r));
+      parameters.Bcc.ForEach(r => mm.Bcc.Add(r));
       if (parameters.ReplyTo != null) {
         mm.ReplyTo.Add(parameters.ReplyTo);
       }

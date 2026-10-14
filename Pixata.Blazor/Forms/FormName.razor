@@ -1,37 +1,29 @@
-﻿<div class="pixata-d-flex pixata-flex-wrap gap-col-3">
-  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill" style="max-width: 100px;">
+﻿<div class="pixata-form-name pixata-d-flex pixata-flex-wrap pixata-gap-col-3 gap-col-3">
+  <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill pixata-form-name-title">
     @if (TitleRequired) {
-      <label for="@TitleId">@TitleLabel <span class="pixata-text-danger">*</span></label>
+      <label for="@TitleId" class="pixata-form-label">@TitleLabel <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@TitleId">@TitleLabel</label>
+      <label for="@TitleId" class="pixata-form-label">@TitleLabel</label>
     }
     @Title
   </div>
   <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill">
     @if (SalutationRequired) {
-      <label for="@SalutationId">@SalutationLabel <span class="pixata-text-danger">*</span></label>
+      <label for="@SalutationId" class="pixata-form-label">@SalutationLabel <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@SalutationId">@SalutationLabel</label>
+      <label for="@SalutationId" class="pixata-form-label">@SalutationLabel</label>
     }
     @Salutation
   </div>
   <div class="@(MarginTop ? "pixata-mt-3 " : "")pixata-flex-fill">
     @if (SurnameRequired) {
-      <label for="@SurnameId">@SurnameLabel <span class="pixata-text-danger">*</span></label>
+      <label for="@SurnameId" class="pixata-form-label">@SurnameLabel <span class="pixata-text-danger">*</span></label>
     } else {
-      <label for="@SurnameId">@SurnameLabel</label>
+      <label for="@SurnameId" class="pixata-form-label">@SurnameLabel</label>
     }
     @Surname
   </div>
 </div>
-<style>
-  .gap-col-3 {
-    -moz-column-gap: 1rem;
-    -ms-column-gap: 1rem;
-    -webkit-column-gap: 1rem;
-    column-gap: 1rem;
-  }
-</style>
 
 @code {
   /// <summary>
