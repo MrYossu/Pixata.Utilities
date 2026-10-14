@@ -14,7 +14,7 @@ The `<VirtualiseWithState>` component is a wrapper around the `<Virtualize>` com
 
 It stores the scroll position using `ScrollStateService`, which in turn uses Blazored.LocalStorage, so make sure you have called [`AddPixataBlazor()`](Readme.md#registering-dependencies).
 
-See the [live demo](https://test.pixata.co.uk/VirtualiseWithStateSample) for how it looks, and the [source for that page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/VirtualiseWithStateSample.razor) to see the code required.
+See the [live demo](https://test.pixata.co.uk/VirtualiseWithState) for how it looks, and the [source for that page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/VirtualiseWithStateSample.razor) to see the code required.
 
 ## AuditViewer
 

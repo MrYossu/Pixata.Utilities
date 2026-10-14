@@ -56,12 +56,12 @@ You can find more detail on the [project page](https://github.com/MrYossu/Pixata
 ## Pixata.Blazor.Sample
 The source code for a sample web project that uses the Blazor components. You can see a [live version of this sample](https://test.pixata.co.uk/), or [browse the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Sample).
 
-## Pixata.TelerikComponents
+## Pixata.Blazor.TelerikComponents
 Some components for use with [Telerik UI for Blazor](https://www.telerik.com/blazor-ui).
 
-A [Nuget package](https://www.nuget.org/packages/Pixata.TelerikComponents/) is available for this project.
+A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents/) is available for this project.
 
-You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.TelerikComponents).
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents).
 
 ## Pixata.AspNetCore.Telerik
 The server-side companion to Pixata.Blazor.TelerikComponents, holding the helpers that talk to a database and so need EF Core and SQL Server. Keeping them here means the component package stays usable client-side.
