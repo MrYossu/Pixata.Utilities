@@ -22,7 +22,7 @@ The documentation is split over the following pages...
 | --- | --- |
 | [Styling](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Styling.md) | The stylesheet the components ship with, how to fit it to your own theme, and what changed when the Bootstrap dependency was dropped |
 | [Components](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Components.md) | `VirtualiseWithState`, `SitePageTitle`, `IdentityInspector`, `HebrewDatePicker`, `ListOrGridChooser` and the `CommonComponentBase` base class |
-| [Grid](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md) | `PixataGrid`, a data grid with paging, sorting, filtering, selection, editing, grouping, resizable, movable and frozen columns, and saved state (work in progress) |
+| [Grid](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md) | `PixataGrid`, a data grid with paging, sorting, filtering, selection, editing, grouping, resizable, movable and frozen columns, saved state and virtual scrolling (work in progress) |
 | [Date picker](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md) | `PixataDatePicker`, `PixataDateInput` and `PixataCalendar`, for picking and typing dates |
 | [Containers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Containers.md) | `HtmlRaw`, `Busy`, `Loader`, `Confirm`, `Inform`, `MessageView`, `Expander` and `DumpCollection` |
 | [ApiResponseView](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ApiResponseView.md) | The container that renders an `ApiResponse<T>`, handling loading, errors and expired sessions for you |

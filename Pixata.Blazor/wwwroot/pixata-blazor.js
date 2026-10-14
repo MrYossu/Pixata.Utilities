@@ -445,3 +445,32 @@ export function autoFitColumns(gridId, keys) {
   table.style.width = `${cols.reduce((total, c) => total + c.width, 0)}px`;
   return cols.filter(c => c.key).map(c => ({ key: c.key, width: c.width }));
 }
+
+// ---------- Virtual scrolling ----------
+
+// Tells the grid where its content has been scrolled to, at most every 16ms, so it can render the rows and columns in view.
+// A timer is used rather than requestAnimationFrame, which doesn't run while the page isn't being drawn. It also tells the
+// grid once at the start, so it knows how big the content is
+export function initVirtualScroll(element, dotNet) {
+  if (!element) {
+    return;
+  }
+  let pending = false;
+  const report = () => {
+    pending = false;
+    dotNet.invokeMethodAsync("VirtualScrolled", element.scrollTop, element.scrollLeft, element.clientWidth, element.clientHeight);
+  };
+  element.addEventListener("scroll", () => {
+    if (!pending) {
+      pending = true;
+      setTimeout(report, 16);
+    }
+  }, { passive: true });
+  new ResizeObserver(() => report()).observe(element);
+}
+
+export function scrollContentTo(element, top) {
+  if (element) {
+    element.scrollTop = top;
+  }
+}

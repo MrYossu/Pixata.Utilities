@@ -19,7 +19,7 @@ public static class GridQueryExtensions {
     IQueryable<T> sorted = filtered.ApplySorts(SortsWithGroups(request));
     int total = sorted.Count();
     if (request.PageSize > 0) {
-      sorted = sorted.Skip((Math.Max(request.Page, 1) - 1) * request.PageSize).Take(request.PageSize);
+      sorted = sorted.Skip(request.ItemsToSkip).Take(request.PageSize);
     }
     return WithGroupsAndAggregates(filtered, [.. sorted], total, request);
   }

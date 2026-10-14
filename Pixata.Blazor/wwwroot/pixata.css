@@ -68,6 +68,7 @@
   --pixata-grid-chip-bg: #ebebeb;
   --pixata-grid-chip-border-color: #c2c2c2;
   --pixata-grid-locked-border-color: rgba(0, 0, 0, .3);
+  --pixata-grid-skeleton-bg: rgba(61, 61, 61, .2);
   --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
   --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-grid-border-radius: 4px;
@@ -2034,6 +2035,48 @@
 .pixata-blazor-grid-columnmenu-actions .pixata-blazor-button {
   flex: 1 1 0;
   justify-content: center;
+}
+
+/* ---------- Grid virtual scrolling ---------- */
+
+/* Every row is the same height, so text doesn't wrap */
+.pixata-blazor-grid-virtual .pixata-blazor-grid-td {
+  white-space: nowrap;
+}
+
+.pixata-blazor-grid-virtual-spacer,
+.pixata-blazor-grid-virtual-spacer > td,
+.pixata-blazor-grid-td.pixata-blazor-grid-virtual-spacer {
+  padding: 0;
+  background: none;
+}
+
+.pixata-blazor-grid-virtual-spacer > td {
+  border: 0;
+}
+
+/* What a cell shows while its row is loading */
+.pixata-blazor-grid-skeleton {
+  display: block;
+  height: .8em;
+  border-radius: var(--pixata-grid-border-radius);
+  background-color: var(--pixata-grid-skeleton-bg);
+  animation: pixata-blazor-grid-skeleton-pulse 1.5s ease-in-out .5s infinite;
+}
+
+@keyframes pixata-blazor-grid-skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-grid-skeleton {
+    animation: none;
+  }
 }
 
 /* ---------- Windows and dialogs (the grid's popup editor and delete confirmation) ---------- */

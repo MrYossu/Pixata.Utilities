@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Pixata.Extensions.Grid;
 
@@ -17,6 +19,18 @@ public record GridRequest {
   /// The number of items on a page. Zero means no paging, so every item is returned
   /// </summary>
   public int PageSize { get; init; }
+
+  /// <summary>
+  /// The number of items to skip, in place of <see cref="Page"/>, for a grid that scrolls virtually rather than paging
+  /// </summary>
+  public int? Skip { get; init; }
+
+  /// <summary>
+  /// The number of items before the ones wanted, from <see cref="Skip"/> if it's set, otherwise from the page
+  /// </summary>
+  [JsonIgnore]
+  public int ItemsToSkip =>
+    Skip ?? (Math.Max(Page, 1) - 1) * PageSize;
 
   /// <summary>
   /// The sorts to apply, in order of priority

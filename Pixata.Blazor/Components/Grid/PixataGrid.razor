@@ -15,6 +15,7 @@
       ApplyPendingColumnStates();
       List<PixataGridColumn<TItem>> columns = RenderedColumns();
       LayoutColumns(columns);
+      _columnWindow = ColumnWindow(columns);
       List<List<HeaderCell>> headerRows = HeaderRows();
     }
     <div class="@Css.Join(GridClass, DragToSelect ? "pixata-blazor-grid-drag-select" : null)" style="@GridStyle" id="@_gridId" @onmouseup="DragEnd">
@@ -23,13 +24,13 @@
           @GridToolBarTemplate
         </div>
       }
-      @if (Pageable && PagerPosition == PixataGridPagerPosition.Top) {
+      @if (Pageable && !VirtualRows && PagerPosition == PixataGridPagerPosition.Top) {
         @Pager
       }
       @if (Groupable) {
         @GroupPanel
       }
-      <div class="pixata-blazor-grid-content">
+      <div class="pixata-blazor-grid-content" @ref="_contentElement">
         <table class="pixata-blazor-grid-table" style="@TableStyle(columns)">
           <colgroup>
             @for (int level = 0; level < GroupLevels; level++) {
@@ -70,7 +71,7 @@
           <tbody>
             @{
               int span = Math.Max(columns.Count + GroupLevels, 1);
-              _rowIndex = 0;
+              _rowIndex = VirtualRows ? _skip : 0;
             }
             @if (_readError is not null) {
               <tr class="pixata-blazor-grid-norecords pixata-blazor-grid-error">
@@ -99,6 +100,25 @@
               </tr>
             } else if (_readError is null && _resultGroups is { Count: > 0 }) {
               @GroupRows(_resultGroups, "", 0, columns)
+            } else if (_readError is null && VirtualRows) {
+              @* Spacers above and below the rows rendered, so the scrollbar is as if all the rows were there *@
+              @if (_skip > 0) {
+                <tr class="pixata-blazor-grid-virtual-spacer" style="@SpacerStyle(_skip)" aria-hidden="true"><td colspan="@span"></td></tr>
+              }
+              @if (_virtualLoading) {
+                @for (int i = 0; i < Math.Min(VirtualRowCount, _total - _skip); i++) {
+                  @PlaceholderRow(columns, _rowIndex++)
+                }
+              } else {
+                @foreach (TItem item in _items) {
+                  @DataRow(item, columns)
+                }
+              }
+              @if (!_virtualLoading && RowsAfter > 0) {
+                <tr class="pixata-blazor-grid-virtual-spacer" style="@SpacerStyle(RowsAfter)" aria-hidden="true"><td colspan="@span"></td></tr>
+              } else if (_virtualLoading && _total - _skip - VirtualRowCount > 0) {
+                <tr class="pixata-blazor-grid-virtual-spacer" style="@SpacerStyle(_total - _skip - VirtualRowCount)" aria-hidden="true"><td colspan="@span"></td></tr>
+              }
             } else if (_readError is null) {
               @foreach (TItem item in _items) {
                 @DataRow(item, columns)
@@ -136,7 +156,7 @@
           </div>
         }
       </div>
-      @if (Pageable && PagerPosition == PixataGridPagerPosition.Bottom) {
+      @if (Pageable && !VirtualRows && PagerPosition == PixataGridPagerPosition.Bottom) {
         @Pager
       }
       @if (_menuColumn is not null) {
@@ -409,12 +429,22 @@
       }
     </text>;
 
+  // A row shown while virtual scrolling waits for the data
+  private RenderFragment PlaceholderRow(List<PixataGridColumn<TItem>> columns, int index) =>
+    @<tr class="@(index % 2 == 1 ? "pixata-blazor-grid-row pixata-blazor-grid-alt-row" : "pixata-blazor-grid-row")" style="@VirtualRowStyle" aria-busy="true">
+      @GroupCells(GroupLevels)
+      @foreach (PixataGridColumn<TItem> column in columns) {
+        <td class="@column.CellClass" style="@column.StickyStyle"><span class="pixata-blazor-grid-skeleton"></span></td>
+      }
+    </tr>;
+
   // A row for an item: the row template, the row being edited, or the normal cells
   private RenderFragment DataRow(TItem item, List<PixataGridColumn<TItem>> columns) {
     int index = _rowIndex++;
     if (RowTemplate is not null) {
       return
         @<tr class="@RowClass(item, index)"
+            style="@VirtualRowStyle"
             @onclick="e => RowClicked(OnRowClick, item, e, null)"
             @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, null)"
             @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, null)"
@@ -427,13 +457,17 @@
       return EditRow(_editItem!, columns);
     }
     bool rowSelected = SelectionType == PixataGridSelectionType.Row && IsSelected(item);
+    (List<PixataGridColumn<TItem>> Columns, int Before, int After) cells = RowColumns(columns, item);
     return
-      @<tr class="@Css.Join(RowClass(item, index), rowSelected ? "pixata-blazor-grid-selected" : null, IsInCellRow(item) ? "pixata-blazor-grid-edit-row" : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
+      @<tr class="@Css.Join(RowClass(item, index), rowSelected ? "pixata-blazor-grid-selected" : null, IsInCellRow(item) ? "pixata-blazor-grid-edit-row" : null)" style="@VirtualRowStyle" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
         @GroupCells(GroupLevels)
         @if (IsInCellRow(item)) {
           @Validator
         }
-        @foreach (PixataGridColumn<TItem> column in columns) {
+        @if (cells.Before > 0) {
+          <td class="pixata-blazor-grid-td pixata-blazor-grid-virtual-spacer" colspan="@cells.Before"></td>
+        }
+        @foreach (PixataGridColumn<TItem> column in cells.Columns) {
           if (IsCellEditing(item, column)) {
             @InCellCell(_editItem!, column)
             continue;
@@ -462,6 +496,9 @@
               @column.Template(item)
             }
           </td>
+        }
+        @if (cells.After > 0) {
+          <td class="pixata-blazor-grid-td pixata-blazor-grid-virtual-spacer" colspan="@cells.After"></td>
         }
       </tr>;
   }

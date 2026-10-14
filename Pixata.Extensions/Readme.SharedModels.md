@@ -59,7 +59,7 @@ Namespace `Pixata.Extensions.Grid`...
 
 | Type | What it is |
 | --- | --- |
-| `GridRequest` | `Page` (1-based), `PageSize` (zero means no paging), `Sorts` (a list of `GridSortDescriptor`s in priority order), `Filters` (a list of `GridCompositeFilterDescriptor`s, all of which must pass), `Search` (the search box's filter, if any), `Groups` (a list of `GridGroupDescriptor`s, outermost first) and `Aggregates` (a list of `GridAggregateDescriptor`s) |
+| `GridRequest` | `Page` (1-based), `PageSize` (zero means no paging), `Skip` (the number of items to skip, in place of the page, for virtual scrolling), `Sorts` (a list of `GridSortDescriptor`s in priority order), `Filters` (a list of `GridCompositeFilterDescriptor`s, all of which must pass), `Search` (the search box's filter, if any), `Groups` (a list of `GridGroupDescriptor`s, outermost first) and `Aggregates` (a list of `GridAggregateDescriptor`s) |
 | `GridFilterDescriptor` | `Member`, `Operator` (a `GridFilterOperator`, whose values match Telerik's `FilterOperator`) and `Value`. A value that has been through JSON arrives as a `JsonElement`, and is converted to the field's type when the filter is applied |
 | `GridCompositeFilterDescriptor` | `Logic` (`And` or `Or`) and `Filters`, a list of `GridFilterDescriptor`s, such as the two conditions in a column's filter menu |
 | `GridSortDescriptor` | `Member` (the field, such as "Address.City") and `SortDirection` (a `ListSortDirection`). It isn't called `SortDescriptor`, so it doesn't clash with Telerik's |

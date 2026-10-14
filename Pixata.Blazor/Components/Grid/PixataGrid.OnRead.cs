@@ -99,8 +99,9 @@ public partial class PixataGrid<TItem> {
 
   private GridRequest CurrentRequest() =>
     new() {
-      Page = Pageable ? _page : 1,
-      PageSize = Pageable ? _pageSize : 0,
+      Page = Pageable && !VirtualRows ? _page : 1,
+      PageSize = VirtualRows ? VirtualRowCount : Pageable ? _pageSize : 0,
+      Skip = VirtualRows ? _skip : null,
       Sorts = [.. _sorts],
       Filters = CurrentFilters,
       Search = _search,
@@ -119,7 +120,8 @@ public partial class PixataGrid<TItem> {
     _requestedAggregates = request.Aggregates;
     PixataGridReadEventArgs<TItem> args = new(request, _readCancel.Token);
     _loading = true;
-    if (EnableLoaderContainer && _firstReadDone) {
+    // Virtual scrolling shows placeholder rows instead
+    if (EnableLoaderContainer && _firstReadDone && !_virtualLoading) {
       _ = ShowLoaderAfterDelay(version);
     }
     try {
@@ -138,11 +140,12 @@ public partial class PixataGrid<TItem> {
     }
     _items = [.. args.Data ?? []];
     _total = args.Total;
+    _virtualLoading = false;
     _resultGroups = request.Groups.Count == 0 ? null : args.Groups ?? GridGroupingExtensions.GroupPage(_items.AsQueryable(), _items, request.Groups, request.Aggregates);
     _resultAggregates = args.Aggregates;
     _readError = args.ErrorMessage;
     // If the page is now past the end (because the data has shrunk), go to the last page and ask again
-    if (Pageable && _pageSize > 0 && _readError is null && _total > 0) {
+    if (Pageable && !VirtualRows && _pageSize > 0 && _readError is null && _total > 0) {
       int pageCount = (_total + _pageSize - 1) / _pageSize;
       if (_page > pageCount) {
         _page = pageCount;

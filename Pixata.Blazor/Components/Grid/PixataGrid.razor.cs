@@ -191,6 +191,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   }
 
   protected override async Task OnParametersSetAsync() {
+    CheckVirtualParameters();
     SyncSelectionParameters();
     if (Page != _lastPageParameter) {
       _page = Math.Max(Page, 1);
@@ -241,7 +242,11 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     _requestedAggregates = request.Aggregates;
     GridResult<TItem> result = data.ToGridResult(request);
     bool moved = false;
-    if (Pageable && _pageSize > 0) {
+    if (VirtualRows && _skip > 0 && _skip + result.Data.Count < Math.Min(result.Total, _skip + VirtualRowCount)) {
+      // The data has shrunk, so the rows rendered move back to the end of it
+      _skip = Math.Max(result.Total - VirtualRowCount, 0);
+      result = data.ToGridResult(CurrentRequest());
+    } else if (Pageable && !VirtualRows && _pageSize > 0) {
       int pageCount = Math.Max((result.Total + _pageSize - 1) / _pageSize, 1);
       if (_page > pageCount) {
         _page = pageCount;
@@ -357,7 +362,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     Css.Join("pixata-blazor-grid", Size switch {
       PixataGridSize.Small => "pixata-blazor-grid-sm",
       _ => "pixata-blazor-grid-md"
-    }, Class);
+    }, VirtualRows ? "pixata-blazor-grid-virtual" : null, Class);
 
   private string? GridStyle {
     get {
@@ -376,6 +381,8 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     await OpenFilterMenuPopup();
     await AfterInCellRender();
     await InitHeaderDrag();
+    await InitVirtualScroll();
+    await AfterVirtualRender();
     await CheckStateChanged();
   }
 

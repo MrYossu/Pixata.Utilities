@@ -606,6 +606,74 @@
   </GridColumns>
 </PixataGrid>
 
+<h4>Virtual scrolling</h4>
+
+<p>With <code>ScrollMode="Virtual"</code>, only the rows in view (plus a few) are rendered, and more are rendered as you scroll, rather than paging. The second pair of grids gets its rows through <code>OnRead</code>, slowed down to half a second, so placeholder rows show while they load.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" ScrollMode="PixataGridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid, with OnRead</p>
+<PixataGrid TItem="GridSampleEmployee" OnRead="ReadEmployeesVirtually" Size="_size" ScrollMode="PixataGridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" ScrollMode="GridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true" FilterMode="GridFilterMode.FilterRow">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid, with OnRead</p>
+<TelerikGrid TItem="GridSampleEmployee" OnRead="ReadEmployeesVirtuallyForTelerik" Size="@TelerikSize" ScrollMode="GridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+
+<h4>Virtual columns</h4>
+
+<p>With <code>ColumnVirtualization="true"</code>, only the columns in view are rendered. Every column needs a width. This grid has 30 columns.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" ColumnVirtualization="true" ScrollMode="PixataGridScrollMode.Virtual" Height="300px" RowHeight="36" PageSize="20" Width="800px">
+  <GridColumns>
+    @foreach ((string field, string title) in WideColumns) {
+      <PixataGridColumn Field="@field" Title="@title" Width="150px" />
+    }
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" ColumnVirtualization="true" ScrollMode="GridScrollMode.Virtual" Height="300px" RowHeight="36" PageSize="20" Width="800px">
+  <GridColumns>
+    @foreach ((string field, string title) in WideColumns) {
+      <GridColumn Field="@field" Title="@title" Width="150px" />
+    }
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -729,6 +797,22 @@
 
   private async Task ReadEmployees(PixataGridReadEventArgs<GridSampleEmployee> args) =>
     args.SetResult(await EmployeeService.Read(args.Request, TimeSpan.FromMilliseconds(1500), args.CancellationToken));
+
+  private async Task ReadEmployeesVirtually(PixataGridReadEventArgs<GridSampleEmployee> args) =>
+    args.SetResult(await EmployeeService.Read(args.Request, TimeSpan.FromMilliseconds(500), args.CancellationToken));
+
+  private async Task ReadEmployeesVirtuallyForTelerik(GridReadEventArgs args) {
+    await Task.Delay(500);
+    DataSourceResult result = GridSampleEmployee.All().ToDataSourceResult(args.Request);
+    args.Data = result.Data;
+    args.Total = result.Total;
+  }
+
+  // Thirty columns, going round the employee's fields
+  private static readonly List<(string Field, string Title)> WideColumns = [.. Enumerable.Range(1, 30).Select(n => {
+    string field = new[] { nameof(GridSampleEmployee.Id), nameof(GridSampleEmployee.FirstName), nameof(GridSampleEmployee.Surname), nameof(GridSampleEmployee.Email), nameof(GridSampleEmployee.Pet), nameof(GridSampleEmployee.Salary) }[(n - 1) % 6];
+    return (field, $"{field} {n}");
+  })];
 
   private async Task ReadEmployeesForTelerik(GridReadEventArgs args) {
     await Task.Delay(1500);

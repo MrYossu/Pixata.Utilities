@@ -36,6 +36,14 @@ public class GridQueryExtensions_Tests {
     Assert.AreEqual(1, People.ToGridResult(new GridRequest { Page = 0, PageSize = 10 }).Data[0].Id);
 
   [TestMethod]
+  public void ToGridResult_Skip_TakesThePlaceOfThePage() {
+    GridResult<Person> result = People.ToGridResult(new GridRequest { Page = 3, PageSize = 4, Skip = 7 });
+
+    CollectionAssert.AreEqual(new[] { 8, 9, 10, 11 }, result.Data.Select(p => p.Id).ToArray());
+    Assert.AreEqual(25, result.Total);
+  }
+
+  [TestMethod]
   public void FieldAccessor_Getter_ReadsSimpleAndNestedFields() {
     Person person = new(7, "Fred", new("Leeds"), 42);
 

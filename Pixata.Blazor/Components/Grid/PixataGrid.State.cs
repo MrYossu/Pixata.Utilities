@@ -156,7 +156,7 @@ public partial class PixataGrid<TItem> {
     new() {
       Page = _page,
       PageSize = _pageSize,
-      Skip = (_page - 1) * _pageSize,
+      Skip = VirtualRows ? _skip : (_page - 1) * _pageSize,
       SortDescriptors = [.. _sorts],
       FilterDescriptors = CurrentFilters,
       SearchFilter = _search,
@@ -225,6 +225,9 @@ public partial class PixataGrid<TItem> {
       _pageSize = state.PageSize.Value;
     }
     _page = Math.Max(state.Page ?? (state.Skip is int skip && _pageSize > 0 ? skip / _pageSize + 1 : 1), 1);
+    if (VirtualRows) {
+      ScrollToRow(state.Skip ?? 0);
+    }
     _sorts.Clear();
     _sorts.AddRange(state.SortDescriptors);
     _filters.Clear();

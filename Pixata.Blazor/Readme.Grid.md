@@ -69,6 +69,9 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
 | `Groupable` | `bool` | Shows a panel above the grid that the user can drag column headers into, to group the rows. See [grouping](#grouping-and-aggregates) |
 | `GridAggregates` | `RenderFragment` | The aggregates to calculate, as `PixataGridAggregate`s, for the footer templates |
+| `ScrollMode` | `PixataGridScrollMode` | `Scrollable` (the default) or `Virtual`, which renders only the rows in view. See [virtual scrolling](#virtual-scrolling) |
+| `RowHeight` | `double?` | The height of each row in pixels, for virtual scrolling |
+| `ColumnVirtualization` | `bool` | Renders only the columns in view |
 | `Resizable` | `bool` | Lets the user resize columns. See [columns](#resizing-moving-and-freezing-columns) |
 | `Reorderable` | `bool` | Lets the user move columns by dragging their headers |
 | `ShowColumnMenu` | `bool` | Gives each header a menu. See [the column menu](#the-column-menu) |
@@ -487,6 +490,26 @@ Only one of the sections expands at a time. Choose what's offered with `PixataGr
 | `Reorderable` | `bool` | Move Previous and Move Next. Defaults to `false` |
 
 The column's own parameters (such as `Sortable="false"` or `Lockable="false"`) take precedence. A column with `ShowColumnMenu="false"` has no menu, but keeps its filter menu button if the grid's `FilterMode` is `FilterMenu`.
+
+## Virtual scrolling
+
+For a lot of rows, set `ScrollMode="PixataGridScrollMode.Virtual"`, with a `Height` and a `RowHeight` (in pixels). Instead of paging, the grid scrolls through all the rows, but only renders three pages of them (`PageSize` is the number in view at once, so set it to about the number that fit in the height), and renders others as the user scrolls...
+
+```razor
+<PixataGrid Data="People" ScrollMode="PixataGridScrollMode.Virtual" Height="400px" RowHeight="36" PageSize="20" Sortable="true">
+  ...
+</PixataGrid>
+```
+
+- Every row is `RowHeight` pixels high, and text in the cells doesn't wrap. Use the height of a normal row (36px for the medium size) unless your templates make rows taller
+- With `OnRead`, the request has a `Skip` (the number of rows before the ones wanted) instead of a page, and a `PageSize` of three pages. `ToGridResult()` and `ToGridResultAsync()` handle it for you. While the rows load, placeholders are shown in their place
+- Filtering and searching go back to the top. Sorting stays where it is
+- There's no pager, so `Pageable` is ignored
+- It can't be combined with grouping, and the grid throws an exception if you try, or if `Height` or `RowHeight` is missing
+
+### Virtual columns
+
+For a grid with a lot of columns, set `ColumnVirtualization="true"`, and each row only has cells for the columns in view (and one either side), with the rest filled by an empty cell spanning them. The headers are all there, so resizing, moving and the column menu work as normal. Every column needs a `Width` in pixels; if one hasn't, all the cells are rendered. It works with or without virtual rows.
 
 ## State
 

@@ -27,7 +27,7 @@ public static class GridQueryableExtensions {
     IQueryable<T> sorted = filtered.ApplySorts(GridQueryExtensions.SortsWithGroups(request));
     int total = await sorted.CountAsync(cancellationToken);
     if (request.PageSize > 0) {
-      sorted = sorted.Skip((Math.Max(request.Page, 1) - 1) * request.PageSize).Take(request.PageSize);
+      sorted = sorted.Skip(request.ItemsToSkip).Take(request.PageSize);
     }
     List<T> data = await sorted.ToListAsync(cancellationToken);
     // The group counts and aggregates are a handful of small queries, which are run synchronously
