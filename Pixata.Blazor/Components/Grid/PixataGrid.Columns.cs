@@ -68,9 +68,13 @@ public partial class PixataGrid<TItem> {
     return columns;
   }
 
-  // Columns in the order the user has put them in, which starts as the order they were declared in
+  // Columns in the order the user has put them in, which starts as the order they were declared in. A column that has been
+  // put somewhere (such as by a state that only gives some columns' positions) goes before one that is there by default
   private static List<PixataGridColumn<TItem>> Ordered(List<PixataGridColumn<TItem>> siblings) =>
-    [.. siblings.Select((column, index) => (column, index)).OrderBy(c => c.column.RuntimeOrder ?? c.index).Select(c => c.column)];
+    [.. siblings.Select((column, index) => (column, index))
+      .OrderBy(c => c.column.RuntimeOrder ?? c.index)
+      .ThenBy(c => c.column.RuntimeOrder is null ? 1 : 0)
+      .Select(c => c.column)];
 
   private static List<PixataGridColumn<TItem>> VisibleOrdered(List<PixataGridColumn<TItem>> siblings) =>
     [.. Ordered(siblings).Where(c => c.IsVisible && (!c.IsGroupColumn || LeafCount(c) > 0))];
@@ -171,12 +175,15 @@ public partial class PixataGrid<TItem> {
   }
 
   // Once the user has resized a column, the table is as wide as its columns
-  private string? TableStyle(List<PixataGridColumn<TItem>> leaves) {
+  private string? TableStyle(List<PixataGridColumn<TItem>> leaves) =>
+    TableWidthPixels(leaves) is double width ? FormattableString.Invariant($"width: {width}px;") : null;
+
+  private double? TableWidthPixels(List<PixataGridColumn<TItem>> leaves) {
     if (!_fixedWidths) {
       return null;
     }
     List<double?> widths = [.. leaves.Select(c => Pixels(c.CurrentWidth))];
-    return widths.Any(w => w is null) ? null : FormattableString.Invariant($"width: {widths.Sum() + GroupLevels * 32}px;");
+    return widths.Any(w => w is null) ? null : widths.Sum() + GroupLevels * 32;
   }
 
   // ---------- Resizing ----------

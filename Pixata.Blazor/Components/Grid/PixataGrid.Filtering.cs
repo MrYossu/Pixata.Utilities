@@ -243,6 +243,7 @@ public partial class PixataGrid<TItem> {
   }
 
   internal async Task SetSearch(string text, List<string>? fields) {
+    _searchText = text;
     List<string> searchFields = fields ?? [.. RenderedColumns().Where(c => c.Field is not null && c.FilterKind == FilterKind.Text).Select(c => c.Field!)];
     _search = string.IsNullOrEmpty(text) || searchFields.Count == 0
       ? null

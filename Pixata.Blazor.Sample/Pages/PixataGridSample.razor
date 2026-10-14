@@ -550,6 +550,62 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>State</h4>
+
+<p>Sort, filter, group, page, resize or move columns, then click Save. Change things again, and Restore puts them back. Reset goes back to how the grid started. The line under each grid shows the last change reported by <code>OnStateChanged</code>.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<div class="pixata-blazor-grid-sample-options">
+  <button type="button" class="pixata-btn pixata-btn-primary" @onclick="() => _pixataSavedState = _stateGrid!.GetState()">Save</button>
+  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="() => _stateGrid!.SetState(_pixataSavedState)" disabled="@(_pixataSavedState is null)">Restore</button>
+  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="() => _stateGrid!.SetState(null)">Reset</button>
+</div>
+<PixataGrid @ref="_stateGrid" Data="Data" Size="_size" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow" Groupable="true" Resizable="true" Reorderable="true" Pageable="true" PageSize="5"
+            OnStateChanged="@((PixataGridStateEventArgs<GridSampleEmployee> args) => _pixataStateChange = args.PropertyName ?? "")">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+<p>Last change: @_pixataStateChange</p>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<div class="pixata-blazor-grid-sample-options">
+  <button type="button" class="pixata-btn pixata-btn-primary" @onclick="() => _telerikSavedState = _telerikStateGrid!.GetState()">Save</button>
+  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="() => _telerikStateGrid!.SetStateAsync(_telerikSavedState)" disabled="@(_telerikSavedState is null)">Restore</button>
+  <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="() => _telerikStateGrid!.SetStateAsync(null)">Reset</button>
+</div>
+<TelerikGrid @ref="_telerikStateGrid" Data="Data" Size="@TelerikSize" Sortable="true" FilterMode="GridFilterMode.FilterRow" Groupable="true" Resizable="true" Reorderable="true" Pageable="true" PageSize="5"
+             OnStateChanged="@((GridStateEventArgs<GridSampleEmployee> args) => _telerikStateChange = args.PropertyName ?? "")">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+<p>Last change: @_telerikStateChange</p>
+
+<h4>Saving the state in local storage</h4>
+
+<p>This grid has a <code>StorageKey</code>, so its state is saved in the browser's local storage whenever it changes. Change it, then refresh the page.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" StorageKey="pixata-grid-sample-state" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow" Groupable="true" Resizable="true" Reorderable="true" Pageable="true" PageSize="5">
+  <GridToolBarTemplate>
+    <PixataGridSearchBox />
+  </GridToolBarTemplate>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -594,6 +650,12 @@
 
   private PixataGrid<GridSampleEmployee>? _groupedGrid;
   private string _columnEvent = "";
+  private PixataGrid<GridSampleEmployee>? _stateGrid;
+  private PixataGridState<GridSampleEmployee>? _pixataSavedState;
+  private string _pixataStateChange = "";
+  private TelerikGrid<GridSampleEmployee>? _telerikStateGrid;
+  private GridState<GridSampleEmployee>? _telerikSavedState;
+  private string _telerikStateChange = "";
 
   // Starts the PixataGrid grouped by pet, as the Telerik one is
   protected override void OnAfterRender(bool firstRender) {

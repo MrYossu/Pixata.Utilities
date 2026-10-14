@@ -73,6 +73,8 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Reorderable` | `bool` | Lets the user move columns by dragging their headers |
 | `ShowColumnMenu` | `bool` | Gives each header a menu. See [the column menu](#the-column-menu) |
 | `OnColumnResize` | `EventCallback<PixataGridColumnResizeEventArgs<TItem>>` | Fires when the user has resized a column, with the column and its new width in pixels |
+| `OnStateInit`, `OnStateChanged` | `EventCallback<PixataGridStateEventArgs<TItem>>` | Set the state the grid starts with, and hear about changes to it. See [state](#state) |
+| `StorageKey` | `string` | Saves the grid's state in the browser's local storage under this key, and restores it when the grid is next shown |
 | `OnColumnReorder` | `EventCallback<PixataGridColumnReorderEventArgs<TItem>>` | Fires when the user has moved a column, with the column and its old and new positions among the columns it is with |
 
 ## Column parameters
@@ -485,6 +487,32 @@ Only one of the sections expands at a time. Choose what's offered with `PixataGr
 | `Reorderable` | `bool` | Move Previous and Move Next. Defaults to `false` |
 
 The column's own parameters (such as `Sortable="false"` or `Lockable="false"`) take precedence. A column with `ShowColumnMenu="false"` has no menu, but keeps its filter menu button if the grid's `FilterMode` is `FilterMenu`.
+
+## State
+
+The grid's state is everything the user can change: the page and page size, sorting, filters, the search, grouping and collapsed groups, each column's position, width, visibility and freezing, the table width after a resize, the selected items, and any editing. `GetState()` returns it as a `PixataGridState<TItem>`, and `SetState(state)` puts it back (`SetState(null)` goes back to how the grid started). The state serialises to JSON as it is, so you can save it wherever you like...
+
+```razor
+<PixataGrid @ref="_grid" Data="People" Sortable="true" Pageable="true" OnStateChanged="StateChanged">...</PixataGrid>
+
+@code {
+  private PixataGrid<Person> _grid = null!;
+
+  private async Task StateChanged(PixataGridStateEventArgs<Person> args) =>
+    await Settings.Save("people-grid", JsonSerializer.Serialize(args.GridState));
+}
+```
+
+- `OnStateInit` fires once, before the data is first read. Change `args.GridState` (or replace it) to set how the grid starts, such as sorted by a column or grouped
+- `OnStateChanged` fires after the user changes the state, once for each part that changed, with `args.PropertyName` saying which, such as "SortDescriptors", "Page" or "ColumnStates". It isn't raised for `SetState`. Items are compared by reference, so it fires when editing starts and stops, not as the user types
+
+Columns are matched to their saved state by `Id` if they have one, otherwise by `Field`, otherwise by title, so give columns an `Id` if two could match. Filter values come back from JSON as `JsonElement`s, and the grid turns them back into the field's type. Selected and edited items come back as copies, so they are matched to the data with `ItemKey` (or `Equals`, which works for records).
+
+### Saving the state in local storage
+
+Set `StorageKey`, and the grid saves its state in the browser's local storage under that key whenever it changes, and restores it when the grid is next shown (before `OnStateInit`, which can still change it). It uses Blazored.LocalStorage, which `AddPixataBlazor()` registers. Without it, a grid with a `StorageKey` throws an exception saying so.
+
+While a page is being prerendered, local storage can't be read, so the prerendered page shows the grid as it starts, and the saved state appears when the page becomes interactive. This is handled for you, as is an `OnStateInit` handler that uses JavaScript, which gets another go once the page is interactive.
 
 ## Grouping and aggregates
 

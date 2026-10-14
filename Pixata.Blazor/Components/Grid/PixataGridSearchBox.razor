@@ -40,6 +40,14 @@
     if (Grid is null) {
       throw new InvalidOperationException("PixataGridSearchBox must be inside a PixataGrid, such as in its GridToolBarTemplate");
     }
+    // A search restored from the grid's state is shown in the box
+    _text = Grid.SearchText;
+    Grid.SearchTextRestored += SearchTextRestored;
+  }
+
+  private void SearchTextRestored(string text) {
+    _text = text;
+    InvokeAsync(StateHasChanged);
   }
 
   private async Task OnInput(ChangeEventArgs e) {
@@ -56,6 +64,10 @@
     await Grid!.SetSearch(_text, Fields);
   }
 
-  public void Dispose() =>
+  public void Dispose() {
     _debounce?.Cancel();
+    if (Grid is not null) {
+      Grid.SearchTextRestored -= SearchTextRestored;
+    }
+  }
 }

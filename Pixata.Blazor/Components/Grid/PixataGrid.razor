@@ -12,6 +12,7 @@
   @GridColumns
   <PixataGridDefer>
     @{
+      ApplyPendingColumnStates();
       List<PixataGridColumn<TItem>> columns = RenderedColumns();
       LayoutColumns(columns);
       List<List<HeaderCell>> headerRows = HeaderRows();
