@@ -60,3 +60,84 @@
     display: block;
   }
 }
+
+/* The expandable sections */
+.nav-section {
+  font-size: 0.9rem;
+  padding-bottom: 0.5rem;
+}
+
+.nav-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 3rem;
+  padding: 0 1rem;
+  color: #d7d7d7;
+  font-weight: 600;
+  text-align: start;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+}
+
+.nav-section-toggle:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-section-toggle:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.nav-section-toggle > span:first-child {
+  width: 1.5rem;
+  text-align: center;
+}
+
+.nav-section-title {
+  flex: 1 1 auto;
+}
+
+/* A chevron drawn with borders, pointing right when closed and down when open */
+.nav-section-arrow {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+
+.nav-section-arrow-open {
+  transform: rotate(45deg);
+}
+
+.nav-section-items {
+  padding-inline-start: 1rem;
+}
+
+.nav-section-items .nav-item {
+  padding-bottom: 0.25rem;
+}
+
+.nav-section-items .nav-item:first-of-type {
+  padding-top: 0.25rem;
+}
+
+.nav-section-items .nav-item:last-of-type {
+  padding-bottom: 0;
+}
+
+.nav-section-items .nav-item ::deep a {
+  height: 2.5rem;
+  line-height: 2.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-section-arrow {
+    transition: none;
+  }
+}
+

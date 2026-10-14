@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-4 navbar navbar-dark">
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<div class="top-row ps-4 navbar navbar-dark">
   <a class="navbar-brand" href="">Pixata.Blazor.Sample</a>
   <button class="navbar-toggler" @onclick="ToggleNavMenu">
     <span class="navbar-toggler-icon"></span>
@@ -13,168 +16,120 @@
         <span class="oi oi-home" aria-hidden="true"></span> Home
       </NavLink>
     </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="Conditionals" Match="NavLinkMatch.All">
-        <span class="fas fa-question" aria-hidden="true"></span> Conditionals
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="ApiResponseViewRegular" Match="NavLinkMatch.All">
-        <span class="fas fa-reply" aria-hidden="true"></span> ApiResponseView&nbsp;1
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="ApiResponseViewManual" Match="NavLinkMatch.All">
-        <span class="fas fa-reply-all" aria-hidden="true"></span> ApiResponseView&nbsp;2
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="Notifications" Match="NavLinkMatch.All">
-        <span class="oi oi-info" aria-hidden="true"></span> Notifications
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="FormSample" Match="NavLinkMatch.All">
-        <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Forms
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="InformSample" Match="NavLinkMatch.All">
-        <span class="oi oi-warning" aria-hidden="true"></span> Inform
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="ConfirmSample">
-        <span class="far fa-check-circle" aria-hidden="true"></span> Confirm
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="SendEmail" Match="NavLinkMatch.All">
-        <span class="far fa-at" aria-hidden="true"></span> Email
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="LoaderSample">
-        <span class="fas fa-truck-loading" aria-hidden="true"></span> Loader
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="ExpanderSample">
-        <span class="fal fa-expand-arrows-alt" aria-hidden="true"></span> Expander
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="ConditionalSample">
-        <span class="fas fa-question" aria-hidden="true"></span> Conditional
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="TelerikGrid">
-        <span class="far fa-border-all" aria-hidden="true"></span> Telerik grid
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="pixata-grid">
-        <span class="far fa-border-all" aria-hidden="true"></span> Pixata grid
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="TelerikGridWithState">
-        <span class="far fa-border-all" aria-hidden="true"></span> Telerik grid with state
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="VirtualiseWithState">
-        <span class="far fa-border-all" aria-hidden="true"></span> Virtualise with state
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="pixata-datepicker">
-        <span class="far fa-calendar-alt" aria-hidden="true"></span> Pixata date picker
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="hebrewdatepicker">
-        <span class="far fa-calendar-alt" aria-hidden="true"></span> Hebrew DatePicker
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="telerikhebrewdatepicker">
-        <span class="far fa-calendar-alt" aria-hidden="true"></span> Telerik Hebrew DatePicker
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link" href="AuditViewerSample">
-        <span class="oi oi-list" aria-hidden="true"></span> Audit Viewer
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="DropDownsSample">
-        <span class="far fa-caret-square-down" aria-hidden="true"></span> Drop-downs
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="TabStripSample">
-        <span class="far fa-folder" aria-hidden="true"></span> Tab strip
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="EditorSample">
-        <span class="far fa-edit" aria-hidden="true"></span> Editor
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="FileUploadSample">
-        <span class="fas fa-upload" aria-hidden="true"></span> File select and upload
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="DialogsSample">
-        <span class="far fa-comment-alt" aria-hidden="true"></span> Dialogs
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="WindowSample">
-        <span class="far fa-window-maximize" aria-hidden="true"></span> Window
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="WizardSample">
-        <span class="fas fa-magic" aria-hidden="true"></span> Wizard and stepper
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="RadioGroupSample">
-        <span class="far fa-dot-circle" aria-hidden="true"></span> Radio group
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="SwitchSample">
-        <span class="fas fa-toggle-on" aria-hidden="true"></span> Switch
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="ChartSample">
-        <span class="far fa-chart-bar" aria-hidden="true"></span> Chart
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="ButtonsSample">
-        <span class="far fa-caret-square-down" aria-hidden="true"></span> Drop-down and split buttons
-      </NavLink>
-    </li>
-    <li class="nav-item px-3">
-      <NavLink class="nav-link text-truncate" href="SchedulerSample">
-        <span class="far fa-calendar-alt" aria-hidden="true"></span> Scheduler
-      </NavLink>
-    </li>
+    @foreach (NavSection section in Sections) {
+      bool open = _open.Contains(section.Title);
+      <li class="nav-section px-3">
+        <button type="button"
+                class="nav-section-toggle"
+                aria-expanded="@(open ? "true" : "false")"
+                @onclick="() => ToggleSection(section)"
+                @onclick:stopPropagation="true">
+          <span class="@section.Icon" aria-hidden="true"></span>
+          <span class="nav-section-title">@section.Title</span>
+          <span class="nav-section-arrow @(open ? "nav-section-arrow-open" : null)" aria-hidden="true"></span>
+        </button>
+        @if (open) {
+          <ul class="nav flex-column nav-section-items">
+            @foreach (NavItem item in section.Items) {
+              <li class="nav-item">
+                <NavLink class="nav-link text-truncate" href="@item.Href" Match="NavLinkMatch.All">
+                  <span class="@item.Icon" aria-hidden="true"></span> @item.Title
+                </NavLink>
+              </li>
+            }
+          </ul>
+        }
+      </li>
+    }
   </ul>
 </div>
 
 @code {
+  private record NavItem(string Href, string Title, string Icon);
+
+  private record NavSection(string Title, string Icon, List<NavItem> Items);
+
+  // Every sample page, grouped by what it shows. Add new pages here
+  private static readonly List<NavSection> Sections = [
+    new("Grids and data", "far fa-border-all", [
+      new("pixata-grid", "Pixata grid", "far fa-border-all"),
+      new("TelerikGrid", "Telerik grid", "far fa-border-all"),
+      new("TelerikGridWithState", "Telerik grid with state", "far fa-border-all"),
+      new("VirtualiseWithState", "Virtualise with state", "far fa-stream"),
+      new("ChartSample", "Chart", "far fa-chart-bar"),
+      new("SchedulerSample", "Scheduler", "far fa-calendar-week"),
+      new("AuditViewerSample", "Audit viewer", "oi oi-list")
+    ]),
+    new("Dates", "far fa-calendar-alt", [
+      new("pixata-datepicker", "Pixata date picker", "far fa-calendar-alt"),
+      new("hebrewdatepicker", "Hebrew date picker", "far fa-calendar-alt"),
+      new("telerikhebrewdatepicker", "Telerik Hebrew date picker", "far fa-calendar-alt")
+    ]),
+    new("Forms and inputs", "far fa-edit", [
+      new("FormSample", "Forms", "oi oi-data-transfer-download"),
+      new("DropDownsSample", "Drop-downs", "far fa-caret-square-down"),
+      new("RadioGroupSample", "Radio group", "far fa-dot-circle"),
+      new("SwitchSample", "Switch", "fas fa-toggle-on"),
+      new("EditorSample", "Editor", "far fa-edit"),
+      new("FileUploadSample", "File select and upload", "fas fa-upload")
+    ]),
+    new("Layout", "far fa-window-maximize", [
+      new("TabStripSample", "Tab strip", "far fa-folder"),
+      new("WindowSample", "Window", "far fa-window-maximize"),
+      new("WizardSample", "Wizard and stepper", "fas fa-magic"),
+      new("ExpanderSample", "Expander", "fal fa-expand-arrows-alt"),
+      new("ButtonsSample", "Drop-down and split buttons", "far fa-caret-square-down")
+    ]),
+    new("Messages", "far fa-comment-alt", [
+      new("DialogsSample", "Dialogs", "far fa-comment-alt"),
+      new("Notifications", "Notifications", "oi oi-info"),
+      new("InformSample", "Inform", "oi oi-warning"),
+      new("ConfirmSample", "Confirm", "far fa-check-circle"),
+      new("LoaderSample", "Loader", "fas fa-truck-loading")
+    ]),
+    new("Helpers", "fas fa-tools", [
+      new("Conditionals", "Conditionals", "fas fa-question"),
+      new("ConditionalSample", "Conditional", "fas fa-question"),
+      new("ApiResponseViewRegular", "ApiResponseView 1", "fas fa-reply"),
+      new("ApiResponseViewManual", "ApiResponseView 2", "fas fa-reply-all"),
+      new("SendEmail", "Email", "far fa-at")
+    ])
+  ];
+
+  private readonly System.Collections.Generic.HashSet<string> _open = [];
   private bool collapseNavMenu = true;
 
-  private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+  private string? NavMenuCssClass =>
+    collapseNavMenu ? "collapse" : null;
 
-  private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+  protected override void OnInitialized() {
+    OpenCurrentSection();
+    Navigation.LocationChanged += LocationChanged;
+  }
+
+  // The section with the page being shown is opened, so the page is always visible in the menu
+  private void OpenCurrentSection() {
+    string path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0];
+    NavSection? current = Sections.FirstOrDefault(s => s.Items.Any(i => string.Equals(i.Href, path, StringComparison.OrdinalIgnoreCase)));
+    if (current is not null) {
+      _open.Add(current.Title);
+    }
+  }
+
+  private void LocationChanged(object? sender, LocationChangedEventArgs e) {
+    OpenCurrentSection();
+    InvokeAsync(StateHasChanged);
+  }
+
+  private void ToggleSection(NavSection section) {
+    if (!_open.Remove(section.Title)) {
+      _open.Add(section.Title);
+    }
+  }
+
+  private void ToggleNavMenu() =>
+    collapseNavMenu = !collapseNavMenu;
+
+  public void Dispose() =>
+    Navigation.LocationChanged -= LocationChanged;
 }
