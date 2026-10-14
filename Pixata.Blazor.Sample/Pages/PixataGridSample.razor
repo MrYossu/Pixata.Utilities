@@ -8,6 +8,8 @@
 @using ClosedXML.Excel
 @using System.IO
 @inject GridSampleEmployeeService EmployeeService
+@using Pixata.Blazor.Extensions
+@inject TemplateHelper TemplateHelper
 
 <SitePageTitle>Pixata grid</SitePageTitle>
 
@@ -157,7 +159,7 @@
   <GridColumns>
     <PixataGridColumn Title="Name">
       <Template>
-        <strong>@context.FirstName</strong> @context.Surname
+        <strong>@((context as GridSampleEmployee)!.FirstName)</strong> @((context as GridSampleEmployee)!.Surname)
       </Template>
     </PixataGridColumn>
     <PixataGridColumn TItem="GridSampleEmployee" Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" OnCellRender="PixataSalaryRender">
@@ -168,6 +170,25 @@
     <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" Title="Manager" />
   </GridColumns>
 </PixataGrid>
+
+<h4>Templates from the TemplateHelper</h4>
+
+<p>A column's <code>Template</code> can be built with the <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Helpers.md#templatehelper"><code>TemplateHelper</code></a>, which saves writing the markup and casting the context. The email is a link, and the salary is right-aligned, in red if it's over 300,000.</p>
+
+<PixataGrid TItem="GridSampleEmployee" Data="Data" Size="_size" Pageable="true" PageSize="5">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)"
+                      Template="@(TemplateHelper.Link<GridSampleEmployee>(e => e.Email, e => $"mailto:{e.Email}", title: "Send an email"))" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)"
+                      Template="@(TemplateHelper.Text<GridSampleEmployee>(e => e.Salary.ToString("C0"), e => e.Salary > 300000 ? "text-align: right; color: red" : "text-align: right"))" />
+  </GridColumns>
+</PixataGrid>
+
+<p>Inject the helper (or inherit <code>CommonComponentBase&lt;T&gt;</code>, which does it for you), and pass what it builds to the column's <code>Template</code>...</p>
+
+<pre class="export-comparison">@TemplateHelperCode</pre>
 
 <h4>Selection</h4>
 

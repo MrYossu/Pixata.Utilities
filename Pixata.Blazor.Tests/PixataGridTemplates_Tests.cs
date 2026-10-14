@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
+using Pixata.Blazor.Extensions;
 using Pixata.Extensions.Grid;
 
 namespace Pixata.Blazor.Tests;
@@ -37,9 +38,9 @@ public class PixataGridTemplates_Tests {
         .Add(g => g.GridColumns, b => {
           b.OpenComponent<PixataGridColumn<Person>>(0);
           b.AddAttribute(1, "Title", "Name");
-          b.AddAttribute(2, "Template", (RenderFragment<Person>)(person => builder => {
+          b.AddAttribute(2, "Template", (RenderFragment<object>)(context => builder => {
             builder.OpenElement(0, "strong");
-            builder.AddContent(1, person.Name);
+            builder.AddContent(1, ((Person)context).Name);
             builder.CloseElement();
           }));
           b.CloseComponent();
@@ -57,6 +58,15 @@ public class PixataGridTemplates_Tests {
 
     Assert.AreEqual("<strong>Alice</strong>", grid.Find("tbody td").InnerHtml.Trim());
     Assert.AreEqual("Name", grid.Find("th").TextContent.Trim());
+  }
+
+  [TestMethod]
+  public void Template_TakesATemplateFromTheTemplateHelper() {
+    RenderFragment<object> template = new TemplateHelper().Text<Person>(p => $"{p.Age} years", classCss: "text-end");
+    IRenderedComponent<PixataGrid<Person>> grid = Render(ageColumn: b => b.AddAttribute(12, "Template", template));
+
+    IElement cell = grid.FindAll("tbody tr")[0].QuerySelectorAll("td")[1];
+    Assert.AreEqual("<div class=\"text-end\" style=\"\">30 years</div>", cell.InnerHtml.Trim());
   }
 
   [TestMethod]

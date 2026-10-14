@@ -197,4 +197,4 @@ The string overload of `Link<T>()` also takes an optional `title`, which becomes
 
 `BuildLink<T>()` is the same as that last overload of `Link<T>()`, and `BuildTemplate<T>()` and `BuildTemplateLink<T>()` are the older names for `Text<T>()` and `Link<T>()`. They are all still there, so existing code keeps working, but will be removed at some point, so please convert your code to use the newer methods.
 
-You can see a sample of these in action on the sample project, [demo here](https://test.pixata.co.uk/TelerikGrid), [source code here](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/GridSample.razor).
+These work with a `PixataGridColumn`'s `Template` as well. You can see a sample of these in action on the sample project, [demo here](https://test.pixata.co.uk/pixata-grid), [source code here](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataGridSample.razor).

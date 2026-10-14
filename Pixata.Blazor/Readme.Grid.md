@@ -107,7 +107,7 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `FilterMenuType` | `PixataGridFilterMenuType` | `Menu` (two conditions, the default) or `CheckBoxList` |
 | `DefaultFilterOperator` | `GridFilterOperator?` | The operator the filter starts with. Defaults to Contains for text, and Is equal to for everything else |
 | `FilterCellTemplate`, `FilterMenuTemplate` | `RenderFragment<PixataGridFilterTemplateContext>` | Your own filter UI. See [custom filters](#custom-filters) |
-| `Template` | `RenderFragment<TItem>` | The content of each data cell. See [templates](#templates-and-row-events) |
+| `Template` | `RenderFragment<object>` | The content of each data cell. See [templates](#templates-and-row-events) |
 | `HeaderTemplate` | `RenderFragment` | The content of the header cell, in place of the title |
 | `OnCellRender` | `Action<PixataGridCellRenderEventArgs<TItem>>` | Lets you set a CSS class on each cell |
 | `Editable` | `bool` | Set to `false` to stop the column being edited. Defaults to `true`, but a property with no public setter is never editable |
@@ -316,14 +316,24 @@ The grid's elements all have classes starting with `pixata-blazor-grid-`, so you
 
 ## Templates and row events
 
-A column's `Template` replaces the formatted value in each cell. The context is the row's item itself, so there's no need to cast it. A template column doesn't need a `Field`, but if it has one, the column can be sorted and filtered by it...
+A column's `Template` replaces the formatted value in each cell. The context is the row's item as an `object` (as in Telerik's grid), so cast it to your type. A template column doesn't need a `Field`, but if it has one, the column can be sorted and filtered by it...
 
 ```razor
 <PixataGridColumn Title="Name" Field="@nameof(Person.Surname)">
   <Template>
-    <a href="/people/@context.Id">@context.FirstName @context.Surname</a>
+    @{
+      Person person = (Person)context;
+      <a href="/people/@person.Id">@person.FirstName @person.Surname</a>
+    }
   </Template>
 </PixataGridColumn>
+```
+
+As the context is an `object`, templates built with the [`TemplateHelper`](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Helpers.md#templatehelper) can be used as they are, and do the cast for you...
+
+```razor
+<PixataGridColumn Field="@nameof(Person.Salary)"
+                  Template="@(TemplateHelper.Text<Person>(p => p.Salary.ToString("C2"), classCss: "text-end"))" />
 ```
 
 `HeaderTemplate` does the same for the header (clicking it still sorts), and the grid's `RowTemplate` replaces a whole row's cells (render a `td` for each column).

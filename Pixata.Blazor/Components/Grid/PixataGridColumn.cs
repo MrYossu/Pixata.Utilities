@@ -199,11 +199,12 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   public RenderFragment<PixataGridFilterTemplateContext>? FilterMenuTemplate { get; set; }
 
   /// <summary>
-  /// The content of each data cell, in place of the formatted value. The context is the row's item. A column with a template
-  /// doesn't need a <see cref="Field"/>, but if it has one, the column can still be sorted and filtered by it
+  /// The content of each data cell, in place of the formatted value. The context is the row's item, as an <see cref="object"/>
+  /// (as in Telerik's grid), so templates built by the <c>TemplateHelper</c> can be used. A column with a template doesn't need
+  /// a <see cref="Field"/>, but if it has one, the column can still be sorted and filtered by it
   /// </summary>
   [Parameter]
-  public RenderFragment<TItem>? Template { get; set; }
+  public RenderFragment<object>? Template { get; set; }
 
   /// <summary>
   /// The content of the header cell, in place of the title. Clicking it still sorts the column

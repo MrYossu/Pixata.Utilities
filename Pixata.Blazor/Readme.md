@@ -64,7 +64,7 @@ This registers the following services (all from this package)...
 | `PixataDialogFactory` | The [alert, confirm and prompt dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) you show from code ([sample page](https://test.pixata.co.uk/DialogsSample)). It also needs `<PixataDialogHost />` in your layout, as described below |
 | `PixataDialogTexts` | The button text and tooltips used by the dialogs and windows (OK, Cancel, Close and so on). Register your own instance before calling `AddPixataBlazor()` to translate them |
 | `ScrollStateService` | The `VirtualiseWithState` component |
-| `TemplateHelper` | Building templates for grids and other templated components ([sample page](https://test.pixata.co.uk/TelerikGrid)) |
+| `TemplateHelper` | Building templates for grids and other templated components ([sample page](https://test.pixata.co.uk/pixata-grid)) |
 
 >`PersistentStateHelper<T>` does the same job as the [`[PersistentState]` attribute](https://learn.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-10.0?view=aspnetcore-10.0#declarative-model-for-persisting-state-from-components-and-services) added in .NET 10. This one was written around .NET 8, and is still useful for projects targetting .NET versions before 10.
 
