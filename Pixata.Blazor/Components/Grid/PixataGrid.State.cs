@@ -142,6 +142,16 @@ public partial class PixataGrid<TItem> {
   [Parameter]
   public string? StorageKey { get; set; }
 
+  /// <summary>
+  /// The text the grid shows, to translate it. If not set, the grid uses a <see cref="PixataGridMessages"/> registered as a
+  /// service, if there is one, otherwise English
+  /// </summary>
+  [Parameter]
+  public PixataGridMessages? Messages { get; set; }
+
+  internal PixataGridMessages Text =>
+    Messages ?? Services.GetService<PixataGridMessages>() ?? PixataGridMessages.Default;
+
   private bool _stateInitDone;
   private Dictionary<string, string>? _stateSnapshot;
   private bool _resnapshot;

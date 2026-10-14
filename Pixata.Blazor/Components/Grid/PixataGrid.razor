@@ -18,10 +18,11 @@
       LayoutColumns(columns);
       _columnWindow = ColumnWindow(columns);
       List<List<HeaderCell>> headerRows = HeaderRows();
+      _headerRowCount = headerRows.Count + (FilterMode == PixataGridFilterMode.FilterRow ? 1 : 0);
     }
     <div class="@Css.Join(GridClass, DragToSelect ? "pixata-blazor-grid-drag-select" : null)" style="@GridStyle" id="@_gridId" @onmouseup="DragEnd">
       @if (GridToolBarTemplate is not null) {
-        <div class="pixata-blazor-grid-toolbar" role="toolbar" aria-label="Grid toolbar">
+        <div class="pixata-blazor-grid-toolbar" role="toolbar" aria-label="@Text.Toolbar">
           @GridToolBarTemplate
         </div>
       }
@@ -32,7 +33,11 @@
         @GroupPanel
       }
       <div class="pixata-blazor-grid-content" @ref="_contentElement">
-        <table class="pixata-blazor-grid-table" style="@TableStyle(columns)">
+        <table class="pixata-blazor-grid-table"
+               style="@TableStyle(columns)"
+               role="@(Navigable ? "grid" : null)"
+               aria-rowcount="@(Navigable ? AriaRowCount(headerRows.Count) : null)"
+               aria-colcount="@(Navigable ? columns.Count : null)">
           <colgroup>
             @for (int level = 0; level < GroupLevels; level++) {
               <col class="pixata-blazor-grid-group-col" />
@@ -52,7 +57,7 @@
                     <th class="pixata-blazor-grid-th pixata-blazor-grid-group-cell" rowspan="@(headerRows.Count > 1 ? headerRows.Count : null)" aria-hidden="true"></th>
                   }
                   if (HasDetail) {
-                    <th class="pixata-blazor-grid-th pixata-blazor-grid-hierarchy-cell" rowspan="@(headerRows.Count > 1 ? headerRows.Count : null)" aria-label="@PixataGridMessages.Details"></th>
+                    <th class="pixata-blazor-grid-th pixata-blazor-grid-hierarchy-cell" rowspan="@(headerRows.Count > 1 ? headerRows.Count : null)" aria-label="@Text.Details"></th>
                   }
                 }
                 @foreach (HeaderCell cell in headerRows[row]) {
@@ -66,7 +71,7 @@
                   <td class="pixata-blazor-grid-filter-cell pixata-blazor-grid-group-cell" aria-hidden="true"></td>
                 }
                 @foreach (PixataGridColumn<TItem> column in columns) {
-                  <td class="@Css.Join("pixata-blazor-grid-filter-cell", column.LockedClass)" style="@column.StickyStyle" aria-label="@($"{column.HeaderText} filter")">
+                  <td class="@Css.Join("pixata-blazor-grid-filter-cell", column.LockedClass)" style="@column.StickyStyle" aria-label="@Text.FilterEditor(column.HeaderText)">
                     @if (CanFilter(column)) {
                       @FilterCell(column)
                     }
@@ -99,7 +104,7 @@
               <tr class="pixata-blazor-grid-norecords">
                 <td class="pixata-blazor-grid-td" colspan="@span">
                   @if (NoDataTemplate is null) {
-                    @PixataGridMessages.NoRecords
+                    @Text.NoRecords
                   } else {
                     @NoDataTemplate
                   }
@@ -149,7 +154,7 @@
         </table>
         @* Inside the scrolling area and under the sticky header, so it covers the rows but not the headers, as Telerik's does *@
         @if (_showLoader) {
-          <div class="pixata-blazor-grid-loader" role="status" aria-label="Loading">
+          <div class="pixata-blazor-grid-loader" role="status" aria-label="@Text.Loading">
             <div class="pixata-blazor-grid-loader-overlay"></div>
             @if (LoaderTemplate is null) {
               <div class="pixata-blazor-loader">
@@ -181,12 +186,12 @@
           <div class="pixata-blazor-overlay"></div>
           <div class="pixata-blazor-window pixata-blazor-dialog" role="alertdialog" aria-modal="true" aria-labelledby="@($"{_gridId}-delete-title")">
             <div class="pixata-blazor-window-titlebar">
-              <span class="pixata-blazor-window-title" id="@($"{_gridId}-delete-title")">@PixataGridMessages.Delete</span>
+              <span class="pixata-blazor-window-title" id="@($"{_gridId}-delete-title")">@Text.Delete</span>
             </div>
-            <div class="pixata-blazor-window-content">@PixataGridMessages.ConfirmDelete</div>
+            <div class="pixata-blazor-window-content">@Text.ConfirmDelete</div>
             <div class="pixata-blazor-window-actions pixata-blazor-window-actions-end">
-              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="() => ConfirmDeleteAnswered(true)">@PixataGridMessages.Ok</button>
-              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => ConfirmDeleteAnswered(false)">@PixataGridMessages.Cancel</button>
+              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="() => ConfirmDeleteAnswered(true)">@Text.Ok</button>
+              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => ConfirmDeleteAnswered(false)">@Text.Cancel</button>
             </div>
           </div>
         </div>
@@ -208,7 +213,8 @@
                       InputType="@(PagerSettings?.InputType ?? PixataGridPagerInputType.Buttons)"
                       Adaptive="@(PagerSettings?.Adaptive ?? true)"
                       PageChanged="OnPageChanged"
-                      PageSizeChanged="OnPageSizeChanged" />;
+                      PageSizeChanged="OnPageSizeChanged"
+                      Messages="Text" />;
 
   // A header cell. A column containing others has a header spanning theirs
   private RenderFragment HeaderCellFragment(HeaderCell cell) {
@@ -244,7 +250,7 @@
             <input type="checkbox"
                    class="@Css.Join("pixata-blazor-checkbox", !AllSelected(checkboxColumn) && SomeSelected(checkboxColumn) ? "pixata-blazor-checkbox-indeterminate" : null)"
                    checked="@AllSelected(checkboxColumn)"
-                   aria-label="Select all rows"
+                   aria-label="@Text.SelectAllRows"
                    @onclick="() => SelectAllClicked(checkboxColumn)" />
           }
           @if (CanResize(column)) {
@@ -268,7 +274,7 @@
           data-pixata-reorder-scope="@(reorder ? ReorderScope(column) : null)"
           scope="col"
           aria-sort="@(sort is null ? null : sort.SortDirection == ListSortDirection.Ascending ? "ascending" : "descending")"
-          tabindex="@(sortable ? "0" : null)"
+          tabindex="@(sortable && !Navigable ? "0" : null)"
           @onclick="() => OnHeaderClick(column)"
           @onkeydown="e => OnHeaderKeyDown(e, column)">
         <span class="pixata-blazor-grid-cell-inner">
@@ -294,8 +300,8 @@
                   class="@Css.Join("pixata-blazor-grid-header-menu", "pixata-blazor-grid-column-menu-button", HasFilter(column) ? "pixata-blazor-grid-filter-active" : null)"
                   role="button"
                   tabindex="-1"
-                  title="@PixataGridMessages.ColumnMenu"
-                  aria-label="@($"{column.HeaderText} {PixataGridMessages.ColumnMenu}")"
+                  title="@Text.ColumnMenu"
+                  aria-label="@($"{column.HeaderText} {Text.ColumnMenu}")"
                   aria-haspopup="dialog"
                   aria-expanded="@(_menuColumn == column ? "true" : "false")"
                   @onclick="() => ToggleColumnMenu(column)"
@@ -307,8 +313,8 @@
                   class="@Css.Join("pixata-blazor-grid-header-menu", "pixata-blazor-grid-filter-menu-button", HasFilter(column) ? "pixata-blazor-grid-filter-active" : null)"
                   role="button"
                   tabindex="-1"
-                  title="@($"{column.HeaderText} column filter menu settings")"
-                  aria-label="@($"{column.HeaderText} column filter menu settings")"
+                  title="@Text.FilterMenuButton(column.HeaderText)"
+                  aria-label="@Text.FilterMenuButton(column.HeaderText)"
                   aria-haspopup="dialog"
                   aria-expanded="@(_menuColumn == column ? "true" : "false")"
                   @onclick="() => ToggleFilterMenu(column)"
@@ -317,7 +323,7 @@
             </span>
           }
           @if (sort is not null) {
-            <span class="pixata-blazor-visually-hidden">@(sort.SortDirection == ListSortDirection.Ascending ? PixataGridMessages.SortedAscending : PixataGridMessages.SortedDescending)</span>
+            <span class="pixata-blazor-visually-hidden">@(sort.SortDirection == ListSortDirection.Ascending ? Text.SortedAscending : Text.SortedDescending)</span>
           }
         </span>
         @if (CanResize(column)) {
@@ -336,9 +342,9 @@
 
   // The panel that headers are dragged into to group by them, showing a chip for each group
   private RenderFragment GroupPanel =>
-    @<div class="pixata-blazor-grid-group-panel" role="toolbar" aria-label="@PixataGridMessages.GroupPanelLabel">
+    @<div class="pixata-blazor-grid-group-panel" role="toolbar" aria-label="@Text.GroupPanelLabel">
       @if (_groups.Count > 0) {
-        <div class="pixata-blazor-grid-group-chips" role="listbox" aria-label="@PixataGridMessages.GroupPanelLabel" aria-orientation="horizontal">
+        <div class="pixata-blazor-grid-group-chips" role="listbox" aria-label="@Text.GroupPanelLabel" aria-orientation="horizontal">
           @for (int i = 0; i < _groups.Count; i++) {
             int index = i;
             GridGroupDescriptor group = _groups[index];
@@ -356,8 +362,8 @@
               </span>
               <span class="pixata-blazor-grid-group-chip-remove"
                     role="button"
-                    title="@PixataGridMessages.Remove"
-                    aria-label="@($"{PixataGridMessages.Remove} {title}")"
+                    title="@Text.Remove"
+                    aria-label="@($"{Text.Remove} {title}")"
                     @onclick="() => Ungroup(group.Member)"
                     @onclick:stopPropagation="true">
                 @PixataGridIcons.For(PixataGridIcon.XCircle)
@@ -366,7 +372,7 @@
           }
         </div>
       }
-      <div class="pixata-blazor-grid-group-hint">@(_groups.Count == 0 ? PixataGridMessages.GroupPanelEmpty : "")</div>
+      <div class="pixata-blazor-grid-group-hint">@(_groups.Count == 0 ? Text.GroupPanelEmpty : "")</div>
     </div>;
 
   // Delete or Backspace on a chip stops grouping by its field
@@ -398,7 +404,7 @@
               <span class="pixata-blazor-grid-group-toggle"
                     role="button"
                     tabindex="0"
-                    aria-label="@(expanded ? PixataGridMessages.Collapse : PixataGridMessages.Expand)"
+                    aria-label="@(expanded ? Text.Collapse : Text.Expand)"
                     @onclick="() => ToggleGroup(path)"
                     @onkeydown="e => GroupToggleKeyDown(e, path)">
                 @PixataGridIcons.For(expanded ? PixataGridIcon.CaretDown : PixataGridIcon.CaretRight)
@@ -456,7 +462,7 @@
         <span class="pixata-blazor-grid-hierarchy-toggle"
               role="button"
               tabindex="0"
-              aria-label="@(expanded ? PixataGridMessages.Collapse : PixataGridMessages.Expand)"
+              aria-label="@(expanded ? Text.Collapse : Text.Expand)"
               @onclick="() => ToggleDetail(item)"
               @onclick:stopPropagation="true"
               @onkeydown="e => DetailKeyDown(e, item)">
@@ -479,7 +485,9 @@
 
   // The row's position among the rows shown, for dragging it
   private int? RowDragIndex(TItem item) =>
-    RowDraggable ? _items.IndexOf(item) : null;
+    RowDraggable || Navigable ? _items.IndexOf(item) : null;
+
+  private int _headerRowCount;
 
   // A row shown while virtual scrolling waits for the data
   private RenderFragment PlaceholderRow(List<PixataGridColumn<TItem>> columns, int index) =>
@@ -517,7 +525,7 @@
     (List<PixataGridColumn<TItem>> Columns, int Before, int After) cells = RowColumns(columns, item);
     return
       @<text>
-      <tr class="@Css.Join(RowClass(item, index), rowSelected ? "pixata-blazor-grid-selected" : null, IsInCellRow(item) ? "pixata-blazor-grid-edit-row" : null, HasDetail && IsExpanded(item) ? "pixata-blazor-grid-expanded" : null)" style="@VirtualRowStyle" data-pixata-row-index="@RowDragIndex(item)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
+      <tr class="@Css.Join(RowClass(item, index), rowSelected ? "pixata-blazor-grid-selected" : null, IsInCellRow(item) ? "pixata-blazor-grid-edit-row" : null, HasDetail && IsExpanded(item) ? "pixata-blazor-grid-expanded" : null, IsHighlighted(item) ? "pixata-blazor-grid-highlighted" : null)" style="@VirtualRowStyle" data-pixata-row-index="@RowDragIndex(item)" aria-rowindex="@(Navigable ? _headerRowCount + index + 1 : null)" aria-selected="@(SelectionMode == PixataGridSelectionMode.None ? null : rowSelected ? "true" : "false")">
         @GroupCells(GroupLevels)
         @HierarchyCell(item)
         @if (IsInCellRow(item)) {
@@ -531,7 +539,8 @@
             @InCellCell(_editItem!, column)
             continue;
           }
-          <td style="@column.StickyStyle" class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, column is PixataGridCommandColumn<TItem> ? "pixata-blazor-grid-command-cell" : null, column is PixataGridDragColumn<TItem> ? "pixata-blazor-grid-drag-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null)"
+          <td style="@column.StickyStyle" class="@Css.Join(column.CellClassFor(item), column is PixataGridCheckboxColumn<TItem> ? "pixata-blazor-grid-checkbox-cell" : null, column is PixataGridCommandColumn<TItem> ? "pixata-blazor-grid-command-cell" : null, column is PixataGridDragColumn<TItem> ? "pixata-blazor-grid-drag-cell" : null, SelectionType == PixataGridSelectionType.Cell && IsCellSelected(item, column.Field) ? "pixata-blazor-grid-selected" : null, IsCellHighlighted(item, column.Field) ? "pixata-blazor-grid-highlighted" : null)"
+              data-pixata-column-key="@(Navigable ? column.Key : null)"
               @onclick="e => CellClicked(item, column, e)"
               @ondblclick="e => RowClicked(OnRowDoubleClick, item, e, column.Field)"
               @oncontextmenu="e => RowClicked(OnRowContextMenu, item, e, column.Field)"
@@ -544,13 +553,13 @@
               </CascadingValue>
             } else if (column is PixataGridDragColumn<TItem>) {
               @if (RowDraggable) {
-                <span class="pixata-blazor-grid-drag-handle" data-pixata-row-drag="true" aria-label="@PixataGridMessages.DragRow">@PixataGridIcons.For(PixataGridIcon.Reorder)</span>
+                <span class="pixata-blazor-grid-drag-handle" data-pixata-row-drag="true" aria-label="@Text.DragRow">@PixataGridIcons.For(PixataGridIcon.Reorder)</span>
               }
             } else if (column is PixataGridCheckboxColumn<TItem>) {
               <input type="checkbox"
                      class="pixata-blazor-checkbox"
                      checked="@IsSelected(item)"
-                     aria-label="Select a row"
+                     aria-label="@Text.SelectRow"
                      @onclick="() => CheckboxClicked(item)"
                      @onclick:stopPropagation="true" />
             } else if (column.Template is null) {
@@ -647,7 +656,7 @@
     return EditorTypeFor(column) switch {
       PixataGridEditorType.NumericTextBox =>
         @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
-          <PixataGridNumericTextBox Value="ToDecimal(value)" ValueChanged="d => SetEditValue(column, FromDecimal(column, d))" AriaLabel="@label" />
+          <PixataGridNumericTextBox Messages="Text" Value="ToDecimal(value)" ValueChanged="d => SetEditValue(column, FromDecimal(column, d))" AriaLabel="@label" />
         </span>,
       PixataGridEditorType.DatePicker =>
         @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
@@ -683,7 +692,7 @@
         <div class="@Css.Join("pixata-blazor-window", "pixata-blazor-grid-popup-edit", PopupEditSettings?.Class)" style="@(style == "" ? null : style)" role="dialog" aria-modal="true" aria-labelledby="@($"{_gridId}-edit-title")" tabindex="0" @onkeydown="PopupKeyDown">
           <div class="pixata-blazor-window-titlebar">
             <span class="pixata-blazor-window-title" id="@($"{_gridId}-edit-title")">@PopupTitle</span>
-            <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-window-close" title="@PixataGridMessages.Close" aria-label="@PixataGridMessages.Close" @onclick="CancelEditCommand">
+            <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-window-close" title="@Text.Close" aria-label="@Text.Close" @onclick="CancelEditCommand">
               @PixataGridIcons.For(PixataGridIcon.X)
             </button>
           </div>
@@ -722,11 +731,11 @@
             } else {
               <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="SaveEdit">
                 @PixataGridIcons.For(PixataGridIcon.Save)
-                <span class="pixata-blazor-button-text">@PixataGridMessages.Update</span>
+                <span class="pixata-blazor-button-text">@Text.Update</span>
               </button>
               <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="CancelEditCommand">
                 @PixataGridIcons.For(PixataGridIcon.Cancel)
-                <span class="pixata-blazor-button-text">@PixataGridMessages.Cancel</span>
+                <span class="pixata-blazor-button-text">@Text.Cancel</span>
               </button>
             }
           </div>
@@ -749,22 +758,23 @@
   private static readonly RenderFragment FilterClearIcon =
     @<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2h12L8.5 7.5V13l-2-1.3V7.5zm9.6 7.4 1.9 1.9 1.9-1.9.7.7-1.9 1.9 1.9 1.9-.7.7-1.9-1.9-1.9 1.9-.7-.7 1.9-1.9-1.9-1.9z" /></svg>;
 
-  private static readonly List<(object?, string)> BooleanItems = [(null, "(All)"), (true, "is true"), (false, "is false")];
+  private List<(object?, string)> BooleanItems =>
+    [(null, Text.FilterAll), (true, Text.IsTrue), (false, Text.IsFalse)];
 
   // An editor for a filter value, suited to the column's type. The callback's second argument says whether to wait a moment
   // before filtering, which is only wanted for typing in the filter row
   private RenderFragment Editor(PixataGridColumn<TItem> column, object? value, Func<object?, bool, Task> changed, bool inRow) => column.FilterKind switch {
     FilterKind.Number =>
-      @<PixataGridNumericTextBox Value="ToDecimal(value)" ValueChanged="d => changed(FromDecimal(column, d), inRow)" AriaLabel="@($"{column.HeaderText} Filter")" />,
+      @<PixataGridNumericTextBox Messages="Text" Value="ToDecimal(value)" ValueChanged="d => changed(FromDecimal(column, d), inRow)" AriaLabel="@Text.FilterEditor(column.HeaderText)" />,
     FilterKind.Date =>
       @<PixataDatePicker TValue="DateTime?" Value="ToDate(value)" ValueChanged="d => changed(FromDate(column, d), false)" Class="pixata-blazor-grid-filter-date" />,
     FilterKind.Boolean =>
-      @<PixataGridDropDownList TValue="object" Items="BooleanItems" Value="value" ValueChanged="v => changed(v, false)" AriaLabel="@($"{column.HeaderText} Filter")" Class="pixata-blazor-grid-filter-editor" />,
+      @<PixataGridDropDownList TValue="object" Items="BooleanItems" Value="value" ValueChanged="v => changed(v, false)" AriaLabel="@Text.FilterEditor(column.HeaderText)" Class="pixata-blazor-grid-filter-editor" />,
     FilterKind.Enum =>
-      @<PixataGridDropDownList TValue="object" Items="EnumItems(column)" Value="value" DefaultText="-Select value-" ValueChanged="v => changed(v, false)" AriaLabel="@($"{column.HeaderText} Filter")" Class="pixata-blazor-grid-filter-editor" />,
+      @<PixataGridDropDownList TValue="object" Items="EnumItems(column)" Value="value" DefaultText="@Text.SelectValue" ValueChanged="v => changed(v, false)" AriaLabel="@Text.FilterEditor(column.HeaderText)" Class="pixata-blazor-grid-filter-editor" />,
     _ =>
       @<span class="pixata-blazor-grid-textbox">
-        <input class="pixata-blazor-grid-input-inner" type="text" value="@(value as string)" aria-label="@($"{column.HeaderText} Filter")" @oninput="e => changed(e.Value?.ToString(), inRow)" />
+        <input class="pixata-blazor-grid-input-inner" type="text" value="@(value as string)" aria-label="@Text.FilterEditor(column.HeaderText)" @oninput="e => changed(e.Value?.ToString(), inRow)" />
       </span>
   };
 
@@ -794,8 +804,8 @@
             }
             <button type="button"
                     class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-icon pixata-blazor-grid-filter-clear"
-                    title="Clear"
-                    aria-label="Clear"
+                    title="@Text.Clear"
+                    aria-label="@Text.Clear"
                     disabled="@(!HasFilter(column))"
                     @onclick="() => ClearFilterRow(column)">
               @FilterClearIcon
@@ -808,14 +818,24 @@
   private RenderFragment FilterMenu(PixataGridColumn<TItem> column) {
     PixataGridFilterTemplateContext? templateContext = column.FilterMenuTemplate is null ? null : TemplateContext(column);
     return
-      @<div @ref="_menuPopup" class="pixata-blazor-grid-filter-popup" role="dialog" aria-label="@($"{column.HeaderText} Filter Menu")">
+      @<div @ref="_menuPopup" class="pixata-blazor-grid-filter-popup" role="dialog" aria-label="@Text.FilterMenu(column.HeaderText)">
+        @AdaptiveHeader(column.HeaderText)
         <div class="pixata-blazor-grid-columnmenu-item">
           @FilterIcon
-          Filter
+          @Text.Filter
         </div>
         @FilterMenuForm(column, templateContext)
       </div>;
   }
+
+  // The title bar of a menu when it fills a small screen, which needs a way to close it. It's hidden otherwise
+  private RenderFragment AdaptiveHeader(string title) =>
+    @<div class="pixata-blazor-grid-adaptive-header">
+      <span class="pixata-blazor-grid-adaptive-title">@title</span>
+      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon" title="@Text.Close" aria-label="@Text.Close" @onclick="ClosePopup">
+        @PixataGridIcons.For(PixataGridIcon.X)
+      </button>
+    </div>;
 
   // The column menu. Its sections are as the settings and the column allow, and only one expands at a time
   private RenderFragment ColumnMenu(PixataGridColumn<TItem> column) {
@@ -827,16 +847,17 @@
     int count = Siblings(column).Count;
     bool grouped = _groups.Any(g => g.Member == column.Field);
     return
-      @<div @ref="_menuPopup" class="pixata-blazor-grid-filter-popup pixata-blazor-grid-column-menu" role="dialog" aria-label="@($"{column.HeaderText} {PixataGridMessages.ColumnMenu}")">
+      @<div @ref="_menuPopup" class="pixata-blazor-grid-filter-popup pixata-blazor-grid-column-menu" role="dialog" aria-label="@($"{column.HeaderText} {Text.ColumnMenu}")">
+        @AdaptiveHeader(column.HeaderText)
         @if (MenuSorts(column)) {
           <div class="pixata-blazor-grid-columnmenu-section">
-            @MenuItem(PixataGridIcon.SortUp, PixataGridMessages.SortAscending, () => MenuSort(column, ListSortDirection.Ascending), sort?.SortDirection == ListSortDirection.Ascending)
-            @MenuItem(PixataGridIcon.SortDown, PixataGridMessages.SortDescending, () => MenuSort(column, ListSortDirection.Descending), sort?.SortDirection == ListSortDirection.Descending)
+            @MenuItem(PixataGridIcon.SortUp, Text.SortAscending, () => MenuSort(column, ListSortDirection.Ascending), sort?.SortDirection == ListSortDirection.Ascending)
+            @MenuItem(PixataGridIcon.SortDown, Text.SortDescending, () => MenuSort(column, ListSortDirection.Descending), sort?.SortDirection == ListSortDirection.Descending)
           </div>
         }
         @if (MenuChoosesColumns) {
           <div class="pixata-blazor-grid-columnmenu-section">
-            @MenuExpander(PixataGridIcon.Columns, PixataGridMessages.Columns, ColumnMenuSection.Columns)
+            @MenuExpander(PixataGridIcon.Columns, Text.Columns, ColumnMenuSection.Columns)
             @if (_menuSection == ColumnMenuSection.Columns) {
               <div class="pixata-blazor-grid-columnmenu-content">
                 <div class="pixata-blazor-grid-column-list">
@@ -850,11 +871,11 @@
                 <div class="pixata-blazor-grid-columnmenu-actions">
                   <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="ApplyChooser">
                     @PixataGridIcons.For(PixataGridIcon.Check)
-                    <span class="pixata-blazor-button-text">@PixataGridMessages.Apply</span>
+                    <span class="pixata-blazor-button-text">@Text.Apply</span>
                   </button>
                   <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="ResetChooser">
                     @PixataGridIcons.For(PixataGridIcon.Reset)
-                    <span class="pixata-blazor-button-text">@PixataGridMessages.Reset</span>
+                    <span class="pixata-blazor-button-text">@Text.Reset</span>
                   </button>
                 </div>
               </div>
@@ -863,7 +884,7 @@
         }
         @if (MenuFilters(column)) {
           <div class="pixata-blazor-grid-columnmenu-section">
-            @MenuExpander(PixataGridIcon.Filter, PixataGridMessages.Filter, ColumnMenuSection.Filter)
+            @MenuExpander(PixataGridIcon.Filter, Text.Filter, ColumnMenuSection.Filter)
             @if (_menuSection == ColumnMenuSection.Filter) {
               @FilterMenuForm(column, templateContext)
             }
@@ -871,21 +892,21 @@
         }
         @if (MenuGroups(column)) {
           <div class="pixata-blazor-grid-columnmenu-section">
-            @MenuItem(PixataGridIcon.Group, grouped ? PixataGridMessages.UngroupColumn : PixataGridMessages.GroupColumn, () => MenuGroup(column))
+            @MenuItem(PixataGridIcon.Group, grouped ? Text.UngroupColumn : Text.GroupColumn, () => MenuGroup(column))
           </div>
         }
         @if (locks || moves) {
           <div class="pixata-blazor-grid-columnmenu-section">
-            @MenuExpander(PixataGridIcon.ColumnPosition, PixataGridMessages.SetColumnPosition, ColumnMenuSection.Position)
+            @MenuExpander(PixataGridIcon.ColumnPosition, Text.SetColumnPosition, ColumnMenuSection.Position)
             @if (_menuSection == ColumnMenuSection.Position) {
               <div class="pixata-blazor-grid-columnmenu-content">
                 @if (locks) {
-                  @MenuItem(PixataGridIcon.Lock, PixataGridMessages.Lock, () => MenuLock(column, true), disabled: column.IsLocked)
-                  @MenuItem(PixataGridIcon.Unlock, PixataGridMessages.Unlock, () => MenuLock(column, false), disabled: !CanUnlock(column))
+                  @MenuItem(PixataGridIcon.Lock, Text.Lock, () => MenuLock(column, true), disabled: column.IsLocked)
+                  @MenuItem(PixataGridIcon.Unlock, Text.Unlock, () => MenuLock(column, false), disabled: !CanUnlock(column))
                 }
                 @if (moves) {
-                  @MenuItem(PixataGridIcon.CaretLeft, PixataGridMessages.MovePrevious, () => MenuMove(column, -1), disabled: index <= 0)
-                  @MenuItem(PixataGridIcon.CaretRight, PixataGridMessages.MoveNext, () => MenuMove(column, 1), disabled: index >= count - 1)
+                  @MenuItem(PixataGridIcon.CaretLeft, Text.MovePrevious, () => MenuMove(column, -1), disabled: index <= 0)
+                  @MenuItem(PixataGridIcon.CaretRight, Text.MoveNext, () => MenuMove(column, 1), disabled: index >= count - 1)
                 }
               </div>
             }
@@ -941,13 +962,13 @@
               List<(object? Value, string Text)> shown = [.. values.Where(v => _menuSearch.Length == 0 || v.Text.Contains(_menuSearch, StringComparison.CurrentCultureIgnoreCase))];
               <span class="pixata-blazor-grid-search">
                 <span class="pixata-blazor-grid-search-icon">@SearchIcon</span>
-                <input class="pixata-blazor-grid-input-inner" type="text" placeholder="Search" value="@_menuSearch" @oninput="e => _menuSearch = e.Value?.ToString() ?? string.Empty" />
+                <input class="pixata-blazor-grid-input-inner" type="text" placeholder="@Text.Search" value="@_menuSearch" @oninput="e => _menuSearch = e.Value?.ToString() ?? string.Empty" />
               </span>
               <ul class="pixata-blazor-grid-multicheck">
                 <li class="pixata-blazor-grid-multicheck-item pixata-blazor-grid-multicheck-all">
                   <label class="pixata-blazor-grid-checkbox-label">
                     <input type="checkbox" class="pixata-blazor-checkbox" checked="@(shown.Count > 0 && shown.All(v => _menuState.Checked.Contains(v.Value)))" @onchange="e => ToggleAll(shown, e)" />
-                    <span>Select All</span>
+                    <span>@Text.SelectAll</span>
                   </label>
                 </li>
                 @foreach ((object? value, string text) in shown) {
@@ -963,23 +984,23 @@
               @Editor(column, _menuState.Value1, (v, _) => SetMenuValue(1, v), false)
             } else {
               List<(GridFilterOperator, string)> operators = OperatorsFor(column.FilterKind, column.IsNullable);
-              <PixataGridDropDownList TValue="GridFilterOperator" Items="operators" Value="_menuState.Operator1" ValueChanged="op => _menuState.Operator1 = op" AriaLabel="Filter Operators list" Class="pixata-blazor-grid-filter-editor" />
+              <PixataGridDropDownList TValue="GridFilterOperator" Items="operators" Value="_menuState.Operator1" ValueChanged="op => _menuState.Operator1 = op" AriaLabel="@Text.FilterOperators" Class="pixata-blazor-grid-filter-editor" />
               @Editor(column, _menuState.Value1, (v, _) => SetMenuValue(1, v), false)
               <div class="pixata-blazor-grid-button-group" role="group">
-                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.And ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.And ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.And">And</button>
-                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.Or ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.Or ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.Or">Or</button>
+                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.And ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.And ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.And">@Text.And</button>
+                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.Or ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.Or ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.Or">@Text.Or</button>
               </div>
-              <PixataGridDropDownList TValue="GridFilterOperator" Items="operators" Value="_menuState.Operator2" ValueChanged="op => _menuState.Operator2 = op" AriaLabel="Filter Operators list" Class="pixata-blazor-grid-filter-editor" />
+              <PixataGridDropDownList TValue="GridFilterOperator" Items="operators" Value="_menuState.Operator2" ValueChanged="op => _menuState.Operator2 = op" AriaLabel="@Text.FilterOperators" Class="pixata-blazor-grid-filter-editor" />
               @Editor(column, _menuState.Value2, (v, _) => SetMenuValue(2, v), false)
             }
             <div class="pixata-blazor-grid-filter-actions">
               <button type="submit" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary">
                 @FilterIcon
-                Filter
+                @Text.Filter
               </button>
               <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => templateContext is null ? ClearFilterMenu() : templateContext.ClearFilterAsync()">
                 @FilterClearIcon
-                Clear
+                @Text.Clear
               </button>
             </div>
           </div>

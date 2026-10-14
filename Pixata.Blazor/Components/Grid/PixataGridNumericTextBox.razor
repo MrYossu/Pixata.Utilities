@@ -13,16 +13,19 @@
          @oninput="OnInput"
          @onkeydown="OnKeyDown" />
   <span class="pixata-blazor-grid-numeric-spinner">
-    <button type="button" class="pixata-blazor-grid-numeric-increase" tabindex="-1" title="Increase value" aria-label="Increase value" @onclick="() => Step(1)">
+    <button type="button" class="pixata-blazor-grid-numeric-increase" tabindex="-1" title="@Messages.IncreaseValue" aria-label="@Messages.IncreaseValue" @onclick="() => Step(1)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10h8L8 5z" /></svg>
     </button>
-    <button type="button" class="pixata-blazor-grid-numeric-decrease" tabindex="-1" title="Decrease value" aria-label="Decrease value" @onclick="() => Step(-1)">
+    <button type="button" class="pixata-blazor-grid-numeric-decrease" tabindex="-1" title="@Messages.DecreaseValue" aria-label="@Messages.DecreaseValue" @onclick="() => Step(-1)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6h8l-4 5z" /></svg>
     </button>
   </span>
 </span>
 
 @code {
+  [Parameter]
+  public PixataGridMessages Messages { get; set; } = PixataGridMessages.Default;
+
   [Parameter]
   public decimal? Value { get; set; }
 

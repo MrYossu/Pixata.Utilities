@@ -8,7 +8,7 @@
   <span class="pixata-blazor-grid-search-icon" aria-hidden="true">
     <svg viewBox="0 0 16 16"><path d="M6.5 1a5.5 5.5 0 0 1 4.4 8.8l4 4-.7.7-4-4A5.5 5.5 0 1 1 6.5 1m0 1a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9" /></svg>
   </span>
-  <input class="pixata-blazor-grid-input-inner" type="text" placeholder="@Placeholder" aria-label="@Placeholder" value="@_text" @oninput="OnInput" />
+  <input class="pixata-blazor-grid-input-inner" type="text" placeholder="@(Placeholder ?? Grid!.Text.SearchPlaceholder)" aria-label="@(Placeholder ?? Grid!.Text.SearchPlaceholder)" value="@_text" @oninput="OnInput" />
 </span>
 
 @code {
@@ -22,7 +22,7 @@
   public List<string>? Fields { get; set; }
 
   [Parameter]
-  public string Placeholder { get; set; } = "Search...";
+  public string? Placeholder { get; set; }
 
   /// <summary>
   /// How long to wait after the last key press before searching, in milliseconds. Defaults to 300

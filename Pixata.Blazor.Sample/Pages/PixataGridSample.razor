@@ -828,6 +828,90 @@
   </div>
 }
 
+<h4>Keyboard navigation</h4>
+
+<p>With <code>Navigable="true"</code>, the grid is a single tab stop. Tab into it, then use the arrow keys, Home and End (with Ctrl for the first and last cells), Page Up and Page Down to page, Enter on a header to sort, Space to select a row, and Alt+Down on a header to open its menu.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Navigable="true" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterMenu" SelectionMode="PixataGridSelectionMode.Multiple">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Navigable="true" Pageable="true" PageSize="5" Sortable="true" FilterMode="GridFilterMode.FilterMenu" SelectionMode="GridSelectionMode.Multiple">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+
+<h4>Highlighting</h4>
+
+<p>The second and third rows are highlighted with <code>HighlightedItems</code>, and the first row's salary with <code>HighlightedCells</code>.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data.Take(5)" Size="_size" HighlightedItems="Data.Skip(1).Take(2)" HighlightedCells="_pixataHighlightedCells">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data.Take(5)" Size="@TelerikSize" HighlightedItems="@(Data.Skip(1).Take(2).ToList())" HighlightedCells="_telerikHighlightedCells">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+
+<h4>Translation and right to left</h4>
+
+<p>This grid is given Hebrew text through its <code>Messages</code> parameter, and is inside an element with <code>dir="rtl"</code>, so it is laid out from right to left. The first column is frozen, so it sticks on the right when the grid scrolls sideways.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<div dir="rtl">
+  <PixataGrid Data="Data" Size="_size" Messages="HebrewMessages" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterRow" Groupable="true" Resizable="true" Width="700px">
+    <GridColumns>
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Title="שם פרטי" Width="150px" Locked="true" />
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" Title="שם משפחה" Width="200px" />
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" Title="חיית מחמד" Width="200px" />
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" Title="משכורת" Width="200px" DisplayFormat="{0:C0}" />
+    </GridColumns>
+  </PixataGrid>
+</div>
+
+<h4>Small screens</h4>
+
+<p>With <code>AdaptiveMode="Auto"</code>, on a screen 768px wide or less, the filter menu, column menu and popup editor fill the screen. Make the window narrow, or open the page on a phone, to see it.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" AdaptiveMode="PixataGridAdaptiveMode.Auto" Pageable="true" PageSize="5" Sortable="true" FilterMode="PixataGridFilterMode.FilterMenu" ShowColumnMenu="true">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" AdaptiveMode="AdaptiveMode.Auto" Pageable="true" PageSize="5" Sortable="true" FilterMode="GridFilterMode.FilterMenu" ShowColumnMenu="true">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -886,6 +970,33 @@
   private PixataGrid<GridSampleEmployee>? _groupedGrid;
   private string _columnEvent = "";
   private int _telerikExpands;
+  private List<PixataGridHighlightedCell<GridSampleEmployee>> _pixataHighlightedCells =>
+    [new(Data.First(), nameof(GridSampleEmployee.Salary))];
+  private List<GridHighlightedCellDescriptor> _telerikHighlightedCells =>
+    [new() { ColumnField = nameof(GridSampleEmployee.Salary), DataItem = Data.First() }];
+
+  // Some of the grid's text in Hebrew, to show translation
+  private static readonly PixataGridMessages HebrewMessages = new() {
+    NoRecords = "אין רשומות.",
+    PagerFirstPage = "לעמוד הראשון",
+    PagerPreviousPage = "לעמוד הקודם",
+    PagerNextPage = "לעמוד הבא",
+    PagerLastPage = "לעמוד האחרון",
+    PagerInfoFormat = "{0} - {1} מתוך {2} פריטים",
+    PagerNavigationFormat = "ניווט בין עמודים, עמוד {0} מתוך {1}",
+    GroupPanelEmpty = "גררו כותרת עמודה לכאן כדי לקבץ לפיה",
+    Clear = "ניקוי",
+    IsEqualTo = "שווה ל",
+    IsNotEqualTo = "שונה מ",
+    Contains = "מכיל",
+    DoesNotContain = "לא מכיל",
+    StartsWith = "מתחיל ב",
+    EndsWith = "מסתיים ב",
+    IsLessThan = "קטן מ",
+    IsGreaterThan = "גדול מ",
+    SortedAscending = "ממוין בסדר עולה",
+    SortedDescending = "ממוין בסדר יורד"
+  };
   private bool _exportAllPages;
   private PixataGrid<GridSampleEmployee>? _exportGrid;
   private TelerikGrid<GridSampleEmployee>? _telerikExportGrid;

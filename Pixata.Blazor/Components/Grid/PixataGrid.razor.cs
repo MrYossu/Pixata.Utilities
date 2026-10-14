@@ -66,6 +66,13 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   public PixataGridSize Size { get; set; } = PixataGridSize.Medium;
 
   /// <summary>
+  /// With <c>Auto</c>, the filter menu, column menu and popup editor fill the screen on small screens, where a popup would be
+  /// cramped
+  /// </summary>
+  [Parameter]
+  public PixataGridAdaptiveMode AdaptiveMode { get; set; } = PixataGridAdaptiveMode.None;
+
+  /// <summary>
   /// What to show when there are no items. Defaults to "No records available."
   /// </summary>
   [Parameter]
@@ -362,7 +369,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     Css.Join("pixata-blazor-grid", Size switch {
       PixataGridSize.Small => "pixata-blazor-grid-sm",
       _ => "pixata-blazor-grid-md"
-    }, VirtualRows ? "pixata-blazor-grid-virtual" : null, Class);
+    }, VirtualRows ? "pixata-blazor-grid-virtual" : null, AdaptiveMode == PixataGridAdaptiveMode.Auto ? "pixata-blazor-grid-adaptive" : null, Class);
 
   private string? GridStyle {
     get {
@@ -383,6 +390,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     await InitHeaderDrag();
     await InitVirtualScroll();
     await InitRowDrag();
+    await InitNavigation();
     await AfterVirtualRender();
     await CheckStateChanged();
   }
@@ -398,6 +406,9 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     if (_module is not null) {
       try {
         await CloseFilterMenu();
+        if (_navigationReady) {
+          await _module.InvokeVoidAsync("disposeNavigation", _gridId);
+        }
         if (_rowDragReady) {
           await _module.InvokeVoidAsync("disposeRowDrag", _gridId);
         }

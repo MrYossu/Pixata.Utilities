@@ -7,31 +7,31 @@
 <div class="pixata-blazor-grid-pager-container">
   <div class="@Css.Join("pixata-blazor-grid-pager", Adaptive ? "pixata-blazor-grid-pager-adaptive" : null)"
        role="navigation"
-       aria-label="@PixataGridMessages.PagerNavigation(Page, PageCount)">
+       aria-label="@Messages.PagerNavigation(Page, PageCount)">
     <div class="pixata-blazor-grid-pager-numbers-wrap">
-      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav pixata-blazor-grid-pager-first" title="@PixataGridMessages.PagerFirstPage" aria-label="@PixataGridMessages.PagerFirstPage" disabled="@(Page <= 1)" @onclick="() => GoTo(1)">
+      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav pixata-blazor-grid-pager-first" title="@Messages.PagerFirstPage" aria-label="@Messages.PagerFirstPage" disabled="@(Page <= 1)" @onclick="() => GoTo(1)">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 4v8L5 8zM4 4v8h1V4z" /></svg>
       </button>
-      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav" title="@PixataGridMessages.PagerPreviousPage" aria-label="@PixataGridMessages.PagerPreviousPage" disabled="@(Page <= 1)" @onclick="() => GoTo(Page - 1)">
+      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav" title="@Messages.PagerPreviousPage" aria-label="@Messages.PagerPreviousPage" disabled="@(Page <= 1)" @onclick="() => GoTo(Page - 1)">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 4v8L5 8z" /></svg>
       </button>
       @if (InputType == PixataGridPagerInputType.Buttons) {
         <div class="pixata-blazor-grid-pager-numbers">
           @if (FirstButton > 1) {
-            <button type="button" class="pixata-blazor-button pixata-blazor-grid-pager-number" title="@PixataGridMessages.PagerMorePages" aria-label="@PixataGridMessages.PagerMorePages" @onclick="() => GoTo(FirstButton - 1)">...</button>
+            <button type="button" class="pixata-blazor-button pixata-blazor-grid-pager-number" title="@Messages.PagerMorePages" aria-label="@Messages.PagerMorePages" @onclick="() => GoTo(FirstButton - 1)">...</button>
           }
           @for (int p = FirstButton; p <= LastButton; p++) {
             int pageNumber = p;
             <button type="button"
                     class="@Css.Join("pixata-blazor-button", "pixata-blazor-grid-pager-number", pageNumber == Page ? "pixata-blazor-grid-selected" : null)"
-                    title="@($"{PixataGridMessages.PagerPage} {pageNumber}")"
+                    title="@($"{Messages.PagerPage} {pageNumber}")"
                     aria-current="@(pageNumber == Page ? "page" : null)"
                     @onclick="() => GoTo(pageNumber)">
               @pageNumber
             </button>
           }
           @if (LastButton < PageCount) {
-            <button type="button" class="pixata-blazor-button pixata-blazor-grid-pager-number" title="@PixataGridMessages.PagerMorePages" aria-label="@PixataGridMessages.PagerMorePages" @onclick="() => GoTo(LastButton + 1)">...</button>
+            <button type="button" class="pixata-blazor-button pixata-blazor-grid-pager-number" title="@Messages.PagerMorePages" aria-label="@Messages.PagerMorePages" @onclick="() => GoTo(LastButton + 1)">...</button>
           }
         </div>
         @if (Adaptive && PageCount > 0) {
@@ -40,25 +40,25 @@
                                   Items="PageItems"
                                   Value="Page"
                                   ValueChanged="GoTo"
-                                  AriaLabel="@PixataGridMessages.PagerSelectPage" />
+                                  AriaLabel="@Messages.PagerSelectPage" />
         }
       } else {
         <span class="pixata-blazor-grid-pager-input">
-          <span class="pixata-blazor-grid-pager-input-label">@PixataGridMessages.PagerPage</span>
+          <span class="pixata-blazor-grid-pager-input-label">@Messages.PagerPage</span>
           <input @key="_inputKey"
                  class="pixata-blazor-grid-pager-input-box"
                  type="text"
                  inputmode="numeric"
-                 aria-label="@PixataGridMessages.PagerSelectPage"
+                 aria-label="@Messages.PagerSelectPage"
                  value="@Page"
                  @onchange="OnInputChange" />
-          <span>@PixataGridMessages.PagerOf @PageCount</span>
+          <span>@Messages.PagerOf @PageCount</span>
         </span>
       }
-      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav" title="@PixataGridMessages.PagerNextPage" aria-label="@PixataGridMessages.PagerNextPage" disabled="@(Page >= PageCount)" @onclick="() => GoTo(Page + 1)">
+      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav" title="@Messages.PagerNextPage" aria-label="@Messages.PagerNextPage" disabled="@(Page >= PageCount)" @onclick="() => GoTo(Page + 1)">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 4v8l6-4z" /></svg>
       </button>
-      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav pixata-blazor-grid-pager-last" title="@PixataGridMessages.PagerLastPage" aria-label="@PixataGridMessages.PagerLastPage" disabled="@(Page >= PageCount)" @onclick="() => GoTo(PageCount)">
+      <button type="button" class="pixata-blazor-button pixata-blazor-button-icon pixata-blazor-grid-pager-nav pixata-blazor-grid-pager-last" title="@Messages.PagerLastPage" aria-label="@Messages.PagerLastPage" disabled="@(Page >= PageCount)" @onclick="() => GoTo(PageCount)">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 4v8l6-4zM11 4v8h1V4z" /></svg>
       </button>
     </div>
@@ -68,8 +68,8 @@
                                 Items="PageSizeItems"
                                 Value="PageSize"
                                 ValueChanged="OnPageSizeChange"
-                                AriaLabel="@PixataGridMessages.PagerSelectPageSize" />
-        <span class="pixata-blazor-grid-pager-sizes-label">@PixataGridMessages.PagerItemsPerPage</span>
+                                AriaLabel="@Messages.PagerSelectPageSize" />
+        <span class="pixata-blazor-grid-pager-sizes-label">@Messages.PagerItemsPerPage</span>
       </span>
     }
     <span class="pixata-blazor-grid-pager-info">@Info</span>
@@ -77,6 +77,9 @@
 </div>
 
 @code {
+  [Parameter]
+  public PixataGridMessages Messages { get; set; } = PixataGridMessages.Default;
+
   [Parameter]
   public int Page { get; set; }
 
@@ -119,11 +122,11 @@
   private string Info {
     get {
       if (Total == 0) {
-        return PixataGridMessages.PagerInfo(0, 0, 0);
+        return Messages.PagerInfo(0, 0, 0);
       }
       int first = PageSize <= 0 ? 1 : (Page - 1) * PageSize + 1;
       int last = PageSize <= 0 ? Total : Math.Min(Page * PageSize, Total);
-      return PixataGridMessages.PagerInfo(first, last, Total);
+      return Messages.PagerInfo(first, last, Total);
     }
   }
 
@@ -131,7 +134,7 @@
     [.. Enumerable.Range(1, PageCount).Select(p => (p, p.ToString(CultureInfo.CurrentCulture)))];
 
   private List<(int?, string)> PageSizeItems =>
-    [.. (PageSizes ?? []).Select(s => (s, s?.ToString(CultureInfo.CurrentCulture) ?? PixataGridMessages.PagerAll))];
+    [.. (PageSizes ?? []).Select(s => (s, s?.ToString(CultureInfo.CurrentCulture) ?? Messages.PagerAll))];
 
   private async Task GoTo(int page) {
     page = Math.Clamp(page, 1, Math.Max(PageCount, 1));

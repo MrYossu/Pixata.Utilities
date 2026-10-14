@@ -146,31 +146,30 @@ public partial class PixataGrid<TItem> {
   private bool HasFilter(PixataGridColumn<TItem> column) =>
     column.Field is not null && _filters.ContainsKey(column.Field);
 
-  // The operators Telerik offers for each kind of field, in Telerik's order and with its labels. Nullable fields also get
-  // "Is null" and "Is not null"
-  internal static List<(GridFilterOperator, string)> OperatorsFor(FilterKind kind, bool nullable) {
-    List<(GridFilterOperator, string)> operators = kind switch {
+  // The operators offered for each kind of field, in the reference grid's order, named from the messages. Nullable fields also
+  // get "Is null" and "Is not null"
+  internal List<(GridFilterOperator, string)> OperatorsFor(FilterKind kind, bool nullable) {
+    List<GridFilterOperator> operators = kind switch {
       FilterKind.Text => [
-        (GridFilterOperator.IsEqualTo, "Is equal to"), (GridFilterOperator.IsNotEqualTo, "Is not equal to"), (GridFilterOperator.StartsWith, "Starts with"),
-        (GridFilterOperator.Contains, "Contains"), (GridFilterOperator.DoesNotContain, "Does not contain"), (GridFilterOperator.EndsWith, "Ends with"),
-        (GridFilterOperator.IsNull, "Is null"), (GridFilterOperator.IsNotNull, "Is not null"), (GridFilterOperator.IsEmpty, "Is empty"),
-        (GridFilterOperator.IsNotEmpty, "Is not empty"), (GridFilterOperator.IsNullOrEmpty, "Has no value"), (GridFilterOperator.IsNotNullOrEmpty, "Has value")
+        GridFilterOperator.IsEqualTo, GridFilterOperator.IsNotEqualTo, GridFilterOperator.StartsWith, GridFilterOperator.Contains,
+        GridFilterOperator.DoesNotContain, GridFilterOperator.EndsWith, GridFilterOperator.IsNull, GridFilterOperator.IsNotNull,
+        GridFilterOperator.IsEmpty, GridFilterOperator.IsNotEmpty, GridFilterOperator.IsNullOrEmpty, GridFilterOperator.IsNotNullOrEmpty
       ],
       FilterKind.Number => [
-        (GridFilterOperator.IsLessThan, "Is less than"), (GridFilterOperator.IsLessThanOrEqualTo, "Is less than or equal to"), (GridFilterOperator.IsEqualTo, "Is equal to"),
-        (GridFilterOperator.IsNotEqualTo, "Is not equal to"), (GridFilterOperator.IsGreaterThanOrEqualTo, "Is greater than or equal to"), (GridFilterOperator.IsGreaterThan, "Is greater than")
+        GridFilterOperator.IsLessThan, GridFilterOperator.IsLessThanOrEqualTo, GridFilterOperator.IsEqualTo, GridFilterOperator.IsNotEqualTo,
+        GridFilterOperator.IsGreaterThanOrEqualTo, GridFilterOperator.IsGreaterThan
       ],
       FilterKind.Date => [
-        (GridFilterOperator.IsEqualTo, "Is equal to"), (GridFilterOperator.IsNotEqualTo, "Is not equal to"), (GridFilterOperator.IsGreaterThanOrEqualTo, "Is after or equal to"),
-        (GridFilterOperator.IsGreaterThan, "Is after"), (GridFilterOperator.IsLessThanOrEqualTo, "Is before or equal to"), (GridFilterOperator.IsLessThan, "Is before")
+        GridFilterOperator.IsEqualTo, GridFilterOperator.IsNotEqualTo, GridFilterOperator.IsGreaterThanOrEqualTo, GridFilterOperator.IsGreaterThan,
+        GridFilterOperator.IsLessThanOrEqualTo, GridFilterOperator.IsLessThan
       ],
-      FilterKind.Enum => [(GridFilterOperator.IsEqualTo, "Is equal to"), (GridFilterOperator.IsNotEqualTo, "Is not equal to")],
+      FilterKind.Enum => [GridFilterOperator.IsEqualTo, GridFilterOperator.IsNotEqualTo],
       _ => []
     };
     if (nullable && kind is FilterKind.Number or FilterKind.Date or FilterKind.Enum) {
-      operators.AddRange([(GridFilterOperator.IsNull, "Is null"), (GridFilterOperator.IsNotNull, "Is not null")]);
+      operators.AddRange([GridFilterOperator.IsNull, GridFilterOperator.IsNotNull]);
     }
-    return operators;
+    return [.. operators.Select(op => (op, Text.Operator(op, kind == FilterKind.Date)))];
   }
 
   private static GridFilterOperator DefaultOperator(PixataGridColumn<TItem> column) =>

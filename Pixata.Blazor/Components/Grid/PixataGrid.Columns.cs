@@ -175,7 +175,8 @@ public partial class PixataGrid<TItem> {
   private static void SetSticky(PixataGridColumn<TItem> column, double left, double right) {
     column.StickyLeft = left;
     column.StickyRight = right;
-    column.StickyStyle = FormattableString.Invariant($"left: {left}px; right: {right}px;");
+    // Logical sides, so frozen columns stick to the right in a right-to-left page
+    column.StickyStyle = FormattableString.Invariant($"inset-inline-start: {left}px; inset-inline-end: {right}px;");
   }
 
   // Once the user has resized a column, the table is as wide as its columns

@@ -69,6 +69,8 @@
   --pixata-grid-chip-border-color: #c2c2c2;
   --pixata-grid-locked-border-color: rgba(0, 0, 0, .3);
   --pixata-grid-skeleton-bg: rgba(61, 61, 61, .2);
+  --pixata-grid-focus-color: rgba(61, 61, 61, .3);
+  --pixata-grid-highlight-bg: rgba(255, 192, 0, .25);
   --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
   --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-grid-border-radius: 4px;
@@ -1874,8 +1876,8 @@
 .pixata-blazor-grid-column-resizer {
   position: absolute;
   top: 0;
-  right: 0;
   bottom: 0;
+  inset-inline-end: 0;
   width: .5em;
   cursor: col-resize;
   touch-action: none;
@@ -2155,7 +2157,7 @@
 .pixata-blazor-grid-row-drop-hint::before {
   position: absolute;
   top: -4px;
-  left: -2px;
+  inset-inline-start: -2px;
   content: "";
   border: 5px solid transparent;
   border-inline-start-color: var(--pixata-grid-primary);
@@ -2163,6 +2165,68 @@
 
 .pixata-blazor-grid-row-drop-over > .pixata-blazor-grid-td {
   background-color: color-mix(in srgb, var(--pixata-grid-primary) 15%, transparent);
+}
+
+/* ---------- Keyboard navigation and highlighting ---------- */
+
+/* The cell the keyboard is on, in a Navigable grid */
+.pixata-blazor-grid-th:focus-visible,
+.pixata-blazor-grid-td:focus-visible,
+.pixata-blazor-grid-filter-cell:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--pixata-grid-focus-color);
+}
+
+/* Highlighted rows and cells, set with HighlightedItems and HighlightedCells */
+.pixata-blazor-grid-row.pixata-blazor-grid-highlighted > .pixata-blazor-grid-td,
+.pixata-blazor-grid-td.pixata-blazor-grid-highlighted {
+  background-color: var(--pixata-grid-highlight-bg);
+}
+
+/* ---------- Adaptive popups ---------- */
+
+.pixata-blazor-grid-adaptive-header {
+  display: none;
+}
+
+/* With AdaptiveMode="Auto", on small screens the menus and the popup editor fill the screen. The menus are positioned by the
+   JavaScript, so their position has to be overridden */
+@media (max-width: 768px) {
+  .pixata-blazor-grid-adaptive .pixata-blazor-grid-filter-popup {
+    inset: 0 !important;
+    width: auto;
+    overflow-y: auto;
+    border: 0;
+  }
+
+  .pixata-blazor-grid-adaptive .pixata-blazor-grid-adaptive-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .5rem .5rem .5rem 1rem;
+    font-weight: 700;
+    background-color: var(--pixata-grid-header-bg);
+    border-bottom: 1px solid var(--pixata-grid-border-color);
+  }
+
+  .pixata-blazor-grid-adaptive .pixata-blazor-grid-popup-edit {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100%;
+    max-height: none !important;
+    border-radius: 0;
+  }
+}
+
+/* ---------- Right to left ---------- */
+
+/* Arrows that point along the line of text point the other way in a right-to-left page */
+.pixata-blazor-grid-pager-nav svg:dir(rtl),
+.pixata-blazor-grid-group-toggle svg:dir(rtl) {
+  transform: scaleX(-1);
 }
 
 /* ---------- Windows and dialogs (the grid's popup editor and delete confirmation) ---------- */

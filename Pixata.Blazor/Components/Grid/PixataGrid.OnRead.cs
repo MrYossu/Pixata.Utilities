@@ -41,6 +41,9 @@ public class PixataGridReadEventArgs<TItem>(GridRequest request, CancellationTok
   /// </summary>
   public string? ErrorMessage { get; set; }
 
+  // The grid's messages, for the error message when an API call fails without one
+  internal PixataGridMessages Messages { get; set; } = PixataGridMessages.Default;
+
   /// <summary>
   /// The groups the page's items are in, if the request asked for grouping. If not set, the grid groups the page itself, but
   /// then the group counts and aggregates only cover the page
@@ -66,7 +69,7 @@ public class PixataGridReadEventArgs<TItem>(GridRequest request, CancellationTok
     if (response.State == ApiResponseStates.Success && response.Data is GridResult<TItem> result) {
       SetResult(result);
     } else {
-      ErrorMessage = string.IsNullOrWhiteSpace(response.Message) ? PixataGridMessages.ReadFailed : response.Message;
+      ErrorMessage = string.IsNullOrWhiteSpace(response.Message) ? Messages.ReadFailed : response.Message;
     }
   }
 }
@@ -118,7 +121,7 @@ public partial class PixataGrid<TItem> {
     _readCancel = new();
     GridRequest request = CurrentRequest();
     _requestedAggregates = request.Aggregates;
-    PixataGridReadEventArgs<TItem> args = new(request, _readCancel.Token);
+    PixataGridReadEventArgs<TItem> args = new(request, _readCancel.Token) { Messages = Text };
     _loading = true;
     // Virtual scrolling shows placeholder rows instead
     if (EnableLoaderContainer && _firstReadDone && !_virtualLoading) {

@@ -354,7 +354,7 @@ public partial class PixataGrid<TItem> {
     };
 
   private string PopupTitle =>
-    PopupEditSettings?.Title ?? (_isNew ? PixataGridMessages.AddNewRecord : PixataGridMessages.Edit);
+    PopupEditSettings?.Title ?? (_isNew ? Text.AddNewRecord : Text.Edit);
 
   private IEnumerable<PixataGridColumn<TItem>> PopupColumns =>
     RenderedColumns().Where(c => c is not PixataGridCommandColumn<TItem> and not PixataGridCheckboxColumn<TItem> && !string.IsNullOrWhiteSpace(c.Field));

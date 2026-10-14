@@ -96,7 +96,7 @@ public class PixataGridGrouping_Tests {
     IRenderedComponent<PixataGrid<Person>> grid = Render();
 
     IElement panel = grid.Find(".pixata-blazor-grid-group-panel");
-    Assert.AreEqual(PixataGridMessages.GroupPanelEmpty, panel.TextContent.Trim());
+    Assert.AreEqual(PixataGridMessages.Default.GroupPanelEmpty, panel.TextContent.Trim());
     Assert.AreEqual(0, Chips(grid).Count);
     Assert.AreEqual("Team", grid.FindAll("th")[1].GetAttribute("data-pixata-group-field"));
   }

@@ -110,7 +110,9 @@ function positionPopup(anchor, popup) {
   const p = popup.getBoundingClientRect();
   const below = window.innerHeight - a.bottom;
   const top = below >= p.height || below >= a.top ? a.bottom : a.top - p.height;
-  const left = Math.max(0, Math.min(a.left, window.innerWidth - p.width));
+  // In a right-to-left page, the popup lines up with the anchor's right edge
+  const start = getComputedStyle(anchor).direction === "rtl" ? a.right - p.width : a.left;
+  const left = Math.max(0, Math.min(start, window.innerWidth - p.width));
   popup.style.position = "fixed";
   popup.style.top = `${Math.max(0, top)}px`;
   popup.style.left = `${left}px`;
@@ -233,6 +235,7 @@ export function initHeaderDrag(gridId, dotNet) {
   let drag = null;
   let resize = null;
   let hint = null;
+  const isRtl = () => getComputedStyle(grid).direction === "rtl";
   const panelOf = () => grid.querySelector(".pixata-blazor-grid-group-panel");
   const isOverPanel = (x, y) => {
     const panel = panelOf();
@@ -250,7 +253,8 @@ export function initHeaderDrag(gridId, dotNet) {
       return null;
     }
     const rect = th.getBoundingClientRect();
-    return { th, before: x < rect.left + rect.width / 2 };
+    const firstHalf = x < rect.left + rect.width / 2;
+    return { th, before: isRtl() ? !firstHalf : firstHalf };
   };
   const showHint = target => {
     if (!target) {
@@ -264,7 +268,7 @@ export function initHeaderDrag(gridId, dotNet) {
       document.body.appendChild(hint);
     }
     const rect = target.th.getBoundingClientRect();
-    hint.style.left = `${target.before ? rect.left : rect.right}px`;
+    hint.style.left = `${target.before !== isRtl() ? rect.left : rect.right}px`;
     hint.style.top = `${rect.top}px`;
     hint.style.height = `${rect.height}px`;
   };
@@ -295,7 +299,7 @@ export function initHeaderDrag(gridId, dotNet) {
       const { table, cols } = fixWidths(grid);
       const col = cols.find(c => c.key === handle.dataset.pixataResize);
       if (col) {
-        resize = { handle, table, cols, col, x: e.clientX, width: col.width, moved: false };
+        resize = { handle, table, cols, col, x: e.clientX, width: col.width, moved: false, rtl: isRtl() };
       }
       return;
     }
@@ -311,7 +315,8 @@ export function initHeaderDrag(gridId, dotNet) {
     if (resize) {
       e.preventDefault();
       resize.moved = true;
-      const width = clampWidth(resize.width + e.clientX - resize.x, resize.handle);
+      // In a right-to-left page, the handle is on the left, so dragging left widens the column
+      const width = clampWidth(resize.width + (e.clientX - resize.x) * (resize.rtl ? -1 : 1), resize.handle);
       resize.col.col.style.width = `${width}px`;
       resize.table.style.width = `${resize.cols.reduce((total, c) => total + (c === resize.col ? width : c.width), 0)}px`;
       return;
@@ -458,7 +463,8 @@ export function initVirtualScroll(element, dotNet) {
   let pending = false;
   const report = () => {
     pending = false;
-    dotNet.invokeMethodAsync("VirtualScrolled", element.scrollTop, element.scrollLeft, element.clientWidth, element.clientHeight);
+    // Scrolling sideways in a right-to-left page gives a negative scrollLeft
+    dotNet.invokeMethodAsync("VirtualScrolled", element.scrollTop, Math.abs(element.scrollLeft), element.clientWidth, element.clientHeight);
   };
   element.addEventListener("scroll", () => {
     if (!pending) {
@@ -604,4 +610,166 @@ export async function downloadFile(fileName, contentType, streamReference) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+// ---------- Keyboard navigation ----------
+
+const navigations = new Map();
+
+// Makes a grid a single tab stop, with the arrow keys (and Home, End, Ctrl+Home and Ctrl+End) moving between its cells. The
+// cell the user is on has tabindex 0 and the others -1, which is put back after every render. Keys that do something to the
+// data (Page Up and Down, Enter, F2, Space and Alt+Down) are passed to .NET
+export function initNavigation(gridId, dotNet) {
+  const grid = document.getElementById(gridId);
+  const table = grid?.querySelector(".pixata-blazor-grid-table");
+  if (!table || navigations.has(gridId)) {
+    return;
+  }
+  let active = { row: 0, col: 0 };
+  let hadFocus = false;
+  const rows = () => [...table.querySelectorAll(":scope > thead > tr, :scope > tbody > tr, :scope > tfoot > tr")]
+    .filter(r => !r.classList.contains("pixata-blazor-grid-virtual-spacer"));
+  const cellsOf = row => [...row.children].filter(c => c.matches("th, td"));
+  const cellAt = (r, c) => {
+    const all = rows();
+    const row = all[Math.max(0, Math.min(r, all.length - 1))];
+    if (!row) {
+      return null;
+    }
+    const cells = cellsOf(row);
+    return cells[Math.max(0, Math.min(c, cells.length - 1))] ?? null;
+  };
+  const positionOf = cell => ({ row: rows().indexOf(cell.parentElement), col: cellsOf(cell.parentElement).indexOf(cell) });
+  const apply = focus => {
+    for (const row of rows()) {
+      for (const cell of cellsOf(row)) {
+        if (cell.tabIndex !== -1) {
+          cell.tabIndex = -1;
+        }
+      }
+    }
+    const cell = cellAt(active.row, active.col);
+    if (cell) {
+      cell.tabIndex = 0;
+      if (focus) {
+        cell.focus();
+      }
+    }
+  };
+  const moveTo = cell => {
+    if (cell) {
+      active = positionOf(cell);
+      apply(true);
+    }
+  };
+  // The cell in another row that lines up with this one
+  const cellBelow = (cell, step) => {
+    const all = rows();
+    const rect = cell.getBoundingClientRect();
+    const middle = rect.left + rect.width / 2;
+    for (let r = all.indexOf(cell.parentElement) + step; r >= 0 && r < all.length; r += step) {
+      const match = cellsOf(all[r]).find(c => {
+        const box = c.getBoundingClientRect();
+        return box.left <= middle && box.right >= middle;
+      });
+      if (match && match !== cell) {
+        return match;
+      }
+    }
+    return null;
+  };
+  const keyDown = e => {
+    const cell = e.target;
+    if (!cell.matches?.("th, td") || cell.closest("table") !== table) {
+      return;
+    }
+    const rtl = getComputedStyle(table).direction === "rtl";
+    const cells = cellsOf(cell.parentElement);
+    const index = cells.indexOf(cell);
+    let target = undefined;
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowLeft":
+        target = cells[index + ((e.key === "ArrowRight") !== rtl ? 1 : -1)] ?? null;
+        break;
+      case "ArrowDown":
+        if (e.altKey && cell.tagName === "TH") {
+          dotNet.invokeMethodAsync("NavigationKey", "Menu", -1, cell.dataset.pixataColumnKey ?? null);
+          e.preventDefault();
+          return;
+        }
+        target = cellBelow(cell, 1);
+        break;
+      case "ArrowUp":
+        target = cellBelow(cell, -1);
+        break;
+      case "Home":
+        target = e.ctrlKey ? cellAt(0, 0) : cells[0];
+        break;
+      case "End":
+        target = e.ctrlKey ? cellAt(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER) : cells[cells.length - 1];
+        break;
+      case "PageDown":
+      case "PageUp":
+        dotNet.invokeMethodAsync("NavigationKey", e.key, -1, null);
+        e.preventDefault();
+        return;
+      case "Enter":
+      case "F2":
+      case " ": {
+        const row = cell.closest("tr[data-pixata-row-index]");
+        if (row && cell.tagName === "TD") {
+          dotNet.invokeMethodAsync("NavigationKey", e.key, Number(row.dataset.pixataRowIndex), cell.dataset.pixataColumnKey ?? null);
+          e.preventDefault();
+        }
+        return;
+      }
+      default:
+        return;
+    }
+    e.preventDefault();
+    moveTo(target);
+  };
+  const focusIn = e => {
+    hadFocus = true;
+    const cell = e.target.closest?.("th, td");
+    if (cell && cell.closest("table") === table) {
+      active = positionOf(cell);
+      if (e.target === cell) {
+        apply(false);
+      }
+    }
+  };
+  const focusOut = e => {
+    hadFocus = table.contains(e.relatedTarget);
+  };
+  // After a render, the tab stop is put back, and if the focused cell was replaced (such as by paging), its replacement is
+  // focused
+  let pending = false;
+  const observer = new MutationObserver(() => {
+    if (pending) {
+      return;
+    }
+    pending = true;
+    setTimeout(() => {
+      pending = false;
+      apply(hadFocus && (document.activeElement === document.body || !document.activeElement));
+    }, 0);
+  });
+  observer.observe(table, { childList: true, subtree: true });
+  table.addEventListener("keydown", keyDown);
+  table.addEventListener("focusin", focusIn);
+  table.addEventListener("focusout", focusOut);
+  apply(false);
+  navigations.set(gridId, () => {
+    observer.disconnect();
+    table.removeEventListener("keydown", keyDown);
+    table.removeEventListener("focusin", focusIn);
+    table.removeEventListener("focusout", focusOut);
+  });
+}
+
+export function disposeNavigation(gridId) {
+  navigations.get(gridId)?.();
+  navigations.delete(gridId);
 }

@@ -2,9 +2,9 @@
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataGrid` is a data grid with paging, sorting, filtering, searching, selection, editing, grouping and aggregates. It renders on the client or the server, so it can be used in WASM as well as Blazor Server apps.
+`PixataGrid` is a data grid with paging, sorting, filtering, searching, selection, editing, grouping and aggregates, resizable, movable and frozen columns, virtual scrolling, detail rows, row dragging, export, keyboard navigation, translation and right-to-left layout. It renders on the client or the server, so it can be used in WASM as well as Blazor Server apps.
 
->**Work in progress.** The grid is being built up in stages, tracked in [issue #49](https://github.com/MrYossu/Pixata.Utilities/issues/49). This page describes what's there so far. The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataGridSample.razor) shows each feature.
+The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataGridSample.razor) shows each feature.
 
 ## Getting started
 
@@ -69,6 +69,11 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
 | `Groupable` | `bool` | Shows a panel above the grid that the user can drag column headers into, to group the rows. See [grouping](#grouping-and-aggregates) |
 | `GridAggregates` | `RenderFragment` | The aggregates to calculate, as `PixataGridAggregate`s, for the footer templates |
+| `Navigable` | `bool` | Makes the grid one tab stop, with the keyboard moving between cells. See [keyboard navigation](#keyboard-navigation-and-accessibility) |
+| `HighlightedItems` | `IEnumerable<TItem>` | Rows to draw attention to. See [highlighting](#highlighting) |
+| `HighlightedCells` | `IEnumerable<PixataGridHighlightedCell<TItem>>` | Cells to draw attention to |
+| `Messages` | `PixataGridMessages` | The grid's text, to translate it. See [translation](#translation) |
+| `AdaptiveMode` | `PixataGridAdaptiveMode` | `None` (the default) or `Auto`, which makes the menus and popup editor fill small screens. See [small screens](#small-screens) |
 | `GridExport` | `RenderFragment` | Export settings, such as a `PixataGridCsvExport`. See [export](#export) |
 | `DetailTemplate` | `RenderFragment<TItem>` | Details for each row, shown when the user expands it. See [detail rows](#detail-rows) |
 | `OnRowExpand`, `OnRowCollapse` | `EventCallback<PixataGridRowExpandEventArgs<TItem>>`, `EventCallback<PixataGridRowCollapseEventArgs<TItem>>` | Fire when the user shows or hides a row's details |
@@ -299,6 +304,9 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 | `--pixata-grid-picker-bg`, `--pixata-grid-picker-hover-bg` | `#f5f5f5`, `#ebebeb` | The background of dropdowns and solid buttons |
 | `--pixata-grid-chip-bg`, `--pixata-grid-chip-border-color` | `#ebebeb`, `#c2c2c2` | The chips in the group panel |
 | `--pixata-grid-locked-border-color` | `rgba(0, 0, 0, .3)` | The lines either side of frozen columns |
+| `--pixata-grid-skeleton-bg` | `rgba(61, 61, 61, .2)` | The placeholders shown while virtual rows load |
+| `--pixata-grid-focus-color` | `rgba(61, 61, 61, .3)` | The ring round the cell the keyboard is on, in a `Navigable` grid |
+| `--pixata-grid-highlight-bg` | `rgba(255, 192, 0, .25)` | Highlighted rows and cells |
 | `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The focus ring on inputs and buttons |
 | `--pixata-grid-popup-shadow` | A soft two-layer shadow | The shadow under dropdown lists and filter menus |
 | `--pixata-grid-border-radius` | `4px` | Rounded corners on inputs and buttons |
@@ -544,6 +552,65 @@ Set `RowDraggable="true"`, and the user can drag rows by a handle at the start o
 | `DropPosition` | `Before`, `Over` or `After` the destination row: the top quarter of a row is before it, the bottom quarter after it, and the rest over it |
 
 Rows can only be dropped on the rows of a grid that is itself `RowDraggable`, with the same `TItem`. Dropped anywhere else in such a grid, they go after its rows. The dragging uses pointer events, so it works with touch as well as the mouse.
+
+## Keyboard navigation and accessibility
+
+With `Navigable="true"`, the grid is a single tab stop, and the keyboard moves between its cells (header cells, filter cells and data cells)...
+
+| Key | What it does |
+| --- | --- |
+| Arrow keys | Move to the next cell in that direction. In a right-to-left page, left and right are swapped |
+| Home, End | Move to the first or last cell in the row |
+| Ctrl+Home, Ctrl+End | Move to the first cell of the grid, or the last |
+| Page Up, Page Down | Go to the previous or next page, keeping the focus in the grid |
+| Enter | On a header, sort by it. On a cell, edit it (in `InCell` mode) or its row (in `Inline` and `Popup` modes) |
+| F2 | Edit, as Enter does on a cell |
+| Space | Select the row (or the cell, when selecting cells) |
+| Alt+Down | On a header, open its column menu or filter menu |
+| Escape | Cancel editing |
+
+A `Navigable` grid's table has the ARIA `grid` role, with `aria-rowcount` and `aria-colcount` for all the data (not just the rows rendered), and each data row has its `aria-rowindex`, so screen readers can say where the user is. Without `Navigable`, the grid is a normal table, which screen readers can also read, and its sortable headers are each a tab stop. Either way, sorted headers have `aria-sort`, selected rows `aria-selected`, menus are dialogs with labels, and the buttons have labels.
+
+## Highlighting
+
+`HighlightedItems` and `HighlightedCells` draw attention to rows and cells, such as ones that have just changed, without selecting them...
+
+```razor
+<PixataGrid Data="People" HighlightedItems="_changed" HighlightedCells="_flagged">...</PixataGrid>
+
+@code {
+  private List<Person> _changed = [];
+  private List<PixataGridHighlightedCell<Person>> _flagged = [];
+}
+```
+
+Items are matched with `ItemKey` if the grid has one, otherwise with `Equals`.
+
+## Translation
+
+Everything the grid says itself (the pager, the filter operators, the menus, the messages and the labels read by screen readers) comes from a `PixataGridMessages`, which is English by default. To translate it, create one with the text you want (anything you leave out stays English), and either register it, so every grid uses it, or give it to a grid...
+
+```csharp
+builder.Services.AddSingleton(new PixataGridMessages {
+  NoRecords = "אין רשומות.",
+  PagerInfoFormat = "{0} - {1} מתוך {2} פריטים",
+  Contains = "מכיל"
+});
+```
+
+```razor
+<PixataGrid Data="People" Messages="_hebrew">...</PixataGrid>
+```
+
+The properties ending in "Format" are format strings, with {0} and so on for the values. See the [class](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Components/Grid/PixataGridMessages.cs) for the full list. A search box's placeholder comes from the messages too, unless you give it a `Placeholder`.
+
+## Right to left
+
+Put the grid inside an element with `dir="rtl"` (or set it on the page), and the grid is laid out from right to left: the columns, the pager, the group panel, the menus and the popups. Frozen columns stick to the right, column resize handles are on the left edge of the headers, and arrows that point along the line of text point the other way. The keyboard and the dragging work the right way round.
+
+## Small screens
+
+The grid works on phones as it is: it scrolls sideways if it needs to, the pager adapts to its width, and the dragging works with touch. With `AdaptiveMode="PixataGridAdaptiveMode.Auto"`, on screens 768px wide or less, the filter menu and column menu fill the screen, with a title bar and a close button, and so does the popup editor, as a small popup would be cramped.
 
 ## Export
 

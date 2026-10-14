@@ -113,10 +113,10 @@ public class PixataGridColumns_Tests {
       Column(nameof(Person.Age), ("Width", "100px"), ("Locked", true))));
 
     IRefreshableElementCollection<IElement> cells = grid.FindAll("tbody tr:first-child td");
-    Assert.AreEqual("left: 0px; right: 220px;", cells[0].GetAttribute("style"));
+    Assert.AreEqual("inset-inline-start: 0px; inset-inline-end: 220px;", cells[0].GetAttribute("style"));
     Assert.IsNull(cells[1].GetAttribute("style"));
-    Assert.AreEqual("left: 80px; right: 100px;", cells[2].GetAttribute("style"));
-    Assert.AreEqual("left: 200px; right: 0px;", cells[3].GetAttribute("style"));
+    Assert.AreEqual("inset-inline-start: 80px; inset-inline-end: 100px;", cells[2].GetAttribute("style"));
+    Assert.AreEqual("inset-inline-start: 200px; inset-inline-end: 0px;", cells[3].GetAttribute("style"));
     Assert.IsTrue(cells[0].ClassList.Contains("pixata-blazor-grid-locked"));
     Assert.IsTrue(grid.FindAll("thead th")[3].ClassList.Contains("pixata-blazor-grid-locked"));
   }
@@ -345,7 +345,7 @@ public class PixataGridColumns_Tests {
     ClickItem(grid, "Lock");
 
     CollectionAssert.AreEqual(new[] { "First", "Id", "Last", "Age" }, Titles(grid));
-    Assert.AreEqual("left: 0px; right: 0px;", grid.FindAll("thead th")[0].GetAttribute("style"));
+    Assert.AreEqual("inset-inline-start: 0px; inset-inline-end: 0px;", grid.FindAll("thead th")[0].GetAttribute("style"));
 
     OpenMenu(grid, 0);
     ClickItem(grid, "Set column position");
