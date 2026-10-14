@@ -1,0 +1,38 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@inherits PixataSchedulerToolBarToolBase<TItem>
+
+@* The toolbar's button for adding an appointment. Only shown when the scheduler's AllowCreate is true *@
+@if (Owner.AllowCreate) {
+  <button type="button"
+          class="@PixataCss.Classes(PixataCss.Button(ThemeColor, null, null, null), "pixata-blazor-scheduler-new-event", PixataCss.Disabled(Enabled), Class)"
+          title="@Owner.Text.NewEvent"
+          aria-label="@Owner.Text.NewEvent"
+          disabled="@(!Enabled)"
+          @onclick="Owner.CreateFromToolBar">
+    <PixataIcon Icon="@(Icon ?? PixataSvgIcons.Plus)" />
+    <span class="pixata-blazor-scheduler-tool-text">@Owner.Text.NewEvent</span>
+  </button>
+}
+
+@code {
+
+  /// <summary>
+  /// One of the <see cref="PixataThemeConstants.Button.ThemeColor"/> values. Primary by default
+  /// </summary>
+  [Parameter]
+  public string ThemeColor { get; set; } = PixataThemeConstants.Button.ThemeColor.Primary;
+
+  /// <summary>
+  /// The button's icon: a <see cref="PixataSvgIcon"/> or an icon font class. A plus sign by default
+  /// </summary>
+  [Parameter]
+  public object? Icon { get; set; }
+
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  [Parameter]
+  public string? Class { get; set; }
+
+}

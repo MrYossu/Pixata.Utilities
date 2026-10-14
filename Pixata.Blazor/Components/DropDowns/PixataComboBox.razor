@@ -1,0 +1,51 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@typeparam TValue
+@inherits PixataSingleSelectBase<TItem, TValue>
+
+@*
+  A text box with a list: the user picks an item from the list, or types to find one (and, with AllowCustom, can type a value
+  of their own)
+*@
+<span @ref="Element"
+      @attributes="AdditionalAttributes"
+      class="@MainClasses()"
+      style="@WidthStyle"
+      data-pixata-dropdown="@Uid"
+      @onclick="HandleClick">
+  <input @ref="_input"
+         id="@Id"
+         type="text"
+         class="pixata-blazor-input-inner pixata-blazor-combobox-input"
+         value="@_shownText"
+         placeholder="@Placeholder"
+         autocomplete="off"
+         tabindex="@TabIndex"
+         disabled="@(!Enabled)"
+         readonly="@ReadOnly"
+         role="combobox"
+         aria-autocomplete="list"
+         aria-haspopup="listbox"
+         aria-expanded="@AriaExpanded"
+         aria-controls="@(IsOpen ? ListId : null)"
+         aria-activedescendant="@ActiveDescendant"
+         aria-label="@AriaLabel"
+         aria-labelledby="@AriaLabelledBy"
+         aria-describedby="@AriaDescribedBy"
+         aria-readonly="@(ReadOnly ? "true" : null)"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         aria-busy="@(Loading ? "true" : null)"
+         @oninput="HandleInput"
+         @onkeydown="HandleKeyDown"
+         @onkeydown:stopPropagation="IsOpen" />
+  @LoadingFragment
+  @if (ShowClearButton && _text != "" && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-clear-value" role="button" aria-label="Clear" title="Clear" @onclick="HandleClear" @onclick:stopPropagation="true">
+      <PixataIcon Icon="@PixataSvgIcons.X" />
+    </span>
+  }
+  <span class="pixata-blazor-input-button pixata-blazor-combobox-button" role="button" aria-label="Open" @onclick="HandleButtonClick" @onclick:stopPropagation="true">
+    <PixataIcon Icon="@PixataSvgIcons.ChevronDown" />
+  </span>
+</span>
+@PopupFragment

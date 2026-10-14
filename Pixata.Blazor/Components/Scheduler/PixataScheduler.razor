@@ -1,0 +1,292 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+
+<CascadingValue Value="this">
+  @SchedulerViews
+  @SchedulerResources
+  @SchedulerSettings
+  <div @ref="_element"
+       id="@Id"
+       class="@RootClass"
+       style="@RootStyle"
+       role="application"
+       aria-label="@RangeText"
+       @attributes="AdditionalAttributes">
+    <div class="pixata-blazor-scheduler-toolbar" role="toolbar" aria-label="@Text.ToolBar">
+      @if (SchedulerToolBar is not null) {
+        @SchedulerToolBar
+      } else {
+        <PixataSchedulerToolBarNewEventTool TItem="TItem" />
+        <PixataSchedulerToolBarNavigationTool TItem="TItem" />
+        <PixataSchedulerToolBarCalendarTool TItem="TItem" />
+        <PixataSchedulerToolBarSpacerTool TItem="TItem" />
+        <PixataSchedulerToolBarViewsTool TItem="TItem" />
+      }
+    </div>
+    <div @ref="_content"
+         class="@PixataCss.Classes("pixata-blazor-scheduler-content", $"pixata-blazor-scheduler-{CurrentView.ToString().ToLowerInvariant()}-view")"
+         tabindex="0"
+         aria-label="@($"{ViewName(CurrentView)}: {RangeText}")"
+         @onkeydown="ContentKeyDown">
+      @switch (CurrentView) {
+        case PixataSchedulerView.Day:
+        case PixataSchedulerView.MultiDay:
+        case PixataSchedulerView.Week:
+          <PixataSchedulerTimeGrid TItem="TItem" Scheduler="this" />
+          break;
+        case PixataSchedulerView.Month:
+          <PixataSchedulerMonthGrid TItem="TItem" Scheduler="this" />
+          break;
+        case PixataSchedulerView.Timeline:
+          <PixataSchedulerTimelineGrid TItem="TItem" Scheduler="this" />
+          break;
+        case PixataSchedulerView.Agenda:
+          <PixataSchedulerAgendaList TItem="TItem" Scheduler="this" />
+          break;
+      }
+    </div>
+    @if (IsTimeView) {
+      <div class="pixata-blazor-scheduler-footer">
+        <button type="button"
+                class="@PixataCss.Button(null, null, null, null)"
+                aria-pressed="@(_showWorkHours ? "true" : "false")"
+                @onclick="ToggleWorkHours">
+          <PixataIcon Icon="PixataSvgIcons.Clock" />
+          <span>@(_showWorkHours ? Text.ShowFullDay : Text.ShowWorkHours)</span>
+        </button>
+      </div>
+    }
+    @if (_edit is { } edit) {
+      <div class="pixata-blazor-scheduler-overlay"></div>
+      <span class="pixata-blazor-scheduler-focus-sentinel" tabindex="0" @onfocus="FocusDialog"></span>
+      <div @ref="_dialogElement"
+           class="@PixataCss.Classes("pixata-blazor-scheduler-dialog", "pixata-blazor-scheduler-edit-dialog", PopupEditSettings?.Class)"
+           style="@DialogStyle"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="@DialogTitleId"
+           @onkeydown="DialogKeyDown"
+           @onkeydown:stopPropagation="true">
+        <div class="pixata-blazor-scheduler-dialog-titlebar">
+          <span id="@DialogTitleId" class="pixata-blazor-scheduler-dialog-title">@(PopupEditSettings?.Title ?? (edit.IsNew ? Text.CreateTitle : Text.EditTitle))</span>
+          <button type="button" class="@PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null, true)" aria-label="@Text.Close" title="@Text.Close" @onclick="CancelEdit">
+            <PixataIcon Icon="PixataSvgIcons.X" />
+          </button>
+        </div>
+        <EditForm EditContext="edit.EditContext" OnSubmit="SaveEdit" class="pixata-blazor-scheduler-edit-form">
+          <DataAnnotationsValidator />
+          <div class="pixata-blazor-scheduler-dialog-content">
+            @if (PopupEditFormSettings?.FormTemplate is { } formTemplate) {
+              @formTemplate(TemplateContext(edit))
+            } else if (edit.Model is not null) {
+              <PixataSchedulerEditForm TItem="TItem" Scheduler="this" />
+            }
+          </div>
+          <div class="pixata-blazor-scheduler-dialog-actions">
+            @if (PopupEditFormSettings?.ButtonsTemplate is { } buttonsTemplate) {
+              @buttonsTemplate(TemplateContext(edit))
+            } else {
+              @if (!edit.IsNew && edit.Source is { } source && CanDelete(source)) {
+                <button type="button" class="@PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null)" @onclick="DeleteFromEditor">
+                  <PixataIcon Icon="PixataSvgIcons.Trash" />
+                  <span>@Text.Delete</span>
+                </button>
+              }
+              <span class="pixata-blazor-scheduler-dialog-spacer"></span>
+              <button type="submit" class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, null)">@Text.Save</button>
+              <button type="button" class="@PixataCss.Button(null, null, null, null)" @onclick="CancelEdit">@Text.Cancel</button>
+            }
+          </div>
+        </EditForm>
+      </div>
+      <span class="pixata-blazor-scheduler-focus-sentinel" tabindex="0" @onfocus="FocusDialog"></span>
+    }
+    @if (_prompt is { } prompt) {
+      <div class="pixata-blazor-scheduler-overlay pixata-blazor-scheduler-prompt-overlay"></div>
+      <span class="pixata-blazor-scheduler-focus-sentinel" tabindex="0" @onfocus="FocusDialog"></span>
+      <div @ref="_promptElement"
+           class="pixata-blazor-scheduler-dialog pixata-blazor-scheduler-prompt"
+           role="alertdialog"
+           aria-modal="true"
+           aria-labelledby="@($"{DialogTitleId}-prompt")"
+           aria-describedby="@($"{DialogTitleId}-prompt-text")"
+           @onkeydown="DialogKeyDown"
+           @onkeydown:stopPropagation="true">
+        <div class="pixata-blazor-scheduler-dialog-titlebar">
+          <span id="@($"{DialogTitleId}-prompt")" class="pixata-blazor-scheduler-dialog-title">@prompt.Title</span>
+          <button type="button" class="@PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null, true)" aria-label="@Text.Close" title="@Text.Close" @onclick="ClosePrompt">
+            <PixataIcon Icon="PixataSvgIcons.X" />
+          </button>
+        </div>
+        <div id="@($"{DialogTitleId}-prompt-text")" class="pixata-blazor-scheduler-dialog-content">@prompt.Text</div>
+        <div class="pixata-blazor-scheduler-dialog-actions">
+          @foreach ((string label, Func<Task> action, bool primary) in prompt.Buttons) {
+            <button type="button"
+                    class="@PixataCss.Button(primary ? PixataThemeConstants.Button.ThemeColor.Primary : null, null, null, null)"
+                    @onclick="action">@label</button>
+          }
+        </div>
+      </div>
+      <span class="pixata-blazor-scheduler-focus-sentinel" tabindex="0" @onfocus="FocusDialog"></span>
+    }
+    <div class="pixata-blazor-sr-only" aria-live="polite">@_announcement</div>
+  </div>
+</CascadingValue>
+
+@code {
+
+  private readonly string _dialogTitleId = $"pixata-scheduler-{Guid.NewGuid():N}";
+
+  private string DialogTitleId => _dialogTitleId;
+
+  private string RootClass =>
+    PixataCss.Classes("pixata-blazor-scheduler",
+      Height is null ? null : "pixata-blazor-scheduler-fixed-height",
+      IsGrouped ? "pixata-blazor-scheduler-grouped" : null,
+      Class);
+
+  private string? RootStyle {
+    get {
+      string style = $"{(Height is null ? "" : $"height:{Height};")}{(Width is null ? "" : $"width:{Width};")}";
+      return style == "" ? null : style;
+    }
+  }
+
+  private string? DialogStyle {
+    get {
+      if (PopupEditSettings is not { } settings) {
+        return null;
+      }
+      string style = string.Join("", new[] {
+        Css("width", settings.Width), Css("height", settings.Height), Css("min-width", settings.MinWidth),
+        Css("max-width", settings.MaxWidth), Css("min-height", settings.MinHeight), Css("max-height", settings.MaxHeight)
+      });
+      return style == "" ? null : style;
+    }
+  }
+
+  private static string Css(string property, string? value) =>
+    string.IsNullOrWhiteSpace(value) ? "" : $"{property}:{value};";
+
+  private PixataSchedulerEditFormContext<TItem> TemplateContext(EditState edit) =>
+    new(edit.Item, edit.IsNew, edit.EditMode, edit.EditContext, SaveEdit, CancelEdit,
+      !edit.IsNew && edit.Source is { } source && CanDelete(source) ? DeleteFromEditor : null);
+
+  /// <summary>
+  /// Draws an appointment. Its events are handled by the scheduler, so it renders again afterwards
+  /// </summary>
+  internal RenderFragment RenderAppointment(PixataSchedulerItem<TItem> item, PixataSchedulerEventPlacement placement) {
+    bool canEdit = CanEdit(item);
+    bool canDelete = CanDelete(item);
+    bool draggable = canEdit && placement.Draggable;
+    bool vertical = placement.Orientation == PixataSchedulerEventPlacement.Vertical;
+    bool agenda = placement.Orientation == PixataSchedulerEventPlacement.Agenda;
+    RenderFragment<TItem>? template = TemplateFor(item, placement.InAllDayRow);
+    string? style = $"{placement.Style}{(string.IsNullOrWhiteSpace(item.Colour) ? "" : $"--pixata-blazor-scheduler-event-bg:{item.Colour};")}";
+    return @<div class="@PixataCss.Classes("pixata-blazor-scheduler-event", $"pixata-blazor-scheduler-event-{placement.Orientation}",
+                  item.Key == _selectedKey ? "pixata-blazor-selected" : null,
+                  item.ReadOnly ? "pixata-blazor-scheduler-event-read-only" : null,
+                  template is null ? null : "pixata-blazor-scheduler-event-templated",
+                  ItemClass(item))"
+                 style="@(style == "" ? null : style)"
+                 role="button"
+                 tabindex="@(item.Key == TabStopKey ? "0" : "-1")"
+                 aria-label="@ItemLabel(item)"
+                 data-pixata-key="@item.Key"
+                 data-pixata-draggable="@(draggable ? "true" : "false")"
+                 data-pixata-orientation="@placement.Orientation"
+                 @onclick="e => ItemClicked(item, e)"
+                 @ondblclick="e => ItemDoubleClicked(item, e)"
+                 @oncontextmenu="e => ItemContextMenu(item, e)"
+                 @oncontextmenu:preventDefault="OnItemContextMenu.HasDelegate"
+                 @onkeydown="e => ItemKeyDown(item, e)"
+                 @onkeydown:stopPropagation="true">
+      @if (agenda && !string.IsNullOrWhiteSpace(item.Colour)) {
+        <span class="pixata-blazor-scheduler-event-swatch" aria-hidden="true"></span>
+      }
+      @if (placement.ContinuesBefore) {
+        <span class="pixata-blazor-scheduler-event-continues pixata-blazor-scheduler-event-continues-before" aria-hidden="true">
+          <PixataIcon Icon="@(vertical ? PixataSvgIcons.CaretUp : PixataSvgIcons.CaretLeft)" Size="sm" />
+        </span>
+      }
+      <span class="pixata-blazor-scheduler-event-content">
+        @if (template is not null) {
+          @template(item.Item)
+        } else {
+          <span class="pixata-blazor-scheduler-event-title">@item.Title</span>
+          @if (vertical) {
+            <span class="pixata-blazor-scheduler-event-time">@ItemTimeText(item)</span>
+          }
+        }
+      </span>
+      @if (item.IsOccurrence || item.IsException) {
+        <span class="pixata-blazor-scheduler-event-icon">
+          <PixataIcon Icon="@(item.IsOccurrence ? PixataSvgIcons.Repeat : PixataSvgIcons.RepeatException)" Title="@(item.IsOccurrence ? Text.Recurring : Text.RecurrenceException)" />
+        </span>
+      }
+      @if (placement.ContinuesAfter) {
+        <span class="pixata-blazor-scheduler-event-continues pixata-blazor-scheduler-event-continues-after" aria-hidden="true">
+          <PixataIcon Icon="@(vertical ? PixataSvgIcons.CaretDown : PixataSvgIcons.CaretRight)" Size="sm" />
+        </span>
+      }
+      @if (canDelete) {
+        <button type="button"
+                class="pixata-blazor-scheduler-event-delete"
+                tabindex="-1"
+                aria-label="@Text.DeleteEvent"
+                title="@Text.DeleteEvent"
+                @onclick="() => DeleteItem(item)"
+                @onclick:stopPropagation="true"
+                @ondblclick:stopPropagation="true">
+          <PixataIcon Icon="PixataSvgIcons.X" Size="sm" />
+        </button>
+      }
+      @if (draggable && !agenda) {
+        @if (!placement.ContinuesBefore) {
+          <span class="pixata-blazor-scheduler-resize-handle pixata-blazor-scheduler-resize-handle-start" data-pixata-edge="start" aria-hidden="true"></span>
+        }
+        @if (!placement.ContinuesAfter) {
+          <span class="pixata-blazor-scheduler-resize-handle pixata-blazor-scheduler-resize-handle-end" data-pixata-edge="end" aria-hidden="true"></span>
+        }
+      }
+    </div>;
+  }
+
+  /// <summary>
+  /// Draws a slot: a time slot, a day in the all-day row, or a day in the month view. Clicking selects it, and double-clicking
+  /// creates an appointment in it
+  /// </summary>
+  internal RenderFragment RenderSlot(PixataSchedulerSlot slot, string? cssClass, RenderFragment? content) =>
+    @<div class="@PixataCss.Classes("pixata-blazor-scheduler-slot", cssClass, IsSlotSelected(slot) ? "pixata-blazor-selected" : null, SlotClass(slot))"
+          data-pixata-slot-start="@PixataSchedulerRendering.Iso(slot.Start)"
+          data-pixata-slot-end="@PixataSchedulerRendering.Iso(slot.End)"
+          data-pixata-slot-all-day="@(slot.IsAllDay ? "true" : "false")"
+          data-pixata-slot-group="@slot.Group"
+          @onclick="e => SlotClicked(slot, e)">@content</div>;
+
+  /// <summary>
+  /// Draws the header of a resource group
+  /// </summary>
+  internal RenderFragment RenderGroupHeader(PixataSchedulerGroupLevel level) {
+    RenderFragment<PixataSchedulerResourceGroupHeaderTemplateContext>? template = ActiveView.SchedulerResourceGroupHeaderTemplate;
+    if (template is not null) {
+      return template(new() { Text = level.Text, Value = level.Value, Field = level.Field });
+    }
+    return @<span class="pixata-blazor-scheduler-group-text">
+      @if (!string.IsNullOrWhiteSpace(level.Colour)) {
+        <span class="pixata-blazor-scheduler-group-swatch" style="@($"background-color:{level.Colour}")" aria-hidden="true"></span>
+      }
+      @level.Text
+    </span>;
+  }
+
+  private async Task FocusDialog() =>
+    await PixataJs.Invoke(Js, "focusFirst", false, _prompt is null ? _dialogElement : _promptElement);
+
+  private async Task DialogKeyDown(KeyboardEventArgs args) {
+    if (args.Key == "Escape") {
+      await CloseDialog();
+    }
+  }
+
+}

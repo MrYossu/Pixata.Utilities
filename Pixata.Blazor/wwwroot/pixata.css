@@ -682,3 +682,5722 @@
   flex: 0 1 100px;
   max-width: 100px;
 }
+
+/*
+  ========== Components ==========
+
+  The components in Pixata.Blazor/Components (PixataDropDownList, PixataDialog and the rest) use the classes below. Every
+  class starts with "pixata-blazor-", and the component-specific ones include the component's name, eg
+  pixata-blazor-window-titlebar. Colours, sizes and spacing come from the --pixata-blazor-* custom properties, so you can
+  retheme the components by overriding those, either on :root or on any container...
+
+    :root {
+      --pixata-blazor-primary: #6f42c1;
+      --pixata-blazor-primary-hover: #59359a;
+      --pixata-blazor-border-radius: 0;
+    }
+*/
+
+:root {
+  --pixata-blazor-font-family: inherit;
+  --pixata-blazor-font-size: .875rem;
+  --pixata-blazor-font-size-sm: .75rem;
+  --pixata-blazor-font-size-lg: 1rem;
+  --pixata-blazor-line-height: 1.4285714286;
+  --pixata-blazor-line-height-lg: 1.5;
+  --pixata-blazor-text-color: #3d3d3d;
+  --pixata-blazor-subtle-color: #666;
+  --pixata-blazor-surface-bg: #fff;
+  --pixata-blazor-surface-alt-bg: #fafafa;
+  --pixata-blazor-border-color: rgba(0, 0, 0, .08);
+  --pixata-blazor-border-alt-color: rgba(0, 0, 0, .16);
+  --pixata-blazor-border-radius: .25rem;
+  --pixata-blazor-border-radius-sm: .125rem;
+  --pixata-blazor-border-radius-lg: .375rem;
+  --pixata-blazor-spacing: .25rem;
+  --pixata-blazor-base-bg: #f5f5f5;
+  --pixata-blazor-base-hover-bg: #ebebeb;
+  --pixata-blazor-base-active-bg: #d6d6d6;
+  --pixata-blazor-base-color: #3d3d3d;
+  --pixata-blazor-primary: #ff6358;
+  --pixata-blazor-primary-hover: #eb5b51;
+  --pixata-blazor-primary-active: #d6534a;
+  --pixata-blazor-primary-color: #fff;
+  --pixata-blazor-primary-subtle: #ffe9e7;
+  --pixata-blazor-secondary: #666;
+  --pixata-blazor-secondary-hover: #525252;
+  --pixata-blazor-secondary-active: #3d3d3d;
+  --pixata-blazor-secondary-color: #fff;
+  --pixata-blazor-tertiary: #03a9f4;
+  --pixata-blazor-tertiary-hover: #0399dc;
+  --pixata-blazor-tertiary-active: #0388c4;
+  --pixata-blazor-tertiary-color: #fff;
+  --pixata-blazor-info: #0058e9;
+  --pixata-blazor-info-hover: #0052d6;
+  --pixata-blazor-info-active: #004ac2;
+  --pixata-blazor-info-color: #fff;
+  --pixata-blazor-success: #37b400;
+  --pixata-blazor-success-hover: #32a500;
+  --pixata-blazor-success-active: #2d9600;
+  --pixata-blazor-success-color: #fff;
+  --pixata-blazor-warning: #ffc000;
+  --pixata-blazor-warning-hover: #eaaf00;
+  --pixata-blazor-warning-active: #d59f00;
+  --pixata-blazor-warning-color: #3d3d3d;
+  --pixata-blazor-error: #f31700;
+  --pixata-blazor-error-hover: #df1600;
+  --pixata-blazor-error-active: #ca1400;
+  --pixata-blazor-error-color: #fff;
+  --pixata-blazor-dark: #3d3d3d;
+  --pixata-blazor-dark-hover: #333;
+  --pixata-blazor-dark-active: #292929;
+  --pixata-blazor-dark-color: #fff;
+  --pixata-blazor-light: #ebebeb;
+  --pixata-blazor-light-hover: #e0e0e0;
+  --pixata-blazor-light-active: #d6d6d6;
+  --pixata-blazor-light-color: #3d3d3d;
+  --pixata-blazor-inverse: #3d3d3d;
+  --pixata-blazor-inverse-hover: #333;
+  --pixata-blazor-inverse-active: #292929;
+  --pixata-blazor-inverse-color: #fff;
+  --pixata-blazor-hover-bg: #f0f0f0;
+  --pixata-blazor-selected-bg: #ff6358;
+  --pixata-blazor-selected-hover-bg: #eb5b51;
+  --pixata-blazor-selected-color: #fff;
+  --pixata-blazor-list-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 6%, transparent);
+  --pixata-blazor-list-item-selected-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
+  --pixata-blazor-list-item-selected-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 18%, transparent);
+  --pixata-blazor-list-item-selected-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-focus-shadow: 0 0 0 .25rem rgba(0, 0, 0, .1);
+  --pixata-blazor-focus-ring: inset 0 0 0 2px rgba(0, 0, 0, .13);
+  --pixata-blazor-input-bg: #fff;
+  --pixata-blazor-input-border-color: rgba(0, 0, 0, .16);
+  --pixata-blazor-input-hover-border-color: rgba(0, 0, 0, .24);
+  --pixata-blazor-input-focus-border-color: rgba(0, 0, 0, .24);
+  --pixata-blazor-input-focus-shadow: 0 0 0 2px rgba(0, 0, 0, .06);
+  --pixata-blazor-placeholder-color: #666;
+  --pixata-blazor-disabled-opacity: .6;
+  --pixata-blazor-popup-bg: #fff;
+  --pixata-blazor-popup-border-color: rgba(0, 0, 0, .08);
+  --pixata-blazor-popup-shadow: 0 4px 6px rgba(0, 0, 0, .06), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-blazor-popup-z-index: 100000;
+  --pixata-blazor-overlay-bg: rgba(61, 61, 61, .5);
+  --pixata-blazor-overlay-z-index: 10000;
+  --pixata-blazor-window-shadow: 0 6px 8px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-blazor-transition: .1s ease-in-out;
+  --pixata-blazor-touch-target: 2.5rem;
+}
+
+/* ---------- Icons ---------- */
+
+.pixata-blazor-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.pixata-blazor-svg-icon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pixata-blazor-icon-sm {
+  width: .75rem;
+  height: .75rem;
+}
+
+.pixata-blazor-icon-lg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.pixata-blazor-icon-xl {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* ---------- Shared states ---------- */
+
+.pixata-blazor-disabled,
+.pixata-blazor-disabled:hover {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  cursor: default;
+  pointer-events: none;
+  filter: grayscale(.1);
+}
+
+.pixata-blazor-rounded-none {
+  border-radius: 0;
+}
+
+.pixata-blazor-rounded-sm {
+  border-radius: var(--pixata-blazor-border-radius-sm);
+}
+
+.pixata-blazor-rounded-md {
+  border-radius: var(--pixata-blazor-border-radius);
+}
+
+.pixata-blazor-rounded-lg {
+  border-radius: var(--pixata-blazor-border-radius-lg);
+}
+
+.pixata-blazor-rounded-full {
+  border-radius: 9999px;
+}
+
+/* Text that is only there for screen readers */
+.pixata-blazor-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Buttons ---------- */
+
+/*
+  A button is pixata-blazor-button, plus a size (-sm, -md, -lg), a pixata-blazor-rounded-* class, a fill mode (-solid,
+  -outline, -flat, -link, -clear) and a theme colour (-base, -primary, -secondary...). The theme colour classes only set the
+  custom properties that the fill mode classes use, so a new colour is just a new class setting those properties
+*/
+.pixata-blazor-button {
+  --pixata-blazor-button-bg: var(--pixata-blazor-base-bg);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-base-active-bg);
+  --pixata-blazor-button-color: var(--pixata-blazor-base-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-button-accent: var(--pixata-blazor-text-color);
+  --pixata-blazor-button-on-accent: #fff;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pixata-blazor-spacing);
+  margin: 0;
+  border-width: 1px;
+  border-style: solid;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  font-weight: 400;
+  line-height: var(--pixata-blazor-line-height);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  position: relative;
+  transition: color var(--pixata-blazor-transition), background-color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-button:disabled,
+.pixata-blazor-button.pixata-blazor-disabled {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  cursor: default;
+  pointer-events: none;
+}
+
+.pixata-blazor-button:focus-visible {
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-button-sm {
+  padding: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-button-md {
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-button-lg {
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2);
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: var(--pixata-blazor-line-height-lg);
+}
+
+/* An icon-only button is square */
+.pixata-blazor-icon-button.pixata-blazor-button-sm {
+  padding: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-icon-button.pixata-blazor-button-md {
+  padding: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-icon-button.pixata-blazor-button-lg {
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-icon-button .pixata-blazor-icon {
+  width: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height));
+  height: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height));
+  padding: .125rem;
+}
+
+.pixata-blazor-button-primary {
+  --pixata-blazor-button-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-primary-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-primary-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-button-accent: var(--pixata-blazor-primary);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-primary-color);
+}
+
+.pixata-blazor-button-secondary {
+  --pixata-blazor-button-bg: var(--pixata-blazor-secondary);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-secondary-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-secondary-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-secondary-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-secondary);
+  --pixata-blazor-button-accent: var(--pixata-blazor-secondary);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-secondary-color);
+}
+
+.pixata-blazor-button-tertiary {
+  --pixata-blazor-button-bg: var(--pixata-blazor-tertiary);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-tertiary-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-tertiary-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-tertiary-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-tertiary);
+  --pixata-blazor-button-accent: var(--pixata-blazor-tertiary);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-tertiary-color);
+}
+
+.pixata-blazor-button-info {
+  --pixata-blazor-button-bg: var(--pixata-blazor-info);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-info-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-info-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-info-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-info);
+  --pixata-blazor-button-accent: var(--pixata-blazor-info);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-info-color);
+}
+
+.pixata-blazor-button-success {
+  --pixata-blazor-button-bg: var(--pixata-blazor-success);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-success-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-success-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-success-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-success);
+  --pixata-blazor-button-accent: var(--pixata-blazor-success);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-success-color);
+}
+
+.pixata-blazor-button-warning {
+  --pixata-blazor-button-bg: var(--pixata-blazor-warning);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-warning-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-warning-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-warning-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-warning);
+  --pixata-blazor-button-accent: var(--pixata-blazor-warning);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-warning-color);
+}
+
+.pixata-blazor-button-error {
+  --pixata-blazor-button-bg: var(--pixata-blazor-error);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-error-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-error-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-error-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-error);
+  --pixata-blazor-button-accent: var(--pixata-blazor-error);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-error-color);
+}
+
+.pixata-blazor-button-dark {
+  --pixata-blazor-button-bg: var(--pixata-blazor-dark);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-dark-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-dark-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-dark-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-dark);
+  --pixata-blazor-button-accent: var(--pixata-blazor-dark);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-dark-color);
+}
+
+.pixata-blazor-button-light {
+  --pixata-blazor-button-bg: var(--pixata-blazor-light);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-light-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-light-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-light-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-light);
+  --pixata-blazor-button-accent: var(--pixata-blazor-light-color);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-light);
+}
+
+.pixata-blazor-button-inverse {
+  --pixata-blazor-button-bg: var(--pixata-blazor-inverse);
+  --pixata-blazor-button-hover-bg: var(--pixata-blazor-inverse-hover);
+  --pixata-blazor-button-active-bg: var(--pixata-blazor-inverse-active);
+  --pixata-blazor-button-color: var(--pixata-blazor-inverse-color);
+  --pixata-blazor-button-border-color: var(--pixata-blazor-inverse);
+  --pixata-blazor-button-accent: var(--pixata-blazor-inverse);
+  --pixata-blazor-button-on-accent: var(--pixata-blazor-inverse-color);
+}
+
+.pixata-blazor-button-solid {
+  background-color: var(--pixata-blazor-button-bg);
+  border-color: var(--pixata-blazor-button-border-color);
+  color: var(--pixata-blazor-button-color);
+}
+
+.pixata-blazor-button-solid:hover,
+.pixata-blazor-button-solid.pixata-blazor-hover {
+  background-color: var(--pixata-blazor-button-hover-bg);
+}
+
+.pixata-blazor-button-solid:active,
+.pixata-blazor-button-solid.pixata-blazor-active,
+.pixata-blazor-button-solid.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-button-active-bg);
+}
+
+.pixata-blazor-button-outline {
+  background-color: transparent;
+  border-color: var(--pixata-blazor-button-accent);
+  color: var(--pixata-blazor-button-accent);
+}
+
+.pixata-blazor-button-outline:hover,
+.pixata-blazor-button-outline:active,
+.pixata-blazor-button-outline.pixata-blazor-active,
+.pixata-blazor-button-outline.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-button-accent);
+  border-color: var(--pixata-blazor-button-accent);
+  color: var(--pixata-blazor-button-on-accent);
+}
+
+.pixata-blazor-button-flat,
+.pixata-blazor-button-clear {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--pixata-blazor-button-accent);
+}
+
+.pixata-blazor-button-flat.pixata-blazor-button-base,
+.pixata-blazor-button-clear.pixata-blazor-button-base {
+  color: inherit;
+}
+
+.pixata-blazor-button-flat:hover,
+.pixata-blazor-button-flat.pixata-blazor-hover {
+  background-color: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.pixata-blazor-button-flat:active,
+.pixata-blazor-button-flat.pixata-blazor-active,
+.pixata-blazor-button-flat.pixata-blazor-selected {
+  background-color: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.pixata-blazor-button-clear:hover,
+.pixata-blazor-button-clear:active {
+  opacity: .8;
+}
+
+.pixata-blazor-button-link {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--pixata-blazor-button-accent);
+}
+
+.pixata-blazor-button-link:hover,
+.pixata-blazor-button-link:active {
+  text-decoration: underline;
+}
+
+/* A row of buttons that share borders, eg a split button or a toolbar group */
+.pixata-blazor-button-group {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  vertical-align: middle;
+}
+
+.pixata-blazor-button-group > .pixata-blazor-button + .pixata-blazor-button {
+  margin-inline-start: -1px;
+}
+
+.pixata-blazor-button-group > .pixata-blazor-button:not(:first-child) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.pixata-blazor-button-group > .pixata-blazor-button:not(:last-child) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+/* ---------- Inputs ---------- */
+
+/*
+  The wrapper around an input and its buttons (a drop-down's arrow, a clear button). Size it with -sm, -md or -lg, round it
+  with a pixata-blazor-rounded-* class, and add pixata-blazor-invalid for the invalid state
+*/
+.pixata-blazor-input {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--pixata-blazor-input-border-color);
+  background-color: var(--pixata-blazor-input-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  vertical-align: middle;
+  transition: border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-input-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: var(--pixata-blazor-line-height-lg);
+}
+
+.pixata-blazor-input:hover {
+  border-color: var(--pixata-blazor-input-hover-border-color);
+}
+
+.pixata-blazor-input:focus-within,
+.pixata-blazor-input.pixata-blazor-focus {
+  border-color: var(--pixata-blazor-input-focus-border-color);
+  box-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-input-flat {
+  border-color: transparent;
+  border-bottom-color: var(--pixata-blazor-input-border-color);
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.pixata-blazor-input-outline {
+  border-color: var(--pixata-blazor-text-color);
+  background-color: transparent;
+}
+
+.pixata-blazor-input.pixata-blazor-invalid,
+.pixata-blazor-input.pixata-blazor-invalid:focus-within {
+  border-color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-input.pixata-blazor-invalid:focus-within {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-error) 25%, transparent);
+}
+
+/* The text box (or the element showing the selected value) inside the wrapper */
+.pixata-blazor-input-inner {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border: 0;
+  outline: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  appearance: none;
+}
+
+.pixata-blazor-input-inner::placeholder {
+  color: var(--pixata-blazor-placeholder-color);
+  opacity: 1;
+}
+
+.pixata-blazor-input-sm .pixata-blazor-input-inner {
+  padding: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-input-lg .pixata-blazor-input-inner {
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* The button at the end of an input (eg a drop-down's arrow), which looks like a flat base button */
+.pixata-blazor-input-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) + var(--pixata-blazor-spacing) * 2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-inline-start: 1px solid var(--pixata-blazor-border-color);
+  background-color: var(--pixata-blazor-base-bg);
+  color: var(--pixata-blazor-base-color);
+  cursor: pointer;
+}
+
+.pixata-blazor-input-button:hover {
+  background-color: var(--pixata-blazor-base-hover-bg);
+}
+
+.pixata-blazor-input-sm .pixata-blazor-input-button {
+  width: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) + var(--pixata-blazor-spacing));
+}
+
+.pixata-blazor-input-lg .pixata-blazor-input-button {
+  width: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) + var(--pixata-blazor-spacing) * 4);
+}
+
+/* The little x that clears the value */
+.pixata-blazor-clear-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  align-self: center;
+  padding: 0 var(--pixata-blazor-spacing);
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  opacity: .5;
+  cursor: pointer;
+}
+
+.pixata-blazor-clear-value:hover,
+.pixata-blazor-clear-value:focus-visible {
+  opacity: 1;
+}
+
+/* ---------- Popups and lists ---------- */
+
+.pixata-blazor-popup {
+  box-sizing: border-box;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: var(--pixata-blazor-popup-z-index);
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--pixata-blazor-popup-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-popup-bg);
+  color: var(--pixata-blazor-text-color);
+  box-shadow: var(--pixata-blazor-popup-shadow);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  text-align: start;
+}
+
+/* The scrolling part of a popup, eg its list of items. PixataPopupSettings.Height and MaxHeight set its size */
+.pixata-blazor-popup-content {
+  height: var(--pixata-blazor-popup-height, auto);
+  min-height: var(--pixata-blazor-popup-min-height, 0);
+  max-height: var(--pixata-blazor-popup-max-height, 200px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.pixata-blazor-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: 0;
+}
+
+.pixata-blazor-list-item {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: background-color var(--pixata-blazor-transition), color var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-list-item:hover,
+.pixata-blazor-list-item.pixata-blazor-hover {
+  background-color: var(--pixata-blazor-list-item-hover-bg);
+}
+
+.pixata-blazor-list-item.pixata-blazor-focus {
+  box-shadow: var(--pixata-blazor-focus-ring);
+}
+
+.pixata-blazor-list-item.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-list-item-selected-bg);
+  color: var(--pixata-blazor-list-item-selected-color);
+}
+
+.pixata-blazor-list-item.pixata-blazor-selected:hover {
+  background-color: var(--pixata-blazor-list-item-selected-hover-bg);
+}
+
+.pixata-blazor-list-item.pixata-blazor-disabled {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  pointer-events: none;
+}
+
+.pixata-blazor-list-group-header {
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-list-header,
+.pixata-blazor-list-footer {
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-list-header {
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-list-footer {
+  border-top: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  color: var(--pixata-blazor-subtle-color);
+  text-align: center;
+}
+
+/* Touch screens get bigger targets */
+@media (pointer: coarse) {
+  .pixata-blazor-button,
+  .pixata-blazor-input-button,
+  .pixata-blazor-clear-value {
+    min-height: var(--pixata-blazor-touch-target);
+    min-width: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-list-item {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-button,
+  .pixata-blazor-input,
+  .pixata-blazor-list-item {
+    transition: none;
+  }
+}
+
+/* ========== PixataComboBox, PixataDropDownList and PixataMultiSelect ========== */
+
+/*
+  The drop-downs use the shared input classes (pixata-blazor-input, -input-inner, -input-button, -clear-value) and popup and
+  list classes (pixata-blazor-popup, -popup-content, -list, -list-item, -list-group-header, -no-data). Their own element also
+  has pixata-blazor-dropdown plus pixata-blazor-dropdownlist, pixata-blazor-combobox or pixata-blazor-multiselect, and their
+  popup has pixata-blazor-dropdown-popup plus pixata-blazor-dropdownlist-popup (and so on)
+*/
+:root {
+  --pixata-blazor-dropdown-popup-padding: calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-dropdown-item-radius: var(--pixata-blazor-border-radius);
+  --pixata-blazor-dropdown-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-dropdown-item-selected-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
+  --pixata-blazor-dropdown-item-selected-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 16%, transparent);
+  --pixata-blazor-dropdown-item-selected-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-dropdown-item-focus-ring: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+  --pixata-blazor-dropdown-group-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-dropdown-checkbox-size: 1rem;
+  --pixata-blazor-dropdown-checkbox-border-color: var(--pixata-blazor-border-alt-color);
+  --pixata-blazor-dropdown-checkbox-checked-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-dropdown-checkbox-checked-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-dropdownlist-bg: var(--pixata-blazor-base-bg);
+  --pixata-blazor-dropdownlist-hover-bg: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-dropdownlist-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-multiselect-tag-bg: #ebebeb;
+  --pixata-blazor-multiselect-tag-hover-bg: #e0e0e0;
+  --pixata-blazor-multiselect-tag-border-color: #c2c2c2;
+  --pixata-blazor-multiselect-tag-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-multiselect-tag-gap: .125rem;
+}
+
+/* ---------- The component ---------- */
+
+.pixata-blazor-dropdown {
+  outline: none;
+}
+
+.pixata-blazor-dropdown.pixata-blazor-dropdown-readonly {
+  cursor: default;
+}
+
+.pixata-blazor-dropdown.pixata-blazor-input-lg,
+.pixata-blazor-dropdown-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: 1.5;
+}
+
+/* The drop-down list looks like a button, with the selected item's text on it */
+.pixata-blazor-dropdownlist {
+  border-color: var(--pixata-blazor-dropdownlist-border-color);
+  background-color: var(--pixata-blazor-dropdownlist-bg);
+  color: var(--pixata-blazor-base-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-blazor-dropdownlist:hover {
+  border-color: var(--pixata-blazor-dropdownlist-border-color);
+  background-color: var(--pixata-blazor-dropdownlist-hover-bg);
+}
+
+.pixata-blazor-dropdownlist:focus,
+.pixata-blazor-dropdownlist:focus-within {
+  border-color: var(--pixata-blazor-dropdownlist-border-color);
+  box-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-input-outline {
+  border-color: color-mix(in srgb, var(--pixata-blazor-text-color) 50%, transparent);
+  background-color: transparent;
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-input-flat {
+  border-color: transparent;
+  border-bottom-color: var(--pixata-blazor-border-alt-color);
+  background-color: transparent;
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-input-outline:hover,
+.pixata-blazor-dropdownlist.pixata-blazor-input-flat:hover {
+  background-color: var(--pixata-blazor-dropdown-item-hover-bg);
+}
+
+.pixata-blazor-dropdownlist.pixata-blazor-invalid {
+  border-color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-dropdownlist-value {
+  display: flex;
+  align-items: center;
+}
+
+.pixata-blazor-input-value-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The arrow of the drop-down list is part of the button, so has no background or border of its own */
+.pixata-blazor-dropdownlist .pixata-blazor-input-button,
+.pixata-blazor-dropdownlist .pixata-blazor-input-button:hover {
+  border-inline-start: 0;
+  background: none;
+  color: inherit;
+}
+
+.pixata-blazor-combobox .pixata-blazor-input-button,
+.pixata-blazor-multiselect .pixata-blazor-input-button {
+  user-select: none;
+}
+
+.pixata-blazor-dropdown .pixata-blazor-clear-value {
+  align-self: stretch;
+}
+
+.pixata-blazor-dropdown.pixata-blazor-dropdown-readonly .pixata-blazor-input-button {
+  cursor: default;
+}
+
+/* The spinner shown while OnRead is fetching data */
+.pixata-blazor-dropdown-loading {
+  box-sizing: border-box;
+  display: inline-block;
+  flex: none;
+  align-self: center;
+  width: 1em;
+  height: 1em;
+  margin: 0 var(--pixata-blazor-spacing);
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  opacity: .6;
+  animation: pixata-blazor-dropdown-spin .75s linear infinite;
+}
+
+@keyframes pixata-blazor-dropdown-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- The multi-select's tags ---------- */
+
+.pixata-blazor-multiselect {
+  cursor: text;
+}
+
+.pixata-blazor-multiselect-values {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixata-blazor-multiselect-tag-gap);
+  min-width: 0;
+  padding: var(--pixata-blazor-multiselect-tag-gap);
+}
+
+.pixata-blazor-multiselect-tags {
+  display: contents;
+}
+
+.pixata-blazor-multiselect .pixata-blazor-multiselect-input {
+  flex: 1 1 3em;
+  width: 3em;
+  min-width: 3em;
+  margin: calc(var(--pixata-blazor-multiselect-tag-gap) * -1);
+}
+
+.pixata-blazor-multiselect-tag {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+  max-width: 100%;
+  padding: calc(var(--pixata-blazor-spacing) - 1px) var(--pixata-blazor-spacing);
+  border: 1px solid var(--pixata-blazor-multiselect-tag-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-multiselect-tag-bg);
+  color: var(--pixata-blazor-multiselect-tag-color);
+  line-height: 1rem;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.pixata-blazor-multiselect-tag:hover {
+  background-color: var(--pixata-blazor-multiselect-tag-hover-bg);
+}
+
+.pixata-blazor-input-sm .pixata-blazor-multiselect-tag {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.pixata-blazor-input-lg .pixata-blazor-multiselect-tag {
+  padding-top: calc(var(--pixata-blazor-spacing) * 1.5 - 1px);
+  padding-bottom: calc(var(--pixata-blazor-spacing) * 1.5 - 1px);
+}
+
+.pixata-blazor-multiselect-tag-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-multiselect-tag-remove {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  opacity: .8;
+  cursor: pointer;
+}
+
+.pixata-blazor-multiselect-tag-remove:hover {
+  opacity: 1;
+}
+
+/* ---------- The popup and its list ---------- */
+
+.pixata-blazor-dropdown-popup {
+  padding: var(--pixata-blazor-dropdown-popup-padding);
+}
+
+.pixata-blazor-dropdown-filter {
+  flex: none;
+  padding: var(--pixata-blazor-dropdown-popup-padding);
+  padding-top: 0;
+}
+
+.pixata-blazor-dropdown-filter-box {
+  align-items: center;
+}
+
+.pixata-blazor-dropdown-filter-icon {
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * 2);
+  opacity: .8;
+}
+
+/* The filter box takes the popup's width rather than setting it */
+.pixata-blazor-dropdown-filter-box .pixata-blazor-input-inner {
+  width: 0;
+  padding-inline-start: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-dropdown-header,
+.pixata-blazor-dropdown-footer {
+  flex: none;
+  padding: 0;
+  border: 0;
+}
+
+.pixata-blazor-dropdown-content {
+  position: relative;
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item {
+  border-radius: var(--pixata-blazor-dropdown-item-radius);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item:hover {
+  background-color: var(--pixata-blazor-dropdown-item-hover-bg);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item.pixata-blazor-focus {
+  box-shadow: var(--pixata-blazor-dropdown-item-focus-ring);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-dropdown-item-selected-bg);
+  color: var(--pixata-blazor-dropdown-item-selected-color);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-list-item.pixata-blazor-selected:hover {
+  background-color: var(--pixata-blazor-dropdown-item-selected-hover-bg);
+}
+
+.pixata-blazor-dropdown-item-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-dropdown-sm .pixata-blazor-list-item,
+.pixata-blazor-dropdown-sm .pixata-blazor-list-group-header {
+  padding-top: calc(var(--pixata-blazor-spacing) * .5);
+  padding-bottom: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-dropdown-lg .pixata-blazor-list-item {
+  padding-top: calc(var(--pixata-blazor-spacing) * 2);
+  padding-bottom: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* Group headers stick to the top of the list while their items are in view */
+.pixata-blazor-dropdown-group-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: calc(var(--pixata-blazor-spacing) + 1px) calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 0;
+  background-color: var(--pixata-blazor-popup-bg);
+  box-shadow: inset 0 1px 0 0 var(--pixata-blazor-border-color);
+  color: var(--pixata-blazor-dropdown-group-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.5;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-dropdown-list > .pixata-blazor-dropdown-group-header:first-child {
+  box-shadow: none;
+}
+
+/* "Select all" stays at the top of the list as it scrolls */
+.pixata-blazor-dropdown-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--pixata-blazor-popup-bg);
+}
+
+.pixata-blazor-dropdown-select-all {
+  margin-bottom: var(--pixata-blazor-spacing);
+  box-shadow: 0 1px 0 0 var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-dropdown-list .pixata-blazor-dropdown-select-all.pixata-blazor-focus {
+  box-shadow: var(--pixata-blazor-dropdown-item-focus-ring), 0 1px 0 0 var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-dropdown-custom-value-icon {
+  opacity: .8;
+}
+
+.pixata-blazor-dropdown-placeholder {
+  background: linear-gradient(var(--pixata-blazor-dropdown-item-hover-bg), var(--pixata-blazor-dropdown-item-hover-bg)) no-repeat calc(var(--pixata-blazor-spacing) * 2) center / 60% 40%;
+}
+
+.pixata-blazor-dropdown-no-data {
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 4) calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* A drawn checkbox (the option is what gets chosen, so it isn't an input) */
+.pixata-blazor-dropdown-checkbox {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--pixata-blazor-dropdown-checkbox-size);
+  height: var(--pixata-blazor-dropdown-checkbox-size);
+  border: 1px solid var(--pixata-blazor-dropdown-checkbox-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-input-bg);
+  color: var(--pixata-blazor-dropdown-checkbox-checked-bg);
+}
+
+.pixata-blazor-dropdown-checkbox .pixata-blazor-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.pixata-blazor-dropdown-checkbox svg {
+  stroke-width: 3;
+}
+
+.pixata-blazor-dropdown-checkbox.pixata-blazor-checked {
+  border-color: var(--pixata-blazor-dropdown-checkbox-checked-bg);
+  background-color: var(--pixata-blazor-dropdown-checkbox-checked-bg);
+  color: var(--pixata-blazor-dropdown-checkbox-checked-color);
+}
+
+/* Touch screens: bigger targets for removing a tag, without making the tags themselves bigger */
+@media (pointer: coarse) {
+  .pixata-blazor-multiselect-tag-remove::after {
+    content: "";
+    position: absolute;
+    inset: -.5rem;
+  }
+
+  .pixata-blazor-dropdown .pixata-blazor-clear-value,
+  .pixata-blazor-dropdown .pixata-blazor-input-button {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-dropdown-loading {
+    animation-duration: 2s;
+  }
+}
+
+/* ========== end of PixataComboBox, PixataDropDownList and PixataMultiSelect ========== */
+
+/* ========== PixataTabStrip ========== */
+
+:root {
+  --pixata-blazor-tabstrip-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-tabstrip-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-tabstrip-hover-color: var(--pixata-blazor-primary);
+  --pixata-blazor-tabstrip-active-color: var(--pixata-blazor-primary);
+  --pixata-blazor-tabstrip-active-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-tabstrip-content-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-tabstrip-content-padding: calc(var(--pixata-blazor-spacing) * 4);
+  --pixata-blazor-tabstrip-radius: var(--pixata-blazor-border-radius);
+  --pixata-blazor-tabstrip-focus-ring: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-tabstrip {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-tabstrip-color);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-tabstrip-bottom {
+  flex-direction: column-reverse;
+}
+
+.pixata-blazor-tabstrip-left {
+  flex-direction: row;
+}
+
+.pixata-blazor-tabstrip-right {
+  flex-direction: row-reverse;
+}
+
+/* The row (or column) holding the tabs, the scroll buttons and the suffix template */
+.pixata-blazor-tabstrip-items-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper,
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper {
+  flex-direction: column;
+}
+
+/*
+  The line between the tabs and the content. It is drawn behind the tabs, so the active tab (which has a background) hides
+  it and looks joined to the content, even when the tab list scrolls
+*/
+.pixata-blazor-tabstrip-items-wrapper::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border: 0 solid var(--pixata-blazor-tabstrip-border-color);
+  pointer-events: none;
+}
+
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset: auto 0 0 0;
+  border-bottom-width: 1px;
+}
+
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset: 0 0 auto 0;
+  border-top-width: 1px;
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset-block: 0;
+  inset-inline-end: 0;
+  border-inline-end-width: 1px;
+}
+
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper::after {
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-inline-start-width: 1px;
+}
+
+.pixata-blazor-tabstrip-items {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: inherit;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: 0;
+}
+
+.pixata-blazor-tabstrip-items-start {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-tabstrip-items-center {
+  justify-content: center;
+}
+
+.pixata-blazor-tabstrip-items-end {
+  justify-content: flex-end;
+}
+
+.pixata-blazor-tabstrip-items-justify {
+  justify-content: space-between;
+}
+
+.pixata-blazor-tabstrip-items-stretched > .pixata-blazor-tabstrip-item {
+  flex: 1 0 0;
+}
+
+.pixata-blazor-tabstrip-item {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 var(--pixata-blazor-spacing);
+  border: 1px solid transparent;
+  color: inherit;
+  cursor: pointer;
+  outline: 0;
+  user-select: none;
+  transition: color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), background-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-tabstrip-item:hover {
+  color: var(--pixata-blazor-tabstrip-hover-color);
+}
+
+.pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-color: var(--pixata-blazor-tabstrip-border-color);
+  background-color: var(--pixata-blazor-tabstrip-active-bg);
+  color: var(--pixata-blazor-tabstrip-active-color);
+}
+
+.pixata-blazor-tabstrip-item:focus-visible {
+  box-shadow: var(--pixata-blazor-tabstrip-focus-ring);
+}
+
+/*
+  Each position rounds the corners away from the content, and opens the active tab on to the content. These rules (and the
+  size rules) only reach the tab strip's own tabs, not those of a tab strip in one of its tabs
+*/
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-bottom-color: transparent;
+}
+
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-top-color: transparent;
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-inline-end-color: transparent;
+}
+
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item {
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-item.pixata-blazor-active {
+  border-inline-start-color: transparent;
+}
+
+.pixata-blazor-tabstrip-link {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  padding: calc(var(--pixata-blazor-spacing) * 1.5);
+  color: inherit;
+  white-space: nowrap;
+}
+
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link,
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link {
+  justify-content: center;
+}
+
+.pixata-blazor-tabstrip-sm > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link {
+  padding: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-tabstrip-lg > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-link {
+  padding: calc(var(--pixata-blazor-spacing) * 2.5);
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: 1.5;
+}
+
+.pixata-blazor-tabstrip-item-actions {
+  display: flex;
+  align-items: center;
+  align-self: center;
+}
+
+.pixata-blazor-tabstrip-close.pixata-blazor-icon-button.pixata-blazor-button-sm {
+  padding: .125rem;
+}
+
+.pixata-blazor-tabstrip-close.pixata-blazor-icon-button .pixata-blazor-icon {
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+}
+
+/* The content of each tab. Only the active tab's is shown */
+.pixata-blazor-tabstrip-content {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: var(--pixata-blazor-tabstrip-content-padding);
+  overflow: auto;
+  border: 1px solid var(--pixata-blazor-tabstrip-border-color);
+  background-color: var(--pixata-blazor-tabstrip-content-bg);
+  color: inherit;
+  outline: 0;
+}
+
+.pixata-blazor-tabstrip-content[hidden] {
+  display: none;
+}
+
+.pixata-blazor-tabstrip-content:focus-visible {
+  outline: 1px dotted currentColor;
+  outline-offset: -1px;
+}
+
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-content {
+  border-top-width: 0;
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-content {
+  border-bottom-width: 0;
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-content {
+  border-inline-start-width: 0;
+  border-start-end-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-end-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-content {
+  border-inline-end-width: 0;
+  border-start-start-radius: var(--pixata-blazor-tabstrip-radius);
+  border-end-start-radius: var(--pixata-blazor-tabstrip-radius);
+}
+
+/* A scrollable tab strip keeps its tabs on one line, and scrolls them (with a swipe, the scroll buttons or the keyboard) */
+.pixata-blazor-tabstrip-scrollable > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+.pixata-blazor-tabstrip-scrollable > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items::-webkit-scrollbar {
+  display: none;
+}
+
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items,
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-left > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items,
+.pixata-blazor-tabstrip-scrollable.pixata-blazor-tabstrip-right > .pixata-blazor-tabstrip-items-wrapper > .pixata-blazor-tabstrip-items {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.pixata-blazor-tabstrip-scroll-button.pixata-blazor-button {
+  flex: none;
+  z-index: 1;
+  align-self: stretch;
+}
+
+.pixata-blazor-tabstrip-top > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl),
+.pixata-blazor-tabstrip-bottom > .pixata-blazor-tabstrip-items-wrapper .pixata-blazor-tabstrip-scroll-button .pixata-blazor-icon:dir(rtl) {
+  transform: scaleX(-1);
+}
+
+/* The suffix template, after the tabs */
+.pixata-blazor-tabstrip-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+/* Touch screens get bigger tabs and buttons */
+@media (pointer: coarse) {
+  .pixata-blazor-tabstrip-link {
+    min-width: var(--pixata-blazor-touch-target);
+    min-height: var(--pixata-blazor-touch-target);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-tabstrip-item {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataTabStrip ========== */
+
+/* ========== PixataEditor ========== */
+
+/*
+  PixataEditor. The rules whose selectors mention pixata-blazor-editor-document style the content being edited. In iframe
+  mode the editor copies them (and the custom properties they use) into the iframe, so the content looks the same in both
+  modes, and page styles stay out of the iframe. Restyle the content by adding rules that mention that class too
+*/
+
+:root {
+  --pixata-blazor-editor-bg: var(--pixata-blazor-input-bg);
+  --pixata-blazor-editor-toolbar-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-editor-content-padding: .5rem .75rem;
+  --pixata-blazor-editor-link-color: #0058e9;
+  --pixata-blazor-editor-table-border-color: #c6c6c6;
+  --pixata-blazor-editor-selected-cell-bg: rgba(0, 88, 233, .12);
+  --pixata-blazor-editor-selected-node-outline: 2px solid #8cb2f7;
+  --pixata-blazor-editor-code-bg: #f5f5f5;
+  --pixata-blazor-editor-quote-border-color: #d6d6d6;
+  --pixata-blazor-editor-dialog-width: 400px;
+}
+
+.pixata-blazor-editor {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 6rem;
+  border: 1px solid var(--pixata-blazor-input-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-editor-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  transition: border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-editor:focus-within {
+  border-color: var(--pixata-blazor-input-focus-border-color);
+  box-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-editor.pixata-blazor-invalid,
+.pixata-blazor-editor.pixata-blazor-invalid:focus-within {
+  border-color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-editor.pixata-blazor-invalid:focus-within {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-error) 25%, transparent);
+}
+
+/* The editor stays readable (and scrollable) when disabled */
+.pixata-blazor-editor.pixata-blazor-disabled {
+  pointer-events: none;
+}
+
+.pixata-blazor-editor.pixata-blazor-disabled .pixata-blazor-editor-content {
+  pointer-events: auto;
+}
+
+/* ---------- Toolbar ---------- */
+
+.pixata-blazor-editor-toolbar {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+  background-color: var(--pixata-blazor-editor-toolbar-bg);
+}
+
+/* With Adaptive, the toolbar stays on one line and the tools that don't fit go into the overflow menu */
+.pixata-blazor-editor-toolbar-adaptive {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.pixata-blazor-editor-toolbar-item {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  max-width: 100%;
+}
+
+/* Tools in the overflow menu stay in the toolbar, out of sight, so their widths can still be measured */
+.pixata-blazor-editor-toolbar-item-hidden,
+.pixata-blazor-editor-toolbar-overflow-hidden {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-toolbar-overflow {
+  display: inline-flex;
+  flex: none;
+  margin-inline-start: auto;
+}
+
+.pixata-blazor-editor-tool .pixata-blazor-icon {
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-overflow-tools {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  max-width: min(22rem, calc(100vw - 1rem));
+  max-height: min(20rem, calc(100vh - 6rem));
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  overflow: auto;
+}
+
+/* The format, font and size drop-downs */
+.pixata-blazor-editor-dropdown-wrapper,
+.pixata-blazor-editor-colour-wrapper,
+.pixata-blazor-editor-table-wrapper {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.pixata-blazor-input.pixata-blazor-editor-dropdown {
+  width: 10rem;
+  max-width: 100%;
+  cursor: pointer;
+  text-align: start;
+}
+
+.pixata-blazor-editor-dropdown.pixata-blazor-editor-tool-font-size {
+  width: 8rem;
+}
+
+.pixata-blazor-editor-dropdown:focus-visible {
+  outline: none;
+  border-color: var(--pixata-blazor-input-focus-border-color);
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-editor-dropdown:disabled {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  cursor: default;
+}
+
+.pixata-blazor-editor-dropdown .pixata-blazor-input-inner {
+  display: block;
+  align-self: center;
+}
+
+.pixata-blazor-editor-dropdown-popup .pixata-blazor-popup-content {
+  --pixata-blazor-popup-max-height: 16rem;
+}
+
+.pixata-blazor-editor-format-preview {
+  display: block;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pixata-blazor-editor-format-h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h3 {
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h4 {
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h5 {
+  font-size: .95em;
+  font-weight: 700;
+}
+
+.pixata-blazor-editor-format-h6 {
+  font-size: .85em;
+  font-weight: 700;
+}
+
+/* The colour pickers */
+.pixata-blazor-editor-colour-tool {
+  gap: 0;
+  padding-inline-end: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-editor-colour-icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1px;
+}
+
+.pixata-blazor-editor-colour-icon .pixata-blazor-icon {
+  width: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) - 3px);
+  height: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height) - 3px);
+}
+
+.pixata-blazor-editor-colour-bar {
+  display: block;
+  height: 3px;
+  border-radius: 1px;
+}
+
+.pixata-blazor-editor-colour-bar.pixata-blazor-editor-colour-none {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-editor-colour-caret .pixata-blazor-icon {
+  width: .75rem;
+  height: .75rem;
+}
+
+.pixata-blazor-editor-palette {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-editor-palette-clear {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: var(--pixata-blazor-spacing);
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-blazor-editor-palette-clear:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-editor-palette-clear.pixata-blazor-focus {
+  box-shadow: var(--pixata-blazor-focus-ring);
+}
+
+.pixata-blazor-editor-colour-swatch {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+}
+
+.pixata-blazor-editor-colour-swatch.pixata-blazor-editor-colour-none {
+  border: 1px solid var(--pixata-blazor-border-alt-color);
+  background: linear-gradient(to top right, transparent calc(50% - 1px), var(--pixata-blazor-error) calc(50% - 1px), var(--pixata-blazor-error) calc(50% + 1px), transparent calc(50% + 1px));
+}
+
+.pixata-blazor-editor-palette-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pixata-blazor-editor-palette-row {
+  display: flex;
+  gap: 1px;
+}
+
+.pixata-blazor-editor-palette-cell {
+  box-sizing: border-box;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  cursor: pointer;
+}
+
+.pixata-blazor-editor-palette-cell:hover,
+.pixata-blazor-editor-palette-cell.pixata-blazor-focus {
+  position: relative;
+  outline: 2px solid var(--pixata-blazor-text-color);
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 1px #fff;
+  z-index: 1;
+}
+
+.pixata-blazor-editor-palette-cell.pixata-blazor-selected {
+  box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px rgba(0, 0, 0, .5);
+}
+
+/* The Insert table grid */
+.pixata-blazor-editor-table-picker {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-editor-table-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pixata-blazor-editor-table-row {
+  display: flex;
+  gap: 2px;
+}
+
+.pixata-blazor-editor-table-cell {
+  box-sizing: border-box;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--pixata-blazor-border-alt-color);
+  background-color: var(--pixata-blazor-surface-bg);
+  cursor: pointer;
+}
+
+.pixata-blazor-editor-table-cell.pixata-blazor-selected {
+  border-color: var(--pixata-blazor-primary);
+  background-color: var(--pixata-blazor-primary-subtle);
+}
+
+.pixata-blazor-editor-table-size {
+  color: var(--pixata-blazor-subtle-color);
+  text-align: center;
+}
+
+/* ---------- Content area ---------- */
+
+.pixata-blazor-editor-content {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pixata-blazor-editor-iframe {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background-color: var(--pixata-blazor-editor-bg);
+  color-scheme: normal;
+}
+
+.pixata-blazor-editor-mount {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Until the editor loads in the browser, the content is shown read-only in its place */
+.pixata-blazor-editor-loading {
+  visibility: hidden;
+}
+
+.pixata-blazor-editor-prerender {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+}
+
+/* ---------- Content ---------- */
+
+.pixata-blazor-editor-document {
+  box-sizing: border-box;
+  position: relative;
+  min-height: 100%;
+  margin: 0;
+  padding: var(--pixata-blazor-editor-content-padding);
+  outline: none;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
+  -webkit-font-variant-ligatures: none;
+}
+
+.pixata-blazor-editor-document.pixata-blazor-editor-prerender {
+  white-space: normal;
+}
+
+.pixata-blazor-editor-document > :first-child {
+  margin-top: 0;
+}
+
+.pixata-blazor-editor-document > :last-child {
+  margin-bottom: 0;
+}
+
+.pixata-blazor-editor-document p {
+  margin: 0 0 1em;
+}
+
+.pixata-blazor-editor-document h1,
+.pixata-blazor-editor-document h2,
+.pixata-blazor-editor-document h3,
+.pixata-blazor-editor-document h4,
+.pixata-blazor-editor-document h5,
+.pixata-blazor-editor-document h6 {
+  margin: 0 0 .5em;
+  line-height: 1.2;
+}
+
+.pixata-blazor-editor-document a {
+  color: var(--pixata-blazor-editor-link-color);
+  text-decoration: underline;
+}
+
+.pixata-blazor-editor-document img {
+  max-width: 100%;
+  height: auto;
+}
+
+.pixata-blazor-editor-document ul,
+.pixata-blazor-editor-document ol {
+  margin: 0 0 1em;
+  padding-inline-start: 2em;
+}
+
+.pixata-blazor-editor-document li > p {
+  margin: 0;
+}
+
+.pixata-blazor-editor-document blockquote {
+  margin: 0 0 1em;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--pixata-blazor-editor-quote-border-color);
+}
+
+.pixata-blazor-editor-document pre {
+  margin: 0 0 1em;
+  padding: .5em;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  background-color: var(--pixata-blazor-editor-code-bg);
+  white-space: pre-wrap;
+}
+
+.pixata-blazor-editor-document code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: .9em;
+}
+
+.pixata-blazor-editor-document hr {
+  margin: 1em 0;
+  border: 0;
+  border-top: 1px solid var(--pixata-blazor-editor-table-border-color);
+}
+
+.pixata-blazor-editor-document table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  table-layout: fixed;
+  overflow: hidden;
+}
+
+.pixata-blazor-editor-document td,
+.pixata-blazor-editor-document th {
+  box-sizing: border-box;
+  position: relative;
+  min-width: 1em;
+  padding: .25em .5em;
+  border: 1px solid var(--pixata-blazor-editor-table-border-color);
+  vertical-align: top;
+}
+
+.pixata-blazor-editor-document th {
+  font-weight: 700;
+  text-align: start;
+}
+
+.pixata-blazor-editor-document td > p,
+.pixata-blazor-editor-document th > p {
+  margin: 0;
+}
+
+.pixata-blazor-editor-document .tableWrapper {
+  overflow-x: auto;
+}
+
+.pixata-blazor-editor-document .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-color: var(--pixata-blazor-editor-selected-cell-bg);
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background-color: var(--pixata-blazor-editor-link-color);
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document .ProseMirror-selectednode {
+  outline: var(--pixata-blazor-editor-selected-node-outline);
+}
+
+.pixata-blazor-editor-document li.ProseMirror-selectednode {
+  outline: none;
+}
+
+.pixata-blazor-editor-document li.ProseMirror-selectednode::after {
+  content: "";
+  position: absolute;
+  inset: -2px -2px -2px -32px;
+  border: var(--pixata-blazor-editor-selected-node-outline);
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document img.ProseMirror-separator {
+  display: inline !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+.pixata-blazor-editor-document.ProseMirror-hideselection *::selection {
+  background: transparent;
+}
+
+.pixata-blazor-editor-document.ProseMirror-hideselection *::-moz-selection {
+  background: transparent;
+}
+
+.pixata-blazor-editor-document.ProseMirror-hideselection {
+  caret-color: transparent;
+}
+
+.pixata-blazor-editor-document [draggable][contenteditable=false] {
+  user-select: text;
+}
+
+.pixata-blazor-editor-document .ProseMirror-gapcursor {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+}
+
+.pixata-blazor-editor-document .ProseMirror-gapcursor::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -2px;
+  width: 20px;
+  border-top: 1px solid currentColor;
+  animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes ProseMirror-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.pixata-blazor-editor-document.ProseMirror-focused .ProseMirror-gapcursor {
+  display: block;
+}
+
+.pixata-blazor-editor-document .pixata-blazor-editor-placeholder::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  color: var(--pixata-blazor-placeholder-color);
+  pointer-events: none;
+}
+
+/* ---------- Dialogs (insert link, insert image, view HTML) ---------- */
+
+.pixata-blazor-editor-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--pixata-blazor-overlay-z-index);
+  background-color: var(--pixata-blazor-overlay-bg);
+}
+
+.pixata-blazor-editor-dialog {
+  box-sizing: border-box;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 1);
+  display: flex;
+  flex-direction: column;
+  width: var(--pixata-blazor-editor-dialog-width);
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-surface-bg);
+  color: var(--pixata-blazor-text-color);
+  box-shadow: var(--pixata-blazor-window-shadow);
+  transform: translate(-50%, -50%);
+  text-align: start;
+}
+
+.pixata-blazor-editor-dialog-html {
+  --pixata-blazor-editor-dialog-width: 640px;
+}
+
+.pixata-blazor-editor-dialog-titlebar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 4);
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-editor-dialog-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--pixata-blazor-font-size-lg);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-editor-dialog-form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  margin: 0;
+}
+
+.pixata-blazor-editor-dialog-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 4);
+  overflow: auto;
+}
+
+.pixata-blazor-editor-dialog-field {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+}
+
+.pixata-blazor-editor-dialog-label {
+  font-weight: 500;
+}
+
+.pixata-blazor-editor-dialog-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-editor-dialog-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  cursor: pointer;
+}
+
+.pixata-blazor-editor-dialog-checkbox input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--pixata-blazor-primary);
+}
+
+.pixata-blazor-editor-dialog-error {
+  color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-editor-html-source {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 18rem;
+  height: 50vh;
+  margin: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border: 1px solid var(--pixata-blazor-input-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-input-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.5;
+  resize: vertical;
+  white-space: pre;
+  overflow: auto;
+}
+
+.pixata-blazor-editor-html-source:focus {
+  outline: none;
+  border-color: var(--pixata-blazor-input-focus-border-color);
+  box-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-editor-dialog-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 4);
+  border-top: 1px solid var(--pixata-blazor-border-color);
+}
+
+/* ---------- Touch screens and small screens ---------- */
+
+@media (pointer: coarse) {
+  .pixata-blazor-input.pixata-blazor-editor-dropdown {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-editor-palette-cell {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .pixata-blazor-editor-palette-clear {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-editor-table-cell {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pixata-blazor-editor-dialog {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+  }
+
+  .pixata-blazor-editor-dialog-row {
+    flex-direction: column;
+  }
+
+  .pixata-blazor-editor-html-source {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .pixata-blazor-editor-palette-cell {
+    width: min(1.75rem, calc((100vw - 3rem) / var(--pixata-blazor-editor-palette-columns, 10) - 1px));
+    height: min(1.75rem, calc((100vw - 3rem) / var(--pixata-blazor-editor-palette-columns, 10) - 1px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-editor {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataEditor ========== */
+
+/* ========== PixataFileSelect and PixataUpload ========== */
+
+/*
+  PixataFileSelect and PixataUpload share their markup: pixata-blazor-upload (plus pixata-blazor-fileselect for the file
+  select) holds the drop zone (pixata-blazor-upload-dropzone: the select button, and the hint or upload status), the file
+  list (pixata-blazor-upload-files) and, for an upload that doesn't start by itself, the Clear and Upload buttons
+  (pixata-blazor-upload-actions-bar). Each file is a pixata-blazor-upload-file, with -progress, -success, -error,
+  -invalid or -paused added for its state. PixataDropZone is pixata-blazor-external-dropzone
+*/
+:root {
+  --pixata-blazor-upload-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-upload-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-upload-dropzone-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-upload-dropzone-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, var(--pixata-blazor-surface-alt-bg));
+  --pixata-blazor-upload-button-min-width: 7em;
+  --pixata-blazor-upload-files-max-height: 300px;
+  --pixata-blazor-upload-file-icon-size: 2rem;
+  --pixata-blazor-upload-file-icon-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-upload-progress-height: 2px;
+  --pixata-blazor-upload-progress-bg: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-upload-progress-color: var(--pixata-blazor-info);
+  --pixata-blazor-upload-success-color: color-mix(in srgb, var(--pixata-blazor-success) 85%, #000);
+  --pixata-blazor-upload-error-color: color-mix(in srgb, var(--pixata-blazor-error) 85%, #000);
+  --pixata-blazor-upload-invalid-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-dropzone-height: 220px;
+  --pixata-blazor-dropzone-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-dropzone-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-dropzone-icon-size: 3rem;
+  --pixata-blazor-dropzone-icon-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-dropzone-hover-color: var(--pixata-blazor-primary);
+}
+
+.pixata-blazor-upload {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  overflow: clip;
+  border: 1px solid var(--pixata-blazor-upload-border-color);
+  background-color: var(--pixata-blazor-upload-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  text-align: start;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-upload *,
+.pixata-blazor-upload *::before,
+.pixata-blazor-upload *::after {
+  box-sizing: border-box;
+}
+
+/* When disabled, the buttons are greyed out, but the file list can still be read and scrolled */
+.pixata-blazor-upload-disabled .pixata-blazor-upload-dropzone {
+  pointer-events: none;
+}
+
+/* The bar at the top, holding the select button and the hint (or the upload status) */
+.pixata-blazor-upload-dropzone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  background-color: var(--pixata-blazor-upload-dropzone-bg);
+  transition: background-color var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-upload-drag-hover .pixata-blazor-upload-dropzone {
+  background-color: var(--pixata-blazor-upload-dropzone-hover-bg);
+}
+
+/* The real file input covers the button, so a click or tap goes straight to the browser's file picker */
+.pixata-blazor-upload-button-wrap {
+  position: relative;
+  flex: none;
+}
+
+.pixata-blazor-upload-button {
+  min-width: var(--pixata-blazor-upload-button-min-width);
+}
+
+.pixata-blazor-upload-input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0;
+}
+
+.pixata-blazor-upload-input::-webkit-file-upload-button {
+  cursor: pointer;
+}
+
+.pixata-blazor-upload-input:disabled {
+  visibility: hidden;
+}
+
+/* The input hides the button from the mouse, so the button's hover and pressed looks come from the wrapper */
+.pixata-blazor-upload-button-wrap:hover .pixata-blazor-upload-button:not(:disabled) {
+  background-color: var(--pixata-blazor-button-hover-bg);
+}
+
+.pixata-blazor-upload-button-wrap:active .pixata-blazor-upload-button:not(:disabled) {
+  background-color: var(--pixata-blazor-button-active-bg);
+}
+
+.pixata-blazor-upload-dropzone-hint {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pixata-blazor-subtle-color);
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-upload-status {
+  display: flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+  color: var(--pixata-blazor-subtle-color);
+  white-space: nowrap;
+}
+
+/* The status replaces the hint, except while files are being dragged over the page */
+.pixata-blazor-upload-status + .pixata-blazor-upload-dropzone-hint,
+.pixata-blazor-upload-drag-active .pixata-blazor-upload-status {
+  display: none;
+}
+
+.pixata-blazor-upload-drag-active .pixata-blazor-upload-status + .pixata-blazor-upload-dropzone-hint {
+  display: block;
+}
+
+/* The file list */
+.pixata-blazor-upload-files {
+  max-height: var(--pixata-blazor-upload-files-max-height);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--pixata-blazor-upload-border-color);
+  list-style: none;
+}
+
+.pixata-blazor-upload-files[hidden] {
+  display: none;
+}
+
+.pixata-blazor-upload-file {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2 + 2px);
+  border-bottom: 1px solid var(--pixata-blazor-upload-border-color);
+  outline: none;
+}
+
+.pixata-blazor-upload-file:last-child {
+  border-bottom: 0;
+}
+
+.pixata-blazor-upload-file:focus-visible {
+  box-shadow: var(--pixata-blazor-focus-ring);
+}
+
+.pixata-blazor-upload-file-single {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+}
+
+.pixata-blazor-upload-file-icon-wrapper {
+  display: inline-flex;
+  flex: none;
+  color: var(--pixata-blazor-upload-file-icon-color);
+}
+
+.pixata-blazor-upload-file-icon {
+  width: var(--pixata-blazor-upload-file-icon-size);
+  height: var(--pixata-blazor-upload-file-icon-size);
+}
+
+.pixata-blazor-upload-file-icon svg {
+  stroke-width: 1.25;
+}
+
+.pixata-blazor-upload-file-info {
+  display: block;
+  flex: 1 0 0;
+  min-width: 0;
+  min-height: var(--pixata-blazor-upload-file-icon-size);
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * 2);
+  overflow: hidden;
+}
+
+.pixata-blazor-upload-file-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-upload-file-size,
+.pixata-blazor-upload-file-validation-message {
+  display: block;
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1rem;
+}
+
+.pixata-blazor-upload-file-success .pixata-blazor-upload-file-validation-message {
+  color: var(--pixata-blazor-upload-success-color);
+}
+
+.pixata-blazor-upload-file-error .pixata-blazor-upload-file-validation-message {
+  color: var(--pixata-blazor-upload-error-color);
+}
+
+.pixata-blazor-upload-file-invalid .pixata-blazor-upload-file-validation-message {
+  color: var(--pixata-blazor-upload-invalid-color);
+}
+
+/* The file's buttons (remove, cancel, retry, pause and resume) and its percentage while it uploads */
+.pixata-blazor-upload-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-upload-action:focus-visible {
+  box-shadow: 0 0 0 2px var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-upload-pct {
+  margin: 0 var(--pixata-blazor-spacing);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The progress bar along the bottom of a file, while it uploads */
+.pixata-blazor-upload-progressbar {
+  position: absolute;
+  inset-inline: calc(var(--pixata-blazor-spacing) * 2);
+  bottom: var(--pixata-blazor-spacing);
+  height: var(--pixata-blazor-upload-progress-height);
+  overflow: hidden;
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-upload-progress-bg);
+}
+
+.pixata-blazor-upload-progressbar-value {
+  height: 100%;
+  background-color: var(--pixata-blazor-upload-progress-color);
+  transition: width var(--pixata-blazor-transition);
+}
+
+/* The Upload and Clear buttons under the list */
+.pixata-blazor-upload-actions-bar {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-top: 1px solid var(--pixata-blazor-upload-border-color);
+}
+
+/* PixataDropZone, a separate area to drop files on */
+.pixata-blazor-external-dropzone {
+  box-sizing: border-box;
+  display: flex;
+  flex-flow: row nowrap;
+  height: var(--pixata-blazor-dropzone-height);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+}
+
+.pixata-blazor-dropzone-inner {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border: 1px solid var(--pixata-blazor-dropzone-border-color);
+  background-color: var(--pixata-blazor-dropzone-bg);
+  color: var(--pixata-blazor-text-color);
+  text-align: center;
+  transition: background-color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-dropzone-icon {
+  width: var(--pixata-blazor-dropzone-icon-size);
+  height: var(--pixata-blazor-dropzone-icon-size);
+  margin-bottom: calc(var(--pixata-blazor-spacing) * 6);
+  color: var(--pixata-blazor-dropzone-icon-color);
+  transition: color var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-dropzone-hint {
+  margin-bottom: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-dropzone-note {
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+/* While files are dragged over the page the drop zone's border is dashed, and while they're over it, the icon is coloured */
+.pixata-blazor-external-dropzone-active .pixata-blazor-dropzone-inner {
+  border-style: dashed;
+  border-color: var(--pixata-blazor-border-alt-color);
+}
+
+.pixata-blazor-external-dropzone-hover .pixata-blazor-dropzone-inner {
+  border-color: var(--pixata-blazor-dropzone-hover-color);
+}
+
+.pixata-blazor-external-dropzone-hover .pixata-blazor-dropzone-icon {
+  color: var(--pixata-blazor-dropzone-hover-color);
+}
+
+/* Phones: the hint gets out of the button's way, and there's more room to tap the file's buttons */
+@media (max-width: 480px) {
+  .pixata-blazor-upload-dropzone-hint {
+    font-size: var(--pixata-blazor-font-size-sm);
+  }
+
+  .pixata-blazor-external-dropzone {
+    height: auto;
+    min-height: calc(var(--pixata-blazor-dropzone-height) * .6);
+  }
+}
+
+@media (pointer: coarse) {
+  .pixata-blazor-upload-actions {
+    gap: var(--pixata-blazor-spacing);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-upload-dropzone,
+  .pixata-blazor-upload-progressbar-value,
+  .pixata-blazor-dropzone-inner,
+  .pixata-blazor-dropzone-icon {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataFileSelect and PixataUpload ========== */
+
+/* ========== PixataDialog and PixataWindow ========== */
+
+/*
+  PixataDialog and PixataWindow share most of their look: a surface with a shadow, a titlebar, content that scrolls, and a
+  row of buttons along the bottom. While one is open, it is moved into a wrapper at the end of the page's body, which the
+  script stacks above the page from --pixata-blazor-overlay-z-index upwards (staying below --pixata-blazor-popup-z-index, so
+  drop-downs inside a dialog still show on top of it). The wrapper of the one in front has the data-pixata-blazor-active
+  attribute
+*/
+:root {
+  --pixata-blazor-window-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-window-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-window-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-window-border-radius: 0;
+  --pixata-blazor-window-line-height: 1.25;
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-window-titlebar-padding: .75rem 1rem;
+  --pixata-blazor-window-title-font-size: var(--pixata-blazor-font-size-lg);
+  --pixata-blazor-window-content-padding: 1rem;
+  --pixata-blazor-window-footer-padding: .5rem;
+  --pixata-blazor-window-footer-gap: .5rem;
+  --pixata-blazor-window-active-shadow: 0 14px 16px rgba(0, 0, 0, .24), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-blazor-window-resize-handle-size: 6px;
+  --pixata-blazor-dialog-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
+  --pixata-blazor-dialog-viewport-margin: 1rem;
+  --pixata-blazor-dialog-predefined-min-width: 200px;
+}
+
+/* The placeholder left where the dialog or window was declared */
+.pixata-blazor-layer-anchor {
+  display: contents;
+}
+
+.pixata-blazor-dialog-wrapper,
+.pixata-blazor-window-wrapper {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 1);
+}
+
+.pixata-blazor-dialog-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pixata-blazor-dialog-viewport-margin);
+}
+
+/* A non-modal window's wrapper covers the viewport (or the containment element), but lets clicks through to the page */
+.pixata-blazor-window-wrapper {
+  pointer-events: none;
+}
+
+.pixata-blazor-window-wrapper-modal {
+  pointer-events: auto;
+}
+
+/* The dimmed backdrop behind a dialog or a modal window */
+.pixata-blazor-dialog-wrapper > .pixata-blazor-overlay,
+.pixata-blazor-window-wrapper > .pixata-blazor-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--pixata-blazor-overlay-bg);
+}
+
+.pixata-blazor-dialog,
+.pixata-blazor-window {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0 solid var(--pixata-blazor-window-border-color);
+  border-radius: var(--pixata-blazor-window-border-radius);
+  outline: none;
+  background-color: var(--pixata-blazor-window-bg);
+  color: var(--pixata-blazor-window-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  font-weight: 400;
+  line-height: var(--pixata-blazor-window-line-height);
+  text-align: start;
+  pointer-events: auto;
+}
+
+/* Width and Height set these properties, so that a phone can override them */
+.pixata-blazor-dialog {
+  position: relative;
+  width: var(--pixata-blazor-dialog-width, auto);
+  height: var(--pixata-blazor-dialog-height, auto);
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: var(--pixata-blazor-dialog-shadow);
+}
+
+/* Top and Left are measured from the wrapper, which covers the viewport (or the containment element) */
+.pixata-blazor-window {
+  position: absolute;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: var(--pixata-blazor-window-shadow);
+}
+
+.pixata-blazor-window-wrapper[data-pixata-blazor-active] > .pixata-blazor-window {
+  box-shadow: var(--pixata-blazor-window-active-shadow);
+}
+
+.pixata-blazor-window-centred {
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+}
+
+.pixata-blazor-window-sm {
+  width: 300px;
+}
+
+.pixata-blazor-window-md {
+  width: 800px;
+}
+
+.pixata-blazor-window-lg {
+  width: 1200px;
+}
+
+.pixata-blazor-window-maximised {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+
+.pixata-blazor-window-wrapper > .pixata-blazor-window-maximised {
+  box-shadow: none;
+}
+
+/* ---------- Titlebar ---------- */
+
+.pixata-blazor-dialog-titlebar,
+.pixata-blazor-window-titlebar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  padding: var(--pixata-blazor-window-titlebar-padding);
+  border-bottom: 1px solid var(--pixata-blazor-window-border-color);
+  background-color: var(--pixata-blazor-window-titlebar-bg);
+  color: var(--pixata-blazor-window-titlebar-color);
+  white-space: nowrap;
+}
+
+/* The titlebar is what the user drags to move a window, with a mouse or a finger */
+.pixata-blazor-window-titlebar {
+  touch-action: none;
+  user-select: none;
+}
+
+.pixata-blazor-window-minimised .pixata-blazor-window-titlebar {
+  border-bottom-width: 0;
+}
+
+/* With PersistContent, a minimised window keeps its content and footer, but hides them (the footer is display: flex, which
+   would otherwise beat the hidden attribute) */
+.pixata-blazor-window-content[hidden],
+.pixata-blazor-window-footer[hidden] {
+  display: none;
+}
+
+.pixata-blazor-dialog-title,
+.pixata-blazor-window-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--pixata-blazor-window-title-font-size);
+  line-height: 1.25;
+}
+
+.pixata-blazor-dialog-title:empty::before,
+.pixata-blazor-window-title:empty::before {
+  content: "";
+  display: inline-block;
+}
+
+/* The negative margins stop the buttons making the titlebar taller than the title */
+.pixata-blazor-dialog-titlebar-actions,
+.pixata-blazor-window-titlebar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row nowrap;
+  align-items: center;
+  margin-block: -.5rem;
+  margin-inline-end: -.25rem;
+}
+
+.pixata-blazor-dialog-titlebar-action.pixata-blazor-icon-button,
+.pixata-blazor-window-titlebar-action.pixata-blazor-icon-button {
+  padding: 1px;
+  color: inherit;
+}
+
+.pixata-blazor-dialog-titlebar-action .pixata-blazor-icon,
+.pixata-blazor-window-titlebar-action .pixata-blazor-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: .125rem;
+}
+
+/* A ThemeColor colours the titlebar */
+.pixata-blazor-dialog-primary,
+.pixata-blazor-window-primary {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-primary-color);
+}
+
+.pixata-blazor-dialog-secondary,
+.pixata-blazor-window-secondary {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-secondary);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-secondary-color);
+}
+
+.pixata-blazor-dialog-tertiary,
+.pixata-blazor-window-tertiary {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-tertiary);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-tertiary-color);
+}
+
+.pixata-blazor-dialog-info,
+.pixata-blazor-window-info {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-info);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-info-color);
+}
+
+.pixata-blazor-dialog-success,
+.pixata-blazor-window-success {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-success);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-success-color);
+}
+
+.pixata-blazor-dialog-warning,
+.pixata-blazor-window-warning {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-warning);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-warning-color);
+}
+
+.pixata-blazor-dialog-error,
+.pixata-blazor-window-error {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-error);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-error-color);
+}
+
+.pixata-blazor-dialog-dark,
+.pixata-blazor-window-dark {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-dark);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-dark-color);
+}
+
+.pixata-blazor-dialog-light,
+.pixata-blazor-window-light {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-light);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-light-color);
+}
+
+.pixata-blazor-dialog-inverse,
+.pixata-blazor-window-inverse {
+  --pixata-blazor-window-titlebar-bg: var(--pixata-blazor-inverse);
+  --pixata-blazor-window-titlebar-color: var(--pixata-blazor-inverse-color);
+}
+
+/* ---------- Content, buttons and footer ---------- */
+
+.pixata-blazor-dialog-content,
+.pixata-blazor-window-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--pixata-blazor-window-content-padding);
+  overflow: auto;
+  overscroll-behavior: contain;
+  outline: 0;
+}
+
+.pixata-blazor-dialog-actions,
+.pixata-blazor-window-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: var(--pixata-blazor-window-footer-gap);
+  padding: var(--pixata-blazor-window-footer-padding);
+  border-top: 1px solid var(--pixata-blazor-window-border-color);
+}
+
+.pixata-blazor-dialog-actions-start,
+.pixata-blazor-window-footer-start {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-dialog-actions-center,
+.pixata-blazor-window-footer-center {
+  justify-content: center;
+}
+
+.pixata-blazor-dialog-actions-end,
+.pixata-blazor-window-footer-end {
+  justify-content: flex-end;
+}
+
+.pixata-blazor-dialog-actions-stretch > *,
+.pixata-blazor-window-footer-stretch > * {
+  flex: 1 0 0%;
+}
+
+/* ---------- The alert, confirm and prompt dialogs ---------- */
+
+.pixata-blazor-dialog-predefined {
+  min-width: var(--pixata-blazor-dialog-predefined-min-width);
+}
+
+.pixata-blazor-dialog-message {
+  white-space: pre-line;
+}
+
+.pixata-blazor-dialog-prompt-form {
+  margin: 1.5rem 0 0;
+}
+
+/* ---------- Resize handles ---------- */
+
+.pixata-blazor-window-resize-handle {
+  position: absolute;
+  z-index: 1;
+  touch-action: none;
+}
+
+.pixata-blazor-window-resize-n,
+.pixata-blazor-window-resize-s {
+  left: 0;
+  width: 100%;
+  height: var(--pixata-blazor-window-resize-handle-size);
+}
+
+.pixata-blazor-window-resize-e,
+.pixata-blazor-window-resize-w {
+  top: 0;
+  width: var(--pixata-blazor-window-resize-handle-size);
+  height: 100%;
+}
+
+.pixata-blazor-window-resize-ne,
+.pixata-blazor-window-resize-nw,
+.pixata-blazor-window-resize-se,
+.pixata-blazor-window-resize-sw {
+  z-index: 2;
+  width: calc(var(--pixata-blazor-window-resize-handle-size) * 2);
+  height: calc(var(--pixata-blazor-window-resize-handle-size) * 2);
+}
+
+.pixata-blazor-window-resize-n {
+  top: 0;
+  cursor: n-resize;
+}
+
+.pixata-blazor-window-resize-s {
+  bottom: 0;
+  cursor: s-resize;
+}
+
+.pixata-blazor-window-resize-e {
+  right: 0;
+  cursor: e-resize;
+}
+
+.pixata-blazor-window-resize-w {
+  left: 0;
+  cursor: w-resize;
+}
+
+.pixata-blazor-window-resize-ne {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+
+.pixata-blazor-window-resize-nw {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+
+.pixata-blazor-window-resize-se {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
+.pixata-blazor-window-resize-sw {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+
+/* ---------- Phones and touch screens ---------- */
+
+/* On a phone, a dialog takes the full width of the screen, whatever its Width */
+@media (max-width: 575.98px) {
+  .pixata-blazor-dialog-wrapper {
+    padding: calc(var(--pixata-blazor-dialog-viewport-margin) / 2);
+  }
+
+  .pixata-blazor-dialog {
+    width: 100%;
+  }
+}
+
+/* Fingers get bigger resize handles */
+@media (pointer: coarse) {
+  :root {
+    --pixata-blazor-window-resize-handle-size: 12px;
+  }
+}
+
+/* ========== end of PixataDialog and PixataWindow ========== */
+
+/* ========== PixataWizard and PixataStepper ========== */
+
+:root {
+  --pixata-blazor-stepper-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-stepper-indicator-size: 1.75rem;
+  --pixata-blazor-stepper-indicator-margin: 3px;
+  --pixata-blazor-stepper-indicator-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-stepper-indicator-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-stepper-indicator-hover-bg: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-stepper-accent: var(--pixata-blazor-primary);
+  --pixata-blazor-stepper-accent-hover: var(--pixata-blazor-primary-hover);
+  --pixata-blazor-stepper-accent-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-stepper-line-width: 2px;
+  --pixata-blazor-stepper-line-color: var(--pixata-blazor-base-hover-bg);
+  --pixata-blazor-stepper-label-max-width: 10em;
+  --pixata-blazor-stepper-label-radius: calc(var(--pixata-blazor-spacing) * 4);
+  --pixata-blazor-stepper-success-color: var(--pixata-blazor-success);
+  --pixata-blazor-stepper-error-color: var(--pixata-blazor-error);
+  --pixata-blazor-stepper-optional-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-stepper-disabled-color: color-mix(in srgb, var(--pixata-blazor-stepper-color) 60%, transparent);
+  --pixata-blazor-wizard-padding: calc(var(--pixata-blazor-spacing) * 5);
+  --pixata-blazor-wizard-gap: calc(var(--pixata-blazor-spacing) * 8);
+}
+
+/* ---------- Stepper ---------- */
+
+.pixata-blazor-stepper {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-stepper-color);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-stepper-horizontal {
+  width: 100%;
+}
+
+/* A horizontal stepper collapses when it is too narrow for its steps (see the container query below) */
+.pixata-blazor-stepper-horizontal.pixata-blazor-stepper-collapsible {
+  container: pixata-blazor-stepper / inline-size;
+}
+
+.pixata-blazor-stepper-list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pixata-blazor-stepper-list-horizontal {
+  flex-direction: row;
+}
+
+.pixata-blazor-stepper-list-vertical {
+  flex-direction: column;
+  height: 100%;
+}
+
+.pixata-blazor-stepper-step {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.pixata-blazor-stepper-list-horizontal > .pixata-blazor-stepper-step {
+  flex: 1 1 0;
+  justify-content: center;
+  text-align: center;
+}
+
+.pixata-blazor-stepper-list-vertical > .pixata-blazor-stepper-step {
+  flex: 1 1 0;
+  align-items: flex-start;
+  min-height: calc(var(--pixata-blazor-stepper-indicator-size) + var(--pixata-blazor-stepper-indicator-margin) * 2 + 1.25rem);
+}
+
+/* The clickable part of a step: its indicator and label */
+.pixata-blazor-stepper-step-link {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: 0;
+  appearance: none;
+}
+
+.pixata-blazor-stepper-list-horizontal .pixata-blazor-stepper-step-link {
+  flex-direction: column;
+  max-width: min(100%, var(--pixata-blazor-stepper-label-max-width));
+  margin: 0 auto;
+}
+
+.pixata-blazor-stepper-step-link:disabled,
+.pixata-blazor-stepper-step-unreachable .pixata-blazor-stepper-step-link {
+  cursor: default;
+}
+
+/* The circle holding the step's number, text or icon */
+.pixata-blazor-stepper-step-indicator {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--pixata-blazor-stepper-indicator-size);
+  height: var(--pixata-blazor-stepper-indicator-size);
+  margin: var(--pixata-blazor-stepper-indicator-margin);
+  border: 1px solid var(--pixata-blazor-stepper-indicator-border-color);
+  border-radius: 50%;
+  background-color: var(--pixata-blazor-stepper-indicator-bg);
+  color: var(--pixata-blazor-stepper-color);
+  line-height: 1;
+  transition: color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), background-color var(--pixata-blazor-transition);
+}
+
+/* The focus ring around the indicator */
+.pixata-blazor-stepper-step-indicator::after {
+  content: "";
+  display: none;
+  position: absolute;
+  inset: calc(-1px - var(--pixata-blazor-stepper-indicator-margin));
+  border: 1px solid var(--pixata-blazor-stepper-color);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* The current step shows the ring until the user moves the focus to another step with the arrow keys */
+.pixata-blazor-stepper-list:not(:has(:focus-visible)) .pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-indicator::after,
+.pixata-blazor-stepper-step-link:focus-visible .pixata-blazor-stepper-step-indicator::after {
+  display: block;
+}
+
+.pixata-blazor-stepper-step-indicator .pixata-blazor-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.pixata-blazor-stepper-step-label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  transition: font-weight var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-stepper-list-horizontal .pixata-blazor-stepper-step-indicator + .pixata-blazor-stepper-step-label {
+  margin-top: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-stepper-list-vertical .pixata-blazor-stepper-step-label {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-stepper-list-vertical .pixata-blazor-stepper-step-indicator + .pixata-blazor-stepper-step-label {
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-stepper-step-text {
+  flex-grow: 1;
+  max-width: var(--pixata-blazor-stepper-label-max-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-stepper-step-label-icon {
+  margin-inline-start: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-stepper-step-label-optional {
+  flex-basis: 100%;
+  font-style: italic;
+  color: var(--pixata-blazor-stepper-optional-color);
+}
+
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-label {
+  font-weight: 600;
+}
+
+/* A stepper of labels shows each one as a pill */
+.pixata-blazor-stepper-labels .pixata-blazor-stepper-step-label {
+  padding: calc(var(--pixata-blazor-spacing) * 1.25) calc(var(--pixata-blazor-spacing) * 3);
+  border-radius: var(--pixata-blazor-stepper-label-radius);
+  background-color: var(--pixata-blazor-stepper-indicator-bg);
+}
+
+.pixata-blazor-stepper-labels .pixata-blazor-stepper-list:not(:has(:focus-visible)) .pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-label,
+.pixata-blazor-stepper-labels .pixata-blazor-stepper-step-link:focus-visible .pixata-blazor-stepper-step-label {
+  box-shadow: inset 0 0 0 2px var(--pixata-blazor-border-color);
+}
+
+/* States */
+.pixata-blazor-stepper-step:not(.pixata-blazor-stepper-step-disabled, .pixata-blazor-stepper-step-unreachable) .pixata-blazor-stepper-step-link:hover .pixata-blazor-stepper-step-indicator {
+  background-color: var(--pixata-blazor-stepper-indicator-hover-bg);
+}
+
+.pixata-blazor-stepper-step-done .pixata-blazor-stepper-step-indicator,
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-indicator {
+  border-color: var(--pixata-blazor-stepper-accent);
+  background-color: var(--pixata-blazor-stepper-accent);
+  color: var(--pixata-blazor-stepper-accent-color);
+}
+
+.pixata-blazor-stepper-step-done .pixata-blazor-stepper-step-indicator::after,
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-indicator::after {
+  border-color: var(--pixata-blazor-stepper-accent);
+}
+
+.pixata-blazor-stepper-step-done:not(.pixata-blazor-stepper-step-disabled, .pixata-blazor-stepper-step-unreachable) .pixata-blazor-stepper-step-link:hover .pixata-blazor-stepper-step-indicator,
+.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-link:hover .pixata-blazor-stepper-step-indicator {
+  background-color: var(--pixata-blazor-stepper-accent-hover);
+}
+
+.pixata-blazor-stepper-step-disabled .pixata-blazor-stepper-step-label,
+.pixata-blazor-stepper-step-disabled .pixata-blazor-stepper-step-indicator {
+  color: var(--pixata-blazor-stepper-disabled-color);
+}
+
+.pixata-blazor-stepper-step-disabled.pixata-blazor-stepper-step-done .pixata-blazor-stepper-step-indicator,
+.pixata-blazor-stepper-step-disabled.pixata-blazor-stepper-step-current .pixata-blazor-stepper-step-indicator {
+  border-color: color-mix(in srgb, var(--pixata-blazor-stepper-accent) 60%, transparent);
+  background-color: color-mix(in srgb, var(--pixata-blazor-stepper-accent) 60%, var(--pixata-blazor-stepper-indicator-bg));
+  color: var(--pixata-blazor-stepper-accent-color);
+}
+
+.pixata-blazor-stepper-step-success .pixata-blazor-stepper-step-label-icon {
+  color: var(--pixata-blazor-stepper-success-color);
+}
+
+.pixata-blazor-stepper-step-error .pixata-blazor-stepper-step-label {
+  color: var(--pixata-blazor-stepper-error-color);
+}
+
+/* The line joining the steps, filled in up to the current step */
+.pixata-blazor-stepper-progress {
+  position: absolute;
+  z-index: 0;
+  overflow: hidden;
+  background-color: var(--pixata-blazor-stepper-line-color);
+  pointer-events: none;
+}
+
+.pixata-blazor-stepper-horizontal > .pixata-blazor-stepper-progress {
+  top: calc(var(--pixata-blazor-stepper-indicator-margin) + var(--pixata-blazor-stepper-indicator-size) / 2 - var(--pixata-blazor-stepper-line-width) / 2);
+  height: var(--pixata-blazor-stepper-line-width);
+}
+
+.pixata-blazor-stepper-vertical > .pixata-blazor-stepper-progress {
+  top: calc(var(--pixata-blazor-stepper-indicator-margin) + var(--pixata-blazor-stepper-indicator-size) / 2);
+  inset-inline-start: calc(var(--pixata-blazor-stepper-indicator-margin) + var(--pixata-blazor-stepper-indicator-size) / 2 - var(--pixata-blazor-stepper-line-width) / 2);
+  width: var(--pixata-blazor-stepper-line-width);
+}
+
+.pixata-blazor-stepper-progress-value {
+  background-color: var(--pixata-blazor-stepper-accent);
+  transition: width .2s ease-in-out, height .2s ease-in-out;
+}
+
+.pixata-blazor-stepper-horizontal > .pixata-blazor-stepper-progress > .pixata-blazor-stepper-progress-value {
+  height: 100%;
+}
+
+.pixata-blazor-stepper-vertical > .pixata-blazor-stepper-progress > .pixata-blazor-stepper-progress-value {
+  width: 100%;
+}
+
+/* The collapsed stepper: the current step, buttons to move either way, and a progress bar */
+.pixata-blazor-stepper-compact {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-stepper-compact-summary {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  min-width: 0;
+}
+
+.pixata-blazor-stepper-compact .pixata-blazor-stepper-step-indicator {
+  margin: 0;
+  border-color: var(--pixata-blazor-stepper-accent);
+  background-color: var(--pixata-blazor-stepper-accent);
+  color: var(--pixata-blazor-stepper-accent-color);
+}
+
+.pixata-blazor-stepper-compact-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pixata-blazor-stepper-compact-count {
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-stepper-compact-label {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixata-blazor-stepper-compact-progress {
+  flex: 1 0 100%;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background-color: var(--pixata-blazor-stepper-line-color);
+}
+
+.pixata-blazor-stepper-compact-progress-value {
+  height: 100%;
+  background-color: var(--pixata-blazor-stepper-accent);
+  transition: width .2s ease-in-out;
+}
+
+/*
+  A collapsible horizontal stepper collapses when there is less than 80px for each step (eg below 400px for five steps). Its
+  pixata-blazor-stepper-count-* class says how many steps it has (8 meaning 8 or more), as a container query can't count them
+*/
+@container pixata-blazor-stepper (max-width: 159.98px) {
+  .pixata-blazor-stepper-count-2 > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-count-2 > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+@container pixata-blazor-stepper (max-width: 239.98px) {
+  .pixata-blazor-stepper-count-3 > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-count-3 > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+@container pixata-blazor-stepper (max-width: 319.98px) {
+  .pixata-blazor-stepper-count-4 > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-count-4 > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+@container pixata-blazor-stepper (max-width: 399.98px) {
+  .pixata-blazor-stepper-count-5 > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-count-5 > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+@container pixata-blazor-stepper (max-width: 479.98px) {
+  .pixata-blazor-stepper-count-6 > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-count-6 > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+@container pixata-blazor-stepper (max-width: 559.98px) {
+  .pixata-blazor-stepper-count-7 > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-count-7 > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+@container pixata-blazor-stepper (max-width: 639.98px) {
+  .pixata-blazor-stepper-count-8 > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-stepper-count-8 > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+/* ---------- Wizard ---------- */
+
+/* The wizard is a size container, so it can rearrange itself when it is narrow (see the container query below) */
+.pixata-blazor-wizard {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: var(--pixata-blazor-wizard-padding);
+  overflow: hidden;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-text-color);
+  container: pixata-blazor-wizard / inline-size;
+}
+
+.pixata-blazor-wizard-layout {
+  display: flex;
+  gap: var(--pixata-blazor-wizard-gap);
+  height: 100%;
+  min-height: 0;
+}
+
+.pixata-blazor-wizard-top > .pixata-blazor-wizard-layout {
+  flex-direction: column;
+}
+
+.pixata-blazor-wizard-bottom > .pixata-blazor-wizard-layout {
+  flex-direction: column-reverse;
+}
+
+.pixata-blazor-wizard-left > .pixata-blazor-wizard-layout {
+  flex-direction: row;
+}
+
+.pixata-blazor-wizard-right > .pixata-blazor-wizard-layout {
+  flex-direction: row-reverse;
+}
+
+.pixata-blazor-wizard-stepper {
+  flex: none;
+}
+
+.pixata-blazor-wizard-vertical .pixata-blazor-wizard-stepper {
+  align-self: stretch;
+  height: auto;
+}
+
+/* The wizard has its own buttons, so the collapsed stepper doesn't need any */
+.pixata-blazor-wizard-stepper .pixata-blazor-stepper-compact-button {
+  display: none;
+}
+
+.pixata-blazor-wizard-steps {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-wizard-step {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2 + 2px);
+  outline: 0;
+}
+
+.pixata-blazor-wizard-step:focus-visible {
+  outline: 1px dotted var(--pixata-blazor-subtle-color);
+  outline-offset: -1px;
+}
+
+.pixata-blazor-wizard-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.pixata-blazor-wizard-form {
+  margin: 0;
+}
+
+.pixata-blazor-wizard-buttons {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  margin-top: var(--pixata-blazor-wizard-gap);
+}
+
+.pixata-blazor-wizard-buttons-end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--pixata-blazor-spacing) * 2.5);
+  margin-inline-start: auto;
+}
+
+/*
+  A narrow wizard (eg on a phone) puts a stepper that would have been at the side above the step, collapsed. A stepper at the
+  top or bottom collapses when it is too narrow for its steps, like any other
+*/
+@container pixata-blazor-wizard (max-width: 360px) {
+  .pixata-blazor-wizard-left > .pixata-blazor-wizard-layout,
+  .pixata-blazor-wizard-right > .pixata-blazor-wizard-layout {
+    flex-direction: column;
+  }
+
+  .pixata-blazor-wizard-vertical .pixata-blazor-wizard-stepper.pixata-blazor-stepper-collapsible > :is(.pixata-blazor-stepper-list, .pixata-blazor-stepper-progress) {
+    display: none;
+  }
+
+  .pixata-blazor-wizard-vertical .pixata-blazor-wizard-stepper.pixata-blazor-stepper-collapsible > .pixata-blazor-stepper-compact {
+    display: flex;
+  }
+}
+
+/* Touch screens get bigger targets */
+@media (pointer: coarse) {
+  .pixata-blazor-stepper-step-link {
+    min-width: var(--pixata-blazor-touch-target);
+    min-height: var(--pixata-blazor-touch-target);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-stepper-step-indicator,
+  .pixata-blazor-stepper-step-label,
+  .pixata-blazor-stepper-progress-value,
+  .pixata-blazor-stepper-compact-progress-value {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataWizard and PixataStepper ========== */
+
+/* ========== PixataRadioGroup ========== */
+
+/*
+  pixata-blazor-radiogroup is the list, plus -vertical or -horizontal, and pixata-blazor-disabled or pixata-blazor-invalid
+  when they apply. Each pixata-blazor-radiogroup-item holds a native radio button (pixata-blazor-radiogroup-radio, plus -sm,
+  -md or -lg) and its pixata-blazor-radiogroup-label; the checked item also has pixata-blazor-radiogroup-item-checked
+*/
+:root {
+  --pixata-blazor-radiogroup-radio-size-sm: 12px;
+  --pixata-blazor-radiogroup-radio-size-md: 16px;
+  --pixata-blazor-radiogroup-radio-size-lg: 20px;
+  --pixata-blazor-radiogroup-radio-bg: #fff;
+  --pixata-blazor-radiogroup-radio-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-radiogroup-checked-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-radiogroup-checked-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-radiogroup-dot-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-radiogroup-dot-size: 57%;
+  --pixata-blazor-radiogroup-focus-shadow: 0 0 0 2px var(--pixata-blazor-border-color);
+  --pixata-blazor-radiogroup-checked-focus-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-primary) 30%, transparent);
+  --pixata-blazor-radiogroup-item-gap: var(--pixata-blazor-spacing);
+  --pixata-blazor-radiogroup-item-padding: var(--pixata-blazor-spacing) 0;
+  --pixata-blazor-radiogroup-horizontal-gap: calc(var(--pixata-blazor-spacing) * 4);
+}
+
+.pixata-blazor-radiogroup {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pixata-blazor-radiogroup-horizontal {
+  flex-flow: row wrap;
+  column-gap: var(--pixata-blazor-radiogroup-horizontal-gap);
+}
+
+.pixata-blazor-radiogroup-item {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: var(--pixata-blazor-radiogroup-item-gap);
+  margin: 0;
+  padding: var(--pixata-blazor-radiogroup-item-padding);
+}
+
+/* The native radio button, drawn by us */
+.pixata-blazor-radiogroup-radio {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-md);
+  box-sizing: border-box;
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--pixata-blazor-radiogroup-radio-size);
+  height: var(--pixata-blazor-radiogroup-radio-size);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pixata-blazor-radiogroup-radio-border-color);
+  border-radius: 50%;
+  outline: 0;
+  background-color: var(--pixata-blazor-radiogroup-radio-bg);
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background-color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-radiogroup-radio-sm {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-sm);
+}
+
+.pixata-blazor-radiogroup-radio-lg {
+  --pixata-blazor-radiogroup-radio-size: var(--pixata-blazor-radiogroup-radio-size-lg);
+}
+
+.pixata-blazor-radiogroup-radio:focus-visible {
+  box-shadow: var(--pixata-blazor-radiogroup-focus-shadow);
+}
+
+.pixata-blazor-radiogroup-radio:checked {
+  border-color: var(--pixata-blazor-radiogroup-checked-border-color);
+  background-color: var(--pixata-blazor-radiogroup-checked-bg);
+  background-image: radial-gradient(circle closest-side, var(--pixata-blazor-radiogroup-dot-color) 0 var(--pixata-blazor-radiogroup-dot-size), transparent calc(var(--pixata-blazor-radiogroup-dot-size) + 1px));
+}
+
+.pixata-blazor-radiogroup-radio:checked:focus-visible {
+  box-shadow: var(--pixata-blazor-radiogroup-checked-focus-shadow);
+}
+
+.pixata-blazor-radiogroup-radio:disabled {
+  cursor: default;
+}
+
+.pixata-blazor-radiogroup-label {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--pixata-blazor-spacing);
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.pixata-blazor-radiogroup-label:empty {
+  display: none;
+}
+
+.pixata-blazor-radiogroup.pixata-blazor-invalid .pixata-blazor-radiogroup-radio {
+  border-color: var(--pixata-blazor-error);
+}
+
+/* On a touch screen, each option is at least --pixata-blazor-touch-target high, and its label fills that height */
+@media (pointer: coarse) {
+  .pixata-blazor-radiogroup-item {
+    min-height: var(--pixata-blazor-touch-target);
+    padding-block: 0;
+  }
+
+  .pixata-blazor-radiogroup-label {
+    align-self: stretch;
+    align-items: center;
+    flex: 1 1 auto;
+  }
+
+  .pixata-blazor-radiogroup-horizontal .pixata-blazor-radiogroup-label {
+    flex: 0 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-radiogroup-radio {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataRadioGroup ========== */
+
+/* ========== PixataSwitch ========== */
+
+/*
+  pixata-blazor-switch is the button, plus a size (-sm, -md, -lg), -on or -off, and -readonly when it can't be changed. Inside
+  it are the track (pixata-blazor-switch-track, holding the -label-on and -label-off text) and the thumb
+  (pixata-blazor-switch-thumb, inside pixata-blazor-switch-thumb-wrap). The Width parameter sets --pixata-blazor-switch-width
+*/
+:root {
+  --pixata-blazor-switch-width-sm: 52px;
+  --pixata-blazor-switch-height-sm: 26px;
+  --pixata-blazor-switch-label-inset-sm: 4px;
+  --pixata-blazor-switch-width-md: 60px;
+  --pixata-blazor-switch-height-md: 30px;
+  --pixata-blazor-switch-label-inset-md: 6px;
+  --pixata-blazor-switch-width-lg: 68px;
+  --pixata-blazor-switch-height-lg: 34px;
+  --pixata-blazor-switch-label-inset-lg: 8px;
+  --pixata-blazor-switch-label-font-size: 10px;
+  --pixata-blazor-switch-off-track-bg: #fff;
+  --pixata-blazor-switch-off-track-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-switch-off-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-switch-on-track-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-switch-on-track-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-switch-on-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-switch-thumb-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-switch-thumb-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-switch-off-focus-outline: 2px solid color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-switch-on-focus-outline: 2px solid color-mix(in srgb, var(--pixata-blazor-primary) 25%, transparent);
+  --pixata-blazor-switch-on-transition: .3s cubic-bezier(.68, -.55, .265, 1.55);
+  --pixata-blazor-switch-off-transition: .25s cubic-bezier(0, 0, .58, 1);
+}
+
+.pixata-blazor-switch {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-md);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-md);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-md);
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  width: var(--pixata-blazor-switch-width);
+  height: var(--pixata-blazor-switch-height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-switch-label-font-size);
+  line-height: 1;
+  vertical-align: middle;
+  outline: 0;
+  cursor: pointer;
+  user-select: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Lets a sideways swipe reach the switch, rather than being taken as a scroll */
+  touch-action: pan-y;
+}
+
+/* The sizes only set the custom properties, so the Width parameter (an inline --pixata-blazor-switch-width) wins */
+.pixata-blazor-switch-sm {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-sm);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-sm);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-sm);
+}
+
+.pixata-blazor-switch-lg {
+  --pixata-blazor-switch-width: var(--pixata-blazor-switch-width-lg);
+  --pixata-blazor-switch-height: var(--pixata-blazor-switch-height-lg);
+  --pixata-blazor-switch-label-inset: var(--pixata-blazor-switch-label-inset-lg);
+}
+
+.pixata-blazor-switch-readonly {
+  cursor: default;
+}
+
+.pixata-blazor-switch-track {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  width: 100%;
+  height: 100%;
+  border-width: 1px;
+  border-style: solid;
+  outline: 0;
+  transition: background-color .15s ease-out, border-color .15s ease-out, color .15s ease-out;
+}
+
+.pixata-blazor-switch-label-on,
+.pixata-blazor-switch-label-off {
+  position: absolute;
+  top: 50%;
+  display: inline;
+  overflow: hidden;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  transition: color var(--pixata-blazor-switch-off-transition);
+}
+
+.pixata-blazor-switch-label-on {
+  inset-inline-start: var(--pixata-blazor-switch-label-inset);
+}
+
+.pixata-blazor-switch-label-off {
+  inset-inline-end: var(--pixata-blazor-switch-label-inset);
+}
+
+/* A zero-size box whose centre the thumb sits on, which slides from one end of the track to the other */
+.pixata-blazor-switch-thumb-wrap {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  inset-inline-start: calc(var(--pixata-blazor-switch-height) / 2);
+  transition: left var(--pixata-blazor-switch-off-transition), right var(--pixata-blazor-switch-off-transition);
+}
+
+.pixata-blazor-switch-on .pixata-blazor-switch-thumb-wrap {
+  inset-inline-start: calc(100% - var(--pixata-blazor-switch-height) / 2);
+  transition: left var(--pixata-blazor-switch-on-transition), right var(--pixata-blazor-switch-on-transition);
+}
+
+.pixata-blazor-switch-thumb {
+  box-sizing: border-box;
+  position: absolute;
+  display: block;
+  width: var(--pixata-blazor-switch-height);
+  height: var(--pixata-blazor-switch-height);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--pixata-blazor-switch-thumb-border-color);
+  background-color: var(--pixata-blazor-switch-thumb-bg);
+  transform: translate(-50%, -50%);
+  transition: background-color .15s ease-out, border-color .15s ease-out;
+}
+
+.pixata-blazor-switch:dir(rtl) .pixata-blazor-switch-thumb {
+  transform: translate(50%, -50%);
+}
+
+.pixata-blazor-switch-off .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-switch-off-track-border-color);
+  background-color: var(--pixata-blazor-switch-off-track-bg);
+  color: var(--pixata-blazor-switch-off-color);
+}
+
+.pixata-blazor-switch-off .pixata-blazor-switch-label-on,
+.pixata-blazor-switch-on .pixata-blazor-switch-label-off {
+  color: transparent;
+}
+
+.pixata-blazor-switch-on .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-switch-on-track-border-color);
+  background-color: var(--pixata-blazor-switch-on-track-bg);
+  color: var(--pixata-blazor-switch-on-color);
+}
+
+.pixata-blazor-switch-off:focus-visible .pixata-blazor-switch-track {
+  outline: var(--pixata-blazor-switch-off-focus-outline);
+}
+
+.pixata-blazor-switch-on:focus-visible .pixata-blazor-switch-track {
+  outline: var(--pixata-blazor-switch-on-focus-outline);
+}
+
+.pixata-blazor-switch.pixata-blazor-invalid .pixata-blazor-switch-track {
+  border-color: var(--pixata-blazor-error);
+}
+
+/* On a touch screen, the area you can tap is at least --pixata-blazor-touch-target high */
+@media (pointer: coarse) {
+  .pixata-blazor-switch::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: max(100%, var(--pixata-blazor-touch-target));
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-switch-track,
+  .pixata-blazor-switch-label-on,
+  .pixata-blazor-switch-label-off,
+  .pixata-blazor-switch-thumb-wrap,
+  .pixata-blazor-switch-on .pixata-blazor-switch-thumb-wrap,
+  .pixata-blazor-switch-thumb {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataSwitch ========== */
+
+/* ========== PixataChart ========== */
+
+/*
+  PixataChart is SVG drawn by the component, with the title, legend and tooltip as HTML. The series colours, text sizes and
+  line colours below can all be overridden. The point colour of each column, line, marker, segment and legend marker is
+  passed to it in the --pixata-blazor-chart-point-color property
+*/
+:root {
+  --pixata-blazor-chart-series-1: #ff6358;
+  --pixata-blazor-chart-series-2: #ffd246;
+  --pixata-blazor-chart-series-3: #78d237;
+  --pixata-blazor-chart-series-4: #28b4c8;
+  --pixata-blazor-chart-series-5: #2d73f5;
+  --pixata-blazor-chart-series-6: #aa46be;
+  --pixata-blazor-chart-height: 400px;
+  --pixata-blazor-chart-bg: transparent;
+  --pixata-blazor-chart-text-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-chart-font-size: var(--pixata-blazor-font-size);
+  --pixata-blazor-chart-title-font-size: 1rem;
+  --pixata-blazor-chart-axis-title-font-size: .875rem;
+  --pixata-blazor-chart-label-font-size: .75rem;
+  --pixata-blazor-chart-major-lines: rgba(61, 61, 61, .08);
+  --pixata-blazor-chart-minor-lines: rgba(61, 61, 61, .04);
+  --pixata-blazor-chart-axis-color: rgba(61, 61, 61, .12);
+  --pixata-blazor-chart-inactive: rgba(61, 61, 61, .5);
+  --pixata-blazor-chart-column-border: 20%;
+  --pixata-blazor-chart-marker-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-chart-hover-opacity: .75;
+  --pixata-blazor-chart-label-halo: rgba(255, 255, 255, .85);
+  --pixata-blazor-chart-connector-color: rgba(61, 61, 61, .5);
+  --pixata-blazor-chart-focus-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-chart-legend-marker-size: .875rem;
+  --pixata-blazor-chart-tooltip-color: #fff;
+  --pixata-blazor-chart-tooltip-dark-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-chart-tooltip-font-size: .8125rem;
+  --pixata-blazor-chart-shared-tooltip-bg: var(--pixata-blazor-base-bg);
+  --pixata-blazor-chart-tooltip-z-index: 3;
+  --pixata-blazor-chart-transition: .5s ease-out;
+}
+
+.pixata-blazor-chart {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--pixata-blazor-chart-height);
+  min-width: 0;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-chart-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-chart-text-color);
+  background: var(--pixata-blazor-chart-bg);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.pixata-blazor-chart-title {
+  flex: none;
+  padding: calc(var(--pixata-blazor-spacing) * 1.25);
+  font-size: var(--pixata-blazor-chart-title-font-size);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pixata-blazor-chart-title-align-left {
+  text-align: start;
+}
+
+.pixata-blazor-chart-title-align-right {
+  text-align: end;
+}
+
+.pixata-blazor-chart-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-chart-body-legend-top,
+.pixata-blazor-chart-body-legend-bottom {
+  flex-direction: column;
+}
+
+.pixata-blazor-chart-plot {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-chart-surface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  font-family: inherit;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.pixata-blazor-chart-surface:focus-visible {
+  outline: 1px dotted var(--pixata-blazor-chart-focus-color);
+  outline-offset: -1px;
+}
+
+.pixata-blazor-chart-background,
+.pixata-blazor-chart-band {
+  fill: transparent;
+}
+
+.pixata-blazor-chart-gridline {
+  stroke: var(--pixata-blazor-chart-major-lines);
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.pixata-blazor-chart-gridline-minor {
+  stroke: var(--pixata-blazor-chart-minor-lines);
+}
+
+.pixata-blazor-chart-axis-line {
+  stroke: var(--pixata-blazor-chart-axis-color);
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.pixata-blazor-chart-axis-label,
+.pixata-blazor-chart-axis-title,
+.pixata-blazor-chart-label {
+  fill: var(--pixata-blazor-chart-text-color);
+}
+
+.pixata-blazor-chart-axis-label {
+  font-size: var(--pixata-blazor-chart-label-font-size);
+}
+
+.pixata-blazor-chart-axis-title {
+  font-size: var(--pixata-blazor-chart-axis-title-font-size);
+}
+
+.pixata-blazor-chart-label {
+  font-size: var(--pixata-blazor-chart-label-font-size);
+  paint-order: stroke;
+  stroke: var(--pixata-blazor-chart-label-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.pixata-blazor-chart-labels {
+  pointer-events: none;
+}
+
+.pixata-blazor-chart-label-connector {
+  fill: none;
+  stroke: var(--pixata-blazor-chart-connector-color);
+  stroke-width: 1px;
+}
+
+.pixata-blazor-chart-column,
+.pixata-blazor-chart-segment,
+.pixata-blazor-chart-marker {
+  cursor: pointer;
+  transition: opacity var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-chart-column {
+  fill: var(--pixata-blazor-chart-point-color);
+  stroke: color-mix(in srgb, var(--pixata-blazor-chart-point-color), #000 var(--pixata-blazor-chart-column-border));
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.pixata-blazor-chart-segment {
+  fill: var(--pixata-blazor-chart-point-color);
+}
+
+.pixata-blazor-chart-line {
+  fill: none;
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.pixata-blazor-chart-marker-target {
+  fill: transparent;
+}
+
+.pixata-blazor-chart-marker-shape {
+  fill: var(--pixata-blazor-chart-marker-bg);
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-width: 2px;
+}
+
+.pixata-blazor-chart-marker-cross {
+  fill: none;
+}
+
+.pixata-blazor-chart-marker-hidden .pixata-blazor-chart-marker-shape {
+  visibility: hidden;
+}
+
+.pixata-blazor-chart-column.pixata-blazor-chart-point-active,
+.pixata-blazor-chart-segment.pixata-blazor-chart-point-active {
+  opacity: var(--pixata-blazor-chart-hover-opacity);
+}
+
+.pixata-blazor-chart-marker.pixata-blazor-chart-point-active .pixata-blazor-chart-marker-shape {
+  visibility: visible;
+  stroke-width: 3px;
+}
+
+/* The keyboard focus */
+.pixata-blazor-chart-column.pixata-blazor-chart-point-focused,
+.pixata-blazor-chart-segment.pixata-blazor-chart-point-focused {
+  stroke: var(--pixata-blazor-chart-focus-color);
+  stroke-width: 2px;
+}
+
+.pixata-blazor-chart-marker.pixata-blazor-chart-point-focused .pixata-blazor-chart-marker-target {
+  stroke: var(--pixata-blazor-chart-focus-color);
+  stroke-width: 2px;
+  r: 8px;
+}
+
+/* Legend */
+
+.pixata-blazor-chart-legend {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 1.25);
+}
+
+.pixata-blazor-chart-legend-vertical {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  overflow-y: auto;
+}
+
+.pixata-blazor-chart-legend-top,
+.pixata-blazor-chart-legend-left {
+  order: -1;
+}
+
+.pixata-blazor-chart-legend-align-start {
+  justify-content: flex-start;
+}
+
+.pixata-blazor-chart-legend-align-end {
+  justify-content: flex-end;
+}
+
+.pixata-blazor-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 1.5);
+  margin: 0;
+  padding: calc(var(--pixata-blazor-spacing) * .25) calc(var(--pixata-blazor-spacing) * .5);
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-blazor-chart-legend-item:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-ring);
+}
+
+.pixata-blazor-chart-legend-item-hidden {
+  color: var(--pixata-blazor-chart-inactive);
+}
+
+.pixata-blazor-chart-legend-item-hidden .pixata-blazor-chart-legend-marker {
+  --pixata-blazor-chart-point-color: var(--pixata-blazor-chart-inactive) !important;
+}
+
+.pixata-blazor-chart-legend-marker {
+  display: inline-block;
+  flex: none;
+  width: var(--pixata-blazor-chart-legend-marker-size);
+  height: var(--pixata-blazor-chart-legend-marker-size);
+}
+
+.pixata-blazor-chart-legend-marker-column {
+  background: var(--pixata-blazor-chart-point-color);
+}
+
+.pixata-blazor-chart-legend-marker-line {
+  width: calc(var(--pixata-blazor-chart-legend-marker-size) * 1.25);
+}
+
+.pixata-blazor-chart-legend-marker-line svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pixata-blazor-chart-legend-marker-line path {
+  fill: none;
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-width: 2px;
+}
+
+.pixata-blazor-chart-legend-marker-line circle {
+  fill: var(--pixata-blazor-chart-marker-bg);
+  stroke: var(--pixata-blazor-chart-point-color);
+  stroke-width: 2px;
+}
+
+/* Tooltip. It is placed by its point, and these classes move it above, below or to the side */
+
+.pixata-blazor-chart-tooltip {
+  position: absolute;
+  z-index: var(--pixata-blazor-chart-tooltip-z-index);
+  box-sizing: border-box;
+  max-width: min(18rem, 90vw);
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border-radius: var(--pixata-blazor-border-radius);
+  background: var(--pixata-blazor-chart-tooltip-bg, var(--pixata-blazor-text-color));
+  color: var(--pixata-blazor-chart-tooltip-color);
+  font-size: var(--pixata-blazor-chart-tooltip-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(var(--pixata-blazor-chart-tooltip-x, -50%), var(--pixata-blazor-chart-tooltip-y, calc(-100% - 8px)));
+}
+
+.pixata-blazor-chart-tooltip-below {
+  --pixata-blazor-chart-tooltip-y: 12px;
+}
+
+.pixata-blazor-chart-tooltip-start {
+  --pixata-blazor-chart-tooltip-x: -12px;
+}
+
+.pixata-blazor-chart-tooltip-end {
+  --pixata-blazor-chart-tooltip-x: calc(-100% + 12px);
+}
+
+.pixata-blazor-chart-tooltip-after {
+  --pixata-blazor-chart-tooltip-x: 0;
+  --pixata-blazor-chart-tooltip-y: -50%;
+}
+
+.pixata-blazor-chart-tooltip-before {
+  --pixata-blazor-chart-tooltip-x: -100%;
+  --pixata-blazor-chart-tooltip-y: -50%;
+}
+
+.pixata-blazor-chart-tooltip-shared {
+  border: 1px solid var(--pixata-blazor-border-color);
+  background: var(--pixata-blazor-chart-shared-tooltip-bg);
+  color: var(--pixata-blazor-chart-text-color);
+}
+
+.pixata-blazor-chart-tooltip-category {
+  font-weight: 600;
+  text-align: center;
+}
+
+.pixata-blazor-chart-tooltip table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.pixata-blazor-chart-tooltip td {
+  padding: calc(var(--pixata-blazor-spacing) * .5) var(--pixata-blazor-spacing);
+  vertical-align: middle;
+}
+
+.pixata-blazor-chart-tooltip-marker {
+  display: block;
+  width: 15px;
+  height: 3px;
+  background: var(--pixata-blazor-chart-point-color);
+}
+
+/* The columns grow and everything else fades in when the chart first appears */
+@keyframes pixata-blazor-chart-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes pixata-blazor-chart-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-column {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: pixata-blazor-chart-grow var(--pixata-blazor-chart-transition);
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-column-negative {
+  transform-origin: 50% 0;
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-line,
+.pixata-blazor-chart-animate .pixata-blazor-chart-marker,
+.pixata-blazor-chart-animate .pixata-blazor-chart-segment,
+.pixata-blazor-chart-animate .pixata-blazor-chart-labels {
+  animation: pixata-blazor-chart-fade var(--pixata-blazor-chart-transition);
+}
+
+/* Until the browser has reported the chart's size, a phone-sized screen moves a side legend underneath */
+@media (max-width: 400px) {
+  .pixata-blazor-chart-body-legend-left,
+  .pixata-blazor-chart-body-legend-right {
+    flex-direction: column;
+  }
+
+  .pixata-blazor-chart-legend-left {
+    order: 0;
+  }
+
+  .pixata-blazor-chart-legend-vertical {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (pointer: coarse) {
+  .pixata-blazor-chart-legend-item {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-chart-marker-target {
+    r: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-chart-animate .pixata-blazor-chart-column,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-line,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-marker,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-segment,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-labels {
+    animation: none;
+  }
+
+  .pixata-blazor-chart-column,
+  .pixata-blazor-chart-segment,
+  .pixata-blazor-chart-marker {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataChart ========== */
+
+/* ========== PixataDropDownButton and PixataSplitButton ========== */
+
+/*
+  The buttons use the shared pixata-blazor-button classes. pixata-blazor-dropdownbutton and pixata-blazor-splitbutton are
+  their outer elements (with -open while the menu is showing). The menu is a pixata-blazor-popup with
+  pixata-blazor-button-menu-popup, holding a pixata-blazor-button-menu list (plus -sm, -md or -lg, matching the button) of
+  pixata-blazor-button-menu-item items
+*/
+:root {
+  --pixata-blazor-button-menu-max-height: 80vh;
+  --pixata-blazor-button-menu-bg: var(--pixata-blazor-popup-bg);
+  --pixata-blazor-button-menu-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-button-menu-item-padding-sm: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-padding-md: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-padding-lg: calc(var(--pixata-blazor-spacing) * 1.5) calc(var(--pixata-blazor-spacing) * 2);
+  --pixata-blazor-button-menu-item-end-padding: calc(var(--pixata-blazor-spacing) * 4 + 1rem);
+  --pixata-blazor-button-menu-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, transparent);
+  --pixata-blazor-button-menu-item-active-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
+  --pixata-blazor-button-menu-item-focus-ring: inset 0 0 0 2px var(--pixata-blazor-border-alt-color);
+  --pixata-blazor-splitbutton-arrow-touch-width: 2.75rem;
+}
+
+.pixata-blazor-dropdownbutton,
+.pixata-blazor-splitbutton {
+  position: relative;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  vertical-align: middle;
+}
+
+/* The down arrow a drop-down button shows when ShowArrowButton is set */
+.pixata-blazor-dropdownbutton-arrow {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * -1);
+  margin-inline-end: calc(var(--pixata-blazor-spacing) * -2);
+  padding-inline: var(--pixata-blazor-spacing);
+}
+
+/* The two halves of a split button share a border, and only the outer corners are rounded */
+.pixata-blazor-splitbutton-main {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.pixata-blazor-splitbutton-arrow {
+  margin-inline-start: -1px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.pixata-blazor-splitbutton-main:focus-visible,
+.pixata-blazor-splitbutton-arrow:focus-visible {
+  z-index: 1;
+}
+
+/* The arrow is narrower than other icon-only buttons, but as tall as the main button */
+.pixata-blazor-splitbutton-arrow .pixata-blazor-icon {
+  width: 1rem;
+  padding-inline: 0;
+}
+
+/* The menu */
+.pixata-blazor-button-menu-popup {
+  background-color: var(--pixata-blazor-button-menu-bg);
+  color: var(--pixata-blazor-button-menu-color);
+}
+
+.pixata-blazor-button-menu.pixata-blazor-popup-content {
+  max-height: var(--pixata-blazor-popup-max-height, var(--pixata-blazor-button-menu-max-height));
+}
+
+.pixata-blazor-button-menu {
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+}
+
+.pixata-blazor-button-menu-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+}
+
+.pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-md);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+  outline: 0;
+}
+
+.pixata-blazor-button-menu-sm .pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-sm);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+}
+
+.pixata-blazor-button-menu-lg .pixata-blazor-button-menu-item {
+  padding: var(--pixata-blazor-button-menu-item-padding-lg);
+  padding-inline-end: var(--pixata-blazor-button-menu-item-end-padding);
+}
+
+.pixata-blazor-button-menu-item:hover {
+  background-color: var(--pixata-blazor-button-menu-item-hover-bg);
+}
+
+.pixata-blazor-button-menu-item:active {
+  background-color: var(--pixata-blazor-button-menu-item-active-bg);
+}
+
+.pixata-blazor-button-menu-item:focus-visible {
+  box-shadow: var(--pixata-blazor-button-menu-item-focus-ring);
+}
+
+.pixata-blazor-button-menu-item-text {
+  display: flex;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Touch screens get a wider arrow on split buttons (the buttons and menu items are already enlarged by the shared styles) */
+@media (pointer: coarse) {
+  .pixata-blazor-splitbutton-arrow {
+    min-width: var(--pixata-blazor-splitbutton-arrow-touch-width);
+  }
+}
+
+/* ========== end of PixataDropDownButton and PixataSplitButton ========== */
+
+/* ========== PixataScheduler ========== */
+
+:root {
+  --pixata-blazor-scheduler-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-scheduler-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-scheduler-head-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-scheduler-nonwork-bg: var(--pixata-blazor-base-bg);
+  --pixata-blazor-scheduler-selected-slot-bg: color-mix(in srgb, var(--pixata-blazor-primary) 12%, transparent);
+  --pixata-blazor-scheduler-today-color: var(--pixata-blazor-primary);
+  --pixata-blazor-scheduler-event-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-scheduler-event-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-scheduler-event-selected-overlay: rgba(0, 0, 0, .14);
+  --pixata-blazor-scheduler-slot-height: 2.375rem;
+  --pixata-blazor-scheduler-side-width: 4.5rem;
+  --pixata-blazor-scheduler-column-min-width: 3.5rem;
+  --pixata-blazor-scheduler-event-gutter: .875rem;
+  --pixata-blazor-scheduler-bar-height: 1.5rem;
+  --pixata-blazor-scheduler-bar-gap: 2px;
+  --pixata-blazor-scheduler-month-day-height: 6rem;
+  --pixata-blazor-scheduler-month-date-height: 1.75rem;
+  --pixata-blazor-scheduler-month-column-min-width: 2.75rem;
+  --pixata-blazor-scheduler-timeline-column-width: 6.25rem;
+  --pixata-blazor-scheduler-timeline-lane-height: 4.5rem;
+  --pixata-blazor-scheduler-dialog-width: 40rem;
+}
+
+.pixata-blazor-scheduler {
+  --pixata-blazor-scheduler-bar-pitch: calc(var(--pixata-blazor-scheduler-bar-height) + var(--pixata-blazor-scheduler-bar-gap));
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--pixata-blazor-scheduler-border-color);
+  background-color: var(--pixata-blazor-scheduler-bg);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-scheduler *,
+.pixata-blazor-scheduler *::before,
+.pixata-blazor-scheduler *::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Toolbar and footer ---------- */
+
+.pixata-blazor-scheduler-toolbar {
+  container: pixata-blazor-scheduler-toolbar / inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  flex-shrink: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+.pixata-blazor-scheduler-navigation,
+.pixata-blazor-scheduler-calendar-tool,
+.pixata-blazor-scheduler-views,
+.pixata-blazor-scheduler-custom-tool {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pixata-blazor-scheduler-toolbar-spacer {
+  flex: 1 1 0;
+}
+
+.pixata-blazor-scheduler-navigation .pixata-blazor-icon:dir(rtl),
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-continues .pixata-blazor-icon:dir(rtl) {
+  transform: scaleX(-1);
+}
+
+.pixata-blazor-scheduler-calendar-popup-content {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-calendar-popup-content .pixata-blazor-input {
+  width: auto;
+}
+
+/* The view switcher: a pill of buttons, or a drop-down list when the toolbar is narrow */
+.pixata-blazor-scheduler-views-buttons,
+.pixata-blazor-scheduler-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 2px;
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--pixata-blazor-base-bg), currentColor 6%);
+}
+
+.pixata-blazor-scheduler-view-button,
+.pixata-blazor-scheduler-segmented-button {
+  margin: 0;
+  padding: 3px calc(var(--pixata-blazor-spacing) * 3);
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-view-button:hover,
+.pixata-blazor-scheduler-segmented-button:hover {
+  background-color: color-mix(in srgb, var(--pixata-blazor-surface-bg) 50%, transparent);
+}
+
+.pixata-blazor-scheduler-view-button.pixata-blazor-selected,
+.pixata-blazor-scheduler-segmented-button.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-surface-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+}
+
+.pixata-blazor-scheduler-view-button:focus-visible,
+.pixata-blazor-scheduler-segmented-button:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-scheduler-views-select-wrapper {
+  position: relative;
+  display: none;
+  align-items: center;
+}
+
+.pixata-blazor-scheduler-views-select {
+  margin: 0;
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 7) var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-base-bg);
+  color: var(--pixata-blazor-base-color);
+  font: inherit;
+  appearance: none;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-views-select:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-scheduler-views-select-icon {
+  position: absolute;
+  inset-inline-end: calc(var(--pixata-blazor-spacing) * 2);
+  pointer-events: none;
+}
+
+@container pixata-blazor-scheduler-toolbar (max-width: 64rem) {
+  .pixata-blazor-scheduler-views-buttons {
+    display: none;
+  }
+
+  .pixata-blazor-scheduler-views-select-wrapper {
+    display: inline-flex;
+  }
+}
+
+@container pixata-blazor-scheduler-toolbar (max-width: 30rem) {
+  .pixata-blazor-scheduler-tool-text {
+    display: none;
+  }
+}
+
+.pixata-blazor-scheduler-footer {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-top: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+/* ---------- The views ---------- */
+
+.pixata-blazor-scheduler-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  outline: none;
+  overscroll-behavior: contain;
+}
+
+.pixata-blazor-scheduler-content:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-primary) 50%, transparent);
+}
+
+.pixata-blazor-scheduler-grid {
+  position: relative;
+  min-width: 100%;
+}
+
+.pixata-blazor-scheduler-time-grid {
+  width: max(100%, calc(var(--pixata-blazor-scheduler-side-width) + var(--pixata-blazor-scheduler-column-count) * var(--pixata-blazor-scheduler-column-min-width)));
+}
+
+.pixata-blazor-scheduler-month-grid {
+  width: max(100%, calc(var(--pixata-blazor-scheduler-column-count) * var(--pixata-blazor-scheduler-month-column-min-width)));
+}
+
+.pixata-blazor-scheduler-timeline-grid {
+  width: max(100%, calc(var(--pixata-blazor-scheduler-side-width) + var(--pixata-blazor-scheduler-column-count) * var(--pixata-blazor-scheduler-timeline-column-width)));
+}
+
+.pixata-blazor-scheduler-head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background-color: var(--pixata-blazor-scheduler-head-bg);
+}
+
+.pixata-blazor-scheduler-row {
+  display: flex;
+  min-width: 0;
+}
+
+.pixata-blazor-scheduler-cells {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  grid-template-columns: repeat(var(--pixata-blazor-scheduler-column-count), minmax(0, 1fr));
+}
+
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-cells {
+  grid-template-columns: repeat(var(--pixata-blazor-scheduler-column-count), minmax(0, 1fr));
+}
+
+.pixata-blazor-scheduler-side-cell {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 2;
+  flex: 0 0 var(--pixata-blazor-scheduler-side-width);
+  width: var(--pixata-blazor-scheduler-side-width);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  background-color: var(--pixata-blazor-scheduler-head-bg);
+  font-size: var(--pixata-blazor-font-size-sm);
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.pixata-blazor-scheduler-head .pixata-blazor-scheduler-side-cell {
+  z-index: 5;
+}
+
+.pixata-blazor-scheduler-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  text-align: center;
+  overflow: hidden;
+}
+
+.pixata-blazor-scheduler-group-cell {
+  padding-block: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-group-text {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 1.5);
+}
+
+.pixata-blazor-scheduler-group-swatch {
+  flex: none;
+  width: .75rem;
+  height: .75rem;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+}
+
+.pixata-blazor-scheduler-group-band {
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+  padding: calc(var(--pixata-blazor-spacing) * 1.5) calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  background-color: var(--pixata-blazor-base-bg);
+  font-weight: 600;
+}
+
+.pixata-blazor-scheduler-group-band-item {
+  position: sticky;
+  inset-inline-start: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-date-link,
+.pixata-blazor-scheduler-date-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: var(--pixata-blazor-line-height);
+}
+
+.pixata-blazor-scheduler-date-link {
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-date-link:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-scheduler-date-link:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-blazor-focus-shadow);
+}
+
+.pixata-blazor-scheduler-day-name {
+  color: var(--pixata-blazor-subtle-color);
+}
+
+.pixata-blazor-scheduler-today .pixata-blazor-scheduler-day-name,
+.pixata-blazor-scheduler-today > .pixata-blazor-scheduler-date-link,
+.pixata-blazor-scheduler-today > .pixata-blazor-scheduler-date-text,
+.pixata-blazor-scheduler-today .pixata-blazor-scheduler-month-day-header,
+.pixata-blazor-scheduler-today .pixata-blazor-scheduler-agenda-day-number {
+  color: var(--pixata-blazor-scheduler-today-color);
+}
+
+/* Slots: the cells that can be selected, double-clicked and dropped on */
+.pixata-blazor-scheduler-slot {
+  position: relative;
+  min-width: 0;
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  overflow: hidden;
+  cursor: default;
+}
+
+.pixata-blazor-scheduler-slot.pixata-blazor-scheduler-nonwork {
+  background-color: var(--pixata-blazor-scheduler-nonwork-bg);
+}
+
+.pixata-blazor-scheduler-slot.pixata-blazor-selected,
+.pixata-blazor-scheduler-slot.pixata-blazor-scheduler-drop-target {
+  background-color: var(--pixata-blazor-scheduler-selected-slot-bg);
+}
+
+/* Appointments are drawn over the slots, in a layer that lets clicks through to the slots between them */
+.pixata-blazor-scheduler-event-layer,
+.pixata-blazor-scheduler-bar-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The day, multi-day and week views */
+.pixata-blazor-scheduler-time-grid .pixata-blazor-scheduler-date-cell {
+  padding: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-scheduler-all-day-row .pixata-blazor-scheduler-cells {
+  min-height: max(var(--pixata-blazor-scheduler-slot-height), calc((var(--pixata-blazor-scheduler-bar-rows) + 1) * var(--pixata-blazor-scheduler-bar-pitch)));
+}
+
+.pixata-blazor-scheduler-all-day-row .pixata-blazor-scheduler-slot {
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+.pixata-blazor-scheduler-all-day-row {
+  --pixata-blazor-scheduler-bar-top: var(--pixata-blazor-scheduler-bar-gap);
+}
+
+.pixata-blazor-scheduler-times {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.pixata-blazor-scheduler-time-cell {
+  height: calc(var(--pixata-blazor-scheduler-span) * var(--pixata-blazor-scheduler-slot-height));
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-times .pixata-blazor-scheduler-time-cell:last-child {
+  border-bottom: 0;
+}
+
+.pixata-blazor-scheduler-time-body .pixata-blazor-scheduler-cells {
+  align-items: start;
+}
+
+.pixata-blazor-scheduler-day-column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pixata-blazor-scheduler-day-column .pixata-blazor-scheduler-slot {
+  flex: none;
+  height: var(--pixata-blazor-scheduler-slot-height);
+  border-bottom-style: dotted;
+}
+
+.pixata-blazor-scheduler-day-column .pixata-blazor-scheduler-slot.pixata-blazor-scheduler-slot-end {
+  border-bottom-style: solid;
+}
+
+.pixata-blazor-scheduler-scroll-mark {
+  position: absolute;
+  top: calc(var(--pixata-blazor-scheduler-span) * var(--pixata-blazor-scheduler-slot-height));
+  width: 0;
+  height: 0;
+}
+
+/* The month view */
+.pixata-blazor-scheduler-month-grid .pixata-blazor-scheduler-date-cell {
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-day-name-short {
+  display: none;
+}
+
+.pixata-blazor-scheduler-month-week .pixata-blazor-scheduler-cells {
+  --pixata-blazor-scheduler-bar-top: var(--pixata-blazor-scheduler-month-date-height);
+  min-height: max(var(--pixata-blazor-scheduler-month-day-height),
+    calc(var(--pixata-blazor-scheduler-month-date-height) + var(--pixata-blazor-scheduler-items-per-slot) * var(--pixata-blazor-scheduler-bar-pitch) + 1.25rem));
+}
+
+.pixata-blazor-scheduler-month-day {
+  padding: 0 calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-month-day-header {
+  display: flex;
+  align-items: center;
+  height: var(--pixata-blazor-scheduler-month-date-height);
+}
+
+.pixata-blazor-scheduler-month-day-header .pixata-blazor-scheduler-date-link,
+.pixata-blazor-scheduler-month-day-header .pixata-blazor-scheduler-date-text {
+  margin-inline-start: calc(var(--pixata-blazor-spacing) * -2);
+  padding-block: 0;
+}
+
+.pixata-blazor-scheduler-other-month .pixata-blazor-scheduler-month-day-header {
+  color: var(--pixata-blazor-subtle-color);
+}
+
+.pixata-blazor-scheduler-more {
+  position: absolute;
+  inset-inline: 2px;
+  bottom: 2px;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius);
+  background: none;
+  color: var(--pixata-blazor-primary);
+  font: inherit;
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-more:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+/* The timeline view */
+/* A day spans many columns, so its date (and group) is kept in view as the timeline scrolls (clip, unlike hidden, lets it stick) */
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-date-cell,
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-group-cell {
+  align-items: flex-start;
+  overflow: clip;
+}
+
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-date-cell > *,
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-group-cell > * {
+  position: sticky;
+  inset-inline-start: calc(var(--pixata-blazor-scheduler-side-width) + var(--pixata-blazor-spacing));
+}
+
+.pixata-blazor-scheduler-timeline-grid .pixata-blazor-scheduler-time-cell {
+  height: auto;
+  padding: calc(var(--pixata-blazor-spacing) * 2) var(--pixata-blazor-spacing);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+}
+
+.pixata-blazor-scheduler-timeline-lane .pixata-blazor-scheduler-cells {
+  --pixata-blazor-scheduler-bar-top: calc(var(--pixata-blazor-spacing) * 1.5);
+  min-height: max(var(--pixata-blazor-scheduler-timeline-lane-height), calc(var(--pixata-blazor-scheduler-bar-rows) * var(--pixata-blazor-scheduler-bar-pitch) + 1.5rem));
+}
+
+.pixata-blazor-scheduler-timeline-lane .pixata-blazor-scheduler-slot {
+  border-inline-end-style: dotted;
+}
+
+.pixata-blazor-scheduler-timeline-lane .pixata-blazor-scheduler-slot.pixata-blazor-scheduler-slot-end {
+  border-inline-end-style: solid;
+}
+
+.pixata-blazor-scheduler-lane-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--pixata-blazor-spacing);
+}
+
+/* The agenda view */
+.pixata-blazor-scheduler-agenda-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.pixata-blazor-scheduler-agenda-table th,
+.pixata-blazor-scheduler-agenda-table td {
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-scheduler-border-color);
+  border-inline-end: 1px solid var(--pixata-blazor-scheduler-border-color);
+  font-weight: 400;
+  text-align: start;
+  vertical-align: top;
+}
+
+.pixata-blazor-scheduler-agenda-table th:last-child,
+.pixata-blazor-scheduler-agenda-table td:last-child {
+  border-inline-end: 0;
+}
+
+.pixata-blazor-scheduler-agenda-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--pixata-blazor-scheduler-head-bg);
+  font-size: var(--pixata-blazor-font-size-sm);
+  text-align: center;
+}
+
+.pixata-blazor-scheduler-agenda-date-cell,
+.pixata-blazor-scheduler-agenda-group-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-agenda-day-number {
+  display: inline-block;
+  margin-inline-end: calc(var(--pixata-blazor-spacing) * 2);
+  font-size: 2.25rem;
+  line-height: 1;
+  vertical-align: top;
+}
+
+.pixata-blazor-scheduler-agenda-day-details {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: top;
+}
+
+.pixata-blazor-scheduler-agenda-month {
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-scheduler-agenda-time-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-agenda-empty {
+  color: var(--pixata-blazor-subtle-color);
+}
+
+/* ---------- Appointments ---------- */
+
+.pixata-blazor-scheduler-event {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-scheduler-event-bg);
+  color: var(--pixata-blazor-scheduler-event-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  line-height: 1.3333;
+  text-align: start;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.pixata-blazor-scheduler-event.pixata-blazor-selected {
+  background-image: linear-gradient(var(--pixata-blazor-scheduler-event-selected-overlay), var(--pixata-blazor-scheduler-event-selected-overlay));
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .16);
+}
+
+.pixata-blazor-scheduler-event:focus-visible {
+  box-shadow: 0 0 0 2px var(--pixata-blazor-scheduler-bg), 0 0 0 4px var(--pixata-blazor-scheduler-event-bg);
+}
+
+.pixata-blazor-scheduler-event-read-only {
+  cursor: default;
+}
+
+.pixata-blazor-scheduler-event-content {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  overflow: hidden;
+}
+
+.pixata-blazor-scheduler-event-title,
+.pixata-blazor-scheduler-event-time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixata-blazor-scheduler-event-time {
+  font-size: var(--pixata-blazor-font-size-sm);
+  opacity: .9;
+}
+
+.pixata-blazor-scheduler-event-icon,
+.pixata-blazor-scheduler-event-continues {
+  display: inline-flex;
+  align-self: center;
+  flex: none;
+  padding-inline: 2px;
+}
+
+.pixata-blazor-scheduler-event-delete {
+  display: none;
+  align-self: center;
+  flex: none;
+  margin: 0 2px;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--pixata-blazor-border-radius);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-event-delete:hover {
+  background-color: rgba(255, 255, 255, .25);
+}
+
+.pixata-blazor-scheduler-event:hover .pixata-blazor-scheduler-event-delete,
+.pixata-blazor-scheduler-event.pixata-blazor-selected .pixata-blazor-scheduler-event-delete,
+.pixata-blazor-scheduler-event:focus-visible .pixata-blazor-scheduler-event-delete {
+  display: inline-flex;
+}
+
+/* A box in a time column: --pixata-blazor-scheduler-event-top and -height are set on it, and it takes its lane's share of
+   the column's width, leaving a gutter to click on the slots */
+.pixata-blazor-scheduler-event-vertical {
+  top: var(--pixata-blazor-scheduler-event-top);
+  height: var(--pixata-blazor-scheduler-event-height);
+  min-height: 1.25rem;
+  inset-inline-start: calc((100% - var(--pixata-blazor-scheduler-event-gutter)) * var(--pixata-blazor-scheduler-event-lane) / var(--pixata-blazor-scheduler-event-lanes));
+  width: calc((100% - var(--pixata-blazor-scheduler-event-gutter)) / var(--pixata-blazor-scheduler-event-lanes) - 2px);
+  flex-direction: row;
+}
+
+/* Short boxes show their title on one line, and no time */
+.pixata-blazor-scheduler-event-vertical {
+  container-type: size;
+}
+
+@container (max-height: 2.5rem) {
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-title {
+    white-space: nowrap;
+  }
+
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-time {
+    display: none;
+  }
+}
+
+@container (max-width: 4.5rem) {
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-time {
+    display: none;
+  }
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-icon,
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-delete {
+  align-self: flex-start;
+  margin-top: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-continues {
+  position: absolute;
+  inset-inline: 0;
+  justify-content: center;
+  padding: 0;
+  pointer-events: none;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-continues-before {
+  top: 0;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-event-continues-after {
+  bottom: 0;
+}
+
+/* A bar: --pixata-blazor-scheduler-event-start, -width and -row are set on it */
+.pixata-blazor-scheduler-event-horizontal {
+  top: calc(var(--pixata-blazor-scheduler-bar-top, 0px) + var(--pixata-blazor-scheduler-event-row) * var(--pixata-blazor-scheduler-bar-pitch));
+  height: var(--pixata-blazor-scheduler-bar-height);
+  inset-inline-start: calc(var(--pixata-blazor-scheduler-event-start) + 1px);
+  width: calc(var(--pixata-blazor-scheduler-event-width) - 3px);
+  align-items: center;
+  container-type: inline-size;
+}
+
+/* Narrow bars (eg the month view on a phone) keep their room for the title */
+@container (max-width: 4.5rem) {
+  .pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-icon {
+    display: none;
+  }
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-content {
+  padding-block: 0;
+  white-space: nowrap;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-continues-before {
+  padding-inline-end: 0;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-event-continues-before + .pixata-blazor-scheduler-event-content {
+  padding-inline-start: 2px;
+}
+
+/* A row of the agenda */
+.pixata-blazor-scheduler-event-agenda {
+  position: static;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  margin: calc(var(--pixata-blazor-spacing) * -1);
+  padding: var(--pixata-blazor-spacing);
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.pixata-blazor-scheduler-event-agenda .pixata-blazor-scheduler-event-content {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0 calc(var(--pixata-blazor-spacing) * 2);
+  padding: 0;
+}
+
+.pixata-blazor-scheduler-event-agenda:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-scheduler-event-agenda.pixata-blazor-selected {
+  background-image: none;
+  background-color: var(--pixata-blazor-scheduler-selected-slot-bg);
+  box-shadow: none;
+}
+
+.pixata-blazor-scheduler-event-agenda .pixata-blazor-scheduler-event-icon {
+  order: -1;
+}
+
+.pixata-blazor-scheduler-event-agenda .pixata-blazor-scheduler-event-delete:hover {
+  background-color: var(--pixata-blazor-hover-bg);
+}
+
+.pixata-blazor-scheduler-event-swatch {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  background-color: var(--pixata-blazor-scheduler-event-bg);
+}
+
+/* Resize handles, shown when the pointer is over an appointment that can be changed */
+.pixata-blazor-scheduler-resize-handle {
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+}
+
+.pixata-blazor-scheduler-resize-handle::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--pixata-blazor-scheduler-bg);
+  border-radius: 9999px;
+  background-color: var(--pixata-blazor-scheduler-event-bg);
+}
+
+.pixata-blazor-scheduler-event:hover .pixata-blazor-scheduler-resize-handle,
+.pixata-blazor-scheduler-event.pixata-blazor-selected .pixata-blazor-scheduler-resize-handle {
+  visibility: visible;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle {
+  inset-inline: 0;
+  height: .5rem;
+  cursor: ns-resize;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle::before {
+  inset-inline-start: calc(50% - 4px);
+  top: calc(50% - 4px);
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle-start {
+  top: 0;
+}
+
+.pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle-end {
+  bottom: 0;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle {
+  inset-block: 0;
+  width: .5rem;
+  cursor: ew-resize;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle::before {
+  top: calc(50% - 4px);
+  inset-inline-start: calc(50% - 4px);
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle-start {
+  inset-inline-start: 0;
+}
+
+.pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle-end {
+  inset-inline-end: 0;
+}
+
+/* A selected appointment that can be moved takes over touch gestures, so it can be dragged with a finger */
+.pixata-blazor-scheduler-event.pixata-blazor-selected[data-pixata-draggable="true"] {
+  touch-action: none;
+}
+
+.pixata-blazor-scheduler-dragging {
+  z-index: 6;
+  opacity: .8;
+  box-shadow: var(--pixata-blazor-popup-shadow);
+  cursor: grabbing;
+}
+
+.pixata-blazor-scheduler-drag-active,
+.pixata-blazor-scheduler-drag-active * {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- Dialogs ---------- */
+
+.pixata-blazor-scheduler-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--pixata-blazor-overlay-z-index);
+  background-color: var(--pixata-blazor-overlay-bg);
+}
+
+.pixata-blazor-scheduler-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 1);
+  display: flex;
+  flex-direction: column;
+  width: min(var(--pixata-blazor-scheduler-dialog-width), calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: var(--pixata-blazor-border-radius-lg);
+  background-color: var(--pixata-blazor-surface-bg);
+  color: var(--pixata-blazor-text-color);
+  box-shadow: var(--pixata-blazor-window-shadow);
+  font-size: var(--pixata-blazor-font-size);
+}
+
+.pixata-blazor-scheduler-prompt-overlay {
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 2);
+}
+
+.pixata-blazor-scheduler-prompt {
+  z-index: calc(var(--pixata-blazor-overlay-z-index) + 3);
+  width: min(28rem, calc(100vw - 2rem));
+}
+
+.pixata-blazor-scheduler-dialog-titlebar {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 3) calc(var(--pixata-blazor-spacing) * 4);
+  border-bottom: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-scheduler-dialog-title {
+  flex: 1 1 auto;
+  font-size: var(--pixata-blazor-font-size-lg);
+  font-weight: 600;
+}
+
+.pixata-blazor-scheduler-edit-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pixata-blazor-scheduler-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: calc(var(--pixata-blazor-spacing) * 4);
+  overflow: auto;
+}
+
+.pixata-blazor-scheduler-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 4);
+  border-top: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-scheduler-dialog-spacer {
+  flex: 1 1 auto;
+}
+
+.pixata-blazor-scheduler-focus-sentinel {
+  position: fixed;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+/* The built-in edit form */
+.pixata-blazor-scheduler-form {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-scheduler-form-field {
+  display: grid;
+  grid-template-columns: minmax(5rem, 22%) minmax(0, 1fr);
+  align-items: start;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-scheduler-form-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--pixata-blazor-spacing);
+  padding-top: calc(var(--pixata-blazor-spacing) + 1px);
+  text-align: end;
+}
+
+.pixata-blazor-scheduler-form-value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pixata-blazor-spacing);
+  min-width: 0;
+}
+
+.pixata-blazor-scheduler-form .validation-message {
+  color: var(--pixata-blazor-error);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-scheduler-checkbox-label,
+.pixata-blazor-scheduler-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 1.5);
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-checkbox,
+.pixata-blazor-scheduler-radio-label input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--pixata-blazor-primary);
+}
+
+.pixata-blazor-scheduler-textarea .pixata-blazor-input-inner {
+  min-height: 4.5rem;
+  white-space: pre-wrap;
+  resize: vertical;
+}
+
+.pixata-blazor-scheduler-select {
+  width: auto;
+  max-width: 100%;
+}
+
+.pixata-blazor-scheduler-select .pixata-blazor-input-inner {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.pixata-blazor-scheduler-number-input {
+  width: 5rem;
+}
+
+/* The recurrence editor */
+.pixata-blazor-scheduler-recurrence-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--pixata-blazor-spacing) * 3);
+}
+
+.pixata-blazor-scheduler-recurrence-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-recurrence-label {
+  min-width: 6rem;
+}
+
+.pixata-blazor-scheduler-recurrence-options {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-recurrence-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-scheduler-recurrence-option > .pixata-blazor-input:not(.pixata-blazor-scheduler-number-input):not(.pixata-blazor-scheduler-select) {
+  width: auto;
+}
+
+.pixata-blazor-scheduler-recurrence-summary {
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+/* ---------- Phones and touch screens ---------- */
+
+@media (max-width: 600px) {
+  .pixata-blazor-scheduler {
+    --pixata-blazor-scheduler-side-width: 3.5rem;
+    --pixata-blazor-scheduler-column-min-width: 3rem;
+  }
+
+  .pixata-blazor-scheduler-day-name-long {
+    display: none;
+  }
+
+  .pixata-blazor-scheduler-day-name-short {
+    display: inline;
+  }
+
+  .pixata-blazor-scheduler-agenda-day-details {
+    display: flex;
+  }
+
+  .pixata-blazor-scheduler-agenda-day-number {
+    font-size: 1.75rem;
+  }
+
+  .pixata-blazor-scheduler-dialog {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    max-height: 100dvh;
+    transform: none;
+    border-radius: var(--pixata-blazor-border-radius-lg) var(--pixata-blazor-border-radius-lg) 0 0;
+  }
+
+  .pixata-blazor-scheduler-form-field {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--pixata-blazor-spacing);
+  }
+
+  .pixata-blazor-scheduler-form-label {
+    justify-content: flex-start;
+    padding-top: 0;
+    text-align: start;
+  }
+}
+
+@media (pointer: coarse) {
+  .pixata-blazor-scheduler-view-button,
+  .pixata-blazor-scheduler-segmented-button,
+  .pixata-blazor-scheduler-views-select {
+    min-height: var(--pixata-blazor-touch-target);
+  }
+
+  .pixata-blazor-scheduler-event-vertical .pixata-blazor-scheduler-resize-handle {
+    height: 1rem;
+  }
+
+  .pixata-blazor-scheduler-event-horizontal .pixata-blazor-scheduler-resize-handle {
+    width: 1rem;
+  }
+
+  .pixata-blazor-scheduler-event:hover:not(.pixata-blazor-selected) .pixata-blazor-scheduler-resize-handle {
+    visibility: hidden;
+  }
+
+  .pixata-blazor-scheduler-event-delete {
+    padding: var(--pixata-blazor-spacing);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-scheduler-view-button,
+  .pixata-blazor-scheduler-segmented-button {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataScheduler ========== */

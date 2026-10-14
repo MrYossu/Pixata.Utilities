@@ -1,0 +1,463 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataLayerBase
+@using Microsoft.JSInterop
+
+@*
+  A floating window with a titlebar, content and an optional footer, which the user can move, resize, minimise and maximise.
+  Non-modal by default. See PixataLayerBase for how it is stacked and focused, and pixata-dialogs.js for the moving and
+  resizing. The placeholder div is display: contents, and holds nothing else, as its child is moved to the end of the body
+  while the window is visible
+*@
+<div @ref="AnchorElement" class="pixata-blazor-layer-anchor">
+  @if (Visible) {
+    <div @ref="WrapperElement" class="@WrapperClass">
+      @if (Modal) {
+        <div class="pixata-blazor-overlay" @onclick="OverlayClick"></div>
+      }
+      <div @ref="LayerElement"
+           id="@ElementId"
+           class="@WindowClass"
+           style="@WindowStyle"
+           role="dialog"
+           aria-modal="@(Modal ? "true" : "false")"
+           aria-labelledby="@TitleId"
+           tabindex="0"
+           @attributes="AdditionalAttributes"
+           @onkeydown="HandleKeyDown"
+           @onkeydown:stopPropagation="true">
+        <div class="pixata-blazor-window-titlebar">
+          <span class="pixata-blazor-window-title" id="@TitleId">@WindowTitle</span>
+          @if (WindowActions is not null) {
+            <div class="pixata-blazor-window-titlebar-actions">
+              <CascadingValue Value="this" IsFixed="true">
+                <CascadingValue Value="_state">
+                  @WindowActions
+                </CascadingValue>
+              </CascadingValue>
+            </div>
+          }
+        </div>
+        @if (_state != PixataWindowState.Minimized || PersistContent) {
+          <div class="pixata-blazor-window-content" hidden="@(_state == PixataWindowState.Minimized)">
+            @WindowContent
+          </div>
+          @if (WindowFooter is not null) {
+            <div class="@FooterClass" hidden="@(_state == PixataWindowState.Minimized)">
+              @WindowFooter
+            </div>
+          }
+        }
+        @if (Resizable && _state == PixataWindowState.Default) {
+          @foreach (string direction in ResizeDirections) {
+            <div class="pixata-blazor-window-resize-handle pixata-blazor-window-resize-@direction" data-pixata-blazor-direction="@direction"></div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
+
+@code {
+
+  private static readonly string[] ResizeDirections = ["n", "e", "s", "w", "ne", "nw", "se", "sw"];
+
+  private PixataWindowState _state;
+  private PixataWindowState _stateParameter;
+  private string? _top;
+  private string? _topParameter;
+  private string? _left;
+  private string? _leftParameter;
+  private string? _width;
+  private string? _widthParameter;
+  private string? _height;
+  private string? _heightParameter;
+  private bool _moved;
+  private bool _wasVisible;
+
+  /// <summary>
+  /// The titlebar's text or markup
+  /// </summary>
+  [Parameter]
+  public RenderFragment? WindowTitle { get; set; }
+
+  /// <summary>
+  /// The body of the window. It scrolls if it is bigger than the window
+  /// </summary>
+  [Parameter]
+  public RenderFragment? WindowContent { get; set; }
+
+  /// <summary>
+  /// An optional footer below the content, eg for buttons, laid out as <see cref="FooterLayoutAlign"/> says
+  /// </summary>
+  [Parameter]
+  public RenderFragment? WindowFooter { get; set; }
+
+  /// <summary>
+  /// The buttons in the titlebar: <see cref="PixataWindowAction"/>s, either the built-in <c>Minimize</c>, <c>Maximize</c> and
+  /// <c>Close</c> ones, or your own. There are none unless you add them
+  /// </summary>
+  [Parameter]
+  public RenderFragment? WindowActions { get; set; }
+
+  /// <summary>
+  /// Whether the window is shown normally, minimised (just the titlebar) or maximised (filling the viewport, or the
+  /// containment element). Use <c>@bind-State</c> to keep track of the user's changes
+  /// </summary>
+  [Parameter]
+  public PixataWindowState State { get; set; }
+
+  [Parameter]
+  public EventCallback<PixataWindowState> StateChanged { get; set; }
+
+  /// <summary>
+  /// Whether the window is modal: shown over a dimmed overlay that blocks the page, with the focus kept inside it. False by
+  /// default
+  /// </summary>
+  [Parameter]
+  public bool Modal { get; set; }
+
+  /// <summary>
+  /// Whether clicking (or tapping) the overlay around a modal window closes it. False by default
+  /// </summary>
+  [Parameter]
+  public bool CloseOnOverlayClick { get; set; }
+
+  /// <summary>
+  /// Whether pressing Esc while the window (or something in it) has the focus closes it. True by default
+  /// </summary>
+  [Parameter]
+  public bool CloseOnEscape { get; set; } = true;
+
+  /// <summary>
+  /// Whether the user can move the window by dragging its titlebar (with a mouse, a finger or a pen), or with the arrow keys
+  /// when the window itself has the focus. True by default
+  /// </summary>
+  [Parameter]
+  public bool Draggable { get; set; } = true;
+
+  /// <summary>
+  /// Whether the user can resize the window by dragging its edges and corners, or with Ctrl and the arrow keys when the window
+  /// itself has the focus. True by default
+  /// </summary>
+  [Parameter]
+  public bool Resizable { get; set; } = true;
+
+  /// <summary>
+  /// The smallest width the window can be resized to, as a CSS length. 120px by default if the window is resizable
+  /// </summary>
+  [Parameter]
+  public string? MinWidth { get; set; }
+
+  /// <summary>
+  /// The largest width the window can be resized to, as a CSS length. It is never wider than the viewport (or the
+  /// containment element) anyway
+  /// </summary>
+  [Parameter]
+  public string? MaxWidth { get; set; }
+
+  /// <summary>
+  /// The smallest height the window can be resized to, as a CSS length. 100px by default if the window is resizable
+  /// </summary>
+  [Parameter]
+  public string? MinHeight { get; set; }
+
+  /// <summary>
+  /// The largest height the window can be resized to, as a CSS length. It is never taller than the viewport (or the
+  /// containment element) anyway
+  /// </summary>
+  [Parameter]
+  public string? MaxHeight { get; set; }
+
+  /// <summary>
+  /// The distance from the top of the viewport (or the containment element) to the window, as a CSS length. Use
+  /// <c>@bind-Top</c> to keep track of where the user moves it. If neither this nor <see cref="Left"/> is set, the window
+  /// is centred
+  /// </summary>
+  [Parameter]
+  public string? Top { get; set; }
+
+  [Parameter]
+  public EventCallback<string> TopChanged { get; set; }
+
+  /// <summary>
+  /// The distance from the left of the viewport (or the containment element) to the window, as a CSS length. Use
+  /// <c>@bind-Left</c> to keep track of where the user moves it
+  /// </summary>
+  [Parameter]
+  public string? Left { get; set; }
+
+  [Parameter]
+  public EventCallback<string> LeftChanged { get; set; }
+
+  /// <summary>
+  /// The window's width as a CSS length. By default it fits its content (or <see cref="Size"/>). Use <c>@bind-Width</c> to
+  /// keep track of the user's resizing
+  /// </summary>
+  [Parameter]
+  public string? Width { get; set; }
+
+  [Parameter]
+  public EventCallback<string> WidthChanged { get; set; }
+
+  /// <summary>
+  /// The window's height as a CSS length. By default it fits its content. Use <c>@bind-Height</c> to keep track of the user's
+  /// resizing
+  /// </summary>
+  [Parameter]
+  public string? Height { get; set; }
+
+  [Parameter]
+  public EventCallback<string> HeightChanged { get; set; }
+
+  /// <summary>
+  /// A preset width, one of the <see cref="PixataThemeConstants.Window.Size"/> values (<c>sm</c>, <c>md</c> or <c>lg</c>).
+  /// <see cref="Width"/> takes precedence
+  /// </summary>
+  [Parameter]
+  public string? Size { get; set; }
+
+  /// <summary>
+  /// Opens the window in the middle of the viewport (or the containment element), even if <see cref="Top"/> and
+  /// <see cref="Left"/> are set. Once the user moves or resizes it, it stays where they put it until it is closed
+  /// </summary>
+  [Parameter]
+  public bool Centered { get; set; }
+
+  /// <summary>
+  /// A CSS selector for an element to keep the window inside, eg <c>#workspace</c>. <see cref="Top"/> and <see cref="Left"/>
+  /// are then measured from that element, the window can't be dragged out of it, and it fills it when maximised. Ignored for
+  /// modal windows
+  /// </summary>
+  [Parameter]
+  public string? ContainmentSelector { get; set; }
+
+  /// <summary>
+  /// Keeps the content (and the state of any components in it) while the window is minimised, rather than removing it.
+  /// False by default
+  /// </summary>
+  [Parameter]
+  public bool PersistContent { get; set; }
+
+  /// <summary>
+  /// How the <see cref="WindowFooter"/> content is laid out. <see cref="PixataWindowFooterLayoutAlign.Stretch"/> by default
+  /// </summary>
+  [Parameter]
+  public PixataWindowFooterLayoutAlign FooterLayoutAlign { get; set; } = PixataWindowFooterLayoutAlign.Stretch;
+
+  /// <summary>
+  /// Colours the titlebar with one of the <see cref="PixataThemeConstants.ThemeColor"/> values, eg <c>primary</c>. By default
+  /// it has the plain surface colour
+  /// </summary>
+  [Parameter]
+  public string? ThemeColor { get; set; }
+
+  /// <summary>
+  /// Minimises the window to its titlebar
+  /// </summary>
+  public Task Minimize() =>
+    InvokeAsync(() => SetState(PixataWindowState.Minimized));
+
+  /// <summary>
+  /// Maximises the window to fill the viewport (or the containment element)
+  /// </summary>
+  public Task Maximize() =>
+    InvokeAsync(() => SetState(PixataWindowState.Maximized));
+
+  /// <summary>
+  /// Returns a minimised or maximised window to its own size and position
+  /// </summary>
+  public Task Restore() =>
+    InvokeAsync(() => SetState(PixataWindowState.Default));
+
+  /// <summary>
+  /// Re-renders the window, eg after changing something its content shows that it doesn't know about
+  /// </summary>
+  public void Refresh() =>
+    _ = InvokeAsync(StateHasChanged);
+
+  /// <summary>
+  /// The state the titlebar buttons are drawn for
+  /// </summary>
+  internal PixataWindowState CurrentState => _state;
+
+  protected override void OnParametersSet() {
+    if (State != _stateParameter) {
+      _stateParameter = State;
+      _state = State;
+    }
+    if (Top != _topParameter) {
+      _topParameter = Top;
+      _top = Top;
+    }
+    if (Left != _leftParameter) {
+      _leftParameter = Left;
+      _left = Left;
+    }
+    if (Width != _widthParameter) {
+      _widthParameter = Width;
+      _width = Width;
+    }
+    if (Height != _heightParameter) {
+      _heightParameter = Height;
+      _height = Height;
+    }
+    if (Visible && !_wasVisible) {
+      // Opened again: forget where the user moved or resized it to last time, and start from the parameters (which hold the
+      // user's changes if they are bound)
+      _moved = false;
+      _top = Top;
+      _left = Left;
+      _width = Width;
+      _height = Height;
+    }
+    _wasVisible = Visible;
+  }
+
+  private string TitleId => $"{ElementId}-title";
+
+  private bool IsCentred =>
+    !_moved && (Centered || (string.IsNullOrWhiteSpace(_top) && string.IsNullOrWhiteSpace(_left)));
+
+  private string WrapperClass =>
+    PixataCss.Classes("pixata-blazor-window-wrapper", Modal ? "pixata-blazor-window-wrapper-modal" : null);
+
+  private string WindowClass =>
+    PixataCss.Classes("pixata-blazor-window",
+      string.IsNullOrWhiteSpace(Size) ? null : $"pixata-blazor-window-{Size}",
+      IsCentred && _state != PixataWindowState.Maximized ? "pixata-blazor-window-centred" : null,
+      _state == PixataWindowState.Minimized ? "pixata-blazor-window-minimised" : null,
+      _state == PixataWindowState.Maximized ? "pixata-blazor-window-maximised" : null,
+      string.IsNullOrWhiteSpace(ThemeColor) || ThemeColor == PixataThemeConstants.ThemeColor.Base ? null : $"pixata-blazor-window-{ThemeColor}",
+      Class);
+
+  private string? WindowStyle {
+    get {
+      if (_state == PixataWindowState.Maximized) {
+        return null;
+      }
+      List<string> parts = [];
+      if (!IsCentred) {
+        parts.Add($"left:{Or(_left, "0px")}");
+        parts.Add($"top:{Or(_top, "0px")}");
+      }
+      AddStyle(parts, "width", _width);
+      AddStyle(parts, "min-width", MinWidth ?? (Resizable ? "120px" : null));
+      AddStyle(parts, "max-width", string.IsNullOrWhiteSpace(MaxWidth) ? null : $"min(100%, {MaxWidth})");
+      if (_state == PixataWindowState.Default) {
+        AddStyle(parts, "height", _height);
+        AddStyle(parts, "min-height", MinHeight ?? (Resizable ? "100px" : null));
+        AddStyle(parts, "max-height", string.IsNullOrWhiteSpace(MaxHeight) ? null : $"min(100%, {MaxHeight})");
+      }
+      return parts.Count == 0 ? null : $"{string.Join(";", parts)};";
+    }
+  }
+
+  private string FooterClass =>
+    PixataCss.Classes("pixata-blazor-window-footer", $"pixata-blazor-window-footer-{FooterLayoutAlign.ToString().ToLowerInvariant()}");
+
+  private static void AddStyle(List<string> parts, string property, string? value) {
+    if (!string.IsNullOrWhiteSpace(value)) {
+      parts.Add($"{property}:{value}");
+    }
+  }
+
+  private static string Or(string? value, string fallback) =>
+    string.IsNullOrWhiteSpace(value) ? fallback : value;
+
+  private protected override PixataLayerOptions LayerOptions =>
+    new("window", Modal, null, false, Draggable, Resizable, Modal ? null : ContainmentSelector);
+
+  private async Task SetState(PixataWindowState state) {
+    if (_state == state) {
+      return;
+    }
+    _state = state;
+    StateHasChanged();
+    await StateChanged.InvokeAsync(state);
+  }
+
+  /// <summary>
+  /// What the built-in titlebar buttons do
+  /// </summary>
+  internal Task ToggleMinimised() =>
+    SetState(_state == PixataWindowState.Minimized ? PixataWindowState.Default : PixataWindowState.Minimized);
+
+  internal Task ToggleMaximised() =>
+    SetState(_state == PixataWindowState.Maximized ? PixataWindowState.Default : PixataWindowState.Maximized);
+
+  internal Task CloseFromAction() =>
+    Close();
+
+  private async Task HandleKeyDown(KeyboardEventArgs e) {
+    if (e.Key == "Escape" && CloseOnEscape) {
+      await Close();
+    }
+  }
+
+  protected override Task HandleEscape() =>
+    CloseOnEscape ? Close() : Task.CompletedTask;
+
+  private async Task OverlayClick() {
+    if (Modal && CloseOnOverlayClick) {
+      await Close();
+    }
+  }
+
+  /// <summary>
+  /// Called by the script when the user has moved the window
+  /// </summary>
+  [JSInvokable]
+  public Task OnWindowMoved(double left, double top) =>
+    InvokeAsync(async () => {
+      _moved = true;
+      string newLeft = Pixels(left);
+      string newTop = Pixels(top);
+      bool leftChanged = newLeft != _left;
+      bool topChanged = newTop != _top;
+      _left = newLeft;
+      _top = newTop;
+      StateHasChanged();
+      if (leftChanged) {
+        await LeftChanged.InvokeAsync(newLeft);
+      }
+      if (topChanged) {
+        await TopChanged.InvokeAsync(newTop);
+      }
+    });
+
+  /// <summary>
+  /// Called by the script when the user has resized the window
+  /// </summary>
+  [JSInvokable]
+  public Task OnWindowResized(double left, double top, double width, double height) =>
+    InvokeAsync(async () => {
+      _moved = true;
+      string newWidth = Pixels(width);
+      string newHeight = Pixels(height);
+      bool widthChanged = newWidth != _width;
+      bool heightChanged = newHeight != _height;
+      _width = newWidth;
+      _height = newHeight;
+      await OnWindowMoved(left, top);
+      if (widthChanged) {
+        await WidthChanged.InvokeAsync(newWidth);
+      }
+      if (heightChanged) {
+        await HeightChanged.InvokeAsync(newHeight);
+      }
+    });
+
+  /// <summary>
+  /// Called by the script for Alt+Up (<c>maximise</c>) and Alt+Down (<c>minimise</c>) on the window
+  /// </summary>
+  [JSInvokable]
+  public Task OnWindowShortcut(string command) =>
+    InvokeAsync(() => (command, _state) switch {
+      ("maximise", PixataWindowState.Minimized) => SetState(PixataWindowState.Default),
+      ("maximise", PixataWindowState.Default) => SetState(PixataWindowState.Maximized),
+      ("minimise", PixataWindowState.Maximized) => SetState(PixataWindowState.Default),
+      ("minimise", PixataWindowState.Default) => SetState(PixataWindowState.Minimized),
+      _ => Task.CompletedTask
+    });
+
+}

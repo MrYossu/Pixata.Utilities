@@ -1,0 +1,87 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@inherits PixataSchedulerToolBarToolBase<TItem>
+@using System.Globalization
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+@* The toolbar's date range, which opens a date picker for going to another date *@
+<span class="pixata-blazor-scheduler-calendar-tool" @ref="_anchor">
+  <button type="button"
+          @ref="_button"
+          class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null), "pixata-blazor-scheduler-range")"
+          aria-haspopup="dialog"
+          aria-expanded="@(_open ? "true" : "false")"
+          aria-label="@($"{Owner.Text.ChooseDate}: {Owner.RangeText}")"
+          @onclick="Toggle">
+    <PixataIcon Icon="PixataSvgIcons.Calendar" />
+    <span class="pixata-blazor-scheduler-range-text" aria-live="polite">@Owner.RangeText</span>
+  </button>
+  <PixataPopup Visible="_open"
+               AnchorElement="_anchor"
+               MatchAnchorWidth="false"
+               Role="dialog"
+               AriaLabel="@Owner.Text.ChooseDate"
+               Class="pixata-blazor-scheduler-calendar-popup"
+               OnOutsideClick="Close">
+    <div class="pixata-blazor-scheduler-calendar-popup-content" @onkeydown="PopupKeyDown" @onkeydown:stopPropagation="true">
+      <span class="@PixataCss.Input(null, null, null)">
+        <input @ref="_input"
+               type="date"
+               class="pixata-blazor-input-inner"
+               aria-label="@Owner.Text.ChooseDate"
+               value="@Owner.CurrentDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)"
+               @onchange="DateChanged" />
+      </span>
+      <button type="button" class="@PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, null)" @onclick="Today">@Owner.Text.Today</button>
+    </div>
+  </PixataPopup>
+</span>
+
+@code {
+
+  private ElementReference _anchor;
+  private ElementReference _button;
+  private ElementReference _input;
+  private bool _open;
+  private bool _focusInput;
+  private bool _focusButton;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (_focusInput) {
+      _focusInput = false;
+      await PixataJs.InvokeVoid(Js, "focusElement", _input);
+    } else if (_focusButton) {
+      _focusButton = false;
+      await PixataJs.InvokeVoid(Js, "focusElement", _button);
+    }
+  }
+
+  private void Toggle() {
+    _open = !_open;
+    _focusInput = _open;
+  }
+
+  private void Close() =>
+    _open = false;
+
+  private async Task DateChanged(ChangeEventArgs args) {
+    if (DateTime.TryParseExact(args.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date)) {
+      await Owner.ChangeDate(date);
+    }
+  }
+
+  private async Task Today() {
+    _open = false;
+    _focusButton = true;
+    await Owner.GoToToday();
+  }
+
+  private void PopupKeyDown(KeyboardEventArgs args) {
+    if (args.Key is "Escape" or "Enter") {
+      _open = false;
+      _focusButton = true;
+    }
+  }
+
+}

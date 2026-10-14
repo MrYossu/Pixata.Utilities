@@ -1,0 +1,354 @@
+@page "/EditorSample"
+@using System.ComponentModel.DataAnnotations
+@using Pixata.Blazor.Components
+@using Telerik.Blazor.Components.Editor
+
+<h3>Editor</h3>
+
+<p><code>PixataEditor</code> is a rich text editor whose value is HTML. Each example below shows it next to the equivalent Telerik editor, set up the same way. Press Alt+F10 in the document to move to the toolbar, use the arrow keys to move between the tools, and Esc to go back to the document.</p>
+
+<ComponentComparison Title="Basic use">
+  <Description>
+    <p>Two-way binding with <code>@@bind-Value</code> and the default tools. The value is updated 100ms after you stop typing (<code>DebounceDelay</code>), and straight away when the editor loses the focus.</p>
+  </Description>
+  <Pixata>
+    <PixataEditor @bind-Value="_pixataBasic" AriaLabel="Basic editor" />
+    <pre class="editor-sample-value">@_pixataBasic</pre>
+  </Pixata>
+  <Telerik>
+    <TelerikEditor @bind-Value="_telerikBasic" AriaLabel="Basic editor" />
+    <pre class="editor-sample-value">@_telerikBasic</pre>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="All the tools">
+  <Description>
+    <p><code>Tools="PixataEditorToolSets.All"</code> adds undo and redo, strikethrough, subscript and superscript, the font, its size and colours, tables, clearing the formatting and viewing the HTML. Put the cursor in the table to use the row and column tools.</p>
+  </Description>
+  <Pixata>
+    <PixataEditor @bind-Value="_pixataAll" Tools="PixataEditorToolSets.All" Height="380px" AriaLabel="Editor with all the tools" />
+  </Pixata>
+  <Telerik>
+    <TelerikEditor @bind-Value="_telerikAll" Tools="EditorToolSets.All" Height="380px" AriaLabel="Editor with all the tools" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Div edit mode">
+  <Description>
+    <p>By default the document is in an iframe, so the page's styles don't affect it. With <code>EditMode="PixataEditorEditMode.Div"</code> it is in a div, and inherits the page's styles. This page makes paragraphs in div-mode editors italic and dark blue, to show the difference.</p>
+  </Description>
+  <Pixata>
+    <div class="editor-sample-page-styles">
+      <PixataEditor @bind-Value="_pixataDiv" EditMode="PixataEditorEditMode.Div" Height="200px" AriaLabel="Div mode editor" />
+    </div>
+  </Pixata>
+  <Telerik>
+    <div class="editor-sample-page-styles">
+      <TelerikEditor @bind-Value="_telerikDiv" EditMode="EditorEditMode.Div" Height="200px" AriaLabel="Div mode editor" />
+    </div>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Adaptive toolbar">
+  <Description>
+    <p>With <code>Adaptive="true"</code> the toolbar stays on one line, and the tools that don't fit go into a menu at its end. Without it (the default) the toolbar wraps. Drag the slider to change the editors' width.</p>
+    <label>Width: <input type="range" min="260" max="900" step="10" @bind="_adaptiveWidth" @bind:event="oninput" /> @(_adaptiveWidth)px</label>
+  </Description>
+  <Pixata>
+    <PixataEditor @bind-Value="_pixataAdaptive" Tools="PixataEditorToolSets.All" Adaptive="true" Width="@($"min(100%, {_adaptiveWidth}px)")" Height="200px" AriaLabel="Adaptive editor" />
+  </Pixata>
+  <Telerik>
+    <TelerikEditor @bind-Value="_telerikAdaptive" Tools="EditorToolSets.All" Adaptive="true" Width="@($"min(100%, {_adaptiveWidth}px)")" Height="200px" AriaLabel="Adaptive editor" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Read-only and disabled">
+  <Description>
+    <p>A read-only editor's content can be selected and copied but not changed, and its tools are disabled. A disabled editor can't be used at all.</p>
+    <label class="me-3"><input type="checkbox" @bind="_readOnly" /> ReadOnly</label>
+    <label><input type="checkbox" @bind="_enabled" /> Enabled</label>
+  </Description>
+  <Pixata>
+    <PixataEditor @bind-Value="_pixataReadOnly" ReadOnly="_readOnly" Enabled="_enabled" Height="180px" AriaLabel="Read-only editor" />
+  </Pixata>
+  <Telerik>
+    <TelerikEditor @bind-Value="_telerikReadOnly" ReadOnly="_readOnly" Enabled="_enabled" Height="180px" AriaLabel="Read-only editor" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Custom tools">
+  <Description>
+    <p>Put a <code>PixataEditorCustomTool</code> in <code>Tools</code>, and its content in a <code>PixataEditorCustomToolTemplate</code> with the same name in <code>EditorCustomTools</code>. These ones use <code>ExecuteAsync()</code> to insert today's date and a signature.</p>
+  </Description>
+  <Pixata>
+    <PixataEditor @ref="_pixataCustomEditor" @bind-Value="_pixataCustom" Tools="_pixataCustomTools" Height="200px" AriaLabel="Editor with custom tools">
+      <EditorCustomTools>
+        <PixataEditorCustomToolTemplate Name="InsertDate">
+          <button type="button" class="pixata-blazor-button pixata-blazor-button-md pixata-blazor-rounded-md pixata-blazor-button-solid pixata-blazor-button-base" @onclick="PixataInsertDate">Insert date</button>
+        </PixataEditorCustomToolTemplate>
+        <PixataEditorCustomToolTemplate Name="Signature">
+          <button type="button" class="pixata-blazor-button pixata-blazor-button-md pixata-blazor-rounded-md pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="PixataInsertSignature">Sign</button>
+        </PixataEditorCustomToolTemplate>
+      </EditorCustomTools>
+    </PixataEditor>
+  </Pixata>
+  <Telerik>
+    <TelerikEditor @ref="_telerikCustomEditor" @bind-Value="_telerikCustom" Tools="_telerikCustomTools" Height="200px" AriaLabel="Editor with custom tools">
+      <EditorCustomTools>
+        <EditorCustomTool Name="InsertDate">
+          <TelerikButton OnClick="TelerikInsertDate">Insert date</TelerikButton>
+        </EditorCustomTool>
+        <EditorCustomTool Name="Signature">
+          <TelerikButton ThemeColor="primary" OnClick="TelerikInsertSignature">Sign</TelerikButton>
+        </EditorCustomTool>
+      </EditorCustomTools>
+    </TelerikEditor>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Running commands from code">
+  <Description>
+    <p><code>ExecuteAsync()</code> runs any command, as if the user had used a tool. Select some text and click the buttons.</p>
+  </Description>
+  <Pixata>
+    <div class="mb-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _pixataCommandsEditor.ExecuteAsync(new PixataEditorToolCommandArgs(PixataEditorCommands.Bold))">Bold</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _pixataCommandsEditor.ExecuteAsync(new PixataEditorFormatCommandArgs(PixataEditorCommands.Format, Heading2))">Heading 2</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _pixataCommandsEditor.ExecuteAsync(new PixataEditorFormatCommandArgs(PixataEditorCommands.ForeColor, Red))">Red</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _pixataCommandsEditor.ExecuteAsync(new PixataEditorHtmlCommandArgs(PixataEditorCommands.InsertHtml, SampleTable))">Insert a table</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _pixataCommandsEditor.ExecuteAsync(new PixataEditorHtmlCommandArgs(PixataEditorCommands.ViewHtml, StartText))">Reset</button>
+    </div>
+    <PixataEditor @ref="_pixataCommandsEditor" @bind-Value="_pixataCommands" Height="220px" AriaLabel="Editor driven from code" />
+  </Pixata>
+  <Telerik>
+    <div class="mb-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _telerikCommandsEditor.ExecuteAsync(new ToolCommandArgs(TelerikBold))">Bold</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _telerikCommandsEditor.ExecuteAsync(new FormatCommandArgs(TelerikFormat, Heading2))">Heading 2</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _telerikCommandsEditor.ExecuteAsync(new FormatCommandArgs(TelerikForeColor, Red))">Red</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _telerikCommandsEditor.ExecuteAsync(new HtmlCommandArgs(TelerikInsertHtml, SampleTable))">Insert a table</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _telerikCommandsEditor.ExecuteAsync(new HtmlCommandArgs(TelerikSetHtml, StartText))">Reset</button>
+    </div>
+    <TelerikEditor @ref="_telerikCommandsEditor" @bind-Value="_telerikCommands" Height="220px" AriaLabel="Editor driven from code" />
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Sanitising">
+  <Description>
+    <p>The value below contains a script, an <code>onclick</code> handler, a <code>javascript:</code> link and an iframe. <code>PixataEditor</code> sanitises HTML when it is given a value and when it emits one, so none of them reach the page. The bound value only changes when the editor emits a new one, so edit the text to see the sanitised value.</p>
+    <pre class="editor-sample-value">@UnsafeHtml</pre>
+  </Description>
+  <Pixata>
+    <PixataEditor @bind-Value="_pixataUnsafe" Height="180px" AriaLabel="Editor given unsafe HTML" />
+    <pre class="editor-sample-value">@_pixataUnsafe</pre>
+  </Pixata>
+  <Telerik>
+    <TelerikEditor @bind-Value="_telerikUnsafe" Height="180px" AriaLabel="Editor given unsafe HTML" />
+    <pre class="editor-sample-value">@_telerikUnsafe</pre>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Paste settings">
+  <Description>
+    <p><code>PixataEditorPasteSettings</code> in <code>EditorSettings</code> controls how pasted HTML is cleaned. These editors remove pasted <code>style</code> attributes and strip <code>span</code> tags (keeping their text), as well as cleaning up what Microsoft Word pastes. Copy some formatted text from another page or from Word and paste it in.</p>
+  </Description>
+  <Pixata>
+    <PixataEditor @bind-Value="_pixataPaste" Height="180px" AriaLabel="Editor with paste settings">
+      <EditorSettings>
+        <PixataEditorPasteSettings ConvertMsLists="true"
+                                   RemoveMsClasses="true"
+                                   RemoveMsStyles="true"
+                                   RemoveHtmlComments="true"
+                                   RemoveAttributes="_removeAttributes"
+                                   StripTags="_stripTags" />
+      </EditorSettings>
+    </PixataEditor>
+    <pre class="editor-sample-value">@_pixataPaste</pre>
+  </Pixata>
+  <Telerik>
+    <TelerikEditor @bind-Value="_telerikPaste" Height="180px" AriaLabel="Editor with paste settings">
+      <EditorSettings>
+        <EditorPasteSettings ConvertMsLists="true"
+                             RemoveMsClasses="true"
+                             RemoveMsStyles="true"
+                             RemoveHtmlComments="true"
+                             RemoveAttributes="_removeAttributes"
+                             StripTags="_stripTags" />
+      </EditorSettings>
+    </TelerikEditor>
+    <pre class="editor-sample-value">@_telerikPaste</pre>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Events, debouncing and placeholder">
+  <Description>
+    <p>Here <code>DebounceDelay</code> is 1000ms, so the value is only updated a second after you stop typing (or when you leave the editor). <code>OnChange</code> is raised when the editor loses the focus after its value changed, and <code>OnBlur</code> whenever it loses the focus. <code>Placeholder</code> shows text while the editor is empty (the Telerik editor has no equivalent).</p>
+  </Description>
+  <Pixata>
+    <PixataEditor Value="@_pixataEvents"
+                  ValueChanged="@((string v) => { _pixataEvents = v; _pixataLog.Insert(0, $"ValueChanged ({v.Length} characters)"); })"
+                  DebounceDelay="1000"
+                  Placeholder="Type something here..."
+                  OnChange="@((string v) => _pixataLog.Insert(0, $"OnChange ({v.Length} characters)"))"
+                  OnBlur="@(() => _pixataLog.Insert(0, "OnBlur"))"
+                  Height="160px"
+                  AriaLabel="Editor with events" />
+    <ul class="editor-sample-log">
+      @foreach (string entry in _pixataLog.Take(6)) {
+        <li>@entry</li>
+      }
+    </ul>
+  </Pixata>
+  <Telerik>
+    <TelerikEditor Value="@_telerikEvents"
+                   ValueChanged="@((string v) => { _telerikEvents = v; _telerikLog.Insert(0, $"ValueChanged ({v.Length} characters)"); })"
+                   DebounceDelay="1000"
+                   Height="160px"
+                   AriaLabel="Editor with events" />
+    <ul class="editor-sample-log">
+      @foreach (string entry in _telerikLog.Take(6)) {
+        <li>@entry</li>
+      }
+    </ul>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="In an EditForm">
+  <Description>
+    <p>Both editors are bound to a property marked <code>[Required]</code> with a <code>[MaxLength(200)]</code> on the HTML. Clear the text and press Save to see the invalid state.</p>
+  </Description>
+  <Pixata>
+    <EditForm Model="_pixataModel" OnValidSubmit="() => _pixataSaved = DateTime.Now">
+      <DataAnnotationsValidator />
+      <PixataEditor @bind-Value="_pixataModel.Notes" Height="160px" AriaLabel="Notes" />
+      <ValidationMessage For="() => _pixataModel.Notes" />
+      <button type="submit" class="btn btn-sm btn-primary mt-2">Save</button>
+      @if (_pixataSaved is not null) {
+        <span class="ms-2">Saved at @_pixataSaved.Value.ToLongTimeString()</span>
+      }
+    </EditForm>
+  </Pixata>
+  <Telerik>
+    <EditForm Model="_telerikModel" OnValidSubmit="() => _telerikSaved = DateTime.Now">
+      <DataAnnotationsValidator />
+      <TelerikEditor @bind-Value="_telerikModel.Notes" Height="160px" AriaLabel="Notes" />
+      <ValidationMessage For="() => _telerikModel.Notes" />
+      <button type="submit" class="btn btn-sm btn-primary mt-2">Save</button>
+      @if (_telerikSaved is not null) {
+        <span class="ms-2">Saved at @_telerikSaved.Value.ToLongTimeString()</span>
+      }
+    </EditForm>
+  </Telerik>
+</ComponentComparison>
+
+<style>
+  .editor-sample-value {
+    max-height: 10rem;
+    margin: .5rem 0 0;
+    padding: .5rem;
+    overflow: auto;
+    background-color: #f8f9fa;
+    font-size: .75rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .editor-sample-page-styles p {
+    color: #1a3f8f;
+    font-style: italic;
+  }
+
+  .editor-sample-log {
+    margin: .5rem 0 0;
+    padding-inline-start: 1.25rem;
+    font-size: .875rem;
+  }
+</style>
+
+@code {
+
+  private const string Heading2 = "h2";
+  private const string Red = "#e61919";
+
+  // The Telerik editor's command names
+  private const string TelerikBold = "bold";
+  private const string TelerikFormat = "format";
+  private const string TelerikForeColor = "foreColor";
+  private const string TelerikInsertHtml = "insertHtml";
+  private const string TelerikSetHtml = "setHtml";
+
+  private const string StartText = "<p>The <strong>quick</strong> brown fox <em>jumps</em> over the <u>lazy</u> dog.</p><ul><li>One</li><li>Two</li></ul>";
+
+  private const string SampleTable = "<table><tbody><tr><td>One</td><td>Two</td></tr><tr><td>Three</td><td>Four</td></tr></tbody></table>";
+
+  private const string UnsafeHtml = "<p onclick=\"alert('clicked')\">Click <a href=\"javascript:alert('link')\">this link</a> or <a href=\"https://www.example.com\" onmouseover=\"alert('hover')\">this one</a>.</p><script>alert('script')</script><iframe src=\"https://www.example.com\"></iframe><p style=\"color: red; background-image: url(javascript:alert(1))\">Red text</p>";
+
+  private const string AllText = "<h2>All the tools</h2><p>Some <strong>bold</strong>, <em>italic</em>, <u>underlined</u> and <s>struck through</s> text, with H<sub>2</sub>O and E = mc<sup>2</sup>.</p><p style=\"text-align: center;\"><span style=\"color: #1237a5; font-family: Georgia, Times, 'Times New Roman', serif;\">A centred line in blue</span></p><ol><li>First</li><li>Second</li></ol><table><tbody><tr><td>One</td><td>Two</td></tr><tr><td>Three</td><td>Four</td></tr></tbody></table><p>A <a href=\"https://www.pixata.co.uk\">link</a>.</p>";
+
+  private string _pixataBasic = StartText;
+  private string _telerikBasic = StartText;
+  private string _pixataAll = AllText;
+  private string _telerikAll = AllText;
+  private string _pixataDiv = StartText;
+  private string _telerikDiv = StartText;
+  private string _pixataAdaptive = StartText;
+  private string _telerikAdaptive = StartText;
+  private int _adaptiveWidth = 420;
+  private string _pixataReadOnly = StartText;
+  private string _telerikReadOnly = StartText;
+  private bool _readOnly = true;
+  private bool _enabled = true;
+  private string _pixataCustom = "<p>Put the cursor somewhere and use the custom tools.</p>";
+  private string _telerikCustom = "<p>Put the cursor somewhere and use the custom tools.</p>";
+  private string _pixataCommands = StartText;
+  private string _telerikCommands = StartText;
+  private string _pixataUnsafe = UnsafeHtml;
+  private string _telerikUnsafe = UnsafeHtml;
+  private string _pixataPaste = "<p>Paste here.</p>";
+  private string _telerikPaste = "<p>Paste here.</p>";
+  private string _pixataEvents = "";
+  private string _telerikEvents = "";
+  private readonly List<string> _pixataLog = [];
+  private readonly List<string> _telerikLog = [];
+  private readonly NotesModel _pixataModel = new();
+  private readonly NotesModel _telerikModel = new();
+  private DateTime? _pixataSaved;
+  private DateTime? _telerikSaved;
+  private readonly List<string> _removeAttributes = ["style"];
+  private readonly List<string> _stripTags = ["span", "font"];
+
+  private PixataEditor _pixataCustomEditor = null!;
+  private TelerikEditor _telerikCustomEditor = null!;
+  private PixataEditor _pixataCommandsEditor = null!;
+  private TelerikEditor _telerikCommandsEditor = null!;
+
+  private readonly List<PixataEditorTool> _pixataCustomTools = [
+    new PixataEditorButtonGroup(new PixataEditorBold(), new PixataEditorItalic(), new PixataEditorUnderline()),
+    new PixataEditorCustomTool("InsertDate"),
+    new PixataEditorCustomTool("Signature")
+  ];
+
+  private readonly List<IEditorTool> _telerikCustomTools = [
+    new EditorButtonGroup(new Bold(), new Italic(), new Underline()),
+    new CustomTool("InsertDate"),
+    new CustomTool("Signature")
+  ];
+
+  private Task PixataInsertDate() =>
+    _pixataCustomEditor.ExecuteAsync(new PixataEditorHtmlCommandArgs(PixataEditorCommands.InsertHtml, DateTime.Today.ToLongDateString(), true));
+
+  private Task PixataInsertSignature() =>
+    _pixataCustomEditor.ExecuteAsync(new PixataEditorHtmlCommandArgs(PixataEditorCommands.InsertHtml, "<p>Kind regards,</p><p><strong>The Pixata team</strong></p>"));
+
+  private Task TelerikInsertDate() =>
+    _telerikCustomEditor.ExecuteAsync(new HtmlCommandArgs(TelerikInsertHtml, DateTime.Today.ToLongDateString(), true));
+
+  private Task TelerikInsertSignature() =>
+    _telerikCustomEditor.ExecuteAsync(new HtmlCommandArgs(TelerikInsertHtml, "<p>Kind regards,</p><p><strong>The Pixata team</strong></p>"));
+
+  private class NotesModel {
+    [Required(ErrorMessage = "Please enter some notes")]
+    [MaxLength(200, ErrorMessage = "The notes can be at most 200 characters of HTML")]
+    public string Notes { get; set; } = "<p>Some notes</p>";
+  }
+
+}

@@ -1,0 +1,92 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@implements IHandleEvent
+@attribute [EditorBrowsable(EditorBrowsableState.Never)]
+@using System.ComponentModel
+@using System.Globalization
+
+@* The agenda view of a PixataScheduler. Used by the scheduler; not for use on its own *@
+@if (Scheduler.Model<PixataSchedulerAgendaModel<TItem>>() is { } model) {
+  CultureInfo culture = Scheduler.CurrentCulture;
+  bool grouped = model.Groups.Any(g => g.Group is not null);
+  int columns = grouped ? 4 : 3;
+  <div class="pixata-blazor-scheduler-grid pixata-blazor-scheduler-agenda">
+    <table class="pixata-blazor-scheduler-agenda-table">
+      <thead>
+        <tr>
+          @if (grouped) {
+            <th scope="col" class="pixata-blazor-scheduler-agenda-group-header"></th>
+          }
+          <th scope="col">@Scheduler.Text.Date</th>
+          <th scope="col">@Scheduler.Text.Time</th>
+          <th scope="col">@Scheduler.Text.Event</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (model.Groups.All(g => g.Days.Count == 0)) {
+          <tr>
+            <td colspan="@columns" class="pixata-blazor-scheduler-agenda-empty">@Scheduler.Text.NoEvents</td>
+          </tr>
+        }
+        @foreach (PixataSchedulerAgendaGroup<TItem> agendaGroup in model.Groups) {
+          int groupRows = agendaGroup.Days.Sum(d => Math.Max(1, d.Items.Count));
+          bool firstInGroup = true;
+          @foreach ((DateTime day, List<PixataSchedulerItem<TItem>> items) in agendaGroup.Days) {
+            for (int i = 0; i < Math.Max(1, items.Count); i++) {
+              bool groupCell = firstInGroup;
+              firstInGroup = false;
+              PixataSchedulerItem<TItem>? item = i < items.Count ? items[i] : null;
+              <tr class="@PixataCss.Classes("pixata-blazor-scheduler-agenda-row", i == 0 ? "pixata-blazor-scheduler-agenda-day-start" : null, day == DateTime.Today ? "pixata-blazor-scheduler-today" : null)">
+                @if (grouped && groupCell) {
+                  <th scope="rowgroup" rowspan="@groupRows" class="pixata-blazor-scheduler-agenda-group-cell">
+                    @if (agendaGroup.Group is { } group) {
+                      @foreach (PixataSchedulerGroupLevel level in group.Levels) {
+                        <span class="pixata-blazor-scheduler-group-band-item">@Scheduler.RenderGroupHeader(level)</span>
+                      }
+                    }
+                  </th>
+                }
+                @if (i == 0) {
+                  <th scope="row" rowspan="@Math.Max(1, items.Count)" class="pixata-blazor-scheduler-agenda-date-cell">
+                    @if (Scheduler.ActiveView.DateHeaderTemplate is { } dateTemplate) {
+                      @dateTemplate(day)
+                    } else {
+                      <span class="pixata-blazor-scheduler-agenda-day-number">@day.ToString("dd", culture)</span>
+                      <span class="pixata-blazor-scheduler-agenda-day-details">
+                        <span class="pixata-blazor-scheduler-agenda-day-name">@culture.DateTimeFormat.GetDayName(day.DayOfWeek)</span>
+                        <span class="pixata-blazor-scheduler-agenda-month">@day.ToString("MMM yyyy", culture)</span>
+                      </span>
+                    }
+                  </th>
+                }
+                @if (item is null) {
+                  <td colspan="2" class="pixata-blazor-scheduler-agenda-empty">@Scheduler.Text.NoEvents</td>
+                } else {
+                  <td class="pixata-blazor-scheduler-agenda-time-cell">@TimeText(item)</td>
+                  <td class="pixata-blazor-scheduler-agenda-event-cell">
+                    @Scheduler.RenderAppointment(item, new(PixataSchedulerEventPlacement.Agenda, null, false, false, false, false))
+                  </td>
+                }
+              </tr>
+            }
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@code {
+
+  [Parameter, EditorRequired]
+  public PixataScheduler<TItem> Scheduler { get; set; } = null!;
+
+  // Events are handled by the scheduler, so that it renders again (and this with it)
+  Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg) =>
+    ((IHandleEvent)Scheduler).HandleEventAsync(callback, arg);
+
+  // The appointment's times, or "all day"
+  private string TimeText(PixataSchedulerItem<TItem> item) =>
+    item.IsAllDay ? Scheduler.Text.AllDay : PixataSchedulerDates.TimeRange(item.Start, item.End, Scheduler.CurrentCulture);
+
+}

@@ -1,0 +1,398 @@
+@page "/ChartSample"
+@using Pixata.Blazor.Components
+@using Pixata.Blazor.Sample.Models
+
+<SitePageTitle>Chart</SitePageTitle>
+
+<h3>Chart</h3>
+
+<p>
+  <code>PixataChart</code> draws column, line and pie charts as SVG, with no JavaScript charting library. Hover over (or tap)
+  a column, point or segment to see its tooltip, click a legend item to hide or show its series, and tab to a chart to move
+  round its points with the arrow keys. Make the window narrow to see the labels turn and thin out and the legend move below.
+</p>
+
+<ComponentComparison Title="Columns with a line on a second axis">
+  <Description>
+    Two column series and a line series on a second value axis (on the right, because the category axis's
+    <code>AxisCrossingValue</code> puts it past the last category), with axis titles, label formats and an explicit range on
+    the second axis.
+  </Description>
+  <Pixata>
+    <PixataChart Height="360px">
+      <PixataChartTitle Text="Sales and margin" />
+      <PixataChartLegend Position="PixataChartLegendPosition.Bottom" />
+      <PixataChartTooltip Visible="true" />
+      <PixataChartSeriesItems>
+        <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" />
+        <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
+        <PixataChartSeries Type="PixataChartSeriesType.Line" Name="Margin" Data="@_sales" Field="@nameof(MonthlySales.Margin)" CategoryField="@nameof(MonthlySales.Month)" Axis="margin">
+          <PixataChartSeriesTooltip Format="{0:P0}" />
+        </PixataChartSeries>
+      </PixataChartSeriesItems>
+      <PixataChartCategoryAxes>
+        <PixataChartCategoryAxis AxisCrossingValue="@(new object[] { 0, 100 })">
+          <PixataChartCategoryAxisTitle Text="Month" />
+        </PixataChartCategoryAxis>
+      </PixataChartCategoryAxes>
+      <PixataChartValueAxes>
+        <PixataChartValueAxis>
+          <PixataChartValueAxisTitle Text="Sales" />
+          <PixataChartValueAxisLabels Format="{0:C0}" />
+        </PixataChartValueAxis>
+        <PixataChartValueAxis Name="margin" Min="0" Max="0.4" Color="#78d237">
+          <PixataChartValueAxisLabels Format="{0:P0}" />
+        </PixataChartValueAxis>
+      </PixataChartValueAxes>
+    </PixataChart>
+  </Pixata>
+  <Telerik>
+    <TelerikChart Height="360px">
+      <ChartTitle Text="Sales and margin" />
+      <ChartLegend Position="ChartLegendPosition.Bottom" />
+      <ChartTooltip Visible="true" />
+      <ChartSeriesItems>
+        <ChartSeries Type="ChartSeriesType.Column" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" />
+        <ChartSeries Type="ChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
+        <ChartSeries Type="ChartSeriesType.Line" Name="Margin" Data="@_sales" Field="@nameof(MonthlySales.Margin)" CategoryField="@nameof(MonthlySales.Month)" Axis="margin" />
+      </ChartSeriesItems>
+      <ChartCategoryAxes>
+        <ChartCategoryAxis AxisCrossingValue="@(new object[] { 0, 100 })">
+          <ChartCategoryAxisTitle Text="Month" />
+        </ChartCategoryAxis>
+      </ChartCategoryAxes>
+      <ChartValueAxes>
+        <ChartValueAxis>
+          <ChartValueAxisTitle Text="Sales" />
+          <ChartValueAxisLabels Format="{0:C0}" />
+        </ChartValueAxis>
+        <ChartValueAxis Name="margin" Min="0" Max="0.4" Color="#78d237">
+          <ChartValueAxisLabels Format="{0:P0}" />
+        </ChartValueAxis>
+      </ChartValueAxes>
+    </TelerikChart>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Stacked columns, gap and spacing, shared tooltip">
+  <Description>
+    <div class="chart-sample-controls">
+      <label>Stack
+        <select @bind="_stack">
+          <option value="none">Not stacked</option>
+          <option value="normal">Stacked</option>
+          <option value="stack100">100% stacked</option>
+        </select>
+      </label>
+      <label>Gap <input type="number" step="0.25" min="0" max="5" @bind="_gap" /></label>
+      <label>Spacing <input type="number" step="0.1" min="0" max="2" @bind="_spacing" /></label>
+    </div>
+    The stack settings go on the first series and apply to the others of the same type. The shared tooltip lists every
+    series in the category.
+  </Description>
+  <Pixata>
+    <PixataChart Height="320px">
+      <PixataChartTooltip Visible="true" Shared="true" />
+      <PixataChartSeriesItems>
+        <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" Gap="@_gap" Spacing="@_spacing">
+          <PixataChartSeriesStack Enabled="@(_stack != "none")" Type="@(_stack == "stack100" ? PixataChartSeriesStackType.Stack100 : PixataChartSeriesStackType.Normal)" />
+        </PixataChartSeries>
+        <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
+        <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Services" Data="@_sales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" />
+      </PixataChartSeriesItems>
+    </PixataChart>
+  </Pixata>
+  <Telerik>
+    <TelerikChart Height="320px">
+      <ChartTooltip Visible="true" Shared="true" />
+      <ChartSeriesItems>
+        <ChartSeries Type="ChartSeriesType.Column" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" Gap="@_gap" Spacing="@_spacing">
+          <ChartSeriesStack Enabled="@(_stack != "none")" Type="@(_stack == "stack100" ? ChartSeriesStackType.Stack100 : ChartSeriesStackType.Normal)" />
+        </ChartSeries>
+        <ChartSeries Type="ChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
+        <ChartSeries Type="ChartSeriesType.Column" Name="Services" Data="@_sales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" />
+      </ChartSeriesItems>
+    </TelerikChart>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Line styles, markers and missing values">
+  <Description>
+    <div class="chart-sample-controls">
+      <label>Style
+        <select @bind="_lineStyle">
+          @foreach (PixataChartSeriesStyle style in Enum.GetValues<PixataChartSeriesStyle>()) {
+            <option value="@style">@style</option>
+          }
+        </select>
+      </label>
+      <label>Missing values
+        <select @bind="_missingValues">
+          @foreach (PixataChartSeriesMissingValues missing in Enum.GetValues<PixataChartSeriesMissingValues>()) {
+            <option value="@missing">@missing</option>
+          }
+        </select>
+      </label>
+      <label>Markers
+        <select @bind="_markerType">
+          @foreach (PixataChartSeriesMarkersType type in Enum.GetValues<PixataChartSeriesMarkersType>()) {
+            <option value="@type">@type</option>
+          }
+        </select>
+      </label>
+      <label><input type="checkbox" @bind="_lineLabels" /> Labels</label>
+    </div>
+    July's high is missing. The low series is drawn dashed.
+  </Description>
+  <Pixata>
+    <PixataChart Height="320px">
+      <PixataChartTooltip Visible="true" />
+      <PixataChartSeriesItems>
+        <PixataChartSeries Type="PixataChartSeriesType.Line" Name="High" Data="@ChartSampleData.TemperatureHigh" Style="@_lineStyle" MissingValues="@_missingValues">
+          <PixataChartSeriesMarkers Type="@_markerType" />
+          <PixataChartSeriesLabels Visible="@_lineLabels" />
+        </PixataChartSeries>
+        <PixataChartSeries Type="PixataChartSeriesType.Line" Name="Low" Data="@ChartSampleData.TemperatureLow" Style="@_lineStyle" DashType="PixataChartDashType.Dash">
+          <PixataChartSeriesMarkers Type="@_markerType" />
+        </PixataChartSeries>
+      </PixataChartSeriesItems>
+      <PixataChartCategoryAxes>
+        <PixataChartCategoryAxis Categories="@_months" />
+      </PixataChartCategoryAxes>
+      <PixataChartValueAxes>
+        <PixataChartValueAxis>
+          <PixataChartValueAxisLabels Format="{0}°" />
+        </PixataChartValueAxis>
+      </PixataChartValueAxes>
+    </PixataChart>
+  </Pixata>
+  <Telerik>
+    <TelerikChart Height="320px">
+      <ChartTooltip Visible="true" />
+      <ChartSeriesItems>
+        <ChartSeries Type="ChartSeriesType.Line" Name="High" Data="@ChartSampleData.TemperatureHigh" Style="@((ChartSeriesStyle)(int)_lineStyle)" MissingValues="@((ChartSeriesMissingValues)(int)_missingValues)">
+          <ChartSeriesMarkers Type="@((ChartSeriesMarkersType)(int)_markerType)" />
+          <ChartSeriesLabels Visible="@_lineLabels" />
+        </ChartSeries>
+        <ChartSeries Type="ChartSeriesType.Line" Name="Low" Data="@ChartSampleData.TemperatureLow" Style="@((ChartSeriesStyle)(int)_lineStyle)" DashType="DashType.Dash">
+          <ChartSeriesMarkers Type="@((ChartSeriesMarkersType)(int)_markerType)" />
+        </ChartSeries>
+      </ChartSeriesItems>
+      <ChartCategoryAxes>
+        <ChartCategoryAxis Categories="@_months" />
+      </ChartCategoryAxes>
+      <ChartValueAxes>
+        <ChartValueAxis>
+          <ChartValueAxisLabels Format="{0}°" />
+        </ChartValueAxis>
+      </ChartValueAxes>
+    </TelerikChart>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Pie with labels, an exploded segment and a start angle">
+  <Description>
+    <div class="chart-sample-controls">
+      <label>Start angle <input type="range" min="0" max="360" step="15" @bind="_startAngle" @bind:event="oninput" /> @_startAngle°</label>
+      <label>Legend
+        <select @bind="_legendPosition">
+          @foreach (PixataChartLegendPosition position in Enum.GetValues<PixataChartLegendPosition>()) {
+            <option value="@position">@position</option>
+          }
+        </select>
+      </label>
+    </div>
+    The labels use the template <code>#= category #: #= format('{0:P0}', percentage) #</code>, and Safari's
+    <code>Explode</code> field is true. Click a legend item to hide its segment.
+  </Description>
+  <Pixata>
+    <PixataChart Height="340px">
+      <PixataChartTitle Text="Browser share" />
+      <PixataChartLegend Position="@_legendPosition" />
+      <PixataChartTooltip Visible="true" Format="{0:P0}" />
+      <PixataChartSeriesItems>
+        <PixataChartSeries Type="PixataChartSeriesType.Pie" Data="@_browsers" Field="@nameof(MarketShare.Share)" CategoryField="@nameof(MarketShare.Browser)" ExplodeField="@nameof(MarketShare.Explode)" StartAngle="@_startAngle">
+          <PixataChartSeriesLabels Visible="true" Template="#= category #: #= format('{0:P0}', percentage) #" />
+        </PixataChartSeries>
+      </PixataChartSeriesItems>
+    </PixataChart>
+  </Pixata>
+  <Telerik>
+    <TelerikChart Height="340px">
+      <ChartTitle Text="Browser share" />
+      <ChartLegend Position="@((ChartLegendPosition)(int)_legendPosition)" />
+      <ChartTooltip Visible="true" />
+      <ChartSeriesItems>
+        <ChartSeries Type="ChartSeriesType.Pie" Data="@_browsers" Field="@nameof(MarketShare.Share)" CategoryField="@nameof(MarketShare.Browser)" ExplodeField="@nameof(MarketShare.Explode)" StartAngle="@_startAngle">
+          <ChartSeriesLabels Visible="true" Template="#= category #: #= kendo.format('{0:P0}', percentage) #" />
+        </ChartSeries>
+      </ChartSeriesItems>
+    </TelerikChart>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Events, templates and Refresh()">
+  <Description>
+    <div class="chart-sample-controls">
+      <button type="button" @onclick="AddMonth">Add a month (in place) and call Refresh()</button>
+    </div>
+    The tooltips use a <code>Template</code> and the column labels a <code>TextTemplate</code>. Clicking a column or a legend
+    item raises <code>OnSeriesClick</code> or <code>OnLegendItemClick</code>.
+    <div class="chart-sample-log">
+      @foreach (string entry in _log.TakeLast(4)) {
+        <div>@entry</div>
+      }
+    </div>
+  </Description>
+  <Pixata>
+    <PixataChart @ref="_eventsChart" Height="320px" OnSeriesClick="@SeriesClicked" OnLegendItemClick="@LegendItemClicked">
+      <PixataChartLegend Position="PixataChartLegendPosition.Top" />
+      <PixataChartTooltip Visible="true">
+        <Template>
+          <strong>@context.SeriesName</strong><br />
+          @context.Category: @(((double?)context.Value)?.ToString("C0"))
+        </Template>
+      </PixataChartTooltip>
+      <PixataChartSeriesItems>
+        <PixataChartSeries Name="Hardware" Data="@_growingSales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)">
+          <PixataChartSeriesLabels Visible="true" TextTemplate="@(c => $"{c.Value / 1000:0}k")" />
+        </PixataChartSeries>
+        <PixataChartSeries Name="Services" Data="@_growingSales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" Color="#2d73f5" />
+      </PixataChartSeriesItems>
+    </PixataChart>
+  </Pixata>
+  <Telerik>
+    <TelerikChart @ref="_telerikEventsChart" Height="320px" OnSeriesClick="@TelerikSeriesClicked" OnLegendItemClick="@TelerikLegendItemClicked">
+      <ChartLegend Position="ChartLegendPosition.Top" />
+      <ChartTooltip Visible="true">
+        <Template>
+          <strong>@context.SeriesName</strong><br />
+          @context.Category: @(((context.DataItem as MonthlySales)?.Hardware)?.ToString("C0"))
+        </Template>
+      </ChartTooltip>
+      <ChartSeriesItems>
+        <ChartSeries Type="ChartSeriesType.Column" Name="Hardware" Data="@_growingSales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)">
+          <ChartSeriesLabels Visible="true" Template="#= value / 1000 #k" />
+        </ChartSeries>
+        <ChartSeries Type="ChartSeriesType.Column" Name="Services" Data="@_growingSales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" Color="#2d73f5" />
+      </ChartSeriesItems>
+    </TelerikChart>
+  </Telerik>
+</ComponentComparison>
+
+<ComponentComparison Title="Long category names, minor grid lines and a fixed range">
+  <Description>
+    Twelve long category names. When they don't fit side by side they turn to -45 degrees, and on a narrow screen only every
+    other (or third) one is shown. The value axis has a fixed maximum and minor grid lines.
+  </Description>
+  <Pixata>
+    <PixataChart Height="340px">
+      <PixataChartLegend Visible="false" />
+      <PixataChartTooltip Visible="true" Format="{0:N1}m" />
+      <PixataChartSeriesItems>
+        <PixataChartSeries Name="Population" Data="@ChartSampleData.RegionValues" Color="#28b4c8" />
+      </PixataChartSeriesItems>
+      <PixataChartCategoryAxes>
+        <PixataChartCategoryAxis Categories="@_regions">
+          <PixataChartCategoryAxisMajorGridLines Visible="false" />
+        </PixataChartCategoryAxis>
+      </PixataChartCategoryAxes>
+      <PixataChartValueAxes>
+        <PixataChartValueAxis Max="12" MajorUnit="2">
+          <PixataChartValueAxisTitle Text="Millions" />
+          <PixataChartValueAxisMinorGridLines Visible="true" />
+        </PixataChartValueAxis>
+      </PixataChartValueAxes>
+    </PixataChart>
+  </Pixata>
+  <Telerik>
+    <TelerikChart Height="340px">
+      <ChartLegend Visible="false" />
+      <ChartTooltip Visible="true" />
+      <ChartSeriesItems>
+        <ChartSeries Type="ChartSeriesType.Column" Name="Population" Data="@ChartSampleData.RegionValues" Color="#28b4c8" />
+      </ChartSeriesItems>
+      <ChartCategoryAxes>
+        <ChartCategoryAxis Categories="@_regions">
+          <ChartCategoryAxisMajorGridLines Visible="false" />
+          <ChartCategoryAxisLabels>
+            <ChartCategoryAxisLabelsRotation Angle="@("auto")" />
+          </ChartCategoryAxisLabels>
+        </ChartCategoryAxis>
+      </ChartCategoryAxes>
+      <ChartValueAxes>
+        <ChartValueAxis Max="12" MajorUnit="2">
+          <ChartValueAxisTitle Text="Millions" />
+          <ChartValueAxisMinorGridLines Visible="true" />
+        </ChartValueAxis>
+      </ChartValueAxes>
+    </TelerikChart>
+  </Telerik>
+</ComponentComparison>
+
+<style>
+  .chart-sample-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1rem;
+    align-items: center;
+    margin-bottom: .5rem;
+  }
+
+  .chart-sample-controls input[type=number] {
+    width: 5rem;
+  }
+
+  .chart-sample-log {
+    min-height: 5.5em;
+    margin-top: .5rem;
+    font-size: .875rem;
+    color: #555;
+  }
+</style>
+
+@code {
+
+  private readonly List<MonthlySales> _sales = ChartSampleData.Sales();
+  private readonly List<MonthlySales> _growingSales = ChartSampleData.Sales().Take(5).ToList();
+  private readonly List<MarketShare> _browsers = ChartSampleData.Browsers();
+  private readonly object[] _months = ChartSampleData.MonthNames.ToArray<object>();
+  private readonly object[] _regions = ChartSampleData.Regions.ToArray<object>();
+  private readonly List<string> _log = [];
+
+  private string _stack = "normal";
+  private double _gap = 1.5;
+  private double _spacing = 0.4;
+  private PixataChartSeriesStyle _lineStyle = PixataChartSeriesStyle.Smooth;
+  private PixataChartSeriesMissingValues _missingValues = PixataChartSeriesMissingValues.Gap;
+  private PixataChartSeriesMarkersType _markerType = PixataChartSeriesMarkersType.Circle;
+  private bool _lineLabels = true;
+  private double _startAngle = 90;
+  private PixataChartLegendPosition _legendPosition = PixataChartLegendPosition.Right;
+  private PixataChart? _eventsChart;
+  private TelerikChart? _telerikEventsChart;
+
+  private void SeriesClicked(PixataChartSeriesClickEventArgs args) =>
+    _log.Add($"Pixata OnSeriesClick: {args.SeriesName}, {args.Category}, {args.Value:C0}");
+
+  private void LegendItemClicked(PixataChartLegendItemClickEventArgs args) =>
+    _log.Add($"Pixata OnLegendItemClick: {args.Text} (series {args.SeriesIndex}), now {(args.Visible ? "shown" : "hidden")}");
+
+  private void TelerikSeriesClicked(ChartSeriesClickEventArgs args) =>
+    _log.Add($"Telerik OnSeriesClick: {args.SeriesName}, {args.Category}");
+
+  private void TelerikLegendItemClicked(ChartLegendItemClickEventArgs args) =>
+    _log.Add($"Telerik OnLegendItemClick: {args.Text} (series {args.SeriesIndex})");
+
+  private void AddMonth() {
+    List<MonthlySales> all = ChartSampleData.Sales();
+    if (_growingSales.Count < all.Count) {
+      _growingSales.Add(all[_growingSales.Count]);
+    } else {
+      _growingSales.RemoveRange(5, _growingSales.Count - 5);
+    }
+    _eventsChart?.Refresh();
+    _telerikEventsChart?.Refresh();
+  }
+
+}
