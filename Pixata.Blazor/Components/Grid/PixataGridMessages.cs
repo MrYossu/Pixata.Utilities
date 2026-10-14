@@ -47,6 +47,8 @@ internal static class PixataGridMessages {
   public const string MoveNext = "Move Next";
   public const string Apply = "Apply";
   public const string Reset = "Reset";
+  public const string Details = "Details";
+  public const string DragRow = "Drag row";
 
   public static string PagerInfo(int first, int last, int total) =>
     $"{first} - {last} of {total} items";

@@ -183,7 +183,7 @@ public partial class PixataGrid<TItem> {
       return null;
     }
     List<double?> widths = [.. leaves.Select(c => Pixels(c.CurrentWidth))];
-    return widths.Any(w => w is null) ? null : widths.Sum() + GroupLevels * 32;
+    return widths.Any(w => w is null) ? null : widths.Sum() + LeadingColumns * 32;
   }
 
   // ---------- Resizing ----------

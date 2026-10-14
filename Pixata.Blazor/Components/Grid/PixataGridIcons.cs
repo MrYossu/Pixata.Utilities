@@ -34,7 +34,9 @@ public enum PixataGridIcon {
   ColumnPosition,
   Lock,
   Unlock,
-  Reset
+  Reset,
+  Minus,
+  Reorder
 }
 
 internal static class PixataGridIcons {
@@ -78,6 +80,8 @@ internal static class PixataGridIcons {
     PixataGridIcon.ColumnPosition => "M1 2h4v12H1zm1 1v10h2V3zm9-1h4v12h-4zm1 1v10h2V3zM6 7.5h3V6l2.5 2L9 10V8.5H6z",
     PixataGridIcon.Lock => "M8 1a3.5 3.5 0 0 1 3.5 3.5V7H13v8H3V7h1.5V4.5A3.5 3.5 0 0 1 8 1m0 1a2.5 2.5 0 0 0-2.5 2.5V7h5V4.5A2.5 2.5 0 0 0 8 2M4 8v6h8V8z",
     PixataGridIcon.Unlock => "M8 1a3.5 3.5 0 0 1 3.5 3.5h-1a2.5 2.5 0 0 0-5 0V7H13v8H3V7h1.5V4.5A3.5 3.5 0 0 1 8 1M4 8v6h8V8z",
+    PixataGridIcon.Minus => "M2 7.5h12v1H2z",
+    PixataGridIcon.Reorder => "M2 4h12v1H2zm0 3.5h12v1H2zM2 11h12v1H2z",
     PixataGridIcon.Reset => "M8 2a6 6 0 1 1-6 6h1a5 5 0 1 0 1.5-3.6L6.5 6H2V1.5l1.8 1.8A6 6 0 0 1 8 2",
     // The cross is cut out of the circle, with fill-rule evenodd set in the CSS
     PixataGridIcon.XCircle => "M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm2.6 3.3L8 6.9 5.4 4.3 4.3 5.4 6.9 8l-2.6 2.6 1.1 1.1L8 9.1l2.6 2.6 1.1-1.1L9.1 8l2.6-2.6z",

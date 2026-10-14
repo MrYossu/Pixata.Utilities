@@ -50,6 +50,11 @@ public class PixataGridState<TItem> {
   public List<TItem> SelectedItems { get; set; } = [];
 
   /// <summary>
+  /// The items whose details are shown
+  /// </summary>
+  public List<TItem> ExpandedItems { get; set; } = [];
+
+  /// <summary>
   /// The copy of an existing item being edited
   /// </summary>
   public TItem? EditItem { get; set; }
@@ -173,6 +178,7 @@ public partial class PixataGrid<TItem> {
       })],
       TableWidth = TableWidthPixels(RenderedColumns()) is double width ? FormattableString.Invariant($"{width}px") : null,
       SelectedItems = [.. _selected],
+      ExpandedItems = [.. _expanded],
       EditItem = _editing && !_isNew ? _editItem : default,
       OriginalEditItem = _editing && !_isNew ? _originalEditItem : default,
       InsertedItem = _editing && _isNew ? _editItem : default,
@@ -251,6 +257,7 @@ public partial class PixataGrid<TItem> {
     if (!_selected.SequenceEqual(state.SelectedItems)) {
       await SetSelection([.. state.SelectedItems]);
     }
+    _expanded = [.. state.ExpandedItems];
     if (state.InsertedItem is not null) {
       BeginEditing(state.InsertedItem, default, true);
       _editField = state.EditField;
@@ -356,6 +363,7 @@ public partial class PixataGrid<TItem> {
       [nameof(state.TableWidth)] = $"{state.TableWidth}",
       // Items are compared by reference, so editing an item's fields isn't reported, but starting and stopping editing is
       [nameof(state.SelectedItems)] = string.Join(",", state.SelectedItems.Select(Reference)),
+      [nameof(state.ExpandedItems)] = string.Join(",", state.ExpandedItems.Select(Reference)),
       [nameof(state.EditItem)] = Reference(state.EditItem),
       [nameof(state.OriginalEditItem)] = Reference(state.OriginalEditItem),
       [nameof(state.InsertedItem)] = Reference(state.InsertedItem),

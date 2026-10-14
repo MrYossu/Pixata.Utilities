@@ -2079,6 +2079,92 @@
   }
 }
 
+/* ---------- Grid detail rows and row dragging ---------- */
+
+/* The narrow column with the arrows that show and hide each row's details */
+.pixata-blazor-grid-hierarchy-col {
+  width: 32px;
+}
+
+.pixata-blazor-grid-th.pixata-blazor-grid-hierarchy-cell,
+.pixata-blazor-grid-td.pixata-blazor-grid-hierarchy-cell {
+  padding: 0;
+  text-align: center;
+}
+
+.pixata-blazor-grid-hierarchy-cell + .pixata-blazor-grid-td,
+.pixata-blazor-grid-hierarchy-cell + .pixata-blazor-grid-th {
+  border-inline-start-width: 0;
+}
+
+.pixata-blazor-grid-hierarchy-toggle {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.pixata-blazor-grid-hierarchy-toggle svg,
+.pixata-blazor-grid-drag-handle svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-blazor-grid-hierarchy-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--pixata-grid-focus-shadow);
+}
+
+.pixata-blazor-grid-detail-row,
+.pixata-blazor-grid-detail-row:hover {
+  background-color: transparent;
+}
+
+/* The cell holding a row's details, which can hold anything, including another grid */
+.pixata-blazor-grid-detail-cell {
+  white-space: normal;
+}
+
+/* The handle rows are dragged by */
+.pixata-blazor-grid-td.pixata-blazor-grid-drag-cell {
+  padding: 0;
+  text-align: center;
+  cursor: move;
+  touch-action: none;
+}
+
+.pixata-blazor-grid-drag-handle {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.pixata-blazor-grid-row-dragging {
+  cursor: move;
+  user-select: none;
+}
+
+/* Where a dragged row will go: a line between rows, or a tint on the row it will be dropped on */
+.pixata-blazor-grid-row-drop-hint {
+  position: fixed;
+  z-index: 10003;
+  height: 2px;
+  margin-top: -1px;
+  pointer-events: none;
+  background-color: var(--pixata-grid-primary);
+}
+
+.pixata-blazor-grid-row-drop-hint::before {
+  position: absolute;
+  top: -4px;
+  left: -2px;
+  content: "";
+  border: 5px solid transparent;
+  border-inline-start-color: var(--pixata-grid-primary);
+}
+
+.pixata-blazor-grid-row-drop-over > .pixata-blazor-grid-td {
+  background-color: color-mix(in srgb, var(--pixata-grid-primary) 15%, transparent);
+}
+
 /* ---------- Windows and dialogs (the grid's popup editor and delete confirmation) ---------- */
 
 .pixata-blazor-dialog-wrapper {

@@ -164,7 +164,7 @@ public partial class PixataGrid<TItem> {
     if (widths.Any(w => w is null)) {
       return null;
     }
-    double offset = GroupLevels * 32;
+    double offset = LeadingColumns * 32;
     int first = -1;
     int last = columns.Count - 1;
     for (int i = 0; i < columns.Count; i++) {

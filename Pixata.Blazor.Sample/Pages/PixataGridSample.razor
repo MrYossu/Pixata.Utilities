@@ -674,6 +674,101 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Detail rows</h4>
+
+<p>Click the arrow at the start of a row to show its details, which here include another grid of the employees with the same pet. The line under each grid counts the rows expanded and collapsed.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Pageable="true" PageSize="5"
+            OnRowExpand="@((PixataGridRowExpandEventArgs<GridSampleEmployee> args) => _pixataExpands++)" OnRowCollapse="@((PixataGridRowCollapseEventArgs<GridSampleEmployee> args) => _pixataCollapses++)">
+  <DetailTemplate>
+    <p><strong>@context.FirstName @context.Surname</strong>, @context.Email, born @context.DateOfBirth.ToString("d MMMM yyyy"), lives in @context.Address.City</p>
+    <PixataGrid Data="@(Data.Where(e => e.Pet == context.Pet && e.Id != context.Id).Take(3))" Size="_size">
+      <GridColumns>
+        <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+        <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+        <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+      </GridColumns>
+    </PixataGrid>
+  </DetailTemplate>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+<p>Expanded @_pixataExpands times, collapsed @_pixataCollapses times</p>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Pageable="true" PageSize="5"
+             OnRowExpand="@((GridRowExpandEventArgs args) => _telerikExpands++)" OnRowCollapse="@((GridRowCollapseEventArgs args) => _telerikCollapses++)">
+  <DetailTemplate>
+    @{
+      GridSampleEmployee employee = (GridSampleEmployee)context;
+    }
+    <p><strong>@employee.FirstName @employee.Surname</strong>, @employee.Email, born @employee.DateOfBirth.ToString("d MMMM yyyy"), lives in @employee.Address.City</p>
+    <TelerikGrid Data="@(Data.Where(e => e.Pet == employee.Pet && e.Id != employee.Id).Take(3))" Size="@TelerikSize">
+      <GridColumns>
+        <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+        <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+        <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+      </GridColumns>
+    </TelerikGrid>
+  </DetailTemplate>
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+<p>Expanded @_telerikExpands times, collapsed @_telerikCollapses times</p>
+
+<h4>Dragging rows</h4>
+
+<p>Drag a row by its handle to move it within its grid, or into the other grid.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrids</p>
+<div class="pixata-blazor-grid-sample-pair">
+  <PixataGrid @ref="_pixataDragLeft" Data="_pixataLeft" Size="_size" RowDraggable="true" SelectionMode="PixataGridSelectionMode.Multiple"
+              OnRowDrop="@((PixataGridRowDropEventArgs<GridSampleEmployee> args) => PixataRowDrop(args, _pixataLeft))">
+    <GridColumns>
+      <PixataGridDragColumn />
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    </GridColumns>
+  </PixataGrid>
+  <PixataGrid @ref="_pixataDragRight" Data="_pixataRight" Size="_size" RowDraggable="true" SelectionMode="PixataGridSelectionMode.Multiple"
+              OnRowDrop="@((PixataGridRowDropEventArgs<GridSampleEmployee> args) => PixataRowDrop(args, _pixataRight))">
+    <GridColumns>
+      <PixataGridDragColumn />
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+      <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    </GridColumns>
+  </PixataGrid>
+</div>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grids</p>
+<div class="pixata-blazor-grid-sample-pair">
+  <TelerikGrid @ref="_telerikDragLeft" Data="_telerikLeft" Size="@TelerikSize" RowDraggable="true"
+               OnRowDrop="@((GridRowDropEventArgs<GridSampleEmployee> args) => TelerikRowDrop(args, _telerikLeft))">
+    <GridColumns>
+      <GridDragColumn />
+      <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+      <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    </GridColumns>
+  </TelerikGrid>
+  <TelerikGrid @ref="_telerikDragRight" Data="_telerikRight" Size="@TelerikSize" RowDraggable="true"
+               OnRowDrop="@((GridRowDropEventArgs<GridSampleEmployee> args) => TelerikRowDrop(args, _telerikRight))">
+    <GridColumns>
+      <GridDragColumn />
+      <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+      <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+    </GridColumns>
+  </TelerikGrid>
+</div>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -701,6 +796,12 @@
     font-weight: bold;
   }
 
+  .pixata-blazor-grid-sample-pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
   .pixata-blazor-grid-sample-label {
     margin: 1rem 0 .25rem;
     font-weight: bold;
@@ -718,6 +819,48 @@
 
   private PixataGrid<GridSampleEmployee>? _groupedGrid;
   private string _columnEvent = "";
+  private int _telerikExpands;
+  private int _pixataExpands;
+  private int _pixataCollapses;
+  private PixataGrid<GridSampleEmployee>? _pixataDragLeft;
+  private PixataGrid<GridSampleEmployee>? _pixataDragRight;
+  private List<GridSampleEmployee> _pixataLeft = GridSampleEmployee.All().Take(5).ToList();
+  private List<GridSampleEmployee> _pixataRight = GridSampleEmployee.All().Skip(5).Take(5).ToList();
+
+  // Moves the dropped rows from the grid they came from to where they were dropped
+  private void PixataRowDrop(PixataGridRowDropEventArgs<GridSampleEmployee> args, List<GridSampleEmployee> source) {
+    if (args.DestinationGrid is null) {
+      return;
+    }
+    List<GridSampleEmployee> destination = args.DestinationGrid == _pixataDragRight ? _pixataRight : _pixataLeft;
+    foreach (GridSampleEmployee item in args.Items) {
+      source.Remove(item);
+    }
+    int index = args.DestinationItem is null ? destination.Count : destination.IndexOf(args.DestinationItem) + (args.DropPosition == PixataGridDropPosition.After ? 1 : 0);
+    destination.InsertRange(Math.Clamp(index, 0, destination.Count), args.Items);
+    _pixataLeft = [.. _pixataLeft];
+    _pixataRight = [.. _pixataRight];
+  }
+  private int _telerikCollapses;
+  private TelerikGrid<GridSampleEmployee>? _telerikDragLeft;
+  private TelerikGrid<GridSampleEmployee>? _telerikDragRight;
+  private List<GridSampleEmployee> _telerikLeft = GridSampleEmployee.All().Take(5).ToList();
+  private List<GridSampleEmployee> _telerikRight = GridSampleEmployee.All().Skip(5).Take(5).ToList();
+
+  // Moves the dropped rows from the grid they came from to where they were dropped
+  private void TelerikRowDrop(GridRowDropEventArgs<GridSampleEmployee> args, List<GridSampleEmployee> source) {
+    List<GridSampleEmployee> destination = args.DestinationGrid == _telerikDragRight ? _telerikRight : _telerikLeft;
+    if (args.DestinationGrid is null) {
+      return;
+    }
+    foreach (GridSampleEmployee item in args.Items) {
+      source.Remove(item);
+    }
+    int index = args.DestinationItem is null ? destination.Count : destination.IndexOf(args.DestinationItem) + (args.DropPosition == GridRowDropPosition.After ? 1 : 0);
+    destination.InsertRange(Math.Clamp(index, 0, destination.Count), args.Items);
+    _telerikLeft = [.. _telerikLeft];
+    _telerikRight = [.. _telerikRight];
+  }
   private PixataGrid<GridSampleEmployee>? _stateGrid;
   private PixataGridState<GridSampleEmployee>? _pixataSavedState;
   private string _pixataStateChange = "";

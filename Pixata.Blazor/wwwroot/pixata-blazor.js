@@ -474,3 +474,119 @@ export function scrollContentTo(element, top) {
     element.scrollTop = top;
   }
 }
+
+// ---------- Dragging rows ----------
+
+const rowDrags = new Map();
+
+// Lets the user drag a grid's rows by their handles, within the grid or onto another grid. Rows are only dropped on rows in
+// a grid that is itself RowDraggable, as only those rows say where they are; anywhere else in a grid drops after its rows
+export function initRowDrag(gridId, dotNet) {
+  const grid = document.getElementById(gridId);
+  if (!grid || rowDrags.has(gridId)) {
+    return;
+  }
+  let drag = null;
+  let hint = null;
+  let over = null;
+  const target = (x, y) => {
+    const element = document.elementFromPoint(x, y);
+    const destination = element?.closest(".pixata-blazor-grid");
+    if (!destination) {
+      return null;
+    }
+    const tr = element.closest("tr[data-pixata-row-index]");
+    if (tr && tr.closest(".pixata-blazor-grid") === destination) {
+      const rect = tr.getBoundingClientRect();
+      const fraction = (y - rect.top) / rect.height;
+      return { gridId: destination.id, index: Number(tr.dataset.pixataRowIndex), tr, position: fraction < .25 ? "Before" : fraction > .75 ? "After" : "Over" };
+    }
+    return { gridId: destination.id, index: -1, tr: null, position: "After" };
+  };
+  const show = found => {
+    over?.classList.remove("pixata-blazor-grid-row-drop-over");
+    over = null;
+    if (found?.tr && found.position === "Over") {
+      over = found.tr;
+      over.classList.add("pixata-blazor-grid-row-drop-over");
+    }
+    if (!found?.tr || found.position === "Over") {
+      hint?.remove();
+      hint = null;
+      return;
+    }
+    if (!hint) {
+      hint = document.createElement("div");
+      hint.className = "pixata-blazor-grid-row-drop-hint";
+      document.body.appendChild(hint);
+    }
+    const rect = found.tr.getBoundingClientRect();
+    hint.style.left = `${rect.left}px`;
+    hint.style.width = `${rect.width}px`;
+    hint.style.top = `${found.position === "Before" ? rect.top : rect.bottom}px`;
+  };
+  const end = () => {
+    drag?.clue?.remove();
+    show(null);
+    document.body.classList.remove("pixata-blazor-grid-row-dragging");
+    drag = null;
+  };
+  const down = e => {
+    const handle = e.target.closest("[data-pixata-row-drag]");
+    const tr = handle?.closest("tr[data-pixata-row-index]");
+    if (e.button !== 0 || !tr || tr.closest(".pixata-blazor-grid") !== grid) {
+      return;
+    }
+    e.preventDefault();
+    drag = { tr, index: Number(tr.dataset.pixataRowIndex), x: e.clientX, y: e.clientY, clue: null };
+  };
+  const move = e => {
+    if (!drag) {
+      return;
+    }
+    if (!drag.clue) {
+      if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 5) {
+        return;
+      }
+      drag.clue = document.createElement("div");
+      drag.clue.className = "pixata-blazor-grid-drag-clue";
+      drag.clue.textContent = [...drag.tr.children].map(td => td.textContent.trim()).filter(text => text).join(" ");
+      document.body.appendChild(drag.clue);
+      document.body.classList.add("pixata-blazor-grid-row-dragging");
+      window.getSelection()?.removeAllRanges();
+    }
+    e.preventDefault();
+    drag.clue.style.left = `${e.clientX + 12}px`;
+    drag.clue.style.top = `${e.clientY + 12}px`;
+    const found = target(e.clientX, e.clientY);
+    drag.clue.classList.toggle("pixata-blazor-grid-drag-clue-drop", found !== null);
+    show(found);
+  };
+  const up = e => {
+    if (!drag?.clue) {
+      drag = null;
+      return;
+    }
+    const index = drag.index;
+    const found = target(e.clientX, e.clientY);
+    end();
+    dotNet.invokeMethodAsync("RowDrop", index, found?.gridId ?? null, found?.index ?? -1, found?.position ?? "After");
+  };
+  const cancel = () => end();
+  grid.addEventListener("pointerdown", down);
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", up);
+  document.addEventListener("pointercancel", cancel);
+  rowDrags.set(gridId, () => {
+    end();
+    grid.removeEventListener("pointerdown", down);
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", up);
+    document.removeEventListener("pointercancel", cancel);
+  });
+}
+
+export function disposeRowDrag(gridId) {
+  rowDrags.get(gridId)?.();
+  rowDrags.delete(gridId);
+}

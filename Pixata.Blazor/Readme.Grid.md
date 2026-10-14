@@ -69,6 +69,10 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
 | `Groupable` | `bool` | Shows a panel above the grid that the user can drag column headers into, to group the rows. See [grouping](#grouping-and-aggregates) |
 | `GridAggregates` | `RenderFragment` | The aggregates to calculate, as `PixataGridAggregate`s, for the footer templates |
+| `DetailTemplate` | `RenderFragment<TItem>` | Details for each row, shown when the user expands it. See [detail rows](#detail-rows) |
+| `OnRowExpand`, `OnRowCollapse` | `EventCallback<PixataGridRowExpandEventArgs<TItem>>`, `EventCallback<PixataGridRowCollapseEventArgs<TItem>>` | Fire when the user shows or hides a row's details |
+| `RowDraggable` | `bool` | Lets the user drag rows. See [dragging rows](#dragging-rows) |
+| `OnRowDrop` | `EventCallback<PixataGridRowDropEventArgs<TItem>>` | Fires when the user drops dragged rows |
 | `ScrollMode` | `PixataGridScrollMode` | `Scrollable` (the default) or `Virtual`, which renders only the rows in view. See [virtual scrolling](#virtual-scrolling) |
 | `RowHeight` | `double?` | The height of each row in pixels, for virtual scrolling |
 | `ColumnVirtualization` | `bool` | Renders only the columns in view |
@@ -490,6 +494,56 @@ Only one of the sections expands at a time. Choose what's offered with `PixataGr
 | `Reorderable` | `bool` | Move Previous and Move Next. Defaults to `false` |
 
 The column's own parameters (such as `Sortable="false"` or `Lockable="false"`) take precedence. A column with `ShowColumnMenu="false"` has no menu, but keeps its filter menu button if the grid's `FilterMode` is `FilterMenu`.
+
+## Detail rows
+
+Give the grid a `DetailTemplate`, and each row gets an arrow at its start that shows and hides a row of details under it. The context is the row's item, and the template can hold anything, including another grid...
+
+```razor
+<PixataGrid Data="Teams">
+  <DetailTemplate>
+    <PixataGrid Data="context.Members">...</PixataGrid>
+  </DetailTemplate>
+  <GridColumns>...</GridColumns>
+</PixataGrid>
+```
+
+`OnRowExpand` and `OnRowCollapse` fire as the user shows and hides details, so you can load the details when they are first wanted. The expanded rows are part of the [state](#state), as `ExpandedItems`. Detail rows don't count for the striping, and the arrows go after the cells for any grouping.
+
+## Dragging rows
+
+Set `RowDraggable="true"` and add a `PixataGridDragColumn`, and the user can drag rows by the handle in that column, within the grid or into another grid. A line shows where a row will go, or the row it will be dropped on is tinted. The grid doesn't move anything itself, as only you know how your data is stored, so handle `OnRowDrop`...
+
+```razor
+<PixataGrid @ref="_left" Data="_leftPeople" RowDraggable="true" OnRowDrop="@((PixataGridRowDropEventArgs<Person> args) => Dropped(args, _leftPeople))">
+  <GridColumns>
+    <PixataGridDragColumn />
+    <PixataGridColumn Field="@nameof(Person.Name)" />
+  </GridColumns>
+</PixataGrid>
+
+@code {
+  private void Dropped(PixataGridRowDropEventArgs<Person> args, List<Person> source) {
+    if (args.DestinationGrid is null) {
+      return;
+    }
+    List<Person> destination = args.DestinationGrid == _left ? _leftPeople : _rightPeople;
+    source.RemoveAll(args.Items.Contains);
+    int index = args.DestinationItem is null ? destination.Count : destination.IndexOf(args.DestinationItem) + (args.DropPosition == PixataGridDropPosition.After ? 1 : 0);
+    destination.InsertRange(index, args.Items);
+  }
+}
+```
+
+| Member of the event args | What it is |
+| --- | --- |
+| `Item` | The row that was dragged |
+| `Items` | The rows that were dragged: all the selected rows if the dragged row was selected, otherwise just that one |
+| `DestinationGrid` | The grid they were dropped on (which may be the same one), or null if they were dropped somewhere else |
+| `DestinationItem`, `DestinationIndex` | The row they were dropped on and its position among the rows shown, or null if they were dropped on the grid but not on a row |
+| `DropPosition` | `Before`, `Over` or `After` the destination row: the top quarter of a row is before it, the bottom quarter after it, and the rest over it |
+
+Rows can only be dropped on the rows of a grid that is itself `RowDraggable`, with the same `TItem`. Dropped anywhere else in such a grid, they go after its rows. The dragging uses pointer events, so it works with touch as well as the mouse.
 
 ## Virtual scrolling
 

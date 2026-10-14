@@ -382,12 +382,14 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     await AfterInCellRender();
     await InitHeaderDrag();
     await InitVirtualScroll();
+    await InitRowDrag();
     await AfterVirtualRender();
     await CheckStateChanged();
   }
 
   public async ValueTask DisposeAsync() {
     _disposed = true;
+    ForgetGrid();
     Unsubscribe();
     _readCancel?.Cancel();
     foreach (CancellationTokenSource cancel in _filterDebounce.Values) {
@@ -396,6 +398,9 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     if (_module is not null) {
       try {
         await CloseFilterMenu();
+        if (_rowDragReady) {
+          await _module.InvokeVoidAsync("disposeRowDrag", _gridId);
+        }
         if (_headerDragReady) {
           await _module.InvokeVoidAsync("disposeHeaderDrag", _gridId);
         }
