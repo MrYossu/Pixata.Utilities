@@ -46,7 +46,7 @@ public class PersistentStateHelper<T> : IDisposable {
     _data = foundInState
       ? dataFromState
       : await getData();
-    return _data;
+    return _data!;
   }
 
   private Task Persist() {

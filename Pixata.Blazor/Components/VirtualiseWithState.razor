@@ -74,7 +74,7 @@
     for (int i = 0; i < 10; i++) {
       await Task.Delay(100);
       await _module!.InvokeVoidAsync("restore", _scrollContainer, scrollTop);
-      double current = await _module.InvokeAsync<double>("getScrollTop", _scrollContainer);
+      double current = await _module!.InvokeAsync<double>("getScrollTop", _scrollContainer);
       if (Math.Abs(current - scrollTop) < 2) {
         return;
       }

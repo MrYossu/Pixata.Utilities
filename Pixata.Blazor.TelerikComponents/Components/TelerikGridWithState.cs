@@ -42,7 +42,7 @@ public class TelerikGridWithState<TItem> : TelerikGrid<TItem> {
           args.GridState = state;
         }
       }
-      catch (Exception ex) {
+      catch (Exception) {
         // No, we don't normally swallow exceptions, but as JS calls cannot be issued during pre-rendering, the local storage code will raise an exception. We can safely ignore it, as the grid state should be restored during the interactive rendering
       }
     }
@@ -58,7 +58,7 @@ public class TelerikGridWithState<TItem> : TelerikGrid<TItem> {
           await LocalStorage.SetItemAsync(StorageKey, state);
         }
       }
-      catch (Exception ex) {
+      catch (Exception) {
         // See the comments above about why we swallow this exception
       }
     }

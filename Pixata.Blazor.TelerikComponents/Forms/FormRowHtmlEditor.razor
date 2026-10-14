@@ -22,22 +22,22 @@
 @code {
 
   [CascadingParameter]
-  public EditContext CascadedEditContext { get; set; }
+  public EditContext CascadedEditContext { get; set; } = null!;
 
   [Parameter]
-  public string PropertyName { get; set; }
+  public string PropertyName { get; set; } = null!;
 
   [Parameter]
-  public string Value { get; set; }
+  public string Value { get; set; } = null!;
 
   [Parameter]
   public EventCallback<string> ValueChanged { get; set; }
 
   [Parameter]
-  public string Caption { get; set; }
+  public string? Caption { get; set; }
 
   [Parameter]
-  public string Icon { get; set; }
+  public string? Icon { get; set; }
 
   [Parameter]
   public string Height { get; set; } = "400px";
@@ -46,7 +46,7 @@
   public string Width { get; set; } = "100%";
 
   [Parameter]
-  public Expression<Func<string>> ValueExpression { get; set; }
+  public Expression<Func<string>> ValueExpression { get; set; } = null!;
 
   private bool _showValidationMsg;
   private string _invalid = "";
@@ -62,7 +62,7 @@
     base.OnInitialized();
   }
 
-  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+  private void EditContext_OnValidationStateChanged(object? sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
     _invalid = _showValidationMsg ? "pixata-invalid" : "";

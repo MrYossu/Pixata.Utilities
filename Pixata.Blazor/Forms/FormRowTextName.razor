@@ -39,25 +39,25 @@
 @code {
 
   [CascadingParameter]
-  public EditContext CascadedEditContext { get; set; }
+  public EditContext CascadedEditContext { get; set; } = null!;
 
   [Parameter]
-  public string PropertyNameTitle { get; set; }
+  public string PropertyNameTitle { get; set; } = null!;
 
   [Parameter]
-  public string PropertyNameFirstName { get; set; }
+  public string PropertyNameFirstName { get; set; } = null!;
 
   [Parameter]
-  public string PropertyNameSurname { get; set; }
+  public string PropertyNameSurname { get; set; } = null!;
 
   [Parameter]
-  public string ValueTitle { get; set; }
+  public string ValueTitle { get; set; } = null!;
 
   [Parameter]
-  public string ValueFirstName { get; set; }
+  public string ValueFirstName { get; set; } = null!;
 
   [Parameter]
-  public string ValueSurname { get; set; }
+  public string ValueSurname { get; set; } = null!;
 
   [Parameter]
   public EventCallback<string> ValueTitleChanged { get; set; }
@@ -69,19 +69,19 @@
   public EventCallback<string> ValueSurnameChanged { get; set; }
 
   [Parameter]
-  public string Caption { get; set; }
+  public string? Caption { get; set; }
 
   [Parameter]
-  public string Icon { get; set; }
+  public string? Icon { get; set; }
 
   [Parameter]
-  public Expression<Func<string>> ValueTitleExpression { get; set; }
+  public Expression<Func<string>> ValueTitleExpression { get; set; } = null!;
 
   [Parameter]
-  public Expression<Func<string>> ValueFirstNameExpression { get; set; }
+  public Expression<Func<string>> ValueFirstNameExpression { get; set; } = null!;
 
   [Parameter]
-  public Expression<Func<string>> ValueSurnameExpression { get; set; }
+  public Expression<Func<string>> ValueSurnameExpression { get; set; } = null!;
 
   private bool _showValidationMsgTitle;
   private string _invalid1 = "";
@@ -95,7 +95,7 @@
     base.OnInitialized();
   }
 
-  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+  private void EditContext_OnValidationStateChanged(object? sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifierTitle = CascadedEditContext.Field(PropertyNameTitle);
     _showValidationMsgTitle = CascadedEditContext.GetValidationMessages(identifierTitle).Any();
     _invalid1 = _showValidationMsgTitle ? "pixata-invalid" : "";

@@ -18,7 +18,7 @@
 @code {
 
   [Parameter]
-  public string PropertyName { get; set; }
+  public string PropertyName { get; set; } = null!;
 
   [Parameter]
   public bool Checked { get; set; }
@@ -27,16 +27,16 @@
   public EventCallback<bool> CheckedChanged { get; set; }
 
   [Parameter]
-  public string Caption { get; set; }
+  public string? Caption { get; set; }
 
   [Parameter]
-  public string Text { get; set; }
+  public string? Text { get; set; }
 
   [Parameter]
-  public string Icon { get; set; }
+  public string? Icon { get; set; }
 
   [Parameter]
-  public string Class { get; set; }
+  public string? Class { get; set; }
 
   private async Task OnChanged(ChangeEventArgs cea) =>
   await CheckedChanged.InvokeAsync(((bool?)cea.Value) ?? false);

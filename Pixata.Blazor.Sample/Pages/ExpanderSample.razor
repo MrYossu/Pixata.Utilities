@@ -35,7 +35,7 @@
 </div>
 
 @code {
-  private Expander _reminderExpander;
+  private Expander _reminderExpander = null!;
 
   private readonly List<ReminderOverview> _reminders = new() {
     new ReminderOverview { Investor = "Billy Shears", Due = DateTime.Today, Text = "Ring Jim and arrange a meeting" },
@@ -44,13 +44,13 @@
   };
 
   private class ReminderOverview {
-    public string Investor { get; set; }
+    public string Investor { get; set; } = "";
     public DateTime Due { get; set; }
 
     public bool Overdue =>
       Due.Date < DateTime.Today;
 
-    public string Text { get; set; }
+    public string Text { get; set; } = "";
   }
 
 }

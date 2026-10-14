@@ -29,8 +29,8 @@
 @code {
 
   public ContactModel TheContactModel { get; set; } = new();
-  public string Text { get; set; }
-  public string Msg { get; set; }
+  public string Text { get; set; } = "";
+  public string Msg { get; set; } = "";
 
   private async Task Send() {
     Text = "Sending email...";
@@ -41,10 +41,10 @@
   }
 
   public class ContactModel {
-    public string Name { get; set; }
-    public string Email { get; set; }
-    public string Subject { get; set; }
-    public string Body { get; set; }
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string Subject { get; set; } = "";
+    public string Body { get; set; } = "";
   }
 
 }

@@ -16,8 +16,8 @@ public static class MemoryCacheExtensions {
   private static readonly ConcurrentDictionary<string, LockState> Locks = new();
 
   public static async Task<T> GetOrCreateSafe<T>(this IMemoryCache cache, string key, Func<CancellationToken, Task<T>> factory, TimeSpan? ttl = null, CancellationToken cancellationToken = default) {
-    if (cache.TryGetValue(key, out T cached)) {
-      return cached;
+    if (cache.TryGetValue(key, out T? cached)) {
+      return cached!;
     }
 
     LockState state = Locks.GetOrAdd(key, _ => new LockState());
@@ -26,7 +26,7 @@ public static class MemoryCacheExtensions {
     await state.Semaphore.WaitAsync(cancellationToken);
     try {
       if (cache.TryGetValue(key, out cached)) {
-        return cached;
+        return cached!;
       }
 
       T value = await factory(cancellationToken);

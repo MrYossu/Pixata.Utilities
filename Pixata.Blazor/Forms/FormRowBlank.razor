@@ -21,13 +21,13 @@
 @code {
 
   [Parameter]
-  public string PropertyName { get; set; }
+  public string PropertyName { get; set; } = null!;
 
   [Parameter]
-  public string Caption { get; set; }
+  public string? Caption { get; set; }
 
   [Parameter]
-  public string Icon { get; set; }
+  public string? Icon { get; set; }
 
   [Parameter]
   public RenderFragment ChildContent { get; set; } = null!;

@@ -8,11 +8,11 @@
         <i class="@Icon"></i>
       </span>
     </div>
-    <select class="pixata-form-control" name="@PropertyName" id="@PropertyName" @bind="Value">
+    <select class="pixata-form-control" name="@PropertyName" id="@PropertyName" @bind:get="Value" @bind:set="OnValueChanged">
 
       @foreach (TEnum enumValue in EnumValues) {
         if (ChildContent == default) {
-          <option value="@enumValue">@enumValue.ToString().SplitCamelCase()</option>
+          <option value="@enumValue">@($"{enumValue}".SplitCamelCase())</option>
         } else {
           @ChildContent(enumValue)
         }

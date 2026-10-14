@@ -39,7 +39,7 @@ public class Case<T> : ComponentBase {
   private Switch<T> Parent { get; set; } = null!;
 
   [Parameter]
-  public T Equals { get; set; } = default!;
+  public new T Equals { get; set; } = default!;
 
   [Parameter]
   public RenderFragment ChildContent { get; set; } = null!;

@@ -16,7 +16,7 @@ namespace Pixata.Extensions {
     /// <param name="separator">An optional parameter that specifies the separator to use. Defaults to ", "</param>
     /// <returns>A string containing the joined input strings</returns>
     public static string JoinStr<T>(this IEnumerable<T> objs, string separator = ", ") =>
-      string.Join(separator, objs.Select(o => o.ToString()));
+      string.Join(separator, objs.Select(o => o?.ToString()));
 
     /// <summary>
     /// Joins the elements of a sequence into a single string, with "and" before the last element.
@@ -60,7 +60,7 @@ namespace Pixata.Extensions {
     public static string SplitEnumCamelCase<T>(this T e, bool toLower = true) where T : struct, IConvertible =>
       !typeof(T).IsEnum
         ? throw new ArgumentException("T must be an enumerated type")
-        : SplitCamelCase(e.ToString(), toLower);
+        : SplitCamelCase(e.ToString() ?? "", toLower);
 
     /// <summary>
     /// Splits an enum member value (assumed to be an int) using camel case as the rule. Splits CamelCase into "Camel Case"
@@ -75,7 +75,7 @@ namespace Pixata.Extensions {
         ? throw new ArgumentException("T must be an enumerated type")
         : !Enum.IsDefined(typeof(T), n)
           ? throw new ArgumentOutOfRangeException($"{n} is not a valid value for the {typeof(T).Name} enum")
-          : SplitCamelCase(((T)Enum.Parse(typeof(T), n.ToString())).ToString(), toLower);
+          : SplitCamelCase(((T)Enum.Parse(typeof(T), n.ToString())).ToString() ?? "", toLower);
 
     /// <summary>
     /// Returns the first line of a multi-line string. Useful for getting the first line of someone's address

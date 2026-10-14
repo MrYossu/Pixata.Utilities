@@ -35,8 +35,8 @@
 <p>Proin varius diam in lobortis feugiat. Praesent at accumsan leo. Etiam eros quam, dapibus a arcu ac, scelerisque mollis libero. Pellentesque justo urna, molestie quis sagittis et, rhoncus at felis. Duis porttitor neque in justo molestie, commodo accumsan purus mattis. Etiam tincidunt ante ac metus interdum, vitae congue nibh auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
 
 @code {
-  private Inform _containerInform;
-  private Inform _viewportInform;
+  private Inform _containerInform = null!;
+  private Inform _viewportInform = null!;
 
   private void ShowInformViewport() =>
     _viewportInform.Display("Please don't click that button again!");

@@ -565,7 +565,7 @@
             } else if (column.Template is null) {
               @column.CellText(item)
             } else {
-              @column.Template(item)
+              @column.Template(item!)
             }
           </td>
         }
@@ -608,7 +608,7 @@
         @if (column.Template is null) {
           @column.CellText(editItem)
         } else {
-          @column.Template(editItem)
+          @column.Template(editItem!)
         }
       </td>;
   }

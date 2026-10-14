@@ -17,22 +17,22 @@
 @code {
 
   [Parameter]
-  public string PropertyName { get; set; }
+  public string PropertyName { get; set; } = null!;
 
   [Parameter]
-  public string Value { get; set; }
+  public string Value { get; set; } = null!;
 
   [Parameter]
   public EventCallback<string> ValueChanged { get; set; }
 
   [Parameter]
-  public string Caption { get; set; }
+  public string? Caption { get; set; }
 
   [Parameter]
-  public string Icon { get; set; }
+  public string? Icon { get; set; }
 
   [Parameter]
-  public Expression<Func<string>> ValueExpression { get; set; }
+  public Expression<Func<string>> ValueExpression { get; set; } = null!;
 
   [Parameter]
   public Dictionary<string, object> Attributes { get; set; } = new();

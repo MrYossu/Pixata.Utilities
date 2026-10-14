@@ -73,7 +73,7 @@ public class GridGrouping_Tests {
     GridResult<Person> result = People.ToGridResult(new GridRequest { Groups = [new("Team"), new("Manager", ListSortDirection.Descending)] });
 
     CollectionAssert.AreEqual(new[] { "A", "B", "C" }, result.Groups!.Select(g => (string)g.Key!).ToArray());
-    GridGroup<Person> teamA = result.Groups[0];
+    GridGroup<Person> teamA = result.Groups![0];
     Assert.AreEqual(0, teamA.Items.Count);
     CollectionAssert.AreEqual(new object[] { true, false }, teamA.Subgroups.Select(g => g.Key).ToArray());
     CollectionAssert.AreEqual(new[] { 4, 6 }, teamA.Subgroups[1].Items.Select(p => p.Id).ToArray());
@@ -86,7 +86,7 @@ public class GridGrouping_Tests {
 
     // Team A has three people, so the second page starts with its last one, then team B's first
     CollectionAssert.AreEqual(new[] { "A", "B" }, result.Groups!.Select(g => (string)g.Key!).ToArray());
-    Assert.AreEqual(1, result.Groups[0].Items.Count);
+    Assert.AreEqual(1, result.Groups![0].Items.Count);
     Assert.AreEqual(3, result.Groups[0].Count);
   }
 }

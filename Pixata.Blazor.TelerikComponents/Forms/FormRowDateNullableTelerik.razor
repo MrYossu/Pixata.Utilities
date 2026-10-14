@@ -34,10 +34,10 @@
 @code {
 
   [CascadingParameter]
-  public EditContext CascadedEditContext { get; set; }
+  public EditContext CascadedEditContext { get; set; } = null!;
 
   [Parameter]
-  public string PropertyName { get; set; }
+  public string PropertyName { get; set; } = null!;
 
   [Parameter]
   public DateTime? Value { get; set; }
@@ -46,16 +46,16 @@
   public EventCallback<DateTime?> ValueChanged { get; set; }
 
   [Parameter]
-  public string Caption { get; set; }
+  public string? Caption { get; set; }
 
   [Parameter]
-  public string Icon { get; set; }
+  public string? Icon { get; set; }
 
   [Parameter]
   public bool ShowTime { get; set; }
 
   [Parameter]
-  public Expression<Func<DateTime?>> ValueExpression { get; set; }
+  public Expression<Func<DateTime?>> ValueExpression { get; set; } = null!;
 
   private bool _showValidationMsg;
 
@@ -69,7 +69,7 @@
     base.OnInitialized();
   }
 
-  private void EditContext_OnValidationStateChanged(object sender, ValidationStateChangedEventArgs e) {
+  private void EditContext_OnValidationStateChanged(object? sender, ValidationStateChangedEventArgs e) {
     FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
     _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
     _invalid = _showValidationMsg ? "pixata-invalid" : "";
