@@ -67,6 +67,7 @@
   --pixata-grid-picker-hover-bg: #ebebeb;
   --pixata-grid-chip-bg: #ebebeb;
   --pixata-grid-chip-border-color: #c2c2c2;
+  --pixata-grid-locked-border-color: rgba(0, 0, 0, .3);
   --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
   --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-grid-border-radius: 4px;
@@ -1713,7 +1714,7 @@
 }
 
 /* Headers and chips can be dragged with touch as well as the mouse, so touch mustn't scroll them */
-.pixata-blazor-grid-group-draggable {
+.pixata-blazor-grid-header-draggable {
   touch-action: none;
 }
 
@@ -1864,6 +1865,175 @@
   position: sticky;
   bottom: 0;
   z-index: 2;
+}
+
+/* ---------- Grid columns: resizing, reordering, frozen columns, multi-column headers and the column menu ---------- */
+
+/* The handle on the right edge of a header, dragged to resize the column */
+.pixata-blazor-grid-column-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: .5em;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+/* A header that contains others */
+.pixata-blazor-grid-header-group {
+  text-align: center;
+}
+
+.pixata-blazor-grid-thead tr + tr .pixata-blazor-grid-th,
+.pixata-blazor-grid-header-group + .pixata-blazor-grid-th,
+.pixata-blazor-grid-th[rowspan] + .pixata-blazor-grid-th {
+  border-inline-start-width: 1px;
+}
+
+/* Where a dragged header will go */
+.pixata-blazor-grid-drop-hint {
+  position: fixed;
+  z-index: 10003;
+  width: 2px;
+  margin-inline-start: -1px;
+  pointer-events: none;
+  background-color: var(--pixata-grid-primary);
+}
+
+/* The hidden table used to measure cells when fitting columns to their content */
+.pixata-blazor-grid-measure {
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  width: auto;
+  table-layout: auto;
+  visibility: hidden;
+}
+
+.pixata-blazor-grid-measure .pixata-blazor-grid-th,
+.pixata-blazor-grid-measure .pixata-blazor-grid-td {
+  width: auto;
+  white-space: nowrap;
+}
+
+/* Frozen columns stay put when the grid scrolls sideways, with a darker line separating them from the others */
+.pixata-blazor-grid-locked {
+  position: sticky;
+  z-index: 1;
+  border-inline-width: 1px;
+  border-inline-color: var(--pixata-grid-locked-border-color);
+}
+
+.pixata-blazor-grid-th.pixata-blazor-grid-locked {
+  z-index: 3;
+  background-color: var(--pixata-grid-header-bg);
+}
+
+.pixata-blazor-grid-td.pixata-blazor-grid-locked,
+.pixata-blazor-grid-filter-cell.pixata-blazor-grid-locked {
+  background-color: var(--pixata-grid-bg);
+}
+
+.pixata-blazor-grid-filter-cell.pixata-blazor-grid-locked {
+  border-style: solid;
+}
+
+/* The row's tint goes over the frozen cells' solid background */
+.pixata-blazor-grid-alt-row > .pixata-blazor-grid-locked {
+  background-image: linear-gradient(var(--pixata-grid-alt-row-bg), var(--pixata-grid-alt-row-bg));
+}
+
+.pixata-blazor-grid-row:hover > .pixata-blazor-grid-locked {
+  background-image: linear-gradient(var(--pixata-grid-hover-bg), var(--pixata-grid-hover-bg));
+}
+
+.pixata-blazor-grid-row.pixata-blazor-grid-selected > .pixata-blazor-grid-locked,
+.pixata-blazor-grid-locked.pixata-blazor-grid-selected {
+  background-image: linear-gradient(color-mix(in srgb, var(--pixata-grid-primary) 25%, transparent), color-mix(in srgb, var(--pixata-grid-primary) 25%, transparent));
+}
+
+.pixata-blazor-grid-locked:first-child,
+.pixata-blazor-grid-group-cell + .pixata-blazor-grid-locked,
+.pixata-blazor-grid-locked + .pixata-blazor-grid-td,
+.pixata-blazor-grid-locked + .pixata-blazor-grid-th,
+.pixata-blazor-grid-locked + .pixata-blazor-grid-filter-cell {
+  border-inline-start-width: 0;
+}
+
+/* The column menu */
+.pixata-blazor-grid-column-menu {
+  width: 230px;
+}
+
+.pixata-blazor-grid-columnmenu-section + .pixata-blazor-grid-columnmenu-section {
+  border-top: 1px solid var(--pixata-grid-border-color);
+}
+
+.pixata-blazor-grid-columnmenu-action {
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixata-blazor-grid-columnmenu-action:hover {
+  background-color: var(--pixata-grid-picker-hover-bg);
+}
+
+.pixata-blazor-grid-columnmenu-action:focus-visible {
+  outline: none;
+  box-shadow: inset var(--pixata-grid-focus-shadow);
+}
+
+.pixata-blazor-grid-columnmenu-item-active {
+  color: var(--pixata-grid-primary);
+}
+
+.pixata-blazor-grid-columnmenu-item-disabled {
+  cursor: default;
+  opacity: .6;
+}
+
+.pixata-blazor-grid-columnmenu-item-disabled:hover {
+  background-color: transparent;
+}
+
+.pixata-blazor-grid-columnmenu-expander {
+  display: inline-flex;
+  margin-inline-start: auto;
+}
+
+.pixata-blazor-grid-columnmenu-expander svg {
+  margin: 0;
+}
+
+.pixata-blazor-grid-column-list {
+  max-height: 200px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.pixata-blazor-grid-column-list-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pixata-blazor-grid-column-list-item:hover {
+  background-color: var(--pixata-grid-picker-hover-bg);
+}
+
+.pixata-blazor-grid-columnmenu-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.pixata-blazor-grid-columnmenu-actions .pixata-blazor-button {
+  flex: 1 1 0;
+  justify-content: center;
 }
 
 /* ---------- Windows and dialogs (the grid's popup editor and delete confirmation) ---------- */

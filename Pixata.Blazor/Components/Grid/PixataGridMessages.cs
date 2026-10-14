@@ -33,6 +33,20 @@ internal static class PixataGridMessages {
   public const string Remove = "Remove";
   public const string Expand = "Expand";
   public const string Collapse = "Collapse";
+  public const string ColumnMenu = "Column menu";
+  public const string SortAscending = "Sort Ascending";
+  public const string SortDescending = "Sort Descending";
+  public const string Columns = "Columns";
+  public const string Filter = "Filter";
+  public const string GroupColumn = "Group column";
+  public const string UngroupColumn = "Ungroup column";
+  public const string SetColumnPosition = "Set column position";
+  public const string Lock = "Lock";
+  public const string Unlock = "Unlock";
+  public const string MovePrevious = "Move Previous";
+  public const string MoveNext = "Move Next";
+  public const string Apply = "Apply";
+  public const string Reset = "Reset";
 
   public static string PagerInfo(int first, int last, int total) =>
     $"{first} - {last} of {total} items";

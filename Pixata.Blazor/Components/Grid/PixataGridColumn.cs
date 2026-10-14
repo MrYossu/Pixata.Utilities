@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Pixata.Extensions;
 using Pixata.Extensions.Grid;
 
@@ -18,6 +20,101 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   /// </summary>
   [Parameter]
   public string? Field { get; set; }
+
+  /// <summary>
+  /// An identifier for the column, for the methods that take one, such as <c>AutoFitColumn</c>
+  /// </summary>
+  [Parameter]
+  public string? Id { get; set; }
+
+  /// <summary>
+  /// Columns to show under this one, which then has a header spanning theirs and no cells of its own
+  /// </summary>
+  [Parameter]
+  public RenderFragment? Columns { get; set; }
+
+  /// <summary>
+  /// Whether the user can resize this column, when the grid is <c>Resizable</c>. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool Resizable { get; set; } = true;
+
+  /// <summary>
+  /// The narrowest the user can make the column, in pixels
+  /// </summary>
+  [Parameter]
+  public double? MinResizableWidth { get; set; }
+
+  /// <summary>
+  /// The widest the user can make the column, in pixels
+  /// </summary>
+  [Parameter]
+  public double? MaxResizableWidth { get; set; }
+
+  /// <summary>
+  /// Whether the user can move this column, when the grid is <c>Reorderable</c>. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool Reorderable { get; set; } = true;
+
+  /// <summary>
+  /// Freezes the column, so it stays put when the grid scrolls sideways. It needs a <see cref="Width"/> in pixels
+  /// </summary>
+  [Parameter]
+  public bool Locked { get; set; }
+
+  /// <summary>
+  /// Whether the user can freeze and unfreeze the column from the column menu. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool Lockable { get; set; } = true;
+
+  /// <summary>
+  /// Whether the column has a column menu, when the grid's <c>ShowColumnMenu</c> is set. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool ShowColumnMenu { get; set; } = true;
+
+  /// <summary>
+  /// Whether the column is listed in the column menu's column chooser, to be shown or hidden. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool VisibleInColumnChooser { get; set; } = true;
+
+  [CascadingParameter(Name = ParentCascadeName)]
+  internal PixataGridColumn<TItem>? ParentColumn { get; set; }
+
+  internal const string ParentCascadeName = "PixataGridParentColumn";
+
+  // What the user has changed, which takes the place of the parameters
+  internal string? RuntimeWidth { get; set; }
+  internal bool? RuntimeVisible { get; set; }
+  internal bool? RuntimeLocked { get; set; }
+  internal int? RuntimeOrder { get; set; }
+
+  // The columns inside this one, if it has Columns
+  internal List<PixataGridColumn<TItem>> Children { get; } = [];
+
+  // Identifies the column in the page, for the JavaScript
+  internal string Key { get; } = Guid.NewGuid().ToString("N")[..8];
+
+  // Set by the grid as it renders, for a frozen column
+  internal string? StickyStyle { get; set; }
+  internal double? StickyLeft { get; set; }
+  internal double? StickyRight { get; set; }
+
+  internal bool IsGroupColumn =>
+    Columns is not null;
+
+  internal string? CurrentWidth =>
+    RuntimeWidth ?? Width;
+
+  // A frozen column, or one inside a frozen column
+  internal bool IsLocked =>
+    RuntimeLocked ?? (Locked || ParentColumn?.IsLocked == true);
+
+  internal string? LockedClass =>
+    StickyStyle is null ? null : "pixata-blazor-grid-locked";
 
   /// <summary>
   /// The header text. If not set, the grid uses the <c>[Display(Name = "...")]</c> attribute on the field if there is one,
@@ -188,9 +285,12 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
     FieldType is not null && (!FieldType.IsValueType || Nullable.GetUnderlyingType(FieldType) is not null);
 
   internal bool IsVisible =>
-    Visible ?? true;
+    RuntimeVisible ?? Visible ?? true;
 
-  internal string HeaderText {
+  /// <summary>
+  /// The title shown in the column's header
+  /// </summary>
+  public string HeaderText {
     get {
       Resolve();
       return Title ?? _attributeTitle ?? Field?.Split('.')[^1].SplitCamelCase() ?? "";
@@ -198,7 +298,7 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   }
 
   internal string? WidthStyle =>
-    string.IsNullOrWhiteSpace(Width) ? null : $"width: {Width}";
+    string.IsNullOrWhiteSpace(CurrentWidth) ? null : $"width: {CurrentWidth}";
 
   internal string CellClass =>
     Css.Join("pixata-blazor-grid-td", TextAlign switch {
@@ -206,10 +306,10 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
       PixataGridTextAlign.Center => "pixata-blazor-grid-text-center",
       PixataGridTextAlign.Right => "pixata-blazor-grid-text-right",
       _ => null
-    }, Class);
+    }, LockedClass, Class);
 
   internal string HeaderCellClass =>
-    Css.Join("pixata-blazor-grid-th", HeaderClass);
+    Css.Join("pixata-blazor-grid-th", LockedClass, HeaderClass);
 
   internal object? CellValue(TItem item) {
     Resolve();
@@ -266,4 +366,20 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   protected override void OnParametersSet() =>
     // Done here as well as lazily, so that a bad field name throws as soon as the column is created, not part way through rendering
     Resolve();
+
+  // A column with Columns renders them, so they can register with it. Other columns render nothing
+  protected override void BuildRenderTree(RenderTreeBuilder builder) {
+    if (Columns is null) {
+      return;
+    }
+    builder.OpenComponent<CascadingValue<PixataGridColumn<TItem>>>(0);
+    builder.AddComponentParameter(1, "Name", ParentCascadeName);
+    builder.AddComponentParameter(2, "Value", this);
+    builder.AddComponentParameter(3, "IsFixed", true);
+    builder.AddComponentParameter(4, "ChildContent", Columns);
+    builder.CloseComponent();
+  }
+
+  protected override bool ShouldRender() =>
+    Columns is not null;
 }

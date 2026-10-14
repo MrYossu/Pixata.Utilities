@@ -405,6 +405,151 @@
   </GridColumns>
 </TelerikGrid>
 
+<h4>Resizing and reordering columns</h4>
+
+<p>Drag the edge of a header to resize its column, or double-click the edge to fit the column to its content. Drag a header onto another to move it. First name can't be made narrower than 80px, and salary can't be wider than 200px. Email can't be resized, and date of birth can't be moved.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Resizable="true" Reorderable="true" Pageable="true" PageSize="5" OnColumnResize="@((PixataGridColumnResizeEventArgs<GridSampleEmployee> args) => _columnEvent = $"{args.Column.HeaderText} resized to {args.Width}px")" OnColumnReorder="@((PixataGridColumnReorderEventArgs<GridSampleEmployee> args) => _columnEvent = $"{args.Column.HeaderText} moved from {args.OldIndex} to {args.NewIndex}")">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" MinResizableWidth="80" Id="first" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="150px" Id="surname" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)" Resizable="false" Id="email" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" Reorderable="false" Id="dob" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" MaxResizableWidth="200" Id="salary" />
+  </GridColumns>
+</PixataGrid>
+<p>@_columnEvent</p>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Resizable="true" Reorderable="true" Pageable="true" PageSize="5">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" MinResizableWidth="80" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="150px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Email)" Resizable="false" />
+    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" Reorderable="false" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" MaxResizableWidth="200" />
+  </GridColumns>
+</TelerikGrid>
+
+<h4>Frozen columns</h4>
+
+<p>The grid is narrower than its columns, so it scrolls sideways. Id and first name are frozen on the left, salary on the right, and pet, in the middle, sticks to the left once it gets there.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Width="800px" Height="300px">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" Locked="true" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" Locked="true" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="200px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)" Width="300px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" Width="120px" Locked="true" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" Width="200px" DisplayFormat="{0:dd MMM yyyy}" />
+    <PixataGridColumn Field="Address.City" Width="200px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" Width="150px" DisplayFormat="{0:C0}" Locked="true" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Width="800px" Height="300px">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" Locked="true" />
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" Locked="true" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="200px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Email)" Width="300px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" Width="120px" Locked="true" />
+    <GridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" Width="200px" DisplayFormat="{0:dd MMM yyyy}" />
+    <GridColumn Field="Address.City" Width="200px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" Width="150px" DisplayFormat="{0:C0}" Locked="true" />
+  </GridColumns>
+</TelerikGrid>
+
+<h4>Multi-column headers</h4>
+
+<p>A column can contain other columns, which share a header above their own.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" Sortable="true" Pageable="true" PageSize="5">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <PixataGridColumn Title="Name">
+      <Columns>
+        <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+        <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+      </Columns>
+    </PixataGridColumn>
+    <PixataGridColumn Title="Details">
+      <Columns>
+        <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)" />
+        <PixataGridColumn Title="Other">
+          <Columns>
+            <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+            <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
+          </Columns>
+        </PixataGridColumn>
+      </Columns>
+    </PixataGridColumn>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" Sortable="true" Pageable="true" PageSize="5">
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
+    <GridColumn Title="Name">
+      <Columns>
+        <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+        <GridColumn Field="@nameof(GridSampleEmployee.Surname)" />
+      </Columns>
+    </GridColumn>
+    <GridColumn Title="Details">
+      <Columns>
+        <GridColumn Field="@nameof(GridSampleEmployee.Email)" />
+        <GridColumn Title="Other">
+          <Columns>
+            <GridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+            <GridColumn Field="@nameof(GridSampleEmployee.IsManager)" />
+          </Columns>
+        </GridColumn>
+      </Columns>
+    </GridColumn>
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+
+<h4>Column menu</h4>
+
+<p>Each header has a menu for sorting, filtering, showing and hiding columns, freezing, grouping and moving. Email isn't in the column chooser, and pet has no menu.</p>
+
+<p class="pixata-blazor-grid-sample-label">PixataGrid</p>
+<PixataGrid Data="Data" Size="_size" ShowColumnMenu="true" Sortable="true" FilterMode="PixataGridFilterMode.FilterMenu" Groupable="true" Reorderable="true" Resizable="true" Pageable="true" PageSize="5">
+  <GridSettings>
+    <PixataGridColumnMenuSettings Lockable="true" Groupable="true" Reorderable="true" />
+  </GridSettings>
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="150px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)" Width="250px" VisibleInColumnChooser="false" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Pet)" Width="120px" ShowColumnMenu="false" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" Width="150px" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</PixataGrid>
+
+<p class="pixata-blazor-grid-sample-label">Telerik grid</p>
+<TelerikGrid Data="Data" Size="@TelerikSize" ShowColumnMenu="true" Sortable="true" FilterMode="GridFilterMode.FilterMenu" Groupable="true" Reorderable="true" Resizable="true" Pageable="true" PageSize="5">
+  <GridSettings>
+    <GridColumnMenuSettings Lockable="true" Groupable="true" Reorderable="true" />
+  </GridSettings>
+  <GridColumns>
+    <GridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="150px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="150px" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Email)" Width="250px" VisibleInColumnChooser="false" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Pet)" Width="120px" ShowColumnMenu="false" />
+    <GridColumn Field="@nameof(GridSampleEmployee.Salary)" Width="150px" DisplayFormat="{0:C0}" />
+  </GridColumns>
+</TelerikGrid>
+
 <h4>Auto-generated columns</h4>
 
 <p>With <code>AutoGenerateColumns="true"</code> and no <code>GridColumns</code>, there's a column for each simple public property. Phone is left out by <code>[Display(AutoGenerateField = false)]</code>, and Address, being an object, is left out by <code>PixataGrid</code>. The grid has no height, so it is as tall as its rows.</p>
@@ -448,6 +593,7 @@
     args.GridState.GroupDescriptors = [new GroupDescriptor { Member = nameof(GridSampleEmployee.Pet), MemberType = typeof(Pets) }];
 
   private PixataGrid<GridSampleEmployee>? _groupedGrid;
+  private string _columnEvent = "";
 
   // Starts the PixataGrid grouped by pet, as the Telerik one is
   protected override void OnAfterRender(bool firstRender) {

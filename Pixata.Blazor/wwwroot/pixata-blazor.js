@@ -192,23 +192,81 @@ export function unwatchOutside(id) {
   }
 }
 
-// ---------- Dragging grid headers into the group panel ----------
+// ---------- Dragging grid headers: grouping, reordering and resizing ----------
 
-const groupDrags = new Map();
+const headerDrags = new Map();
 
-// Lets the user drag a grid's column headers into its group panel, and its group chips to reorder them or (dropped outside
-// the panel) remove them. It uses pointer events rather than HTML drag and drop, so it works with touch too
-export function initGroupDrag(gridId, dotNet) {
+// The grid's own columns, leaving out the narrow group columns, with their keys and current widths
+function columnWidths(grid) {
+  return [...grid.querySelectorAll(".pixata-blazor-grid-table > colgroup > col")]
+    .map(col => ({ col, key: col.dataset.pixataColumnKey, width: col.getBoundingClientRect().width }));
+}
+
+function clampWidth(width, handle) {
+  const min = Number(handle.dataset.pixataMin) || 10;
+  const max = Number(handle.dataset.pixataMax) || Infinity;
+  return Math.min(Math.max(width, min), max);
+}
+
+// Fixes every column at its current width and the table at their total, so resizing one column leaves the others alone
+function fixWidths(grid) {
+  const table = grid.querySelector(".pixata-blazor-grid-table");
+  const cols = columnWidths(grid);
+  cols.forEach(c => c.col.style.width = `${c.width}px`);
+  table.style.width = `${cols.reduce((total, c) => total + c.width, 0)}px`;
+  return { table, cols };
+}
+
+function reportWidths(grid, dotNet, key) {
+  const widths = columnWidths(grid).filter(c => c.key).map(c => ({ key: c.key, width: c.width }));
+  dotNet.invokeMethodAsync("ColumnsResized", key, widths);
+}
+
+// Lets the user drag a grid's headers into its group panel, onto other headers to move them, and drag their edges to resize
+// them (or double-click an edge to fit the column to its content). Group chips can be dragged to reorder them or, dropped
+// outside the panel, to remove them. It uses pointer events rather than HTML drag and drop, so it works with touch too
+export function initHeaderDrag(gridId, dotNet) {
   const grid = document.getElementById(gridId);
-  if (!grid || groupDrags.has(gridId)) {
+  if (!grid || headerDrags.has(gridId)) {
     return;
   }
   let drag = null;
+  let resize = null;
+  let hint = null;
   const panelOf = () => grid.querySelector(".pixata-blazor-grid-group-panel");
   const isOverPanel = (x, y) => {
     const panel = panelOf();
     const target = document.elementFromPoint(x, y);
     return panel && target && panel.contains(target) ? target : null;
+  };
+  // The header a dragged header would be dropped next to, and which side of it
+  const reorderTarget = (x, y) => {
+    const scope = drag?.source.dataset.pixataReorderScope;
+    if (scope === undefined) {
+      return null;
+    }
+    const th = document.elementFromPoint(x, y)?.closest("th[data-pixata-reorder-key]");
+    if (!th || !grid.contains(th) || th === drag.source || th.dataset.pixataReorderScope !== scope) {
+      return null;
+    }
+    const rect = th.getBoundingClientRect();
+    return { th, before: x < rect.left + rect.width / 2 };
+  };
+  const showHint = target => {
+    if (!target) {
+      hint?.remove();
+      hint = null;
+      return;
+    }
+    if (!hint) {
+      hint = document.createElement("div");
+      hint.className = "pixata-blazor-grid-drop-hint";
+      document.body.appendChild(hint);
+    }
+    const rect = target.th.getBoundingClientRect();
+    hint.style.left = `${target.before ? rect.left : rect.right}px`;
+    hint.style.top = `${rect.top}px`;
+    hint.style.height = `${rect.height}px`;
   };
   const end = () => {
     if (drag?.clue) {
@@ -216,18 +274,48 @@ export function initGroupDrag(gridId, dotNet) {
       grid.classList.remove("pixata-blazor-grid-group-dragging");
       panelOf()?.classList.remove("pixata-blazor-grid-group-panel-drop");
     }
+    showHint(null);
     drag = null;
   };
+  const swallowNextClick = () => {
+    const swallow = ev => {
+      ev.stopPropagation();
+      ev.preventDefault();
+    };
+    window.addEventListener("click", swallow, { capture: true, once: true });
+    setTimeout(() => window.removeEventListener("click", swallow, { capture: true }), 0);
+  };
   const down = e => {
-    if (e.button !== 0 || e.target.closest(".pixata-blazor-grid-header-menu, .pixata-blazor-grid-group-chip-remove")) {
+    if (e.button !== 0) {
       return;
     }
-    const source = e.target.closest("[data-pixata-group-field], [data-pixata-group-index]");
+    const handle = e.target.closest(".pixata-blazor-grid-column-resizer");
+    if (handle && grid.contains(handle)) {
+      e.preventDefault();
+      const { table, cols } = fixWidths(grid);
+      const col = cols.find(c => c.key === handle.dataset.pixataResize);
+      if (col) {
+        resize = { handle, table, cols, col, x: e.clientX, width: col.width, moved: false };
+      }
+      return;
+    }
+    if (e.target.closest(".pixata-blazor-grid-header-menu, .pixata-blazor-grid-group-chip-remove")) {
+      return;
+    }
+    const source = e.target.closest("[data-pixata-group-field], [data-pixata-group-index], [data-pixata-reorder-key]");
     if (source && grid.contains(source)) {
       drag = { source, x: e.clientX, y: e.clientY, clue: null };
     }
   };
   const move = e => {
+    if (resize) {
+      e.preventDefault();
+      resize.moved = true;
+      const width = clampWidth(resize.width + e.clientX - resize.x, resize.handle);
+      resize.col.col.style.width = `${width}px`;
+      resize.table.style.width = `${resize.cols.reduce((total, c) => total + (c === resize.col ? width : c.width), 0)}px`;
+      return;
+    }
     if (!drag) {
       return;
     }
@@ -246,45 +334,114 @@ export function initGroupDrag(gridId, dotNet) {
     e.preventDefault();
     drag.clue.style.left = `${e.clientX + 12}px`;
     drag.clue.style.top = `${e.clientY + 12}px`;
-    const over = isOverPanel(e.clientX, e.clientY) !== null;
-    panelOf()?.classList.toggle("pixata-blazor-grid-group-panel-drop", over);
-    drag.clue.classList.toggle("pixata-blazor-grid-drag-clue-drop", over);
+    const overPanel = drag.source.dataset.pixataReorderKey === undefined || drag.source.dataset.pixataGroupField !== undefined
+      ? isOverPanel(e.clientX, e.clientY) !== null
+      : false;
+    const target = overPanel ? null : reorderTarget(e.clientX, e.clientY);
+    panelOf()?.classList.toggle("pixata-blazor-grid-group-panel-drop", overPanel);
+    drag.clue.classList.toggle("pixata-blazor-grid-drag-clue-drop", overPanel || target !== null);
+    showHint(target);
   };
   const up = e => {
+    if (resize) {
+      const { moved, handle } = resize;
+      resize = null;
+      if (moved) {
+        swallowNextClick();
+        reportWidths(grid, dotNet, handle.dataset.pixataResize);
+      }
+      return;
+    }
     if (!drag?.clue) {
       drag = null;
       return;
     }
     const source = drag.source;
+    const target = reorderTarget(e.clientX, e.clientY);
     end();
-    // The click that follows the drag mustn't sort the column
-    const swallow = ev => {
-      ev.stopPropagation();
-      ev.preventDefault();
-    };
-    window.addEventListener("click", swallow, { capture: true, once: true });
-    setTimeout(() => window.removeEventListener("click", swallow, { capture: true }), 0);
-    const target = isOverPanel(e.clientX, e.clientY);
-    const chip = target?.closest("[data-pixata-group-index]");
+    swallowNextClick();
+    if (target) {
+      dotNet.invokeMethodAsync("ColumnDrop", source.dataset.pixataReorderKey, target.th.dataset.pixataReorderKey, target.before);
+      return;
+    }
+    if (source.dataset.pixataGroupField === undefined && source.dataset.pixataGroupIndex === undefined) {
+      return;
+    }
+    const overPanel = isOverPanel(e.clientX, e.clientY);
+    const chip = overPanel?.closest("[data-pixata-group-index]");
     const from = source.dataset.pixataGroupIndex === undefined ? -1 : Number(source.dataset.pixataGroupIndex);
     const to = chip ? Number(chip.dataset.pixataGroupIndex) : -1;
-    dotNet.invokeMethodAsync("GroupDrop", source.dataset.pixataGroupField ?? null, from, to, target !== null);
+    dotNet.invokeMethodAsync("GroupDrop", source.dataset.pixataGroupField ?? null, from, to, overPanel !== null);
   };
-  const cancel = () => end();
+  const doubleClick = e => {
+    const handle = e.target.closest(".pixata-blazor-grid-column-resizer");
+    if (handle && grid.contains(handle)) {
+      const widths = autoFitColumns(gridId, [handle.dataset.pixataResize]);
+      dotNet.invokeMethodAsync("ColumnsResized", handle.dataset.pixataResize, widths);
+    }
+  };
+  const cancel = () => {
+    resize = null;
+    end();
+  };
   grid.addEventListener("pointerdown", down);
+  grid.addEventListener("dblclick", doubleClick);
   document.addEventListener("pointermove", move);
   document.addEventListener("pointerup", up);
   document.addEventListener("pointercancel", cancel);
-  groupDrags.set(gridId, () => {
+  headerDrags.set(gridId, () => {
     end();
     grid.removeEventListener("pointerdown", down);
+    grid.removeEventListener("dblclick", doubleClick);
     document.removeEventListener("pointermove", move);
     document.removeEventListener("pointerup", up);
     document.removeEventListener("pointercancel", cancel);
   });
 }
 
-export function disposeGroupDrag(gridId) {
-  groupDrags.get(gridId)?.();
-  groupDrags.delete(gridId);
+export function disposeHeaderDrag(gridId) {
+  headerDrags.get(gridId)?.();
+  headerDrags.delete(gridId);
+}
+
+// Works out how wide some columns need to be to fit their content without wrapping, by copying their cells into a hidden
+// table that sizes itself to its content. Returns the widths of all the columns, with those ones changed, as the others
+// are fixed at their current widths
+export function autoFitColumns(gridId, keys) {
+  const grid = document.getElementById(gridId);
+  if (!grid) {
+    return [];
+  }
+  const { table, cols } = fixWidths(grid);
+  const measure = document.createElement("table");
+  measure.className = "pixata-blazor-grid-table pixata-blazor-grid-measure";
+  const body = document.createElement("tbody");
+  measure.appendChild(body);
+  grid.appendChild(measure);
+  for (const key of keys) {
+    const index = cols.findIndex(c => c.key === key);
+    const handle = grid.querySelector(`[data-pixata-resize="${key}"]`);
+    if (index < 0) {
+      continue;
+    }
+    // The header, and the cells of each row that has a cell for every column
+    const cells = [grid.querySelector(`th[data-pixata-column-key="${key}"]`),
+      ...[...table.querySelectorAll("tbody > tr, tfoot > tr")].filter(tr => tr.children.length === cols.length).map(tr => tr.children[index])]
+      .filter(cell => cell);
+    body.replaceChildren(...cells.map(cell => {
+      const tr = document.createElement("tr");
+      const copy = cell.cloneNode(true);
+      copy.removeAttribute("style");
+      copy.removeAttribute("rowspan");
+      copy.removeAttribute("id");
+      tr.appendChild(copy);
+      return tr;
+    }));
+    const width = Math.ceil(Math.max(0, ...[...body.querySelectorAll("tr > *")].map(cell => cell.getBoundingClientRect().width)));
+    cols[index].width = handle ? clampWidth(width, handle) : width;
+    cols[index].col.style.width = `${cols[index].width}px`;
+  }
+  measure.remove();
+  table.style.width = `${cols.reduce((total, c) => total + c.width, 0)}px`;
+  return cols.filter(c => c.key).map(c => ({ key: c.key, width: c.width }));
 }

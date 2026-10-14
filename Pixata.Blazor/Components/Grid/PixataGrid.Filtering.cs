@@ -261,7 +261,7 @@ public partial class PixataGrid<TItem> {
   // ---------- The filter menu ----------
 
   private string MenuAnchorId(PixataGridColumn<TItem> column) =>
-    $"{_gridId}-filter-{column.Field!.Replace('.', '-')}";
+    $"{_gridId}-menu-{column.Key}";
 
   private async Task ToggleFilterMenu(PixataGridColumn<TItem> column) {
     if (_menuColumn == column) {
@@ -270,6 +270,7 @@ public partial class PixataGrid<TItem> {
     }
     await CloseFilterMenu();
     _menuColumn = column;
+    _columnMenuOpen = false;
     _menuSearch = "";
     _menuState = new() { Operator1 = DefaultOperator(column), Operator2 = DefaultOperator(column) };
     // The menu starts with the column's current filter, if it has one
@@ -301,6 +302,7 @@ public partial class PixataGrid<TItem> {
       return;
     }
     _menuColumn = null;
+    _columnMenuOpen = false;
     if (_module is not null) {
       try {
         await _module.InvokeVoidAsync("closePopup", _menuPopup);

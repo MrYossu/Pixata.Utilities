@@ -183,18 +183,19 @@ public partial class PixataGrid<TItem> {
 
   // ---------- Dragging headers into the group panel ----------
 
-  private bool _groupDragReady;
+  private bool _headerDragReady;
 
-  // The dragging is done by the JavaScript, which calls GroupDrop at the end
-  private async Task InitGroupDrag() {
-    if (!Groupable || _groupDragReady || _disposed) {
+  // The dragging (to group, reorder and resize) is done by the JavaScript, which calls GroupDrop, ColumnDrop or
+  // ColumnsResized at the end
+  private async Task InitHeaderDrag() {
+    if (!(Groupable || Reorderable || Resizable) || _headerDragReady || _disposed) {
       return;
     }
-    _groupDragReady = true;
+    _headerDragReady = true;
     try {
       _module ??= await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       _self ??= DotNetObjectReference.Create(this);
-      await _module.InvokeVoidAsync("initGroupDrag", _gridId, _self);
+      await _module.InvokeVoidAsync("initHeaderDrag", _gridId, _self);
     } catch (JSDisconnectedException) {
       // The circuit has gone
     }

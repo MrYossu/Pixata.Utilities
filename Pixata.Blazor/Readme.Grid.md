@@ -69,6 +69,11 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `ConfirmDelete` | `bool` | Asks the user to confirm before deleting |
 | `Groupable` | `bool` | Shows a panel above the grid that the user can drag column headers into, to group the rows. See [grouping](#grouping-and-aggregates) |
 | `GridAggregates` | `RenderFragment` | The aggregates to calculate, as `PixataGridAggregate`s, for the footer templates |
+| `Resizable` | `bool` | Lets the user resize columns. See [columns](#resizing-moving-and-freezing-columns) |
+| `Reorderable` | `bool` | Lets the user move columns by dragging their headers |
+| `ShowColumnMenu` | `bool` | Gives each header a menu. See [the column menu](#the-column-menu) |
+| `OnColumnResize` | `EventCallback<PixataGridColumnResizeEventArgs<TItem>>` | Fires when the user has resized a column, with the column and its new width in pixels |
+| `OnColumnReorder` | `EventCallback<PixataGridColumnReorderEventArgs<TItem>>` | Fires when the user has moved a column, with the column and its old and new positions among the columns it is with |
 
 ## Column parameters
 
@@ -93,6 +98,15 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Editable` | `bool` | Set to `false` to stop the column being edited. Defaults to `true`, but a property with no public setter is never editable |
 | `EditorType` | `PixataGridEditorType?` | The editor to use, if not the default for the field's type |
 | `EditorTemplate` | `RenderFragment<TItem>` | Your own editor. The context is the copy being edited |
+| `Id` | `string` | An identifier, for `AutoFitColumn` and `AutoFitColumns` |
+| `Columns` | `RenderFragment` | Columns to show under this one. See [multi-column headers](#multi-column-headers) |
+| `Resizable` | `bool` | Set to `false` to stop the user resizing this column. Defaults to `true`, but only matters if the grid is `Resizable` |
+| `MinResizableWidth`, `MaxResizableWidth` | `double?` | The narrowest and widest the user can make the column, in pixels |
+| `Reorderable` | `bool` | Set to `false` to stop the user moving this column. Defaults to `true`, but only matters if the grid is `Reorderable` |
+| `Locked` | `bool` | Freezes the column, so it stays put when the grid scrolls sideways. It needs a `Width` in pixels |
+| `Lockable` | `bool` | Set to `false` to stop the user freezing and unfreezing the column from the column menu |
+| `ShowColumnMenu` | `bool` | Set to `false` to leave the column out when the grid's `ShowColumnMenu` is set. It then has a filter menu button instead, if the grid's `FilterMode` is `FilterMenu` |
+| `VisibleInColumnChooser` | `bool` | Set to `false` to leave the column out of the column menu's list of columns |
 | `Groupable` | `bool` | Set to `false` to stop the user grouping by this column. Defaults to `true`, but only matters if the grid is `Groupable` |
 | `GroupHeaderTemplate` | `RenderFragment<PixataGridGroupTemplateContext>` | The content of a group's header row when grouped by this column, in place of "Title: value" |
 | `GroupFooterTemplate` | `RenderFragment<PixataGridGroupTemplateContext>` | The content of this column's cell in each group's footer row |
@@ -274,6 +288,7 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 | `--pixata-grid-input-bg` | `#fff` | The background of text boxes, number boxes, popups and dropdown lists |
 | `--pixata-grid-picker-bg`, `--pixata-grid-picker-hover-bg` | `#f5f5f5`, `#ebebeb` | The background of dropdowns and solid buttons |
 | `--pixata-grid-chip-bg`, `--pixata-grid-chip-border-color` | `#ebebeb`, `#c2c2c2` | The chips in the group panel |
+| `--pixata-grid-locked-border-color` | `rgba(0, 0, 0, .3)` | The lines either side of frozen columns |
 | `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The focus ring on inputs and buttons |
 | `--pixata-grid-popup-shadow` | A soft two-layer shadow | The shadow under dropdown lists and filter menus |
 | `--pixata-grid-border-radius` | `4px` | Rounded corners on inputs and buttons |
@@ -417,6 +432,59 @@ In `Popup` mode, the item is edited in a form in a window, titled "Edit" (or "Ad
 | --- | --- |
 | `PixataGridPopupEditSettings` | `Title`, `Width`, `MaxHeight` and `Class` for the window |
 | `PixataGridPopupEditFormSettings` | `Columns` (the number of columns the fields are laid out in), `ButtonsLayout` (`Start`, `Center`, `End` or `Stretch`), `FormTemplate` (your own form, given the item) and `ButtonsTemplate` (your own buttons) |
+
+## Resizing, moving and freezing columns
+
+With `Resizable="true"`, the user can drag the right edge of a header to resize its column, and double-click the edge to make the column as wide as its content (the header, the rows on the page and any footers, without wrapping). Once a column has been resized, every column keeps the width it had, and the table is as wide as its columns, so it may scroll sideways or leave a gap on the right. `MinResizableWidth` and `MaxResizableWidth` limit the width. You can fit columns to their content from code with `AutoFitColumn(id)`, `AutoFitColumns(ids)` and `AutoFitAllColumns()`, which use the columns' `Id`s, and work whether or not the grid is `Resizable`. Call them after the grid has rendered.
+
+With `Reorderable="true"`, the user can drag a header onto another to move the column before or after it (a line shows where it will go). A column can only be moved among the columns it is with, so a column inside another stays inside it, and frozen columns can only be moved among frozen ones.
+
+A column with `Locked="true"` is frozen, so it stays visible when the grid scrolls sideways. Each frozen column sticks after the frozen columns to its left and before those to its right, so frozen columns at the start stay on the left, those at the end stay on the right, and one in the middle scrolls until it reaches the frozen columns on either side. Frozen columns need a `Width` in pixels, and the grid needs to be narrower than its columns (give the grid a `Width`, or give the columns enough width) for there to be anything to scroll. If any frozen column hasn't got a width in pixels, none are frozen.
+
+The dragging uses pointer events, so it works with touch as well as the mouse.
+
+## Multi-column headers
+
+A column can contain other columns, which share a header above their own...
+
+```razor
+<PixataGrid Data="People">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(Person.Id)" Width="80px" />
+    <PixataGridColumn Title="Name">
+      <Columns>
+        <PixataGridColumn Field="@nameof(Person.FirstName)" />
+        <PixataGridColumn Field="@nameof(Person.Surname)" />
+      </Columns>
+    </PixataGridColumn>
+  </GridColumns>
+</PixataGrid>
+```
+
+The containing column only has a header, so it doesn't need a `Field`. Columns can be nested as deeply as you like. Hiding a containing column hides the columns inside it, and if all of those are hidden, it's hidden too.
+
+## The column menu
+
+With `ShowColumnMenu="true"`, each header has a menu button. Its menu has...
+
+- Sort Ascending and Sort Descending, for a sortable column. Picking the sort the column already has removes it
+- Columns, a list of the columns with a tick box for each. Untick some and click Apply to hide them, or Reset to go back to how they were. The last ticked column can't be unticked
+- Filter, the same form as the filter menu, for a filterable column when the grid has a `FilterMode`
+- Group column (or Ungroup column), when the grid is `Groupable`
+- Set column position, with Lock and Unlock (to freeze and unfreeze the column), and Move Previous and Move Next. A frozen column moves to the end of the frozen columns on the left, and an unfrozen one to just after them. A column frozen by its `Locked` parameter can't be unfrozen
+
+Only one of the sections expands at a time. Choose what's offered with `PixataGridColumnMenuSettings` in the grid's `GridSettings`...
+
+| Setting | Type | What it does |
+| --- | --- | --- |
+| `ShowColumnChooser` | `bool` | The list of columns. Defaults to `true` |
+| `Sortable` | `bool` | Sorting. Defaults to `true` |
+| `FilterMode` | `PixataGridColumnMenuFilterMode` | `FilterMenu` (the default) or `None` |
+| `Lockable` | `bool` | Lock and Unlock. Defaults to `true` |
+| `Groupable` | `bool` | Group column. Defaults to `false` |
+| `Reorderable` | `bool` | Move Previous and Move Next. Defaults to `false` |
+
+The column's own parameters (such as `Sortable="false"` or `Lockable="false"`) take precedence. A column with `ShowColumnMenu="false"` has no menu, but keeps its filter menu button if the grid's `FilterMode` is `FilterMenu`.
 
 ## Grouping and aggregates
 
