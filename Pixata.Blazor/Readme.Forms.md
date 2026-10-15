@@ -108,6 +108,7 @@ The set is...
 | `FormRowPassword` | A password |
 | `FormRowInt`, `FormRowDecimal`, `FormRowDouble` | Numbers |
 | `FormRowCheckbox` | A `bool`. Binds `Checked` rather than `Value` |
+| `FormRowDate` | A date, using a `PixataDatePicker`. Binds a `DateTime`, `DateOnly` or a nullable version of either. `Format` defaults to `dd MMMM yyyy`, and `ShowClearButton` adds an x that clears a nullable date |
 | `FormRowDropdown`, `FormRowDropdownNullable` | A list of options, passed as `Values`, an `IEnumerable` of `(int val, string name)` tuples. The nullable version binds an `int?`, so it can have a "none selected" entry |
 | `FormRowDropdownEnum` | The members of an `enum`, with their names split by camel case |
 | `FormRowBlank` | A row with a label and an icon, but no input. Put whatever you like in its `ChildContent` and it lines up with the rest of the form |

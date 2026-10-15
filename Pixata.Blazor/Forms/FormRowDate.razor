@@ -1,0 +1,86 @@
+@typeparam TValue
+@using Pixata.Blazor.Components
+@* A form row with a PixataDatePicker. TValue can be DateTime, DateOnly or a nullable version of either *@
+<div class="pixata-form-group pixata-row">
+  <label for="@PropertyName" class="pixata-col-2 pixata-col-form-label">@(Caption ?? PropertyName)</label>
+  <div class="pixata-col-10 pixata-input-group">
+    <div class="pixata-input-group-prepend">
+      <span class="pixata-input-group-text pixata-h-100">
+        <i class="@Icon"></i>
+      </span>
+    </div>
+    <PixataDatePicker TValue="TValue"
+                      Id="@PropertyName"
+                      Value="@Value"
+                      ValueChanged="@OnChanged"
+                      ValueExpression="@ValueExpression"
+                      Format="@Format"
+                      ShowClearButton="@ShowClearButton"
+                      Enabled="@Enabled"
+                      Class="@($"pixata-form-control {_invalid}")" />
+    <div class="pixata-input-group-append">
+      <div class="pixata-input-group-text pixata-has-error pixata-h-100">
+        @if (_showValidationMsg) {
+          <ValidationMessage For="@ValueExpression" />
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  [CascadingParameter]
+  public EditContext CascadedEditContext { get; set; } = null!;
+
+  [Parameter]
+  public string PropertyName { get; set; } = null!;
+
+  [Parameter]
+  public TValue? Value { get; set; }
+
+  [Parameter]
+  public EventCallback<TValue> ValueChanged { get; set; }
+
+  [Parameter]
+  public string? Caption { get; set; }
+
+  [Parameter]
+  public string? Icon { get; set; }
+
+  // A .NET date format. Defaults to 12 March 2026 style
+  [Parameter]
+  public string Format { get; set; } = "dd MMMM yyyy";
+
+  // Shows an x that clears the date. Only has an effect for nullable types
+  [Parameter]
+  public bool ShowClearButton { get; set; }
+
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  [Parameter]
+  public Expression<Func<TValue>> ValueExpression { get; set; } = null!;
+
+  private bool _showValidationMsg;
+  private string _invalid = "";
+
+  protected override void OnInitialized() {
+    CascadedEditContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
+    base.OnInitialized();
+  }
+
+  private void EditContext_OnValidationStateChanged(object? sender, ValidationStateChangedEventArgs e) {
+    FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
+    _showValidationMsg = CascadedEditContext.GetValidationMessages(identifier).Any();
+    _invalid = _showValidationMsg ? "pixata-invalid" : "";
+  }
+
+  private async Task OnChanged(TValue value) {
+    Value = value;
+    await ValueChanged.InvokeAsync(value);
+    FieldIdentifier identifier = CascadedEditContext.Field(PropertyName);
+    CascadedEditContext.NotifyFieldChanged(identifier);
+  }
+
+}
