@@ -8,6 +8,8 @@ This project contains Blazor components that are useful when working with the ra
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.LanguageExtComponents/) is available for this project.
 
+>**Version 2.1.0** references Pixata.Blazor v5.0.0. No code changes.
+
 ## The components
 ### OptionBlazor
 One of the first monads (oh no, the m-word!) that you'll probably come across is `Option<T>`. This is a very robust way of handling missing values, whilst avoiding null reference exceptions. If you have an `Option<T>` and want to use it in a Blazor component, then the `OptionBlazor` component will help.
