@@ -106,19 +106,7 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
-    # Pixata.Blazor.LanguageExtComponents
-    - name: Restore - Pixata.Blazor.LanguageExtComponents Dependencies
-      run: dotnet restore Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configfile ./nuget.config
-      env:
-        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
-        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
     
-    - name: Build - Pixata.Blazor.LanguageExtComponents.csproj
-      run: dotnet build Pixata.Blazor.LanguageExtComponents/Pixata.Blazor.LanguageExtComponents.csproj  --configuration Release --configfile ./nuget.config
-      env:
-        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
-        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-
     # Pixata.Blazor.Sample
     - name: Restore - Pixata.Blazor.Sample Dependencies
       run: dotnet restore Pixata.Blazor.Sample/Pixata.Blazor.Sample.csproj --configfile ./nuget.config
@@ -154,19 +142,6 @@ jobs:
     
     - name: Build - Pixata.Email.csproj
       run: dotnet build Pixata.Email/Pixata.Email.csproj  --configuration Release --configfile ./nuget.config
-      env:
-        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
-        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-
-    # Pixata.Functional
-    - name: Restore - Pixata.Functional Dependencies
-      run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config
-      env:
-        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
-        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-
-    - name: Build - Pixata.Functional.csproj
-      run: dotnet build Pixata.Functional/Pixata.Functional.csproj --configuration Release --configfile ./nuget.config
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
@@ -213,11 +188,19 @@ jobs:
 # ***************** TESTS **************** #
 
 # IMPORTANT - ALL PROJECTS SHOULD BE RESTORED (and built) BEFORE USING dotnet tests
-# The credentials are here too, as this runs against the whole solution. If any project hasn't been
+# The test projects are named rather than running against the whole solution, so the unmaintained
+# Pixata.Functional (still in the .sln) isn't built.
+# The credentials are here too, as this restores the test projects. If any project hasn't been
 # restored above, NuGet asks the Telerik feed about its packages, and an unauthenticated feed answers
 # 401 rather than 404, which is a hard NU1301 failure rather than a skipped source.
-    - name: Run Tests
-      run: dotnet test --verbosity normal
+    - name: Run Tests - Pixata.Extensions.Tests
+      run: dotnet test Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Run Tests - Pixata.Blazor.Tests
+      run: dotnet test Pixata.Blazor.Tests/Pixata.Blazor.Tests.csproj --verbosity normal
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}

@@ -163,19 +163,6 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
-    # Pixata.Functional
-    - name: Restore - Pixata.Functional Dependencies
-      run: dotnet restore Pixata.Functional/Pixata.Functional.csproj --configfile ./nuget.config
-      env:
-        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
-        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-
-    - name: Build - Pixata.Functional.csproj
-      run: dotnet build Pixata.Functional/Pixata.Functional.csproj --configuration Release --configfile ./nuget.config
-      env:
-        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
-        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
-
     # Pixata.SimilarityChooser
     - name: Restore - Pixata.SimilarityChooser Dependencies
       run: dotnet restore Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configfile ./nuget.config
@@ -217,11 +204,19 @@ jobs:
 
 # ***************** TESTS **************** #
 
-# The credentials are here too, as this runs against the whole solution. If any project hasn't been
+# The test projects are named rather than running against the whole solution, so the unmaintained
+# Pixata.Functional (still in the .sln) isn't built.
+# The credentials are here too, as this restores the test projects. If any project hasn't been
 # restored above, NuGet asks the Telerik feed about its packages, and an unauthenticated feed answers
 # 401 rather than 404, which is a hard NU1301 failure rather than a skipped source.
-    - name: Run Tests
-      run: dotnet test --verbosity normal
+    - name: Run Tests - Pixata.Extensions.Tests
+      run: dotnet test Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Run Tests - Pixata.Blazor.Tests
+      run: dotnet test Pixata.Blazor.Tests/Pixata.Blazor.Tests.csproj --verbosity normal
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
@@ -281,12 +276,6 @@ jobs:
       with:   
        PROJECT_FILE_PATH: Pixata.Email/Pixata.Email.csproj  
        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
-
-    - name: Publish Pixata.Functional
-      uses: alirezanet/publish-nuget@v3.0.4  
-      with:   
-        PROJECT_FILE_PATH: Pixata.Functional/Pixata.Functional.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
 
     - name: Publish Pixata.SimilarityChooser
       uses: alirezanet/publish-nuget@v3.0.4  

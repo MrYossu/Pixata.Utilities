@@ -69,7 +69,7 @@ Each package exposes one `AddPixataXxx()` extension. `AddPixataBlazor()` checks 
 4. Commit. Version-bump commits are conventionally named `Pixata.Blazor v4.2.0` (or `Pixata.AspNetCore v1.8.0, Pixata.Blazor v2.32.0, …` for several at once); behaviour commits use a plain imperative sentence.
 5. Pushing to `master` builds and tests. Pushing to `release` publishes every package to nuget.org and FTP-deploys the sample site — only ever push to `release` when asked.
 
-A new package must be added to *both* `.github/workflows/master.yml` and `release.yml` (restore + build steps, and a publish step in `release.yml`); the workflows list projects explicitly, and an unrestored project makes the solution-wide `dotnet test` step fail with `NU1301`.
+A new package must be added to *both* `.github/workflows/master.yml` and `release.yml` (restore + build steps, and a publish step in `release.yml`); the workflows list projects explicitly, and run each test project by name rather than the whole solution. A new test project needs its own `dotnet test` step in both. `Pixata.Functional` and `Pixata.Blazor.LanguageExtComponents` are unmaintained and deliberately left out of both workflows.
 
 ## Code style
 
