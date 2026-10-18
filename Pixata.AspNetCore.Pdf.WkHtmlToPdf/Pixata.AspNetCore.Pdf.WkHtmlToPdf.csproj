@@ -13,7 +13,7 @@
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</RepositoryUrl>
-    <PackageIcon>ConnectionReseau.png</PackageIcon>
+    <PackageIcon>ordinateuroff.png</PackageIcon>
     <PackageTags>C# ASP.NET Core PDF</PackageTags>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="ConnectionReseau.png" Pack="true" PackagePath="\" />
+    <None Include="ordinateuroff.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 
