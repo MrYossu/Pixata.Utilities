@@ -187,6 +187,21 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   public GridFilterOperator? DefaultFilterOperator { get; set; }
 
   /// <summary>
+  /// The operators offered in the column's filter row and filter menu, in place of the defaults for the field's type, such
+  /// as <see cref="PixataGridFilterOperators.StringOperators"/>. The filter starts with
+  /// <see cref="DefaultFilterOperator"/> if set, otherwise the usual default if it's in the list, otherwise the first one
+  /// </summary>
+  [Parameter]
+  public List<PixataGridFilterListOperator>? FilterOperators { get; set; }
+
+  /// <summary>
+  /// Set to false to hide the operator drop-down and the clear button in the column's filter row cell, leaving just the
+  /// editor. Defaults to true
+  /// </summary>
+  [Parameter]
+  public bool ShowFilterCellButtons { get; set; } = true;
+
+  /// <summary>
   /// Your own content for the column's cell in the filter row
   /// </summary>
   [Parameter]

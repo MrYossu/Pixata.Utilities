@@ -106,6 +106,8 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Filterable` | `bool` | Set to `false` to stop the user filtering by this column. Defaults to `true` |
 | `FilterMenuType` | `PixataGridFilterMenuType` | `Menu` (two conditions, the default) or `CheckBoxList` |
 | `DefaultFilterOperator` | `GridFilterOperator?` | The operator the filter starts with. Defaults to Contains for text, and Is equal to for everything else |
+| `FilterOperators` | `List<PixataGridFilterListOperator>` | The operators to offer, in place of the defaults for the field's type. See [typed columns](#typed-columns) |
+| `ShowFilterCellButtons` | `bool` | Set to `false` to hide the operator button and the clear button in the filter row, leaving just the editor. Defaults to `true` |
 | `FilterCellTemplate`, `FilterMenuTemplate` | `RenderFragment<PixataGridFilterTemplateContext>` | Your own filter UI. See [custom filters](#custom-filters) |
 | `Template` | `RenderFragment<object>` | The content of each data cell. See [templates](#templates-and-row-events) |
 | `HeaderTemplate` | `RenderFragment` | The content of the header cell, in place of the title |
@@ -230,6 +232,37 @@ Nullable numbers, dates and enums also get Is null and Is not null. Columns of o
 
 Text comparisons ignore case, and filtering (or searching) goes back to the first page.
 
+### Typed columns
+
+The full lists of operators are more than most users need, so there are four columns that set up the filter for a type of field. They take all the same parameters as `PixataGridColumn`...
+
+| Column | Filter |
+| --- | --- |
+| `PixataGridTextColumn` | contains (the default), starts with, ends with |
+| `PixataGridNumericColumn` | equals (the default), less than, more than |
+| `PixataGridDateColumn` | before, on (the default), on or after |
+| `PixataGridEnumColumn` | Just the drop-down of values, filtering on equality, with no operator or clear button |
+
+```razor
+<PixataGrid Data="_people" FilterMode="PixataGridFilterMode.FilterRow">
+  <GridColumns>
+    <PixataGridTextColumn Field="@nameof(Person.Name)" />
+    <PixataGridNumericColumn Field="@nameof(Person.Age)" />
+    <PixataGridDateColumn Field="@nameof(Person.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
+    <PixataGridEnumColumn Field="@nameof(Person.Department)" />
+  </GridColumns>
+</PixataGrid>
+```
+
+The lists come from `PixataGridFilterOperators.StringOperators`, `NumericOperators` and `DateOperators`. You can replace these at startup to change the operators (or their text) everywhere, or pass your own list to any column's `FilterOperators`...
+
+```razor
+<PixataGridColumn Field="@nameof(Person.Age)"
+                  FilterOperators="@([new() { Operator = GridFilterOperator.IsGreaterThanOrEqualTo, Text = "at least" }])" />
+```
+
+The filter starts with the column's `DefaultFilterOperator` if you set one. Otherwise it starts with the usual default for the type if that's in the list, or the first operator in the list if not.
+
 ### Search box
 
 Put a `PixataGridSearchBox` in the grid's toolbar to let the user search. It shows the rows where any of the text columns contain what they type, ignoring case, and works alongside any column filters...
@@ -252,7 +285,7 @@ Put a `PixataGridSearchBox` in the grid's toolbar to let the user search. It sho
 
 ### Custom filters
 
-A column's `FilterCellTemplate` replaces its cell in the filter row, and `FilterMenuTemplate` replaces the conditions in its filter menu (the Filter and Clear buttons are still there). Both are given a `PixataGridFilterTemplateContext`, whose `Filter` is the column's `GridCompositeFilterDescriptor`. Add or change its descriptors, then call `FilterAsync()` to apply them, or `ClearFilterAsync()` to remove the filter...
+A column's `FilterCellTemplate` replaces its cell in the filter row, and `FilterMenuTemplate` replaces the conditions in its filter menu (the Filter and Clear buttons are still there). Both are given a `PixataGridFilterTemplateContext`, whose `Filter` is the column's `GridCompositeFilterDescriptor`, and whose `Field` is the column's field. Add or change its descriptors, then call `FilterAsync()` to apply them, or `ClearFilterAsync()` to remove the filter...
 
 ```razor
 <PixataGridColumn Field="@nameof(Person.Age)">
@@ -265,6 +298,32 @@ A column's `FilterCellTemplate` replaces its cell in the filter row, and `Filter
   </FilterCellTemplate>
 </PixataGridColumn>
 ```
+
+### Bool filter
+
+`PixataGridBoolFilter` is a filter for a `bool` column in the filter row, as an alternative to the drop-down. It's a three-state checkbox, which starts empty with a dash (all rows), and each click moves it on to ticked (true), unticked (false) and back to all rows. Use its `Filter()` method as the column's `FilterCellTemplate`...
+
+```razor
+<PixataGridColumn Field="@nameof(Person.Manager)" FilterCellTemplate="PixataGridBoolFilter.Filter()" />
+```
+
+Pass `true` to `Filter()` to show a clear button beside the checkbox. To set its other parameters, use it in the template yourself...
+
+```razor
+<PixataGridColumn Field="@nameof(Person.Manager)">
+  <FilterCellTemplate>
+    <PixataGridBoolFilter Context="context" ShowClearButton="true" AriaLabel="Filter managers" />
+  </FilterCellTemplate>
+</PixataGridColumn>
+```
+
+| Parameter | Type | What it does |
+| --- | --- | --- |
+| `Context` | `PixataGridFilterTemplateContext` | The context passed to the `FilterCellTemplate`. Required |
+| `ShowClearButton` | `bool` | Shows a button that clears the filter. Defaults to `false` |
+| `Class` | `string` | A CSS class for the container, which centres the checkbox in the cell |
+| `AriaLabel` | `string` | The checkbox's accessible name. Defaults to "Filter" |
+| `ClearText` | `string` | The clear button's tooltip and accessible name. Defaults to "Clear" |
 
 ## Updating the data
 

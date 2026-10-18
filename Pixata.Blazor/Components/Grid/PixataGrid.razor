@@ -793,23 +793,25 @@
         <div class="pixata-blazor-grid-filtercell-wrapper">
           @Editor(column, state.Value1, (v, debounce) => OnFilterRowValueChanged(column, v, debounce), true)
           <div class="pixata-blazor-grid-filtercell-operator">
-            @if (column.FilterKind != FilterKind.Boolean) {
+            @if (column.FilterKind != FilterKind.Boolean && column.ShowFilterCellButtons) {
               <PixataGridDropDownList TValue="GridFilterOperator"
                                       Icon="FilterIcon"
-                                      Items="OperatorsFor(column.FilterKind, column.IsNullable)"
+                                      Items="OperatorsFor(column)"
                                       Value="state.Operator1"
                                       ValueChanged="op => OnFilterRowOperatorChanged(column, op)"
                                       AriaLabel="@column.HeaderText"
                                       Class="pixata-blazor-grid-filter-operator" />
             }
-            <button type="button"
-                    class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-icon pixata-blazor-grid-filter-clear"
-                    title="@Text.Clear"
-                    aria-label="@Text.Clear"
-                    disabled="@(!HasFilter(column))"
-                    @onclick="() => ClearFilterRow(column)">
-              @FilterClearIcon
-            </button>
+            @if (column.ShowFilterCellButtons) {
+              <button type="button"
+                      class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-icon pixata-blazor-grid-filter-clear"
+                      title="@Text.Clear"
+                      aria-label="@Text.Clear"
+                      disabled="@(!HasFilter(column))"
+                      @onclick="() => ClearFilterRow(column)">
+                @FilterClearIcon
+              </button>
+            }
           </div>
         </div>
       </div>;
@@ -983,7 +985,7 @@
             } else if (column.FilterKind == FilterKind.Boolean) {
               @Editor(column, _menuState.Value1, (v, _) => SetMenuValue(1, v), false)
             } else {
-              List<(GridFilterOperator, string)> operators = OperatorsFor(column.FilterKind, column.IsNullable);
+              List<(GridFilterOperator, string)> operators = OperatorsFor(column);
               <PixataGridDropDownList TValue="GridFilterOperator" Items="operators" Value="_menuState.Operator1" ValueChanged="op => _menuState.Operator1 = op" AriaLabel="@Text.FilterOperators" Class="pixata-blazor-grid-filter-editor" />
               @Editor(column, _menuState.Value1, (v, _) => SetMenuValue(1, v), false)
               <div class="pixata-blazor-grid-button-group" role="group">

@@ -1,0 +1,92 @@
+@using Pixata.Extensions.Grid
+
+@* A three-state checkbox for a bool column's FilterCellTemplate. Each click moves on from all rows, to true, to false, and
+   back to all rows *@
+<div class="@Css.Join("pixata-blazor-grid-bool-filter", Class)">
+  <button type="button"
+          role="checkbox"
+          class="@Css.Join("pixata-blazor-checkbox", _value switch { true => "pixata-blazor-checkbox-checked", null => "pixata-blazor-checkbox-indeterminate", _ => null })"
+          aria-checked="@(_value switch { true => "true", false => "false", null => "mixed" })"
+          aria-label="@AriaLabel"
+          @onclick="Toggle"></button>
+  @if (ShowClearButton) {
+    <button type="button"
+            class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-icon pixata-blazor-grid-filter-clear"
+            title="@ClearText"
+            aria-label="@ClearText"
+            disabled="@(_value is null)"
+            @onclick="ClearFilter">
+      @PixataGridIcons.For(PixataGridIcon.FilterClear)
+    </button>
+  }
+</div>
+
+@code {
+
+  /// <summary>
+  /// The context the grid passes to the column's <c>FilterCellTemplate</c>
+  /// </summary>
+  [Parameter, EditorRequired]
+  public PixataGridFilterTemplateContext Context { get; set; } = null!;
+
+  /// <summary>
+  /// A CSS class to add to the filter's container
+  /// </summary>
+  [Parameter]
+  public string? Class { get; set; }
+
+  /// <summary>
+  /// Shows a button to clear the filter, as well as the checkbox. Defaults to false
+  /// </summary>
+  [Parameter]
+  public bool ShowClearButton { get; set; }
+
+  /// <summary>
+  /// The accessible name of the checkbox
+  /// </summary>
+  [Parameter]
+  public string AriaLabel { get; set; } = "Filter";
+
+  /// <summary>
+  /// The tooltip and accessible name of the clear button
+  /// </summary>
+  [Parameter]
+  public string ClearText { get; set; } = "Clear";
+
+  private bool? _value;
+
+  // The checkbox shows the column's current filter, so it's right after the grid's state is loaded or reset
+  protected override void OnParametersSet() =>
+    _value = Context.Filter.Filters
+      .FirstOrDefault(f => f.Member == Context.Field && f.Operator == GridFilterOperator.IsEqualTo)?.Value as bool?;
+
+  private async Task Toggle() {
+    _value = _value switch {
+      null => true,
+      true => false,
+      false => null
+    };
+    if (_value is null) {
+      await Context.ClearFilterAsync();
+    } else {
+      Context.Filter.Filters.Clear();
+      Context.Filter.Filters.Add(new(Context.Field, GridFilterOperator.IsEqualTo, _value.Value));
+      await Context.FilterAsync();
+    }
+  }
+
+  private async Task ClearFilter() {
+    _value = null;
+    await Context.ClearFilterAsync();
+  }
+
+  /// <summary>
+  /// A <c>FilterCellTemplate</c> that shows this filter, so a column can use it with
+  /// <c>FilterCellTemplate="PixataGridBoolFilter.Filter()"</c>
+  /// </summary>
+  public static RenderFragment<PixataGridFilterTemplateContext> Filter(bool showClearButton = false) =>
+    context => __builder => {
+      <PixataGridBoolFilter Context="context" ShowClearButton="showClearButton" />
+    };
+
+}

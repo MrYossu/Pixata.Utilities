@@ -1540,7 +1540,8 @@
   box-shadow: 0 0 0 2px var(--pixata-grid-border-color);
 }
 
-.pixata-blazor-checkbox:checked {
+.pixata-blazor-checkbox:checked,
+.pixata-blazor-checkbox.pixata-blazor-checkbox-checked {
   border-color: var(--pixata-grid-primary);
   background-color: var(--pixata-grid-primary);
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M3,8 l3,3 l7-7'/%3e%3c/svg%3e");
@@ -1645,6 +1646,18 @@
   border-color: var(--pixata-grid-border-color);
   background-color: var(--pixata-grid-input-bg);
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff6358' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M4,8 h8'/%3e%3c/svg%3e");
+}
+
+/* PixataGridBoolFilter, whose box is a button so it can show three states */
+.pixata-blazor-grid-bool-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.pixata-blazor-grid-bool-filter button.pixata-blazor-checkbox {
+  padding: 0;
 }
 
 .pixata-blazor-grid-error .pixata-blazor-grid-td {

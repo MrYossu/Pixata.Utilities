@@ -46,7 +46,8 @@ public enum PixataGridFilterMenuType {
 /// What a column's custom filter template is given. Change <see cref="Filter"/> and call <see cref="FilterAsync"/> to apply it
 /// </summary>
 public class PixataGridFilterTemplateContext {
-  internal PixataGridFilterTemplateContext(GridCompositeFilterDescriptor filter, Func<Task> apply, Func<Task> clear) {
+  internal PixataGridFilterTemplateContext(string field, GridCompositeFilterDescriptor filter, Func<Task> apply, Func<Task> clear) {
+    Field = field;
     Filter = filter;
     _apply = apply;
     _clear = clear;
@@ -54,6 +55,11 @@ public class PixataGridFilterTemplateContext {
 
   private readonly Func<Task> _apply;
   private readonly Func<Task> _clear;
+
+  /// <summary>
+  /// The column's field, for the descriptors you add to <see cref="Filter"/>
+  /// </summary>
+  public string Field { get; }
 
   /// <summary>
   /// The column's filter. Add, change or remove its descriptors, then call <see cref="FilterAsync"/>
@@ -148,6 +154,11 @@ public partial class PixataGrid<TItem> {
 
   // The operators offered for each kind of field, in the reference grid's order, named from the messages. Nullable fields also
   // get "Is null" and "Is not null"
+  internal List<(GridFilterOperator, string)> OperatorsFor(PixataGridColumn<TItem> column) =>
+    column.FilterOperators is { Count: > 0 } custom
+      ? [.. custom.Select(o => (o.Operator, o.Text))]
+      : OperatorsFor(column.FilterKind, column.IsNullable);
+
   internal List<(GridFilterOperator, string)> OperatorsFor(FilterKind kind, bool nullable) {
     List<GridFilterOperator> operators = kind switch {
       FilterKind.Text => [
@@ -172,8 +183,15 @@ public partial class PixataGrid<TItem> {
     return [.. operators.Select(op => (op, Text.Operator(op, kind == FilterKind.Date)))];
   }
 
-  private static GridFilterOperator DefaultOperator(PixataGridColumn<TItem> column) =>
-    column.DefaultFilterOperator ?? (column.FilterKind == FilterKind.Text ? GridFilterOperator.Contains : GridFilterOperator.IsEqualTo);
+  // The column's DefaultFilterOperator, otherwise Contains for text and Is equal to for everything else, unless the column has
+  // its own FilterOperators that don't include that, in which case the first of them
+  private static GridFilterOperator DefaultOperator(PixataGridColumn<TItem> column) {
+    if (column.DefaultFilterOperator is GridFilterOperator op) {
+      return op;
+    }
+    GridFilterOperator typeDefault = column.FilterKind == FilterKind.Text ? GridFilterOperator.Contains : GridFilterOperator.IsEqualTo;
+    return column.FilterOperators is { Count: > 0 } custom && custom.All(o => o.Operator != typeDefault) ? custom[0].Operator : typeDefault;
+  }
 
   private ColumnFilterState RowState(PixataGridColumn<TItem> column) {
     if (!_filterRowState.TryGetValue(column.Field!, out ColumnFilterState? state)) {
@@ -377,7 +395,7 @@ public partial class PixataGrid<TItem> {
     GridCompositeFilterDescriptor filter = _filters.TryGetValue(column.Field!, out GridCompositeFilterDescriptor? current)
       ? current with { Filters = [.. current.Filters] }
       : new(GridFilterLogic.And, []);
-    return new(filter, async () => {
+    return new(column.Field!, filter, async () => {
       await CloseFilterMenu();
       SetFilter(column, filter);
     }, async () => {

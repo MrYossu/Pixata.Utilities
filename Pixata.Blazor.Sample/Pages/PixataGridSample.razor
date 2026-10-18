@@ -133,6 +133,21 @@
   </GridColumns>
 </PixataGrid>
 
+<h4>Typed columns and the bool filter</h4>
+
+<p>The text, numeric and date columns offer short lists of filter operators (open the filter button beside each editor), and the date column starts on "on". The pet column is an enum column, so it has just the drop-down, with no operator or clear button. The surname column is an ordinary column given its own <code>FilterOperators</code>. The manager column uses <code>PixataGridBoolFilter</code> (with its clear button), which moves from all rows, to managers, to non-managers and back with each click.</p>
+
+<PixataGrid Data="Data" Size="_size" FilterMode="PixataGridFilterMode.FilterRow" Pageable="true" PageSize="5" Sortable="true">
+  <GridColumns>
+    <PixataGridTextColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" FilterOperators="_surnameOperators" />
+    <PixataGridDateColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
+    <PixataGridNumericColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
+    <PixataGridEnumColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" Title="Manager" FilterCellTemplate="PixataGridBoolFilter.Filter(true)" />
+  </GridColumns>
+</PixataGrid>
+
 <h4>Supplying the data with OnRead</h4>
 
 <p>This grid gets its data from the sample app's database through <code>OnRead</code>, so only the page being shown is loaded. Each read is slowed down to 1.5 seconds, so you can see the loading indicator when you page, sort or filter (it isn't shown for the first read). It uses <code>ToGridResultAsync()</code> from Pixata.AspNetCore, which runs the paging, sorting and filtering in the database.</p>
@@ -752,6 +767,11 @@
 
   private PixataGridFilterMenuType PixataFilterMenuType =>
     _filterMode == "checkbox" ? PixataGridFilterMenuType.CheckBoxList : PixataGridFilterMenuType.Menu;
+
+  private readonly List<PixataGridFilterListOperator> _surnameOperators = [
+    new() { Operator = GridFilterOperator.StartsWith, Text = "starts with" },
+    new() { Operator = GridFilterOperator.IsEqualTo, Text = "is exactly" }
+  ];
 
   private int _pageSize = 3;
   private int _page = 1;
