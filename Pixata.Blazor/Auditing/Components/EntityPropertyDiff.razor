@@ -1,16 +1,16 @@
 @namespace Pixata.Blazor.Auditing.Components
 
-<div class="property-row @(IsChanged ? "property-changed" : "")">
-  <span class="property-name">@PropertyName</span>
+<div class="pixata-blazor-audit-property-row @(IsChanged ? "pixata-blazor-audit-property-changed" : "")">
+  <span class="pixata-blazor-audit-property-name">@PropertyName</span>
   @if (IsChanged) {
-    <span class="property-badge">🟡</span>
-    <div class="property-values">
-      <span class="old-value">@OldValue</span>
-      <span class="arrow">→</span>
-      <span class="new-value">@NewValue</span>
+    <span class="pixata-blazor-audit-property-badge">🟡</span>
+    <div class="pixata-blazor-audit-property-values">
+      <span class="pixata-blazor-audit-old-value">@OldValue</span>
+      <span class="pixata-blazor-audit-arrow">→</span>
+      <span class="pixata-blazor-audit-new-value">@NewValue</span>
     </div>
   } else {
-    <span class="property-value">@Value</span>
+    <span class="pixata-blazor-audit-property-value">@Value</span>
   }
 </div>
 

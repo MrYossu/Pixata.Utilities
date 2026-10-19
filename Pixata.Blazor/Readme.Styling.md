@@ -29,6 +29,8 @@ The stylesheet is written in terms of CSS custom properties, so you can restyle 
 
 The full list (including `--pixata-label-font-size`, `--pixata-label-font-weight` and `--pixata-label-color` for the form labels) is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter. The `--pixata-grid-*` properties are for `PixataGrid`, and have their own defaults rather than Bootstrap's. See [Grid](Readme.Grid.md#styling).
 
+The [audit viewer](Readme.AuditViewer.md#styling), [`Confirm` and `Inform`](Readme.Containers.md#styling-confirm-and-inform) and the [notifications](Readme.Notifications.md#icons-and-colours) use these variables too, along with a few of their own, which are listed on their pages. Prior to v6.0.0, their colours were hard-coded.
+
 The classes used by those components all start with `pixata-blazor-`, followed by the component name where they're specific to one component (such as `pixata-blazor-grid-pager`), so you can target them in your own CSS without clashing with anything else.
 
 ## The newer components

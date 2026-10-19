@@ -17,6 +17,10 @@
 <button @onclick="@Time">Show the time</button>
 <div>@_msg</div>
 
+<p class="mt-2">A notification can show formatted text, such as a list, by sending a render fragment (or a <code>MarkupString</code>) rather than a string...</p>
+
+<button @onclick="@Problems">Show some problems</button>
+
 <p class="mt-2">As mentioned above, this page is pointlessly simple. If you only want to show a notification in the current component, you wouldn't need this helper. The main use comes if you add the <code>NotificationArea</code> component elsewhere (say in your main layout component), then any component that injects a <code>NotificationHelper</code> can send a message, and it will be shown.</p>
 
 <NotificationArea NotificationHelper="@NotificationHelper" />
@@ -30,6 +34,16 @@
     NotificationHelper.Send(NotificationType.Error, "Oops! Something went wrong.", DateTime.Now);
 
   private string _msg = "";
+
+  private void Problems() =>
+    NotificationHelper.Send(NotificationType.Warning, @<div>
+      <p>The order wasn't saved, because...</p>
+      <ul>
+        @foreach (string problem in new[] { "There's no delivery address", "The quantity must be at least 1" }) {
+          <li>@problem</li>
+        }
+      </ul>
+    </div>, DateTime.Now);
 
   private void Time() =>
     NotificationHelper.Send(NotificationType.Info, "Click me to see the time", DateTime.Now, () => {

@@ -127,4 +127,22 @@ For example, to show UK times...
              TimeZoneLabel="UK time" />
 ```
 
+The entity IDs are listed in numerical order (1, 2, 10 rather than 1, 10, 2) when they're all whole numbers, which needs Pixata.AspNetCore v2.2.0 or later. Other IDs, such as GUIDs, are in text order.
+
 `TimeZone`, `DateFormat` and `TimeZoneLabel` were added in v4.5.0. Properties that were left out of the audit trail with `[NoAudit]` (see the [auditing documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Auditing.md)) are shown as "(hidden)".
+
+## Styling
+
+The viewer's styles are in pixata.css (see [Styling](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Styling.md)), and its colours come from the same variables as the rest of the components, so it picks up your theme. For example, the buttons use `--pixata-primary`, the borders `--pixata-border-color` and `--pixata-card-border-color`, the panels and table headers `--pixata-light`, and the corners `--pixata-border-radius`. Three variables are specific to the viewer...
+
+| Variable | Default | What it colours |
+| --- | --- | --- |
+| `--pixata-audit-changed-bg` | `#fff8e1` | The background of a property that changed |
+| `--pixata-audit-old-value-color` | `#c62828` | A changed property's old value |
+| `--pixata-audit-new-value-color` | `#2e7d32` | A changed property's new value |
+
+The drop-downs' shadow is `--pixata-popup-shadow`.
+
+Every class the viewer uses starts with `pixata-blazor-audit-`, so you can restyle any part of it without `!important`, and without the risk of its styles clashing with yours.
+
+>**Changed in v6.0.0.** The styles used to be in a `<style>` block inside the component, with hard-coded colours and global class names such as `view-btn` and `filters`. If you overrode any of those, add `pixata-blazor-audit-` to the front of the class name, dropping any `audit-` it started with, eg `view-btn` is now `pixata-blazor-audit-view-btn`, and `audit-timeline` is now `pixata-blazor-audit-timeline`.

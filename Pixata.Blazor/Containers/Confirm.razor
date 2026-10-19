@@ -1,7 +1,7 @@
 ﻿<div style="position: relative">
-  <div id="confirmOverlay" style="display: @_displayStyle; position: @_position; z-index: @ZIndex">
-    <div id="confirmOverlayContent">
-      <div style="margin-bottom: 1rem"><HtmlRaw Html="@Caption" /></div>
+  <div class="pixata-blazor-confirm-overlay" style="display: @_displayStyle; position: @_position; z-index: @ZIndex">
+    <div class="pixata-blazor-confirm-content">
+      <div class="pixata-blazor-confirm-caption"><HtmlRaw Html="@Caption" /></div>
       <button type="button" class="pixata-btn pixata-btn-secondary" @onclick="@(() => ButtonClicked(false))" disabled=@_disabled>@NoText</button> <button type="button" class="pixata-btn pixata-btn-primary" @onclick="@(() => ButtonClicked(true))" disabled=@_disabled><i class="@_busyIcon"></i>@YesText</button>
     </div>
   </div>
@@ -57,7 +57,7 @@
       _displayStyle = "none";
     } else {
       _disabled = true;
-      _busyIcon = SpinnerClass + " mr-1";
+      _busyIcon = SpinnerClass + " pixata-me-1";
     }
     OnClicked.InvokeAsync(yes);
   }
