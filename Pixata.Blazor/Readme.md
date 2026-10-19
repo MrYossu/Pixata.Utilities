@@ -6,6 +6,8 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.4.0** lets you theme the audit viewer, `Confirm`, `Inform` and the notifications through the CSS variables in pixata.css, lets notifications show formatted messages (such as a list), and changes the notifications' default icons to ones in Font Awesome's free set. Some class names and ids have changed, so if you styled any of these yourself, see [styling changes in v5.4.0](#styling-changes-in-v540) below.
+
 >**Version 5.3.0** makes some changes that help when moving from Telerik's components...
 >- `PixataDropDownList` has an icon-only mode, set with the new `Icon` (or `IconTemplate`) parameter. See the [drop-downs documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md#icon-only)
 >- The content of a `PixataGridCommandColumn` is now given the row's item, so its buttons can depend on the row. If a template inside the column also uses `context`, add `Context="row"` to the column. See the [grid documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#using-the-row-in-a-command-column)
@@ -17,6 +19,14 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available fo
 >**Version 5.1.0** adds typed grid columns (`PixataTextGridColumn`, `PixataNumericGridColumn`, `PixataDateGridColumn` and `PixataEnumGridColumn`) with short lists of filter operators, the `FilterOperators` and `ShowFilterCellButtons` column parameters, and `PixataGridBoolFilter`, a three-state checkbox filter for `bool` columns. See the [grid documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns) for details.
 
 >**Version 5.0.0** adds a large set of new components: `PixataGrid` (with Excel export in the separate [Pixata.Blazor.Grid.Excel](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Grid.Excel/Readme.md) package), the date picker, drop-downs, tab strip, editor, file select and upload, dialogs, window, wizard and stepper, radio group, switch, charts, drop-down and split buttons, scheduler, and the `FormRowDate` form row. See the documentation pages below for details.
+
+## Styling changes in v5.4.0
+
+These only affect you if you wrote CSS of your own for these components, or relied on their default look.
+
+- **Audit viewer classes.** The viewer's styles have moved from a `<style>` block inside the component into pixata.css, and every class now starts with `pixata-blazor-audit-`, followed by the old name without any `audit-` it started with. So `view-btn` is now `pixata-blazor-audit-view-btn`, and `audit-timeline` is now `pixata-blazor-audit-timeline`. The old names were global, so they could clash with your own CSS, and the block's rules (for `.filters`, `.spinner`, `.user` and so on) applied to the rest of your page while the viewer was on it. The colours now come from the `--pixata-*` variables, so the viewer follows your theme, and it uses your page's font rather than the system font. See [styling the audit viewer](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.AuditViewer.md#styling).
+- **`Confirm` and `Inform` ids.** The `confirmOverlay`, `confirmOverlayContent`, `informOverlay` and `informOverlayContent` ids are now the classes `pixata-blazor-confirm-overlay`, `pixata-blazor-confirm-content`, `pixata-blazor-inform-overlay` and `pixata-blazor-inform-content`, so you can have more than one on a page. The pop-up has a softer shadow and smaller corners, and both can be changed with variables. See [Containers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Containers.md#styling-confirm-and-inform).
+- **Notification icons.** The default icons are now Font Awesome's solid (`fas`) ones, which are in the free set, rather than the regular (`far`) ones, most of which are Pro only. The icon colours now come from CSS variables, so `NotificationHelper.GetIcon()` is obsolete. See [Notifications](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md#icons-and-colours).
 
 I sometimes waffle on about these components [in my blog](https://www.pixata.co.uk/tag/blazor/). No-one reads it, but it satisfies my deeply buried desire to be a writer. If you read the blog, you'll realize why the desire is still deeply buried!
 

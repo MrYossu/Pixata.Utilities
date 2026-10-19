@@ -42,7 +42,10 @@ public partial class NotificationArea : IDisposable {
       await InvokeAsync(() => {
         _timers[notification.Id] = cts;
         Notifications.Insert(0, notification);
-        duplicates.AddRange(Notifications.Where(n => n != notification && n.Message == notification.Message && n.Show));
+        // Notifications sent as a render fragment have no message to compare
+        if (notification.Message != "") {
+          duplicates.AddRange(Notifications.Where(n => n != notification && n.Message == notification.Message && n.Show));
+        }
         StateHasChanged();
       });
 

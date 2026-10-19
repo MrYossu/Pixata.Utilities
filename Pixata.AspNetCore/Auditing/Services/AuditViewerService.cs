@@ -11,9 +11,14 @@ using Pixata.Extensions.Auditing.Services;
 
 namespace Pixata.AspNetCore.Auditing.Services;
 
-public class AuditViewerService(AuditServiceInterface auditService, DbContext context) : AuditViewerServiceInterface {
+/// <param name="auditService">Reads the audit trail</param>
+/// <param name="contextType">The type of the app's <see cref="DbContext"/>, whose <c>DbSet</c> properties give the entity types to offer</param>
+public class AuditViewerService(AuditServiceInterface auditService, Type contextType) : AuditViewerServiceInterface {
+  public AuditViewerService(AuditServiceInterface auditService, DbContext context) : this(auditService, context.GetType()) {
+  }
+
   public async Task<List<EntityTypeMetadata>> GetEntityTypes() {
-    List<EntityTypeMetadata> contextTypes = GetEntityTypesFromContext(context.GetType());
+    List<EntityTypeMetadata> contextTypes = GetEntityTypesFromContext(contextType);
     List<string> auditedEntityTypes = await auditService.GetAllAuditedEntityTypes();
 
     HashSet<string> existingNames = contextTypes.Select(et => et.FullName).ToHashSet();

@@ -87,7 +87,7 @@ You can find more detail on the [project page](https://github.com/MrYossu/Pixata
 ## Pixata.SimilarityChooser 
 A utility that checks for similar items. Useful for when your users don't bother checking to see if the data they want already exists, and add a duplicate. The Similarity Chooser looks through your existing items and lets you know which may match.
 
-A [Nuget package](https://www.nuget.org/packages/Pixata.SimilarityChooser /) is available for this project.
+A [Nuget package](https://www.nuget.org/packages/Pixata.SimilarityChooser/) is available for this project.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser).
 

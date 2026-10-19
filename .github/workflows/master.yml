@@ -218,6 +218,12 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    - name: Run Tests - Pixata.SimilarityChooser.Tests
+      run: dotnet test Pixata.SimilarityChooser.Tests/Pixata.SimilarityChooser.Tests.csproj --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
 # ***************** PUBLISHING **************** #
 
 # nuget pushes moved to release.yml workflow

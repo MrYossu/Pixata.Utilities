@@ -2,11 +2,15 @@
   @foreach (Notification notif in Notifications) {
     <div class="notification @(notif.Show ? "new" : "remove") pixata-m-3 pixata-p-3 round-it pixata-bg-white pixata-position-relative" @onclick="@(() => OpenFromNotification(notif))" @key="notif">
       <div class="pixata-d-flex pixata-gap-3">
-        <div class="icon d-grid-center" style="background-color: #@NotificationHelper.GetIcon(notif.Type).Item2;">
-          <i class="@NotificationHelper.GetIcon(notif.Type).Item1"></i>
+        <div class="icon d-grid-center @NotificationHelper.GetColourClass(notif.Type)">
+          <i class="@NotificationHelper.GetIconClass(notif.Type)"></i>
         </div>
         <div class="message">
-          <div>@notif.Message</div>
+          @if (notif.Content is not null) {
+            <div>@notif.Content</div>
+          } else {
+            <div>@notif.Message</div>
+          }
         </div>
         <div class="dismiss" @onclick="@(() => Dismiss(notif))" @onclick:stopPropagation="true"><button class="pixata-btn pixata-btn-close" /></div>
       </div>

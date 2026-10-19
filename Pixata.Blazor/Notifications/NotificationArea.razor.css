@@ -40,7 +40,6 @@
       }
 
       .notifications-area .notification .icon {
-        color: #fff;
         min-width: 40px;
         height: 40px;
         -moz-border-radius: 50%;
@@ -49,18 +48,21 @@
       }
 
       .notifications-area .notification .message {
+        flex: 1 1 auto;
+        min-width: 0;
         max-width: 225px;
-        margin-right: 17px;
       }
 
         .notifications-area .notification .message > div {
           overflow-wrap: anywhere;
         }
 
+      /* In the flow rather than positioned, so a long message can't run under it, whatever size the button is. The negative margins put
+         it near the corner, where it was when it was positioned */
       .notifications-area .notification .dismiss {
-        position: absolute;
-        right: 14px;
-        top: 10px;
+        flex-shrink: 0;
+        align-self: flex-start;
+        margin: -.375rem -.125rem 0 auto;
       }
 
         .notifications-area .notification .dismiss button {

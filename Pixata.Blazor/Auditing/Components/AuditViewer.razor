@@ -7,26 +7,26 @@
 @using Pixata.Blazor.Auditing.Services
 @implements IDisposable
 
-<div class="audit-viewer">
+<div class="pixata-blazor-audit-viewer">
   @if (_selectedEntityId is not null && _selectedEntityType is not null) {
-    <div class="audit-history-view">
-      <button class="back-btn" @onclick="BackToEntityList">← Back to entity list</button>
+    <div class="pixata-blazor-audit-history-view">
+      <button class="pixata-blazor-audit-back-btn" @onclick="BackToEntityList">← Back to entity list</button>
       <h3>Audit history for @_selectedEntityType.ShortName #@_selectedEntityId</h3>
 
-      <div class="filters">
-        <div class="filter-group">
+      <div class="pixata-blazor-audit-filters">
+        <div class="pixata-blazor-audit-filter-group">
           <label>From:</label>
           <input type="date" @bind="_filterFromDate" />
         </div>
-        <div class="filter-group">
+        <div class="pixata-blazor-audit-filter-group">
           <label>To:</label>
           <input type="date" @bind="_filterToDate" />
         </div>
-        <div class="filter-group">
+        <div class="pixata-blazor-audit-filter-group">
           <label>User:</label>
           <input type="text" @bind="_filterUser" placeholder="Filter by user..." />
         </div>
-        <div class="filter-group">
+        <div class="pixata-blazor-audit-filter-group">
           <label>Operation:</label>
           <select @bind="_filterOperation">
             <option value="">All</option>
@@ -35,12 +35,12 @@
             <option value="@AuditOperation.Deleted">Deleted</option>
           </select>
         </div>
-        <button class="filter-btn" @onclick="ApplyFilters">Apply filters</button>
+        <button class="pixata-blazor-audit-filter-btn" @onclick="ApplyFilters">Apply filters</button>
       </div>
 
       @if (_isLoadingHistory) {
-        <div class="loading-state">
-          <div class="spinner"></div>
+        <div class="pixata-blazor-audit-loading-state">
+          <div class="pixata-blazor-audit-spinner"></div>
           <span>Loading audit history…</span>
         </div>
       } else {
@@ -58,25 +58,25 @@
       }
     </div>
   } else {
-    <div class="entity-list-view">
-      <div class="entity-type-selector">
+    <div class="pixata-blazor-audit-entity-list-view">
+      <div class="pixata-blazor-audit-entity-type-selector">
         <label>Entity type:</label>
-        <div class="entity-type-dropdown">
-          <button class="entity-type-dropdown-btn" @onclick="ToggleEntityTypeDropdown">
+        <div class="pixata-blazor-audit-entity-type-dropdown">
+          <button class="pixata-blazor-audit-entity-type-dropdown-btn" @onclick="ToggleEntityTypeDropdown">
             @GetEntityTypeSelectorLabel() ▾
           </button>
           @if (_entityTypeDropdownOpen) {
-            <div class="entity-type-dropdown-backdrop" @onclick="CloseEntityTypeDropdown"></div>
-            <div class="entity-type-dropdown-menu">
-              <div class="entity-type-dropdown-actions">
+            <div class="pixata-blazor-audit-entity-type-dropdown-backdrop" @onclick="CloseEntityTypeDropdown"></div>
+            <div class="pixata-blazor-audit-entity-type-dropdown-menu">
+              <div class="pixata-blazor-audit-entity-type-dropdown-actions">
                 <button @onclick="CheckAllEntityTypes">Check all</button>
                 <button @onclick="UncheckAllEntityTypes">Uncheck all</button>
               </div>
-              <div class="entity-type-dropdown-item entity-type-all-item @(_showAllView ? "selected" : "")" @onclick="SelectAllView">
+              <div class="pixata-blazor-audit-entity-type-dropdown-item pixata-blazor-audit-entity-type-all-item @(_showAllView ? "pixata-blazor-audit-selected" : "")" @onclick="SelectAllView">
                 All
               </div>
               @foreach (EntityTypeMetadata entityType in _entityTypes) {
-                <label class="entity-type-dropdown-item @(!_showAllView && _selectedEntityTypeName == entityType.FullName ? "selected" : "")">
+                <label class="pixata-blazor-audit-entity-type-dropdown-item @(!_showAllView && _selectedEntityTypeName == entityType.FullName ? "pixata-blazor-audit-selected" : "")">
                   <input type="checkbox"
                          checked="@_checkedEntityTypes.Contains(entityType.FullName)"
                          @onchange="e => ToggleEntityTypeCheck(entityType.FullName, e)"
@@ -90,40 +90,40 @@
       </div>
 
       @if (_isLoadingEntityTypes) {
-        <div class="loading-state">
-          <div class="spinner"></div>
+        <div class="pixata-blazor-audit-loading-state">
+          <div class="pixata-blazor-audit-spinner"></div>
           <span>Loading entity types…</span>
         </div>
       } else if (_showAllView) {
-        <div class="all-audit-view">
-          <div class="filters">
-            <div class="filter-group">
+        <div class="pixata-blazor-audit-all-audit-view">
+          <div class="pixata-blazor-audit-filters">
+            <div class="pixata-blazor-audit-filter-group">
               <label>From:</label>
               <input type="date" @bind="_allViewFilterFrom" />
             </div>
-            <div class="filter-group">
+            <div class="pixata-blazor-audit-filter-group">
               <label>To:</label>
               <input type="date" @bind="_allViewFilterTo" />
             </div>
-            <div class="filter-group">
+            <div class="pixata-blazor-audit-filter-group">
               <label>User:</label>
               <input type="text" @bind="_allViewFilterUser" placeholder="Filter by user..." />
             </div>
-            <button class="filter-btn" @onclick="ApplyAllViewFilters">Apply filters</button>
+            <button class="pixata-blazor-audit-filter-btn" @onclick="ApplyAllViewFilters">Apply filters</button>
           </div>
 
           @if (_isLoadingAllEntries) {
-            <div class="loading-state">
-              <div class="spinner"></div>
+            <div class="pixata-blazor-audit-loading-state">
+              <div class="pixata-blazor-audit-spinner"></div>
               <span>Loading audit entries…</span>
             </div>
           } else if (_filteredAllViewEntries.Count == 0) {
-            <div class="empty-state">
+            <div class="pixata-blazor-audit-empty-state">
               <span>📋</span>
               <p>No audit entries found.</p>
             </div>
           } else {
-            <table class="entity-table all-audit-table">
+            <table class="pixata-blazor-audit-entity-table pixata-blazor-audit-all-audit-table">
               <thead>
                 <tr>
                   <th>Entity Type</th>
@@ -140,47 +140,47 @@
                   <tr>
                     <td>@GetEntityShortName(entry.EntityType)</td>
                     <td>@entry.EntityId</td>
-                    <td><span class="operation-icon">@GetOperationIcon(entry.Operation)</span> @entry.Operation</td>
+                    <td><span class="pixata-blazor-audit-operation-icon">@GetOperationIcon(entry.Operation)</span> @entry.Operation</td>
                     <td>@FormatChangedAt(entry.ChangedAt)</td>
                     <td>@entry.ChangedBy</td>
                     <td>
                       @if (_expandedAllViewEntries.Contains(entry.Id)) {
-                        <button class="toggle-btn" @onclick="() => ToggleAllViewEntry(entry.Id)">▼ Hide properties</button>
+                        <button class="pixata-blazor-audit-toggle-btn" @onclick="() => ToggleAllViewEntry(entry.Id)">▼ Hide properties</button>
                       } else {
-                        <button class="toggle-btn" @onclick="() => ToggleAllViewEntry(entry.Id)">▶ Show properties (@GetAllViewPropertyCount(entry))</button>
+                        <button class="pixata-blazor-audit-toggle-btn" @onclick="() => ToggleAllViewEntry(entry.Id)">▶ Show properties (@GetAllViewPropertyCount(entry))</button>
                       }
                     </td>
                     <td>
-                      <a class="view-btn" href="@GetAllViewEntityHistoryUrl(entry)">View history</a>
+                      <a class="pixata-blazor-audit-view-btn" href="@GetAllViewEntityHistoryUrl(entry)">View history</a>
                     </td>
                   </tr>
                   @if (_expandedAllViewEntries.Contains(entry.Id)) {
-                    <tr class="all-audit-expanded-row">
+                    <tr class="pixata-blazor-audit-all-audit-expanded-row">
                       <td colspan="7">
-                        <div class="properties-list">
+                        <div class="pixata-blazor-audit-properties-list">
                           @if (entry.Operation == AuditOperation.Created) {
                             @foreach (KeyValuePair<string, object?> prop in entry.Properties) {
-                              <div class="property-row">
-                                <span class="property-name">@prop.Key</span>
-                                <span class="property-value">@prop.Value</span>
+                              <div class="pixata-blazor-audit-property-row">
+                                <span class="pixata-blazor-audit-property-name">@prop.Key</span>
+                                <span class="pixata-blazor-audit-property-value">@prop.Value</span>
                               </div>
                             }
                           } else if (entry.ChangedProperties.Count > 0) {
                             @foreach (PropertyChange change in entry.ChangedProperties) {
-                              <div class="property-row property-changed">
-                                <span class="property-name">@change.PropertyName</span>
-                                <div class="property-values">
-                                  <span class="old-value">@change.OldValue</span>
-                                  <span class="arrow">→</span>
-                                  <span class="new-value">@change.NewValue</span>
+                              <div class="pixata-blazor-audit-property-row pixata-blazor-audit-property-changed">
+                                <span class="pixata-blazor-audit-property-name">@change.PropertyName</span>
+                                <div class="pixata-blazor-audit-property-values">
+                                  <span class="pixata-blazor-audit-old-value">@change.OldValue</span>
+                                  <span class="pixata-blazor-audit-arrow">→</span>
+                                  <span class="pixata-blazor-audit-new-value">@change.NewValue</span>
                                 </div>
                               </div>
                             }
                           } else {
                             @foreach (KeyValuePair<string, object?> prop in entry.Properties) {
-                              <div class="property-row">
-                                <span class="property-name">@prop.Key</span>
-                                <span class="property-value">@prop.Value</span>
+                              <div class="pixata-blazor-audit-property-row">
+                                <span class="pixata-blazor-audit-property-name">@prop.Key</span>
+                                <span class="pixata-blazor-audit-property-value">@prop.Value</span>
                               </div>
                             }
                           }
@@ -192,7 +192,7 @@
               </tbody>
             </table>
             @if (_allViewTotalPages > 1) {
-              <div class="audit-pagination">
+              <div class="pixata-blazor-audit-pagination">
                 <button disabled="@(_allViewCurrentPage <= 1)" @onclick="AllViewPreviousPage">← Previous</button>
                 <span>Page @_allViewCurrentPage of @_allViewTotalPages</span>
                 <button disabled="@(_allViewCurrentPage >= _allViewTotalPages)" @onclick="AllViewNextPage">Next →</button>
@@ -201,22 +201,22 @@
           }
         </div>
       } else if (!string.IsNullOrWhiteSpace(_selectedEntityTypeName)) {
-        <div class="entity-search">
+        <div class="pixata-blazor-audit-entity-search">
           <input type="text" @bind="_searchTerm" @bind:after="LoadAuditedEntities" placeholder="Search by entity ID..." />
         </div>
 
         @if (_isLoadingEntities) {
-          <div class="loading-state">
-            <div class="spinner"></div>
+          <div class="pixata-blazor-audit-loading-state">
+            <div class="pixata-blazor-audit-spinner"></div>
             <span>Loading entities…</span>
           </div>
         } else if (_auditedEntityIds.Count == 0) {
-          <div class="empty-state">
+          <div class="pixata-blazor-audit-empty-state">
             <span>📋</span>
             <p>No audited entities found for this type.</p>
           </div>
         } else {
-          <table class="entity-table">
+          <table class="pixata-blazor-audit-entity-table">
             <thead>
               <tr>
                 <th>Entity ID</th>
@@ -228,14 +228,14 @@
                 <tr>
                   <td>@entityId</td>
                   <td>
-                    <a class="view-btn" href="@GetEntityHistoryUrl(entityId)">View history</a>
+                    <a class="pixata-blazor-audit-view-btn" href="@GetEntityHistoryUrl(entityId)">View history</a>
                   </td>
                 </tr>
               }
             </tbody>
           </table>
           @if (_totalPages > 1) {
-            <div class="audit-pagination">
+            <div class="pixata-blazor-audit-pagination">
               <button disabled="@(_currentPage <= 1)" @onclick="PreviousPage">← Previous</button>
               <span>Page @_currentPage of @_totalPages</span>
               <button disabled="@(_currentPage >= _totalPages)" @onclick="NextPage">Next →</button>
@@ -246,456 +246,6 @@
     </div>
   }
 </div>
-
-<style>
-  .audit-viewer {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    margin: 0 auto;
-    max-width: 100%;
-  }
-  .audit-viewer h2 {
-    margin-bottom: 1rem;
-  }
-  .entity-type-selector {
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .entity-type-selector label {
-    font-weight: 600;
-  }
-  .entity-type-dropdown {
-    position: relative;
-  }
-  .entity-type-dropdown-btn {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    min-width: 200px;
-    background: white;
-    cursor: pointer;
-    text-align: left;
-    font-size: 0.9rem;
-  }
-  .entity-type-dropdown-btn:hover {
-    background: #f0f0f0;
-  }
-  .entity-type-dropdown-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 11;
-  }
-  .entity-type-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 12;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 220px;
-    margin-top: 0.25rem;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-  .entity-type-dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.75rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  .entity-type-dropdown-item:hover {
-    background: #f5f5f5;
-  }
-  .entity-type-dropdown-item.selected {
-    background: #e8f0fe;
-    font-weight: 600;
-  }
-  .entity-type-all-item {
-    font-weight: 600;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  .entity-type-dropdown-actions {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  .entity-type-dropdown-actions button {
-    padding: 0.2rem 0.5rem;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-  }
-  .entity-type-dropdown-actions button:hover {
-    background: #f0f0f0;
-  }
-  .entity-search {
-    margin-bottom: 1rem;
-  }
-  .entity-search input {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 300px;
-  }
-  .entity-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-  }
-  .entity-table th, .entity-table td {
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  .entity-table th {
-    background: #f5f5f5;
-    font-weight: 600;
-  }
-  .entity-table tr:hover {
-    background: #f9f9f9;
-  }
-  .all-audit-table td {
-    vertical-align: top;
-  }
-  .all-audit-expanded-row td {
-    background: #fafafa;
-    padding: 0.5rem 0.75rem;
-  }
-  .view-btn, .back-btn, .filter-btn {
-    padding: 0.3rem 0.7rem;
-    border: 1px solid #0078d4;
-    background: #0078d4;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .view-btn:hover, .back-btn:hover, .filter-btn:hover {
-    background: #006abc;
-  }
-  .back-btn {
-    margin-bottom: 1rem;
-  }
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    background: #f5f5f5;
-    border-radius: 6px;
-  }
-  .filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-  .filter-group label {
-    font-weight: 600;
-    font-size: 0.85rem;
-  }
-  .filter-group input, .filter-group select {
-    padding: 0.3rem 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  .audit-pagination {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-  .audit-pagination button {
-    padding: 0.3rem 0.6rem;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .audit-pagination button:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-  .loading-state {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    color: #666;
-  }
-  .spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #ccc;
-    border-top-color: #0078d4;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @@keyframes spin { to { transform: rotate(360deg); } }
-  .empty-state {
-    text-align: center;
-    padding: 2rem;
-    color: #888;
-  }
-  .empty-state span {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-  .audit-timeline {
-    margin-top: 1rem;
-  }
-  .timeline-entry {
-    border-left: 3px solid #0078d4;
-    margin-bottom: 1rem;
-    padding-left: 1rem;
-  }
-  .timeline-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.95rem;
-    margin-bottom: 0.3rem;
-  }
-  .operation-icon {
-    font-size: 1.1rem;
-  }
-  .operation-label {
-    font-weight: 600;
-  }
-  .timestamp {
-    color: #666;
-    font-size: 0.85rem;
-  }
-  .user {
-    color: #888;
-    font-size: 0.85rem;
-  }
-  .toggle-btn {
-    background: none;
-    border: none;
-    color: #0078d4;
-    cursor: pointer;
-    padding: 0.2rem 0;
-    font-size: 0.85rem;
-  }
-  .toggle-btn:hover {
-    text-decoration: underline;
-  }
-  .changed-summary {
-    font-size: 0.85rem;
-    color: #666;
-    margin-top: 0.3rem;
-  }
-  .properties-list {
-    margin-top: 0.5rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    padding: 0.5rem;
-  }
-  .property-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.85rem;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .property-row:last-child {
-    border-bottom: none;
-  }
-  .property-changed {
-    background: #fff8e1;
-  }
-  .property-name {
-    font-weight: 600;
-    min-width: 150px;
-  }
-  .property-badge {
-    font-size: 0.75rem;
-  }
-  .property-value {
-    color: #333;
-  }
-  .property-values {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-  .old-value {
-    color: #c62828;
-    text-decoration: line-through;
-  }
-  .arrow {
-    color: #888;
-  }
-  .new-value {
-    color: #2e7d32;
-    font-weight: 600;
-  }
-  .audit-timeline-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding: 0.5rem 0.75rem;
-    background: #f5f5f5;
-    border-radius: 6px;
-  }
-  .audit-toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-  }
-  .audit-view-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    margin-left: auto;
-  }
-  .audit-view-toggle-label {
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin-right: 0.2rem;
-  }
-  .audit-view-toggle-btn {
-    padding: 0.25rem 0.6rem;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
-  .audit-view-toggle-btn.active {
-    background: #0078d4;
-    color: white;
-    border-color: #0078d4;
-  }
-  .audit-view-toggle-btn:hover:not(.active) {
-    background: #f0f0f0;
-  }
-  .audit-horizontal-scroll {
-    overflow-x: auto;
-    width: 0;
-    min-width: 100%;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-  }
-  .audit-horizontal-table {
-    border-collapse: collapse;
-    white-space: nowrap;
-  }
-  .audit-horizontal-table th,
-  .audit-horizontal-table td {
-    padding: 0.4rem 0.75rem;
-    border: 1px solid #e0e0e0;
-    text-align: left;
-    font-size: 0.85rem;
-    vertical-align: top;
-    max-width: 350px;
-    text-wrap: auto;
-  }
-  .audit-horizontal-table thead th {
-    background: #f5f5f5;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-  .audit-horizontal-property-col {
-    position: sticky;
-    left: 0;
-    background: #f5f5f5;
-    z-index: 2;
-    min-width: 150px;
-  }
-  .audit-horizontal-table thead th.audit-horizontal-property-col {
-    z-index: 3;
-  }
-  .audit-property-filter {
-    position: relative;
-  }
-  .audit-property-filter-btn {
-    padding: 0.25rem 0.6rem;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
-  .audit-property-filter-btn:hover {
-    background: #f0f0f0;
-  }
-  .audit-property-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 12;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 220px;
-    margin-top: 0.25rem;
-  }
-  .audit-property-dropdown-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 11;
-  }
-  .audit-property-dropdown-actions {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  .audit-property-dropdown-actions button {
-    padding: 0.2rem 0.5rem;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-  }
-  .audit-property-dropdown-actions button:hover {
-    background: #f0f0f0;
-  }
-  .audit-property-dropdown-list {
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 0.25rem 0;
-  }
-  .audit-property-dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.3rem 0.75rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
-  .audit-property-dropdown-item:hover {
-    background: #f5f5f5;
-  }
-</style>
 
 @code {
 

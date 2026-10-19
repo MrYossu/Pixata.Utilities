@@ -1,6 +1,6 @@
 ﻿<div style="position: relative">
-  <div id="informOverlay" style="display: @_displayStyle; position: @_position; z-index: @ZIndex">
-    <div id="informOverlayContent">
+  <div class="pixata-blazor-inform-overlay" style="display: @_displayStyle; position: @_position; z-index: @ZIndex">
+    <div class="pixata-blazor-inform-content">
       <div><HtmlRaw Html="@Caption" /></div>
       <button type="button" class="pixata-btn pixata-btn-primary" @onclick="@(ButtonClicked)">@OkText</button>
     </div>
