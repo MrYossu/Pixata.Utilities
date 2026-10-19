@@ -1,6 +1,6 @@
 # Pixata.AspNetCore.Pdf.Telerik [![Pixata.AspNetCore.Pdf.Telerik Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore.Pdf.Telerik)](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/)
 
-![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore.Pdf.Telerik/ConnectionReseau.png "Pixata")
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore.Pdf.Telerik/ordinateuroff.png "Pixata")
 
 A PDF converter for the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore), using [Telerik Document Processing](https://www.telerik.com/document-processing-libraries). It turns the HTML rendered from your Blazor template into a PDF, without a browser or a native PDF engine.
 

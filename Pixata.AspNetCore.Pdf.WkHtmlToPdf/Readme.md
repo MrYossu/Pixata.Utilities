@@ -1,6 +1,6 @@
 # Pixata.AspNetCore.Pdf.WkHtmlToPdf [![Pixata.AspNetCore.Pdf.WkHtmlToPdf Nuget package](https://img.shields.io/nuget/v/Pixata.AspNetCore.Pdf.WkHtmlToPdf)](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.WkHtmlToPdf/)
 
-![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf/ConnectionReseau.png "Pixata")
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf/ordinateuroff.png "Pixata")
 
 ## Obsolete
 
