@@ -14,7 +14,7 @@ Namespace `Pixata.Extensions.Auditing.Models`...
 
 | Type | What it is |
 | --- | --- |
-| `Audit` | The audit record itself, and the entity you add to your `DbContext` as `DbSet<Audit>`. Holds the entity type, the JSON-serialised key, the operation, who changed it and when, a full JSON snapshot, and the changed properties |
+| `Audit` | The audit record itself, and the entity you add to your `DbContext` as `DbSet<Audit>`, and configure with `modelBuilder.ConfigureAuditing()` from Pixata.AspNetCore, so the JSON columns aren't given a maximum length. Holds the entity type, the JSON-serialised key, the operation, who changed it and when, a full JSON snapshot, and the changed properties |
 | `AuditOperation` | An `enum` of `Created`, `Updated` and `Deleted` |
 | `AuditEntryViewModel` | An audit record with its JSON unpacked into a property dictionary and a list of `PropertyChange`s, which is what the viewer binds to |
 | `PropertyChange` | The name of a property, its old value and its new value |

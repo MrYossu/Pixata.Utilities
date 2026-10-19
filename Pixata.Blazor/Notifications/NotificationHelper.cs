@@ -77,7 +77,7 @@ public class NotificationHelper {
       _ => "pixata-blazor-notification-general"
     };
 
-  [Obsolete("The icons are now coloured by the --pixata-notification-* variables in pixata.css, so the colours returned here are only the defaults. Use GetIconClass() for the icon, and GetColourClass() for the colour")]
+  [Obsolete("The icons are now coloured by the --pixata-notification-* variables in pixata.css, so the colours returned here are only the defaults. Use GetDisplayIcon() for the icon, and GetColourClass() for the colour")]
   public static (string, string) GetIcon(NotificationType type) =>
     type switch {
       NotificationType.General => (GeneralIcon, "00b7d6"),

@@ -35,6 +35,7 @@ Pixata.Extensions          — no project deps; the shared kernel
   ├── Pixata.Blazor        — Razor components (client-safe)
   ├── Pixata.AspNetCore    — server-side (EF Core, FluentValidation); no PDF engine since v2.0.0
   │     ├── Pixata.AspNetCore.Pdf.Telerik     — PdfConverterInterface via Telerik Document Processing
+  │     ├── Pixata.AspNetCore.Pdf.Playwright  — PdfConverterInterface via Playwright and Chromium
   │     └── Pixata.AspNetCore.Pdf.WkHtmlToPdf — obsolete wkhtmltopdf converter, kept for one release
   ├── Pixata.Email         — MailKit wrapper
   └── Pixata.SimilarityChooser

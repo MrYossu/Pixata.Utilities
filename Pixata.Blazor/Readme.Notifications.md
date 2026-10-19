@@ -16,7 +16,7 @@ Put a `NotificationArea` somewhere that is always on screen, typically in your l
 <NotificationArea NotificationHelper="NotificationHelper" />
 ```
 
-The icons use Font Awesome classes, so you'll need Font Awesome loaded for them to show. See [icons and colours](#icons-and-colours) below.
+The icons are built in, so you don't need an icon font, and the notifications follow your theme's colours. See [icons and colours](#icons-and-colours) below.
 
 ## Sending a notification
 
