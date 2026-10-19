@@ -1,19 +1,19 @@
-<div class="notifications-area">
+@using Pixata.Blazor.Components
+
+<div class="pixata-blazor-notification-area">
   @foreach (Notification notif in Notifications) {
-    <div class="notification @(notif.Show ? "new" : "remove") pixata-m-3 pixata-p-3 round-it pixata-bg-white pixata-position-relative" @onclick="@(() => OpenFromNotification(notif))" @key="notif">
-      <div class="pixata-d-flex pixata-gap-3">
-        <div class="icon d-grid-center @NotificationHelper.GetColourClass(notif.Type)">
-          <i class="@NotificationHelper.GetIconClass(notif.Type)"></i>
-        </div>
-        <div class="message">
-          @if (notif.Content is not null) {
-            <div>@notif.Content</div>
-          } else {
-            <div>@notif.Message</div>
-          }
-        </div>
-        <div class="dismiss" @onclick="@(() => Dismiss(notif))" @onclick:stopPropagation="true"><button class="pixata-btn pixata-btn-close" /></div>
+    <div class="pixata-blazor-notification @(notif.Show ? "pixata-blazor-notification-new" : "pixata-blazor-notification-remove")" @onclick="@(() => OpenFromNotification(notif))" @key="notif">
+      <div class="pixata-blazor-notification-icon @NotificationHelper.GetColourClass(notif.Type)">
+        <PixataIcon Icon="@NotificationHelper.GetDisplayIcon(notif.Type)" />
       </div>
+      <div class="pixata-blazor-notification-message">
+        @if (notif.Content is not null) {
+          <div>@notif.Content</div>
+        } else {
+          <div>@notif.Message</div>
+        }
+      </div>
+      <div class="pixata-blazor-notification-dismiss" @onclick="@(() => Dismiss(notif))" @onclick:stopPropagation="true"><button class="pixata-btn pixata-btn-close" aria-label="Dismiss" /></div>
     </div>
   }
 </div>
