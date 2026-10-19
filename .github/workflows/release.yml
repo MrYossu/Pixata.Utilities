@@ -15,6 +15,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    # The publish steps below skip a package whose version is already on nuget.org, so a package whose code changed without a version
+    # bump would silently not be released (see issue #91). This fails the release before anything is built or published
+    - name: Check that changed packages have new versions
+      run: python .github/scripts/check-package-versions.py
+
     - name: Setup .NET Core 2.1
       uses: actions/setup-dotnet@v4
       with:  

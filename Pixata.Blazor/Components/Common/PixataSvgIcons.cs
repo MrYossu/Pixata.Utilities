@@ -33,5 +33,7 @@ public static partial class PixataSvgIcons {
   public static readonly PixataSvgIcon Clock = new("clock", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 3\"/>");
   public static readonly PixataSvgIcon Info = new("info", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v6M12 7.5v.5\"/>");
   public static readonly PixataSvgIcon Warning = new("warning", "<path d=\"M12 3l10 18H2z\"/><path d=\"M12 10v5M12 18v.5\"/>");
+  public static readonly PixataSvgIcon Exclamation = new("exclamation", "<path d=\"M12 4v10M12 19.5v.5\"/>");
+  public static readonly PixataSvgIcon Bell = new("bell", "<path d=\"M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z\"/><path d=\"M10 20.5a2 2 0 0 0 4 0M12 3v2\"/>");
   public static readonly PixataSvgIcon Cancel = new("cancel", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M5.6 5.6l12.8 12.8\"/>");
 }

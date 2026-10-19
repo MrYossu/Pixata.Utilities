@@ -1,7 +1,9 @@
+@using Pixata.Blazor.Components
+
 <div class="dd-item pixata-position-relative">
   <div class="pixata-d-flex pixata-gap-3" @onclick="OpenFromNotification">
     <div class="notif-icon d-grid-center @NotificationHelper.GetColourClass(Type)">
-      <i class="@NotificationHelper.GetIconClass(Type) @(Type == NotificationType.General ? "tilt" : "")"></i>
+      <PixataIcon Icon="@NotificationHelper.GetDisplayIcon(Type)" Class="@(Type == NotificationType.General ? "tilt" : null)" />
     </div>
     <div class="message">
       @if (Content is not null) {
@@ -12,7 +14,7 @@
       <small class="time">@Time.ToPrettyString(true)</small>
     </div>
   </div>
-  <div class="dismiss" @onclick="@DismissIt"><button class="pixata-btn pixata-btn-close" /></div>
+  <div class="dismiss" @onclick="@DismissIt"><button class="pixata-btn pixata-btn-close" aria-label="Dismiss" /></div>
 </div>
 
 @code {

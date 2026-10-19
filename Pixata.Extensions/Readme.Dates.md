@@ -17,3 +17,19 @@ Extension methods for working with dates, found in `DateExtensionMethods`.
 `IsWithin()` - True if the date is within the range supplied.
 
 `DateRangeToString()` - Formats a date/time range in a human-friendly way, omitting redundant information. Overloads accept nullable and non-nullable from/to dates and an optional `showTime` boolean to include times. The formatting omits repeated parts when possible (same day, same month, same year) and produces concise strings.
+
+```csharp
+(new DateTime(2026, 11, 2), new DateTime(2026, 11, 30)).DateRangeToString();       // 2nd-30th Nov 26
+(new DateTime(2026, 11, 2), new DateTime(2027, 1, 10)).DateRangeToString();        // 2nd Nov 26 - 10th Jan 27
+```
+
+As of v2.22.0, it also works on a tuple of `DateOnly` values (nullable or not), and there's a long format, with full month names and "to" between the dates, which suits text that will be read as a sentence, such as an email...
+
+```csharp
+(new DateOnly(2026, 11, 2), new DateOnly(2026, 11, 30)).DateRangeToString();                        // 2nd-30th Nov 26
+(new DateOnly(2026, 11, 2), new DateOnly(2026, 11, 30)).DateRangeToString(DateRangeFormat.Long);    // 2 to 30 November 2026
+(new DateOnly(2026, 11, 2), new DateOnly(2027, 1, 10)).DateRangeToString(DateRangeFormat.Long);     // 2 November 2026 to 10 January 2027
+(start, (DateOnly?)null).DateRangeToString(DateRangeFormat.Long);                                   // From 2 November 2026
+```
+
+The `DateTime` overloads take the format too, before `showTime`, eg `(from, to).DateRangeToString(DateRangeFormat.Long, true)` gives "2 November 2026 09:30 to 16:00" for two times on the same day. A `DateOnly` has no time, so its overloads don't have `showTime`. The month names come from the current culture.
