@@ -13,6 +13,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    # Warns (without failing the build) about any package whose code has changed since its current version was published, so the
+    # version can be bumped before the release workflow refuses to publish
+    - name: Check that changed packages have new versions
+      run: python .github/scripts/check-package-versions.py --warn-only
+
     - name: Setup .NET Core 2.1
       uses: actions/setup-dotnet@v4 
       with:  
