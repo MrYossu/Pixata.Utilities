@@ -2,6 +2,8 @@
 
 Excel export for `PixataGrid`, the data grid in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md). It's a separate package because it uses [ClosedXML](https://github.com/ClosedXML/ClosedXML), which would otherwise add weight to every app that uses Pixata.Blazor, including WASM apps that don't need it.
 
+>**Version 1.0.1** has no changes of its own. It depends on Pixata.Blazor 5.5.0, so adding this package on its own brings in a Pixata.Blazor (and Pixata.Extensions) whose grid works. Version 1.0.0 depended on Pixata.Blazor 5.0.0, which depended on a Pixata.Extensions without the grid types, so the grid threw a `TypeLoadException`.
+
 ## Using it
 
 Add the package, add `@using Pixata.Blazor.Grid.Excel` (in the page or `_Imports.razor`), and put a `PixataGridExcelExport` in the grid's `GridExport`. An `ExcelExport` command button then saves the grid as an Excel file...
