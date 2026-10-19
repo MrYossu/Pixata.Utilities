@@ -119,6 +119,50 @@ public class DropDowns_Tests {
   }
 
   [TestMethod]
+  public void DropDownList_Icon_ShowsJustTheIconWithTheSelectedItemAsItsName() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataDropDownList<string, string>> cut = RenderFruit(context, p => p
+      .Add(c => c.Value, "Banana")
+      .Add(c => c.DefaultText, "Pick one")
+      .Add(c => c.ShowClearButton, true)
+      .Add(c => c.Icon, PixataSvgIcons.MoreVertical)
+      .Add(c => c.AriaLabel, "Fruit"));
+    IElement box = cut.Find(".pixata-blazor-dropdownlist");
+    Assert.IsTrue(box.ClassList.Contains("pixata-blazor-dropdownlist-icon-only"));
+    Assert.AreEqual(1, box.QuerySelectorAll(".pixata-blazor-dropdownlist-icon .pixata-blazor-svg-icon").Length);
+    Assert.AreEqual(0, box.QuerySelectorAll(".pixata-blazor-input-value-text, .pixata-blazor-dropdownlist-button, .pixata-blazor-clear-value").Length);
+    Assert.AreEqual("Banana", box.GetAttribute("title"));
+    Assert.AreEqual("Fruit: Banana", box.GetAttribute("aria-label"));
+  }
+
+  [TestMethod]
+  public async Task DropDownList_IconFontClass_OpensTheListAndSelectingUpdatesTheName() {
+    using BunitContext context = PixataTestContext.Create();
+    string? value = null;
+    IRenderedComponent<PixataDropDownList<string, string>> cut = RenderFruit(context, p => p
+      .Add(c => c.Icon, "fas fa-filter")
+      .Add(c => c.ValueChanged, (string v) => value = v));
+    Assert.AreEqual(1, cut.FindAll(".pixata-blazor-dropdownlist-icon .pixata-blazor-font-icon.fa-filter").Count);
+    // Nothing is selected, so there's nothing to say
+    Assert.IsNull(cut.Find(".pixata-blazor-dropdownlist").GetAttribute("title"));
+    await cut.Find(".pixata-blazor-dropdownlist").ClickAsync(new());
+    CollectionAssert.AreEqual(new[] { "Apple", "Apricot", "Banana", "Cherry", "Damson" }, DropDownTestData.Options(cut).ToList());
+    await cut.FindAll("[role=option]")[3].ClickAsync(new());
+    Assert.AreEqual("Cherry", value);
+    Assert.AreEqual("Cherry", cut.Find(".pixata-blazor-dropdownlist").GetAttribute("title"));
+    Assert.AreEqual("Cherry", cut.Find(".pixata-blazor-dropdownlist").GetAttribute("aria-label"));
+  }
+
+  [TestMethod]
+  public void DropDownList_IconTemplate_IsRenderedInPlaceOfTheIcon() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataDropDownList<string, string>> cut = RenderFruit(context, p => p
+      .Add(c => c.IconTemplate, "<b class=\"mine\">&lt;</b>"));
+    Assert.IsTrue(cut.Find(".pixata-blazor-dropdownlist").ClassList.Contains("pixata-blazor-dropdownlist-icon-only"));
+    Assert.AreEqual(1, cut.FindAll(".pixata-blazor-dropdownlist-icon b.mine").Count);
+  }
+
+  [TestMethod]
   public async Task DropDownList_SelectedItem_IsMarkedSelectedAndFocusedWhenOpened() {
     using BunitContext context = PixataTestContext.Create();
     IRenderedComponent<PixataDropDownList<DropDownTestData.Country, int>> cut = RenderCountries(context, p => p.Add(c => c.Value, 3));

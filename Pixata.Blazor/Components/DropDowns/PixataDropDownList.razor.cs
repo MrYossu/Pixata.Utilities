@@ -25,7 +25,23 @@ public partial class PixataDropDownList<TItem, TValue> {
   public RenderFragment<TItem>? ValueTemplate { get; set; }
 
   /// <summary>
-  /// Whether to show a button that clears the value
+  /// Shows the drop-down list as just this icon, in a square box as high as a normal drop-down list, rather than a box with the
+  /// selected item's text in it. Use it where there isn't room for the text, and the selected value doesn't need to be seen all
+  /// the time. It takes a <see cref="PixataSvgIcon"/> (see <see cref="PixataSvgIcons"/>), or the CSS class(es) of an icon
+  /// font. The list opens as normal, and the selected item's text is the box's tooltip and accessible name. The box has no
+  /// text, <see cref="DefaultText"/>, clear button or arrow
+  /// </summary>
+  [Parameter]
+  public object? Icon { get; set; }
+
+  /// <summary>
+  /// Your own content for an icon-only drop-down list, in place of <see cref="Icon"/>
+  /// </summary>
+  [Parameter]
+  public RenderFragment? IconTemplate { get; set; }
+
+  /// <summary>
+  /// Whether to show a button that clears the value. Not shown when <see cref="Icon"/> is set
   /// </summary>
   [Parameter]
   public bool ShowClearButton { get; set; }
@@ -69,6 +85,19 @@ public partial class PixataDropDownList<TItem, TValue> {
 
   private string DisplayText =>
     HasSelectedItem ? TextOf(SelectedItem!) : DefaultText ?? "";
+
+  private bool IsIconOnly =>
+    Icon is not null || IconTemplate is not null;
+
+  // What an icon-only list says instead of showing the selected item
+  private string? IconOnlyText =>
+    string.IsNullOrEmpty(DisplayText) ? null : DisplayText;
+
+  // An icon-only list's accessible name includes the selected item, as it can't be seen
+  private string? EffectiveAriaLabel =>
+    !IsIconOnly || IconOnlyText is null ? AriaLabel
+    : string.IsNullOrWhiteSpace(AriaLabel) ? IconOnlyText
+    : $"{AriaLabel}: {IconOnlyText}";
 
   private protected override async Task ChooseItem(TItem item) {
     await SelectItem(item);
