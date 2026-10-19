@@ -317,6 +317,8 @@ export function openPopup(anchor, popup, dotNet) {
     return;
   }
   positionGridPopup(anchor, popup);
+  // Marks the popup as placed. The date pickers' popups are hidden until then, so they don't flash up in the wrong place
+  popup.dataset.pixataPositioned = "";
   const reposition = () => positionGridPopup(anchor, popup);
   // A press outside both the anchor and the popup closes it, as in Telerik's components
   const outside = e => {

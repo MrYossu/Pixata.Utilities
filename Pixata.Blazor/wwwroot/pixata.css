@@ -1073,6 +1073,11 @@
   box-shadow: var(--pixata-datepicker-popup-shadow);
 }
 
+/* Hidden until the JavaScript has positioned it, so it doesn't flash up in its unpositioned place first */
+.pixata-blazor-datepicker-popup:not([data-pixata-positioned]) {
+  visibility: hidden;
+}
+
 .pixata-blazor-calendar {
   display: inline-flex;
   flex-direction: column;
