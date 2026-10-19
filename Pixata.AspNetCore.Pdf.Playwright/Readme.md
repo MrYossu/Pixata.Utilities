@@ -21,12 +21,36 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwrigh
 
 ## Setup
 
-In `Program.cs`...
+This package is a converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, so you register both. In `Program.cs`...
 
 ```csharp
-builder.Services.AddPixataAspNetCore<ContactModel>(o => o.DocumentBaseUrl = "https://www.example.com");
+builder.Services.AddPixataAspNetCore<Program>();
 builder.Services.AddPixataPlaywrightPdf();
 ```
+
+The first line registers `DocumentTemplateHelper` (along with the `HtmlRenderer` and `IHttpContextAccessor` it needs), which renders a Blazor component to HTML, and then hands the HTML to the converter registered by the second line to turn it into a PDF.
+
+The type parameter can be any type in your app. It's only used to find your FluentValidation validators for Pixata.AspNetCore's validation endpoint filter, which is registered at the same time. `Program` is always there, so it's the easiest choice. If you don't use the validation filter, the non-generic `builder.Services.AddPixataAspNetCore()` registers everything else. See [registering services](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.md#registering-services) for how to opt out of the parts you don't want.
+
+### The base URL
+
+Templates are given a `BaseUrl` parameter for linking to images and style sheets on your site, and the converter only loads them from that site (see [images and style sheets](#images-and-style-sheets)). You don't need to set it, as the helper takes it from the scheme and host of the current request, so it is right in development, test and live without any changes. This works when you create PDFs from an endpoint, a controller, a Razor page, or a statically rendered or prerendering Blazor component.
+
+There is no current request inside an interactive Blazor Server component (after the first render), or in a hosted or background service. If you create PDFs from either of those, pick up the base URL from the first request the app gets, by adding this to `Program.cs` after `UseHttpsRedirection()` (and after `UseForwardedHeaders()`, if the app is behind a reverse proxy)...
+
+```csharp
+PixataAspNetCoreOptions pixataOptions = app.Services.GetRequiredService<PixataAspNetCoreOptions>();
+app.Use(async (HttpContext context, Func<Task> next) => {
+  if (pixataOptions.DocumentBaseUrl == "") {
+    pixataOptions.DocumentBaseUrl = $"{context.Request.Scheme}://{context.Request.Host}";
+  }
+  await next();
+});
+```
+
+An interactive Blazor Server component always follows a request (the one that loaded its page), so this always works there. A background service that creates a PDF before the site has had any requests gets an `InvalidOperationException` saying that the base URL can't be worked out.
+
+As this trusts the `Host` header of the first request, set `AllowedHosts` in the live site's `appsettings.json` (eg `"AllowedHosts": "www.example.com"`), so that a request with a made-up host is rejected rather than becoming the base URL. Your host may already filter requests by host name for you.
 
 Then use `DocumentTemplateHelper.CreatePdfFromTemplate` as described in [generating documents and PDFs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md). If you're switching from another converter, this registration is the only code change you need, although templates written for a different engine may print differently.
 

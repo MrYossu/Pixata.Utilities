@@ -23,13 +23,18 @@ public partial class PixataTabStrip {
 
   /// <summary>
   /// The <see cref="PixataTab.Id"/> of the selected tab. Use <c>@bind-ActiveTabId</c> for two-way binding. If it is null, or
-  /// doesn't match a visible tab, the first visible tab that isn't disabled is selected
+  /// doesn't match a visible tab, the first visible tab that isn't disabled is selected. If you set it one way and handle
+  /// <see cref="ActiveTabIdChanged"/> yourself, the tab only changes when you set it, so you can (eg) load a tab's data before
+  /// it is shown
   /// </summary>
   [Parameter]
   public string? ActiveTabId { get; set; }
 
   /// <summary>
-  /// Raised when the user selects a different tab, or the selected tab is closed, hidden or removed
+  /// Raised when the user selects a different tab, or the selected tab is closed, hidden or removed. When this is handled, a
+  /// tab the user selects isn't shown until <see cref="ActiveTabId"/> is set to its id, and isn't shown at all if it never
+  /// is. Without a handler, the tab strip changes tabs itself. When the selected tab is closed, hidden or removed, the tab
+  /// strip moves to a neighbour straight away, as there is nothing left to show, and this tells you which
   /// </summary>
   [Parameter]
   public EventCallback<string> ActiveTabIdChanged { get; set; }
@@ -150,6 +155,8 @@ public partial class PixataTabStrip {
   private bool _hasRendered;
   private bool _orderMayBeWrong;
   private bool _focusActiveTab;
+  // When the page owns the active tab, the tab the keyboard moved to, which gets the focus when the page selects it
+  private string? _pendingFocusTabId;
   private bool _scrollActiveTabIntoView;
   private bool _notifyActiveTabChanged;
   private bool _disposed;
@@ -198,6 +205,10 @@ public partial class PixataTabStrip {
       if (_activeTabId != ActiveTabId) {
         _activeTabId = ActiveTabId;
         _scrollActiveTabIntoView = true;
+        if (_pendingFocusTabId is not null) {
+          _focusActiveTab = _pendingFocusTabId == ActiveTabId;
+          _pendingFocusTabId = null;
+        }
         RedrawTabs();
       }
     }
@@ -271,11 +282,30 @@ public partial class PixataTabStrip {
     }
   }
 
-  private async Task Activate(PixataTab tab) {
+  /// <summary>
+  /// Selects a tab the user chose. If the page handles <see cref="ActiveTabIdChanged"/>, it owns the active tab, so this only
+  /// tells it, and the tab changes when it sets <see cref="ActiveTabId"/>, as in Telerik's tab strip. Otherwise the tab strip
+  /// changes tabs itself
+  /// </summary>
+  private async Task Activate(PixataTab tab, bool fromKeyboard = false) {
     PixataTab? previous = ActiveTab;
     if (_activeTabId == tab.EffectiveId && previous == tab) {
       return;
     }
+    if (ActiveTabIdChanged.HasDelegate) {
+      _pendingFocusTabId = fromKeyboard ? tab.EffectiveId : null;
+      await ActiveTabIdChanged.InvokeAsync(tab.EffectiveId);
+      return;
+    }
+    await Show(tab, previous);
+    _focusActiveTab = fromKeyboard;
+  }
+
+  /// <summary>
+  /// Shows a tab straight away and tells the page. Used when the tab strip owns the active tab, and when the active tab is
+  /// closed, as there is then nothing left to show
+  /// </summary>
+  private async Task Show(PixataTab tab, PixataTab? previous) {
     _activeTabId = tab.EffectiveId;
     _scrollActiveTabIntoView = true;
     previous?.Redraw();
@@ -299,7 +329,7 @@ public partial class PixataTabStrip {
     }
     if (wasActive) {
       if (neighbour is not null && !neighbour.IsDisposed) {
-        await Activate(neighbour);
+        await Show(neighbour, ActiveTab);
       } else {
         _activeTabId = null;
         await ActiveTabIdChanged.InvokeAsync(ActiveTab?.EffectiveId);
@@ -334,8 +364,7 @@ public partial class PixataTabStrip {
       _ => null
     };
     if (target is not null) {
-      await Activate(target);
-      _focusActiveTab = true;
+      await Activate(target, true);
       return;
     }
     if (e.Key == "Delete" && active is { Closeable: true }) {

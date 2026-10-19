@@ -61,18 +61,33 @@
     if (!firstRender) {
       return;
     }
-    _module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/Components/VirtualiseWithState.razor.js");
-    _dotNetReference = DotNetObjectReference.Create(this);
-    await _module.InvokeVoidAsync("initialise", _scrollContainer, _dotNetReference);
-    double? scrollTop = await ScrollState.Get(StorageKey);
-    if (scrollTop.HasValue) {
-      await RestoreScrollPosition(scrollTop.Value);
+    try {
+      IJSObjectReference module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/Components/VirtualiseWithState.razor.js");
+      // The user can leave the page while the module is being imported, in which case the scroll container has already gone
+      if (_disposed) {
+        await module.DisposeAsync();
+        return;
+      }
+      _module = module;
+      _dotNetReference = DotNetObjectReference.Create(this);
+      await _module.InvokeVoidAsync("initialise", _scrollContainer, _dotNetReference);
+      double? scrollTop = await ScrollState.Get(StorageKey);
+      if (scrollTop.HasValue) {
+        await RestoreScrollPosition(scrollTop.Value);
+      }
+    } catch (JSException) {
+      // The scroll container has gone from the page
+    } catch (JSDisconnectedException) {
+      // So has the page
     }
   }
 
   private async Task RestoreScrollPosition(double scrollTop) {
     for (int i = 0; i < 10; i++) {
       await Task.Delay(100);
+      if (_disposed) {
+        return;
+      }
       await _module!.InvokeVoidAsync("restore", _scrollContainer, scrollTop);
       double current = await _module!.InvokeAsync<double>("getScrollTop", _scrollContainer);
       if (Math.Abs(current - scrollTop) < 2) {
@@ -112,6 +127,8 @@
         await _module.InvokeVoidAsync("dispose", _scrollContainer);
         await _module.DisposeAsync();
       }
+    }
+    catch (JSException) {
     }
     catch (JSDisconnectedException) {
     }

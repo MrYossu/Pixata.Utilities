@@ -36,6 +36,30 @@
   </ChildContent>
 </ComponentSample>
 
+<ComponentSample Title="Loading data before a tab is shown">
+  <Description>
+    <code>ActiveTabId</code> is set one way, and the page handles <code>ActiveTabIdChanged</code> itself, so the tab doesn't
+    change until the page sets <code>ActiveTabId</code>. Here the "Statements" tab takes a second to load its data, and isn't
+    shown until it has. With "Locked" ticked, the handler doesn't set <code>ActiveTabId</code>, so the tab doesn't change at all.
+    <label class="ml-3"><input type="checkbox" @bind="_ownedLocked" /> Locked</label>
+  </Description>
+  <ChildContent>
+    <PixataTabStrip ActiveTabId="@_ownedTab" ActiveTabIdChanged="OwnedTabChanged">
+      <PixataTab Id="details" Title="Details">
+        <p>The property's details go here.</p>
+      </PixataTab>
+      <PixataTab Id="statements" Title="Statements">
+        <ul>
+          @foreach (string statement in _statements!) {
+            <li>@statement</li>
+          }
+        </ul>
+      </PixataTab>
+    </PixataTabStrip>
+    <p class="mt-2">Active tab: <strong>@_ownedTab</strong>. @_ownedMessage</p>
+  </ChildContent>
+</ComponentSample>
+
 <ComponentSample Title="Position, alignment and size">
   <Description>
     <label>Position
@@ -171,6 +195,27 @@
   private string? _pixataDocument = "Report";
   private string _pixataCloseMessage = "";
   private int _documentNumber = 1;
+
+  private string _ownedTab = "details";
+  private bool _ownedLocked;
+  private string _ownedMessage = "";
+  // Null until the Statements tab is first selected, so its content would throw if it were shown before the data had loaded
+  private List<string>? _statements;
+
+  private async Task OwnedTabChanged(string id) {
+    if (_ownedLocked) {
+      _ownedMessage = $"Locked, so the tab didn't change to {id}.";
+      return;
+    }
+    if (id == "statements" && _statements is null) {
+      _ownedMessage = "Loading the statements...";
+      StateHasChanged();
+      await Task.Delay(1000);
+      _statements = ["January statement", "February statement", "March statement"];
+    }
+    _ownedMessage = "";
+    _ownedTab = id;
+  }
 
   private bool IsVertical =>
     _position is PixataTabPosition.Left or PixataTabPosition.Right;

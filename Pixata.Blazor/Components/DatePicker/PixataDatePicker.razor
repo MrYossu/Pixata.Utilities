@@ -155,6 +155,8 @@
         }
       } catch (JSException) {
         // The popup was closed again before it could be positioned
+      } catch (JSDisconnectedException) {
+        // The page has gone
       }
     }
   }

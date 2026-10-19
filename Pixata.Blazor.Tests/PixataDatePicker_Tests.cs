@@ -1,10 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components;
 
@@ -218,6 +223,49 @@ public class PixataDatePicker_Tests {
 
     Assert.IsTrue(notified);
     Assert.AreEqual(new DateTime(2026, 3, 2), model.Due);
+  }
+
+  [TestMethod]
+  public async Task DateInput_RemovedWhileTheModuleIsLoading_DoesNotInitialiseTheInput() {
+    // The import doesn't complete until the component has gone, as when the user leaves the page while it's starting up
+    PendingImportRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    _ctx.Render<PixataDateInput<DateTime?>>(p => p.Add(c => c.Value, new DateTime(2026, 3, 1)));
+    await _ctx.DisposeComponentsAsync();
+
+    RecordingModule module = new();
+    await _ctx.Renderer.Dispatcher.InvokeAsync(() => js.Import.SetResult(module));
+
+    CollectionAssert.DoesNotContain(module.Calls, "initDateInput");
+    Assert.IsTrue(module.Disposed);
+  }
+
+  private class PendingImportRuntime : IJSRuntime {
+    public TaskCompletionSource<IJSObjectReference> Import { get; } = new();
+
+    public async ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args) =>
+      identifier == "import" ? (TValue)await Import.Task : default!;
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args) =>
+      InvokeAsync<TValue>(identifier, args);
+  }
+
+  private class RecordingModule : IJSObjectReference {
+    public List<string> Calls { get; } = [];
+    public bool Disposed { get; private set; }
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args) {
+      Calls.Add(identifier);
+      return ValueTask.FromResult(default(TValue)!);
+    }
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args) =>
+      InvokeAsync<TValue>(identifier, args);
+
+    public ValueTask DisposeAsync() {
+      Disposed = true;
+      return ValueTask.CompletedTask;
+    }
   }
 
   private class Model {

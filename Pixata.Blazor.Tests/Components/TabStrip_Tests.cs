@@ -116,14 +116,118 @@ public class TabStrip_Tests {
     Assert.AreEqual("Content c", VisiblePanelText(cut));
   }
 
+  /// <summary>
+  /// A page that sets the tab strip's ActiveTabId one way and handles ActiveTabIdChanged itself. With the defaults, the
+  /// handler sets the field straight away, which is what <c>@bind-ActiveTabId</c> does
+  /// </summary>
+  private class OwningHost : ComponentBase {
+    [Parameter]
+    public RenderFragment? Tabs { get; set; }
+
+    /// <summary>
+    /// When false, the handler doesn't set the field, so the tab shouldn't change
+    /// </summary>
+    [Parameter]
+    public bool Update { get; set; } = true;
+
+    /// <summary>
+    /// Awaited by the handler before it sets the field, as when a page loads the tab's data first
+    /// </summary>
+    [Parameter]
+    public Task? Delay { get; set; }
+
+    public string ActiveTabId { get; private set; } = "a";
+    public List<string> Changes { get; } = [];
+
+    private async Task Changed(string id) {
+      Changes.Add(id);
+      if (Delay is not null) {
+        await Delay;
+      }
+      if (Update) {
+        ActiveTabId = id;
+      }
+    }
+
+    protected override void BuildRenderTree(RenderTreeBuilder builder) {
+      builder.OpenComponent<PixataTabStrip>(0);
+      builder.AddAttribute(1, nameof(PixataTabStrip.ActiveTabId), ActiveTabId);
+      builder.AddAttribute(2, nameof(PixataTabStrip.ActiveTabIdChanged), EventCallback.Factory.Create<string>(this, Changed));
+      builder.AddAttribute(3, nameof(PixataTabStrip.ChildContent), Tabs);
+      builder.CloseComponent();
+    }
+  }
+
+  private static IRenderedComponent<OwningHost> RenderOwned(BunitContext context, RenderFragment tabs, bool update = true, Task? delay = null) =>
+    context.Render<OwningHost>(p => p
+      .Add(c => c.Tabs, tabs)
+      .Add(c => c.Update, update)
+      .Add(c => c.Delay, delay));
+
   [TestMethod]
-  public void ClickingATab_SelectsItAndRaisesActiveTabIdChanged() {
+  public void ClickingATab_WithBinding_SelectsItAndRaisesActiveTabIdChanged() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<OwningHost> host = RenderOwned(context, Tabs(Specs("a", "b", "c")));
+    IRenderedComponent<PixataTabStrip> cut = host.FindComponent<PixataTabStrip>();
+    cut.FindAll("[role=tab]")[2].Click();
+    CollectionAssert.AreEqual(new[] { "c" }, host.Instance.Changes);
+    Assert.AreEqual("Content c", VisiblePanelText(cut));
+  }
+
+  [TestMethod]
+  public void ClickingATab_WithoutAHandler_SelectsIt() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(Specs("a", "b", "c")), "a");
+    cut.FindAll("[role=tab]")[2].Click();
+    Assert.AreEqual("Content c", VisiblePanelText(cut));
+  }
+
+  [TestMethod]
+  public void ClickingATab_WithAHandlerThatDoesNotSetActiveTabId_DoesNotChangeTab() {
     using BunitContext context = PixataTestContext.Create();
     string? changed = null;
     IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(Specs("a", "b", "c")), "a", p => p.Add(c => c.ActiveTabIdChanged, (string id) => changed = id));
     cut.FindAll("[role=tab]")[2].Click();
     Assert.AreEqual("c", changed);
-    Assert.AreEqual("Content c", VisiblePanelText(cut));
+    Assert.AreEqual("Content a", VisiblePanelText(cut));
+    Assert.AreEqual("Title a", ActiveHeader(cut).TextContent.Trim());
+  }
+
+  [TestMethod]
+  public void ClickingATab_WithASlowHandler_KeepsTheOldTabUntilActiveTabIdIsSet() {
+    using BunitContext context = PixataTestContext.Create();
+    TaskCompletionSource loaded = new();
+    IRenderedComponent<OwningHost> host = RenderOwned(context, Tabs(Specs("a", "b", "c")), delay: loaded.Task);
+    IRenderedComponent<PixataTabStrip> cut = host.FindComponent<PixataTabStrip>();
+    cut.FindAll("[role=tab]")[2].Click();
+    CollectionAssert.AreEqual(new[] { "c" }, host.Instance.Changes);
+    Assert.AreEqual("Content a", VisiblePanelText(cut));
+    host.InvokeAsync(loaded.SetResult).Wait();
+    cut.WaitForAssertion(() => Assert.AreEqual("Content c", VisiblePanelText(cut)));
+  }
+
+  [TestMethod]
+  public void KeyboardNavigation_WithASlowHandler_FocusesTheNewTabWhenItIsShown() {
+    using BunitContext context = PixataTestContext.Create();
+    TaskCompletionSource loaded = new();
+    IRenderedComponent<OwningHost> host = RenderOwned(context, Tabs(Specs("a", "b")), delay: loaded.Task);
+    IRenderedComponent<PixataTabStrip> cut = host.FindComponent<PixataTabStrip>();
+    Press(cut, "ArrowRight");
+    Assert.AreEqual("Content a", VisiblePanelText(cut));
+    Assert.IsFalse(context.JSInterop.Invocations.Any(i => i.Identifier == "focusElement"));
+    host.InvokeAsync(loaded.SetResult).Wait();
+    cut.WaitForAssertion(() => Assert.AreEqual("Content b", VisiblePanelText(cut)));
+    Assert.IsTrue(context.JSInterop.Invocations.Any(i => i.Identifier == "focusElement"));
+  }
+
+  [TestMethod]
+  public void ClosingTheActiveTab_WithAHandler_MovesToItsNeighbourStraightAway() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<OwningHost> host = RenderOwned(context, Tabs(new TabSpec("a", Closeable: true), new TabSpec("b")), update: false);
+    IRenderedComponent<PixataTabStrip> cut = host.FindComponent<PixataTabStrip>();
+    cut.Find("[role=tab] .pixata-blazor-tabstrip-close").Click();
+    Assert.AreEqual("Content b", VisiblePanelText(cut));
+    CollectionAssert.Contains(host.Instance.Changes, "b");
   }
 
   [TestMethod]
@@ -150,8 +254,9 @@ public class TabStrip_Tests {
   [TestMethod]
   public void ArrowKeys_MoveThroughTheTabsSkippingDisabledOnesAndWrapping() {
     using BunitContext context = PixataTestContext.Create();
-    List<string> changes = [];
-    IRenderedComponent<PixataTabStrip> cut = Render(context, Tabs(new TabSpec("a"), new TabSpec("b", Disabled: true), new TabSpec("c")), "a", p => p.Add(c => c.ActiveTabIdChanged, (string id) => changes.Add(id)));
+    IRenderedComponent<OwningHost> host = RenderOwned(context, Tabs(new TabSpec("a"), new TabSpec("b", Disabled: true), new TabSpec("c")));
+    IRenderedComponent<PixataTabStrip> cut = host.FindComponent<PixataTabStrip>();
+    List<string> changes = host.Instance.Changes;
     Press(cut, "ArrowRight");
     Assert.AreEqual("Content c", VisiblePanelText(cut));
     Press(cut, "ArrowRight");
