@@ -109,6 +109,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.AspNetCore.Pdf.Playwright
+    - name: Restore - Pixata.AspNetCore.Pdf.Playwright Dependencies
+      run: dotnet restore Pixata.AspNetCore.Pdf.Playwright/Pixata.AspNetCore.Pdf.Playwright.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Pdf.Playwright.csproj
+      run: dotnet build Pixata.AspNetCore.Pdf.Playwright/Pixata.AspNetCore.Pdf.Playwright.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.AspNetCore
     - name: Restore - Pixata.AspNetCore Dependencies
       run: dotnet restore Pixata.AspNetCore/Pixata.AspNetCore.csproj --configfile ./nuget.config
@@ -257,6 +270,12 @@ jobs:
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.AspNetCore.Pdf.WkHtmlToPdf/Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+    - name: Publish Pixata.AspNetCore.Pdf.Playwright
+      uses: alirezanet/publish-nuget@v3.0.4
+      with:
+       PROJECT_FILE_PATH: Pixata.AspNetCore.Pdf.Playwright/Pixata.AspNetCore.Pdf.Playwright.csproj
        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
     - name: Publish Pixata.AspNetCore.Telerik

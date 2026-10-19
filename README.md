@@ -41,8 +41,15 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/)
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik).
 
+## Pixata.AspNetCore.Pdf.Playwright
+A PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Chromium driven by Microsoft Playwright. Templates print as they would in Chrome, Chromium is copied into the app's publish output so that nothing needs installing on the server, and letterheads can be added to page headers and footers.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwright/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
+
 ## Pixata.AspNetCore.Pdf.WkHtmlToPdf
-**Obsolete.** The wkhtmltopdf converter that Pixata.AspNetCore used before v2.0.0, kept so that apps can upgrade before moving their templates to Pixata.AspNetCore.Pdf.Telerik. It will be removed in a future release.
+**Obsolete.** The wkhtmltopdf converter that Pixata.AspNetCore used before v2.0.0, kept so that apps can upgrade before moving their templates to another converter. It will be removed in a future release.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf).
 

@@ -32,7 +32,7 @@ public class DocumentTemplateHelper(HtmlRenderer htmlRenderer, PixataAspNetCoreO
 
   public async Task<byte[]> CreatePdfFromTemplate<T>(PdfOptions pdfOptions, params (string name, object? value)[] parameters) where T : IComponent {
     if (pdfConverter is null) {
-      throw new InvalidOperationException($"No {nameof(PdfConverterInterface)} has been registered. Add the Pixata.AspNetCore.Pdf.Telerik package and call AddPixataTelerikPdf(), or register an implementation of your own");
+      throw new InvalidOperationException($"No {nameof(PdfConverterInterface)} has been registered. Add a PDF converter package (eg one of the Pixata.AspNetCore.Pdf.* packages), or register an implementation of your own");
     }
     string html = await CreateHtmlFromTemplate<T>(parameters);
     if (string.IsNullOrWhiteSpace(pdfOptions.BaseUrl)) {

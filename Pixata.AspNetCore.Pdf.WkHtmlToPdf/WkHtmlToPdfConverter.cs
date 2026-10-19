@@ -1,15 +1,13 @@
 using System.Text.RegularExpressions;
-using Pixata.AspNetCore.Pdf;
 using WkHtmlToPdfDotNet;
 using WkHtmlToPdfDotNet.Contracts;
 
 namespace Pixata.AspNetCore.Pdf.WkHtmlToPdf;
 
 /// <summary>
-/// Converts HTML to PDF with wkhtmltopdf. This is what Pixata.AspNetCore used before v2.0.0. wkhtmltopdf was archived in January 2023, and
-/// gets no more fixes, so use Pixata.AspNetCore.Pdf.Telerik instead
+/// Converts HTML to PDF with wkhtmltopdf. 
 /// </summary>
-[Obsolete("wkhtmltopdf is no longer maintained, and is unsafe with user-supplied HTML. Use Pixata.AspNetCore.Pdf.Telerik instead")]
+[Obsolete("wkhtmltopdf is no longer maintained, and is unsafe with user-supplied HTML. Use Pixata.AspNetCore.Pdf.Playwright or Pixata.AspNetCore.Pdf.Telerik instead")]
 public class WkHtmlToPdfConverter(IConverter converter) : PdfConverterInterface {
   public Task<byte[]> Convert(string html, PdfOptions options) {
     (double width, double height) = options.PaperSizeMm();

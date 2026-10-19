@@ -1,0 +1,87 @@
+<Project>
+
+  <!--
+    Copies the Chromium headless shell into the app's build and publish output (in a .playwright-browsers folder), so that the app can be
+    deployed to a server without installing anything there. The browser is downloaded once, by the Playwright driver that comes with
+    Microsoft.Playwright, into the build machine's Playwright browser cache, so it always matches the version of Playwright the app uses.
+
+    Properties you can set in the app's project file:
+      PixataPlaywrightBundleBrowser  false to not copy the browser (eg when you set Channel or BrowserExecutablePath)
+      PixataPlaywrightAllLocales     true to copy all of Chromium's locale files, rather than just en-US (about 40MB more)
+      PixataPlaywrightBrowserCache   where the build machine keeps downloaded browsers. Defaults to Playwright's own cache
+  -->
+
+  <PropertyGroup>
+    <PixataPlaywrightBundleBrowser Condition="'$(PixataPlaywrightBundleBrowser)' == ''">true</PixataPlaywrightBundleBrowser>
+    <PixataPlaywrightAllLocales Condition="'$(PixataPlaywrightAllLocales)' == ''">false</PixataPlaywrightAllLocales>
+    <PixataPlaywrightBrowserCache Condition="'$(PixataPlaywrightBrowserCache)' == ''">$(PLAYWRIGHT_BROWSERS_PATH)</PixataPlaywrightBrowserCache>
+    <PixataPlaywrightBrowserCache Condition="'$(PixataPlaywrightBrowserCache)' == '' AND $([MSBuild]::IsOSPlatform('Windows'))">$(LOCALAPPDATA)\ms-playwright</PixataPlaywrightBrowserCache>
+    <PixataPlaywrightBrowserCache Condition="'$(PixataPlaywrightBrowserCache)' == '' AND $([MSBuild]::IsOSPlatform('OSX'))">$(HOME)/Library/Caches/ms-playwright</PixataPlaywrightBrowserCache>
+    <PixataPlaywrightBrowserCache Condition="'$(PixataPlaywrightBrowserCache)' == ''">$(HOME)/.cache/ms-playwright</PixataPlaywrightBrowserCache>
+  </PropertyGroup>
+
+  <!-- Runs straight after Microsoft.Playwright adds its driver to the Content items, so the browser goes wherever the driver goes -->
+  <Target Name="PixataPlaywrightBundleBrowser" AfterTargets="CopyPlaywrightFilesToOutput" Condition="'$(PixataPlaywrightBundleBrowser)' == 'true'">
+    <PropertyGroup>
+      <_PixataPlaywrightHostNode Condition="$([MSBuild]::IsOSPlatform('Windows'))">.playwright\node\win32_x64\node.exe</_PixataPlaywrightHostNode>
+      <_PixataPlaywrightHostNode Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">.playwright\node\linux-arm64\node</_PixataPlaywrightHostNode>
+      <_PixataPlaywrightHostNode Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$(_PixataPlaywrightHostNode)' == ''">.playwright\node\linux-x64\node</_PixataPlaywrightHostNode>
+      <_PixataPlaywrightHostNode Condition="$([MSBuild]::IsOSPlatform('OSX')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">.playwright\node\darwin-arm64\node</_PixataPlaywrightHostNode>
+      <_PixataPlaywrightHostNode Condition="$([MSBuild]::IsOSPlatform('OSX')) AND '$(_PixataPlaywrightHostNode)' == ''">.playwright\node\darwin-x64\node</_PixataPlaywrightHostNode>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_PixataPlaywrightDriver Include="@(Content)" Condition="'%(Content.NuGetPackageId)' == 'Microsoft.Playwright'" />
+      <_PixataPlaywrightNode Include="@(_PixataPlaywrightDriver)" Condition="'%(_PixataPlaywrightDriver.Link)' == '$(_PixataPlaywrightHostNode)'" />
+      <_PixataPlaywrightCli Include="@(_PixataPlaywrightDriver)" Condition="'%(_PixataPlaywrightDriver.Link)' == '.playwright\package\cli.js'" />
+      <_PixataPlaywrightBrowsersJson Include="@(_PixataPlaywrightDriver)" Condition="'%(_PixataPlaywrightDriver.Link)' == '.playwright\package\browsers.json'" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_PixataPlaywrightNodePath>@(_PixataPlaywrightNode->'%(FullPath)')</_PixataPlaywrightNodePath>
+      <_PixataPlaywrightCliPath>@(_PixataPlaywrightCli->'%(FullPath)')</_PixataPlaywrightCliPath>
+      <_PixataPlaywrightBrowsersJsonPath>@(_PixataPlaywrightBrowsersJson->'%(FullPath)')</_PixataPlaywrightBrowsersJsonPath>
+    </PropertyGroup>
+
+    <Error Condition="'$(_PixataPlaywrightNodePath)' == '' OR '$(_PixataPlaywrightCliPath)' == '' OR '$(_PixataPlaywrightBrowsersJsonPath)' == ''"
+           Text="Pixata.AspNetCore.Pdf.Playwright couldn't find the Playwright driver for this machine ($(_PixataPlaywrightHostNode)) among the files Microsoft.Playwright adds to the build, so it can't download Chromium. If you set PlaywrightPlatform to a platform other than the one you're building on, include this one too, or set PixataPlaywrightBundleBrowser to false and deploy a browser yourself" />
+
+    <!-- The browser build that this version of Playwright works with, from the driver's browsers.json -->
+    <PropertyGroup>
+      <_PixataPlaywrightBrowsersJsonText>$([System.IO.File]::ReadAllText('$(_PixataPlaywrightBrowsersJsonPath)'))</_PixataPlaywrightBrowsersJsonText>
+      <_PixataPlaywrightRevision>$([System.Text.RegularExpressions.Regex]::Replace($(_PixataPlaywrightBrowsersJsonText), '(?s)^.*?"name":\s*"chromium-headless-shell",\s*"revision":\s*"(\d+)".*$', '$1'))</_PixataPlaywrightRevision>
+    </PropertyGroup>
+
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(_PixataPlaywrightRevision)', '^\d+$'))"
+           Text="Pixata.AspNetCore.Pdf.Playwright couldn't find the chromium-headless-shell revision in $(_PixataPlaywrightBrowsersJsonPath)" />
+
+    <PropertyGroup>
+      <_PixataPlaywrightBrowserFolderName>chromium_headless_shell-$(_PixataPlaywrightRevision)</_PixataPlaywrightBrowserFolderName>
+      <_PixataPlaywrightBrowserFolder>$([MSBuild]::EnsureTrailingSlash('$(PixataPlaywrightBrowserCache)'))$(_PixataPlaywrightBrowserFolderName)</_PixataPlaywrightBrowserFolder>
+    </PropertyGroup>
+
+    <!-- Playwright writes INSTALLATION_COMPLETE once a download has been unpacked, so a download that was interrupted is tried again. Not run in
+         Visual Studio's design-time builds, so that opening the project doesn't start a download in the background -->
+    <Message Importance="high" Text="Pixata.AspNetCore.Pdf.Playwright: downloading Chromium headless shell revision $(_PixataPlaywrightRevision) to $(PixataPlaywrightBrowserCache). This only happens once per revision"
+             Condition="!Exists('$(_PixataPlaywrightBrowserFolder)\INSTALLATION_COMPLETE') AND '$(DesignTimeBuild)' != 'true'" />
+    <Exec Command="&quot;$(_PixataPlaywrightNodePath)&quot; &quot;$(_PixataPlaywrightCliPath)&quot; install --only-shell --no-remove chromium"
+          EnvironmentVariables="PLAYWRIGHT_BROWSERS_PATH=$(PixataPlaywrightBrowserCache)"
+          Condition="!Exists('$(_PixataPlaywrightBrowserFolder)\INSTALLATION_COMPLETE') AND '$(DesignTimeBuild)' != 'true'" />
+
+    <ItemGroup Condition="Exists('$(_PixataPlaywrightBrowserFolder)\INSTALLATION_COMPLETE')">
+      <_PixataPlaywrightBrowserFiles Include="$(_PixataPlaywrightBrowserFolder)\**"
+                                     Exclude="$(_PixataPlaywrightBrowserFolder)\INSTALLATION_COMPLETE;$(_PixataPlaywrightBrowserFolder)\DEPENDENCIES_VALIDATED" />
+      <_PixataPlaywrightBrowserFiles Remove="$(_PixataPlaywrightBrowserFolder)\**\locales\*.pak" Condition="'$(PixataPlaywrightAllLocales)' != 'true'" />
+      <_PixataPlaywrightBrowserFiles Include="$(_PixataPlaywrightBrowserFolder)\**\locales\en-US.pak" Condition="'$(PixataPlaywrightAllLocales)' != 'true'" />
+      <Content Include="@(_PixataPlaywrightBrowserFiles)">
+        <Link>.playwright-browsers\$(_PixataPlaywrightBrowserFolderName)\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <PublishState>Included</PublishState>
+        <Visible>false</Visible>
+        <Pack>false</Pack>
+      </Content>
+    </ItemGroup>
+  </Target>
+
+</Project>

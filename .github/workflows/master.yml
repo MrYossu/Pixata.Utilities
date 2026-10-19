@@ -106,6 +106,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.AspNetCore.Pdf.Playwright
+    - name: Restore - Pixata.AspNetCore.Pdf.Playwright Dependencies
+      run: dotnet restore Pixata.AspNetCore.Pdf.Playwright/Pixata.AspNetCore.Pdf.Playwright.csproj --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.AspNetCore.Pdf.Playwright.csproj
+      run: dotnet build Pixata.AspNetCore.Pdf.Playwright/Pixata.AspNetCore.Pdf.Playwright.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     
     # Pixata.Blazor.Sample
     - name: Restore - Pixata.Blazor.Sample Dependencies

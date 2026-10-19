@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <Company>Pixata Ltd</Company>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Product>Pixata.AspNetCore.Pdf.Playwright</Product>
+    <Description>Playwright and Chromium PDF converter for Pixata.AspNetCore's DocumentTemplateHelper. Chromium is copied into the app's build and publish output, so nothing needs installing on the server</Description>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
+    <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright</ProjectUrl>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright</RepositoryUrl>
+    <PackageIcon>ordinateuroff.png</PackageIcon>
+    <PackageTags>C# ASP.NET Core PDF Playwright Chromium</PackageTags>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="ordinateuroff.png" Pack="true" PackagePath="\" />
+    <None Include="Readme.md" Pack="True" PackagePath="\" />
+    <!-- Copies Chromium into the consuming app's build and publish output. buildTransitive is what NuGet imports for apps that get this
+         package through another one -->
+    <None Include="build\Pixata.AspNetCore.Pdf.Playwright.targets" Pack="true" PackagePath="build\" />
+    <None Include="buildTransitive\Pixata.AspNetCore.Pdf.Playwright.targets" Pack="true" PackagePath="buildTransitive\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- PrivateAssets none so that apps using this package also get Microsoft.Playwright's build targets, which copy its driver into their
+         output -->
+    <PackageReference Include="Microsoft.Playwright" Version="1.63.0" PrivateAssets="none" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pixata.AspNetCore\Pixata.AspNetCore.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -6,6 +6,8 @@ Server-side helpers for ASP.NET Core apps - entity auditing, payload encryption,
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
 
+>**Version 2.1.1** lists [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) alongside Pixata.AspNetCore.Pdf.Telerik in the message `DocumentTemplateHelper` throws when no PDF converter is registered, and in the `RegisterPdfConverter` obsolete message. No other changes.
+
 ## Breaking changes in v2.0.0
 
 - **No PDF engine.** This package no longer references wkhtmltopdf (which was archived in 2023, and is unsafe with user-supplied HTML), so apps that don't generate PDFs no longer deploy its native binary. `DocumentTemplateHelper` now converts through a `PdfConverterInterface`, which comes from a separate package. Add [Pixata.AspNetCore.Pdf.Telerik](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik) and call `AddPixataTelerikPdf()`, or, if you need to keep wkhtmltopdf for now, add the obsolete [Pixata.AspNetCore.Pdf.WkHtmlToPdf](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf) and call `AddPixataWkHtmlToPdf()`. The wkhtmltopdf `IConverter` is no longer registered, and `RegisterPdfConverter` is obsolete and does nothing. See [generating documents and PDFs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md).

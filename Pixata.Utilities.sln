@@ -39,9 +39,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Blazor.Tests", "Pixata.Blazor.Tests\Pixata.Blazor.Tests.csproj", "{74F3DD71-AE47-400E-B6E8-F97E0A5B84F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Blazor.Grid.Excel", "Pixata.Blazor.Grid.Excel\Pixata.Blazor.Grid.Excel.csproj", "{97D445B8-F26A-46D7-9D19-5038D07EF18C}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.AspNetCore.Pdf.Telerik", "Pixata.AspNetCore.Pdf.Telerik\Pixata.AspNetCore.Pdf.Telerik.csproj", "{0989D415-21E9-4CDB-B702-741B89E91FEE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.AspNetCore.Pdf.WkHtmlToPdf", "Pixata.AspNetCore.Pdf.WkHtmlToPdf\Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj", "{D60566C1-084E-4D51-B0CF-4EE58E63D34E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.AspNetCore.Pdf.Playwright", "Pixata.AspNetCore.Pdf.Playwright\Pixata.AspNetCore.Pdf.Playwright.csproj", "{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -233,6 +236,18 @@ Global
 		{D60566C1-084E-4D51-B0CF-4EE58E63D34E}.Release|x64.Build.0 = Release|Any CPU
 		{D60566C1-084E-4D51-B0CF-4EE58E63D34E}.Release|x86.ActiveCfg = Release|Any CPU
 		{D60566C1-084E-4D51-B0CF-4EE58E63D34E}.Release|x86.Build.0 = Release|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Debug|x64.Build.0 = Debug|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Debug|x86.Build.0 = Debug|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Release|x64.ActiveCfg = Release|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Release|x64.Build.0 = Release|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Release|x86.ActiveCfg = Release|Any CPU
+		{E5FC5D19-E6E6-4B6A-A2AC-8977A0D7AF05}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
