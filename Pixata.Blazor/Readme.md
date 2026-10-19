@@ -6,6 +6,12 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.3.0** makes some changes that help when moving from Telerik's components...
+>- `PixataDropDownList` has an icon-only mode, set with the new `Icon` (or `IconTemplate`) parameter. See the [drop-downs documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md#icon-only)
+>- The content of a `PixataGridCommandColumn` is now given the row's item, so its buttons can depend on the row. If a template inside the column also uses `context`, add `Context="row"` to the column. See the [grid documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#using-the-row-in-a-command-column)
+>- **Behaviour change:** when you set `PixataTabStrip.ActiveTabId` one way and handle `ActiveTabIdChanged` yourself, the tab now only changes when you set `ActiveTabId`, as in Telerik, so you can load a tab's data before it is shown. `@bind-ActiveTabId` works as before. See the [tab strip documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TabStrip.md#who-changes-the-tab)
+>- Leaving a page while a date picker, calendar or `VirtualiseWithState` is starting up no longer crashes the circuit
+
 >**Version 5.2.0** adds `PixataDateRangePicker`, for picking the start and end of a range of dates, and gives `PixataCalendar` a range selection mode and the `Views` parameter for showing more than one month side by side. See the [date picker documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#date-range-picker) for details.
 
 >**Version 5.1.0** adds typed grid columns (`PixataTextGridColumn`, `PixataNumericGridColumn`, `PixataDateGridColumn` and `PixataEnumGridColumn`) with short lists of filter operators, the `FilterOperators` and `ShowFilterCellButtons` column parameters, and `PixataGridBoolFilter`, a three-state checkbox filter for `bool` columns. See the [grid documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns) for details.
