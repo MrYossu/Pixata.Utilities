@@ -1,0 +1,76 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+
+@* Two date inputs, for the start and end of a range, with a popup calendar that picks both *@
+<span @ref="_wrapper" class="@WrapperClass" style="@WidthStyle">
+  <span class="pixata-blazor-daterangepicker-part pixata-blazor-daterangepicker-start"
+        @onclick="() => InputClicked(false)"
+        @onkeydown="e => OnInputKeyDown(e, false)">
+    @if (!string.IsNullOrEmpty(StartLabel)) {
+      <label class="pixata-blazor-daterangepicker-label" for="@StartInputId">@StartLabel</label>
+    }
+    <PixataDateInput @ref="_startInput"
+                     TValue="TValue"
+                     Value="StartValue"
+                     ValueChanged="OnStartInputChanged"
+                     ValueExpression="StartValueExpression"
+                     OnChange="OnInputChange"
+                     Format="@Format"
+                     Min="Min"
+                     Max="Max"
+                     Placeholder="@StartPlaceholder"
+                     Enabled="Enabled"
+                     ReadOnly="ReadOnly"
+                     ShowClearButton="ShowClearButton"
+                     Id="@StartInputId"
+                     Class="pixata-blazor-daterangepicker-input"
+                     role="combobox"
+                     aria-haspopup="grid"
+                     aria-expanded="@(_open ? "true" : "false")" />
+  </span>
+  <span class="pixata-blazor-daterangepicker-part pixata-blazor-daterangepicker-end"
+        @onclick="() => InputClicked(true)"
+        @onkeydown="e => OnInputKeyDown(e, true)">
+    @if (!string.IsNullOrEmpty(EndLabel)) {
+      <label class="pixata-blazor-daterangepicker-label" for="@EndInputId">@EndLabel</label>
+    }
+    <PixataDateInput @ref="_endInput"
+                     TValue="TValue"
+                     Value="EndValue"
+                     ValueChanged="OnEndInputChanged"
+                     ValueExpression="EndValueExpression"
+                     OnChange="OnInputChange"
+                     Format="@Format"
+                     Min="Min"
+                     Max="Max"
+                     Placeholder="@EndPlaceholder"
+                     Enabled="Enabled"
+                     ReadOnly="ReadOnly"
+                     ShowClearButton="ShowClearButton"
+                     Id="@EndInputId"
+                     Class="pixata-blazor-daterangepicker-input"
+                     role="combobox"
+                     aria-haspopup="grid"
+                     aria-expanded="@(_open ? "true" : "false")" />
+  </span>
+  @if (_open) {
+    <div @ref="_popup" class="@DatePickerCss.Join("pixata-blazor-datepicker-popup", "pixata-blazor-daterangepicker-popup", PopupClass)">
+      <PixataCalendar @ref="_calendar"
+                      SelectionMode="PixataCalendarSelectionMode.Range"
+                      RangeStart="StartDate"
+                      RangeEnd="EndDate"
+                      RangeChanged="OnCalendarRangeChanged"
+                      @bind-SelectingRangeEnd="_selectingEnd"
+                      AllowReverse="AllowReverse"
+                      Views="2"
+                      Date="_calendarDate"
+                      Min="Min"
+                      Max="Max"
+                      View="View"
+                      BottomView="BottomView"
+                      DisabledDates="DisabledDates"
+                      ShowWeekNumbers="ShowWeekNumbers"
+                      OnEscape="CloseAndFocus" />
+    </div>
+  }
+</span>

@@ -1,13 +1,15 @@
-# Date picker, date input and calendar
+# Date picker, date range picker, date input and calendar
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataDatePicker`, `PixataDateInput` and `PixataCalendar` are a date picker (an input with a calendar popup), a date input on its own, and a calendar on its own. They render on the client or the server, so they can be used in WASM as well as Blazor Server apps. The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor) shows each one.
+`PixataDatePicker`, `PixataDateRangePicker`, `PixataDateInput` and `PixataCalendar` are a date picker (an input with a calendar popup), a date range picker (start and end inputs with a calendar popup that picks both), a date input on its own, and a calendar on its own. They render on the client or the server, so they can be used in WASM as well as Blazor Server apps. The [date picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor) and [date range picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDateRangePickerSample.razor) show each one.
 
 They are in the `Pixata.Blazor.Components` namespace, and need [the stylesheet](Readme.Styling.md). They use a small JavaScript module (`_content/Pixata.Blazor/pixata-blazor.js`), which they load themselves, so there's nothing to add to your page.
 
 ```razor
 <PixataDatePicker @bind-Value="_order.Due" Min="DateTime.Today" />
+
+<PixataDateRangePicker @bind-StartValue="_booking.From" @bind-EndValue="_booking.To" />
 
 <PixataDateInput @bind-Value="_dateOfBirth" Format="dd/MM/yyyy" />
 
@@ -77,6 +79,72 @@ Both work inside an `EditForm`. Bind with `@bind-Value`, and they tell the form 
 </EditForm>
 ```
 
+## Date range picker
+
+`PixataDateRangePicker` has two date inputs, labelled "Start" and "End", for the start and end of a range. Clicking (or tapping) either input opens a calendar that shows two months side by side, or one on a phone. The first date picked is the start of the range, and the second is the end. Once the end is picked, the calendar closes. The days between the start and end are shaded.
+
+```razor
+<PixataDateRangePicker @bind-StartValue="_from" @bind-EndValue="_to" Min="DateTime.Today" />
+
+@code {
+  private DateTime _from = DateTime.Today;
+  private DateTime _to = DateTime.Today.AddDays(7);
+}
+```
+
+Clicking the start input opens the calendar ready to pick the start, and clicking the end input opens it ready to pick just the end (if there's already a start). Picking a new start keeps the end if it's still after the new start, and clears it if not. Picking an end before the start begins a new range from that date, unless `AllowReverse` is set, when the two are swapped round.
+
+The focus stays in the input when the calendar is opened by clicking, so you can still type a date as described above. Alt+Down opens the calendar and moves the focus into it, so the arrow keys move around it. Escape or Alt+Up closes it, as does clicking anywhere else.
+
+`TValue` can be `DateTime`, `DateOnly`, or a nullable version of either. A non-nullable end can't be cleared, so when a later start is picked, the end keeps its old value until a new end is picked.
+
+### Parameters
+
+| Parameter | Type | What it does |
+| --- | --- | --- |
+| `StartValue`, `EndValue` | `TValue` | The start and end of the range. Can be two-way bound |
+| `Format` | `string` | A .NET date format for both inputs. Defaults to `d`, the culture's short date |
+| `Min`, `Max` | `DateTime` | The range of dates allowed. Default to 1st January 1900 and 31st December 2099 |
+| `DisabledDates` | `List<DateTime>` | Dates the user can't pick from the calendar |
+| `AllowReverse` | `bool` | Whether picking an end before the start swaps them round, rather than starting again. Defaults to false |
+| `ShowWeekNumbers` | `bool` | Shows ISO-8601 week numbers in the calendar |
+| `View`, `BottomView` | `PixataCalendarView` | The view the calendar opens in, and the most detailed one. Set `BottomView` to `Year` to pick a range of months |
+| `StartLabel`, `EndLabel` | `string` | The labels above the inputs. Default to "Start" and "End". Set them to `null` or `""` for no labels |
+| `StartPlaceholder`, `EndPlaceholder` | `string` | Shown in an empty input that doesn't have focus |
+| `StartId`, `EndId` | `string` | The ids of the inputs. If you don't set them, ids are generated so that the labels work |
+| `Enabled`, `ReadOnly` | `bool` | As you'd expect. Neither opens the calendar |
+| `ShowClearButton` | `bool` | Shows an x in each input that clears it. Only for nullable types |
+| `Width`, `Class`, `PopupClass` | `string` | The width and class of the whole component, and a class for the popup |
+
+### Events
+
+| Event | Type | When it fires |
+| --- | --- | --- |
+| `StartValueChanged`, `EndValueChanged` | `EventCallback<TValue>` | When either end changes, whether typed or picked |
+| `OnChange` | `EventCallback<PixataDateRangePickerChangeEventArgs>` | When the user has finished changing the range: when they pick the end in the calendar, close the calendar, or press Enter in or leave an input, having changed something. The arguments have `StartValue` and `EndValue` properties (as `object`, holding values of type `TValue`) |
+| `OnOpen`, `OnClose` | `EventCallback` | When the calendar opens and closes |
+
+### Methods
+
+`Open()` opens the calendar, ready to pick the start, and `Close()` closes it. `FocusStartAsync()` and `FocusEndAsync()` move the focus to the start and end inputs.
+
+### Forms
+
+The range picker works inside an `EditForm`. Bind with `@bind-StartValue` and `@bind-EndValue`, and each input tells the form when its value changes, and shows as invalid when its field has validation errors...
+
+```razor
+<EditForm Model="_booking">
+  <DataAnnotationsValidator />
+  <PixataDateRangePicker @bind-StartValue="_booking.From" @bind-EndValue="_booking.To" StartLabel="From" EndLabel="To" />
+  <ValidationMessage For="() => _booking.From" />
+  <ValidationMessage For="() => _booking.To" />
+</EditForm>
+```
+
+### On a phone
+
+Below 576 pixels wide, the calendar shows one month instead of two. On a touch screen, the inputs and the days in the calendar are bigger, so they are easier to tap.
+
 ## Calendar
 
 | Parameter | Type | What it does |
@@ -88,11 +156,23 @@ Both work inside an `EditForm`. Bind with `@bind-Value`, and they tell the form 
 | `Min`, `Max` | `DateTime` | The range of dates allowed |
 | `DisabledDates` | `List<DateTime>` | Dates that can't be picked |
 | `ShowWeekNumbers` | `bool` | Shows ISO-8601 week numbers |
-| `ShowOtherMonthDays` | `bool` | Shows the days from the months either side that fill the first and last weeks. Defaults to true |
+| `ShowOtherMonthDays` | `bool` | Shows the days from the months either side that fill the first and last weeks. Defaults to true. They are never shown when `Views` is more than 1, so no day appears twice |
+| `Views` | `int` | How many months (or years, decades or centuries) to show side by side. Defaults to 1. Below 576 pixels wide, only the first is shown |
+| `SelectionMode` | `PixataCalendarSelectionMode` | `Single` (the default) picks one date into `Value`. `Range` picks a range into `RangeStart` and `RangeEnd` |
+| `RangeStart`, `RangeEnd` | `DateTime?` | The range, in range mode. Can be two-way bound |
+| `RangeChanged` | `EventCallback<PixataCalendarRangeChangeEventArgs>` | Fires in range mode when either end is picked. The arguments have `Start` and `End` properties, either of which can be null while the range is being picked |
+| `SelectingRangeEnd` | `bool` | In range mode, whether the next date picked is the end (true) or the start (false). It changes as dates are picked, and can be two-way bound |
+| `AllowReverse` | `bool` | In range mode, whether picking an end before the start swaps them round, rather than starting a new range. Defaults to false |
 
 It has `FocusAsync()` and `NavigateTo(date, view)` methods.
 
-The keyboard works like this: the arrow keys move by one cell or one row, Page Up and Page Down by one month (or year, decade or century), Home and End go to the start and end of it, Ctrl+Up goes up a view, and Enter or Space picks the cell (or goes down a view).
+To pick a range with the calendar on its own...
+
+```razor
+<PixataCalendar SelectionMode="PixataCalendarSelectionMode.Range" @bind-RangeStart="_from" @bind-RangeEnd="_to" Views="2" />
+```
+
+The keyboard works like this: the arrow keys move by one cell or one row (going into the next view, when there is more than one, before the views move along), Page Up and Page Down by one month (or year, decade or century), Home and End go to the start and end of it, Ctrl+Up goes up a view, and Enter or Space picks the cell (or goes down a view).
 
 The first day of the week, and the day and month names, come from the current culture.
 
@@ -115,5 +195,28 @@ The colours and sizes come from these custom properties, which you can override 
 | `--pixata-datepicker-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The input's focus ring |
 | `--pixata-datepicker-popup-shadow` | A soft two-layer shadow | The calendar popup's shadow |
 | `--pixata-datepicker-border-radius` | `4px` | Rounded corners |
+| `--pixata-datepicker-range-bg` | `rgba(255, 99, 88, .15)` | The shading of the days in a range |
 
-All the classes start with `pixata-blazor-dateinput-`, `pixata-blazor-datepicker-` or `pixata-blazor-calendar-` (for example `pixata-blazor-calendar-title`, `pixata-blazor-calendar-selected` and `pixata-blazor-datepicker-popup`), so you can target any part of them in your own CSS.
+All the classes start with `pixata-blazor-dateinput-`, `pixata-blazor-datepicker-`, `pixata-blazor-daterangepicker-` or `pixata-blazor-calendar-` (for example `pixata-blazor-calendar-title`, `pixata-blazor-calendar-selected` and `pixata-blazor-datepicker-popup`), so you can target any part of them in your own CSS.
+
+The date range picker's parts are...
+
+| Class | What it is |
+| --- | --- |
+| `pixata-blazor-daterangepicker` | The whole component. It also has `pixata-blazor-daterangepicker-open` while the calendar is open, and `pixata-blazor-daterangepicker-disabled` when it's disabled |
+| `pixata-blazor-daterangepicker-part` | The label and input for one end of the range, which also has `pixata-blazor-daterangepicker-start` or `pixata-blazor-daterangepicker-end` |
+| `pixata-blazor-daterangepicker-label` | A label |
+| `pixata-blazor-daterangepicker-input` | An input (which also has the date input's classes) |
+| `pixata-blazor-daterangepicker-popup` | The popup (which also has `pixata-blazor-datepicker-popup`) |
+
+and the calendar's range and multi-view parts are...
+
+| Class | What it is |
+| --- | --- |
+| `pixata-blazor-calendar-range` | The calendar, in range mode. It also has `pixata-blazor-calendar-range-complete` when both ends are set |
+| `pixata-blazor-calendar-range-start`, `pixata-blazor-calendar-range-end` | The days at the ends of the range (which also have `pixata-blazor-calendar-selected`) |
+| `pixata-blazor-calendar-range-middle` | The days between them |
+| `pixata-blazor-calendar-multiview` | The calendar, when `Views` is more than 1 |
+| `pixata-blazor-calendar-view`, `pixata-blazor-calendar-view-extra` | Each view, and the views after the first, which are hidden on a phone |
+| `pixata-blazor-calendar-caption` | The month (or year, decade or century) above each view, also hidden on a phone |
+| `pixata-blazor-calendar-title-multi`, `pixata-blazor-calendar-title-single` | The title for all the views, and the one for just the first, which is shown instead on a phone |

@@ -1,13 +1,19 @@
 @namespace Pixata.Blazor.Components
 
-<div class="@DatePickerCss.Join("pixata-blazor-calendar", Class)" id="@Id">
+<div class="@DatePickerCss.Join("pixata-blazor-calendar", Views > 1 ? "pixata-blazor-calendar-multiview" : null, SelectionMode == PixataCalendarSelectionMode.Range ? "pixata-blazor-calendar-range" : null, SelectionMode == PixataCalendarSelectionMode.Range && RangeStart is not null && RangeEnd is not null ? "pixata-blazor-calendar-range-complete" : null, Class)" id="@Id">
   <div class="pixata-blazor-calendar-header">
     <button type="button"
             class="pixata-blazor-button pixata-blazor-calendar-title"
             title="@(_view == TopView ? null : TitleTooltip)"
             disabled="@(_view == TopView)"
             @onclick="GoUp">
-      @Title
+      @if (Views > 1) {
+        @* The single title is shown instead when there is only room for one view, as on a phone *@
+        <span class="pixata-blazor-calendar-title-multi">@Title</span>
+        <span class="pixata-blazor-calendar-title-single">@PeriodTitle(_anchor)</span>
+      } else {
+        @Title
+      }
     </button>
     <span class="pixata-blazor-calendar-spacer"></span>
     <span class="pixata-blazor-calendar-nav">
@@ -20,50 +26,59 @@
       </button>
     </span>
   </div>
-  <div class="@DatePickerCss.Join("pixata-blazor-calendar-view", $"pixata-blazor-calendar-{_view.ToString().ToLowerInvariant()}view", ShowWeekNumbers && _view == PixataCalendarView.Month ? "pixata-blazor-calendar-with-week-numbers" : null)">
-    <table @ref="_table"
-           class="pixata-blazor-calendar-table"
-           role="grid"
-           tabindex="0"
-           aria-label="@Title"
-           @onkeydown="OnKeyDown"
-           @onfocus="() => _tableHasFocus = true"
-           @onblur="() => _tableHasFocus = false">
-      @if (_view == PixataCalendarView.Month) {
-        <thead>
-          <tr>
-            @if (ShowWeekNumbers) {
-              <th class="pixata-blazor-calendar-th pixata-blazor-calendar-week-number" scope="col"></th>
-            }
-            @foreach (string day in DayHeaders) {
-              <th class="pixata-blazor-calendar-th" scope="col" abbr="@day">@day[..1]</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @foreach (List<Cell?> row in MonthRows()) {
-            <tr>
-              @if (ShowWeekNumbers) {
-                <td class="pixata-blazor-calendar-td pixata-blazor-calendar-week-number">@WeekNumber(row)</td>
+  <div @ref="_viewsElement" class="pixata-blazor-calendar-views">
+    @for (int i = 0; i < Views; i++) {
+      int index = i;
+      DateTime period = Next(_anchor, index);
+      <div class="@DatePickerCss.Join("pixata-blazor-calendar-view", $"pixata-blazor-calendar-{_view.ToString().ToLowerInvariant()}view", ShowWeekNumbers && _view == PixataCalendarView.Month ? "pixata-blazor-calendar-with-week-numbers" : null, index > 0 ? "pixata-blazor-calendar-view-extra" : null)">
+        @if (Views > 1) {
+          <div class="pixata-blazor-calendar-caption">@PeriodTitle(period)</div>
+        }
+        <table @ref="_tables[index]"
+               class="pixata-blazor-calendar-table"
+               role="grid"
+               tabindex="@(index == FocusedViewIndex ? 0 : -1)"
+               aria-label="@PeriodTitle(period)"
+               @onkeydown="OnKeyDown"
+               @onfocus="() => _tableHasFocus = true"
+               @onblur="() => _tableHasFocus = false">
+          @if (_view == PixataCalendarView.Month) {
+            <thead>
+              <tr>
+                @if (ShowWeekNumbers) {
+                  <th class="pixata-blazor-calendar-th pixata-blazor-calendar-week-number" scope="col"></th>
+                }
+                @foreach (string day in DayHeaders) {
+                  <th class="pixata-blazor-calendar-th" scope="col" abbr="@day">@day[..1]</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @foreach (List<Cell?> row in MonthRows(period)) {
+                <tr>
+                  @if (ShowWeekNumbers) {
+                    <td class="pixata-blazor-calendar-td pixata-blazor-calendar-week-number">@WeekNumber(row)</td>
+                  }
+                  @foreach (Cell? cell in row) {
+                    @CellMarkup(cell)
+                  }
+                </tr>
               }
-              @foreach (Cell? cell in row) {
-                @CellMarkup(cell)
+            </tbody>
+          } else {
+            <tbody>
+              @foreach (List<Cell?> row in GridRows(period)) {
+                <tr>
+                  @foreach (Cell? cell in row) {
+                    @CellMarkup(cell)
+                  }
+                </tr>
               }
-            </tr>
+            </tbody>
           }
-        </tbody>
-      } else {
-        <tbody>
-          @foreach (List<Cell?> row in GridRows()) {
-            <tr>
-              @foreach (Cell? cell in row) {
-                @CellMarkup(cell)
-              }
-            </tr>
-          }
-        </tbody>
-      }
-    </table>
+        </table>
+      </div>
+    }
   </div>
 </div>
 

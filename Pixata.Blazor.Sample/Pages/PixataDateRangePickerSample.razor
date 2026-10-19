@@ -1,0 +1,84 @@
+@page "/pixata-daterangepicker"
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+@using Pixata.Blazor.Components
+
+<SitePageTitle>Pixata date range picker</SitePageTitle>
+
+<h3>Pixata date range picker</h3>
+
+<h4>Date range picker</h4>
+
+<p>Click either input to open the calendar, which shows two months side by side (one on a phone). The first date you pick is the start, and the second the end. You can also type in either input, and Alt+Down opens the calendar from the keyboard.</p>
+
+<PixataDateRangePicker @bind-StartValue="_start" @bind-EndValue="_end" Min="_min" Max="_max" ShowWeekNumbers="_weekNumbers" AllowReverse="_allowReverse"
+                       OnChange="RangeChanged" />
+<p>Start: @_start.ToString("dd MMM yyyy", CultureInfo.CurrentCulture), end: @_end.ToString("dd MMM yyyy", CultureInfo.CurrentCulture)</p>
+<p>Last OnChange: @(_lastChange ?? "none yet")</p>
+
+<label>
+  <input type="checkbox" @bind="_weekNumbers" />
+  Show week numbers
+</label>
+<label>
+  <input type="checkbox" @bind="_allowReverse" />
+  Allow reverse
+</label>
+
+<h4>Nullable, with placeholders, custom labels and clear buttons</h4>
+
+<PixataDateRangePicker @bind-StartValue="_nullableStart" @bind-EndValue="_nullableEnd" StartLabel="Check in" EndLabel="Check out"
+                       StartPlaceholder="Arrival" EndPlaceholder="Departure" ShowClearButton="true" DisabledDates="_disabledDates" />
+<p>Start: @(_nullableStart?.ToString("dd MMM yyyy", CultureInfo.CurrentCulture) ?? "null"), end: @(_nullableEnd?.ToString("dd MMM yyyy", CultureInfo.CurrentCulture) ?? "null")</p>
+
+<h4>DateOnly values, a custom format, and picking months</h4>
+
+<PixataDateRangePicker @bind-StartValue="_fromMonth" @bind-EndValue="_toMonth" Format="MMM yyyy" BottomView="PixataCalendarView.Year" View="PixataCalendarView.Year" />
+<p>Start: @_fromMonth, end: @_toMonth</p>
+
+<h4>In a form</h4>
+
+<EditForm Model="_form">
+  <DataAnnotationsValidator />
+  <PixataDateRangePicker @bind-StartValue="_form.From" @bind-EndValue="_form.To" StartLabel="From" EndLabel="To" />
+  <ValidationMessage For="() => _form.From" />
+  <ValidationMessage For="() => _form.To" />
+</EditForm>
+
+<h4>Disabled</h4>
+
+<PixataDateRangePicker @bind-StartValue="_start" @bind-EndValue="_end" Enabled="false" />
+
+<h4>Calendar picking a range</h4>
+
+<PixataCalendar SelectionMode="PixataCalendarSelectionMode.Range" @bind-RangeStart="_calendarStart" @bind-RangeEnd="_calendarEnd" Views="2" />
+<p>Start: @(_calendarStart?.ToString("dd MMM yyyy", CultureInfo.CurrentCulture) ?? "null"), end: @(_calendarEnd?.ToString("dd MMM yyyy", CultureInfo.CurrentCulture) ?? "null")</p>
+
+@code {
+  private DateTime _start = DateTime.Today.AddDays(-3);
+  private DateTime _end = DateTime.Today.AddDays(4);
+  private DateTime? _nullableStart;
+  private DateTime? _nullableEnd;
+  private DateOnly _fromMonth = new(2026, 1, 1);
+  private DateOnly _toMonth = new(2026, 6, 1);
+  private DateTime? _calendarStart;
+  private DateTime? _calendarEnd;
+  private readonly DateTime _min = new(2000, 1, 1);
+  private readonly DateTime _max = new(2030, 12, 31);
+  private readonly List<DateTime> _disabledDates = [DateTime.Today.AddDays(2), DateTime.Today.AddDays(3)];
+  private bool _weekNumbers;
+  private bool _allowReverse;
+  private string? _lastChange;
+  private readonly SampleForm _form = new();
+
+  private void RangeChanged(PixataDateRangePickerChangeEventArgs e) =>
+    _lastChange = $"{e.StartValue:dd MMM yyyy} to {e.EndValue:dd MMM yyyy}";
+
+  private class SampleForm {
+    [Required(ErrorMessage = "Please pick a start date")]
+    public DateTime? From { get; set; }
+
+    [Required(ErrorMessage = "Please pick an end date")]
+    public DateTime? To { get; set; }
+  }
+}
