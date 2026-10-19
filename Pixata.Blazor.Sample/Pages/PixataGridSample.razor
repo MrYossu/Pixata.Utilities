@@ -139,11 +139,11 @@
 
 <PixataGrid Data="Data" Size="_size" FilterMode="PixataGridFilterMode.FilterRow" Pageable="true" PageSize="5" Sortable="true">
   <GridColumns>
-    <PixataGridTextColumn Field="@nameof(GridSampleEmployee.FirstName)" />
+    <PixataTextGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" FilterOperators="_surnameOperators" />
-    <PixataGridDateColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
-    <PixataGridNumericColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
-    <PixataGridEnumColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataDateGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
+    <PixataNumericGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
+    <PixataEnumGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
     <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" Title="Manager" FilterCellTemplate="PixataGridBoolFilter.Filter(true)" />
   </GridColumns>
 </PixataGrid>

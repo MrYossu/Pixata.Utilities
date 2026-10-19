@@ -238,18 +238,18 @@ The full lists of operators are more than most users need, so there are four col
 
 | Column | Filter |
 | --- | --- |
-| `PixataGridTextColumn` | contains (the default), starts with, ends with |
-| `PixataGridNumericColumn` | equals (the default), less than, more than |
-| `PixataGridDateColumn` | before, on (the default), on or after |
-| `PixataGridEnumColumn` | Just the drop-down of values, filtering on equality, with no operator or clear button |
+| `PixataTextGridColumn` | contains (the default), starts with, ends with |
+| `PixataNumericGridColumn` | equals (the default), less than, more than |
+| `PixataDateGridColumn` | before, on (the default), on or after |
+| `PixataEnumGridColumn` | Just the drop-down of values, filtering on equality, with no operator or clear button |
 
 ```razor
 <PixataGrid Data="_people" FilterMode="PixataGridFilterMode.FilterRow">
   <GridColumns>
-    <PixataGridTextColumn Field="@nameof(Person.Name)" />
-    <PixataGridNumericColumn Field="@nameof(Person.Age)" />
-    <PixataGridDateColumn Field="@nameof(Person.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
-    <PixataGridEnumColumn Field="@nameof(Person.Department)" />
+    <PixataTextGridColumn Field="@nameof(Person.Name)" />
+    <PixataNumericGridColumn Field="@nameof(Person.Age)" />
+    <PixataDateGridColumn Field="@nameof(Person.DateOfBirth)" DisplayFormat="{0:dd MMM yyyy}" />
+    <PixataEnumGridColumn Field="@nameof(Person.Department)" />
   </GridColumns>
 </PixataGrid>
 ```

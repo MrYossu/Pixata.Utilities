@@ -13,8 +13,8 @@ public class PixataGridFilterListOperator {
 
 /// <summary>
 /// Short lists of filter operators, for a column's <see cref="PixataGridColumn{TItem}.FilterOperators"/>. These are used by
-/// <see cref="PixataGridTextColumn{TItem}"/>, <see cref="PixataGridNumericColumn{TItem}"/> and
-/// <see cref="PixataGridDateColumn{TItem}"/>, and can be replaced at startup to change the operators (or their text) everywhere
+/// <see cref="PixataTextGridColumn{TItem}"/>, <see cref="PixataNumericGridColumn{TItem}"/> and
+/// <see cref="PixataDateGridColumn{TItem}"/>, and can be replaced at startup to change the operators (or their text) everywhere
 /// </summary>
 public static class PixataGridFilterOperators {
   public static List<PixataGridFilterListOperator> StringOperators { get; set; } = [

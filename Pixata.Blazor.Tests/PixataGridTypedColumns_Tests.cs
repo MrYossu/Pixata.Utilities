@@ -56,11 +56,11 @@ public class PixataGridTypedColumns_Tests {
       .Add(g => g.Data, People())
       .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
       .Add(g => g.GridColumns, b => {
-        Column<PixataGridTextColumn<Person>>(b, "Name");
-        Column<PixataGridNumericColumn<Person>>(b, "Age");
+        Column<PixataTextGridColumn<Person>>(b, "Name");
+        Column<PixataNumericGridColumn<Person>>(b, "Age");
         Column<PixataGridColumn<Person>>(b, "Manager", c => c.AddAttribute(2, "FilterCellTemplate", PixataGridBoolFilter.Filter(showClearButton)));
-        Column<PixataGridEnumColumn<Person>>(b, "Pet");
-        Column<PixataGridDateColumn<Person>>(b, "Born");
+        Column<PixataEnumGridColumn<Person>>(b, "Pet");
+        Column<PixataDateGridColumn<Person>>(b, "Born");
       }));
 
   private static string Names(IRenderedComponent<PixataGrid<Person>> grid) =>

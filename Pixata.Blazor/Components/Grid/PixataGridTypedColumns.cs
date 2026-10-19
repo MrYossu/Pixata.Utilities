@@ -5,8 +5,8 @@ namespace Pixata.Blazor.Components.Grid;
 /// <summary>
 /// A column for text, whose filter offers "contains", "starts with" and "ends with", starting with "contains"
 /// </summary>
-public class PixataGridTextColumn<TItem> : PixataGridColumn<TItem> {
-  public PixataGridTextColumn() {
+public class PixataTextGridColumn<TItem> : PixataGridColumn<TItem> {
+  public PixataTextGridColumn() {
     FilterOperators = PixataGridFilterOperators.StringOperators;
     DefaultFilterOperator = GridFilterOperator.Contains;
   }
@@ -15,16 +15,16 @@ public class PixataGridTextColumn<TItem> : PixataGridColumn<TItem> {
 /// <summary>
 /// A column for numbers, whose filter offers "equals", "less than" and "more than"
 /// </summary>
-public class PixataGridNumericColumn<TItem> : PixataGridColumn<TItem> {
-  public PixataGridNumericColumn() =>
+public class PixataNumericGridColumn<TItem> : PixataGridColumn<TItem> {
+  public PixataNumericGridColumn() =>
     FilterOperators = PixataGridFilterOperators.NumericOperators;
 }
 
 /// <summary>
 /// A column for dates, whose filter offers "before", "on" and "on or after"
 /// </summary>
-public class PixataGridDateColumn<TItem> : PixataGridColumn<TItem> {
-  public PixataGridDateColumn() =>
+public class PixataDateGridColumn<TItem> : PixataGridColumn<TItem> {
+  public PixataDateGridColumn() =>
     FilterOperators = PixataGridFilterOperators.DateOperators;
 }
 
@@ -32,8 +32,8 @@ public class PixataGridDateColumn<TItem> : PixataGridColumn<TItem> {
 /// A column for an enum, whose filter row cell is just a drop-down of the values, filtering on equality, with no operator or
 /// clear button
 /// </summary>
-public class PixataGridEnumColumn<TItem> : PixataGridColumn<TItem> {
-  public PixataGridEnumColumn() {
+public class PixataEnumGridColumn<TItem> : PixataGridColumn<TItem> {
+  public PixataEnumGridColumn() {
     DefaultFilterOperator = GridFilterOperator.IsEqualTo;
     ShowFilterCellButtons = false;
   }
