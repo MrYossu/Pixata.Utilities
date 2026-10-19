@@ -37,6 +37,9 @@ internal static class PixataSchedulerJs {
     }
     catch (TaskCanceledException) {
     }
+    catch (JSException) {
+      // The element passed in has gone from the page, so there's nothing to do
+    }
     catch (InvalidOperationException) {
     }
   }
@@ -53,6 +56,9 @@ internal static class PixataSchedulerJs {
     catch (JSDisconnectedException) {
     }
     catch (TaskCanceledException) {
+    }
+    catch (JSException) {
+      // The element passed in has gone from the page, so there's nothing to do
     }
     catch (InvalidOperationException) {
     }

@@ -35,6 +35,9 @@ internal static class PixataDropDownJs {
     }
     catch (TaskCanceledException) {
     }
+    catch (JSException) {
+      // The element passed in has gone from the page, so there's nothing to do
+    }
     catch (ObjectDisposedException) {
     }
     catch (InvalidOperationException) {

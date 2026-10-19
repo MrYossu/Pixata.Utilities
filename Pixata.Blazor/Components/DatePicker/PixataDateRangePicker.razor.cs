@@ -235,6 +235,8 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
         }
       } catch (JSException) {
         // The popup was closed again before it could be positioned
+      } catch (JSDisconnectedException) {
+        // The page has gone
       }
     }
   }

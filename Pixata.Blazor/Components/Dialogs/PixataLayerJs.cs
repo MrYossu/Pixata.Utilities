@@ -38,6 +38,9 @@ internal static class PixataLayerJs {
     }
     catch (TaskCanceledException) {
     }
+    catch (JSException) {
+      // The element passed in has gone from the page, so there's nothing to do
+    }
     catch (InvalidOperationException) {
       // JavaScript interop calls cannot be issued while prerendering
     }
@@ -55,6 +58,9 @@ internal static class PixataLayerJs {
     catch (JSDisconnectedException) {
     }
     catch (TaskCanceledException) {
+    }
+    catch (JSException) {
+      // The element passed in has gone from the page, so there's nothing to do
     }
     catch (InvalidOperationException) {
     }

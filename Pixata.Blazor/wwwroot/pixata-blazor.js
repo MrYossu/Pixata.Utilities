@@ -197,7 +197,7 @@ const dateInputs = new WeakMap();
 const dateInputKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete", "Home", "End"]);
 
 function applyDateInputState(input, state) {
-  if (!state) {
+  if (!input || !state) {
     return;
   }
   input.value = state.text;
@@ -207,6 +207,10 @@ function applyDateInputState(input, state) {
 }
 
 export function initDateInput(input, dotNet) {
+  // The component can be removed while the module is being imported, in which case its input has already gone
+  if (!input) {
+    return;
+  }
   const call = async (method, ...args) => applyDateInputState(input, await dotNet.invokeMethodAsync(method, ...args));
   const handlers = {
     keydown: e => {
@@ -272,6 +276,9 @@ const navigationKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown
 const keyBlockers = new WeakMap();
 
 export function preventNavigationKeys(element) {
+  if (!element) {
+    return;
+  }
   const handler = e => {
     if (navigationKeys.has(e.key)) {
       e.preventDefault();

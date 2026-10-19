@@ -165,6 +165,7 @@ public partial class PixataCalendar : IAsyncDisposable {
   private bool? _lastSelectingRangeEndParameter;
   private bool _selectingEnd;
   private bool _tableHasFocus;
+  private bool _disposed;
 
   private static DateTimeFormatInfo Info =>
     CultureInfo.CurrentCulture.DateTimeFormat;
@@ -199,8 +200,16 @@ public partial class PixataCalendar : IAsyncDisposable {
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (firstRender) {
       try {
-        _module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
+        IJSObjectReference module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
+        // The calendar can be removed (eg the date picker's popup closed) while the module is being imported
+        if (_disposed) {
+          await module.DisposeAsync();
+          return;
+        }
+        _module = module;
         await _module.InvokeVoidAsync("preventNavigationKeys", _viewsElement);
+      } catch (JSException) {
+        // The calendar has gone from the page
       } catch (JSDisconnectedException) {
         // The page has gone
       }
@@ -550,10 +559,13 @@ public partial class PixataCalendar : IAsyncDisposable {
       cell.Focused && _tableHasFocus ? "pixata-blazor-calendar-focus" : null);
 
   public async ValueTask DisposeAsync() {
+    _disposed = true;
     if (_module is not null) {
       try {
         await _module.InvokeVoidAsync("allowNavigationKeys", _viewsElement);
         await _module.DisposeAsync();
+      } catch (JSException) {
+        // The calendar has already gone
       } catch (JSDisconnectedException) {
         // The circuit has gone
       }

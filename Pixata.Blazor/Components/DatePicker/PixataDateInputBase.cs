@@ -128,6 +128,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   private DateTime? _lastValue;
   private DateTime? _valueAtFocus;
   private bool _initialised;
+  private bool _disposed;
   private FieldIdentifier? _field;
 
   // The text the input is first rendered with. It never changes, so Blazor never touches the input's value again, which
@@ -185,10 +186,22 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
 
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (firstRender) {
-      _module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
-      _dotNet = DotNetObjectReference.Create(this);
-      await _module.InvokeVoidAsync("initDateInput", InputElement, _dotNet);
-      _initialised = true;
+      try {
+        IJSObjectReference module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
+        // The user can leave the page while the module is being imported, in which case the input has already gone
+        if (_disposed) {
+          await module.DisposeAsync();
+          return;
+        }
+        _module = module;
+        _dotNet = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("initDateInput", InputElement, _dotNet);
+        _initialised = true;
+      } catch (JSException) {
+        // The input has gone from the page
+      } catch (JSDisconnectedException) {
+        // So has the page
+      }
     }
   }
 
@@ -288,7 +301,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   }
 
   protected async Task PushState() {
-    if (_module is not null) {
+    if (_module is not null && !_disposed) {
       try {
         await _module.InvokeVoidAsync("setDateInputState", InputElement, State());
       } catch (JSException) {
@@ -317,10 +330,13 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   }
 
   public virtual async ValueTask DisposeAsync() {
+    _disposed = true;
     if (_module is not null) {
       try {
         await _module.InvokeVoidAsync("disposeDateInput", InputElement);
         await _module.DisposeAsync();
+      } catch (JSException) {
+        // The input has already gone
       } catch (JSDisconnectedException) {
         // The circuit has gone, so there's nothing to clean up
       }
