@@ -8,7 +8,7 @@
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.AspNetCore.Pdf.WkHtmlToPdf</Product>
-    <Description>Obsolete wkhtmltopdf PDF converter for Pixata.AspNetCore's DocumentTemplateHelper. Use Pixata.AspNetCore.Pdf.Telerik instead</Description>
+    <Description>Obsolete wkhtmltopdf PDF converter for Pixata.AspNetCore's DocumentTemplateHelper. Use Pixata.AspNetCore.Pdf.Playwright instead</Description>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf</PackageProjectUrl>
