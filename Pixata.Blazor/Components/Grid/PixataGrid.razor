@@ -549,7 +549,7 @@
               @onmouseover="e => DragOver(item, column, e)">
             @if (column is PixataGridCommandColumn<TItem> commandColumn) {
               <CascadingValue Value="RowContext(item)">
-                @commandColumn.ChildContent
+                @commandColumn.ChildContent?.Invoke(item!)
               </CascadingValue>
             } else if (column is PixataGridDragColumn<TItem>) {
               @if (RowDraggable) {
@@ -593,7 +593,7 @@
       return
         @<td style="@column.StickyStyle" class="@Css.Join(column.CellClass, "pixata-blazor-grid-command-cell")">
           <CascadingValue Value="RowContext(_isNew ? editItem : _originalEditItem!)">
-            @commandColumn.ChildContent
+            @commandColumn.ChildContent?.Invoke((_isNew ? editItem : _originalEditItem)!)
           </CascadingValue>
         </td>;
     }
@@ -621,7 +621,7 @@
         @if (column is PixataGridCommandColumn<TItem> commandColumn) {
           <td style="@column.StickyStyle" class="@Css.Join(column.CellClass, "pixata-blazor-grid-command-cell")">
             <CascadingValue Value="RowContext(_isNew ? editItem : _originalEditItem!)">
-              @commandColumn.ChildContent
+              @commandColumn.ChildContent?.Invoke((_isNew ? editItem : _originalEditItem)!)
             </CascadingValue>
           </td>
         } else if (CanEdit(column)) {

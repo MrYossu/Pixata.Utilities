@@ -74,7 +74,7 @@ public class PixataGridEditing_Tests {
             b.CloseComponent();
           }
           b.OpenComponent<PixataGridCommandColumn<Person>>(30);
-          b.AddAttribute(31, "ChildContent", (RenderFragment)(c => {
+          b.AddAttribute(31, "ChildContent", (RenderFragment<object>)(_ => c => {
             Button(c, 0, "Edit");
             Button(c, 10, "Delete");
             Button(c, 20, "Save", true);
@@ -237,7 +237,7 @@ public class PixataGridEditing_Tests {
       .Add(g => g.Data, _people)
       .Add(g => g.GridColumns, b => {
         b.OpenComponent<PixataGridCommandColumn<Person>>(0);
-        b.AddAttribute(1, "ChildContent", (RenderFragment)(c => {
+        b.AddAttribute(1, "ChildContent", (RenderFragment<object>)(_ => c => {
           c.OpenComponent<PixataGridCommandButton<Person>>(0);
           c.AddAttribute(1, "OnClick", EventCallback.Factory.Create<PixataGridCommandEventArgs<Person>>(this, args => clicked = args.Item.Name));
           c.AddAttribute(2, "ChildContent", (RenderFragment)(t => t.AddContent(0, "Hello")));
@@ -249,5 +249,51 @@ public class PixataGridEditing_Tests {
     CommandButton(Row(grid, 1), "Hello").Click();
 
     Assert.AreEqual("Bob", clicked);
+  }
+
+  // A command column whose content shows the row's name, an Edit button for everyone, and a Delete button only for those
+  // over 35, as a page might
+  private IRenderedComponent<PixataGrid<Person>> RenderWithRowContent() =>
+    _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, _people)
+      .Add(g => g.EditMode, PixataGridEditMode.Inline)
+      .Add(g => g.GridColumns, b => {
+        b.OpenComponent<PixataGridColumn<Person>>(0);
+        b.AddAttribute(1, "Field", nameof(Person.Name));
+        b.CloseComponent();
+        b.OpenComponent<PixataGridCommandColumn<Person>>(10);
+        b.AddAttribute(11, "ChildContent", (RenderFragment<object>)(row => c => {
+          Person person = (Person)row;
+          c.OpenElement(0, "span");
+          c.AddAttribute(1, "class", "who");
+          c.AddContent(2, person.Name);
+          c.CloseElement();
+          Button(c, 10, "Edit");
+          if (person.Age > 35) {
+            Button(c, 20, "Delete");
+          }
+        }));
+        b.CloseComponent();
+      }));
+
+  [TestMethod]
+  public void CommandColumnContent_IsGivenTheRowsItem() {
+    IRenderedComponent<PixataGrid<Person>> grid = RenderWithRowContent();
+
+    Assert.AreEqual("Alice", Row(grid, 0).QuerySelector(".who")!.TextContent);
+    Assert.AreEqual("Bob", Row(grid, 1).QuerySelector(".who")!.TextContent);
+    Assert.AreEqual("Edit", string.Join(" ", Row(grid, 0).QuerySelectorAll("button").Select(b => b.TextContent.Trim())));
+    Assert.AreEqual("Edit Delete", string.Join(" ", Row(grid, 1).QuerySelectorAll("button").Select(b => b.TextContent.Trim())));
+  }
+
+  [TestMethod]
+  public void CommandColumnContent_WhileEditing_IsGivenTheRowAsItWas() {
+    IRenderedComponent<PixataGrid<Person>> grid = RenderWithRowContent();
+
+    CommandButton(Row(grid, 0), "Edit").Click();
+    Row(grid, 0).QuerySelector("input")!.Input("Alicia");
+
+    Assert.IsTrue(Row(grid, 0).ClassList.Contains("pixata-blazor-grid-edit-row"));
+    Assert.AreEqual("Alice", Row(grid, 0).QuerySelector(".who")!.TextContent);
   }
 }

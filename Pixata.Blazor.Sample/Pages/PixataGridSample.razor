@@ -271,6 +271,37 @@
   </GridColumns>
 </PixataGrid>
 
+<h4>Command columns that use the row</h4>
+
+<p>
+  The command column's content is given the row's item, so the buttons can depend on the row. Here managers can't be deleted,
+  and everyone else has a Promote button of the page's own, alongside the grid's Edit and Delete commands.
+</p>
+
+<PixataGrid TItem="GridSampleEditableEmployee" Data="_pixataRowCommands" Size="_size" Pageable="true" PageSize="5" ConfirmDelete="true"
+            OnUpdate="RowCommandsUpdate" OnDelete="RowCommandsDelete">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.FirstName)" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.Surname)" />
+    <PixataGridColumn Field="@nameof(GridSampleEditableEmployee.IsManager)" Title="Manager" />
+    <PixataGridCommandColumn Width="280px" Context="row">
+      @{
+        GridSampleEditableEmployee employee = (GridSampleEditableEmployee)row;
+      }
+      <PixataGridCommandButton Command="Edit" Icon="PixataGridIcon.Pencil">Edit</PixataGridCommandButton>
+      @if (employee.IsManager) {
+        <span class="ml-2">Managers can't be deleted</span>
+      } else {
+        <PixataGridCommandButton Command="Delete" Icon="PixataGridIcon.Trash">Delete</PixataGridCommandButton>
+        <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => Promote(employee)">Promote</button>
+      }
+      <PixataGridCommandButton Command="Save" Icon="PixataGridIcon.Save" ShowInEdit="true">Save</PixataGridCommandButton>
+      <PixataGridCommandButton Command="Cancel" Icon="PixataGridIcon.Cancel" ShowInEdit="true">Cancel</PixataGridCommandButton>
+    </PixataGridCommandColumn>
+  </GridColumns>
+</PixataGrid>
+<p>@_rowCommandMessage</p>
+
 <h4>Grouping and aggregates</h4>
 
 <p>Drag a column header into the panel above the grid to group by it. The salary column has aggregates, shown in group footers and the grid's footer.</p>
@@ -734,6 +765,22 @@
 
   private void PixataDelete(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) =>
     _pixataEditable.RemoveAll(e => e.Id == args.Item.Id);
+
+  private List<GridSampleEditableEmployee> _pixataRowCommands = GridSampleEditableEmployee.Some();
+  private string _rowCommandMessage = "";
+
+  private void RowCommandsUpdate(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) =>
+    _pixataRowCommands[_pixataRowCommands.FindIndex(e => e.Id == args.Item.Id)] = args.Item;
+
+  private void RowCommandsDelete(PixataGridCommandEventArgs<GridSampleEditableEmployee> args) {
+    _pixataRowCommands.RemoveAll(e => e.Id == args.Item.Id);
+    _rowCommandMessage = $"Deleted {args.Item.FirstName} {args.Item.Surname}.";
+  }
+
+  private void Promote(GridSampleEditableEmployee employee) {
+    employee.IsManager = true;
+    _rowCommandMessage = $"Promoted {employee.FirstName} {employee.Surname}.";
+  }
 
   private IEnumerable<GridSampleEmployee> _pixataSelected = [];
   private IEnumerable<PixataGridSelectedCell<GridSampleEmployee>> _selectedCells = [];
