@@ -39,4 +39,8 @@
     <ProjectReference Include="..\Pixata.AspNetCore\Pixata.AspNetCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Pixata.AspNetCore.Pdf.Playwright.Tests" />
+  </ItemGroup>
+
 </Project>

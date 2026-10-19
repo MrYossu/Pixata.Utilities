@@ -26,7 +26,7 @@ dotnet test Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --filter "Ful
 
 **Solution-wide `dotnet restore`/`build`/`test` needs Telerik feed credentials.** `nuget.config` adds `https://nuget.telerik.com` with `%TELERIK_USERNAME%`/`%TELERIK_PASSWORD%`. Without them the feed answers 401 (not 404) for *any* package it is asked about, which is a hard `NU1301` failure rather than a skipped source — so a solution-level restore fails even for projects that have nothing to do with Telerik. Prefer per-project commands unless the Telerik env vars are set.
 
-Test projects are MSTest (`Pixata.Extensions.Tests`, `Pixata.Blazor.Tests`, `Pixata.SimilarityChooser.Tests`); they target `net8.0` only, even where the package under test multi-targets.
+Test projects are MSTest (`Pixata.Extensions.Tests`, `Pixata.Blazor.Tests`, `Pixata.SimilarityChooser.Tests`, `Pixata.AspNetCore.Pdf.Playwright.Tests`); they target `net8.0` only, even where the package under test multi-targets.
 
 ## Package layout and dependency direction
 

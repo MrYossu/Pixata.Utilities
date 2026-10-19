@@ -23,7 +23,7 @@ public partial class PlaywrightPdfConverter(PlaywrightPdfOptions options, IHostE
   private const string NoBaseUrl = "https://pixata-pdf.invalid/";
 
   // A 1x1 transparent PNG, used in place of an image that mustn't be loaded, so that it leaves a gap rather than a broken image icon
-  private static readonly byte[] BlankImage = System.Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==");
+  internal static readonly byte[] BlankImage = System.Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
 
   private readonly SemaphoreSlim _launchLock = new(1, 1);
   private readonly SemaphoreSlim _conversionLock = new(options.MaxConcurrentConversions, options.MaxConcurrentConversions);

@@ -229,6 +229,12 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    - name: Run Tests - Pixata.AspNetCore.Pdf.Playwright.Tests
+      run: dotnet test Pixata.AspNetCore.Pdf.Playwright.Tests/Pixata.AspNetCore.Pdf.Playwright.Tests.csproj --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
 # ***************** PUBLISHING **************** #
 
 # nuget pushes moved to release.yml workflow
