@@ -4187,6 +4187,37 @@
   white-space: nowrap;
 }
 
+/* An icon-only drop-down list is a square as high as a normal one: the icon sits in a box one line high and wide, with the
+   same padding all round as the text of a normal one has above and below it */
+.pixata-blazor-dropdownlist.pixata-blazor-dropdownlist-icon-only {
+  flex: none;
+  width: auto;
+}
+
+.pixata-blazor-dropdownlist-icon {
+  box-sizing: content-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height));
+  width: 1lh;
+  height: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height));
+  height: 1lh;
+  padding: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-input-sm .pixata-blazor-dropdownlist-icon {
+  padding: calc(var(--pixata-blazor-spacing) * .5);
+}
+
+.pixata-blazor-input-lg .pixata-blazor-dropdownlist-icon {
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-dropdownlist-icon .pixata-blazor-dropdown-loading {
+  margin: 0;
+}
+
 /* The arrow of the drop-down list is part of the button, so has no background or border of its own */
 .pixata-blazor-dropdownlist .pixata-blazor-input-button,
 .pixata-blazor-dropdownlist .pixata-blazor-input-button:hover {

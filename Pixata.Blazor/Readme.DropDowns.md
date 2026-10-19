@@ -141,6 +141,33 @@ Removing a tag (with its &times; button, or Backspace in the empty text box) rem
 </PixataDropDownList>
 ```
 
+## Icon-only
+
+Set `Icon` on a `PixataDropDownList` to show it as just an icon, in a small square box, rather than a box showing the selected item's text. Use it where there isn't room for the text, and the selected value doesn't need to be seen all the time, such as an operator picker in a narrow filter cell...
+
+```razor
+@* A PixataSvgIcon... *@
+<PixataDropDownList Data="@_views" @bind-Value="@_view" Icon="PixataSvgIcons.MoreVertical" AriaLabel="View" />
+
+@* ...or the CSS classes of an icon font *@
+<PixataDropDownList Data="@_operators" @bind-Value="@_operator" Icon="@("fas fa-filter")" AriaLabel="Operator" />
+```
+
+For anything else, use `IconTemplate` in place of `Icon`. It can depend on the value, for example to show which operator is selected...
+
+```razor
+<PixataDropDownList Data="@_operators" @bind-Value="@_operator" AriaLabel="Operator">
+  <IconTemplate><strong>@(_operator == "Greater than" ? ">" : "<")</strong></IconTemplate>
+</PixataDropDownList>
+```
+
+How it works...
+
+- The box shows only the icon. It has no text, `DefaultText`, clear button or arrow, is as high as a normal drop-down list and as wide as it is high. `Size`, `Rounded` and `FillMode` work as usual
+- The list opens as normal when the box is clicked (or with Alt+Down, Enter or Space), and shows the items with their text, with the selected one marked. The keyboard works as for any drop-down list, so the arrow keys change the value while it's closed. `Filterable` works too, as the filter box is in the popup
+- As the selected item can't be seen, its text is the box's tooltip, and is added to its accessible name, after `AriaLabel` if you set one (eg "Operator: Less than"), so both mouse and screen reader users can tell what's selected. Set `AriaLabel` to say what the list is for. A `title` attribute of your own replaces the tooltip
+- The popup is as wide as its items need (it is only ever at least as wide as the box), so it isn't squashed to the width of the icon. Set `PopupSettings.Width` to fix its width. `Width` only affects the box, and you won't normally need it
+
 ## Virtual scrolling
 
 For long lists, set `ScrollMode="PixataDropDownScrollMode.Virtual"`, and only the items that can be seen are rendered as the list scrolls. Every item must be the same height, given by `ItemHeight` (in pixels, default 28, which suits the medium size and plain text). If your `ItemTemplate` makes the items taller, or you use the large size, set `ItemHeight` to match.
@@ -258,7 +285,9 @@ Only on the `PixataDropDownList`...
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | `DefaultText` | `string?` | | The text shown when nothing is selected, which is also the first option in the list (choosing it clears the value) |
-| `ShowClearButton` | `bool` | `false` | Whether to show a button that clears the value |
+| `ShowClearButton` | `bool` | `false` | Whether to show a button that clears the value. Not shown in an icon-only list |
+| `Icon` | `object?` | | Shows the list as just this icon (see [icon-only](#icon-only)): a `PixataSvgIcon` (see `PixataSvgIcons`), or the CSS class(es) of an icon font |
+| `IconTemplate` | `RenderFragment?` | | Your own content for an icon-only list, in place of `Icon` |
 | `FilterPlaceholder` | `string?` | | The placeholder of the filter box |
 | `FilterDebounceDelay` | `int` | `150` | Milliseconds to wait after the user stops typing in the filter box before raising `OnRead` |
 
@@ -317,6 +346,8 @@ The components use the shared input, popup and list classes from [pixata.css](Re
 | `pixata-blazor-dropdown-readonly` | Added to the outer element when `ReadOnly` |
 | `pixata-blazor-dropdownlist-value`, `pixata-blazor-input-value-text` | The drop-down list's box, and the selected item's text in it |
 | `pixata-blazor-dropdownlist-default-text` | The text in the drop-down list's box when it shows `DefaultText` |
+| `pixata-blazor-dropdownlist-icon-only` | Added to the drop-down list's outer element when it has an `Icon` or `IconTemplate` |
+| `pixata-blazor-dropdownlist-icon` | The box around the icon in an icon-only drop-down list |
 | `pixata-blazor-combobox-input`, `pixata-blazor-multiselect-input` | The text boxes |
 | `pixata-blazor-dropdownlist-button`, `pixata-blazor-combobox-button`, `pixata-blazor-multiselect-button` | The arrow buttons |
 | `pixata-blazor-clear-value` | The clear button |

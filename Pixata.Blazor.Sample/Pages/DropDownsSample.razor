@@ -58,6 +58,36 @@
   </ChildContent>
 </ComponentSample>
 
+<ComponentSample Title="Icon-only">
+  <Description>
+    With <code>Icon</code> (or <code>IconTemplate</code>), the drop-down list is a small square showing just the icon, for
+    where there isn't room for the selected item's text. The list opens as normal, and the selected item is the box's
+    tooltip and accessible name (hover over one to see it). The first is a filter like the ones in a grid's filter row, which
+    has to fit in a narrow column. Its <code>IconTemplate</code> shows which operator is selected.
+  </Description>
+  <ChildContent>
+    <div style="display: flex; gap: 4px; align-items: center; width: 230px;">
+      <span class="pixata-blazor-input pixata-blazor-input-md pixata-blazor-rounded-md pixata-blazor-input-solid">
+        <input type="number" class="pixata-blazor-input-inner" @bind="_iconAmount" placeholder="Amount" aria-label="Amount" />
+      </span>
+      <PixataDropDownList Data="@AmountOperators" @bind-Value="@_iconOperator" AriaLabel="Operator">
+        <IconTemplate><strong>@(_iconOperator == "Greater than" ? ">" : "<")</strong></IconTemplate>
+      </PixataDropDownList>
+      <button type="button" class="pixata-blazor-button pixata-blazor-button-md pixata-blazor-rounded-md pixata-blazor-button-solid pixata-blazor-button-base pixata-blazor-icon-button" title="Clear" @onclick="() => _iconAmount = null">
+        <PixataIcon Icon="PixataSvgIcons.X" />
+      </button>
+    </div>
+    <p class="mt-2"><small>@(_iconAmount is null ? "No filter" : $"{_iconOperator} {_iconAmount}")</small></p>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <PixataDropDownList Data="@Fruit" @bind-Value="@_iconFruit" Icon="PixataSvgIcons.MoreVertical" AriaLabel="Fruit" Size="sm" />
+      <PixataDropDownList Data="@Fruit" @bind-Value="@_iconFruit" Icon="PixataSvgIcons.MoreVertical" AriaLabel="Fruit" />
+      <PixataDropDownList Data="@Fruit" @bind-Value="@_iconFruit" Icon="@("fas fa-apple-alt")" AriaLabel="Fruit" Size="lg" />
+      <PixataDropDownList Data="@Fruit" @bind-Value="@_iconFruit" Icon="@("fas fa-apple-alt")" AriaLabel="Fruit" FillMode="flat" Filterable="true" />
+      <small>Value: @(_iconFruit ?? "(null)")</small>
+    </div>
+  </ChildContent>
+</ComponentSample>
+
 <h4 class="mt-4">Combo box</h4>
 
 <ComponentSample Title="Primitive data">
@@ -201,6 +231,10 @@
 @code {
 
   private string? _fruit;
+  private string? _iconFruit = "Banana";
+  private decimal? _iconAmount;
+  private string _iconOperator = "Less than";
+  private static readonly List<string> AmountOperators = ["Less than", "Greater than"];
   private int _countryId = 16;
   private int _templatedId = 8;
 

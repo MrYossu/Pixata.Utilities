@@ -460,7 +460,7 @@ To select cells rather than rows, set the selection type in the grid's settings,
 
 ## Editing
 
-Set `EditMode` to `Inline` or `Popup`, add a `PixataGridCommandColumn` with the buttons you want, and handle the events that change your data...
+Set `EditMode` to `Inline` or `Popup`, add a `PixataGridCommandColumn` with the buttons you want (see [Using the row in a command column](#using-the-row-in-a-command-column) for buttons that depend on the row), and handle the events that change your data...
 
 ```razor
 <PixataGrid TItem="Person" Data="_people" EditMode="PixataGridEditMode.Inline" ConfirmDelete="true"
@@ -510,6 +510,34 @@ Each cell is saved with `OnUpdate`, whose `args.Field` and `args.Value` say whic
 ### Command buttons
 
 `PixataGridCommandButton` runs one of the built-in commands, `Add`, `Edit`, `Save`, `Cancel` or `Delete`. For anything else, leave out `Command` and handle `OnClick`, which is given the row's item. In a command column, a button shows when the row isn't being edited, or, with `ShowInEdit="true"`, when it is. `Icon` takes one of the `PixataGridIcon` values (or use `IconTemplate` for your own), and `ThemeColor="primary"` makes it stand out.
+
+### Using the row in a command column
+
+The content of a `PixataGridCommandColumn` is a template that's given the row's item, as an `object` (as in Telerik's grid, and as a column's `Template` is). So the buttons can depend on the row, and you can put anything else that needs the row in the column, such as a button of your own, a link or one of your components. You can mix these freely with `PixataGridCommandButton`s, which still know which row they're in. Cast the context to your type to use it...
+
+```razor
+<PixataGridCommandColumn Width="220px" Context="row">
+  @{
+    Invoice invoice = (Invoice)row;
+  }
+  <PixataGridCommandButton Command="Edit" Icon="PixataGridIcon.Pencil">Edit</PixataGridCommandButton>
+  @if (invoice.IsPaid) {
+    @* A button of your own, which acts on the row *@
+    <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => ShowReceipt(invoice)">Receipt</button>
+  } else {
+    @* Only unpaid invoices can be deleted, with the grid's own Delete command (and ConfirmDelete, if it's set) *@
+    <PixataGridCommandButton Command="Delete" Icon="PixataGridIcon.Trash">Delete</PixataGridCommandButton>
+  }
+  <PixataGridCommandButton Command="Save" Icon="PixataGridIcon.Save" ShowInEdit="true">Save</PixataGridCommandButton>
+  <PixataGridCommandButton Command="Cancel" Icon="PixataGridIcon.Cancel" ShowInEdit="true">Cancel</PixataGridCommandButton>
+</PixataGridCommandColumn>
+```
+
+A few things to know...
+
+- Command columns that don't use the context carry on working as they are. The only time you need to do anything is when a template inside the column also uses the name `context` (for example a `PixataDropDownList` with an `ItemTemplate`), where Razor complains that it is used twice. Rename the column's with `Context="row"`, as above, as you would with Telerik
+- While the row is being edited (inline, in the popup or a cell at a time), the context is the row as it was before editing started, not the copy being edited. When a new row is being added, it is the new item
+- Your own controls are shown whether or not the row is being edited. To show them only for one or the other, or to tell whether the row is new, pick up the `PixataGridRowContext<TItem>` that the grid cascades to the column's content (it has `Item`, `IsEditing` and `IsNew`), in a component of your own with `[CascadingParameter] public PixataGridRowContext<Invoice>? RowContext { get; set; }`
 
 ### Popup editing
 

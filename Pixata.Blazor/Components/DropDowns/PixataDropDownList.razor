@@ -5,12 +5,14 @@
 
 @*
   A list the user picks one item from. The selected item is shown in a button-like box; clicking it (or pressing Alt+Down,
-  Enter or Space) opens the list
+  Enter or Space) opens the list. With an Icon (or IconTemplate), the box is a square showing just the icon, and the selected
+  item's text is its tooltip and accessible name
 *@
 <span @ref="Element"
+      title="@(IsIconOnly ? IconOnlyText : null)"
       @attributes="AdditionalAttributes"
       id="@Id"
-      class="@MainClasses("pixata-blazor-picker")"
+      class="@MainClasses("pixata-blazor-picker", IsIconOnly ? "pixata-blazor-dropdownlist-icon-only" : null)"
       style="@WidthStyle"
       tabindex="@(Enabled ? (TabIndex ?? 0) : -1)"
       role="combobox"
@@ -18,7 +20,7 @@
       aria-expanded="@AriaExpanded"
       aria-controls="@(IsOpen ? ListId : null)"
       aria-activedescendant="@(ShowPopupFilter ? null : ActiveDescendant)"
-      aria-label="@AriaLabel"
+      aria-label="@EffectiveAriaLabel"
       aria-labelledby="@AriaLabelledBy"
       aria-describedby="@AriaDescribedBy"
       aria-disabled="@(Enabled ? null : "true")"
@@ -29,21 +31,33 @@
       @onclick="HandleClick"
       @onkeydown="HandleKeyDown"
       @onkeydown:stopPropagation="IsOpen">
-  <span class="pixata-blazor-input-inner pixata-blazor-dropdownlist-value">
-    @if (HasSelectedItem && ValueTemplate is not null) {
-      @ValueTemplate(SelectedItem!)
-    } else {
-      <span class="@PixataCss.Classes("pixata-blazor-input-value-text", HasSelectedItem ? null : "pixata-blazor-dropdownlist-default-text")">@DisplayText</span>
+  @if (IsIconOnly) {
+    <span class="pixata-blazor-dropdownlist-icon" aria-hidden="true">
+      @if (Loading) {
+        @LoadingFragment
+      } else if (IconTemplate is not null) {
+        @IconTemplate
+      } else {
+        <PixataIcon Icon="@Icon" />
+      }
+    </span>
+  } else {
+    <span class="pixata-blazor-input-inner pixata-blazor-dropdownlist-value">
+      @if (HasSelectedItem && ValueTemplate is not null) {
+        @ValueTemplate(SelectedItem!)
+      } else {
+        <span class="@PixataCss.Classes("pixata-blazor-input-value-text", HasSelectedItem ? null : "pixata-blazor-dropdownlist-default-text")">@DisplayText</span>
+      }
+    </span>
+    @LoadingFragment
+    @if (ShowClearButton && HasSelectedItem && Enabled && !ReadOnly) {
+      <span class="pixata-blazor-clear-value" role="button" aria-label="Clear" title="Clear" @onclick="HandleClear" @onclick:stopPropagation="true">
+        <PixataIcon Icon="@PixataSvgIcons.X" />
+      </span>
     }
-  </span>
-  @LoadingFragment
-  @if (ShowClearButton && HasSelectedItem && Enabled && !ReadOnly) {
-    <span class="pixata-blazor-clear-value" role="button" aria-label="Clear" title="Clear" @onclick="HandleClear" @onclick:stopPropagation="true">
-      <PixataIcon Icon="@PixataSvgIcons.X" />
+    <span class="pixata-blazor-input-button pixata-blazor-dropdownlist-button" aria-hidden="true">
+      <PixataIcon Icon="@PixataSvgIcons.ChevronDown" />
     </span>
   }
-  <span class="pixata-blazor-input-button pixata-blazor-dropdownlist-button" aria-hidden="true">
-    <PixataIcon Icon="@PixataSvgIcons.ChevronDown" />
-  </span>
 </span>
 @PopupFragment
