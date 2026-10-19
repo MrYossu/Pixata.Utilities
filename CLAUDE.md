@@ -35,6 +35,7 @@ Pixata.Extensions          — no project deps; the shared kernel
   ├── Pixata.Blazor        — Razor components (client-safe)
   ├── Pixata.AspNetCore    — server-side (EF Core, FluentValidation); no PDF engine since v2.0.0
   │     ├── Pixata.AspNetCore.Pdf.Telerik     — PdfConverterInterface via Telerik Document Processing
+  │     ├── Pixata.AspNetCore.Pdf.Playwright  — PdfConverterInterface via Playwright and Chromium
   │     └── Pixata.AspNetCore.Pdf.WkHtmlToPdf — obsolete wkhtmltopdf converter, kept for one release
   ├── Pixata.Email         — MailKit wrapper
   └── Pixata.SimilarityChooser
@@ -68,6 +69,8 @@ Each package exposes one `AddPixataXxx()` extension. `AddPixataBlazor()` checks 
 3. Document the change in that package's `Readme.md` — these are shipped as `PackageReadmeFile`, so they are the actual package documentation, not just repo notes.
 4. Commit. Version-bump commits are conventionally named `Pixata.Blazor v4.2.0` (or `Pixata.AspNetCore v1.8.0, Pixata.Blazor v2.32.0, …` for several at once); behaviour commits use a plain imperative sentence.
 5. Pushing to `master` builds and tests. Pushing to `release` publishes every package to nuget.org and FTP-deploys the sample site — only ever push to `release` when asked.
+
+The publish step silently skips a package whose version is already on nuget.org, so `.github/scripts/check-package-versions.py` runs first in `release.yml` (and as a warning in `master.yml`): it fails the release if any published package's code (Markdown aside) has changed since the commit its current version was built from, which nuget.org records in the nuspec. A package whose code didn't change but whose dependency did (eg Pixata.Blazor.Grid.Excel after a Pixata.Blazor bump) isn't flagged, so bump it by hand when it needs the newer dependency.
 
 A new package must be added to *both* `.github/workflows/master.yml` and `release.yml` (restore + build steps, and a publish step in `release.yml`); the workflows list projects explicitly, and run each test project by name rather than the whole solution. A new test project needs its own `dotnet test` step in both. `Pixata.Functional` and `Pixata.Blazor.LanguageExtComponents` are unmaintained and deliberately left out of both workflows.
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Components;
+using Pixata.Blazor.Components;
 
 namespace Pixata.Blazor.Notifications;
 
@@ -24,7 +25,8 @@ public class NotificationHelper {
     Receive?.Invoke(new() { Type = type, Content = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
 
   /// <summary>
-  /// The classes for a notification type's icon, from <see cref="GeneralIcon"/> and the other fields below
+  /// The classes for a notification type's icon, from <see cref="GeneralIcon"/> and the other fields below. This is <c>""</c> for a type
+  /// that uses the built-in icon, which is all of them unless you've set the fields. To show the icon, use <see cref="GetDisplayIcon"/>
   /// </summary>
   public static string GetIconClass(NotificationType type) =>
     type switch {
@@ -34,6 +36,34 @@ public class NotificationHelper {
       NotificationType.Error => ErrorIcon,
       _ => GeneralIcon
     };
+
+  /// <summary>
+  /// What to pass to <see cref="PixataIcon"/> to show a notification type's icon. This is the classes you've set in <see cref="GeneralIcon"/>
+  /// or the other fields below, or the built-in SVG icon if you haven't set any, so the icons don't need an icon font
+  /// </summary>
+  public static object GetDisplayIcon(NotificationType type) =>
+    GetIconClass(type) is { Length: > 0 } classes
+      ? classes
+      : type switch {
+        NotificationType.Info => PixataSvgIcons.Info,
+        NotificationType.Success => PixataSvgIcons.Check,
+        NotificationType.Warning => PixataSvgIcons.Warning,
+        NotificationType.Error => PixataSvgIcons.Exclamation,
+        _ => PixataSvgIcons.Bell
+      };
+
+  /// <summary>
+  /// Shows Font Awesome's icons rather than the built-in ones, by setting <see cref="GeneralIcon"/> and the other fields below to Font
+  /// Awesome's solid icons, which are in the free set of both Font Awesome 5 and 6. These were the default icons before v5.5.0. Call it once,
+  /// eg in <c>Program.cs</c>
+  /// </summary>
+  public static void UseFontAwesomeIcons() {
+    GeneralIcon = "fas fa-bell";
+    InfoIcon = "fas fa-info-circle";
+    SuccessIcon = "fas fa-check";
+    WarningIcon = "fas fa-exclamation-triangle";
+    ErrorIcon = "fas fa-exclamation";
+  }
 
   /// <summary>
   /// The class that colours a notification type's icon, using the <c>--pixata-notification-*</c> variables in pixata.css
@@ -47,7 +77,7 @@ public class NotificationHelper {
       _ => "pixata-blazor-notification-general"
     };
 
-  [Obsolete("The icons are now coloured by the --pixata-notification-* variables in pixata.css, so the colours returned here are only the defaults. Use GetIconClass() for the icon, and GetColourClass() for the colour")]
+  [Obsolete("The icons are now coloured by the --pixata-notification-* variables in pixata.css, so the colours returned here are only the defaults. Use GetDisplayIcon() for the icon, and GetColourClass() for the colour")]
   public static (string, string) GetIcon(NotificationType type) =>
     type switch {
       NotificationType.General => (GeneralIcon, "00b7d6"),
@@ -58,12 +88,13 @@ public class NotificationHelper {
       _ => (GeneralIcon, "00b7d6"),
     };
 
-  // Font Awesome's solid icons, which are in the free set of both Font Awesome 5 and 6. Most of the regular (far) ones are Pro only
-  public static string GeneralIcon = "fas fa-bell";
-  public static string InfoIcon = "fas fa-info-circle";
-  public static string SuccessIcon = "fas fa-check";
-  public static string WarningIcon = "fas fa-exclamation-triangle";
-  public static string ErrorIcon = "fas fa-exclamation";
+  // The classes for an icon font's icons, eg "fas fa-check". Left empty, the built-in SVG icon is shown, so no icon font is needed. See
+  // UseFontAwesomeIcons()
+  public static string GeneralIcon = "";
+  public static string InfoIcon = "";
+  public static string SuccessIcon = "";
+  public static string WarningIcon = "";
+  public static string ErrorIcon = "";
 }
 
 public enum NotificationType {

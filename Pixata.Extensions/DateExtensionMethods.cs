@@ -102,7 +102,118 @@ namespace Pixata.Extensions {
     public static string DateRangeToString(this (DateTime fromDate, DateTime toDate) dates, bool showTime = false) =>
       DateRangeToString(dates.fromDate, dates.toDate, showTime);
 
-    private static string DateRangeToString(DateTime? fromDate, DateTime? toDate, bool showTime = false) {
+    /// <summary>
+    /// Formats a date/time range in the given format, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of two nullable DateTimes</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
+    public static string DateRangeToString(this (DateTime? fromDate, DateTime? toDate) dates, DateRangeFormat format, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime, format);
+
+    /// <summary>
+    /// Formats a date/time range in the given format, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of a non-nullable DateTime and a nullable DateTime</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
+    public static string DateRangeToString(this (DateTime fromDate, DateTime? toDate) dates, DateRangeFormat format, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime, format);
+
+    /// <summary>
+    /// Formats a date/time range in the given format, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of a nullable DateTime and a non-nullable DateTime</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
+    public static string DateRangeToString(this (DateTime? fromDate, DateTime toDate) dates, DateRangeFormat format, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime, format);
+
+    /// <summary>
+    /// Formats a date/time range in the given format, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of two non-nullable DateTimes</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <param name="showTime">Specifies if the time will be shown, or just the date (default)</param>
+    public static string DateRangeToString(this (DateTime fromDate, DateTime toDate) dates, DateRangeFormat format, bool showTime = false) =>
+      DateRangeToString(dates.fromDate, dates.toDate, showTime, format);
+
+    /// <summary>
+    /// Formats a range of dates in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of two nullable DateOnlys</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> (default) for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <returns>A summary of the range, eg "2nd Nov 26 - 10th Jan 27" or "2 November 2026 to 10 January 2027", "From 2nd Nov 26" or "Until 10 January 2027"</returns>
+    public static string DateRangeToString(this (DateOnly? fromDate, DateOnly? toDate) dates, DateRangeFormat format = DateRangeFormat.Short) =>
+      DateRangeToString(ToDateTime(dates.fromDate), ToDateTime(dates.toDate), false, format);
+
+    /// <summary>
+    /// Formats a range of dates in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of a non-nullable DateOnly and a nullable DateOnly</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> (default) for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <returns>A summary of the range, eg "2nd Nov 26 - 10th Jan 27" or "2 November 2026 to 10 January 2027", "From 2nd Nov 26" or "From 2 November 2026"</returns>
+    public static string DateRangeToString(this (DateOnly fromDate, DateOnly? toDate) dates, DateRangeFormat format = DateRangeFormat.Short) =>
+      DateRangeToString(ToDateTime(dates.fromDate), ToDateTime(dates.toDate), false, format);
+
+    /// <summary>
+    /// Formats a range of dates in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of a nullable DateOnly and a non-nullable DateOnly</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> (default) for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <returns>A summary of the range, eg "2nd Nov 26 - 10th Jan 27" or "2 November 2026 to 10 January 2027", "To 10th Jan 27" or "Until 10 January 2027"</returns>
+    public static string DateRangeToString(this (DateOnly? fromDate, DateOnly toDate) dates, DateRangeFormat format = DateRangeFormat.Short) =>
+      DateRangeToString(ToDateTime(dates.fromDate), ToDateTime(dates.toDate), false, format);
+
+    /// <summary>
+    /// Formats a range of dates in a human-friendly way, omitting redundant information
+    /// </summary>
+    /// <param name="dates">A tuple of two non-nullable DateOnlys</param>
+    /// <param name="format"><see cref="DateRangeFormat.Short"/> (default) for "2nd-30th Nov 26", or <see cref="DateRangeFormat.Long"/> for "2 to 30 November 2026"</param>
+    /// <returns>A summary of the range, eg "2nd Nov 26 - 10th Jan 27" or "2 November 2026 to 10 January 2027", "2nd-30th Nov 26" or "2 to 30 November 2026"</returns>
+    public static string DateRangeToString(this (DateOnly fromDate, DateOnly toDate) dates, DateRangeFormat format = DateRangeFormat.Short) =>
+      DateRangeToString(ToDateTime(dates.fromDate), ToDateTime(dates.toDate), false, format);
+
+    private static DateTime? ToDateTime(DateOnly? date) =>
+      date?.ToDateTime(TimeOnly.MinValue);
+
+    private static string DateRangeToString(DateTime? fromDate, DateTime? toDate, bool showTime = false, DateRangeFormat format = DateRangeFormat.Short) =>
+      format == DateRangeFormat.Long
+        ? LongDateRangeToString(fromDate, toDate, showTime)
+        : ShortDateRangeToString(fromDate, toDate, showTime);
+
+    private static string LongDateRangeToString(DateTime? fromDate, DateTime? toDate, bool showTime) {
+      string Time(DateTime dt) =>
+        showTime ? $" {dt:HH:mm}" : "";
+      switch (fromDate) {
+        case null when toDate == null:
+          return "";
+        case null:
+          return $"Until {FormatLongDate(toDate.Value)}{Time(toDate.Value)}";
+      }
+      if (toDate == null) {
+        return $"From {FormatLongDate(fromDate.Value)}{Time(fromDate.Value)}";
+      }
+      DateTime from = fromDate.Value;
+      DateTime to = toDate.Value;
+      // Same day - only show the date once
+      if (from.Date == to.Date) {
+        return showTime
+          ? $"{FormatLongDate(from)} {from:HH:mm} to {to:HH:mm}"
+          : FormatLongDate(from);
+      }
+      // Same month - only show the month and year once, unless the times come between the dates
+      if (from.Year == to.Year && from.Month == to.Month && !showTime) {
+        return $"{from.Day} to {FormatLongDate(to)}";
+      }
+      // Same year - omit the year from the first date
+      if (from.Year == to.Year) {
+        return $"{from.Day} {from:MMMM}{Time(from)} to {FormatLongDate(to)}{Time(to)}";
+      }
+      return $"{FormatLongDate(from)}{Time(from)} to {FormatLongDate(to)}{Time(to)}";
+    }
+
+    private static string ShortDateRangeToString(DateTime? fromDate, DateTime? toDate, bool showTime) {
       switch (fromDate) {
         case null when toDate == null:
           return "";
@@ -147,6 +258,9 @@ namespace Pixata.Extensions {
     private static string FormatDayMonth(DateTime dt) =>
       $"{GetDayWithSuffix(dt.Day)} {dt:MMM}";
 
+    private static string FormatLongDate(DateTime dt) =>
+      $"{dt.Day} {dt:MMMM yyyy}";
+
     private static string GetDayWithSuffix(int day) =>
       day switch {
         1 or 21 or 31 => $"{day}st",
@@ -154,5 +268,21 @@ namespace Pixata.Extensions {
         3 or 23 => $"{day}rd",
         _ => $"{day}th"
       };
+  }
+
+  /// <summary>
+  /// How <c>DateRangeToString()</c> writes a range
+  /// </summary>
+  public enum DateRangeFormat {
+    /// <summary>
+    /// Ordinal days and short month names, with a dash between the dates, eg "2nd Nov 26 - 10th Jan 27" or "2nd-30th Nov 26"
+    /// </summary>
+    Short,
+
+    /// <summary>
+    /// Full month names and years, with "to" between the dates, eg "2 November 2026 to 10 January 2027" or "2 to 30 November 2026".
+    /// Suits text that will be read as a sentence, such as an email
+    /// </summary>
+    Long
   }
 }

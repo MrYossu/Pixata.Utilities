@@ -104,7 +104,13 @@
   --pixata-audit-changed-bg: #fff8e1;
   --pixata-audit-old-value-color: #c62828;
   --pixata-audit-new-value-color: #2e7d32;
-  /* Notifications. The icon's background shows the type of notification */
+  /* The cross drawn by pixata-btn-close. By default it's the colour of the text around it, so it shows on a dark background too */
+  --pixata-close-button-color: currentColor;
+  /* Notifications. By default the toast follows the components' surface and text colours. The icon's background shows the type */
+  --pixata-notification-bg: var(--pixata-blazor-surface-bg);
+  --pixata-notification-color: var(--pixata-blazor-text-color);
+  --pixata-notification-border-radius: var(--pixata-border-radius);
+  --pixata-notification-shadow: 0 6px 16px rgba(47, 52, 58, .1);
   --pixata-notification-icon-color: #fff;
   --pixata-notification-general-bg: #00b7d6;
   --pixata-notification-info-bg: #00d6ce;
@@ -408,18 +414,32 @@
   text-decoration: underline;
 }
 
-/* A close button, drawn rather than relying on an icon font */
+/*
+  A close button, drawn rather than relying on an icon font. The cross is a mask over the ::before, filled with
+  --pixata-close-button-color (the colour of the text around it by default), so it shows on a dark background as well as a
+  light one. It's on the ::before rather than the button so that the button's focus ring isn't masked out
+*/
 .pixata-btn-close {
+  position: relative;
   box-sizing: content-box;
   width: 1em;
   height: 1em;
   padding: .25em;
-  color: #000;
-  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+  color: inherit;
+  background: transparent;
   border: 0;
   border-radius: var(--pixata-border-radius);
   opacity: .5;
   cursor: pointer;
+}
+
+.pixata-btn-close::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--pixata-close-button-color);
+  -webkit-mask: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center / 1em auto no-repeat;
+  mask: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center / 1em auto no-repeat;
 }
 
 .pixata-btn-close:hover {
@@ -3075,6 +3095,90 @@
 }
 
 /* ---------- Notifications ---------- */
+
+/* NotificationArea, the toasts at the top right of the window */
+.pixata-blazor-notification-area {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  max-height: calc(100vh - 5rem);
+  overflow: auto;
+  z-index: 100000;
+}
+
+.pixata-blazor-notification {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  max-width: 330px;
+  margin: 1rem;
+  padding: 1rem;
+  color: var(--pixata-notification-color);
+  background-color: var(--pixata-notification-bg);
+  border-radius: var(--pixata-notification-border-radius);
+  box-shadow: var(--pixata-notification-shadow);
+  cursor: pointer;
+  transition: all .5s ease-in-out;
+}
+
+.pixata-blazor-notification-new {
+  animation: pixata-blazor-notification-fade-in 2s;
+}
+
+.pixata-blazor-notification-remove {
+  animation: pixata-blazor-notification-fade-out 2s;
+}
+
+@keyframes pixata-blazor-notification-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pixata-blazor-notification-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.pixata-blazor-notification-icon {
+  display: grid;
+  place-content: center;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.pixata-blazor-notification-message {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 225px;
+}
+
+.pixata-blazor-notification-message > div {
+  overflow-wrap: anywhere;
+}
+
+/* In the flow rather than positioned, so a long message can't run under it, whatever size the button is. The negative margins put it
+   near the corner */
+.pixata-blazor-notification-dismiss {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin: -.375rem -.125rem 0 auto;
+}
+
+.pixata-blazor-notification-dismiss button {
+  width: .35rem;
+  height: .35rem;
+}
 
 /* The circle behind a notification's icon, coloured by its type. Set by NotificationHelper.GetColourClass() */
 .pixata-blazor-notification-general,

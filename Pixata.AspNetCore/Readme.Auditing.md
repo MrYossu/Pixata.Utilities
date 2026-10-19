@@ -32,16 +32,24 @@ builder.Services.AddDbContext<MyDbContext>((serviceProvider, options) =>
          .AddAuditingInterceptor(serviceProvider));
 ```
 
-**3. Add the `Audit` DbSet to your DbContext:**
+**3. Add the `Audit` DbSet to your DbContext, and call `ConfigureAuditing()` in `OnModelCreating`:**
 
 ```csharp
+using Pixata.AspNetCore.Auditing.Extensions;
 using Pixata.Extensions.Auditing.Models;
 
 public class MyDbContext : DbContext {
   public DbSet<Audit> Audits { get; set; }
   // ... other DbSets
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder) {
+    modelBuilder.ConfigureAuditing();
+    // ... the rest of your model
+  }
 }
 ```
+
+The audit's `FullSnapshot` and `ChangedProperties` hold JSON of any length. `ConfigureAuditing()` makes those two columns unlimited (`nvarchar(max)` on SQL Server), even if your context gives strings a maximum length in `ConfigureConventions`, eg with `configurationBuilder.Properties<string>().HaveMaxLength(200)`. Without it, they pick up that length, and on SQL Server, saving any entity whose JSON is longer throws "String or binary data would be truncated". SQLite doesn't enforce lengths, so tests that use it won't show the problem. If your context doesn't set a default length, the columns are already unlimited and the call changes nothing, but it's worth making anyway, in case you add one later. `ConfigureAuditing()` was added in v2.3.0. If you add it to an existing app whose columns were limited, the next migration widens them.
 
 **4. Create and run an EF Core migration:**
 

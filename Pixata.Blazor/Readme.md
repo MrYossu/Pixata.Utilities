@@ -6,6 +6,8 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.5.0** makes the notifications suit a dark theme, and stops them needing Font Awesome. The toast's background and text now follow `--pixata-blazor-surface-bg` and `--pixata-blazor-text-color` (or the new `--pixata-notification-bg` and `--pixata-notification-color`), the close button's cross is drawn in the colour of the text around it, and the default icons are built-in SVG ones. It also depends on Pixata.Extensions 2.22.0. Versions 5.0.0 to 5.4.0 depended on Pixata.Extensions 2.21.0, which doesn't have the grid types, so any page with a `PixataGrid` threw a `TypeLoadException`. The notifications' class names have changed, so if you styled them yourself, see [styling changes in v5.5.0](#styling-changes-in-v550) below.
+
 >**Version 5.4.0** lets you theme the audit viewer, `Confirm`, `Inform` and the notifications through the CSS variables in pixata.css, lets notifications show formatted messages (such as a list), and changes the notifications' default icons to ones in Font Awesome's free set. Some class names and ids have changed, so if you styled any of these yourself, see [styling changes in v5.4.0](#styling-changes-in-v540) below.
 
 >**Version 5.3.0** makes some changes that help when moving from Telerik's components...
@@ -19,6 +21,15 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available fo
 >**Version 5.1.0** adds typed grid columns (`PixataTextGridColumn`, `PixataNumericGridColumn`, `PixataDateGridColumn` and `PixataEnumGridColumn`) with short lists of filter operators, the `FilterOperators` and `ShowFilterCellButtons` column parameters, and `PixataGridBoolFilter`, a three-state checkbox filter for `bool` columns. See the [grid documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns) for details.
 
 >**Version 5.0.0** adds a large set of new components: `PixataGrid` (with Excel export in the separate [Pixata.Blazor.Grid.Excel](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Grid.Excel/Readme.md) package), the date picker, drop-downs, tab strip, editor, file select and upload, dialogs, window, wizard and stepper, radio group, switch, charts, drop-down and split buttons, scheduler, and the `FormRowDate` form row. See the documentation pages below for details.
+
+## Styling changes in v5.5.0
+
+These only affect you if you wrote CSS of your own for the notifications, or relied on their default look. See [Notifications](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md#icons-and-colours) for the details.
+
+- **Notification classes.** The classes inside the notification area now start with `pixata-blazor-notification`, so your own styles for classes such as `message` or `icon` no longer land on the notifications. `notifications-area` is now `pixata-blazor-notification-area`, `notification` is `pixata-blazor-notification`, and `new`, `remove`, `icon`, `message` and `dismiss` are `pixata-blazor-notification-` followed by the old name. Their styles have moved from the component's scoped CSS into pixata.css.
+- **Notification icons.** The default icons are now built-in SVG ones, so you don't need Font Awesome for them. Call `NotificationHelper.UseFontAwesomeIcons()` in `Program.cs` if you want Font Awesome's icons back. `NotificationHelper.GetIconClass()` now returns `""` for a type that shows the built-in icon, and the new `GetDisplayIcon()` gives you what to pass to `PixataIcon` to show the same icon as the notifications.
+- **Notification colours.** The background was always white. It now comes from `--pixata-notification-bg`, which defaults to `--pixata-blazor-surface-bg`, and the text from `--pixata-notification-color` (which defaults to `--pixata-blazor-text-color`) rather than the page's text colour. The corners are now rounded (`--pixata-notification-border-radius`).
+- **Close buttons.** The cross on a `pixata-btn-close` button was always black. It's now drawn in the colour of the text around it, or in `--pixata-close-button-color` if you set that.
 
 ## Styling changes in v5.4.0
 
