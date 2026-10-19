@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -38,6 +39,41 @@ namespace Pixata.Email {
     /// <returns>Task&lt;ApiResponse&lt;Yunit&gt;&gt;</returns>
     public Task<ApiResponse<Yunit>> SendEmailAsync(EmailParameters emailParameters, SecureSocketOptions secureSocketOptions) =>
       SendMessageAsync(CreateMailMessage(emailParameters), client => client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, secureSocketOptions), includeExceptionType: false);
+
+    /// <summary>
+    /// Send several emails over a single connection to the SMTP server, which is much quicker than calling SendEmailAsync once for each, as
+    /// the connection, TLS handshake and authentication are only done once. The emails are sent one after the other, so this doesn't send
+    /// any faster than one at a time would, which keeps within the sending rate of providers such as Amazon SES
+    /// </summary>
+    /// <param name="emails">The emails to send</param>
+    /// <returns>Task&lt;List&lt;ApiResponse&lt;Yunit&gt;&gt;&gt;, with one response for each email, in the same order as the emails passed in</returns>
+    public async Task<List<ApiResponse<Yunit>>> SendEmailsAsync(IEnumerable<EmailParameters> emails) {
+      List<ApiResponse<Yunit>> responses = [];
+      using SmtpClient client = new();
+      foreach (EmailParameters emailParameters in emails) {
+        try {
+          // Connects before the first email, and again if the server dropped the connection after a failed one
+          if (!client.IsConnected) {
+            await client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, SmtpSettings.EffectiveSocketOptions());
+            await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
+          }
+          await client.SendAsync(CreateMailMessage(emailParameters));
+          responses.Add(new ApiResponse<Yunit>(ApiResponseStates.Success));
+        }
+        catch (Exception ex) {
+          responses.Add(new ApiResponse<Yunit>(ApiResponseStates.Failure, Message: $"({ex.GetType().Name}) {ex.Message}"));
+        }
+      }
+      if (client.IsConnected) {
+        try {
+          await client.DisconnectAsync(true);
+        }
+        catch (Exception) {
+          // The emails have all been sent (or not) by now, so there's nothing useful to do if the server doesn't say goodbye nicely
+        }
+      }
+      return responses;
+    }
 
     private async Task<ApiResponse<Yunit>> SendMessageAsync(MimeMessage msg, Func<SmtpClient, Task> connectFunc, bool includeExceptionType = true) {
       try {

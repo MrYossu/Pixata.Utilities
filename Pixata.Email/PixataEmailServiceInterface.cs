@@ -1,5 +1,6 @@
 ﻿using MailKit.Security;
 using Pixata.Extensions;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Pixata.Email {
@@ -7,5 +8,6 @@ namespace Pixata.Email {
     Task<ApiResponse<Yunit>> SendEmailAsync(string email, string subject, string htmlMessage);
     Task<ApiResponse<Yunit>> SendEmailAsync(EmailParameters emailParameters);
     Task<ApiResponse<Yunit>> SendEmailAsync(EmailParameters emailParameters, SecureSocketOptions secureSocketOptions);
+    Task<List<ApiResponse<Yunit>>> SendEmailsAsync(IEnumerable<EmailParameters> emails);
   }
 }

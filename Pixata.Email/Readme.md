@@ -6,6 +6,8 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
+>**Version 3.1.0** adds `SendEmailsAsync`, which sends several emails over one connection to the SMTP server, which is much quicker than sending them one by one. See [sending several emails at once](#sending-several-emails-at-once) below.
+
 >**Version 3.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
 
 # Breaking changes
@@ -83,7 +85,7 @@ _emailService.SmtpSettings = myStmpSettings;
 
 ## Usage
 
-There are three overloads of the `SendEmailAsync` method. Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
+There are three overloads of the `SendEmailAsync` method, plus `SendEmailsAsync` for [sending several emails at once](#sending-several-emails-at-once). Easiest to use is a simple one that just takes the recipient's email address, the subject and the HTML body...
 
 ```c#
 (await _emailService.SendEmailAsync("billy@shears.com", "Hello from Jim Spriggs", htmlBody)))
@@ -113,6 +115,36 @@ await _emailService.SendEmailAsync(emailParameters, SecureSocketOptions.StartTls
 The other two overloads connect using the socket options from your settings (see [securing the connection](#securing-the-connection)), so you rarely need this one.
 
 All three return an `ApiResponse<Yunit>`, so the failure message is the exception's message. The two overloads that use your settings prefix it with the exception type (eg `"(AuthenticationException) Authentication failed"`), as that is usually the useful part when a send fails.
+
+### Sending several emails at once
+
+>Note that this feature is only available from v3.1.0 onwards
+
+Each `SendEmailAsync` overload opens a new connection to the SMTP server, secures it, logs in, sends the email and disconnects. That's fine for one email, but if you're sending a batch (statements to a list of customers, for example), the connecting and logging in can take longer than the sending. `SendEmailsAsync` takes a collection of `EmailParameters`, and sends them all over one connection...
+
+```c#
+List<EmailParameters> emails = customers
+  .Select(c => new EmailParameters("Your statement", StatementBody(c), c.Email, c.Name))
+  .ToList();
+List<ApiResponse<Yunit>> responses = await _emailService.SendEmailsAsync(emails);
+```
+
+You get back one `ApiResponse<Yunit>` per email, in the same order as the emails you passed in, so you can match them up to see which ones failed...
+
+```c#
+foreach ((EmailParameters email, ApiResponse<Yunit> response) in emails.Zip(responses)) {
+  response.Match(_ => { }, error => Console.WriteLine($"Couldn't send to {email.Recipients.First()}: {error}"));
+}
+```
+
+A few things to note...
+
+- An email that fails doesn't stop the rest being sent. If the server dropped the connection when it failed, the service connects again for the next email.
+- If the service can't connect or log in at all, every email fails with that error. As it tries again for each one, this can take a while if the server isn't responding.
+- It uses the socket options from your settings, and prefixes the failure messages with the exception type, as `SendEmailAsync(EmailParameters)` does.
+- The emails are sent one after the other, not in parallel, so this won't exceed the sending rate of providers that limit it, such as Amazon SES. It's quicker because each email doesn't need its own connection, not because the emails are sent any faster.
+
+It's a separate method, rather than another `SendEmailAsync` overload, because an overload taking a collection would make existing calls such as `SendEmailAsync(new("Hello", body, "billy@shears.com"))` ambiguous.
 
 ## Breaking change in version 2.0.0
 
