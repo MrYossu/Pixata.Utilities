@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Pixata.AspNetCore.Auditing.Extensions;
 using Pixata.Blazor.Sample.Models;
 using Pixata.Extensions.Auditing.Models;
 
@@ -10,6 +11,8 @@ public class SampleDbContext(DbContextOptions<SampleDbContext> options) : DbCont
   public DbSet<Audit> Audits { get; set; }
   public DbSet<GridSampleEmployee> Employees { get; set; }
 
-  protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+  protected override void OnModelCreating(ModelBuilder modelBuilder) {
+    modelBuilder.ConfigureAuditing();
     modelBuilder.Entity<GridSampleEmployee>().OwnsOne(e => e.Address);
+  }
 }
