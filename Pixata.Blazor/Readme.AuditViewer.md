@@ -145,4 +145,4 @@ The drop-downs' shadow is `--pixata-popup-shadow`.
 
 Every class the viewer uses starts with `pixata-blazor-audit-`, so you can restyle any part of it without `!important`, and without the risk of its styles clashing with yours.
 
->**Changed in v6.0.0.** The styles used to be in a `<style>` block inside the component, with hard-coded colours and global class names such as `view-btn` and `filters`. If you overrode any of those, add `pixata-blazor-audit-` to the front of the class name, dropping any `audit-` it started with, eg `view-btn` is now `pixata-blazor-audit-view-btn`, and `audit-timeline` is now `pixata-blazor-audit-timeline`.
+>**Changed in v5.4.0.** The styles used to be in a `<style>` block inside the component, with hard-coded colours and global class names such as `view-btn` and `filters`. If you overrode any of those, add `pixata-blazor-audit-` to the front of the class name, dropping any `audit-` it started with, eg `view-btn` is now `pixata-blazor-audit-view-btn`, and `audit-timeline` is now `pixata-blazor-audit-timeline`.

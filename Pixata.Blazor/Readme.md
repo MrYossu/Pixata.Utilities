@@ -6,7 +6,7 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
->**Version 6.0.0** lets you theme the audit viewer, `Confirm`, `Inform` and the notifications through the CSS variables in pixata.css, lets notifications show formatted messages (such as a list), and changes the notifications' default icons to ones in Font Awesome's free set. Some class names and ids have changed, so if you styled any of these yourself, see [breaking changes in v6.0.0](#breaking-changes-in-v600) below.
+>**Version 5.4.0** lets you theme the audit viewer, `Confirm`, `Inform` and the notifications through the CSS variables in pixata.css, lets notifications show formatted messages (such as a list), and changes the notifications' default icons to ones in Font Awesome's free set. Some class names and ids have changed, so if you styled any of these yourself, see [styling changes in v5.4.0](#styling-changes-in-v540) below.
 
 >**Version 5.3.0** makes some changes that help when moving from Telerik's components...
 >- `PixataDropDownList` has an icon-only mode, set with the new `Icon` (or `IconTemplate`) parameter. See the [drop-downs documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md#icon-only)
@@ -20,7 +20,7 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available fo
 
 >**Version 5.0.0** adds a large set of new components: `PixataGrid` (with Excel export in the separate [Pixata.Blazor.Grid.Excel](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Grid.Excel/Readme.md) package), the date picker, drop-downs, tab strip, editor, file select and upload, dialogs, window, wizard and stepper, radio group, switch, charts, drop-down and split buttons, scheduler, and the `FormRowDate` form row. See the documentation pages below for details.
 
-## Breaking changes in v6.0.0
+## Styling changes in v5.4.0
 
 These only affect you if you wrote CSS of your own for these components, or relied on their default look.
 

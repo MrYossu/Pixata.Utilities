@@ -56,7 +56,7 @@ NotificationHelper.Send(NotificationType.Error, @<div>
 NotificationHelper.Send(NotificationType.Success, new MarkupString($"Order <strong>{WebUtility.HtmlEncode(order.Reference)}</strong> has been saved"), DateTime.Now);
 ```
 
-The HTML is shown as it is, so encode anything in it that came from a user, as above. A notification sent as a render fragment isn't removed when an identical one arrives, as there's no text to compare. Both overloads were added in v6.0.0.
+The HTML is shown as it is, so encode anything in it that came from a user, as above. A notification sent as a render fragment isn't removed when an identical one arrives, as there's no text to compare. Both overloads were added in v5.4.0.
 
 The `NotificationArea` also has an `OpenNotification` event callback, which is raised with the `Notification` when one is clicked, in case you would rather handle that in one place than pass an action to every call.
 
@@ -93,7 +93,7 @@ The colour behind each icon comes from a variable in pixata.css, so you can chan
 
 The variables are `--pixata-notification-general-bg`, `--pixata-notification-info-bg`, `--pixata-notification-success-bg`, `--pixata-notification-warning-bg` and `--pixata-notification-error-bg`, and `--pixata-notification-icon-color` sets the colour of the icon itself. `Payment` notifications use the general colour.
 
->**Changed in v6.0.0.** The default icons used to be the regular (`far`) ones, most of which are only in Font Awesome Pro, so with the free set you got a placeholder. The colours were hard-coded, so `NotificationHelper.GetIcon()`, which returned them, is now obsolete. Use `GetIconClass()` for the icon's classes, and `GetColourClass()` for the class that colours it. A long message also no longer runs under the close button.
+>**Changed in v5.4.0.** The default icons used to be the regular (`far`) ones, most of which are only in Font Awesome Pro, so with the free set you got a placeholder. The colours were hard-coded, so `NotificationHelper.GetIcon()`, which returned them, is now obsolete. Use `GetIconClass()` for the icon's classes, and `GetColourClass()` for the class that colours it. A long message also no longer runs under the close button.
 
 ## Using them for API errors
 

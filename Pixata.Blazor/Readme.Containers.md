@@ -80,7 +80,7 @@ The pop-ups use these variables from pixata.css, so they follow your theme...
 
 The elements have the classes `pixata-blazor-confirm-overlay` and `pixata-blazor-confirm-content` (or `pixata-blazor-inform-overlay` and `pixata-blazor-inform-content`), so you can style them further in your own CSS.
 
->**Changed in v6.0.0.** These were the ids `confirmOverlay`, `confirmOverlayContent`, `informOverlay` and `informOverlayContent`, which gave duplicate ids when there was more than one on a page. The pop-up also used to have a heavy, offset shadow, a white background and 10px corners.
+>**Changed in v5.4.0.** These were the ids `confirmOverlay`, `confirmOverlayContent`, `informOverlay` and `informOverlayContent`, which gave duplicate ids when there was more than one on a page. The pop-up also used to have a heavy, offset shadow, a white background and 10px corners.
 
 ## MessageView
 
