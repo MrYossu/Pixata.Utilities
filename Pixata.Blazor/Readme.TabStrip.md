@@ -43,12 +43,51 @@ A tab's content can go straight inside the `PixataTab`, as above, or in a `<Cont
 </PixataTab>
 ```
 
+## Who changes the tab
+
+There are two ways of using `ActiveTabId`, and they behave differently when the user selects a tab:
+
+- **The tab strip changes tabs itself** when you use `@bind-ActiveTabId`, or don't handle `ActiveTabIdChanged` at all. The new tab is shown as soon as it is clicked.
+- **Your page changes tabs** when you set `ActiveTabId` one way and handle `ActiveTabIdChanged` yourself. Selecting a tab only raises the event, and the tab doesn't change until you set `ActiveTabId` to the new id. If you never set it, the tab doesn't change at all, which lets you (say) stop the user leaving a tab with unsaved changes.
+
+The second way is what you want when a tab's content needs data that takes a while to load, as the content isn't rendered until the data is there...
+
+```razor
+<PixataTabStrip ActiveTabId="@_activeTab" ActiveTabIdChanged="TabChanged">
+  <PixataTab Id="details" Title="Details">
+    <PropertyDetails Property="_property" />
+  </PixataTab>
+  <PixataTab Id="statements" Title="Statements">
+    <StatementList Statements="_statements" />
+  </PixataTab>
+</PixataTabStrip>
+
+@code {
+  private string _activeTab = "details";
+  private List<Statement> _statements = null!;
+
+  private async Task TabChanged(string id) {
+    if (id == "statements") {
+      _statements = await StatementService.GetStatements(_property.Id);
+    }
+    // Only now does the tab change, so StatementList never sees a null list
+    _activeTab = id;
+  }
+}
+```
+
+`@bind-ActiveTabId` works as before, as the binding sets your field as soon as the event is raised, so the tab changes straight away.
+
+When the user moves between the tabs with the keyboard, the focus moves to the new tab when it is shown, so if your handler takes a while, the focus stays where it is until then.
+
+Closing, hiding or removing the selected tab is different, as there is nothing left to show: the tab strip moves to a neighbour straight away, whichever way you use `ActiveTabId`, and raises `ActiveTabIdChanged` to tell you which.
+
 ## `PixataTabStrip` parameters
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `ActiveTabId` | `string?` | `null` | The `Id` of the selected tab. Use `@bind-ActiveTabId` for two-way binding. |
-| `ActiveTabIdChanged` | `EventCallback<string>` | | Raised when the user selects another tab, or the selected tab is closed, hidden or removed (in which case its neighbour is selected). |
+| `ActiveTabId` | `string?` | `null` | The `Id` of the selected tab. Use `@bind-ActiveTabId` for two-way binding. See [Who changes the tab](#who-changes-the-tab). |
+| `ActiveTabIdChanged` | `EventCallback<string>` | | Raised when the user selects another tab, or the selected tab is closed, hidden or removed (in which case its neighbour is selected). If you handle it yourself (rather than with `@bind-ActiveTabId`), a tab the user selects isn't shown until you set `ActiveTabId` to its id. See [Who changes the tab](#who-changes-the-tab). |
 | `TabPosition` | `PixataTabPosition` | `Top` | Where the tabs go: `Top`, `Bottom`, `Left` or `Right` of the content. |
 | `TabAlignment` | `PixataTabStripTabAlignment` | `Start` | How the tabs line up: `Start`, `End`, `Center`, `Justify` (spread out with space between them) or `Stretched` (sharing the whole width). |
 | `PersistTabContent` | `bool` | `false` | When false, only the selected tab's content is rendered, so it is created afresh each time the tab is selected. When true, a tab's content is kept (hidden) once it has been shown, so anything the user typed survives switching tabs. |
