@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,41 +21,50 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
 
   private record PendingAddedAudit(EntityEntry Entry, string EntityTypeName, string ChangedBy, DateTime ChangedAt);
 
-  private readonly List<PendingAddedAudit> _pendingAddedAudits = [];
+  // What the interceptor needs to remember between the start and end of one context's save
+  private class SaveState {
+    public List<PendingAddedAudit> PendingAddedAudits { get; } = [];
 
-  // The transaction this interceptor started (if any) so that added entities and their audit rows are saved together
-  private IDbContextTransaction? _ownedTransaction;
+    // The transaction this interceptor started (if any) so that added entities and their audit rows are saved together
+    public IDbContextTransaction? OwnedTransaction { get; set; }
 
-  // True while the interceptor is saving the audit rows for added entities, so that it doesn't try to audit its own save
-  private bool _savingAudits;
+    // True while the interceptor is saving the audit rows for added entities, so that it doesn't try to audit its own save
+    public bool SavingAudits { get; set; }
+  }
+
+  // One interceptor can serve several contexts at once, eg every context an IDbContextFactory creates in a Blazor Server circuit, and two of
+  // those can be saving at the same time. So the state is kept per context, and goes when the context does
+  private readonly ConditionalWeakTable<DbContext, SaveState> _states = new();
+
+  private SaveState GetState(DbContext context) =>
+    _states.GetValue(context, _ => new SaveState());
 
   #region Synchronous
 
   public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result) {
-    if (eventData.Context is not null && !_savingAudits) {
-      AddAudits(eventData.Context, GetChangedBy(GetAuthenticationStateUserName()));
-      if (ShouldStartTransaction(eventData.Context)) {
-        _ownedTransaction = eventData.Context.Database.BeginTransaction();
+    if (eventData.Context is { } context && GetState(context) is { SavingAudits: false } state) {
+      AddAudits(context, state, GetChangedBy(GetAuthenticationStateUserName()));
+      if (ShouldStartTransaction(context, state)) {
+        state.OwnedTransaction = context.Database.BeginTransaction();
       }
     }
     return base.SavingChanges(eventData, result);
   }
 
   public override int SavedChanges(SaveChangesCompletedEventData eventData, int result) {
-    if (_pendingAddedAudits.Count > 0 && eventData.Context is not null && !_savingAudits) {
-      DbContext context = eventData.Context;
+    if (eventData.Context is { } context && GetState(context) is { SavingAudits: false, PendingAddedAudits.Count: > 0 } state) {
       try {
-        AddPendingAddedAudits(context);
-        _savingAudits = true;
+        AddPendingAddedAudits(context, state);
+        state.SavingAudits = true;
         context.SaveChanges();
-        _savingAudits = false;
-        _ownedTransaction?.Commit();
-        DisposeOwnedTransaction();
+        state.SavingAudits = false;
+        state.OwnedTransaction?.Commit();
+        DisposeOwnedTransaction(state);
       }
       catch {
-        _savingAudits = false;
-        _ownedTransaction?.Rollback();
-        DisposeOwnedTransaction();
+        state.SavingAudits = false;
+        state.OwnedTransaction?.Rollback();
+        DisposeOwnedTransaction(state);
         throw;
       }
     }
@@ -62,12 +72,13 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
   }
 
   public override void SaveChangesFailed(DbContextErrorEventData eventData) {
-    if (!_savingAudits) {
-      _pendingAddedAudits.Clear();
-      _ownedTransaction?.Rollback();
-      DisposeOwnedTransaction();
-    }
+    AbandonSave(eventData.Context);
     base.SaveChangesFailed(eventData);
+  }
+
+  public override void SaveChangesCanceled(DbContextEventData eventData) {
+    AbandonSave(eventData.Context);
+    base.SaveChangesCanceled(eventData);
   }
 
   #endregion
@@ -75,35 +86,34 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
   #region Asynchronous
 
   public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default) {
-    if (eventData.Context is not null && !_savingAudits) {
+    if (eventData.Context is { } context && GetState(context) is { SavingAudits: false } state) {
       string? authenticationStateUserName = await GetAuthenticationStateUserNameAsync();
-      AddAudits(eventData.Context, GetChangedBy(authenticationStateUserName));
-      if (ShouldStartTransaction(eventData.Context)) {
-        _ownedTransaction = await eventData.Context.Database.BeginTransactionAsync(cancellationToken);
+      AddAudits(context, state, GetChangedBy(authenticationStateUserName));
+      if (ShouldStartTransaction(context, state)) {
+        state.OwnedTransaction = await context.Database.BeginTransactionAsync(cancellationToken);
       }
     }
     return await base.SavingChangesAsync(eventData, result, cancellationToken);
   }
 
   public override async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = default) {
-    if (_pendingAddedAudits.Count > 0 && eventData.Context is not null && !_savingAudits) {
-      DbContext context = eventData.Context;
+    if (eventData.Context is { } context && GetState(context) is { SavingAudits: false, PendingAddedAudits.Count: > 0 } state) {
       try {
-        AddPendingAddedAudits(context);
-        _savingAudits = true;
+        AddPendingAddedAudits(context, state);
+        state.SavingAudits = true;
         await context.SaveChangesAsync(cancellationToken);
-        _savingAudits = false;
-        if (_ownedTransaction is not null) {
-          await _ownedTransaction.CommitAsync(cancellationToken);
+        state.SavingAudits = false;
+        if (state.OwnedTransaction is not null) {
+          await state.OwnedTransaction.CommitAsync(cancellationToken);
         }
-        await DisposeOwnedTransactionAsync();
+        await DisposeOwnedTransactionAsync(state);
       }
       catch {
-        _savingAudits = false;
-        if (_ownedTransaction is not null) {
-          await _ownedTransaction.RollbackAsync(CancellationToken.None);
+        state.SavingAudits = false;
+        if (state.OwnedTransaction is not null) {
+          await state.OwnedTransaction.RollbackAsync(CancellationToken.None);
         }
-        await DisposeOwnedTransactionAsync();
+        await DisposeOwnedTransactionAsync(state);
         throw;
       }
     }
@@ -111,19 +121,38 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
   }
 
   public override async Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default) {
-    if (!_savingAudits) {
-      _pendingAddedAudits.Clear();
-      if (_ownedTransaction is not null) {
-        await _ownedTransaction.RollbackAsync(CancellationToken.None);
-      }
-      await DisposeOwnedTransactionAsync();
-    }
+    await AbandonSaveAsync(eventData.Context);
     await base.SaveChangesFailedAsync(eventData, cancellationToken);
+  }
+
+  public override async Task SaveChangesCanceledAsync(DbContextEventData eventData, CancellationToken cancellationToken = default) {
+    await AbandonSaveAsync(eventData.Context);
+    await base.SaveChangesCanceledAsync(eventData, cancellationToken);
   }
 
   #endregion
 
-  private void AddAudits(DbContext context, string changedBy) {
+  // The save failed or was cancelled, so throw away the pending audit rows and roll back our transaction. A failure of our own save of
+  // the audit rows is dealt with where it's made
+  private void AbandonSave(DbContext? context) {
+    if (context is not null && GetState(context) is { SavingAudits: false } state) {
+      state.PendingAddedAudits.Clear();
+      state.OwnedTransaction?.Rollback();
+      DisposeOwnedTransaction(state);
+    }
+  }
+
+  private async Task AbandonSaveAsync(DbContext? context) {
+    if (context is not null && GetState(context) is { SavingAudits: false } state) {
+      state.PendingAddedAudits.Clear();
+      if (state.OwnedTransaction is not null) {
+        await state.OwnedTransaction.RollbackAsync(CancellationToken.None);
+      }
+      await DisposeOwnedTransactionAsync(state);
+    }
+  }
+
+  private void AddAudits(DbContext context, SaveState state, string changedBy) {
     DateTime changedAt = DateTime.UtcNow;
 
     List<EntityEntry> entries = context.ChangeTracker.Entries()
@@ -139,7 +168,7 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
       if (entry.State == EntityState.Added) {
         // Defer audit creation for Added entities: the database-generated ID is not yet
         // available at this point. The real ID will be resolved after SaveChanges completes.
-        _pendingAddedAudits.Add(new PendingAddedAudit(entry, entityTypeName, changedBy, changedAt));
+        state.PendingAddedAudits.Add(new PendingAddedAudit(entry, entityTypeName, changedBy, changedAt));
         continue;
       }
 
@@ -163,8 +192,8 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
     }
   }
 
-  private void AddPendingAddedAudits(DbContext context) {
-    foreach (PendingAddedAudit pending in _pendingAddedAudits) {
+  private void AddPendingAddedAudits(DbContext context, SaveState state) {
+    foreach (PendingAddedAudit pending in state.PendingAddedAudits) {
       // The database has now assigned the real ID, so we can read it from the entry.
       Audit audit = new() {
         EntityType = pending.EntityTypeName,
@@ -178,30 +207,30 @@ public class AuditingInterceptor(IHttpContextAccessor httpContextAccessor, Audit
 
       context.Set<Audit>().Add(audit);
     }
-    _pendingAddedAudits.Clear();
+    state.PendingAddedAudits.Clear();
   }
 
   // Only start a transaction when there will be a second save, and only when we can. EF Core won't start one inside a retrying execution
   // strategy, and the in-memory provider doesn't support them at all
-  private bool ShouldStartTransaction(DbContext context) =>
+  private bool ShouldStartTransaction(DbContext context, SaveState state) =>
     options.UseTransactionForAddedEntities
-    && _pendingAddedAudits.Count > 0
-    && _ownedTransaction is null
+    && state.PendingAddedAudits.Count > 0
+    && state.OwnedTransaction is null
     && context.Database.IsRelational()
     && context.Database.CurrentTransaction is null
     && System.Transactions.Transaction.Current is null
     && !context.Database.CreateExecutionStrategy().RetriesOnFailure;
 
-  private void DisposeOwnedTransaction() {
-    _ownedTransaction?.Dispose();
-    _ownedTransaction = null;
+  private static void DisposeOwnedTransaction(SaveState state) {
+    state.OwnedTransaction?.Dispose();
+    state.OwnedTransaction = null;
   }
 
-  private async Task DisposeOwnedTransactionAsync() {
-    if (_ownedTransaction is not null) {
-      await _ownedTransaction.DisposeAsync();
+  private static async Task DisposeOwnedTransactionAsync(SaveState state) {
+    if (state.OwnedTransaction is not null) {
+      await state.OwnedTransaction.DisposeAsync();
     }
-    _ownedTransaction = null;
+    state.OwnedTransaction = null;
   }
 
   // Order of precedence: an identifier set explicitly on AuditUserContextInterface, the user on the current HttpContext, the user from

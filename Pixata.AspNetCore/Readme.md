@@ -6,6 +6,8 @@ Server-side helpers for ASP.NET Core apps - entity auditing, payload encryption,
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
 
+>**Version 2.2.0** makes auditing work with an `IDbContextFactory<TContext>`, as Microsoft recommend for Blazor Server. The interceptor now keeps each context's save separate, so the contexts that share it (as all the ones a factory creates in a circuit do) no longer mix up each other's audit rows or transactions, and the audit services read through the factory rather than needing a scoped context. The audit viewer also lists entity IDs in numerical order (1, 2, 10 rather than 1, 10, 2) when they're whole numbers. See [using a DbContext factory](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Auditing.md#using-a-dbcontext-factory).
+
 >**Version 2.1.1** lists [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) alongside Pixata.AspNetCore.Pdf.Telerik in the message `DocumentTemplateHelper` throws when no PDF converter is registered, and in the `RegisterPdfConverter` obsolete message. No other changes.
 
 ## Breaking changes in v2.0.0

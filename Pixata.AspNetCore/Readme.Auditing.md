@@ -52,6 +52,23 @@ dotnet ef database update
 
 That is all you need for auditing information to be recorded when entities are added, modified or deleted.
 
+## Using a DbContext factory
+
+In Blazor Server, Microsoft recommend registering an `IDbContextFactory<TContext>` and creating a short-lived context for each operation, rather than injecting a scoped context, as a circuit's scope lives as long as the browser tab. Auditing works with a factory too. Register it like this...
+
+```csharp
+builder.Services.AddAuditing<MyDbContext>();
+builder.Services.AddDbContextFactory<MyDbContext>((serviceProvider, options) =>
+  options.UseSqlServer(connectionString)
+         .AddAuditingInterceptor(serviceProvider), ServiceLifetime.Scoped);
+```
+
+Note the `ServiceLifetime.Scoped` at the end. That gives each circuit its own factory, and so its own interceptor, which can see who the circuit's user is. A singleton factory (the default for `AddDbContextFactory()`, and the only choice for `AddPooledDbContextFactory()`) builds its options once, from the root service provider, which can't supply the per-circuit services the interceptor needs. In development, you'll get an exception saying that the scoped `AuditingInterceptor` can't be resolved from the root provider. So don't use a pooled factory with auditing.
+
+All the contexts the factory creates in a circuit share that one interceptor. As of v2.2.0, it keeps track of each context's save separately, so two components saving at once (or a save that sets off another) don't mix up each other's audit rows, or commit or roll back each other's transactions.
+
+You don't need to register a scoped context as well. When there's a factory, the audit service reads the audit trail through a short-lived context of its own for each read, and the audit viewer doesn't need a context at all. Prior to v2.2.0, the audit services needed a scoped `MyDbContext`, so an app that only registered a pooled factory had to register one by hand.
+
 ## Data model
 
 Each audit entry stores...

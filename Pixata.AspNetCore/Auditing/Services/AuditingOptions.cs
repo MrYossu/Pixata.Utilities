@@ -41,6 +41,9 @@ public class AuditingOptions : AuditRetentionOptions {
     return this;
   }
 
+  // The app's context type, set by AddAuditing<TContext>(), so the viewer can list the entity types without needing a context
+  internal Type? ContextType { get; set; }
+
   internal bool IsExcluded(Type entityType, string propertyName) =>
     _excludedProperties.Any(p => p.PropertyName == propertyName && p.EntityType.IsAssignableFrom(entityType));
 }
