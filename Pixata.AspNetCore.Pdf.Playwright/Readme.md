@@ -8,6 +8,8 @@ Playwright (Apache 2.0) and Chromium (BSD) are free, with no licence key. Chromi
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwright/) is available for this project.
 
+>**Version 1.0.1** fixes blocked images showing as light blue boxes in the PDF. The blank image used in place of a blocked one was meant to be transparent, but was half-transparent blue, so each blocked image (one that isn't on the site in `PdfOptions.BaseUrl`, see [images and style sheets](#images-and-style-sheets)) appeared as a blue rectangle the size of the image. It now leaves a gap, as intended.
+
 ## Contents
 
 - [Setup](#setup)
