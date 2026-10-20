@@ -32,13 +32,13 @@ There is no current request inside an interactive Blazor Server component (after
 
 ### PDFs
 
-As of v2.0.0, this package doesn't include a PDF engine, so that apps that only want HTML (or that don't use the helper at all) don't have to deploy one. To create PDFs, add a package that provides a `PdfConverterInterface`...
+As of v2.0.0, this package doesn't include a PDF engine, so that apps that only want HTML (or that don't use the helper at all) don't have to deploy one. To create PDFs, add a package that provides a `PdfConverterInterface`. [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) is the recommended one, as it's free, and gives by far the best results...
 
 | Package | Registration | Notes |
 | --- | --- | --- |
 | [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) | `builder.Services.AddPixataPlaywrightPdf();` | Uses Chromium, driven by Microsoft Playwright, so templates print as they would in Chrome, with full CSS support. Free, with no licence key. Chromium (about 330MB including the Playwright driver) is copied into the app's publish output, so nothing is installed on the server, but the host must allow the app to start processes. Supports letterheads in page headers and footers |
-| [Pixata.AspNetCore.Pdf.WkHtmlToPdf](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf) | `builder.Services.AddPixataWkHtmlToPdf();` | Uses the lightweight open-source wkhtmltopdf package. Note that this was archived in January 2023, so does not get security fixes, and has known server-side request forgery and local file read problems with user-supplied HTML. |
-| [Pixata.AspNetCore.Pdf.Telerik](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik) | `builder.Services.AddPixataTelerikPdf();` | Uses Telerik Document Processing, which is pure .NET and actively maintained, with no native binaries to deploy. Its CSS support is more limited than a browser's (no flexbox or grid), so keep templates to simple, table-based layout. Needs a Telerik licence |
+| [Pixata.AspNetCore.Pdf.Telerik](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik) | `builder.Services.AddPixataTelerikPdf();` | Uses Telerik Document Processing, which needs a Telerik licence. Its CSS support is much more limited than a browser's (no flexbox or grid), so templates have to be kept to simple, table-based layout. Use Pixata.AspNetCore.Pdf.Playwright instead, which is free, and gives much better results |
+| [Pixata.AspNetCore.Pdf.WkHtmlToPdf](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf) | `builder.Services.AddPixataWkHtmlToPdf();` | **Obsolete.** Uses wkhtmltopdf, which was archived in January 2023, so does not get security fixes, and has known server-side request forgery and local file read problems with user-supplied HTML. Only for apps upgrading from before v2.0.0, until they move to Pixata.AspNetCore.Pdf.Playwright |
 
 You can also register an implementation of your own...
 

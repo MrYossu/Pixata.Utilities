@@ -6,8 +6,8 @@
 /// </summary>
 public class PixataAspNetCoreOptions {
   /// <summary>
-  /// No longer used. As of v2.0.0, this package doesn't include a PDF engine. Add a PDF converter package (Pixata.AspNetCore.Pdf.Telerik, Pixata.AspNetCore.Pdf.Playwright or the obsolete
-  /// Pixata.AspNetCore.Pdf.WkHtmlToPdf) and call its registration method instead
+  /// No longer used. As of v2.0.0, this package doesn't include a PDF engine. Add a PDF converter package (Pixata.AspNetCore.Pdf.Playwright is
+  /// recommended) and call its registration method instead
   /// </summary>
   [Obsolete("This package no longer includes a PDF engine, so this does nothing. Add a PDF converter package (one of the Pixata.AspNetCore.Pdf.* packages) and call its registration method instead")]
   public bool RegisterPdfConverter { get; set; } = true;

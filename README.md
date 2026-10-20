@@ -34,22 +34,22 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is availabl
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore).
 
-## Pixata.AspNetCore.Pdf.Telerik
-A PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Telerik Document Processing. As of Pixata.AspNetCore v2.0.0, PDF generation lives in its own package, so apps that don't generate PDFs don't deploy a PDF engine.
-
-A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/) is available for this project.
-
-You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik).
-
 ## Pixata.AspNetCore.Pdf.Playwright
-A PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Chromium driven by Microsoft Playwright. Templates print as they would in Chrome, Chromium is copied into the app's publish output so that nothing needs installing on the server, and letterheads can be added to page headers and footers.
+The recommended PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Chromium driven by Microsoft Playwright. It's free, templates print as they would in Chrome, Chromium is copied into the app's publish output so that nothing needs installing on the server, and letterheads can be added to page headers and footers. As of Pixata.AspNetCore v2.0.0, PDF generation lives in its own package, so apps that don't generate PDFs don't deploy a PDF engine.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwright/) is available for this project.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
 
+## Pixata.AspNetCore.Pdf.Telerik
+A PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Telerik Document Processing, which needs a Telerik licence. Pixata.AspNetCore.Pdf.Playwright is free, and gives much better results, so is recommended instead.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik).
+
 ## Pixata.AspNetCore.Pdf.WkHtmlToPdf
-**Obsolete.** The wkhtmltopdf converter that Pixata.AspNetCore used before v2.0.0, kept so that apps can upgrade before moving their templates to another converter. It will be removed in a future release.
+**Obsolete.** The wkhtmltopdf converter that Pixata.AspNetCore used before v2.0.0, kept so that apps can upgrade before moving their templates to Pixata.AspNetCore.Pdf.Playwright. It will be removed in a future release.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.WkHtmlToPdf).
 

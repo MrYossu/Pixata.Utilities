@@ -4,7 +4,11 @@
 
 A PDF converter for the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore), using [Telerik Document Processing](https://www.telerik.com/document-processing-libraries). It turns the HTML rendered from your Blazor template into a PDF, without a browser or a native PDF engine.
 
+>Telerik Document Processing needs a Telerik licence. [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) is free, and gives much better results, as it prints templates as Chrome would, with full CSS support. It is recommended instead of this package.
+
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/) is available for this project.
+
+>**Version 1.0.3** changes the package description and this readme to recommend Pixata.AspNetCore.Pdf.Playwright. No code changes.
 
 >**Version 1.0.2** fixes the image at the top of this readme. No code changes.
 

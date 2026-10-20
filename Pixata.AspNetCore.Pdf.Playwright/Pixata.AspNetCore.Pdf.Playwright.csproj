@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <FileVersion>1.0.1</FileVersion>
+    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.2</AssemblyVersion>
+    <FileVersion>1.0.2</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.AspNetCore.Pdf.Playwright</Product>
-    <Description>Playwright and Chromium PDF converter for Pixata.AspNetCore's DocumentTemplateHelper. Chromium is copied into the app's build and publish output, so nothing needs installing on the server</Description>
+    <Description>The recommended PDF converter for Pixata.AspNetCore's DocumentTemplateHelper, using Playwright and Chromium. Free, and prints templates as Chrome would. Chromium is copied into the app's build and publish output, so nothing needs installing on the server</Description>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright</PackageProjectUrl>

@@ -7,7 +7,7 @@ namespace Pixata.AspNetCore.Pdf.WkHtmlToPdf;
 /// <summary>
 /// Converts HTML to PDF with wkhtmltopdf. 
 /// </summary>
-[Obsolete("wkhtmltopdf is no longer maintained, and is unsafe with user-supplied HTML. Use Pixata.AspNetCore.Pdf.Playwright or Pixata.AspNetCore.Pdf.Telerik instead")]
+[Obsolete("wkhtmltopdf is no longer maintained, and is unsafe with user-supplied HTML. Use Pixata.AspNetCore.Pdf.Playwright instead")]
 public class WkHtmlToPdfConverter(IConverter converter) : PdfConverterInterface {
   public Task<byte[]> Convert(string html, PdfOptions options) {
     (double width, double height) = options.PaperSizeMm();

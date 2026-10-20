@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-    <Version>1.0.2</Version>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>1.0.2</FileVersion>
+    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>1.0.3</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.AspNetCore.Pdf.Telerik</Product>
-    <Description>Telerik Document Processing PDF converter for Pixata.AspNetCore's DocumentTemplateHelper. Pure .NET, with no native binaries</Description>
+    <Description>Telerik Document Processing PDF converter for Pixata.AspNetCore's DocumentTemplateHelper. Needs a Telerik licence. Pixata.AspNetCore.Pdf.Playwright is free, and gives much better results, so is recommended instead</Description>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik</PackageProjectUrl>

@@ -60,7 +60,7 @@ Multi-targeting: the actively maintained packages target `net8.0;net10.0` with p
 
 ## DI registration convention
 
-Each package exposes one `AddPixataXxx()` extension. `AddPixataBlazor()` checks for already-registered services and logs rather than double-registering. `AddPixataAspNetCore<T>()` takes a `PixataAspNetCoreOptions` action so callers can opt out of parts they don't want; PDF converters are registered separately (`AddPixataTelerikPdf()`), and `DocumentTemplateHelper` takes the converter as an optional dependency, throwing a clear exception when a PDF is asked for without one. Follow that pattern — fail loudly at registration, not at resolve time — when adding registrations.
+Each package exposes one `AddPixataXxx()` extension. `AddPixataBlazor()` checks for already-registered services and logs rather than double-registering. `AddPixataAspNetCore<T>()` takes a `PixataAspNetCoreOptions` action so callers can opt out of parts they don't want; PDF converters are registered separately (`AddPixataPlaywrightPdf()`), and `DocumentTemplateHelper` takes the converter as an optional dependency, throwing a clear exception when a PDF is asked for without one. Follow that pattern — fail loudly at registration, not at resolve time — when adding registrations.
 
 ## Release process
 

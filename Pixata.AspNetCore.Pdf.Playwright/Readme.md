@@ -2,11 +2,13 @@
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.AspNetCore.Pdf.Playwright/ordinateuroff.png "Pixata")
 
-A PDF converter for the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore), using [Microsoft Playwright for .NET](https://playwright.dev/dotnet/) and Chromium. It turns the HTML rendered from your Blazor template into a PDF exactly as Chrome would print it, so templates can use any CSS that Chrome supports, including flexbox, grid and print CSS.
+A PDF converter for the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore), using [Microsoft Playwright for .NET](https://playwright.dev/dotnet/) and Chromium. It turns the HTML rendered from your Blazor template into a PDF exactly as Chrome would print it, so templates can use any CSS that Chrome supports, including flexbox, grid and print CSS. This is the recommended converter.
 
 Playwright (Apache 2.0) and Chromium (BSD) are free, with no licence key. Chromium is copied into your app's build and publish output, so nothing needs installing on the server, and the app can be deployed to shared hosting.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwright/) is available for this project.
+
+>**Version 1.0.2** changes the package description and this readme to say that this is the recommended converter. No code changes.
 
 >**Version 1.0.1** fixes blocked images showing as light blue boxes in the PDF. The blank image used in place of a blocked one was meant to be transparent, but was half-transparent blue, so each blocked image (one that isn't on the site in `PdfOptions.BaseUrl`, see [images and style sheets](#images-and-style-sheets)) appeared as a blue rectangle the size of the image. It now leaves a gap, as intended.
 

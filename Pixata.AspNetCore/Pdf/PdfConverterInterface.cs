@@ -2,8 +2,8 @@ namespace Pixata.AspNetCore.Pdf;
 
 /// <summary>
 /// Converts HTML to a PDF. <see cref="Helpers.DocumentTemplateHelper"/> uses whichever implementation is registered. This package doesn't
-/// include one, so that apps that don't generate PDFs don't have to deploy a PDF engine. Add Pixata.AspNetCore.Pdf.Playwright,
-/// Pixata.AspNetCore.Pdf.WkHtmlToPdf or Pixata.AspNetCore.Pdf.Telerik) and call its registration method, or register an implementation of your own
+/// include one, so that apps that don't generate PDFs don't have to deploy a PDF engine. Add Pixata.AspNetCore.Pdf.Playwright
+/// and call its registration method, or register an implementation of your own
 /// </summary>
 public interface PdfConverterInterface {
   Task<byte[]> Convert(string html, PdfOptions options);
