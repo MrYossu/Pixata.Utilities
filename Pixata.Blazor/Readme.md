@@ -6,6 +6,8 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.7.0** lets a grid column's custom filter template replace its `Filter` with a new one, so it can join its descriptors with Or, such as to search two fields at once. See [custom filters](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#custom-filters)
+
 >**Version 5.6.0** makes some more changes that help when moving from Telerik's components...
 >- `PixataDateInput`, `PixataDatePicker` and `PixataDateRangePicker` have a `Size` parameter (`sm`, `md` or `lg`, from `PixataThemeConstants.Size`), as the drop-downs and radio group do. See the [date picker documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#parameters)
 >- `PixataGrid` has a `FilterRowDebounceDelay` parameter, which sets how many milliseconds the filter row waits after the user stops typing before it filters (150 by default, as before), so a grid that reads from the server through `OnRead` isn't asked for data on every key

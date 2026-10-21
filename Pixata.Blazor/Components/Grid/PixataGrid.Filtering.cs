@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -62,9 +62,10 @@ public class PixataGridFilterTemplateContext {
   public string Field { get; }
 
   /// <summary>
-  /// The column's filter. Add, change or remove its descriptors, then call <see cref="FilterAsync"/>
+  /// The column's filter. Add, change or remove its descriptors, or replace it with a new one (such as one whose descriptors
+  /// are joined by Or), then call <see cref="FilterAsync"/>
   /// </summary>
-  public GridCompositeFilterDescriptor Filter { get; }
+  public GridCompositeFilterDescriptor Filter { get; set; }
 
   public Task FilterAsync() =>
     _apply();
@@ -405,14 +406,17 @@ public partial class PixataGrid<TItem> {
     GridCompositeFilterDescriptor filter = _filters.TryGetValue(column.Field!, out GridCompositeFilterDescriptor? current)
       ? current with { Filters = [.. current.Filters] }
       : new(GridFilterLogic.And, []);
-    return new(column.Field!, filter, async () => {
+    // The template can replace the filter, so the one applied is whatever the context has by then
+    PixataGridFilterTemplateContext context = null!;
+    context = new(column.Field!, filter, async () => {
       await CloseFilterMenu();
-      SetFilter(column, filter);
+      SetFilter(column, context.Filter);
     }, async () => {
       await CloseFilterMenu();
       _filterRowState.Remove(column.Field!);
       SetFilter(column, null);
     });
+    return context;
   }
 
   // ---------- Converting values for the editors ----------

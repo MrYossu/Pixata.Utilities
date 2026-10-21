@@ -316,6 +316,29 @@ A column's `FilterCellTemplate` replaces its cell in the filter row, and `Filter
 </PixataGridColumn>
 ```
 
+The descriptors in `Filter` are joined by its `Logic`, which can't be changed, so to join them by Or, replace `Filter` with a new one. This filters the name column on the company name as well...
+
+```razor
+<PixataGridColumn Field="@nameof(Person.Name)">
+  <FilterCellTemplate>
+    <input value="@(context.Filter.Filters.FirstOrDefault()?.Value)" @oninput="async e => {
+      string text = e.Value?.ToString();
+      if (string.IsNullOrEmpty(text)) {
+        await context.ClearFilterAsync();
+      } else {
+        context.Filter = new(GridFilterLogic.Or, [
+          new(nameof(Person.Name), GridFilterOperator.Contains, text),
+          new(nameof(Person.CompanyName), GridFilterOperator.Contains, text)
+        ]);
+        await context.FilterAsync();
+      }
+    }" />
+  </FilterCellTemplate>
+</PixataGridColumn>
+```
+
+`Filter` starts as the column's current filter, so take the template's value from it, as above, rather than keeping it in a field of your own. That way the template shows the right value when the grid's [state](#state) is restored, such as from local storage. A restored filter is matched to its column by the field of its first descriptor, so make that the column's field.
+
 ### Bool filter
 
 `PixataGridBoolFilter` is a filter for a `bool` column in the filter row, as an alternative to the drop-down. It's a three-state checkbox, which starts empty with a dash (all rows), and each click moves it on to ticked (true), unticked (false) and back to all rows. Use its `Filter()` method as the column's `FilterCellTemplate`...

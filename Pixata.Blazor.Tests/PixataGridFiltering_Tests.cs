@@ -267,4 +267,28 @@ public class PixataGridFiltering_Tests {
 
     Assert.AreEqual("Dave", Names(grid));
   }
+
+  [TestMethod]
+  public void FilterCellTemplate_CanReplaceItsFilter() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.FilterRow, extra: (b, field, seq) => {
+      if (field == "Name") {
+        b.AddAttribute(seq, "FilterCellTemplate", (RenderFragment<PixataGridFilterTemplateContext>)(context => builder => {
+          builder.OpenElement(0, "button");
+          builder.AddAttribute(1, "class", "custom");
+          builder.AddAttribute(2, "onclick", EventCallback.Factory.Create(this, async () => {
+            context.Filter = new(GridFilterLogic.Or, [
+              new("Name", GridFilterOperator.StartsWith, "d"),
+              new("Name", GridFilterOperator.StartsWith, "b")
+            ]);
+            await context.FilterAsync();
+          }));
+          builder.CloseElement();
+        }));
+      }
+    });
+
+    grid.Find(".custom").Click();
+
+    Assert.AreEqual("Bob,Dave", Names(grid));
+  }
 }
