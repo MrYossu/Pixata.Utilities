@@ -54,6 +54,7 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Sortable` | `bool` | Lets the user sort by clicking a column header. See [sorting](#sorting) |
 | `SortMode` | `PixataGridSortMode` | `Single` (the default) or `Multiple` |
 | `FilterMode` | `PixataGridFilterMode` | `None` (the default), `FilterRow` or `FilterMenu`. See [filtering](#filtering) |
+| `FilterRowDebounceDelay` | `int` | How long, in milliseconds, the filter row waits after the user stops typing in a text or number filter before it filters. Defaults to 150 |
 | `GridToolBarTemplate` | `RenderFragment` | Content for a toolbar above the grid, such as a [search box](#search-box) |
 | `RowTemplate` | `RenderFragment<TItem>` | The content of each row, in place of the grid's cells. See [templates](#templates-and-row-events) |
 | `LoaderTemplate` | `RenderFragment` | What the loading indicator shows, in place of the dots |
@@ -205,7 +206,7 @@ Setting the initial sort from code will be possible through the grid's state, wh
 
 Set `FilterMode` to choose how the user filters...
 
-- `FilterRow` adds a row under the headers, with an editor for each column. Text and numbers are filtered a moment after the user stops typing, and the other editors filter straight away. The button next to each editor picks the operator (such as "Starts with"), and the one beside it clears the filter
+- `FilterRow` adds a row under the headers, with an editor for each column. Text and numbers are filtered a moment after the user stops typing (150 milliseconds, unless you set `FilterRowDebounceDelay`; make it longer, say 350, when the data comes from the server through `OnRead`, so the server isn't asked on every key), and the other editors filter straight away. The button next to each editor picks the operator (such as "Starts with"), and the one beside it clears the filter
 - `FilterMenu` puts a filter icon in each header. It opens a menu with two conditions joined by And or Or, which are applied when the user clicks Filter. Set a column's `FilterMenuType` to `CheckBoxList` for a list of the column's values to tick instead. The icon is coloured when the column has a filter
 
 ```razor

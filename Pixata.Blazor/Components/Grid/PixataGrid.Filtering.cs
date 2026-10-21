@@ -81,6 +81,14 @@ public partial class PixataGrid<TItem> {
   public PixataGridFilterMode FilterMode { get; set; } = PixataGridFilterMode.None;
 
   /// <summary>
+  /// How long, in milliseconds, the filter row waits after the user stops typing in a text or number filter before it
+  /// filters. Defaults to 150, as in Telerik. Make it longer when the grid reads its data from the server, so it isn't
+  /// asked for data on every key
+  /// </summary>
+  [Parameter]
+  public int FilterRowDebounceDelay { get; set; } = 150;
+
+  /// <summary>
   /// Content for the toolbar above the grid, such as a <see cref="PixataGridSearchBox{TItem}"/>
   /// </summary>
   [Parameter]
@@ -203,7 +211,7 @@ public partial class PixataGrid<TItem> {
 
   // ---------- The filter row ----------
 
-  // Text and numbers are applied a moment after the user stops typing, as in Telerik's filter row
+  // Text and numbers are applied FilterRowDebounceDelay milliseconds after the user stops typing, as in Telerik's filter row
   private async Task OnFilterRowValueChanged(PixataGridColumn<TItem> column, object? value, bool debounce) {
     ColumnFilterState state = RowState(column);
     state.Value1 = value is string text && text.Length == 0 ? null : value;
@@ -214,7 +222,7 @@ public partial class PixataGrid<TItem> {
       CancellationTokenSource cancel = new();
       _filterDebounce[column.Field!] = cancel;
       try {
-        await Task.Delay(150, cancel.Token);
+        await Task.Delay(Math.Max(0, FilterRowDebounceDelay), cancel.Token);
       } catch (TaskCanceledException) {
         return;
       }
