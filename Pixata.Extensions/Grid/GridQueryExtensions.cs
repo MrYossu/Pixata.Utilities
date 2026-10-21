@@ -65,6 +65,26 @@ public static class GridQueryExtensions {
   }
 
   /// <summary>
+  /// Makes the request's filters on the named <see cref="DateTime"/> fields compare the date only, ignoring the time, so that
+  /// filtering for "is equal to 21/10/2026" finds the items on that day whatever their time. This is the equivalent of
+  /// <c>TelerikFilterHelper.RemoveTime()</c>, and is called in a grid's <c>OnRead</c> handler before the data is read. It
+  /// changes the request's filters in place, and returns the request so it can be chained. See
+  /// <see cref="GridFilterDescriptor.IgnoreTime"/>
+  /// </summary>
+  /// <param name="request">The request whose filters are to be changed</param>
+  /// <param name="members">The fields, such as <c>nameof(Person.DateOfBirth)</c></param>
+  /// <returns>The same request</returns>
+  public static GridRequest RemoveTime(this GridRequest request, params string[] members) {
+    for (int i = 0; i < request.Filters.Count; i++) {
+      GridCompositeFilterDescriptor composite = request.Filters[i];
+      request.Filters[i] = composite with {
+        Filters = [.. composite.Filters.Select(f => members.Contains(f.Member) ? f with { IgnoreTime = true } : f)]
+      };
+    }
+    return request;
+  }
+
+  /// <summary>
   /// Sorts a query by each of the descriptors in turn, so the first has the highest priority. A nested field is sorted
   /// safely when part of its path is null, with nulls coming first in ascending order, as they do in LINQ and SQL Server
   /// </summary>

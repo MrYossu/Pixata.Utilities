@@ -104,11 +104,15 @@ public static class GridFilterExpressions {
       case GridFilterOperator.IsContainedIn:
         return Contained(member, filter.Value);
     }
-    ConstantExpression value = Expression.Constant(ConvertValue(filter.Value, type), type);
+    object? converted = ConvertValue(filter.Value, type);
+    Type underlying = Nullable.GetUnderlyingType(type) ?? type;
+    if (filter.IgnoreTime && underlying == typeof(DateTime) && converted is DateTime date) {
+      return DateOnlyFilter(member, filter, date.Date, nullable);
+    }
+    ConstantExpression value = Expression.Constant(converted, type);
     // Enums can only be compared for equality in an expression, so ordering comparisons use their underlying number
     Expression left = member;
     Expression right = value;
-    Type underlying = Nullable.GetUnderlyingType(type) ?? type;
     if (underlying.IsEnum && filter.Operator is not (GridFilterOperator.IsEqualTo or GridFilterOperator.IsNotEqualTo)) {
       Type number = Enum.GetUnderlyingType(underlying);
       Type target = type == underlying ? number : typeof(Nullable<>).MakeGenericType(number);
@@ -123,6 +127,25 @@ public static class GridFilterExpressions {
       GridFilterOperator.IsGreaterThan => Expression.GreaterThan(left, right),
       GridFilterOperator.IsGreaterThanOrEqualTo => Expression.GreaterThanOrEqual(left, right),
       _ => throw new ArgumentException($"The {filter.Operator} filter can only be used on text, not on {underlying.Name} ({filter.Member})", nameof(filter))
+    };
+  }
+
+  // Compares a DateTime field with a day, ignoring the time, using the start of that day and of the next one, so that EF
+  // Core can still use an index on the field
+  private static Expression DateOnlyFilter(Expression member, GridFilterDescriptor filter, DateTime day, bool nullable) {
+    ConstantExpression start = Expression.Constant(day, member.Type);
+    ConstantExpression next = Expression.Constant(day.AddDays(1), member.Type);
+    return filter.Operator switch {
+      GridFilterOperator.IsEqualTo => Expression.AndAlso(Expression.GreaterThanOrEqual(member, start), Expression.LessThan(member, next)),
+      // A null isn't on the day, as it isn't equal to it without IgnoreTime
+      GridFilterOperator.IsNotEqualTo => Expression.OrElse(
+        nullable ? Expression.OrElse(Expression.Equal(member, Expression.Constant(null, member.Type)), Expression.LessThan(member, start)) : Expression.LessThan(member, start),
+        Expression.GreaterThanOrEqual(member, next)),
+      GridFilterOperator.IsLessThan => Expression.LessThan(member, start),
+      GridFilterOperator.IsLessThanOrEqualTo => Expression.LessThan(member, next),
+      GridFilterOperator.IsGreaterThan => Expression.GreaterThanOrEqual(member, next),
+      GridFilterOperator.IsGreaterThanOrEqualTo => Expression.GreaterThanOrEqual(member, start),
+      _ => throw new ArgumentException($"The {filter.Operator} filter can only be used on text, not on DateTime ({filter.Member})", nameof(filter))
     };
   }
 

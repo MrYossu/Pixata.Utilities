@@ -107,6 +107,7 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Filterable` | `bool` | Set to `false` to stop the user filtering by this column. Defaults to `true` |
 | `FilterMenuType` | `PixataGridFilterMenuType` | `Menu` (two conditions, the default) or `CheckBoxList` |
 | `DefaultFilterOperator` | `GridFilterOperator?` | The operator the filter starts with. Defaults to Contains for text, and Is equal to for everything else |
+| `IgnoreTime` | `bool` | For a `DateTime` field, makes the filter compare the date only, so "on 21/10/2026" finds the items at any time that day. True by default for a `PixataDateGridColumn`, false otherwise. See [dates with a time](#dates-with-a-time) |
 | `FilterOperators` | `List<PixataGridFilterListOperator>` | The operators to offer, in place of the defaults for the field's type. See [typed columns](#typed-columns) |
 | `ShowFilterCellButtons` | `bool` | Set to `false` to hide the operator button and the clear button in the filter row, leaving just the editor. Defaults to `true` |
 | `FilterCellTemplate`, `FilterMenuTemplate` | `RenderFragment<PixataGridFilterTemplateContext>` | Your own filter UI. See [custom filters](#custom-filters) |
@@ -263,6 +264,21 @@ The lists come from `PixataGridFilterOperators.StringOperators`, `NumericOperato
 ```
 
 The filter starts with the column's `DefaultFilterOperator` if you set one. Otherwise it starts with the usual default for the type if that's in the list, or the first operator in the list if not.
+
+### Dates with a time
+
+When a `DateTime` field holds a time as well as a date, filtering for "is equal to 21/10/2026" would normally find nothing, as the filter value is midnight and the data isn't. A column with `IgnoreTime="true"` compares the date only, so "on 21/10/2026" finds anything that day, "before" means before the start of that day and "after" means from the start of the next one. `PixataDateGridColumn` does this by default (set `IgnoreTime="false"` to compare the time as well); other columns don't.
+
+The comparison is done with a range ("on or after the start of the day, and before the start of the next"), rather than by taking the date part of the field, so EF Core can still use an index on it. It's carried on each filter in the request as `GridFilterDescriptor.IgnoreTime`, so it works with `OnRead` and across an API as well as with `Data`.
+
+If the columns don't set it (or the request comes from somewhere else), call `RemoveTime()` in your `OnRead` handler, naming the date fields, before you read the data. This is the equivalent of Telerik's `TelerikFilterHelper.RemoveTime()`...
+
+```csharp
+private async Task ReadPeople(PixataGridReadEventArgs<Person> args) {
+  args.Request.RemoveTime(nameof(Person.DateCreated), nameof(Person.DateDeleted));
+  args.SetResult(await Db.People.OrderBy(p => p.Id).ToGridResultAsync(args.Request, args.CancellationToken));
+}
+```
 
 ### Search box
 

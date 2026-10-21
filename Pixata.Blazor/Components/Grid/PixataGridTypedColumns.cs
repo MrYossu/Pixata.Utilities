@@ -21,11 +21,14 @@ public class PixataNumericGridColumn<TItem> : PixataGridColumn<TItem> {
 }
 
 /// <summary>
-/// A column for dates, whose filter offers "before", "on" and "on or after"
+/// A column for dates, whose filter offers "before", "on" and "on or after". The filter ignores the time, unless
+/// <see cref="PixataGridColumn{TItem}.IgnoreTime"/> is set to false
 /// </summary>
 public class PixataDateGridColumn<TItem> : PixataGridColumn<TItem> {
-  public PixataDateGridColumn() =>
+  public PixataDateGridColumn() {
     FilterOperators = PixataGridFilterOperators.DateOperators;
+    IgnoreTime = true;
+  }
 }
 
 /// <summary>

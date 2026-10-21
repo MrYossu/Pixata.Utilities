@@ -55,6 +55,76 @@ public class GridFilter_Tests {
     CollectionAssert.AreEqual(new[] { 3 }, Ids(new GridFilterDescriptor("Born", GridFilterOperator.IsGreaterThan, new DateOnly(1990, 6, 15))));
   }
 
+  public record Visit(int Id, DateTime When, DateTime? Left);
+
+  private static readonly List<Visit> Visits = [
+    new(1, new(2026, 10, 20, 23, 59, 59), null),
+    new(2, new(2026, 10, 21), new(2026, 10, 21, 9, 30, 0)),
+    new(3, new(2026, 10, 21, 14, 15, 0), new(2026, 10, 22, 1, 0, 0)),
+    new(4, new(2026, 10, 22, 0, 0, 0), new(2026, 10, 20, 8, 0, 0))
+  ];
+
+  private static int[] VisitIds(GridFilterLogic logic, params GridFilterDescriptor[] filters) =>
+    [.. Visits.AsQueryable().ApplyFilters([new GridCompositeFilterDescriptor(logic, [.. filters])]).Select(v => v.Id)];
+
+  private static int[] VisitIds(string member, GridFilterOperator op, object? value) =>
+    VisitIds(GridFilterLogic.And, new GridFilterDescriptor(member, op, value) { IgnoreTime = true });
+
+  [TestMethod]
+  public void IgnoreTime_ComparesTheDateOnly() {
+    DateTime day = new(2026, 10, 21, 12, 0, 0);
+    CollectionAssert.AreEqual(new[] { 2, 3 }, VisitIds("When", GridFilterOperator.IsEqualTo, day));
+    CollectionAssert.AreEqual(new[] { 1, 4 }, VisitIds("When", GridFilterOperator.IsNotEqualTo, day));
+    CollectionAssert.AreEqual(new[] { 1 }, VisitIds("When", GridFilterOperator.IsLessThan, day));
+    CollectionAssert.AreEqual(new[] { 1, 2, 3 }, VisitIds("When", GridFilterOperator.IsLessThanOrEqualTo, day));
+    CollectionAssert.AreEqual(new[] { 4 }, VisitIds("When", GridFilterOperator.IsGreaterThan, day));
+    CollectionAssert.AreEqual(new[] { 2, 3, 4 }, VisitIds("When", GridFilterOperator.IsGreaterThanOrEqualTo, day));
+    CollectionAssert.AreEqual(new[] { 2, 3 }, VisitIds("When", GridFilterOperator.IsEqualTo, new DateOnly(2026, 10, 21)));
+  }
+
+  [TestMethod]
+  public void IgnoreTime_WorksOnNullableDates() {
+    DateTime day = new(2026, 10, 21);
+    CollectionAssert.AreEqual(new[] { 2 }, VisitIds("Left", GridFilterOperator.IsEqualTo, day));
+    CollectionAssert.AreEqual(new[] { 1, 3, 4 }, VisitIds("Left", GridFilterOperator.IsNotEqualTo, day));
+    CollectionAssert.AreEqual(new[] { 3 }, VisitIds("Left", GridFilterOperator.IsGreaterThan, day));
+    CollectionAssert.AreEqual(new[] { 1 }, VisitIds("Left", GridFilterOperator.IsNull, null));
+  }
+
+  [TestMethod]
+  public void WithoutIgnoreTime_TheTimeIsCompared() =>
+    CollectionAssert.AreEqual(new[] { 2 }, VisitIds(GridFilterLogic.And, new GridFilterDescriptor("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 21))));
+
+  [TestMethod]
+  public void IgnoreTime_WorksInAnOrComposite() =>
+    CollectionAssert.AreEqual(new[] { 1, 4 }, VisitIds(GridFilterLogic.Or,
+      new GridFilterDescriptor("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 20)) { IgnoreTime = true },
+      new GridFilterDescriptor("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 22)) { IgnoreTime = true }));
+
+  [TestMethod]
+  public void RemoveTime_SetsIgnoreTimeOnTheNamedMembersOnly() {
+    GridRequest request = new() {
+      Filters = [
+        new(GridFilterLogic.And, [new("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 21)), new("Left", GridFilterOperator.IsNotNull)]),
+        new(GridFilterLogic.And, [new("Id", GridFilterOperator.IsGreaterThan, 0)])
+      ]
+    };
+    GridRequest result = request.RemoveTime("When");
+    Assert.AreSame(request, result);
+    Assert.IsTrue(request.Filters[0].Filters[0].IgnoreTime);
+    Assert.IsFalse(request.Filters[0].Filters[1].IgnoreTime);
+    Assert.IsFalse(request.Filters[1].Filters[0].IgnoreTime);
+    CollectionAssert.AreEqual(new[] { 2, 3 }, Visits.ToGridResult(request).Data.Select(v => v.Id).ToArray());
+  }
+
+  [TestMethod]
+  public void IgnoreTime_SurvivesJson() {
+    GridFilterDescriptor filter = new("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 21)) { IgnoreTime = true };
+    GridFilterDescriptor copy = JsonSerializer.Deserialize<GridFilterDescriptor>(JsonSerializer.Serialize(filter))!;
+    Assert.IsTrue(copy.IgnoreTime);
+    CollectionAssert.AreEqual(new[] { 2, 3 }, VisitIds(GridFilterLogic.And, copy));
+  }
+
   [TestMethod]
   public void NullableValues_CanBeComparedAndTestedForNull() {
     CollectionAssert.AreEqual(new[] { 2, 5 }, Ids(new GridFilterDescriptor("Age", GridFilterOperator.IsNull)));

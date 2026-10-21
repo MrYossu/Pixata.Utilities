@@ -248,7 +248,9 @@ public partial class PixataGrid<TItem> {
 
   // A filter needs a value, unless its operator doesn't use one (such as "Is null")
   private static GridFilterDescriptor? Descriptor(PixataGridColumn<TItem> column, GridFilterOperator op, object? value) =>
-    value is null && !ValuelessOperators.Contains(op) ? null : new(column.Field!, op, ValuelessOperators.Contains(op) ? null : value);
+    value is null && !ValuelessOperators.Contains(op)
+      ? null
+      : new(column.Field!, op, ValuelessOperators.Contains(op) ? null : value) { IgnoreTime = column.IgnoreTime };
 
   // ---------- Applying filters ----------
 

@@ -45,7 +45,15 @@ public enum GridFilterLogic {
 /// <param name="Value">What to compare with. Not needed for operators such as <see cref="GridFilterOperator.IsNull"/>.
 /// After a trip through JSON this will be a <c>JsonElement</c>, which is converted to the field's type when the filter is
 /// applied</param>
-public record GridFilterDescriptor(string Member, GridFilterOperator Operator, object? Value = null);
+public record GridFilterDescriptor(string Member, GridFilterOperator Operator, object? Value = null) {
+  /// <summary>
+  /// For a <see cref="System.DateTime"/> field, compares the date only, ignoring the time on both the field and the value. So
+  /// "is equal to 21/10/2026" matches any time on that day, and "is greater than 21/10/2026" starts on the next day. It is
+  /// done with a range rather than by taking the date part of the field, so EF Core can still use an index. It has no effect
+  /// on other types
+  /// </summary>
+  public bool IgnoreTime { get; init; }
+}
 
 /// <summary>
 /// A group of filters combined with AND or OR, such as the two conditions in a column's filter menu

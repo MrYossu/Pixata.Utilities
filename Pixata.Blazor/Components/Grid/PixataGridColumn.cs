@@ -187,6 +187,14 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   public GridFilterOperator? DefaultFilterOperator { get; set; }
 
   /// <summary>
+  /// For a <see cref="DateTime"/> field, makes the filter compare the date only, ignoring the time, so "on 21/10/2026" finds
+  /// the items at any time that day. It is true by default for a <see cref="PixataDateGridColumn{TItem}"/>, and false for
+  /// other columns. See <see cref="GridFilterDescriptor.IgnoreTime"/>
+  /// </summary>
+  [Parameter]
+  public bool IgnoreTime { get; set; }
+
+  /// <summary>
   /// The operators offered in the column's filter row and filter menu, in place of the defaults for the field's type, such
   /// as <see cref="PixataGridFilterOperators.StringOperators"/>. The filter starts with
   /// <see cref="DefaultFilterOperator"/> if set, otherwise the usual default if it's in the list, otherwise the first one
