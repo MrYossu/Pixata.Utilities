@@ -802,7 +802,7 @@
                                       AriaLabel="@column.HeaderText"
                                       Class="pixata-blazor-grid-filter-operator" />
             }
-            @if (column.ShowFilterCellButtons) {
+            @if (column.ShowFilterCellButtons && column.ShowFilterClearButton) {
               <button type="button"
                       class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-icon pixata-blazor-grid-filter-clear"
                       title="@Text.Clear"

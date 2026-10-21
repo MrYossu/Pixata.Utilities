@@ -210,6 +210,13 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   public bool ShowFilterCellButtons { get; set; } = true;
 
   /// <summary>
+  /// Set to false to hide just the clear button in the column's filter row cell, keeping the operator drop-down. Defaults
+  /// to true. Has no effect if <see cref="ShowFilterCellButtons"/> is false
+  /// </summary>
+  [Parameter]
+  public bool ShowFilterClearButton { get; set; } = true;
+
+  /// <summary>
   /// Your own content for the column's cell in the filter row
   /// </summary>
   [Parameter]

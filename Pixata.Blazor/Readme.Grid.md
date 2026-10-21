@@ -110,6 +110,7 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `IgnoreTime` | `bool` | For a `DateTime` field, makes the filter compare the date only, so "on 21/10/2026" finds the items at any time that day. True by default for a `PixataDateGridColumn`, false otherwise. See [dates with a time](#dates-with-a-time) |
 | `FilterOperators` | `List<PixataGridFilterListOperator>` | The operators to offer, in place of the defaults for the field's type. See [typed columns](#typed-columns) |
 | `ShowFilterCellButtons` | `bool` | Set to `false` to hide the operator button and the clear button in the filter row, leaving just the editor. Defaults to `true` |
+| `ShowFilterClearButton` | `bool` | Set to `false` to hide just the clear button in the filter row, keeping the operator button, such as for a numeric column where it's easy enough to delete what was typed. Defaults to `true` |
 | `FilterCellTemplate`, `FilterMenuTemplate` | `RenderFragment<PixataGridFilterTemplateContext>` | Your own filter UI. See [custom filters](#custom-filters) |
 | `Template` | `RenderFragment<object>` | The content of each data cell. See [templates](#templates-and-row-events) |
 | `HeaderTemplate` | `RenderFragment` | The content of the header cell, in place of the title |
