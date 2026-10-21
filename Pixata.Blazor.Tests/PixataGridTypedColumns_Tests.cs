@@ -98,6 +98,57 @@ public class PixataGridTypedColumns_Tests {
     Assert.IsNotNull(cell.QuerySelector(".pixata-blazor-grid-filter-editor"));
   }
 
+  // Opens the enum column's drop-down, and returns its items and the text on the button
+  private static (string Items, string Text) EnumFilter(IRenderedComponent<PixataGrid<Person>> grid, int column) {
+    FilterCell(grid, column).QuerySelector(".pixata-blazor-grid-dropdown-button")!.Click();
+    IElement cell = FilterCell(grid, column);
+    return (string.Join(",", cell.QuerySelectorAll(".pixata-blazor-grid-dropdown-item").Select(li => li.TextContent.Trim())),
+      cell.QuerySelector(".pixata-blazor-grid-dropdown-text")!.TextContent.Trim());
+  }
+
+  private static void PickEnum(IRenderedComponent<PixataGrid<Person>> grid, int column, string text) {
+    FilterCell(grid, column).QuerySelector(".pixata-blazor-grid-dropdown-button")!.Click();
+    FilterCell(grid, column).QuerySelectorAll(".pixata-blazor-grid-dropdown-item").First(li => li.TextContent.Trim() == text).Click();
+  }
+
+  [TestMethod]
+  public void EnumColumn_StartsWithAnAllEntry() =>
+    Assert.AreEqual(("(All),Cat,Dog", "(All)"), EnumFilter(Render(), 3));
+
+  [TestMethod]
+  public void EnumColumn_AllEntryClearsTheFilter() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render();
+
+    PickEnum(grid, 3, "Dog");
+    Assert.AreEqual("Bob,Carol", Names(grid));
+    PickEnum(grid, 3, "(All)");
+
+    Assert.AreEqual("Alice,Bob,Carol,Dave", Names(grid));
+    Assert.AreEqual("(All)", FilterCell(grid, 3).QuerySelector(".pixata-blazor-grid-dropdown-text")!.TextContent.Trim());
+  }
+
+  [TestMethod]
+  public void EnumColumn_AllEntryCanBeLeftOut() {
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People())
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
+      .Add(g => g.GridColumns, b => Column<PixataEnumGridColumn<Person>>(b, "Pet", c => c.AddAttribute(2, "AddAllEntry", false))));
+
+    Assert.AreEqual(("Cat,Dog", "-Select value-"), EnumFilter(grid, 0));
+  }
+
+  [TestMethod]
+  public void ShowFilterClearButton_HidesJustTheClearButton() {
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People())
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
+      .Add(g => g.GridColumns, b => Column<PixataNumericGridColumn<Person>>(b, "Age", c => c.AddAttribute(2, "ShowFilterClearButton", false))));
+    IElement cell = FilterCell(grid, 0);
+
+    Assert.IsNotNull(cell.QuerySelector(".pixata-blazor-grid-filter-operator"));
+    Assert.IsNull(cell.QuerySelector(".pixata-blazor-grid-filter-clear"));
+  }
+
   [TestMethod]
   public void FilterOperators_CanBeSetOnAnyColumn() {
     IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p

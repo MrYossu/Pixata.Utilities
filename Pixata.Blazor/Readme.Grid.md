@@ -244,7 +244,7 @@ The full lists of operators are more than most users need, so there are four col
 | `PixataTextGridColumn` | contains (the default), starts with, ends with |
 | `PixataNumericGridColumn` | equals (the default), less than, more than |
 | `PixataDateGridColumn` | before, on (the default), on or after |
-| `PixataEnumGridColumn` | Just the drop-down of values, filtering on equality, with no operator or clear button |
+| `PixataEnumGridColumn` | Just the drop-down of values, filtering on equality, with no operator or clear button. The drop-down starts with an "(All)" entry that clears the filter. Set `AddAllEntry="false"` to leave it out. Its text comes from the grid's `FilterAll` message |
 
 ```razor
 <PixataGrid Data="_people" FilterMode="PixataGridFilterMode.FilterRow">

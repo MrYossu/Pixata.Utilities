@@ -771,7 +771,7 @@
     FilterKind.Boolean =>
       @<PixataGridDropDownList TValue="object" Items="BooleanItems" Value="value" ValueChanged="v => changed(v, false)" AriaLabel="@Text.FilterEditor(column.HeaderText)" Class="pixata-blazor-grid-filter-editor" />,
     FilterKind.Enum =>
-      @<PixataGridDropDownList TValue="object" Items="EnumItems(column)" Value="value" DefaultText="@Text.SelectValue" ValueChanged="v => changed(v, false)" AriaLabel="@Text.FilterEditor(column.HeaderText)" Class="pixata-blazor-grid-filter-editor" />,
+      @<PixataGridDropDownList TValue="object" Items="EnumFilterItems(column)" Value="value" DefaultText="@Text.SelectValue" ValueChanged="v => changed(v, false)" AriaLabel="@Text.FilterEditor(column.HeaderText)" Class="pixata-blazor-grid-filter-editor" />,
     _ =>
       @<span class="pixata-blazor-grid-textbox">
         <input class="pixata-blazor-grid-input-inner" type="text" value="@(value as string)" aria-label="@Text.FilterEditor(column.HeaderText)" @oninput="e => changed(e.Value?.ToString(), inRow)" />
@@ -782,6 +782,10 @@
     Type type = Nullable.GetUnderlyingType(column.FieldType!) ?? column.FieldType!;
     return [.. Enum.GetValues(type).Cast<object>().Select(v => ((object?)v, v.ToString()!))];
   }
+
+  // The values for an enum filter, with an entry for no filter at the top if the column asks for one
+  private List<(object?, string)> EnumFilterItems(PixataGridColumn<TItem> column) =>
+    column is PixataEnumGridColumn<TItem> { AddAllEntry: true } ? [(null, Text.FilterAll), .. EnumItems(column)] : EnumItems(column);
 
   private RenderFragment FilterCell(PixataGridColumn<TItem> column) {
     if (column.FilterCellTemplate is not null) {

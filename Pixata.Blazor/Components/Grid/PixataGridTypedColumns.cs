@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Pixata.Extensions.Grid;
 
 namespace Pixata.Blazor.Components.Grid;
@@ -33,11 +34,18 @@ public class PixataDateGridColumn<TItem> : PixataGridColumn<TItem> {
 
 /// <summary>
 /// A column for an enum, whose filter row cell is just a drop-down of the values, filtering on equality, with no operator or
-/// clear button
+/// clear button. The drop-down starts with an "(All)" entry that clears the filter, unless <see cref="AddAllEntry"/> is false
 /// </summary>
 public class PixataEnumGridColumn<TItem> : PixataGridColumn<TItem> {
   public PixataEnumGridColumn() {
     DefaultFilterOperator = GridFilterOperator.IsEqualTo;
     ShowFilterCellButtons = false;
   }
+
+  /// <summary>
+  /// Set to false to leave out the "(All)" entry at the top of the filter's drop-down, which clears the filter. Defaults to
+  /// true. The entry's text comes from the grid's <see cref="PixataGridMessages.FilterAll"/>
+  /// </summary>
+  [Parameter]
+  public bool AddAllEntry { get; set; } = true;
 }
