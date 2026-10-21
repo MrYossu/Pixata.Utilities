@@ -6,6 +6,10 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.8.0** makes two changes to the grid's filter row...
+>- Columns have a `ShowFilterClearButton` parameter. Set it to `false` to hide the clear button in the column's filter row cell but keep the operator drop-down, such as for a numeric column, where it's easy enough to delete what was typed
+>- **Behaviour change:** the drop-down in a `PixataEnumGridColumn`'s filter row cell now starts with an "(All)" entry, which clears the filter, and shows it when there's no filter, in place of "-Select value-". Its text comes from the grid's `FilterAll` message. Set `AddAllEntry="false"` on the column to leave it out. See [typed columns](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns)
+
 >**Version 5.7.0** lets a grid column's custom filter template replace its `Filter` with a new one, so it can join its descriptors with Or, such as to search two fields at once. See [custom filters](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#custom-filters)
 
 >**Version 5.6.0** makes some more changes that help when moving from Telerik's components...
