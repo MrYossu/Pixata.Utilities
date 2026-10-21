@@ -8,6 +8,8 @@ This is the shared kernel of the Pixata packages. It has no dependency on EF Cor
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
 
+>**Version 2.23.0** adds `IgnoreTime` to `GridFilterDescriptor`, which makes a filter on a `DateTime` field compare the date only, so "is equal to 21/10/2026" finds anything that day, and `GridRequest.RemoveTime()`, which sets it on the filters for the fields you name, as `TelerikFilterHelper.RemoveTime()` does for Telerik's grid. See [grid requests](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md#grid-requests).
+
 >**Version 2.22.0** adds `DateOnly` overloads of `DateRangeToString()`, and a long format ("2 November 2026 to 10 January 2027") for `DateOnly` and `DateTime` ranges alike. See [date extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Dates.md). It also publishes the grid types (in `Pixata.Extensions.Grid`) that Pixata.Blazor 5.x and Pixata.AspNetCore's `ToGridResultAsync()` use. They were added after v2.21.0 was published, without a new version number, so they never reached NuGet, and any page with a `PixataGrid` threw a `TypeLoadException`.
 
 ## Documentation

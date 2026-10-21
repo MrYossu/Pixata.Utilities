@@ -6,6 +6,8 @@ Server-side helpers for ASP.NET Core apps - entity auditing, payload encryption,
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
 
+>**Version 2.3.2** depends on Pixata.Extensions 2.23.0, so `ToGridResultAsync()` honours the new `IgnoreTime` on grid filters (which compares a `DateTime` field's date only) when a WASM client sends a request with it. No code changes.
+
 >**Version 2.3.1** changes the documentation, and the XML comments on `PdfConverterInterface` and `RegisterPdfConverter`, to recommend [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) for creating PDFs. No code changes.
 
 >**Version 2.3.0** adds `modelBuilder.ConfigureAuditing()`, which keeps the audit table's two JSON columns unlimited when your context gives strings a default maximum length in `ConfigureConventions`. Without it, they picked up that length, and on SQL Server, saving an entity with a longer snapshot threw "String or binary data would be truncated". Call it from `OnModelCreating`, as described in step 3 of [setting up auditing](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Auditing.md#setup). This version also depends on Pixata.Extensions 2.22.0, which has the grid types that `ToGridResultAsync()` uses. The Pixata.Extensions 2.21.0 that earlier versions depended on was published before those types were added.
