@@ -101,6 +101,12 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   public string? Width { get; set; }
 
   /// <summary>
+  /// <c>sm</c>, <c>md</c> (the default) or <c>lg</c>. See <see cref="PixataThemeConstants.Size"/>
+  /// </summary>
+  [Parameter]
+  public string? Size { get; set; }
+
+  /// <summary>
   /// The id of the input, for a label's <c>for</c>
   /// </summary>
   [Parameter]
@@ -148,6 +154,9 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
 
   protected bool HasValue =>
     !Model.IsEmpty;
+
+  protected string SizeClass =>
+    $"pixata-blazor-dateinput-{(string.IsNullOrWhiteSpace(Size) ? PixataThemeConstants.Size.Medium : Size)}";
 
   protected string? EffectiveInputMode =>
     InputMode ?? (Model.IsNumeric ? "numeric" : null);

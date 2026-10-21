@@ -33,7 +33,7 @@
   public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
   private string WrapperClass =>
-    DatePickerCss.Join("pixata-blazor-dateinput", IsInvalid ? "pixata-blazor-dateinput-invalid" : null, Enabled ? null : "pixata-blazor-dateinput-disabled", Class);
+    DatePickerCss.Join("pixata-blazor-dateinput", SizeClass, IsInvalid ? "pixata-blazor-dateinput-invalid" : null, Enabled ? null : "pixata-blazor-dateinput-disabled", Class);
 
   private string? WidthStyle =>
     Width is null ? null : $"width: {Width}";

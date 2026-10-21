@@ -1098,6 +1098,30 @@
   fill: currentColor;
 }
 
+/* Sizes, as for the other inputs. Medium is the default above */
+.pixata-blazor-dateinput-sm .pixata-blazor-dateinput-input {
+  padding: .125rem .5rem;
+}
+
+.pixata-blazor-dateinput-sm .pixata-blazor-datepicker-button {
+  width: 24px;
+  padding: .125rem;
+}
+
+.pixata-blazor-dateinput-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: var(--pixata-blazor-line-height-lg);
+}
+
+.pixata-blazor-dateinput-lg .pixata-blazor-dateinput-input {
+  padding: .5rem .5rem;
+}
+
+.pixata-blazor-dateinput-lg .pixata-blazor-datepicker-button {
+  width: 36px;
+  padding: .5rem;
+}
+
 /* Positioned by the JavaScript, with fixed positioning so it isn't clipped by a container with overflow hidden */
 .pixata-blazor-datepicker-popup {
   position: fixed;

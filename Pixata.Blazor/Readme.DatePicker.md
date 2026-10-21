@@ -49,6 +49,7 @@ These apply to both `PixataDateInput` and `PixataDatePicker`. `TValue` can be `D
 | `Enabled`, `ReadOnly` | `bool` | As you'd expect |
 | `AutoSwitchParts` | `bool` | Whether the selection moves on once a part is complete. Defaults to true |
 | `TwoDigitYearMax` | `int` | See above. Defaults to 68 |
+| `Size` | `string` | `sm`, `md` (the default) or `lg`. See `PixataThemeConstants.Size` |
 | `Width`, `Class`, `Id`, `TabIndex`, `InputMode` | | Passed to the component's elements |
 | `OnChange` | `EventCallback<object?>` | Fires when the user has finished changing the value: when they press Enter, leave the input, or pick a date from the calendar. Unlike `ValueChanged`, it doesn't fire on every key |
 | `OnBlur` | `EventCallback` | Fires when the input loses focus |
@@ -114,6 +115,7 @@ The focus stays in the input when the calendar is opened by clicking, so you can
 | `StartId`, `EndId` | `string` | The ids of the inputs. If you don't set them, ids are generated so that the labels work |
 | `Enabled`, `ReadOnly` | `bool` | As you'd expect. Neither opens the calendar |
 | `ShowClearButton` | `bool` | Shows an x in each input that clears it. Only for nullable types |
+| `Size` | `string` | The size of both inputs: `sm`, `md` (the default) or `lg`. See `PixataThemeConstants.Size` |
 | `Width`, `Class`, `PopupClass` | `string` | The width and class of the whole component, and a class for the popup |
 
 ### Events

@@ -96,7 +96,7 @@
   private bool _justOpened;
 
   private string WrapperClass =>
-    DatePickerCss.Join("pixata-blazor-dateinput", "pixata-blazor-datepicker", IsInvalid ? "pixata-blazor-dateinput-invalid" : null,
+    DatePickerCss.Join("pixata-blazor-dateinput", "pixata-blazor-datepicker", SizeClass, IsInvalid ? "pixata-blazor-dateinput-invalid" : null,
                        Enabled ? null : "pixata-blazor-dateinput-disabled", _open ? "pixata-blazor-datepicker-open" : null, Class);
 
   private string? WidthStyle =>

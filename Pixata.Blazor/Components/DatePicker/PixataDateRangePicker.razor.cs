@@ -160,6 +160,12 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
   public bool ShowClearButton { get; set; }
 
   /// <summary>
+  /// The size of both inputs: <c>sm</c>, <c>md</c> (the default) or <c>lg</c>. See <see cref="PixataThemeConstants.Size"/>
+  /// </summary>
+  [Parameter]
+  public string? Size { get; set; }
+
+  /// <summary>
   /// The width of the whole component, as a CSS width
   /// </summary>
   [Parameter]
