@@ -35,7 +35,7 @@ The classes used by those components all start with `pixata-blazor-`, followed b
 
 ## The newer components
 
-The components added in v5.0.0 (the drop-downs, tab strip, editor, file upload, dialogs, window, wizard and stepper, radio group, switch, chart, drop-down and split buttons, and scheduler) have their own look, and their own set of custom properties, all starting with `--pixata-blazor-`. Their classes start with `pixata-blazor-`, and the component-specific ones include the component's name, eg `pixata-blazor-window-titlebar`.
+The components added in v5.0.0 (the drop-downs, tab strip, editor, file upload, dialogs, window, wizard and stepper, radio group, switch, chart, drop-down and split buttons, and scheduler), and the tree view added in v5.9.0, have their own look, and their own set of custom properties, all starting with `--pixata-blazor-`. Their classes start with `pixata-blazor-`, and the component-specific ones include the component's name, eg `pixata-blazor-window-titlebar`.
 
 They are restyled the same way. Override the variables after the link above, either on `:root`, or on any element to restyle just the components inside it...
 

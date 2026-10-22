@@ -13,7 +13,7 @@ namespace Pixata.Blazor.Components;
 /// (a list of strings, say) is handled
 /// </summary>
 public static class PixataFieldReader {
-  private static readonly ConcurrentDictionary<(Type, string), PropertyInfo> Properties = new();
+  private static readonly ConcurrentDictionary<(Type, string), PropertyInfo?> Properties = new();
 
   /// <summary>
   /// The value of <paramref name="field"/> on <paramref name="item"/>, the item itself if <paramref name="field"/> is null or
@@ -36,6 +36,44 @@ public static class PixataFieldReader {
       };
     }
     return current;
+  }
+
+  /// <summary>
+  /// Reads <paramref name="field"/> like <see cref="GetValue(object?, string?)"/>, but returns false rather than throwing if
+  /// the item (or a property along a nested path) has no property, or dictionary key, of that name. A null along the path
+  /// counts as found, with a null value
+  /// </summary>
+  public static bool TryGetValue(object? item, string? field, out object? value) {
+    value = item;
+    if (item is null || string.IsNullOrEmpty(field)) {
+      return true;
+    }
+    foreach (string part in field.Split('.')) {
+      if (value is null) {
+        return true;
+      }
+      switch (value) {
+        case IDictionary<string, object?> dictionary:
+          if (!dictionary.TryGetValue(part, out value)) {
+            return false;
+          }
+          break;
+        case IReadOnlyDictionary<string, object?> dictionary:
+          if (!dictionary.TryGetValue(part, out value)) {
+            return false;
+          }
+          break;
+        default:
+          PropertyInfo? property = TryProperty(value.GetType(), part);
+          if (property is null) {
+            value = null;
+            return false;
+          }
+          value = property.GetValue(value);
+          break;
+      }
+    }
+    return true;
   }
 
   /// <summary>
@@ -111,7 +149,8 @@ public static class PixataFieldReader {
   }
 
   private static PropertyInfo Property(Type type, string name) =>
-    Properties.GetOrAdd((type, name), key =>
-      key.Item1.GetProperty(key.Item2, BindingFlags.Public | BindingFlags.Instance)
-      ?? throw new InvalidOperationException($"The type {key.Item1.Name} has no public property called {key.Item2}"));
+    TryProperty(type, name) ?? throw new InvalidOperationException($"The type {type.Name} has no public property called {name}");
+
+  private static PropertyInfo? TryProperty(Type type, string name) =>
+    Properties.GetOrAdd((type, name), key => key.Item1.GetProperty(key.Item2, BindingFlags.Public | BindingFlags.Instance));
 }

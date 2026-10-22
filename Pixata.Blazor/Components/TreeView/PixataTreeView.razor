@@ -1,0 +1,121 @@
+@namespace Pixata.Blazor.Components
+@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+@inject NavigationManager Navigation
+
+@*
+  A tree of items, from flat or hierarchical data. The bindings are rendered first, and the items through a template host
+  after them, so the items are drawn with the bindings' new parameters rather than the ones they had before
+*@
+<CascadingValue Value="this" IsFixed="true">
+  @TreeViewBindings
+</CascadingValue>
+<div @ref="_root"
+     id="@TreeId"
+     class="@RootClass"
+     @attributes="AdditionalAttributes">
+  <ul @ref="_list"
+      class="pixata-blazor-treeview-lines"
+      role="tree"
+      aria-label="@AriaLabel"
+      aria-labelledby="@AriaLabelledBy"
+      aria-multiselectable="@(SelectionMode == PixataTreeViewSelectionMode.Multiple || CheckBoxMode == PixataTreeViewCheckBoxMode.Multiple ? "true" : null)"
+      @onkeydown="KeyDown">
+    @PixataTemplateHost.For(() => Items, _ => { })
+  </ul>
+</div>
+
+@code {
+
+  private RenderFragment Items =>
+    builder => {
+      PrepareRender();
+      RenderNodes(builder, Model.Roots);
+    };
+
+  private void RenderNodes(RenderTreeBuilder __builder, IReadOnlyList<PixataTreeViewNode> nodes) {
+    foreach (PixataTreeViewNode node in nodes) {
+      bool hasChildren = node.HasChildren;
+      bool expanded = hasChildren && _expanded.Contains(node.Item);
+      bool loading = _loading.Contains(node.Item);
+      bool selected = _selected.Contains(node.Item);
+      bool? checkState = CheckState(node);
+      string? renderClass = RenderClass(node);
+      string leafClass = PixataCss.Classes("pixata-blazor-treeview-leaf", selected ? "pixata-blazor-selected" : null, node.Disabled ? "pixata-blazor-disabled" : null);
+      <li @key="node.Item"
+          class="@PixataCss.Classes("pixata-blazor-treeview-item", node == _tabStop ? "pixata-blazor-treeview-tab-stop" : null)"
+          role="treeitem"
+          data-pixata-tree-index="@node.Index"
+          aria-level="@(node.Level + 1)"
+          aria-setsize="@node.SetSize"
+          aria-posinset="@(node.Position + 1)"
+          aria-expanded="@(hasChildren ? expanded && !loading ? "true" : "false" : null)"
+          aria-selected="@(SelectionMode == PixataTreeViewSelectionMode.None ? null : selected ? "true" : "false")"
+          aria-checked="@(CheckBoxMode == PixataTreeViewCheckBoxMode.None ? null : checkState switch { true => "true", false => "false", null => "mixed" })"
+          aria-disabled="@(node.Disabled ? "true" : null)"
+          aria-busy="@(loading ? "true" : null)"
+          tabindex="@(node == _tabStop ? "0" : "-1")"
+          @onfocus="() => ItemFocused(node)"
+          @oncontextmenu="e => ItemContextMenu(node, e)"
+          @oncontextmenu:preventDefault="@OnItemContextMenu.HasDelegate"
+          @oncontextmenu:stopPropagation="true">
+        <div class="@PixataCss.Classes("pixata-blazor-treeview-content", PositionClass(node), renderClass)">
+          @if (hasChildren) {
+            <span class="@PixataCss.Classes("pixata-blazor-treeview-toggle", expanded ? "pixata-blazor-treeview-toggle-expanded" : null)" aria-hidden="true" @onclick="() => ToggleExpanded(node)">
+              @if (loading) {
+                <span class="pixata-blazor-treeview-loading"></span>
+              } else {
+                <PixataIcon Icon="@(expanded ? PixataSvgIcons.CaretDown : PixataSvgIcons.CaretRight)" />
+              }
+            </span>
+          }
+          @if (CheckBoxMode != PixataTreeViewCheckBoxMode.None) {
+            <span class="pixata-blazor-treeview-checkbox-wrap">
+              <span class="@PixataCss.Classes("pixata-blazor-checkbox", "pixata-blazor-treeview-checkbox", checkState == true ? "pixata-blazor-checkbox-checked" : null, checkState is null ? "pixata-blazor-checkbox-indeterminate" : null, node.Disabled ? "pixata-blazor-disabled" : null)"
+                    aria-hidden="true"
+                    @onclick="() => ToggleChecked(node)"></span>
+            </span>
+          }
+          @if (node.Url is not null && !node.Disabled) {
+            <a class="@PixataCss.Classes(leafClass, "pixata-blazor-treeview-link")"
+               href="@node.Url"
+               tabindex="-1"
+               draggable="false"
+               @onclick="e => ItemClick(node, e)"
+               @ondblclick="e => ItemDoubleClick(node, e)">
+              @LeafContent(node)
+            </a>
+          } else {
+            <span class="@leafClass"
+                  @onclick="e => ItemClick(node, e)"
+                  @ondblclick="e => ItemDoubleClick(node, e)">
+              @LeafContent(node)
+            </span>
+          }
+        </div>
+        @if (expanded && !loading && node.Children.Count > 0) {
+          <ul class="pixata-blazor-treeview-group" role="group">
+            @{
+              RenderNodes(__builder, node.Children);
+            }
+          </ul>
+        }
+      </li>
+    }
+  }
+
+  private RenderFragment LeafContent(PixataTreeViewNode node) =>
+    @<text>
+      @if (node.Binding.ItemTemplate is not null) {
+        @node.Binding.ItemTemplate(node.Item)
+      } else {
+        @if (node.Icon is not null) {
+          <PixataIcon Icon="@node.Icon" Class="pixata-blazor-treeview-icon" />
+        }
+        <span class="pixata-blazor-treeview-leaf-text">@node.Text</span>
+      }
+    </text>;
+
+}

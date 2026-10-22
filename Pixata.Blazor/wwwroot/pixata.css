@@ -9231,3 +9231,233 @@
 }
 
 /* ========== end of PixataScheduler ========== */
+
+/* ========== PixataTreeView ========== */
+
+:root {
+  --pixata-blazor-treeview-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-treeview-indent: 16px;
+  --pixata-blazor-treeview-item-padding-y: 4px;
+  --pixata-blazor-treeview-item-padding-x: 8px;
+  --pixata-blazor-treeview-item-radius: var(--pixata-blazor-border-radius);
+  --pixata-blazor-treeview-hover-bg: var(--pixata-blazor-hover-bg);
+  --pixata-blazor-treeview-selected-bg: var(--pixata-blazor-selected-bg);
+  --pixata-blazor-treeview-selected-hover-bg: var(--pixata-blazor-selected-hover-bg);
+  --pixata-blazor-treeview-selected-color: var(--pixata-blazor-selected-color);
+  --pixata-blazor-treeview-link-color: inherit;
+  --pixata-blazor-treeview-focus-ring: var(--pixata-blazor-focus-ring);
+  --pixata-blazor-treeview-drop-color: var(--pixata-blazor-primary);
+  --pixata-blazor-treeview-clue-bg: var(--pixata-blazor-surface-bg);
+  --pixata-blazor-treeview-clue-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+}
+
+.pixata-blazor-treeview {
+  box-sizing: border-box;
+  display: block;
+  overflow: auto;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-treeview-color);
+  white-space: nowrap;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixata-blazor-treeview-sm {
+  --pixata-blazor-treeview-item-padding-y: 2px;
+}
+
+.pixata-blazor-treeview-lg {
+  --pixata-blazor-treeview-item-padding-y: 6px;
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: var(--pixata-blazor-line-height-lg);
+}
+
+.pixata-blazor-treeview-lines,
+.pixata-blazor-treeview-group {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each item is indented, and its arrow sits in the indent, so a child's arrow lines up under its parent's text */
+.pixata-blazor-treeview-item {
+  margin: 0;
+  padding: 0;
+  padding-inline-start: var(--pixata-blazor-treeview-indent);
+  outline: none;
+}
+
+.pixata-blazor-treeview-content {
+  display: flex;
+  align-items: center;
+}
+
+.pixata-blazor-treeview-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--pixata-blazor-treeview-indent);
+  margin-inline-start: calc(var(--pixata-blazor-treeview-indent) * -1);
+  align-self: stretch;
+  cursor: pointer;
+}
+
+.pixata-blazor-treeview-toggle .pixata-blazor-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.pixata-blazor-treeview:dir(rtl) .pixata-blazor-treeview-toggle:not(.pixata-blazor-treeview-toggle-expanded) svg {
+  transform: scaleX(-1);
+}
+
+/* Shown in place of the arrow while an item's children are loading */
+.pixata-blazor-treeview-loading {
+  box-sizing: border-box;
+  display: inline-block;
+  width: .875rem;
+  height: .875rem;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  opacity: .6;
+  animation: pixata-blazor-treeview-spin .75s linear infinite;
+}
+
+@keyframes pixata-blazor-treeview-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pixata-blazor-treeview-checkbox-wrap {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  padding-inline-end: 4px;
+}
+
+.pixata-blazor-treeview-checkbox {
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.pixata-blazor-treeview-leaf {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: var(--pixata-blazor-treeview-item-padding-y) var(--pixata-blazor-treeview-item-padding-x);
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--pixata-blazor-treeview-item-radius);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color .2s ease-in-out, color .2s ease-in-out;
+}
+
+.pixata-blazor-treeview-link,
+.pixata-blazor-treeview-link:hover,
+.pixata-blazor-treeview-link:visited {
+  color: var(--pixata-blazor-treeview-link-color);
+  text-decoration: none;
+}
+
+.pixata-blazor-treeview-leaf:hover {
+  background-color: var(--pixata-blazor-treeview-hover-bg);
+}
+
+.pixata-blazor-treeview-leaf.pixata-blazor-selected,
+.pixata-blazor-treeview-leaf.pixata-blazor-selected:visited {
+  color: var(--pixata-blazor-treeview-selected-color);
+  background-color: var(--pixata-blazor-treeview-selected-bg);
+}
+
+.pixata-blazor-treeview-leaf.pixata-blazor-selected:hover {
+  color: var(--pixata-blazor-treeview-selected-color);
+  background-color: var(--pixata-blazor-treeview-selected-hover-bg);
+}
+
+/* The item the keyboard is on. The focus is on the whole item (with its children), but only its own row is outlined */
+.pixata-blazor-treeview-item:focus-visible > .pixata-blazor-treeview-content > .pixata-blazor-treeview-leaf {
+  box-shadow: var(--pixata-blazor-treeview-focus-ring);
+}
+
+.pixata-blazor-treeview-icon {
+  flex: none;
+}
+
+/* Where a dragged item will go: a line before or after an item, or the item it will go inside */
+.pixata-blazor-treeview-leaf.pixata-blazor-treeview-drop-over {
+  box-shadow: inset 0 0 0 1px var(--pixata-blazor-treeview-drop-color);
+  background-color: color-mix(in srgb, var(--pixata-blazor-treeview-drop-color) 12%, transparent);
+}
+
+.pixata-blazor-treeview-drop-hint {
+  position: fixed;
+  z-index: 10003;
+  height: 2px;
+  margin-top: -1px;
+  pointer-events: none;
+  background-color: var(--pixata-blazor-treeview-drop-color);
+}
+
+.pixata-blazor-treeview-drop-hint::before {
+  position: absolute;
+  top: -4px;
+  inset-inline-start: -2px;
+  content: "";
+  border: 5px solid transparent;
+  border-inline-start-color: var(--pixata-blazor-treeview-drop-color);
+}
+
+/* The item following the pointer as it is dragged, with an icon saying what dropping it there would do */
+.pixata-blazor-treeview-drag-clue {
+  position: fixed;
+  z-index: 10003;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  color: var(--pixata-blazor-treeview-color);
+  white-space: nowrap;
+  pointer-events: none;
+  background-color: var(--pixata-blazor-treeview-clue-bg);
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  box-shadow: var(--pixata-blazor-treeview-clue-shadow);
+}
+
+.pixata-blazor-treeview-drag-denied .pixata-blazor-treeview-drag-status {
+  color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-treeview-dragging,
+.pixata-blazor-treeview-dragging * {
+  cursor: move !important;
+  user-select: none;
+}
+
+/* Dragging an item on a touch screen needs the finger to be held on it first, so the browser mustn't treat that as a long
+   press that selects text */
+.pixata-blazor-treeview-draggable .pixata-blazor-treeview-leaf {
+  -webkit-touch-callout: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-treeview-leaf {
+    transition: none;
+  }
+
+  .pixata-blazor-treeview-loading {
+    animation-duration: 2s;
+  }
+}
+
+/* ========== end of PixataTreeView ========== */

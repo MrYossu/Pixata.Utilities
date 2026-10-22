@@ -6,6 +6,8 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.9.0** adds `PixataTreeView`, which shows flat or hierarchical data as a tree, with expanding and collapsing, loading children on demand, selection, checkboxes, templates, links, and drag and drop within a tree, between trees and on to a grid. It also adds `PixataFieldReader.TryGetValue()`, which reads a property without throwing if the item doesn't have it. See the [tree view documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TreeView.md)
+
 >**Version 5.8.0** makes two changes to the grid's filter row...
 >- Columns have a `ShowFilterClearButton` parameter. Set it to `false` to hide the clear button in the column's filter row cell but keep the operator drop-down, such as for a numeric column, where it's easy enough to delete what was typed
 >- **Behaviour change:** the drop-down in a `PixataEnumGridColumn`'s filter row cell now starts with an "(All)" entry, which clears the filter, and shows it when there's no filter, in place of "-Select value-". Its text comes from the grid's `FilterAll` message. Set `AddAllEntry="false"` on the column to leave it out. See [typed columns](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns)
@@ -81,6 +83,7 @@ The documentation is split over the following pages...
 | [Declarative control flow](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ControlFlow.md) | `If`, `Switch` and `ForEach`, which replace the Razor `@if`, `@switch` and `@foreach` statements |
 | [Drop-downs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md) | `PixataComboBox`, `PixataDropDownList` and `PixataMultiSelect` |
 | [Tab strip](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TabStrip.md) | `PixataTabStrip` and `PixataTab` |
+| [Tree view](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TreeView.md) | `PixataTreeView`, for showing flat or hierarchical data as a tree, with selection, checkboxes, loading on demand, and drag and drop |
 | [Editor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Editor.md) | `PixataEditor`, a rich (HTML) text editor |
 | [File select and upload](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.FileUpload.md) | `PixataFileSelect`, which hands the chosen files to your code, and `PixataUpload`, which posts them to an endpoint |
 | [Dialogs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Dialogs.md) | `PixataDialog`, and the alert, confirm and prompt dialogs you can show from code |

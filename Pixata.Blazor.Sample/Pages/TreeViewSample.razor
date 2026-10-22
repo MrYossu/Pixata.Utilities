@@ -1,0 +1,253 @@
+@page "/TreeViewSample"
+@using Pixata.Blazor.Components
+@using Pixata.Blazor.Sample.Models
+
+<h3>Tree view</h3>
+
+<p>
+  <code>PixataTreeView</code> shows flat or hierarchical data as a tree. Focus a tree and use the arrow keys, Home and End to
+  move about, Right and Left to expand and collapse, Enter to select and Space to check. See
+  <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TreeView.md">the documentation</a>.
+</p>
+
+<ComponentSample Title="Flat data and selection">
+  <Description>
+    <p>
+      Each item has an <code>Id</code> and a <code>ParentId</code>, which is null for the root items. The items have icons, and
+      one is disabled. <code>SelectionMode</code> is <code>Multiple</code>, so Ctrl+click and Shift+click select more than one
+      item. <code>ExpandedItems</code> and <code>SelectedItems</code> are bound both ways.
+    </p>
+  </Description>
+  <ChildContent>
+    <PixataTreeView Data="_files"
+                    @bind-ExpandedItems="_filesExpanded"
+                    @bind-SelectedItems="_filesSelected"
+                    SelectionMode="PixataTreeViewSelectionMode.Multiple"
+                    AriaLabel="Files" />
+    <p class="mt-2">
+      Expanded: <strong>@Names(_filesExpanded)</strong><br />
+      Selected: <strong>@Names(_filesSelected)</strong>
+    </p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Hierarchical data, bindings and templates">
+  <Description>
+    <p>
+      Each department holds its staff, which are a different type. A <code>PixataTreeViewBinding</code> for each level says
+      which properties to read, and the second level has an <code>ItemTemplate</code>.
+    </p>
+  </Description>
+  <ChildContent>
+    <PixataTreeView Data="_departments" ExpandedItems="_departmentsExpanded" AriaLabel="Departments">
+      <TreeViewBindings>
+        <PixataTreeViewBinding Level="0" TextField="Name" ItemsField="Staff" />
+        <PixataTreeViewBinding Level="1">
+          <ItemTemplate>
+            @{
+              TreeViewEmployee employee = (TreeViewEmployee)context;
+            }
+            <strong>@employee.FullName</strong>&nbsp;<span class="text-muted">(@employee.Role)</span>
+          </ItemTemplate>
+        </PixataTreeViewBinding>
+      </TreeViewBindings>
+    </PixataTreeView>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Checkboxes">
+  <Description>
+    <p>
+      <code>CheckBoxMode</code> is <code>Multiple</code>. With <code>CheckChildren</code>, checking an item checks everything
+      under it, and with <code>CheckParents</code>, an item is checked when all its children are, and shows a dash when only
+      some are.
+    </p>
+    <label class="me-3"><input type="checkbox" @bind="_checkChildren" /> CheckChildren</label>
+    <label class="me-3"><input type="checkbox" @bind="_checkParents" /> CheckParents</label>
+    <label><input type="checkbox" @bind="_checkOnClick" /> CheckOnClick</label>
+  </Description>
+  <ChildContent>
+    <PixataTreeView Data="_checkFiles"
+                    ExpandedItems="_checkExpanded"
+                    @bind-CheckedItems="_checked"
+                    CheckBoxMode="PixataTreeViewCheckBoxMode.Multiple"
+                    CheckChildren="_checkChildren"
+                    CheckParents="_checkParents"
+                    CheckOnClick="_checkOnClick"
+                    AriaLabel="Files to back up" />
+    <p class="mt-2">Checked: <strong>@Names(_checked)</strong></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Loading on demand">
+  <Description>
+    <p>
+      Only the root items are loaded at first. Each item has <code>HasChildren</code>, so the tree knows to show an arrow, and
+      <code>OnExpand</code> loads the children (after a pretend delay) the first time it is expanded.
+    </p>
+  </Description>
+  <ChildContent>
+    <PixataTreeView Data="_lazy" OnExpand="LoadChildren" AriaLabel="Servers" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Drag and drop">
+  <Description>
+    <p>
+      Both trees are <code>Draggable</code>. Drag an item on to another to put it inside it, or near its top or bottom edge to
+      put it before or after it, and drag between the trees to move items from one to the other. The tree view only says
+      where the item was dropped, in <code>OnDrop</code>, and the page moves it. On a touch screen, hold an item for a moment
+      before dragging it.
+    </p>
+  </Description>
+  <ChildContent>
+    <div class="d-flex flex-wrap gap-4">
+      <div style="min-width: 240px;">
+        <h6>Left</h6>
+        <PixataTreeView @ref="_leftTree" Id="tree-left" Data="_left" @bind-ExpandedItems="_leftExpanded" Draggable="true" OnDrop="e => Drop(e, _left)" AriaLabel="Left" />
+      </div>
+      <div style="min-width: 240px;">
+        <h6>Right</h6>
+        <PixataTreeView @ref="_rightTree" Id="tree-right" Data="_right" @bind-ExpandedItems="_rightExpanded" Draggable="true" OnDrop="e => Drop(e, _right)" AriaLabel="Right" />
+      </div>
+    </div>
+    <p class="mt-2">@_dropLog</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Links and events">
+  <Description>
+    <p>
+      Items with a <code>Url</code> are links. The tree also raises <code>OnItemClick</code>, <code>OnItemDoubleClick</code>
+      and <code>OnItemContextMenu</code> (right-click an item, and the browser's own menu isn't shown).
+    </p>
+  </Description>
+  <ChildContent>
+    <PixataTreeView Data="_pages"
+                    ExpandedItems="_pagesExpanded"
+                    OnItemClick="@((PixataTreeViewItemClickEventArgs e) => Log($"Clicked {((TreeViewFlatItem)e.Item).Text}"))"
+                    OnItemDoubleClick="@((PixataTreeViewItemDoubleClickEventArgs e) => Log($"Double-clicked {((TreeViewFlatItem)e.Item).Text}"))"
+                    OnItemContextMenu="@((PixataTreeViewItemContextMenuEventArgs e) => Log($"Context menu on {((TreeViewFlatItem)e.Item).Text}"))"
+                    AriaLabel="Pages" />
+    <p class="mt-2">@_eventLog</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Sizes">
+  <Description>
+    <p><code>Size</code> is <code>sm</code>, <code>md</code> (the default) or <code>lg</code>.</p>
+  </Description>
+  <ChildContent>
+    <div class="d-flex flex-wrap gap-4">
+      @foreach (string size in new[] { PixataThemeConstants.Size.Small, PixataThemeConstants.Size.Medium, PixataThemeConstants.Size.Large }) {
+        <PixataTreeView Data="_sizeFiles" ExpandedItems="_sizeExpanded" SelectionMode="PixataTreeViewSelectionMode.Single" Size="@size" AriaLabel="@size" />
+      }
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private readonly List<TreeViewFlatItem> _files = TreeViewSampleData.Files();
+  private IEnumerable<object> _filesExpanded = [];
+  private IEnumerable<object> _filesSelected = [];
+
+  private readonly List<TreeViewDepartment> _departments = TreeViewSampleData.Departments();
+  private List<object> _departmentsExpanded = [];
+
+  private readonly List<TreeViewFlatItem> _checkFiles = TreeViewSampleData.Files();
+  private List<object> _checkExpanded = [];
+  private IEnumerable<object> _checked = [];
+  private bool _checkChildren = true;
+  private bool _checkParents = true;
+  private bool _checkOnClick;
+
+  private readonly List<TreeViewLazyItem> _lazy = [
+    new() { Id = 1, Text = "London", HasChildren = true },
+    new() { Id = 2, Text = "Paris", HasChildren = true },
+    new() { Id = 3, Text = "Retired", HasChildren = false }
+  ];
+  private int _nextLazyId = 100;
+
+  private PixataTreeView? _leftTree;
+  private PixataTreeView? _rightTree;
+  private readonly List<TreeViewFlatItem> _left = TreeViewSampleData.Files();
+  private readonly List<TreeViewFlatItem> _right = [
+    new() { Id = 101, Text = "Archive", Icon = PixataSvgIcons.File },
+    new() { Id = 102, ParentId = 101, Text = "2025.zip" }
+  ];
+  private IEnumerable<object> _leftExpanded = [];
+  private IEnumerable<object> _rightExpanded = [];
+  private string _dropLog = "";
+
+  private readonly List<TreeViewFlatItem> _pages = TreeViewSampleData.Pages();
+  private List<object> _pagesExpanded = [];
+  private string _eventLog = "";
+
+  private readonly List<TreeViewFlatItem> _sizeFiles = TreeViewSampleData.Files();
+  private List<object> _sizeExpanded = [];
+
+  protected override void OnInitialized() {
+    _filesExpanded = [_files[0]];
+    _departmentsExpanded = [.. _departments];
+    _checkExpanded = [_checkFiles[0], _checkFiles[1], _checkFiles[5], _checkFiles[8]];
+    _leftExpanded = [_left[0]];
+    _rightExpanded = [_right[0]];
+    _pagesExpanded = [_pages[0]];
+    _sizeExpanded = [_sizeFiles[0]];
+  }
+
+  private static string Names(IEnumerable<object> items) {
+    string names = string.Join(", ", items.OfType<TreeViewFlatItem>().Select(i => i.Text));
+    return names == "" ? "(none)" : names;
+  }
+
+  private async Task LoadChildren(PixataTreeViewExpandEventArgs e) {
+    TreeViewLazyItem item = (TreeViewLazyItem)e.Item;
+    if (!e.Expanded || _lazy.Any(i => i.ParentId == item.Id)) {
+      return;
+    }
+    await Task.Delay(1000);
+    bool deeper = item.ParentId is null;
+    for (int i = 1; i <= 3; i++) {
+      _lazy.Add(new() { Id = _nextLazyId++, ParentId = item.Id, Text = deeper ? $"{item.Text} server {i}" : $"{item.Text} disk {i}", HasChildren = deeper });
+    }
+  }
+
+  private void Drop(PixataTreeViewDropEventArgs e, List<TreeViewFlatItem> source) {
+    TreeViewFlatItem item = (TreeViewFlatItem)e.Item;
+    List<TreeViewFlatItem>? destination = e.DestinationTreeView == _leftTree ? _left : e.DestinationTreeView == _rightTree ? _right : null;
+    if (destination is null) {
+      _dropLog = $"{item.Text} was dropped outside the trees";
+      return;
+    }
+    // The item moves with everything under it
+    List<TreeViewFlatItem> moving = [item, .. Descendants(source, item)];
+    source.RemoveAll(moving.Contains);
+    TreeViewFlatItem? target = e.DestinationItem as TreeViewFlatItem;
+    if (target is null) {
+      item.ParentId = null;
+      destination.AddRange(moving);
+      _dropLog = $"Moved {item.Text} to the end";
+    } else if (e.DropPosition == PixataTreeViewDropPosition.Over) {
+      item.ParentId = target.Id;
+      destination.AddRange(moving);
+      if (destination == _left) {
+        _leftExpanded = [.. _leftExpanded, target];
+      } else {
+        _rightExpanded = [.. _rightExpanded, target];
+      }
+      _dropLog = $"Moved {item.Text} into {target.Text}";
+    } else {
+      item.ParentId = target.ParentId;
+      int index = destination.IndexOf(target) + (e.DropPosition == PixataTreeViewDropPosition.After ? 1 : 0);
+      destination.InsertRange(index, moving);
+      _dropLog = $"Moved {item.Text} {e.DropPosition.ToString().ToLowerInvariant()} {target.Text}";
+    }
+  }
+
+  private static IEnumerable<TreeViewFlatItem> Descendants(List<TreeViewFlatItem> items, TreeViewFlatItem parent) =>
+    items.Where(i => i.ParentId == parent.Id).SelectMany(child => (IEnumerable<TreeViewFlatItem>)[child, .. Descendants(items, child)]).ToList();
+
+  private void Log(string message) =>
+    _eventLog = message;
+}
