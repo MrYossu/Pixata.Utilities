@@ -6,6 +6,8 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.9.1** fixes pressing Enter in a `PixataDatePicker`, `PixataDateInput` or `PixataDateRangePicker` input, which didn't submit the form it was in
+
 >**Version 5.9.0** adds `PixataTreeView`, which shows flat or hierarchical data as a tree, with expanding and collapsing, loading children on demand, selection, checkboxes, templates, links, and drag and drop within a tree, between trees and on to a grid. It also adds `PixataFieldReader.TryGetValue()`, which reads a property without throwing if the item doesn't have it. See the [tree view documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TreeView.md)
 
 >**Version 5.8.0** makes two changes to the grid's filter row...
