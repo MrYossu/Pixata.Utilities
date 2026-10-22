@@ -227,6 +227,10 @@ export function initDateInput(input, dotNet) {
     },
     // Phone keyboards often don't say which key was pressed, so the typed text is taken from beforeinput instead
     beforeinput: e => {
+      // Enter fires beforeinput in Chrome, and cancelling it would stop the form submitting
+      if (e.inputType === "insertLineBreak" || e.inputType === "insertParagraph") {
+        return;
+      }
       e.preventDefault();
       if (input.readOnly) {
         return;
