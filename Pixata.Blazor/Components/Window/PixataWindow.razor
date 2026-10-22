@@ -239,6 +239,13 @@
   public bool PersistContent { get; set; }
 
   /// <summary>
+  /// A CSS selector for the element to focus when the window opens, eg <c>#first-name</c>. By default the window itself is
+  /// focused
+  /// </summary>
+  [Parameter]
+  public string? FocusedElementSelector { get; set; }
+
+  /// <summary>
   /// How the <see cref="WindowFooter"/> content is laid out. <see cref="PixataWindowFooterLayoutAlign.Stretch"/> by default
   /// </summary>
   [Parameter]
@@ -365,7 +372,7 @@
     string.IsNullOrWhiteSpace(value) ? fallback : value;
 
   private protected override PixataLayerOptions LayerOptions =>
-    new("window", Modal, null, false, Draggable, Resizable, Modal ? null : ContainmentSelector);
+    new("window", Modal, FocusedElementSelector, false, Draggable, Resizable, Modal ? null : ContainmentSelector);
 
   private async Task SetState(PixataWindowState state) {
     if (_state == state) {

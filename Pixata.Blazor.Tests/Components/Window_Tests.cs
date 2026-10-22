@@ -465,6 +465,16 @@ public class Window_Tests {
   }
 
   [TestMethod]
+  public void PixataWindow_FocusedElementSelector_IsPassedToTheLayer() {
+    using BunitContext context = PixataTestContext.Create();
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);
+    module.Setup<int>("openLayer", _ => true).SetResult(1);
+    RenderWindow(context, p => p.Add(c => c.FocusedElementSelector, "#date"));
+    string options = module.VerifyInvoke("openLayer").Arguments[4]?.ToString() ?? "";
+    StringAssert.Contains(options, "FocusSelector = #date");
+  }
+
+  [TestMethod]
   public void PixataWindow_Modal_IgnoresTheContainment() {
     using BunitContext context = PixataTestContext.Create();
     BunitJSModuleInterop module = context.JSInterop.SetupModule(ModulePath);

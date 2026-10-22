@@ -58,6 +58,7 @@ As with a dialog, the window is rendered where you declare it (so it can use you
 | `Size` | `string?` | | A preset width: `PixataThemeConstants.Window.Size.Small` (300px), `Medium` (800px) or `Large` (1200px). `Width` takes precedence |
 | `Centered` | `bool` | `false` | Opens the window in the middle, even if `Top` and `Left` are set |
 | `ContainmentSelector` | `string?` | | A CSS selector for an element to keep the window inside, eg `#workspace`. See [Keeping a window inside an element](#keeping-a-window-inside-an-element). Ignored for modal windows |
+| `FocusedElementSelector` | `string?` | | A CSS selector for the element to focus when the window opens, eg `#email`. By default the window itself is focused. Text in a focused text box is selected, so the user can type over it |
 | `PersistContent` | `bool` | `false` | Keeps the content (and the state of any components in it) while the window is minimised, rather than removing it |
 | `FooterLayoutAlign` | `PixataWindowFooterLayoutAlign` | `Stretch` | How the `WindowFooter` content is laid out: `Start`, `Center`, `End` or `Stretch` (buttons share the width equally) |
 | `ThemeColor` | `string?` | | Colours the titlebar with one of the `PixataThemeConstants.ThemeColor` values, eg `primary` |
