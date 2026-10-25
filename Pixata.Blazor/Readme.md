@@ -6,6 +6,8 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.11.0** adds `PixataButton`, a plain button with the package's theme colours, fill modes, roundness and sizes, which can show a spinner while its action runs, and `PixataPrimaryButton` and `PixataSecondaryButton`, the same button with defaults for a page's main action and the others next to it. See the [buttons documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md#plain-buttons)
+
 >**Version 5.10.0** adds `FocusedElementSelector` to `PixataWindow`, to choose the element that gets the focus when the window opens
 
 >**Version 5.9.1** fixes pressing Enter in a `PixataDatePicker`, `PixataDateInput` or `PixataDateRangePicker` input, which didn't submit the form it was in
@@ -96,7 +98,7 @@ The documentation is split over the following pages...
 | [Radio group](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.RadioGroup.md) | `PixataRadioGroup` |
 | [Switch](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Switch.md) | `PixataSwitch`, a toggle switch for booleans |
 | [Charts](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Charts.md) | `PixataChart`, with column, line and pie series |
-| [Buttons](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md) | `PixataDropDownButton` and `PixataSplitButton` |
+| [Buttons](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md) | `PixataButton`, `PixataPrimaryButton`, `PixataSecondaryButton`, `PixataDropDownButton` and `PixataSplitButton` |
 | [Scheduler](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Scheduler.md) | `PixataScheduler`, for showing and editing appointments in day, multi-day, week, month, timeline and agenda views |
 
 ## Registering dependencies
