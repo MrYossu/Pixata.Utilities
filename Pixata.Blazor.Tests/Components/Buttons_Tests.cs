@@ -439,6 +439,124 @@ public class Buttons_Tests {
     StringAssert.Contains(cut.Find(".pixata-blazor-popup").GetAttribute("style"), "width:300px");
   }
 
+  #region PixataButton
+
+  [TestMethod]
+  public void Button_RendersASubmitButtonWithTheDefaultClasses() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataButton> cut = context.Render<PixataButton>(p => p.AddChildContent("Save"));
+    IElement button = cut.Find("button");
+    Assert.AreEqual("submit", button.GetAttribute("type"));
+    Assert.AreEqual("Save", button.TextContent.Trim());
+    Assert.AreEqual("pixata-blazor-button pixata-blazor-button-md pixata-blazor-rounded-md pixata-blazor-button-solid pixata-blazor-button-base", button.ClassName);
+    Assert.IsFalse(button.HasAttribute("disabled"));
+  }
+
+  [TestMethod]
+  public void Button_Click_RaisesOnClick() {
+    using BunitContext context = PixataTestContext.Create();
+    bool clicked = false;
+    IRenderedComponent<PixataButton> cut = context.Render<PixataButton>(p => p
+      .Add(c => c.OnClick, () => clicked = true)
+      .AddChildContent("Save"));
+    cut.Find("button").Click();
+    Assert.IsTrue(clicked);
+  }
+
+  [TestMethod]
+  public void Button_IconOnly_IsSquare() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataButton> cut = context.Render<PixataButton>(p => p
+      .Add(c => c.Icon, PixataSvgIcons.Refresh)
+      .Add(c => c.AriaLabel, "Refresh"));
+    IElement button = cut.Find("button");
+    Assert.IsTrue(button.ClassList.Contains("pixata-blazor-icon-button"));
+    Assert.AreEqual("Refresh", button.GetAttribute("aria-label"));
+    Assert.AreEqual(1, cut.FindAll("svg").Count);
+  }
+
+  [TestMethod]
+  public void Button_Busy_ShowsASpinnerInPlaceOfTheIconAndIsDisabled() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataButton> cut = context.Render<PixataButton>(p => p
+      .Add(c => c.Icon, PixataSvgIcons.Refresh)
+      .Add(c => c.IsBusy, true)
+      .AddChildContent("Save"));
+    IElement button = cut.Find("button");
+    Assert.IsTrue(button.HasAttribute("disabled"));
+    Assert.AreEqual("true", button.GetAttribute("aria-busy"));
+    Assert.AreEqual(1, cut.FindAll(".pixata-blazor-button-spinner").Count);
+    Assert.AreEqual(0, cut.FindAll("svg").Count);
+    cut.Render(p => p.Add(c => c.IsBusy, false));
+    Assert.IsFalse(cut.Find("button").HasAttribute("disabled"));
+    Assert.IsFalse(cut.Find("button").HasAttribute("aria-busy"));
+    Assert.AreEqual(0, cut.FindAll(".pixata-blazor-button-spinner").Count);
+  }
+
+  [TestMethod]
+  public void Button_NotEnabled_IsDisabled() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataButton> cut = context.Render<PixataButton>(p => p.Add(c => c.Enabled, false).AddChildContent("Save"));
+    Assert.IsTrue(cut.Find("button").HasAttribute("disabled"));
+  }
+
+  [TestMethod]
+  public void Button_NotVisible_RendersNothing() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataButton> cut = context.Render<PixataButton>(p => p.Add(c => c.Visible, false).AddChildContent("Save"));
+    Assert.AreEqual(0, cut.FindAll("button").Count);
+  }
+
+  [TestMethod]
+  public void Button_ParametersAndExtraAttributes_AreRendered() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataButton> cut = context.Render<PixataButton>(p => p
+      .Add(c => c.ButtonType, PixataButtonType.Reset)
+      .Add(c => c.ThemeColor, PixataThemeConstants.Button.ThemeColor.Error)
+      .Add(c => c.FillMode, PixataThemeConstants.Button.FillMode.Outline)
+      .Add(c => c.Size, PixataThemeConstants.Button.Size.Large)
+      .Add(c => c.Rounded, PixataThemeConstants.Button.Rounded.Full)
+      .Add(c => c.Class, "mine")
+      .Add(c => c.Title, "Clear the form")
+      .AddUnmatched("data-test", "clear")
+      .AddChildContent("Clear"));
+    IElement button = cut.Find("button");
+    Assert.AreEqual("reset", button.GetAttribute("type"));
+    Assert.AreEqual("pixata-blazor-button pixata-blazor-button-lg pixata-blazor-rounded-full pixata-blazor-button-outline pixata-blazor-button-error mine", button.ClassName);
+    Assert.AreEqual("Clear the form", button.GetAttribute("title"));
+    Assert.AreEqual("clear", button.GetAttribute("data-test"));
+  }
+
+  [TestMethod]
+  public void PrimaryButton_IsAPrimarySubmitButton() {
+    using BunitContext context = PixataTestContext.Create();
+    IElement button = context.Render<PixataPrimaryButton>(p => p.AddChildContent("Save")).Find("button");
+    Assert.AreEqual("submit", button.GetAttribute("type"));
+    Assert.IsTrue(button.ClassList.Contains("pixata-blazor-button-primary"));
+  }
+
+  [TestMethod]
+  public void SecondaryButton_IsABaseButtonThatDoesNotSubmit() {
+    using BunitContext context = PixataTestContext.Create();
+    IElement button = context.Render<PixataSecondaryButton>(p => p.AddChildContent("Cancel")).Find("button");
+    Assert.AreEqual("button", button.GetAttribute("type"));
+    Assert.IsTrue(button.ClassList.Contains("pixata-blazor-button-base"));
+  }
+
+  [TestMethod]
+  public void PrimaryButton_DefaultsCanBeOverridden() {
+    using BunitContext context = PixataTestContext.Create();
+    IElement button = context.Render<PixataPrimaryButton>(p => p
+      .Add(c => c.ThemeColor, PixataThemeConstants.Button.ThemeColor.Success)
+      .Add(c => c.ButtonType, PixataButtonType.Button)
+      .AddChildContent("Go")).Find("button");
+    Assert.AreEqual("button", button.GetAttribute("type"));
+    Assert.IsTrue(button.ClassList.Contains("pixata-blazor-button-success"));
+    Assert.IsFalse(button.ClassList.Contains("pixata-blazor-button-primary"));
+  }
+
+  #endregion
+
   #region The shared popup
 
   [TestMethod]

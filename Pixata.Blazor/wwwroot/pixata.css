@@ -3252,6 +3252,14 @@
   border-width: .2em;
 }
 
+/* The spinner a busy PixataButton shows in place of its icon, sized to match the icons */
+.pixata-blazor-button-spinner {
+  width: 1em;
+  height: 1em;
+  border-width: .15em;
+  vertical-align: middle;
+}
+
 @keyframes pixata-spin {
   to {
     transform: rotate(360deg);

@@ -1,11 +1,36 @@
 @page "/ButtonsSample"
 @using Pixata.Blazor.Components
 
-<h3>Drop-down and split buttons</h3>
-
-<p><code>PixataDropDownButton</code> is a button that opens a menu of actions, and <code>PixataSplitButton</code> is a button for a primary action with an arrow that opens a menu of secondary ones. With the keyboard, Alt+Down opens the menu, the arrow keys move through the items, Enter or Space picks one, and Esc closes it.</p>
+<h3>Buttons</h3>
 
 <p class="text-muted">Last action: <strong>@(_log == "" ? "none yet" : _log)</strong></p>
+
+<h4 class="mt-4">Plain buttons</h4>
+
+<ComponentSample Title="Primary, secondary and plain buttons">
+  <Description>
+    <p><code>PixataButton</code> is a plain button with the theme colours, fill modes, roundness and sizes of the other buttons. <code>PixataPrimaryButton</code> and <code>PixataSecondaryButton</code> are the same button with different defaults: the primary one submits its form, and the secondary one doesn't.</p>
+  </Description>
+  <ChildContent>
+    <PixataPrimaryButton ButtonType="PixataButtonType.Button" OnClick="@(() => Log("Pixata: Save"))">Save</PixataPrimaryButton>
+    <PixataSecondaryButton OnClick="@(() => Log("Pixata: Cancel"))" Class="ms-2">Cancel</PixataSecondaryButton>
+    <PixataButton ButtonType="PixataButtonType.Button" ThemeColor="@PixataThemeConstants.Button.ThemeColor.Error" FillMode="@PixataThemeConstants.Button.FillMode.Outline" Icon="PixataSvgIcons.Trash" OnClick="@(() => Log("Pixata: Delete"))" Class="ms-2">Delete</PixataButton>
+    <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Refresh" AriaLabel="Refresh" Title="Refresh" FillMode="@PixataThemeConstants.Button.FillMode.Flat" OnClick="@(() => Log("Pixata: Refresh"))" Class="ms-2" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Busy">
+  <Description>
+    <p>While <code>IsBusy</code> is true, the button shows a spinner in place of its icon and is disabled, so it can't be clicked twice.</p>
+  </Description>
+  <ChildContent>
+    <PixataPrimaryButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Download" IsBusy="_busy" OnClick="PretendToWork">@(_busy ? "Working..." : "Start a two-second job")</PixataPrimaryButton>
+  </ChildContent>
+</ComponentSample>
+
+<h4 class="mt-4">Drop-down and split buttons</h4>
+
+<p><code>PixataDropDownButton</code> is a button that opens a menu of actions, and <code>PixataSplitButton</code> is a button for a primary action with an arrow that opens a menu of secondary ones. With the keyboard, Alt+Down opens the menu, the arrow keys move through the items, Enter or Space picks one, and Esc closes it.</p>
 
 <h4 class="mt-4">Drop-down button</h4>
 
@@ -188,6 +213,14 @@
   private bool _cancelOpen;
   private readonly List<string> _events = [];
   private PixataSplitButton _pixataSplit = null!;
+  private bool _busy;
+
+  private async Task PretendToWork() {
+    _busy = true;
+    await Task.Delay(2000);
+    _busy = false;
+    Log("Pixata: Job done");
+  }
 
   private void Log(string message) =>
     _log = message;

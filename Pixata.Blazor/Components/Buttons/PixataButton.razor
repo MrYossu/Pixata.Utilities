@@ -1,0 +1,138 @@
+@namespace Pixata.Blazor.Components
+
+@*
+  A plain button with the Pixata.Blazor button classes, so it looks the same as the buttons in the dialogs, grids and so on,
+  and takes its colours and sizes from the --pixata-blazor-* variables. PixataPrimaryButton and PixataSecondaryButton
+  are subclasses that only change the defaults, and an app can subclass it in the same way for its own standard buttons
+*@
+@if (Visible) {
+  <button @ref="_button"
+          type="@ButtonType.ToString().ToLowerInvariant()"
+          id="@Id"
+          class="@CssClass"
+          disabled="@(!Enabled || IsBusy)"
+          title="@(string.IsNullOrWhiteSpace(Title) ? null : Title)"
+          tabindex="@TabIndex"
+          aria-label="@AriaLabel"
+          aria-busy="@(IsBusy ? "true" : null)"
+          @onclick="OnClick"
+          @attributes="AdditionalAttributes">
+    @if (IsBusy) {
+      <span class="pixata-spinner pixata-blazor-button-spinner" aria-hidden="true"></span>
+    } else {
+      <PixataIcon Icon="Icon" />
+    }
+    @ChildContent
+  </button>
+}
+
+@code {
+
+  /// <summary>
+  /// <c>Submit</c> (the default, as for an HTML button), <c>Button</c> or <c>Reset</c>. A button inside a form that
+  /// shouldn't submit it needs <c>Button</c>
+  /// </summary>
+  [Parameter]
+  public PixataButtonType ButtonType { get; set; } = PixataButtonType.Submit;
+
+  /// <summary>
+  /// The colour of the button: <c>base</c> (the default), <c>primary</c>, <c>secondary</c> and so on. See <see cref="PixataThemeConstants.Button.ThemeColor"/>
+  /// </summary>
+  [Parameter]
+  public string? ThemeColor { get; set; }
+
+  /// <summary>
+  /// <c>solid</c> (the default), <c>outline</c>, <c>flat</c>, <c>link</c> or <c>clear</c>. See <see cref="PixataThemeConstants.Button.FillMode"/>
+  /// </summary>
+  [Parameter]
+  public string? FillMode { get; set; }
+
+  /// <summary>
+  /// <c>none</c>, <c>sm</c>, <c>md</c> (the default), <c>lg</c> or <c>full</c>. See <see cref="PixataThemeConstants.Button.Rounded"/>
+  /// </summary>
+  [Parameter]
+  public string? Rounded { get; set; }
+
+  /// <summary>
+  /// <c>sm</c>, <c>md</c> (the default) or <c>lg</c>. See <see cref="PixataThemeConstants.Button.Size"/>
+  /// </summary>
+  [Parameter]
+  public string? Size { get; set; }
+
+  /// <summary>
+  /// An icon shown before the content. A <see cref="PixataSvgIcon"/> (eg one from <see cref="PixataSvgIcons"/>), or the
+  /// CSS class(es) of an icon font, such as <c>"fas fa-save"</c>. A button with an icon and no content is square
+  /// </summary>
+  [Parameter]
+  public object? Icon { get; set; }
+
+  /// <summary>
+  /// When true, a spinner is shown in place of the icon, and the button is disabled. Set it while the button's action is
+  /// running, so it can't be clicked twice
+  /// </summary>
+  [Parameter]
+  public bool IsBusy { get; set; }
+
+  /// <summary>
+  /// When false, the button is greyed out and can't be used
+  /// </summary>
+  [Parameter]
+  public bool Enabled { get; set; } = true;
+
+  /// <summary>
+  /// When false, nothing is rendered
+  /// </summary>
+  [Parameter]
+  public bool Visible { get; set; } = true;
+
+  /// <summary>
+  /// Extra CSS classes for the button
+  /// </summary>
+  [Parameter]
+  public string? Class { get; set; }
+
+  [Parameter]
+  public string? Id { get; set; }
+
+  /// <summary>
+  /// The tooltip of the button
+  /// </summary>
+  [Parameter]
+  public string? Title { get; set; }
+
+  [Parameter]
+  public int? TabIndex { get; set; }
+
+  /// <summary>
+  /// The <c>aria-label</c> of the button. Set it when the button only has an icon
+  /// </summary>
+  [Parameter]
+  public string? AriaLabel { get; set; }
+
+  [Parameter]
+  public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+  /// <summary>
+  /// The content of the button, usually its text
+  /// </summary>
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  /// <summary>
+  /// Any other attributes (eg <c>data-*</c>) are rendered on the button
+  /// </summary>
+  [Parameter(CaptureUnmatchedValues = true)]
+  public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+  private ElementReference _button;
+
+  /// <summary>
+  /// Moves the focus to the button
+  /// </summary>
+  public ValueTask FocusAsync() =>
+    _button.FocusAsync();
+
+  private string CssClass =>
+    PixataCss.Classes(PixataCss.Button(ThemeColor, FillMode, Rounded, Size, ChildContent is null && (Icon is not null || IsBusy)), Class);
+
+}

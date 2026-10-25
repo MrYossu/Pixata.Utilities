@@ -1,13 +1,12 @@
-# Drop-down and split buttons
+# Buttons
 
 >Part of [Pixata.Blazor](Readme.md)
 
-Two buttons that open a menu of actions...
-
+- `PixataButton` is a plain button, with `PixataPrimaryButton` and `PixataSecondaryButton` for the usual main and other actions. Any of them can show a spinner while their action runs
 - `PixataDropDownButton` is a button that opens a menu. Use it when the button itself doesn't do anything, but groups related actions (Export as PDF, Excel or Word, say)
 - `PixataSplitButton` is a button for a primary action, with an arrow next to it that opens a menu of secondary ones (Save, with Save as and Save a copy in the menu)
 
-They share their styling (the same theme colours, fill modes, roundness and sizes as the other buttons in this package), their menu, and nearly all their parameters, events and methods. They work with the mouse, keyboard and touch, and the menu stays inside the viewport on small screens.
+They all share their styling (the same theme colours, fill modes, roundness and sizes as the other buttons in this package, such as those in the dialogs and grids). The drop-down and split buttons also share their menu, and nearly all their parameters, events and methods. They work with the mouse, keyboard and touch, and the menu stays inside the viewport on small screens.
 
 See the [live demo](https://test.pixata.co.uk/ButtonsSample) for how they look, and the [source for that page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ButtonsSample.razor) for the code.
 
@@ -20,6 +19,93 @@ There is nothing to register. Add the stylesheet to your host page if you haven'
 ```
 
 ...and add `@using Pixata.Blazor.Components` to your `_Imports.razor`.
+
+## Plain buttons
+
+`PixataButton` renders a `<button>`. Its content is its text, and it has an optional `Icon`, shown before the text...
+
+```xml
+<PixataButton ThemeColor="primary" Icon="PixataSvgIcons.Download" OnClick="Download">Download</PixataButton>
+```
+
+Like an HTML button, it submits the form it is in unless you say otherwise, so a button in a form that does something else needs `ButtonType="PixataButtonType.Button"`. A button with an `Icon` and no content is square; give it an `AriaLabel` so screen readers can announce it...
+
+```xml
+<PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Refresh" AriaLabel="Refresh" FillMode="flat" OnClick="Reload" />
+```
+
+### Primary and secondary buttons
+
+Most pages have one main action, and maybe a Cancel or Back next to it. `PixataPrimaryButton` and `PixataSecondaryButton` are a `PixataButton` with different defaults, so you don't have to give the same parameters on every page...
+
+| Component | `ThemeColor` | `ButtonType` |
+| --- | --- | --- |
+| `PixataPrimaryButton` | `primary` | `Submit` |
+| `PixataSecondaryButton` | `base` | `Button`, so pressing Enter in the form doesn't trigger it |
+
+```xml
+<EditForm Model="_customer" OnValidSubmit="Save">
+  ...
+  <PixataPrimaryButton>Save</PixataPrimaryButton>
+  <PixataSecondaryButton OnClick="Cancel">Cancel</PixataSecondaryButton>
+</EditForm>
+```
+
+They take all the parameters of `PixataButton`, and any you give override the defaults.
+
+If your app's buttons all have, say, a large size and rounding, you can make your own buttons the same way. The defaults are set in the constructor, and only the parameters you pass when using the button change them...
+
+```c#
+public class SitePrimaryButton : PixataPrimaryButton {
+  public SitePrimaryButton() {
+    Size = PixataThemeConstants.Button.Size.Large;
+    Rounded = PixataThemeConstants.Button.Rounded.Large;
+  }
+}
+```
+
+### Busy buttons
+
+While `IsBusy` is true, the button shows a spinner in place of its icon, is disabled so it can't be clicked twice, and has `aria-busy="true"`...
+
+```xml
+<PixataPrimaryButton IsBusy="_saving" OnClick="Save">Save</PixataPrimaryButton>
+
+@code {
+  private bool _saving;
+
+  private async Task Save() {
+    _saving = true;
+    await CustomerService.Save(_customer);
+    _saving = false;
+  }
+}
+```
+
+### Plain button parameters
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ChildContent` | `RenderFragment` | | The content of the button, usually its text. Write it between the tags |
+| `ButtonType` | `PixataButtonType` | `Submit` | `Submit`, `Button` or `Reset`, rendered as the button's `type` |
+| `Icon` | `object` | | An icon shown before the content. A `PixataSvgIcon` (eg one from `PixataSvgIcons`), or the CSS class(es) of an icon font, such as `"fas fa-save"` |
+| `ThemeColor` | `string` | `"base"` | `"base"`, `"primary"`, `"secondary"`, `"tertiary"`, `"info"`, `"success"`, `"warning"`, `"error"`, `"dark"`, `"light"` or `"inverse"`. The values are in `PixataThemeConstants.Button.ThemeColor` |
+| `FillMode` | `string` | `"solid"` | `"solid"`, `"outline"`, `"flat"`, `"link"` or `"clear"`. The values are in `PixataThemeConstants.Button.FillMode` |
+| `Rounded` | `string` | `"md"` | `"none"`, `"sm"`, `"md"`, `"lg"` or `"full"`. The values are in `PixataThemeConstants.Button.Rounded` |
+| `Size` | `string` | `"md"` | `"sm"`, `"md"` or `"lg"`. The values are in `PixataThemeConstants.Button.Size` |
+| `IsBusy` | `bool` | `false` | When true, a spinner replaces the icon, and the button is disabled |
+| `Enabled` | `bool` | `true` | When false, the button is greyed out and can't be used |
+| `Visible` | `bool` | `true` | When false, nothing is rendered |
+| `OnClick` | `EventCallback<MouseEventArgs>` | | Raised when the button is clicked |
+| `Id` | `string` | | The `id` of the button |
+| `Title` | `string` | | The tooltip of the button |
+| `TabIndex` | `int?` | | The `tabindex` of the button |
+| `Class` | `string` | | Extra CSS classes for the button |
+| `AriaLabel` | `string` | | The `aria-label` of the button. Set it when the button only has an icon |
+
+Any other attributes you add (`form`, `data-*` and so on) are rendered on the button. To move the focus to it, get a reference with `@ref` and call `FocusAsync()`.
+
+The button has the usual `pixata-blazor-button` classes (see [Styling](#styling)), and while it is busy, the spinner has the `pixata-spinner` and `pixata-blazor-button-spinner` classes.
 
 ## Drop-down button
 
@@ -84,7 +170,7 @@ The menu is rendered inside the component, but floats above the page, so it isn'
 
 ## Parameters
 
-These parameters are on both buttons...
+These parameters are on both the drop-down and split buttons...
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -224,7 +310,7 @@ Get a reference to the button with `@ref`...
 
 ## Styling
 
-The buttons use the same `pixata-blazor-button` classes as the other buttons in this package, so they pick up any changes you make to those. On top of those...
+All the buttons use the same `pixata-blazor-button` classes as the other buttons in this package, so they pick up any changes you make to those. The drop-down and split buttons add these...
 
 | Class | Element |
 | --- | --- |
