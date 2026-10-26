@@ -156,7 +156,9 @@ public partial class PixataGrid<TItem> {
   internal PixataGridMessages Text =>
     Messages ?? Services.GetService<PixataGridMessages>() ?? PixataGridMessages.Default;
 
-  private bool _stateInitDone;
+  // Kept rather than a flag, so if the parent re-renders while the saved state is being read, the grid waits for it rather
+  // than reading the data without it
+  private Task? _stateInit;
   private Dictionary<string, string>? _stateSnapshot;
   private bool _resnapshot;
   private List<PixataGridColumnState> _pendingColumnStates = [];
@@ -225,7 +227,6 @@ public partial class PixataGrid<TItem> {
 
   // Called before the data is first read. A saved state comes first, then OnStateInit can change it
   private async Task InitState() {
-    _stateInitDone = true;
     PixataGridState<TItem>? saved = await LoadState();
     if (saved is null && !OnStateInit.HasDelegate) {
       return;

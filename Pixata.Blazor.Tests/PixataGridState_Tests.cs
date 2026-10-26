@@ -200,6 +200,31 @@ public class PixataGridState_Tests {
   }
 
   [TestMethod]
+  public void OnStateInit_ARerenderWhileItRuns_DoesNotReadTheDataWithoutTheState() {
+    TaskCompletionSource waiting = new();
+    List<GridRequest> requests = [];
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.GridColumns, Columns)
+      .Add(g => g.Sortable, true)
+      .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Person>>(this, args => {
+        requests.Add(args.Request);
+        args.SetResult(People.ToGridResult(args.Request));
+      }))
+      .Add(g => g.OnStateInit, EventCallback.Factory.Create<PixataGridStateEventArgs<Person>>(this, async args => {
+        await waiting.Task;
+        args.GridState.SortDescriptors = [new(nameof(Person.Age))];
+      })));
+
+    // The parent re-renders before the handler has finished
+    grid.Render(p => p.Add(g => g.Height, "300px"));
+    grid.InvokeAsync(() => waiting.SetResult()).Wait();
+
+    grid.WaitForAssertion(() => Assert.AreEqual(1, requests.Count));
+    Assert.AreEqual(nameof(Person.Age), requests.Single().Sorts.Single().Member);
+    CollectionAssert.AreEqual(new[] { "3", "1", "5", "2", "4" }, Ids(grid));
+  }
+
+  [TestMethod]
   public void OnStateChanged_SaysWhatChanged() {
     List<string> changes = [];
     IRenderedComponent<PixataGrid<Person>> grid = Render(p => p.Add(g => g.OnStateChanged, EventCallback.Factory.Create<PixataGridStateEventArgs<Person>>(this, args => changes.Add(args.PropertyName!))));

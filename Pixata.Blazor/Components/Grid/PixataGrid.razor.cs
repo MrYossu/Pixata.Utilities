@@ -208,9 +208,8 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
       _pageSize = PageSize;
       _lastPageSizeParameter = PageSize;
     }
-    if (!_stateInitDone) {
-      await InitState();
-    }
+    _stateInit ??= InitState();
+    await _stateInit;
     if (!ReferenceEquals(Data, _boundData)) {
       Unsubscribe();
       _boundData = Data;
