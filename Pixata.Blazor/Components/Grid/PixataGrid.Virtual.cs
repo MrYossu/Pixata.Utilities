@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -40,6 +41,9 @@ public partial class PixataGrid<TItem> {
   private ElementReference _contentElement;
   private bool _virtualReady;
   private int _skip;
+  // The first row in view, which is what the state saves, so the grid comes back where the user left it
+  private int _topRow;
+  private CancellationTokenSource? _scrollStateCancel;
   private bool _virtualLoading;
   private double? _scrollTarget;
   private double _viewLeft;
@@ -112,6 +116,7 @@ public partial class PixataGrid<TItem> {
   // Renders the rows from this one, and scrolls there once they have rendered
   private void ScrollToRow(int row) {
     _skip = Math.Max(row, 0);
+    _topRow = _skip;
     _scrollTarget = _skip * (RowHeight ?? 0);
   }
 
@@ -124,6 +129,10 @@ public partial class PixataGrid<TItem> {
     bool changed = false;
     if (VirtualRows && RowHeight is > 0) {
       int first = (int)(top / RowHeight.Value);
+      if (first != _topRow) {
+        _topRow = first;
+        CheckStateAfterScrolling();
+      }
       int last = (int)Math.Ceiling((top + height) / RowHeight.Value);
       int margin = Math.Max(_pageSize / 2, 1);
       int end = _skip + VirtualRowCount;
@@ -151,6 +160,17 @@ public partial class PixataGrid<TItem> {
     if (changed) {
       StateHasChanged();
     }
+  }
+
+  // Scrolling within the rows rendered doesn't render the grid, so the state isn't checked. It is once the user stops
+  private void CheckStateAfterScrolling() {
+    if (!OnStateChanged.HasDelegate && string.IsNullOrWhiteSpace(StorageKey)) {
+      return;
+    }
+    _scrollStateCancel?.Cancel();
+    _scrollStateCancel = new();
+    CancellationToken token = _scrollStateCancel.Token;
+    _ = Task.Delay(500, token).ContinueWith(_ => InvokeAsync(CheckStateChanged), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
   }
 
   // ---------- Virtual columns ----------

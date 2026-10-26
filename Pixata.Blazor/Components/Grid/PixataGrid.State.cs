@@ -21,7 +21,8 @@ public class PixataGridState<TItem> {
   public int? PageSize { get; set; }
 
   /// <summary>
-  /// The number of items before the page. Only used if <see cref="Page"/> isn't set
+  /// The number of items before the page. Only used if <see cref="Page"/> isn't set. With virtual scrolling, the first row
+  /// in view
   /// </summary>
   public int? Skip { get; set; }
 
@@ -177,7 +178,7 @@ public partial class PixataGrid<TItem> {
     new() {
       Page = _page,
       PageSize = _pageSize,
-      Skip = VirtualRows ? _skip : (_page - 1) * _pageSize,
+      Skip = VirtualRows ? _topRow : (_page - 1) * _pageSize,
       SortDescriptors = [.. _sorts],
       FilterDescriptors = CurrentFilters,
       SearchFilter = _search,
@@ -366,10 +367,12 @@ public partial class PixataGrid<TItem> {
     }
   }
 
-  private static Dictionary<string, string> Snapshot(PixataGridState<TItem> state) =>
+  private Dictionary<string, string> Snapshot(PixataGridState<TItem> state) =>
     new() {
       [nameof(state.Page)] = $"{state.Page}",
       [nameof(state.PageSize)] = $"{state.PageSize}",
+      // Without virtual rows, Skip follows the page, so it isn't reported as well
+      [nameof(state.Skip)] = VirtualRows ? $"{state.Skip}" : "",
       [nameof(state.SortDescriptors)] = Json(state.SortDescriptors),
       [nameof(state.FilterDescriptors)] = Json(state.FilterDescriptors),
       [nameof(state.SearchFilter)] = Json(state.SearchFilter),

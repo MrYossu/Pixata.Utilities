@@ -399,6 +399,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
     ForgetGrid();
     Unsubscribe();
     _readCancel?.Cancel();
+    _scrollStateCancel?.Cancel();
     foreach (CancellationTokenSource cancel in _filterDebounce.Values) {
       await cancel.CancelAsync();
     }

@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Blazored.LocalStorage;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components.Grid;
 using Pixata.Extensions.Grid;
@@ -69,6 +72,35 @@ public class PixataGridVirtual_Tests {
     Assert.AreEqual("height: 36px;", grid.Find("tbody tr.pixata-blazor-grid-row").GetAttribute("style"));
     // There's no pager, as the rows scroll instead
     Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-pager").Count);
+  }
+
+  [TestMethod]
+  public void Scrolling_SavesTheRowInViewInTheState() {
+    _ctx.Services.AddBlazoredLocalStorage();
+    IRenderedComponent<PixataGrid<Item>> grid = Render(p => p.Add(g => g.StorageKey, "items"));
+
+    // Row 101 is at the top. Scrolling a little further stays within the rows rendered, so doesn't render the grid
+    grid.InvokeAsync(() => grid.Instance.VirtualScrolled(3600, 0, 600, 400));
+    grid.InvokeAsync(() => grid.Instance.VirtualScrolled(3672, 0, 600, 400));
+
+    Assert.AreEqual(102, grid.Instance.GetState().Skip);
+    // It's saved once the user stops scrolling, which doesn't render, so WaitForAssertion wouldn't look again
+    Task.Delay(1000).Wait();
+    JSRuntimeInvocation saved = _ctx.JSInterop.Invocations["localStorage.setItem"].Last();
+    Assert.AreEqual(102, JsonSerializer.Deserialize<PixataGridState<Item>>((string)saved.Arguments[1]!)!.Skip);
+  }
+
+  [TestMethod]
+  public void StorageKey_ScrollsBackToTheSavedRow() {
+    _ctx.Services.AddBlazoredLocalStorage();
+    _ctx.JSInterop.Setup<string?>("localStorage.getItem", "items").SetResult(JsonSerializer.Serialize(new PixataGridState<Item> { PageSize = 10, Skip = 102 }));
+
+    IRenderedComponent<PixataGrid<Item>> grid = Render(p => p.Add(g => g.StorageKey, "items"));
+
+    Assert.AreEqual("103", Ids(grid)[0]);
+    Assert.AreEqual(102, grid.Instance.GetState().Skip);
+    JSRuntimeInvocation scroll = _ctx.JSInterop.Invocations["scrollContentTo"].Last();
+    Assert.AreEqual(3672.0, scroll.Arguments[1]);
   }
 
   [TestMethod]
