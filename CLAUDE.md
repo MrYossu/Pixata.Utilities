@@ -66,7 +66,7 @@ Each package exposes one `AddPixataXxx()` extension. `AddPixataBlazor()` checks 
 
 1. Change code in the package.
 2. Bump `<Version>`, `<AssemblyVersion>` and `<FileVersion>` (all three) in that package's `.csproj`.
-3. Document the change in that package's `Readme.md` — these are shipped as `PackageReadmeFile`, so they are the actual package documentation, not just repo notes.
+3. Document the change in that package's `Readme.md` — these are shipped as `PackageReadmeFile`, so they are the actual package documentation, not just repo notes. Pixata.Blazor's version notes go in `Pixata.Blazor/Readme.Releases.md` (newest first), which its `Readme.md` links to, so the readme opens with what the package is rather than its history.
 4. Commit. Version-bump commits are conventionally named `Pixata.Blazor v4.2.0` (or `Pixata.AspNetCore v1.8.0, Pixata.Blazor v2.32.0, …` for several at once); behaviour commits use a plain imperative sentence.
 5. Pushing to `master` builds and tests. Pushing to `release` publishes every package to nuget.org and FTP-deploys the sample site — only ever push to `release` when asked.
 
