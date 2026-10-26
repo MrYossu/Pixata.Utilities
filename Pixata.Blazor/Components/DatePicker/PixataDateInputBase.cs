@@ -206,6 +206,11 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
         _dotNet = DotNetObjectReference.Create(this);
         await _module.InvokeVoidAsync("initDateInput", InputElement, _dotNet);
         _initialised = true;
+        // A value set while the module was being imported (such as a grid filter restored from its saved state) couldn't be
+        // pushed then, so the input still shows the text it was first rendered with
+        if (State().Text != InitialText) {
+          await PushState();
+        }
       } catch (JSException) {
         // The input has gone from the page
       } catch (JSDisconnectedException) {

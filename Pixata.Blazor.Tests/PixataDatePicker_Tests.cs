@@ -240,6 +240,32 @@ public class PixataDatePicker_Tests {
     Assert.IsTrue(module.Disposed);
   }
 
+  [TestMethod]
+  public async Task DateInput_ValueSetWhileTheModuleIsLoading_IsShownOnceItHasLoaded() {
+    // As when a grid's filter row renders before its saved state has been applied
+    PendingImportRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    IRenderedComponent<PixataDateInput<DateTime?>> input = _ctx.Render<PixataDateInput<DateTime?>>();
+    input.Render(p => p.Add(c => c.Value, new DateTime(2026, 3, 1)));
+
+    RecordingModule module = new();
+    await _ctx.Renderer.Dispatcher.InvokeAsync(() => js.Import.SetResult(module));
+
+    CollectionAssert.AreEqual(new[] { "initDateInput", "setDateInputState" }, module.Calls);
+  }
+
+  [TestMethod]
+  public async Task DateInput_ValueUnchangedWhileTheModuleIsLoading_IsNotPushedAgain() {
+    PendingImportRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    _ctx.Render<PixataDateInput<DateTime?>>(p => p.Add(c => c.Value, new DateTime(2026, 3, 1)));
+
+    RecordingModule module = new();
+    await _ctx.Renderer.Dispatcher.InvokeAsync(() => js.Import.SetResult(module));
+
+    CollectionAssert.AreEqual(new[] { "initDateInput" }, module.Calls);
+  }
+
   private class PendingImportRuntime : IJSRuntime {
     public TaskCompletionSource<IJSObjectReference> Import { get; } = new();
 
