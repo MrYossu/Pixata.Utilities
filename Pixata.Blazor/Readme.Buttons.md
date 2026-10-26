@@ -310,7 +310,23 @@ Get a reference to the button with `@ref`...
 
 ## Styling
 
-All the buttons use the same `pixata-blazor-button` classes as the other buttons in this package, so they pick up any changes you make to those. The drop-down and split buttons add these...
+All the buttons use the same `pixata-blazor-button` classes as the other buttons in this package, so they pick up any changes you make to those. A button has one class from each row...
+
+| Class | What it sets |
+| --- | --- |
+| `pixata-blazor-button` | The base style, on every button |
+| `pixata-blazor-button-sm`, `-md` or `-lg` | The `Size` |
+| `pixata-blazor-rounded-none`, `-sm`, `-md`, `-lg` or `-full` | The `Rounded` |
+| `pixata-blazor-button-solid`, `-outline`, `-flat`, `-link` or `-clear` | The `FillMode` |
+| `pixata-blazor-button-base`, `-primary`, `-secondary`, `-tertiary`, `-info`, `-success`, `-warning`, `-error`, `-dark`, `-light` or `-inverse` | The `ThemeColor` |
+
+...plus `pixata-blazor-icon-button` on a button with only an icon, which makes it square. A `PixataButton` is usually simpler, but if you need a plain `<button>` to look the same, give it these classes...
+
+```xml
+<button type="button" class="pixata-blazor-button pixata-blazor-button-md pixata-blazor-rounded-md pixata-blazor-button-solid pixata-blazor-button-primary">Save</button>
+```
+
+The drop-down and split buttons add these...
 
 | Class | Element |
 | --- | --- |
