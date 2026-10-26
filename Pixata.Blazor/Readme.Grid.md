@@ -814,6 +814,8 @@ The grid's state is everything the user can change: the page and page size, sort
 
 - `OnStateInit` fires once, before the data is first read. Change `args.GridState` (or replace it) to set how the grid starts, such as sorted by a column or grouped
 - `OnStateChanged` fires after the user changes the state, once for each part that changed, with `args.PropertyName` saying which, such as "SortDescriptors", "Page" or "ColumnStates". It isn't raised for `SetState`. Items are compared by reference, so it fires when editing starts and stops, not as the user types
+- A column's width is only saved once the user has resized it (otherwise its `Width` in the state is null), so if you change a column's `Width` in your code, anyone who has seen the grid before gets the new width unless they resized the column themselves
+- With virtual scrolling, `Skip` is the first row in view, so the grid comes back where the user left it. It's reported as "Skip" once the user stops scrolling
 
 Columns are matched to their saved state by `Id` if they have one, otherwise by `Field`, otherwise by title, so give columns an `Id` if two could match. Filter values come back from JSON as `JsonElement`s, and the grid turns them back into the field's type. Selected and edited items come back as copies, so they are matched to the data with `ItemKey` (or `Equals`, which works for records).
 

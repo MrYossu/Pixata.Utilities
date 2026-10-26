@@ -6,6 +6,12 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.11.1** fixes four things in `PixataGrid`'s state...
+>- A column's width is only saved once the user has resized it, so a column whose `Width` you change in your code gets the new width for anyone who has seen the grid before (#102)
+>- If the parent re-rendered while the saved state (or an async `OnStateInit` handler) was being read, the grid could read its first page with `OnRead` without the saved sorting and filtering, while the header showed them. It now waits for the state (#103)
+>- A grid with `ScrollMode="Virtual"` now saves its scroll position, as the first row in view, so it comes back where the user left it (#104)
+>- A restored date filter is now shown in the filter row. This was in the date input, so a `PixataDateInput`, `PixataDatePicker` or `PixataDateRangePicker` given a value while it is starting up now shows it (#105)
+
 >**Version 5.11.0** adds `PixataButton`, a plain button with the package's theme colours, fill modes, roundness and sizes, which can show a spinner while its action runs, and `PixataPrimaryButton` and `PixataSecondaryButton`, the same button with defaults for a page's main action and the others next to it. See the [buttons documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md#plain-buttons)
 
 >**Version 5.10.0** adds `FocusedElementSelector` to `PixataWindow`, to choose the element that gets the focus when the window opens
