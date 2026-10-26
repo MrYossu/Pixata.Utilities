@@ -6,6 +6,8 @@ Like many developers, I find myself writing the same Blazor components over and 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available for these components.
 
+>**Version 5.12.0** lets `PixataGridCommandButton.Icon` take a `PixataSvgIcon` or the CSS class(es) of an icon font (such as `"fas fa-trash"`), as well as a `PixataGridIcon`, as the other components' `Icon` parameters do. Existing code doesn't change, but `Icon` is now an `object`, so any code that reads it as a `PixataGridIcon` needs a cast. See [command buttons](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#command-buttons) (#106)
+
 >**Version 5.11.1** fixes four things in `PixataGrid`'s state...
 >- A column's width is only saved once the user has resized it, so a column whose `Width` you change in your code gets the new width for anyone who has seen the grid before (#102)
 >- If the parent re-rendered while the saved state (or an async `OnStateInit` handler) was being read, the grid could read its first page with `OnRead` without the saved sorting and filtering, while the header showed them. It now waits for the state (#103)
