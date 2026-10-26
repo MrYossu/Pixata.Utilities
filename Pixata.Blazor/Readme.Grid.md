@@ -550,7 +550,18 @@ Each cell is saved with `OnUpdate`, whose `args.Field` and `args.Value` say whic
 
 ### Command buttons
 
-`PixataGridCommandButton` runs one of the built-in commands, `Add`, `Edit`, `Save`, `Cancel` or `Delete`. For anything else, leave out `Command` and handle `OnClick`, which is given the row's item. In a command column, a button shows when the row isn't being edited, or, with `ShowInEdit="true"`, when it is. `Icon` takes one of the `PixataGridIcon` values (or use `IconTemplate` for your own), and `ThemeColor="primary"` makes it stand out.
+`PixataGridCommandButton` runs one of the built-in commands, `Add`, `Edit`, `Save`, `Cancel` or `Delete`. For anything else, leave out `Command` and handle `OnClick`, which is given the row's item. In a command column, a button shows when the row isn't being edited, or, with `ShowInEdit="true"`, when it is. `ThemeColor="primary"` makes it stand out.
+
+`Icon` takes the same as the other components' `Icon` parameters: one of the `PixataGridIcon` values, a `PixataSvgIcon` (see `PixataSvgIcons`), or the CSS class(es) of an icon font, which is rendered as `<span class="..." aria-hidden="true"></span>`. So an app that uses an icon font everywhere can keep using it. Use `IconTemplate` for anything else...
+
+```razor
+<PixataGridCommandButton Command="Edit" Icon="PixataGridIcon.Pencil">Edit</PixataGridCommandButton>
+<PixataGridCommandButton Command="Save" Icon="PixataSvgIcons.Save" ShowInEdit="true">Save</PixataGridCommandButton>
+<PixataGridCommandButton Command="Delete" Icon="@("fas fa-trash")">Delete</PixataGridCommandButton>
+<PixataGridCommandButton Command="Cancel" Icon="@IconsHelper.Cancel" ShowInEdit="true">Cancel</PixataGridCommandButton>
+```
+
+As `Icon` is an `object`, a class name written in the markup needs the `@("...")` form, as in the Delete button. A `string` constant of your own, such as `IconsHelper.Cancel` above, can be used as it is.
 
 ### Using the row in a command column
 

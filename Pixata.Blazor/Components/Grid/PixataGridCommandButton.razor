@@ -10,8 +10,10 @@
           @onclick:stopPropagation="true">
     @if (IconTemplate is not null) {
       @IconTemplate
+    } else if (Icon is PixataGridIcon gridIcon) {
+      @PixataGridIcons.For(gridIcon)
     } else {
-      @PixataGridIcons.For(Icon)
+      <PixataIcon Icon="Icon" />
     }
     @if (ChildContent is not null) {
       <span class="pixata-blazor-button-text">@ChildContent</span>
@@ -53,8 +55,12 @@
   [Parameter]
   public bool ShowInAdd { get; set; } = true;
 
+  /// <summary>
+  /// The button's icon: a <see cref="PixataGridIcon"/>, a <see cref="PixataSvgIcon"/> (see <see cref="PixataSvgIcons"/>),
+  /// or the CSS class(es) of an icon font (eg "fas fa-save")
+  /// </summary>
   [Parameter]
-  public PixataGridIcon Icon { get; set; }
+  public object? Icon { get; set; }
 
   /// <summary>
   /// Your own icon, in place of <see cref="Icon"/>

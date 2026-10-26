@@ -7,6 +7,7 @@ using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Pixata.Blazor.Components;
 using Pixata.Blazor.Components.Grid;
 
 namespace Pixata.Blazor.Tests;
@@ -40,11 +41,12 @@ public class PixataGridEditing_Tests {
   public void Cleanup() =>
     _ctx.Dispose();
 
-  private static void Button(RenderTreeBuilder b, int seq, string command, bool showInEdit = false) {
+  private static void Button(RenderTreeBuilder b, int seq, string command, bool showInEdit = false, object? icon = null) {
     b.OpenComponent<PixataGridCommandButton<Person>>(seq);
     b.AddAttribute(seq + 1, "Command", command);
     b.AddAttribute(seq + 2, "ShowInEdit", showInEdit);
     b.AddAttribute(seq + 3, "ChildContent", (RenderFragment)(c => c.AddContent(0, command)));
+    b.AddAttribute(seq + 4, "Icon", icon);
     b.CloseComponent();
   }
 
@@ -90,6 +92,24 @@ public class PixataGridEditing_Tests {
 
   private static IElement Row<TComponent>(IRenderedComponent<TComponent> grid, int index) where TComponent : IComponent =>
     grid.FindAll("tbody tr")[index];
+
+  [TestMethod]
+  public void CommandButton_IconTakesAGridIconAnSvgIconOrAnIconFontClass() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(extra: p => p.Add(g => g.GridToolBarTemplate, b => {
+      Button(b, 0, "Grid", icon: PixataGridIcon.Plus);
+      Button(b, 10, "Svg", icon: PixataSvgIcons.Plus);
+      Button(b, 20, "Font", icon: "fas fa-plus");
+      Button(b, 30, "None");
+    }));
+
+    IElement toolbar = grid.Find(".pixata-blazor-grid-toolbar");
+    Assert.IsTrue(CommandButton(toolbar, "Grid").Children.Any(c => c.LocalName == "svg"));
+    Assert.IsNotNull(CommandButton(toolbar, "Svg").QuerySelector(".pixata-blazor-svg-icon svg"));
+    IElement font = CommandButton(toolbar, "Font").QuerySelector(".pixata-blazor-font-icon")!;
+    Assert.IsTrue(font.ClassList.Contains("fas") && font.ClassList.Contains("fa-plus"));
+    Assert.AreEqual("true", font.GetAttribute("aria-hidden"));
+    Assert.IsNull(CommandButton(toolbar, "None").QuerySelector("svg, .pixata-blazor-icon"));
+  }
 
   [TestMethod]
   public void Inline_EditShowsEditorsAndOnlyTheEditButtons() {
