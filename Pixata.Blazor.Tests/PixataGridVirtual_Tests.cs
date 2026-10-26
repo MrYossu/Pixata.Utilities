@@ -104,6 +104,37 @@ public class PixataGridVirtual_Tests {
   }
 
   [TestMethod]
+  public void StorageKey_WithOnRead_KeepsTheSavedRowWhileTheFirstReadIsWaiting() {
+    _ctx.Services.AddBlazoredLocalStorage();
+    _ctx.JSInterop.Setup<string?>("localStorage.getItem", "items").SetResult(JsonSerializer.Serialize(new PixataGridState<Item> { PageSize = 10, Skip = 20 }));
+    List<GridRequest> requests = [];
+    TaskCompletionSource waiting = new();
+    IRenderedComponent<PixataGrid<Item>> grid = _ctx.Render<PixataGrid<Item>>(p => p
+      .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Item>>(this, async args => {
+        requests.Add(args.Request);
+        await waiting.Task;
+        args.SetResult(Items.ToGridResult(args.Request));
+      }))
+      .Add(g => g.GridColumns, Columns())
+      .Add(g => g.ScrollMode, PixataGridScrollMode.Virtual)
+      .Add(g => g.Height, "400px")
+      .Add(g => g.RowHeight, 36)
+      .Add(g => g.StorageKey, "items")
+      .Add(g => g.PageSize, 10));
+
+    // The browser reports the top of the content, as it hasn't been scrolled yet, and nothing has been scrolled to
+    grid.InvokeAsync(() => grid.Instance.VirtualScrolled(0, 0, 600, 400));
+    Assert.AreEqual(0, _ctx.JSInterop.Invocations["scrollContentTo"].Count);
+    waiting.SetResult();
+
+    grid.WaitForAssertion(() => Assert.AreEqual("21", Ids(grid)[0]));
+    Assert.AreEqual(1, requests.Count);
+    Assert.AreEqual(20, requests[0].Skip);
+    Assert.AreEqual(20, grid.Instance.GetState().Skip);
+    Assert.AreEqual(720.0, _ctx.JSInterop.Invocations["scrollContentTo"].Last().Arguments[1]);
+  }
+
+  [TestMethod]
   public void Scrolling_RendersTheRowsInView() {
     IRenderedComponent<PixataGrid<Item>> grid = Render();
 

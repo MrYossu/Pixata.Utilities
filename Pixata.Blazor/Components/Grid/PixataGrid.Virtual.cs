@@ -94,8 +94,13 @@ public partial class PixataGrid<TItem> {
     }
   }
 
+  // The rows the scroll target refers to have to be there first, or the browser clamps the scroll to the content rendered
+  // so far
+  private bool ScrollTargetReady =>
+    !_loading && !_virtualLoading && (_firstReadDone || !UsesOnRead);
+
   private async Task AfterVirtualRender() {
-    if (_scrollTarget is not double top || _module is null) {
+    if (_scrollTarget is not double top || _module is null || !ScrollTargetReady) {
       return;
     }
     _scrollTarget = null;
@@ -127,7 +132,9 @@ public partial class PixataGrid<TItem> {
   [EditorBrowsable(EditorBrowsableState.Never)]
   public void VirtualScrolled(double top, double left, double width, double height) {
     bool changed = false;
-    if (VirtualRows && RowHeight is > 0) {
+    // Until the grid has scrolled to where it's going (a saved position, say), the position reported is where it was, not
+    // where the user wants to be. The size still counts
+    if (VirtualRows && RowHeight is > 0 && _scrollTarget is null) {
       int first = (int)(top / RowHeight.Value);
       if (first != _topRow) {
         _topRow = first;
