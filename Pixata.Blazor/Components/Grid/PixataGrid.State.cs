@@ -99,6 +99,10 @@ public class PixataGridColumnState {
   /// </summary>
   public int Index { get; set; }
 
+  /// <summary>
+  /// The width the user has resized the column to, or null if they haven't, in which case the column's own <c>Width</c>
+  /// applies
+  /// </summary>
   public string? Width { get; set; }
   public bool Visible { get; set; } = true;
   public bool Locked { get; set; }
@@ -182,7 +186,8 @@ public partial class PixataGrid<TItem> {
         Field = c.Field,
         Title = c.HeaderText,
         Index = Ordered(Siblings(c)).IndexOf(c),
-        Width = c.CurrentWidth,
+        // Only a width the user has set is saved, so a column whose Width is changed in code gets the new one
+        Width = c.RuntimeWidth,
         Visible = c.IsVisible,
         Locked = c.IsLocked
       })],

@@ -102,6 +102,27 @@ public class PixataGridState_Tests {
   }
 
   [TestMethod]
+  public void GetState_OnlySavesWidthsTheUserHasSet() {
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People)
+      .Add(g => g.Resizable, true)
+      .Add(g => g.GridColumns, b => {
+        b.OpenComponent<PixataGridColumn<Person>>(0);
+        b.AddAttribute(1, "Field", nameof(Person.Name));
+        b.AddAttribute(2, "Width", "100px");
+        b.CloseComponent();
+      }));
+
+    // The column's own width isn't saved, so a new one set in code applies to anyone who has seen the grid before
+    Assert.IsNull(grid.Instance.GetState().ColumnStates.Single().Width);
+
+    PixataGridColumn<Person> column = grid.FindComponent<PixataGridColumn<Person>>().Instance;
+    grid.InvokeAsync(() => grid.Instance.ColumnsResized(column.Key, [new(column.Key, 150)]));
+
+    Assert.AreEqual("150px", grid.Instance.GetState().ColumnStates.Single().Width);
+  }
+
+  [TestMethod]
   public void SetState_AppliesEveryPart() {
     IRenderedComponent<PixataGrid<Person>> grid = Render();
 
