@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.13.1** fixes `PixataHeatmap` on narrow screens. Inside a flex item, such as the main column of a layout with a sidebar, the table's width stretched the page rather than the heatmap scrolling sideways in its own box (#110)
+
 >**Version 5.13.0** adds `PixataHeatmap`, which shows a grid of values as coloured cells, with a label for each row and column, such as the days of the week against the hours of the day, to show when something is busy. See the [heatmap documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Heatmap.md) (#110)
 
 >**Version 5.12.1** fixes restoring the scroll position of a `PixataGrid` with `ScrollMode="Virtual"`. The position was saved, but the grid went straight back to the top: the browser's first report of where the grid was scrolled to arrived before the grid had scrolled to the saved row, and the grid took it to mean the user had scrolled back to the start (#104)
