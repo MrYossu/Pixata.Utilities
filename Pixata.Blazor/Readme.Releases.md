@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.13.2** fixes typing a date with its separators into a `PixataDateInput`, `PixataDatePicker` or `PixataDateRangePicker`. Typing `01/10/2026` skipped the month, as the `/` moved on again after the day had already moved on by itself. A separator typed straight after a part has filled itself is now ignored, while one typed after a part that isn't complete (as in `1/10/2026`) still moves on (#109)
+
 >**Version 5.13.1** fixes `PixataHeatmap` on narrow screens. Inside a flex item, such as the main column of a layout with a sidebar, the table's width stretched the page rather than the heatmap scrolling sideways in its own box (#110)
 
 >**Version 5.13.0** adds `PixataHeatmap`, which shows a grid of values as coloured cells, with a label for each row and column, such as the days of the week against the hours of the day, to show when something is busy. See the [heatmap documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Heatmap.md) (#110)
