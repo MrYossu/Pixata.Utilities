@@ -9469,3 +9469,107 @@
 }
 
 /* ========== end of PixataTreeView ========== */
+
+/* ========== PixataHeatmap ========== */
+
+/*
+  PixataHeatmap is a table of cells, each coloured between --pixata-blazor-heatmap-low and --pixata-blazor-heatmap-high by
+  its value. The component passes how far up the scale each cell is in --pixata-blazor-heatmap-level (0% to 100%). A cell 60%
+  or more up the scale gets the pixata-blazor-heatmap-cell-strong class, for text that shows on the darker colour
+*/
+:root {
+  --pixata-blazor-heatmap-low: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-heatmap-high: var(--pixata-blazor-primary);
+  --pixata-blazor-heatmap-empty-bg: transparent;
+  --pixata-blazor-heatmap-color: var(--pixata-blazor-text-color);
+  --pixata-blazor-heatmap-strong-color: var(--pixata-blazor-primary-color);
+  --pixata-blazor-heatmap-label-color: var(--pixata-blazor-subtle-color);
+  --pixata-blazor-heatmap-font-size: var(--pixata-blazor-font-size-sm);
+  --pixata-blazor-heatmap-title-font-size: 1rem;
+  --pixata-blazor-heatmap-cell-width: 2.25rem;
+  --pixata-blazor-heatmap-cell-height: 1.75rem;
+  --pixata-blazor-heatmap-gap: 2px;
+  --pixata-blazor-heatmap-cell-radius: var(--pixata-blazor-border-radius-sm);
+  --pixata-blazor-heatmap-empty-border: var(--pixata-blazor-border-color);
+  --pixata-blazor-heatmap-legend-width: 12rem;
+}
+
+.pixata-blazor-heatmap {
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-heatmap-font-size);
+  color: var(--pixata-blazor-heatmap-color);
+}
+
+.pixata-blazor-heatmap-title {
+  font-size: var(--pixata-blazor-heatmap-title-font-size);
+  font-weight: 600;
+  margin-bottom: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* 24 columns don't fit on a phone, so the grid scrolls sideways rather than squashing the cells */
+.pixata-blazor-heatmap-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.pixata-blazor-heatmap-table {
+  border-collapse: separate;
+  border-spacing: var(--pixata-blazor-heatmap-gap);
+}
+
+.pixata-blazor-heatmap-column-label,
+.pixata-blazor-heatmap-row-label,
+.pixata-blazor-heatmap-corner {
+  font-weight: normal;
+  color: var(--pixata-blazor-heatmap-label-color);
+  white-space: nowrap;
+}
+
+.pixata-blazor-heatmap-column-label {
+  text-align: center;
+  padding: 0 0 var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-heatmap-row-label {
+  text-align: end;
+  padding: 0 calc(var(--pixata-blazor-spacing) * 2) 0 0;
+}
+
+.pixata-blazor-heatmap-cell {
+  min-width: var(--pixata-blazor-heatmap-cell-width);
+  height: var(--pixata-blazor-heatmap-cell-height);
+  padding: 0 var(--pixata-blazor-spacing);
+  text-align: center;
+  white-space: nowrap;
+  /* Keeps the hidden text for screen readers inside the cell */
+  position: relative;
+  border-radius: var(--pixata-blazor-heatmap-cell-radius);
+  background-color: color-mix(in srgb, var(--pixata-blazor-heatmap-high) var(--pixata-blazor-heatmap-level, 0%), var(--pixata-blazor-heatmap-low));
+}
+
+.pixata-blazor-heatmap-cell-strong {
+  color: var(--pixata-blazor-heatmap-strong-color);
+}
+
+.pixata-blazor-heatmap-cell-empty {
+  background-color: var(--pixata-blazor-heatmap-empty-bg);
+  box-shadow: inset 0 0 0 1px var(--pixata-blazor-heatmap-empty-border);
+}
+
+.pixata-blazor-heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  margin-top: calc(var(--pixata-blazor-spacing) * 2);
+  color: var(--pixata-blazor-heatmap-label-color);
+}
+
+.pixata-blazor-heatmap-legend-scale {
+  width: var(--pixata-blazor-heatmap-legend-width);
+  height: .75rem;
+  border-radius: var(--pixata-blazor-heatmap-cell-radius);
+  background: linear-gradient(to right, var(--pixata-blazor-heatmap-low), var(--pixata-blazor-heatmap-high));
+  box-shadow: inset 0 0 0 1px var(--pixata-blazor-border-color);
+}
+
+/* ========== end of PixataHeatmap ========== */

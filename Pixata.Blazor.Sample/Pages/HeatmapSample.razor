@@ -1,0 +1,77 @@
+@page "/HeatmapSample"
+@using Pixata.Blazor.Components
+
+<SitePageTitle>Heatmap</SitePageTitle>
+
+<h3>Heatmap</h3>
+
+<p>
+  <code>PixataHeatmap</code> shows a grid of values as coloured cells, from a low colour for the smallest value to a high
+  colour for the largest. Hover over (or tap) a cell to see its value. Make the window narrow to see the grid scroll sideways.
+</p>
+
+<ComponentSample Title="When is the site busy?">
+  <Description>
+    The average number of visitors in each hour of the week, with the days as the rows and the hours as the columns. The
+    values are only in the tooltips. Cells with no data have an outline.
+  </Description>
+  <ChildContent>
+    <PixataHeatmap Title="Visitors per hour"
+                   CornerText="Day"
+                   RowLabels="@_days"
+                   ColumnLabels="@_hours"
+                   Values="@_visitors"
+                   Format="{0:N1}"
+                   CellTooltip="@(cell => cell.Value is null ? $"{cell.RowLabel} {cell.ColumnLabel}:00, no data" : $"{cell.RowLabel} {cell.ColumnLabel}:00, {cell.Value:N1} visitors on average")" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Values in the cells, with a fixed scale">
+  <Description>
+    <code>ShowValues</code> shows the values in the cells. <code>Min</code> and <code>Max</code> fix the ends of the scale
+    at 0 and 100, rather than the smallest and largest values. The colours are set with the
+    <code>--pixata-blazor-heatmap-low</code> and <code>--pixata-blazor-heatmap-high</code> variables.
+  </Description>
+  <ChildContent>
+    <PixataHeatmap AriaLabel="Test scores"
+                   RowLabels="@_pupils"
+                   ColumnLabels="@_subjects"
+                   Values="@_scores"
+                   ShowValues="true"
+                   Min="0"
+                   Max="100"
+                   Style="--pixata-blazor-heatmap-low: #fff4e5; --pixata-blazor-heatmap-high: #2d73f5; --pixata-blazor-heatmap-cell-width: 4rem" />
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private readonly string[] _days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  private readonly string[] _hours = Enumerable.Range(0, 24).Select(h => $"{h:00}").ToArray();
+  private readonly double?[,] _visitors = new double?[7, 24];
+
+  private readonly string[] _pupils = ["Avi", "Bracha", "Chaim", "Devora"];
+  private readonly string[] _subjects = ["Maths", "English", "Science", "History"];
+  private readonly double?[,] _scores = {
+    { 92, 64, 88, 45 },
+    { 71, 95, 60, null },
+    { 38, 77, 52, 83 },
+    { 85, 58, 99, 70 }
+  };
+
+  protected override void OnInitialized() {
+    // Busy in office hours on weekdays, quieter in the evenings, and quietest at night and at the weekend
+    Random random = new(496);
+    for (int day = 0; day < 7; day++) {
+      for (int hour = 0; hour < 24; hour++) {
+        double busy = hour is >= 9 and < 18 ? 20 : hour is >= 7 and < 22 ? 8 : 1;
+        if (day >= 5) {
+          busy /= 4;
+        }
+        _visitors[day, hour] = Math.Round(busy * (0.7 + random.NextDouble() * 0.6), 1);
+      }
+    }
+    // A gap in the data, as if the site was down
+    _visitors[2, 3] = null;
+    _visitors[2, 4] = null;
+  }
+}

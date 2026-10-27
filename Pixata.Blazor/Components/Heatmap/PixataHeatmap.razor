@@ -1,0 +1,49 @@
+@namespace Pixata.Blazor.Components
+
+@*
+  A grid of cells coloured by their values, such as the days of the week against the hours of the day. It is a table, so
+  screen readers can read it, and each cell's value is in its text, even when it isn't shown
+*@
+<div id="@Id" class="@PixataCss.Classes("pixata-blazor-heatmap", Class)" style="@Style" @attributes="AdditionalAttributes">
+  @if (!string.IsNullOrWhiteSpace(Title)) {
+    <div class="pixata-blazor-heatmap-title" id="@_titleId">@Title</div>
+  }
+  <div class="pixata-blazor-heatmap-scroll">
+    <table class="pixata-blazor-heatmap-table"
+           aria-labelledby="@(string.IsNullOrWhiteSpace(Title) ? null : _titleId)"
+           aria-label="@(string.IsNullOrWhiteSpace(Title) ? AriaLabel : null)">
+      <thead>
+        <tr>
+          <td class="pixata-blazor-heatmap-corner">@CornerText</td>
+          @foreach (string column in ColumnLabels) {
+            <th scope="col" class="pixata-blazor-heatmap-column-label">@column</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (int row = 0; row < RowLabels.Count; row++) {
+          <tr>
+            <th scope="row" class="pixata-blazor-heatmap-row-label">@RowLabels[row]</th>
+            @for (int column = 0; column < ColumnLabels.Count; column++) {
+              PixataHeatmapCell cell = GetCell(row, column);
+              <td class="@CellClass(cell)" style="@CellStyle(cell)" title="@Tooltip(cell)">
+                @if (ShowValues) {
+                  @CellText(cell)
+                } else {
+                  <span class="pixata-blazor-visually-hidden">@CellText(cell)</span>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (ShowLegend && _hasValues) {
+    <div class="pixata-blazor-heatmap-legend" aria-hidden="true">
+      <span class="pixata-blazor-heatmap-legend-text">@FormatValue(_min)</span>
+      <span class="pixata-blazor-heatmap-legend-scale"></span>
+      <span class="pixata-blazor-heatmap-legend-text">@FormatValue(_max)</span>
+    </div>
+  }
+</div>
