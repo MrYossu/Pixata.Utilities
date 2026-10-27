@@ -12,8 +12,27 @@
 
     <div class="content px-4">
       @Body
+      @if (SourceUrl != "") {
+        <p class="page-source"><a href="@SourceUrl" target="_blank">See the source code for this page</a></p>
+      }
     </div>
   </div>
 </div>
 @* Shows the alert, confirm and prompt dialogs requested through PixataDialogFactory *@
 <PixataDialogHost />
+
+@code {
+  private const string SourceRoot = "https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample";
+
+  [CascadingParameter]
+  public RouteData? RouteData { get; set; }
+
+  // Pages live in folders matching their namespace, so the type name gives the file's path
+  private string SourceUrl {
+    get {
+      string? name = RouteData?.PageType.FullName;
+      string prefix = $"{typeof(Program).Assembly.GetName().Name}.";
+      return name is not null && name.StartsWith(prefix) ? $"{SourceRoot}/{name[prefix.Length..].Replace('.', '/')}.razor" : "";
+    }
+  }
+}

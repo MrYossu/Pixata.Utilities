@@ -68,3 +68,8 @@
     padding-right: 1.5rem !important;
   }
 }
+.page-source {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #d6d5d5;
+}
