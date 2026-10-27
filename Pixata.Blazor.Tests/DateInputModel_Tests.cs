@@ -146,6 +146,45 @@ public class DateInputModel_Tests {
   }
 
   [TestMethod]
+  public void Separators_AfterASegmentMovedOnByItself_AreIgnored() {
+    DateInputModel model = Model("dd/MM/yyyy");
+
+    Keys(model, "0", "1", "/", "1", "0", "/", "2", "0", "2", "6");
+
+    Assert.AreEqual(new DateTime(2026, 10, 1), model.Value);
+    Assert.AreEqual("01/10/2026", model.Text);
+  }
+
+  [TestMethod]
+  public void Separators_MixOfCompleteAndIncompleteSegments() {
+    DateInputModel model = Model("dd/MM/yyyy");
+
+    Keys(model, "0", "1", "/", "2", "/", "2", "0", "2", "6");
+
+    Assert.AreEqual(new DateTime(2026, 2, 1), model.Value);
+  }
+
+  [TestMethod]
+  public void Separators_OfMoreThanOneCharacter_AreIgnoredAfterAnAutomaticMove() {
+    DateInputModel model = Model("dd, MM yyyy");
+
+    Keys(model, "0", "1", ",", " ", "1", "0", " ", "2", "0", "2", "6");
+
+    Assert.AreEqual(new DateTime(2026, 10, 1), model.Value);
+  }
+
+  [TestMethod]
+  public void Separators_AfterClickingASegment_MoveOn() {
+    DateInputModel model = Model("dd/MM/yyyy");
+
+    Keys(model, "0", "1");
+    model.SelectAt(0);
+    Keys(model, "/");
+
+    Assert.AreEqual("MM", Selected(model));
+  }
+
+  [TestMethod]
   public void MonthLetters_PickTheMonthAndRepeatingCycles() {
     DateInputModel model = Model(value: new DateTime(2026, 3, 1));
     model.Key("ArrowRight");

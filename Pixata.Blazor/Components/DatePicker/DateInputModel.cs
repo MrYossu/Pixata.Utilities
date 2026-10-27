@@ -39,6 +39,8 @@ internal sealed class DateInputModel {
   private DateTime _base = DateTime.Today;
   private int _current;
   private string _typed = "";
+  // True when the last key filled a segment and moved on to the next one by itself
+  private bool _autoSwitched;
 
   public DateInputModel(string? format, CultureInfo? culture = null) {
     _culture = culture ?? CultureInfo.CurrentCulture;
@@ -127,6 +129,7 @@ internal sealed class DateInputModel {
 
   public void SetValue(DateTime? value) {
     _typed = "";
+    _autoSwitched = false;
     if (value is not DateTime date) {
       _day = _month = _year = _hour = _minute = _second = null;
       _pm = null;
@@ -156,6 +159,7 @@ internal sealed class DateInputModel {
   public void SelectFirst() {
     _current = 0;
     _typed = "";
+    _autoSwitched = false;
   }
 
   /// <summary>
@@ -179,6 +183,7 @@ internal sealed class DateInputModel {
     }
     _current = best;
     _typed = "";
+    _autoSwitched = false;
   }
 
   /// <summary>
@@ -189,6 +194,8 @@ internal sealed class DateInputModel {
     if (_editable.Length == 0) {
       return false;
     }
+    bool autoSwitched = _autoSwitched;
+    _autoSwitched = false;
     switch (key) {
       case "ArrowLeft":
         Move(-1);
@@ -223,6 +230,10 @@ internal sealed class DateInputModel {
       TypeDigit(c);
     } else if (char.IsLetter(c)) {
       TypeLetter(c);
+    } else if (autoSwitched) {
+      // The segment before has already moved on by itself, so the separator is ignored, or "01/10/2026" would skip the month.
+      // It stays ignored for the rest of a separator of more than one character, such as ", "
+      _autoSwitched = true;
     } else {
       // A separator moves on to the next segment, so "1/2/2026" can be typed without using the arrow keys
       Move(1);
@@ -265,6 +276,7 @@ internal sealed class DateInputModel {
     _typed = candidate;
     if (AutoSwitchParts && SegmentFull(segment, candidate)) {
       Move(1);
+      _autoSwitched = true;
     }
   }
 
@@ -346,6 +358,7 @@ internal sealed class DateInputModel {
       }
       if (AutoSwitchParts) {
         Move(1);
+        _autoSwitched = true;
       }
       return;
     }
@@ -376,6 +389,7 @@ internal sealed class DateInputModel {
     _typed = typed;
     if (AutoSwitchParts && !cycling && matches.Count == 1) {
       Move(1);
+      _autoSwitched = true;
     }
   }
 

@@ -22,7 +22,7 @@ The date input (and the input in the date picker) works a part at a time. Clicki
 
 - Typing digits fills in the selected part. It moves on to the next part when another digit couldn't follow, so typing 3 in the day waits for a second digit (it could be 30 or 31), but typing 4 moves on to the month. Turn this off with `AutoSwitchParts="false"`
 - A digit that would make an impossible date is ignored, so with a day of 31, the month can't be set to November
-- Typing a separator, such as `/`, moves to the next part, so you can type `1/2/2026`
+- Typing a separator, such as `/`, moves to the next part, so you can type `1/2/2026`. A separator typed just after a part has filled and moved on by itself is ignored, so `01/10/2026` works too
 - For a month shown by name (`MMM` or `MMMM`), typing letters picks the month. Typing the same letter again moves through the months starting with it, so J, J, J gives January, June and then July
 - Up and Down change the selected part. On a complete date, they work like adding a day, month or year, so the 31st plus a day is the 1st of the next month, and 31st January plus a month is 28th February. On an empty part, they start from today
 - Left and Right (and Home and End) move between the parts
