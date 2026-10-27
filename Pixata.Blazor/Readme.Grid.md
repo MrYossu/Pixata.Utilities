@@ -244,7 +244,7 @@ The full lists of operators are more than most users need, so there are four col
 | `PixataTextGridColumn` | contains (the default), starts with, ends with |
 | `PixataNumericGridColumn` | equals (the default), less than, more than |
 | `PixataDateGridColumn` | before, on (the default), on or after |
-| `PixataEnumGridColumn` | Just the drop-down of values, filtering on equality, with no operator or clear button. The drop-down starts with an "(All)" entry that clears the filter. Set `AddAllEntry="false"` to leave it out. Its text comes from the grid's `FilterAll` message |
+| `PixataEnumGridColumn` | Just the drop-down of values, filtering on equality, with no operator or clear button. The drop-down starts with an "(All)" entry that clears the filter. Set `AddAllEntry="false"` to leave it out. Its text comes from the grid's `FilterAll` message. `DisplayStyle` sets how values whose names are several words are shown, in the cells and the drop-down (see below) |
 
 ```razor
 <PixataGrid Data="_people" FilterMode="PixataGridFilterMode.FilterRow">
@@ -255,6 +255,18 @@ The full lists of operators are more than most users need, so there are four col
     <PixataEnumGridColumn Field="@nameof(Person.Department)" />
   </GridColumns>
 </PixataGrid>
+```
+
+`PixataEnumGridColumn`'s `DisplayStyle` takes a `PixataEnumDisplayStyle`...
+
+| Value | `AwaitingSignature` is shown as |
+| --- | --- |
+| `LowerCamelCase` (the default) | Awaiting signature |
+| `UpperCamelCase` | Awaiting Signature |
+| `NotSplit` | AwaitingSignature |
+
+```razor
+<PixataEnumGridColumn Field="@nameof(Contract.Status)" DisplayStyle="PixataEnumDisplayStyle.UpperCamelCase" />
 ```
 
 The lists come from `PixataGridFilterOperators.StringOperators`, `NumericOperators` and `DateOperators`. You can replace these at startup to change the operators (or their text) everywhere, or pass your own list to any column's `FilterOperators`...

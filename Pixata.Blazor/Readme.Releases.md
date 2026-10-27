@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.16.0** adds `DisplayStyle` to `PixataEnumGridColumn`, which sets how values whose names are several words are shown, in the cells and in the filter's drop-down: `LowerCamelCase` ("Awaiting signature", the default), `UpperCamelCase` ("Awaiting Signature") or `NotSplit` ("AwaitingSignature"). **Behaviour change:** enum columns used to show the names as they are, so set `DisplayStyle="PixataEnumDisplayStyle.NotSplit"` to keep the old look. See [typed columns](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns)
+
 >**Version 5.15.0** adds donut charts to `PixataChart`. A `PixataChartSeries` with `Type="PixataChartSeriesType.Donut"` is a ring, with a `HoleSize`, and several donut series make rings inside each other that share their legend items. A `PixataChartDonutCenterTemplate` puts content (such as a total) in the hole. Every chart now shows "No data" over its plot area when none of its series has any data, which a `PixataChartNoDataTemplate` can replace or turn off. See the [charts documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Charts.md#donuts)
 
 >**Version 5.14.0** makes the picked radio button in a `PixataRadioGroup` easier to see, by drawing it with a solid dot in the middle rather than as a ring around a hollow middle. The old look is still there with `CheckedStyle="PixataRadioGroupCheckedStyle.Ring"`. See [styling the radio group](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.RadioGroup.md#styling)

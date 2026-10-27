@@ -136,13 +136,26 @@
 
 <p>The text, numeric and date columns offer short lists of filter operators (open the filter button beside each editor), and the date column starts on "on". The pet column is an enum column, so it has just the drop-down, with no operator or clear button. The surname column is an ordinary column given its own <code>FilterOperators</code>. The manager column uses <code>PixataGridBoolFilter</code> (with its clear button), which moves from all rows, to managers, to non-managers and back with each click.</p>
 
+<p>The enum column's <code>DisplayStyle</code> sets how values whose names are several words (such as <code>GuineaPig</code>) are shown, in the cells and in the drop-down.</p>
+
+<div class="pixata-blazor-grid-sample-options">
+  <label>
+    Display style
+    <select @bind="_enumDisplayStyle">
+      @foreach (PixataEnumDisplayStyle style in Enum.GetValues<PixataEnumDisplayStyle>()) {
+        <option value="@style">@style</option>
+      }
+    </select>
+  </label>
+</div>
+
 <PixataGrid Data="Data" Size="_size" FilterMode="PixataGridFilterMode.FilterRow" Pageable="true" PageSize="5" Sortable="true">
   <GridColumns>
     <PixataTextGridColumn Field="@nameof(GridSampleEmployee.FirstName)" />
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" FilterOperators="_surnameOperators" />
     <PixataDateGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" />
     <PixataNumericGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C2}" />
-    <PixataEnumGridColumn Field="@nameof(GridSampleEmployee.Pet)" />
+    <PixataEnumGridColumn Field="@nameof(GridSampleEmployee.Pet)" DisplayStyle="_enumDisplayStyle" />
     <PixataGridColumn Field="@nameof(GridSampleEmployee.IsManager)" Title="Manager" FilterCellTemplate="PixataGridBoolFilter.Filter(true)" />
   </GridColumns>
 </PixataGrid>
@@ -810,6 +823,7 @@
   })];
 
   private string _filterMode = "row";
+  private PixataEnumDisplayStyle _enumDisplayStyle = PixataEnumDisplayStyle.LowerCamelCase;
 
   private PixataGridFilterMenuType PixataFilterMenuType =>
     _filterMode == "checkbox" ? PixataGridFilterMenuType.CheckBoxList : PixataGridFilterMenuType.Menu;

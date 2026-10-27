@@ -2,7 +2,7 @@
   public enum Pets {
     Ferret = 0,
     Rabbit = 1,
-    Vulture = 2,
-    Eagle = 3
+    GuineaPig = 2,
+    GoldenEagle = 3
   }
 }

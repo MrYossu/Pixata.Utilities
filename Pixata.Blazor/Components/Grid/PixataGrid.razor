@@ -780,7 +780,7 @@
 
   private static List<(object?, string)> EnumItems(PixataGridColumn<TItem> column) {
     Type type = Nullable.GetUnderlyingType(column.FieldType!) ?? column.FieldType!;
-    return [.. Enum.GetValues(type).Cast<object>().Select(v => ((object?)v, v.ToString()!))];
+    return [.. Enum.GetValues(type).Cast<Enum>().Select(v => ((object?)v, column.EnumText(v)))];
   }
 
   // The values for an enum filter, with an entry for no filter at the top if the column asks for one

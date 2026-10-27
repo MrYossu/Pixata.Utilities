@@ -377,10 +377,15 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
       return "";
     }
     string? format = DisplayFormat ?? _attributeFormat;
-    return string.IsNullOrWhiteSpace(format)
-      ? Convert.ToString(value, CultureInfo.CurrentCulture) ?? ""
-      : string.Format(CultureInfo.CurrentCulture, format, value);
+    if (string.IsNullOrWhiteSpace(format)) {
+      return value is Enum enumValue ? EnumText(enumValue) : Convert.ToString(value, CultureInfo.CurrentCulture) ?? "";
+    }
+    return string.Format(CultureInfo.CurrentCulture, format, value);
   }
+
+  // The text for an enum value, in the cells and in the filter's drop-down
+  internal virtual string EnumText(Enum value) =>
+    value.ToString();
 
   // Works out the getter and the attribute-based defaults once per field, rather than on every cell
   private void Resolve() {

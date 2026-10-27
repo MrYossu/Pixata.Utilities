@@ -111,6 +111,35 @@ public class PixataGridTypedColumns_Tests {
     FilterCell(grid, column).QuerySelectorAll(".pixata-blazor-grid-dropdown-item").First(li => li.TextContent.Trim() == text).Click();
   }
 
+  public enum Status {
+    AwaitingSignature,
+    Signed
+  }
+
+  public class Contract {
+    public Status Status { get; set; }
+  }
+
+  [TestMethod]
+  [DataRow(null, "Awaiting signature")]
+  [DataRow(PixataEnumDisplayStyle.LowerCamelCase, "Awaiting signature")]
+  [DataRow(PixataEnumDisplayStyle.UpperCamelCase, "Awaiting Signature")]
+  [DataRow(PixataEnumDisplayStyle.NotSplit, "AwaitingSignature")]
+  public void EnumColumn_DisplayStyleSetsTheTextInTheCellsAndDropDown(PixataEnumDisplayStyle? style, string expected) {
+    IRenderedComponent<PixataGrid<Contract>> grid = _ctx.Render<PixataGrid<Contract>>(p => p
+      .Add(g => g.Data, [new() { Status = Status.AwaitingSignature }])
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
+      .Add(g => g.GridColumns, b => Column<PixataEnumGridColumn<Contract>>(b, "Status", c => {
+        if (style is not null) {
+          c.AddAttribute(2, "DisplayStyle", style.Value);
+        }
+      })));
+    grid.Find(".pixata-blazor-grid-dropdown-button").Click();
+
+    Assert.AreEqual(expected, grid.Find("tbody td").TextContent.Trim());
+    Assert.AreEqual($"(All),{expected},Signed", string.Join(",", grid.FindAll(".pixata-blazor-grid-dropdown-item").Select(li => li.TextContent.Trim())));
+  }
+
   [TestMethod]
   public void EnumColumn_StartsWithAnAllEntry() =>
     Assert.AreEqual(("(All),Cat,Dog", "(All)"), EnumFilter(Render(), 3));

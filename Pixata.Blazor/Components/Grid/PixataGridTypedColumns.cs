@@ -1,4 +1,6 @@
+using System;
 using Microsoft.AspNetCore.Components;
+using Pixata.Extensions;
 using Pixata.Extensions.Grid;
 
 namespace Pixata.Blazor.Components.Grid;
@@ -48,4 +50,38 @@ public class PixataEnumGridColumn<TItem> : PixataGridColumn<TItem> {
   /// </summary>
   [Parameter]
   public bool AddAllEntry { get; set; } = true;
+
+  /// <summary>
+  /// How values whose names are several words, such as <c>AwaitingSignature</c>, are shown, in the cells and in the filter's
+  /// drop-down. Defaults to <see cref="PixataEnumDisplayStyle.LowerCamelCase"/> ("Awaiting signature")
+  /// </summary>
+  [Parameter]
+  public PixataEnumDisplayStyle DisplayStyle { get; set; } = PixataEnumDisplayStyle.LowerCamelCase;
+
+  internal override string EnumText(Enum value) =>
+    DisplayStyle switch {
+      PixataEnumDisplayStyle.LowerCamelCase => value.ToString().SplitCamelCase(),
+      PixataEnumDisplayStyle.UpperCamelCase => value.ToString().SplitCamelCase(false),
+      _ => value.ToString()
+    };
+}
+
+/// <summary>
+/// How a <see cref="PixataEnumGridColumn{TItem}"/> shows values whose names are several words
+/// </summary>
+public enum PixataEnumDisplayStyle {
+  /// <summary>
+  /// The name as it is, such as "AwaitingSignature"
+  /// </summary>
+  NotSplit,
+
+  /// <summary>
+  /// Split into words, with only the first capitalised, such as "Awaiting signature"
+  /// </summary>
+  LowerCamelCase,
+
+  /// <summary>
+  /// Split into words, each capitalised, such as "Awaiting Signature"
+  /// </summary>
+  UpperCamelCase
 }
