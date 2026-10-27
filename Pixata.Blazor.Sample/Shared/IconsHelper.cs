@@ -6,7 +6,7 @@
     public static string AngleRight = "fas fa-angle-right";
     public static string Attachment = "fa fa-paperclip";
     public static string Bank = "far fa-money-check-edit";
-    public static string Bin = "k-icon k-i-trash";
+    public static string Bin = "fa fa-trash-alt";
     public static string Birthday = "fa fa-birthday-cake"; // Use for date of birth
     public static string Bookmark = "fa fa-bookmark";
     public static string Building = "fa fa-building"; // Use for company name
@@ -26,7 +26,7 @@
     public static string DocumentChart = "far fa-file-medical-alt";
     public static string DocumentUser = "far fa-file-user";
     public static string DataTransferDownload = "oi oi-data-transfer-download";
-    public static string Edit = "k-icon k-i-edit";
+    public static string Edit = "fa fa-edit";
     public static string Email = "fa fa-at";
     public static string Envelope = "fa fa-envelope";
     public static string ExternalLink = "oi oi-external-link";
@@ -43,7 +43,7 @@
     public static string Mobile = "fa fa-mobile-alt";
     public static string Network = "far fa-chart-network";
     public static string Party = "fas fa-birthday-cake"; // Use for parties (as in secondary, but I couldn't find a suitable icon so did a play on words)
-    public static string Plus = "k-icon k-i-plus";
+    public static string Plus = "fa fa-plus";
     public static string Percent = "fas fa-percent";
     public static string Person = "oi oi-person";
     public static string Phone = "fa fa-phone";

@@ -25,9 +25,7 @@ builder.Services.AddRazorPages();
 // The editor sample's documents (eg with a pasted image) can be bigger than SignalR's default limit of 32 KB per message
 builder.Services.AddServerSideBlazor()
   .AddHubOptions(options => options.MaximumReceiveMessageSize = 1024 * 1024);
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<GridSampleEmployeeService>();
-builder.Services.AddTelerikBlazor();
 
 SmtpSettings smtpSettings = builder.Configuration.GetSection("Smtp").Get<SmtpSettings>()!;
 builder.Services.AddSingleton(smtpSettings);

@@ -12,12 +12,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.27" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.22" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
-    <PackageReference Include="Telerik.Licensing" Version="1.9.3" />
-    <PackageReference Include="Telerik.UI.for.Blazor" Version="15.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Pixata.Blazor.TelerikComponents\Pixata.Blazor.TelerikComponents.csproj" />
     <ProjectReference Include="..\Pixata.AspNetCore\Pixata.AspNetCore.csproj" />
     <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
     <ProjectReference Include="..\Pixata.Blazor.Grid.Excel\Pixata.Blazor.Grid.Excel.csproj" />
