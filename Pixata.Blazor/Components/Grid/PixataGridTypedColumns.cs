@@ -12,6 +12,7 @@ public class PixataTextGridColumn<TItem> : PixataGridColumn<TItem> {
   public PixataTextGridColumn() {
     FilterOperators = PixataGridFilterOperators.StringOperators;
     DefaultFilterOperator = GridFilterOperator.Contains;
+    ShowFilterClearButton = false;
   }
 }
 
@@ -19,8 +20,10 @@ public class PixataTextGridColumn<TItem> : PixataGridColumn<TItem> {
 /// A column for numbers, whose filter offers "equals", "less than" and "more than"
 /// </summary>
 public class PixataNumericGridColumn<TItem> : PixataGridColumn<TItem> {
-  public PixataNumericGridColumn() =>
+  public PixataNumericGridColumn() {
     FilterOperators = PixataGridFilterOperators.NumericOperators;
+    ShowFilterClearButton = false;
+  }
 }
 
 /// <summary>
@@ -42,6 +45,7 @@ public class PixataEnumGridColumn<TItem> : PixataGridColumn<TItem> {
   public PixataEnumGridColumn() {
     DefaultFilterOperator = GridFilterOperator.IsEqualTo;
     ShowFilterCellButtons = false;
+    ShowFilterClearButton = false;
   }
 
   /// <summary>
