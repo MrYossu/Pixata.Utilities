@@ -11,10 +11,11 @@ using Microsoft.JSInterop;
 namespace Pixata.Blazor.Components;
 
 /// <summary>
-/// A chart drawn as SVG, with column, line and pie series. Configure it with child components: the series go in
+/// A chart drawn as SVG, with column, line, pie and donut series. Configure it with child components: the series go in
 /// <see cref="PixataChartSeriesItems"/>, the axes in <see cref="PixataChartCategoryAxes"/> and
 /// <see cref="PixataChartValueAxes"/>, plus an optional <see cref="PixataChartTitle"/>, <see cref="PixataChartLegend"/> and
-/// <see cref="PixataChartTooltip"/>. It resizes with its container
+/// <see cref="PixataChartTooltip"/>, <see cref="PixataChartNoDataTemplate"/> and <see cref="PixataChartDonutCenterTemplate"/>.
+/// It resizes with its container
 /// </summary>
 public partial class PixataChart : IAsyncDisposable {
   private const string ModulePath = "./_content/Pixata.Blazor/Components/Chart/PixataChart.razor.js";
@@ -58,14 +59,15 @@ public partial class PixataChart : IAsyncDisposable {
   public RenderFragment? ChildContent { get; set; }
 
   /// <summary>
-  /// Raised when the user clicks or taps a column, line point or pie segment, or presses Enter or Space when the keyboard
+  /// Raised when the user clicks or taps a column, line point or pie or donut segment, or presses Enter or Space when the keyboard
   /// focus is on one
   /// </summary>
   [Parameter]
   public EventCallback<PixataChartSeriesClickEventArgs> OnSeriesClick { get; set; }
 
   /// <summary>
-  /// Raised when the user clicks or taps a legend item, after the item's series (or pie segment) has been shown or hidden
+  /// Raised when the user clicks or taps a legend item, after the item's series (or pie or donut segment) has been shown or
+  /// hidden
   /// </summary>
   [Parameter]
   public EventCallback<PixataChartLegendItemClickEventArgs> OnLegendItemClick { get; set; }
@@ -76,6 +78,8 @@ public partial class PixataChart : IAsyncDisposable {
   internal PixataChartTitle? Title { get; set; }
   internal PixataChartLegend? Legend { get; set; }
   internal PixataChartTooltip? Tooltip { get; set; }
+  internal PixataChartNoDataTemplate? NoDataTemplate { get; set; }
+  internal PixataChartDonutCenterTemplate? DonutCenterTemplate { get; set; }
 
   private readonly List<PixataChartSeries> _series = [];
   private readonly List<PixataChartCategoryAxis> _categoryAxes = [];
@@ -219,6 +223,7 @@ public partial class PixataChart : IAsyncDisposable {
       IsCompact ? "pixata-blazor-chart-compact" : null,
       Transitions ?? true ? "pixata-blazor-chart-animate" : null,
       _scene.IsPie ? "pixata-blazor-chart-pie" : null,
+      _scene.IsDonut ? "pixata-blazor-chart-donut" : null,
       Class);
 
   private string? ChartStyle {
@@ -531,10 +536,15 @@ public partial class PixataChart : IAsyncDisposable {
     bool visible;
     if (entry.PointIndex is int point) {
       visible = series.HiddenPoints.Contains(point);
-      if (visible) {
-        series.HiddenPoints.Remove(point);
-      } else {
-        series.HiddenPoints.Add(point);
+      foreach ((int s, int p) in (entry.Linked ?? []).Prepend((entry.SeriesIndex, point))) {
+        if (s >= _series.Count) {
+          continue;
+        }
+        if (visible) {
+          _series[s].HiddenPoints.Remove(p);
+        } else {
+          _series[s].HiddenPoints.Add(p);
+        }
       }
     } else {
       visible = !series.IsVisible;
@@ -585,6 +595,25 @@ public partial class PixataChart : IAsyncDisposable {
     string bg = background ?? pointColour;
     string text = colour ?? (PixataChartPalette.IsLight(background ?? reportedColour) ? "var(--pixata-blazor-chart-tooltip-dark-color)" : "var(--pixata-blazor-chart-tooltip-color)");
     return $"--pixata-blazor-chart-tooltip-bg:{bg};color:{text};";
+  }
+
+  #endregion
+
+  #region No data and the donut's centre
+
+  private bool ShowNoData =>
+    !_scene.HasData && (NoDataTemplate?.Visible ?? true);
+
+  /// <summary>
+  /// The style that puts the donut's centre content in its hole. The plot is drawn to fit the SVG's viewBox, which is the
+  /// size of the plot area, so its coordinates are pixels. The content gets the square that fits inside the hole
+  /// </summary>
+  private string DonutCenterStyle {
+    get {
+      (double x, double y, double radius) = _scene.Hole;
+      double side = radius * Math.Sqrt(2);
+      return $"left:{PixataChartFormatter.Svg(x)}px;top:{PixataChartFormatter.Svg(y)}px;width:{PixataChartFormatter.Svg(side)}px;height:{PixataChartFormatter.Svg(side)}px;";
+    }
   }
 
   #endregion

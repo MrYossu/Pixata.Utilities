@@ -7526,6 +7526,9 @@
   --pixata-blazor-chart-shared-tooltip-bg: var(--pixata-blazor-base-bg);
   --pixata-blazor-chart-tooltip-z-index: 3;
   --pixata-blazor-chart-transition: .5s ease-out;
+  --pixata-blazor-chart-no-data-bg: color-mix(in srgb, var(--pixata-blazor-surface-bg) 70%, transparent);
+  --pixata-blazor-chart-no-data-color: var(--pixata-blazor-chart-inactive);
+  --pixata-blazor-chart-no-data-font-size: 1rem;
 }
 
 .pixata-blazor-chart {
@@ -7880,6 +7883,36 @@
   width: 15px;
   height: 3px;
   background: var(--pixata-blazor-chart-point-color);
+}
+
+/* What a donut shows in its hole, centred on it and sized to the square that fits inside. Content too big for it isn't cut
+   off, as a total with a digit missing would be worse than one that touches the ring */
+.pixata-blazor-chart-donut-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Shown over the plot area when no series has any data */
+.pixata-blazor-chart-no-data {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: 1rem;
+  text-align: center;
+  font-size: var(--pixata-blazor-chart-no-data-font-size);
+  color: var(--pixata-blazor-chart-no-data-color);
+  background: var(--pixata-blazor-chart-no-data-bg);
 }
 
 /* The columns grow and everything else fades in when the chart first appears */

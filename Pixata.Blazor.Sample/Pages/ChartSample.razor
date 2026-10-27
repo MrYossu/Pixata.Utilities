@@ -6,7 +6,7 @@
 <h3>Chart</h3>
 
 <p>
-  <code>PixataChart</code> draws column, line and pie charts as SVG, with no JavaScript charting library. Hover over (or tap)
+  <code>PixataChart</code> draws column, line, pie and donut charts as SVG, with no JavaScript charting library. Hover over (or tap)
   a column, point or segment to see its tooltip, click a legend item to hide or show its series, and tab to a chart to move
   round its points with the arrow keys. Make the window narrow to see the labels turn and thin out and the legend move below.
 </p>
@@ -158,6 +158,78 @@
   </ChildContent>
 </ComponentSample>
 
+<ComponentSample Title="Donut with rings, a hole size and a centre template">
+  <Description>
+    <div class="chart-sample-controls">
+      <label>Hole size <input type="range" min="0" max="90" step="5" @bind="_holeSize" @bind:event="oninput" /> @_holeSize%</label>
+      <label><input type="checkbox" @bind="_twoRings" /> Last year as an inner ring</label>
+      <label><input type="checkbox" @bind="_donutLabels" /> Labels</label>
+    </div>
+    Each donut series is a ring, the first declared on the inside. The rings share their legend items, so clicking one hides
+    that product in both. The total in the hole is a <code>PixataChartDonutCenterTemplate</code>, and Software's
+    <code>Explode</code> field is true.
+  </Description>
+  <ChildContent>
+    <PixataChart Height="360px">
+      <PixataChartTitle Text="Revenue by product" />
+      <PixataChartLegend Position="PixataChartLegendPosition.Bottom" />
+      <PixataChartTooltip Visible="true">
+        <Template>
+          <strong>@context.SeriesName</strong><br />
+          @context.Category: @(((double?)context.Value)?.ToString("C0")) (@context.Percentage.ToString("P0"))
+        </Template>
+      </PixataChartTooltip>
+      <PixataChartDonutCenterTemplate>
+        <div class="chart-sample-donut-total">@((_revenue.Sum(r => r.ThisYear) / 1000).ToString("C0"))k</div>
+        <div class="chart-sample-donut-caption">this year</div>
+      </PixataChartDonutCenterTemplate>
+      <PixataChartSeriesItems>
+        @if (_twoRings) {
+          <PixataChartSeries Type="PixataChartSeriesType.Donut" Name="Last year" Data="@_revenue" Field="@nameof(ProductRevenue.LastYear)" CategoryField="@nameof(ProductRevenue.Product)" HoleSize="@_holeSize">
+            <PixataChartSeriesLabels Visible="@_donutLabels" Template="#= format('{0:P0}', percentage) #" />
+          </PixataChartSeries>
+        }
+        <PixataChartSeries Type="PixataChartSeriesType.Donut" Name="This year" Data="@_revenue" Field="@nameof(ProductRevenue.ThisYear)" CategoryField="@nameof(ProductRevenue.Product)" ExplodeField="@nameof(ProductRevenue.Explode)" HoleSize="@_holeSize">
+          <PixataChartSeriesLabels Visible="@_donutLabels" Template="#= category #: #= format('{0:P0}', percentage) #" />
+        </PixataChartSeries>
+      </PixataChartSeriesItems>
+    </PixataChart>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="No data">
+  <Description>
+    <div class="chart-sample-controls">
+      <label><input type="checkbox" @bind="_hasData" /> Data</label>
+    </div>
+    When none of a chart's series has any data, the chart shows "No data" over its plot area (left), or the content of a
+    <code>PixataChartNoDataTemplate</code> (right).
+  </Description>
+  <ChildContent>
+    <div class="chart-sample-pair">
+      <PixataChart Height="260px">
+        <PixataChartLegend Visible="false" />
+        <PixataChartTooltip Visible="true" Format="{0:C0}" />
+        <PixataChartSeriesItems>
+          <PixataChartSeries Name="Hardware" Data="@(_hasData ? _sales : [])" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" />
+        </PixataChartSeriesItems>
+      </PixataChart>
+      <PixataChart Height="260px">
+        <PixataChartLegend Visible="false" />
+        <PixataChartTooltip Visible="true" Format="{0:P0}" />
+        <PixataChartNoDataTemplate>
+          <span class="chart-sample-no-data-icon" aria-hidden="true">📉</span>
+          <strong>No browser figures to show yet.</strong>
+          <span>Tick Data to load them.</span>
+        </PixataChartNoDataTemplate>
+        <PixataChartSeriesItems>
+          <PixataChartSeries Type="PixataChartSeriesType.Donut" Data="@(_hasData ? _browsers : [])" Field="@nameof(MarketShare.Share)" CategoryField="@nameof(MarketShare.Browser)" />
+        </PixataChartSeriesItems>
+      </PixataChart>
+    </div>
+  </ChildContent>
+</ComponentSample>
+
 <ComponentSample Title="Events, templates and Refresh()">
   <Description>
     <div class="chart-sample-controls">
@@ -230,6 +302,26 @@
     width: 5rem;
   }
 
+  .chart-sample-pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .chart-sample-donut-total {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .chart-sample-donut-caption {
+    font-size: .8125rem;
+    color: #555;
+  }
+
+  .chart-sample-no-data-icon {
+    font-size: 2rem;
+  }
+
   .chart-sample-log {
     min-height: 5.5em;
     margin-top: .5rem;
@@ -243,6 +335,7 @@
   private readonly List<MonthlySales> _sales = ChartSampleData.Sales();
   private readonly List<MonthlySales> _growingSales = ChartSampleData.Sales().Take(5).ToList();
   private readonly List<MarketShare> _browsers = ChartSampleData.Browsers();
+  private readonly List<ProductRevenue> _revenue = ChartSampleData.Revenue();
   private readonly object[] _months = ChartSampleData.MonthNames.ToArray<object>();
   private readonly object[] _regions = ChartSampleData.Regions.ToArray<object>();
   private readonly List<string> _log = [];
@@ -256,6 +349,10 @@
   private bool _lineLabels = true;
   private double _startAngle = 90;
   private PixataChartLegendPosition _legendPosition = PixataChartLegendPosition.Right;
+  private double _holeSize = 55;
+  private bool _twoRings = true;
+  private bool _donutLabels = true;
+  private bool _hasData;
   private PixataChart? _eventsChart;
 
   private void SeriesClicked(PixataChartSeriesClickEventArgs args) =>

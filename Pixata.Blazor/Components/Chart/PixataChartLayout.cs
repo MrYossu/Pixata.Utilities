@@ -30,6 +30,8 @@ internal static class PixataChartLayout {
   public const double DefaultLineWidth = 2;
   public const double DefaultPieLabelDistance = 35;
   public const double DefaultStartAngle = 90;
+  public const double DefaultHoleSize = 50;
+  public const double RingGap = 2;
 
   private const string AxisLabel = PixataChartTextMeasurer.AxisLabel;
   private const string AxisTitle = PixataChartTextMeasurer.AxisTitle;
@@ -40,15 +42,20 @@ internal static class PixataChartLayout {
       Width = Math.Max(input.Width, 1),
       Height = Math.Max(input.Height, 1)
     };
-    int pieIndex = -1;
+    scene.HasData = input.Series.Any(s => s.Data?.Any() == true);
+    // The first pie or donut series decides what sort of chart this is: a pie shows just that series, and a donut has a ring
+    // for every donut series
+    int round = -1;
     for (int i = 0; i < input.Series.Count; i++) {
-      if (input.Series[i].SeriesType == PixataChartSeriesType.Pie) {
-        pieIndex = i;
+      if (input.Series[i].SeriesType is PixataChartSeriesType.Pie or PixataChartSeriesType.Donut) {
+        round = i;
         break;
       }
     }
-    if (pieIndex >= 0) {
-      BuildPie(scene, input, pieIndex);
+    if (round >= 0 && input.Series[round].SeriesType == PixataChartSeriesType.Pie) {
+      BuildPie(scene, input, [round], false);
+    } else if (round >= 0) {
+      BuildPie(scene, input, Enumerable.Range(0, input.Series.Count).Where(i => input.Series[i].SeriesType == PixataChartSeriesType.Donut).ToList(), true);
     } else {
       BuildCartesian(scene, input);
     }
@@ -604,66 +611,75 @@ internal static class PixataChartLayout {
 
   #endregion
 
-  #region Pie charts
+  #region Pie and donut charts
 
-  private static void BuildPie(PixataChartScene scene, PixataChartLayoutInput input, int seriesIndex) {
+  /// <summary>
+  /// A pie, or one ring of a donut, with its data read out of the series
+  /// </summary>
+  private sealed class Ring {
+    public required PixataChartSeries Series { get; init; }
+    public int Index { get; init; }
+    public List<object> Items { get; } = [];
+    public List<double?> Values { get; } = [];
+    public List<object?> Categories { get; } = [];
+    public List<string> CategoryTexts { get; } = [];
+    public List<(string Css, string Reported)> Colours { get; } = [];
+    public List<bool> Explode { get; } = [];
+    public List<PixataChartPieSlice> Slices { get; set; } = [];
+    public Dictionary<int, string[]> Texts { get; } = [];
+    public Dictionary<int, double> Widths { get; } = [];
+    public double Inner { get; set; }
+    public double Outer { get; set; }
+  }
+
+  /// <summary>
+  /// Draws a pie (one series) or a donut (one ring for each series, the first on the inside)
+  /// </summary>
+  private static void BuildPie(PixataChartScene scene, PixataChartLayoutInput input, IReadOnlyList<int> seriesIndexes, bool donut) {
     scene.IsPie = true;
+    scene.IsDonut = donut;
     PixataChartTextMeasurer measurer = input.Measurer;
-    PixataChartSeries series = input.Series[seriesIndex];
-    List<object> items = [.. series.Data ?? []];
-    List<double?> values = [];
-    List<object?> categories = [];
-    List<string> categoryTexts = [];
-    List<(string Css, string Reported)> colours = [];
-    List<bool> explode = [];
-    for (int i = 0; i < items.Count; i++) {
-      object item = items[i];
-      values.Add(PixataChartFormatter.ToDouble(PixataFieldReader.GetValue(item, series.Field)));
-      object? category = string.IsNullOrEmpty(series.CategoryField) ? null : PixataFieldReader.GetValue(item, series.CategoryField);
-      categories.Add(category);
-      categoryTexts.Add(PixataChartFormatter.Format(category, null));
-      string? colour = string.IsNullOrEmpty(series.ColorField) ? null : PixataChartPalette.Safe(PixataFieldReader.GetValue(item, series.ColorField)?.ToString());
-      colours.Add(colour is null ? (PixataChartPalette.Css(i), PixataChartPalette.Hex(i)) : (colour, colour));
-      explode.Add(!string.IsNullOrEmpty(series.ExplodeField) && PixataChartFormatter.ToBool(PixataFieldReader.GetValue(item, series.ExplodeField)) == true);
-      bool inLegend = string.IsNullOrEmpty(series.VisibleInLegendField) || PixataChartFormatter.ToBool(PixataFieldReader.GetValue(item, series.VisibleInLegendField)) != false;
-      if (inLegend && (series.VisibleInLegend ?? true)) {
-        scene.LegendEntries.Add(new(seriesIndex, i, categoryTexts[i], colours[i].Css, PixataChartSeriesType.Pie, series.IsVisible && !series.HiddenPoints.Contains(i), null));
-      }
-    }
-    scene.Categories.AddRange(categories);
+    List<Ring> rings = seriesIndexes.Select(i => ReadRing(input.Series[i], i)).ToList();
+    AddPieLegend(scene, rings);
+    scene.Categories.AddRange(rings[0].Categories);
     PixataChartBox area = new(Padding, Padding, Math.Max(10, scene.Width - Padding * 2), Math.Max(10, scene.Height - Padding * 2));
     scene.Plot = area;
-    if (!series.IsVisible) {
+    double cx = area.X + area.Width / 2;
+    double cy = area.Y + area.Height / 2;
+    scene.Hole = (cx, cy, 0);
+    List<Ring> visible = rings.Where(r => r.Series.IsVisible).ToList();
+    if (visible.Count == 0) {
       return;
     }
-    List<PixataChartPieSlice> slices = PixataChartPie.Slices(values, series.HiddenPoints, series.StartAngle ?? DefaultStartAngle);
-    PixataChartSeriesLabels? labels = series.Labels;
-    bool labelsVisible = labels?.Visible == true;
-    PixataChartSeriesLabelsPosition position = labels?.Position ?? PixataChartSeriesLabelsPosition.OutsideEnd;
-    bool outside = labelsVisible && position is not (PixataChartSeriesLabelsPosition.InsideEnd or PixataChartSeriesLabelsPosition.Center or PixataChartSeriesLabelsPosition.InsideBase);
-    double distance = labels?.Distance ?? DefaultPieLabelDistance;
-    double labelSize = measurer.FontSize(Label, labels?.Font);
-    double labelLine = measurer.LineHeight(Label, labels?.Font);
-    bool anyExploded = slices.Any(s => explode[s.Index]);
 
-    // The label text of each slice, before the size of the pie is known
-    Dictionary<int, string[]> texts = [];
-    Dictionary<int, double> widths = [];
-    foreach (PixataChartPieSlice slice in slices) {
-      PixataChartScenePoint context = PiePoint(series, seriesIndex, slice, categories[slice.Index], values[slice.Index], items[slice.Index], colours[slice.Index], categoryTexts[slice.Index], 0, 0, 0, null);
-      texts[slice.Index] = labelsVisible ? PixataChartFormatter.Lines(LabelText(labels!, context)) : [];
-      widths[slice.Index] = labelsVisible ? measurer.Width(texts[slice.Index], Label, labels!.Font) : 0;
+    // Outside labels only fit round the outer ring, so the labels of the rings inside it go in the middle of their segments
+    Ring outer = visible[^1];
+    PixataChartSeriesLabels? outerLabels = outer.Series.Labels;
+    bool outside = outerLabels?.Visible == true && IsOutside(outerLabels);
+    double distance = outerLabels?.Distance ?? DefaultPieLabelDistance;
+    double labelSize = measurer.FontSize(Label, outerLabels?.Font);
+    double labelLine = measurer.LineHeight(Label, outerLabels?.Font);
+    foreach (Ring ring in visible) {
+      ring.Slices = PixataChartPie.Slices(ring.Values, ring.Series.HiddenPoints, ring.Series.StartAngle ?? DefaultStartAngle);
+      PixataChartSeriesLabels? labels = ring.Series.Labels;
+      foreach (PixataChartPieSlice slice in ring.Slices) {
+        // The label text of each slice, before the size of the pie is known
+        PixataChartScenePoint context = PiePoint(ring, slice, false, 0, 0, null);
+        ring.Texts[slice.Index] = labels?.Visible == true ? PixataChartFormatter.Lines(LabelText(labels, context)) : [];
+        ring.Widths[slice.Index] = labels?.Visible == true ? measurer.Width(ring.Texts[slice.Index], Label, labels.Font) : 0;
+      }
     }
-    double widest = widths.Values.DefaultIfEmpty(0).Max();
-    double tallest = texts.Values.Select(t => t.Length).DefaultIfEmpty(1).Max() * labelLine;
+    double widest = outer.Widths.Values.DefaultIfEmpty(0).Max();
+    double tallest = outer.Texts.Values.Select(t => t.Length).DefaultIfEmpty(1).Max() * labelLine;
+    bool anyExploded = visible.Any(r => r.Slices.Any(s => r.Explode[s.Index]));
 
     double radius;
-    if (series.Size is > 0) {
-      radius = series.Size.Value;
+    if (outer.Series.Size is > 0) {
+      radius = outer.Series.Size.Value;
     } else if (outside) {
       double smallest = Math.Min(area.Width, area.Height);
       double byWidth = area.Width / 2 - widest - distance - LabelGap;
-      if (byWidth < smallest * .3 && labels?.Distance is null) {
+      if (byWidth < smallest * .3 && outerLabels?.Distance is null) {
         // On a narrow chart (a phone, say), bring the labels in closer to leave more room for the pie
         distance = Math.Min(distance, 16);
         byWidth = area.Width / 2 - widest - distance - LabelGap;
@@ -674,33 +690,47 @@ internal static class PixataChartLayout {
       radius = Math.Min(area.Width, area.Height) / 2;
     }
     double explodeOffset = anyExploded ? Math.Max(4, radius * .1) : 0;
-    if (series.Size is not > 0) {
+    if (outer.Series.Size is not > 0) {
       radius = Math.Max(4, radius - explodeOffset);
       explodeOffset = anyExploded ? Math.Max(4, radius * .1) : 0;
     }
-    double cx = area.X + area.Width / 2;
-    double cy = area.Y + area.Height / 2;
     double maxLabelWidth = Math.Max(labelSize * 3, area.Width / 2 - radius - explodeOffset - distance - LabelGap);
 
+    // The rings share what is left after the hole, with a small gap between them
+    double hole = donut ? radius * Math.Clamp(visible[0].Series.HoleSize ?? DefaultHoleSize, 0, 100) / 100 : 0;
+    scene.Hole = (cx, cy, hole);
+    double ringGap = visible.Count > 1 ? Math.Min(RingGap, (radius - hole) / visible.Count / 4) : 0;
+    double thickness = Math.Max(0, (radius - hole - ringGap * (visible.Count - 1)) / visible.Count);
+    for (int r = 0; r < visible.Count; r++) {
+      visible[r].Inner = hole + r * (thickness + ringGap);
+      visible[r].Outer = visible[r].Inner + thickness;
+    }
+
     List<PixataChartPieLabel> outsideLabels = [];
-    foreach (PixataChartPieSlice slice in slices) {
-      double offset = explode[slice.Index] ? explodeOffset : 0;
-      (double sx, double sy) = PixataChartPie.PointAt(cx, cy, offset, slice.MidAngle);
-      (double ax, double ay) = PixataChartPie.PointAt(sx, sy, radius * .6, slice.MidAngle);
-      string path = PixataChartPie.SegmentPath(sx, sy, radius, slice.StartAngle, slice.EndAngle);
-      PixataChartScenePoint point = PiePoint(series, seriesIndex, slice, categories[slice.Index], values[slice.Index], items[slice.Index], colours[slice.Index], categoryTexts[slice.Index], ax, ay, offset, path);
-      scene.Points.Add(point);
-      if (!labelsVisible) {
-        continue;
-      }
-      if (outside) {
-        (double _, double ey) = PixataChartPie.PointAt(cx, cy, radius + explodeOffset + distance / 2, slice.MidAngle);
-        outsideLabels.Add(new() { Index = slice.Index, Right = Math.Cos(slice.MidAngle * Math.PI / 180) >= -1e-9, Y = ey });
-      } else {
-        double r = position == PixataChartSeriesLabelsPosition.Center ? radius * .5 : radius * .75;
-        (double lx, double ly) = PixataChartPie.PointAt(sx, sy, r, slice.MidAngle);
-        string[] lines = texts[slice.Index];
-        scene.Labels.Add(new(lines, lx, ly + labelSize * .35 - (lines.Length - 1) * labelLine / 2, "middle", Label, labelLine, 0, labels!.Color, labels.Font, labels.Background, widths[slice.Index], labelSize));
+    foreach (Ring ring in visible) {
+      PixataChartSeriesLabels? labels = ring.Series.Labels;
+      foreach (PixataChartPieSlice slice in ring.Slices) {
+        double offset = ring.Explode[slice.Index] ? explodeOffset : 0;
+        (double sx, double sy) = PixataChartPie.PointAt(cx, cy, offset, slice.MidAngle);
+        (double ax, double ay) = PixataChartPie.PointAt(sx, sy, ring.Inner + (ring.Outer - ring.Inner) * (donut ? .5 : .6), slice.MidAngle);
+        string path = PixataChartPie.RingSegmentPath(sx, sy, ring.Inner, ring.Outer, slice.StartAngle, slice.EndAngle);
+        scene.Points.Add(PiePoint(ring, slice, visible.Count > 1, ax, ay, path));
+        if (labels?.Visible != true) {
+          continue;
+        }
+        if (ring == outer && outside) {
+          (double _, double ey) = PixataChartPie.PointAt(cx, cy, radius + explodeOffset + distance / 2, slice.MidAngle);
+          outsideLabels.Add(new() { Index = slice.Index, Right = Math.Cos(slice.MidAngle * Math.PI / 180) >= -1e-9, Y = ey });
+        } else {
+          // A pie's centred labels go half way out and the others three quarters; a donut's go in the middle of the ring
+          // unless they are asked to go at its outer end
+          double share = labels.Position == PixataChartSeriesLabelsPosition.InsideEnd ? .75 : donut || labels.Position == PixataChartSeriesLabelsPosition.Center ? .5 : .75;
+          (double lx, double ly) = PixataChartPie.PointAt(sx, sy, ring.Inner + (ring.Outer - ring.Inner) * share, slice.MidAngle);
+          string[] lines = ring.Texts[slice.Index];
+          double size = measurer.FontSize(Label, labels.Font);
+          double line = measurer.LineHeight(Label, labels.Font);
+          scene.Labels.Add(new(lines, lx, ly + size * .35 - (lines.Length - 1) * line / 2, "middle", Label, line, 0, labels.Color, labels.Font, labels.Background, ring.Widths[slice.Index], size));
+        }
       }
     }
     if (outsideLabels.Count == 0) {
@@ -708,8 +738,8 @@ internal static class PixataChartLayout {
     }
     PixataChartPie.Spread(outsideLabels, labelLine, area.Y + labelLine / 2, area.Bottom - labelLine / 2);
     foreach (PixataChartPieLabel label in outsideLabels) {
-      PixataChartPieSlice slice = slices.First(s => s.Index == label.Index);
-      double offset = explode[slice.Index] ? explodeOffset : 0;
+      PixataChartPieSlice slice = outer.Slices.First(s => s.Index == label.Index);
+      double offset = outer.Explode[slice.Index] ? explodeOffset : 0;
       (double ex, double ey) = PixataChartPie.PointAt(cx, cy, radius + offset + 1, slice.MidAngle);
       (double bx, double by) = PixataChartPie.PointAt(cx, cy, radius + offset + Math.Min(distance / 2, 12), slice.MidAngle);
       double labelX = cx + (label.Right ? 1 : -1) * (radius + explodeOffset + distance);
@@ -717,32 +747,84 @@ internal static class PixataChartLayout {
       if (label.Right ? bx > endX : bx < endX) {
         bx = endX;
       }
-      scene.Connectors.Add(new($"M {PixataChartFormatter.Svg(ex)} {PixataChartFormatter.Svg(ey)} L {PixataChartFormatter.Svg(bx)} {PixataChartFormatter.Svg(by)} L {PixataChartFormatter.Svg(endX)} {PixataChartFormatter.Svg(label.Y)}", "pixata-blazor-chart-label-connector", seriesIndex, labels!.Color));
-      string[] lines = texts[slice.Index].Select(t => PixataChartTextMeasurer.Truncate(t, measurer.Width(t, Label, labels.Font), maxLabelWidth)).ToArray();
-      double lineWidth = Math.Min(widths[slice.Index], maxLabelWidth);
-      scene.Labels.Add(new(lines, labelX, label.Y + labelSize * .35 - (lines.Length - 1) * labelLine / 2, label.Right ? "start" : "end", Label, labelLine, 0, labels.Color, labels.Font, labels.Background, lineWidth, labelSize));
+      scene.Connectors.Add(new($"M {PixataChartFormatter.Svg(ex)} {PixataChartFormatter.Svg(ey)} L {PixataChartFormatter.Svg(bx)} {PixataChartFormatter.Svg(by)} L {PixataChartFormatter.Svg(endX)} {PixataChartFormatter.Svg(label.Y)}", "pixata-blazor-chart-label-connector", outer.Index, outerLabels!.Color));
+      string[] lines = outer.Texts[slice.Index].Select(t => PixataChartTextMeasurer.Truncate(t, measurer.Width(t, Label, outerLabels.Font), maxLabelWidth)).ToArray();
+      double lineWidth = Math.Min(outer.Widths[slice.Index], maxLabelWidth);
+      scene.Labels.Add(new(lines, labelX, label.Y + labelSize * .35 - (lines.Length - 1) * labelLine / 2, label.Right ? "start" : "end", Label, labelLine, 0, outerLabels.Color, outerLabels.Font, outerLabels.Background, lineWidth, labelSize));
     }
   }
 
-  private static PixataChartScenePoint PiePoint(PixataChartSeries series, int seriesIndex, PixataChartPieSlice slice, object? category, double? value, object? item, (string Css, string Reported) colour, string categoryText, double anchorX, double anchorY, double offset, string? path) =>
-    new() {
+  private static bool IsOutside(PixataChartSeriesLabels labels) =>
+    (labels.Position ?? PixataChartSeriesLabelsPosition.OutsideEnd) is not (PixataChartSeriesLabelsPosition.InsideEnd or PixataChartSeriesLabelsPosition.Center or PixataChartSeriesLabelsPosition.InsideBase);
+
+  private static Ring ReadRing(PixataChartSeries series, int seriesIndex) {
+    Ring ring = new() { Series = series, Index = seriesIndex };
+    ring.Items.AddRange(series.Data ?? []);
+    for (int i = 0; i < ring.Items.Count; i++) {
+      object item = ring.Items[i];
+      ring.Values.Add(PixataChartFormatter.ToDouble(PixataFieldReader.GetValue(item, series.Field)));
+      object? category = string.IsNullOrEmpty(series.CategoryField) ? null : PixataFieldReader.GetValue(item, series.CategoryField);
+      ring.Categories.Add(category);
+      ring.CategoryTexts.Add(PixataChartFormatter.Format(category, null));
+      string? colour = string.IsNullOrEmpty(series.ColorField) ? null : PixataChartPalette.Safe(PixataFieldReader.GetValue(item, series.ColorField)?.ToString());
+      ring.Colours.Add(colour is null ? (PixataChartPalette.Css(i), PixataChartPalette.Hex(i)) : (colour, colour));
+      ring.Explode.Add(!string.IsNullOrEmpty(series.ExplodeField) && PixataChartFormatter.ToBool(PixataFieldReader.GetValue(item, series.ExplodeField)) == true);
+    }
+    return ring;
+  }
+
+  /// <summary>
+  /// A legend item for each segment. The rings of a donut often share their categories, so a category that is already in
+  /// the legend isn't listed again, and its item shows and hides it in every ring
+  /// </summary>
+  private static void AddPieLegend(PixataChartScene scene, List<Ring> rings) {
+    List<(PixataChartLegendEntry Entry, List<(int Series, int Point)> Linked)> entries = [];
+    Dictionary<string, int> byText = [];
+    foreach (Ring ring in rings) {
+      PixataChartSeries series = ring.Series;
+      for (int i = 0; i < ring.Items.Count; i++) {
+        bool inLegend = string.IsNullOrEmpty(series.VisibleInLegendField) || PixataChartFormatter.ToBool(PixataFieldReader.GetValue(ring.Items[i], series.VisibleInLegendField)) != false;
+        if (!inLegend || !(series.VisibleInLegend ?? true)) {
+          continue;
+        }
+        string text = ring.CategoryTexts[i];
+        if (text != "" && byText.TryGetValue(text, out int existing)) {
+          entries[existing].Linked.Add((ring.Index, i));
+          continue;
+        }
+        if (text != "") {
+          byText[text] = entries.Count;
+        }
+        entries.Add((new(ring.Index, i, text, ring.Colours[i].Css, series.SeriesType, series.IsVisible && !series.HiddenPoints.Contains(i), null), []));
+      }
+    }
+    scene.LegendEntries.AddRange(entries.Select(e => e.Linked.Count == 0 ? e.Entry : e.Entry with { Linked = e.Linked }));
+  }
+
+  private static PixataChartScenePoint PiePoint(Ring ring, PixataChartPieSlice slice, bool nameRing, double anchorX, double anchorY, string? path) {
+    PixataChartSeries series = ring.Series;
+    string categoryText = ring.CategoryTexts[slice.Index];
+    string what = categoryText == "" ? series.Name ?? "" : nameRing && !string.IsNullOrEmpty(series.Name) ? $"{series.Name}, {categoryText}" : categoryText;
+    double? value = ring.Values[slice.Index];
+    return new() {
       Series = series,
-      SeriesIndex = seriesIndex,
+      SeriesIndex = ring.Index,
       PointIndex = slice.Index,
       Kind = PixataChartPointKind.Segment,
-      Category = category,
+      Category = ring.Categories[slice.Index],
       Value = value,
-      DataItem = item,
+      DataItem = ring.Items[slice.Index],
       Percentage = slice.Percentage,
       Total = slice.Total,
-      Colour = colour.Css,
-      ReportedColour = colour.Reported,
+      Colour = ring.Colours[slice.Index].Css,
+      ReportedColour = ring.Colours[slice.Index].Reported,
       Path = path,
       Opacity = series.Opacity,
       AnchorX = anchorX,
       AnchorY = anchorY,
-      Description = $"{(categoryText == "" ? series.Name : categoryText)}: {PixataChartFormatter.Format(value, series.Labels?.Format)} ({PixataChartFormatter.Format(slice.Percentage, "P0")})"
+      Description = $"{what}: {PixataChartFormatter.Format(value, series.Labels?.Format)} ({PixataChartFormatter.Format(slice.Percentage, "P0")})"
     };
+  }
 
   #endregion
 

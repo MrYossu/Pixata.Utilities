@@ -155,6 +155,20 @@
         }
       </svg>
 
+      @if (scene.IsDonut && DonutCenterTemplate?.ChildContent is { } centre && scene.Hole.Radius > 0 && scene.Points.Count > 0) {
+        <div class="pixata-blazor-chart-donut-center" style="@DonutCenterStyle">@centre</div>
+      }
+
+      @if (ShowNoData) {
+        <div class="pixata-blazor-chart-no-data">
+          @if (NoDataTemplate?.ChildContent is { } noData) {
+            @noData
+          } else {
+            <span class="pixata-blazor-chart-no-data-text">No data</span>
+          }
+        </div>
+      }
+
       @if (_tooltipShown) {
         @RenderTooltip(scene, active)
       }

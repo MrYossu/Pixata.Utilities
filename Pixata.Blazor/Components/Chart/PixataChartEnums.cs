@@ -17,7 +17,13 @@ public enum PixataChartSeriesType {
   /// <summary>
   /// A circle divided into segments, one per data item. A chart with a pie series shows only that series
   /// </summary>
-  Pie
+  Pie,
+
+  /// <summary>
+  /// A pie with a hole in the middle. Each donut series is a ring, the first declared on the inside, and a chart with donut
+  /// series shows only those
+  /// </summary>
+  Donut
 }
 
 /// <summary>

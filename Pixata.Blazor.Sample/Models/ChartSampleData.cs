@@ -24,6 +24,16 @@ public class MarketShare {
   public string? Colour { get; set; }
 }
 
+/// <summary>
+/// A product's share of revenue in two years, used by the donut chart on the chart sample page
+/// </summary>
+public class ProductRevenue {
+  public string Product { get; set; } = "";
+  public double LastYear { get; set; }
+  public double ThisYear { get; set; }
+  public bool Explode { get; set; }
+}
+
 public static class ChartSampleData {
   public static List<MonthlySales> Sales() => [
     new() { Month = "Jan", Hardware = 42000, Software = 28000, Services = 15000, Margin = 0.21, Visitors = 1200 },
@@ -43,6 +53,14 @@ public static class ChartSampleData {
     new() { Browser = "Firefox", Share = 0.06 },
     new() { Browser = "Opera", Share = 0.03 },
     new() { Browser = "Other", Share = 0.02 }
+  ];
+
+  public static List<ProductRevenue> Revenue() => [
+    new() { Product = "Hardware", LastYear = 412000, ThisYear = 380000 },
+    new() { Product = "Software", LastYear = 296000, ThisYear = 341000, Explode = true },
+    new() { Product = "Services", LastYear = 158000, ThisYear = 187000 },
+    new() { Product = "Training", LastYear = 64000, ThisYear = 72000 },
+    new() { Product = "Support", LastYear = 41000, ThisYear = 52000 }
   ];
 
   /// <summary>

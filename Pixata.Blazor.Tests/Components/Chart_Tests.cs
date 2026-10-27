@@ -648,6 +648,7 @@ public class Chart_Tests {
   [DataRow(PixataChartSeriesType.Column)]
   [DataRow(PixataChartSeriesType.Line)]
   [DataRow(PixataChartSeriesType.Pie)]
+  [DataRow(PixataChartSeriesType.Donut)]
   public void Layout_AwkwardData_IsDrawnWithFiniteNumbers(PixataChartSeriesType type) {
     object?[][] datasets = [
       [],
@@ -692,6 +693,76 @@ public class Chart_Tests {
     string centre = $"M {PixataChartFormatter.Svg(scene.Plot.X + scene.Plot.Width / 2)} {PixataChartFormatter.Svg(scene.Plot.Y + scene.Plot.Height / 2)}";
     Assert.IsFalse(scene.Points[0].Path!.StartsWith(centre));
     Assert.IsTrue(scene.Points[1].Path!.StartsWith(centre));
+  }
+
+  [TestMethod]
+  public void Pie_RingSegmentPath_LeavesTheHoleEmpty() {
+    StringAssert.StartsWith(PixataChartPie.RingSegmentPath(50, 50, 5, 10, 90, 0), "M 50 40 A 10 10 0 0 1 60 50 L 55 50 A 5 5 0 0 0 50 45 Z");
+    Assert.AreEqual(PixataChartPie.SegmentPath(50, 50, 10, 90, 0), PixataChartPie.RingSegmentPath(50, 50, 0, 10, 90, 0), "No hole is a pie segment");
+    string whole = PixataChartPie.RingSegmentPath(50, 50, 5, 10, 90, -270);
+    Assert.AreEqual(2, whole.Split('M').Length - 1, "A whole ring is two circles");
+    StringAssert.Contains(whole, "A 5 5 0 1 0", "The inner circle goes the other way, so it is a hole");
+  }
+
+  [TestMethod]
+  public void Layout_Donut_HasAHoleOfTheHoleSize() {
+    PixataChartSeries donut = new() { Type = PixataChartSeriesType.Donut, Data = Sales(), Field = nameof(Sale.Amount), CategoryField = nameof(Sale.Month), HoleSize = 40 };
+    PixataChartScene scene = Layout([donut], width: 300, height: 300);
+    Assert.IsTrue(scene.IsPie);
+    Assert.IsTrue(scene.IsDonut);
+    Assert.AreEqual(3, scene.Points.Count);
+    Assert.AreEqual(150, scene.Hole.X, 1e-9);
+    Assert.AreEqual(150, scene.Hole.Y, 1e-9);
+    Assert.AreEqual((300 - PixataChartLayout.Padding * 2) / 2 * .4, scene.Hole.Radius, 1e-9);
+    Assert.IsTrue(scene.Points.All(p => p.Path!.Split('A').Length - 1 == 2), "Each segment has an outer and an inner arc");
+    double anchor = Math.Sqrt(Math.Pow(scene.Points[0].AnchorX - 150, 2) + Math.Pow(scene.Points[0].AnchorY - 150, 2));
+    Assert.IsTrue(anchor > scene.Hole.Radius, "The tooltip points at the ring, not the hole");
+  }
+
+  [TestMethod]
+  public void Layout_Donut_DrawsARingForEachSeriesFromTheInside() {
+    List<Sale> sales = Sales();
+    PixataChartSeries inner = new() { Type = PixataChartSeriesType.Donut, Name = "2025", Data = sales, Field = nameof(Sale.Amount), CategoryField = nameof(Sale.Month) };
+    PixataChartSeries outer = new() { Type = PixataChartSeriesType.Donut, Name = "2026", Data = sales, Field = nameof(Sale.Amount), CategoryField = nameof(Sale.Month) };
+    PixataChartScene scene = Layout([inner, new() { Data = [1.0] }, outer], width: 300, height: 300);
+    Assert.AreEqual(6, scene.Points.Count, "The column series is left out");
+    double Distance(PixataChartScenePoint p) =>
+      Math.Sqrt(Math.Pow(p.AnchorX - scene.Hole.X, 2) + Math.Pow(p.AnchorY - scene.Hole.Y, 2));
+    Assert.IsTrue(scene.Points.Where(p => p.SeriesIndex == 0).All(p => Distance(p) < scene.Points.Where(q => q.SeriesIndex == 2).Min(Distance)));
+    Assert.AreEqual("2026, Jan: 10 (17%)", scene.Points.First(p => p.SeriesIndex == 2).Description);
+    CollectionAssert.AreEqual(new[] { "Jan", "Feb", "Mar" }, scene.LegendEntries.Select(e => e.Text).ToArray(), "The rings share their legend items");
+    CollectionAssert.AreEqual(new[] { (2, 0) }, scene.LegendEntries[0].Linked!.ToArray());
+  }
+
+  [TestMethod]
+  public void Layout_Donut_InnerRingLabelsGoInsideTheirSegments() {
+    PixataChartSeriesLabels Labels() =>
+      new() { Visible = true };
+    PixataChartScene scene = Layout([
+      new() { Type = PixataChartSeriesType.Donut, Data = Sales(), Field = nameof(Sale.Amount), Labels = Labels() },
+      new() { Type = PixataChartSeriesType.Donut, Data = Sales(), Field = nameof(Sale.Amount), Labels = Labels() }
+    ]);
+    Assert.AreEqual(6, scene.Labels.Count);
+    Assert.AreEqual(3, scene.Connectors.Count, "Only the outer ring's labels sit outside");
+  }
+
+  [TestMethod]
+  public void Layout_PieBeforeADonut_ShowsJustThePie() {
+    PixataChartScene scene = Layout([
+      new() { Type = PixataChartSeriesType.Pie, Data = Sales(), Field = nameof(Sale.Amount) },
+      new() { Type = PixataChartSeriesType.Donut, Data = Sales(), Field = nameof(Sale.Amount) }
+    ]);
+    Assert.IsFalse(scene.IsDonut);
+    Assert.AreEqual(3, scene.Points.Count);
+  }
+
+  [TestMethod]
+  public void Layout_HasData_IsFalseOnlyWhenNoSeriesHasAny() {
+    Assert.IsFalse(Layout([]).HasData);
+    Assert.IsFalse(Layout([new() { Data = [] }, new() { Data = null }]).HasData);
+    Assert.IsFalse(Layout([new() { Type = PixataChartSeriesType.Donut, Data = [] }]).HasData);
+    Assert.IsTrue(Layout([new() { Data = [] }, new() { Data = [1.0] }]).HasData);
+    Assert.IsTrue(Layout([new() { Data = [1.0], Visible = false }]).HasData, "A hidden series still has data");
   }
 
   #endregion
@@ -1129,6 +1200,80 @@ public class Chart_Tests {
     string[] labels = cut.FindAll("text.pixata-blazor-chart-axis-label").Select(t => t.TextContent).ToArray();
     Assert.IsTrue(labels.Contains("£40"));
     Assert.IsTrue(labels.Contains("£0"));
+  }
+
+  private static RenderFragment DonutSeries(string name, IEnumerable<object> data) =>
+    Component<PixataChartSeries>((nameof(PixataChartSeries.Type), PixataChartSeriesType.Donut), (nameof(PixataChartSeries.Name), name), (nameof(PixataChartSeries.Data), data), (nameof(PixataChartSeries.Field), nameof(Sale.Amount)), (nameof(PixataChartSeries.CategoryField), nameof(Sale.Month)));
+
+  [TestMethod]
+  public void Chart_Donut_RendersRingsWithTooltipsAndCentre() {
+    using BunitContext context = PixataTestContext.Create();
+    List<Sale> sales = Sales();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Fragments(
+      Component<PixataChartTooltip>((nameof(PixataChartTooltip.Visible), true)),
+      Component<PixataChartDonutCenterTemplate>(b => b.AddContent(0, "Total 60")),
+      Component<PixataChartSeriesItems>(Fragments(DonutSeries("2025", sales), DonutSeries("2026", sales)))));
+    Assert.IsTrue(cut.Find("div.pixata-blazor-chart").ClassList.Contains("pixata-blazor-chart-donut"));
+    Assert.AreEqual(6, cut.FindAll("path.pixata-blazor-chart-segment").Count);
+    Assert.AreEqual("Total 60", cut.Find(".pixata-blazor-chart-donut-center").TextContent);
+    cut.FindAll("path.pixata-blazor-chart-segment")[4].PointerEnter();
+    Assert.AreEqual("20", cut.Find(".pixata-blazor-chart-tooltip").TextContent.Trim());
+    Assert.AreEqual(3, cut.FindAll("button.pixata-blazor-chart-legend-item").Count);
+    cut.FindAll("button.pixata-blazor-chart-legend-item")[1].Click();
+    Assert.AreEqual(4, cut.FindAll("path.pixata-blazor-chart-segment").Count, "Feb is hidden in both rings");
+    cut.FindAll("button.pixata-blazor-chart-legend-item")[1].Click();
+    Assert.AreEqual(6, cut.FindAll("path.pixata-blazor-chart-segment").Count);
+  }
+
+  [TestMethod]
+  public void Chart_DonutCenter_IsOnlyShownOnADonut() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Fragments(
+      Component<PixataChartDonutCenterTemplate>(b => b.AddContent(0, "Total")),
+      Component<PixataChartSeriesItems>(ColumnSeries("Amount", Sales()))));
+    Assert.AreEqual(0, cut.FindAll(".pixata-blazor-chart-donut-center").Count);
+  }
+
+  [TestMethod]
+  [DataRow(PixataChartSeriesType.Column)]
+  [DataRow(PixataChartSeriesType.Line)]
+  [DataRow(PixataChartSeriesType.Pie)]
+  [DataRow(PixataChartSeriesType.Donut)]
+  public void Chart_WithNoData_ShowsNoData(PixataChartSeriesType type) {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(
+      Component<PixataChartSeries>((nameof(PixataChartSeries.Type), type), (nameof(PixataChartSeries.Name), "Empty"), (nameof(PixataChartSeries.Data), new List<object>()))));
+    Assert.AreEqual("No data", cut.Find(".pixata-blazor-chart-no-data").TextContent.Trim());
+  }
+
+  [TestMethod]
+  public void Chart_WithData_DoesNotShowNoData() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(ColumnSeries("Amount", Sales())));
+    Assert.AreEqual(0, cut.FindAll(".pixata-blazor-chart-no-data").Count);
+  }
+
+  [TestMethod]
+  public void Chart_NoDataTemplate_ReplacesTheTextOrHidesIt() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Fragments(
+      Component<PixataChartNoDataTemplate>(b => b.AddMarkupContent(0, "<strong>Nothing yet</strong>")),
+      Component<PixataChartSeriesItems>(ColumnSeries("Amount", []))));
+    Assert.AreEqual("Nothing yet", cut.Find(".pixata-blazor-chart-no-data strong").TextContent);
+    IRenderedComponent<PixataChart> hidden = RenderChart(context, Fragments(
+      Component<PixataChartNoDataTemplate>((nameof(PixataChartNoDataTemplate.Visible), false)),
+      Component<PixataChartSeriesItems>(ColumnSeries("Amount", []))));
+    Assert.AreEqual(0, hidden.FindAll(".pixata-blazor-chart-no-data").Count);
+  }
+
+  [TestMethod]
+  public void Chart_NoData_GoesWhenDataArrives() {
+    using BunitContext context = PixataTestContext.Create();
+    List<object> empty = [];
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(ColumnSeries("Amount", empty)));
+    Assert.AreEqual(1, cut.FindAll(".pixata-blazor-chart-no-data").Count);
+    cut.Render(p => p.AddChildContent(Component<PixataChartSeriesItems>(ColumnSeries("Amount", Sales()))));
+    Assert.AreEqual(0, cut.FindAll(".pixata-blazor-chart-no-data").Count);
   }
 
   #endregion

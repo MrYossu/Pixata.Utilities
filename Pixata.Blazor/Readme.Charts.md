@@ -2,7 +2,7 @@
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataChart` draws column, line and pie charts. Column and line series can be mixed on one chart, stacked, and plotted against more than one value axis. The chart is plain SVG, drawn by the component, with the title, legend and tooltip as ordinary HTML, so it can be styled with CSS and needs no charting library.
+`PixataChart` draws column, line, pie and donut charts. Column and line series can be mixed on one chart, stacked, and plotted against more than one value axis. The chart is plain SVG, drawn by the component, with the title, legend and tooltip as ordinary HTML, so it can be styled with CSS and needs no charting library.
 
 You describe the chart with child components, one for each part...
 
@@ -54,7 +54,7 @@ Everything goes inside a `PixataChart`. The series and axes each have a containe
 | `PixataChartCategoryAxes` | One `PixataChartCategoryAxis` (any more are ignored) |
 | `PixataChartValueAxes` | One or more `PixataChartValueAxis` |
 
-The other settings go straight inside the chart (`PixataChartTitle`, `PixataChartLegend` and `PixataChartTooltip`), inside a series (`PixataChartSeriesStack`, `PixataChartSeriesLabels`, `PixataChartSeriesMarkers` and `PixataChartSeriesTooltip`), or inside an axis (its title, labels and grid lines).
+The other settings go straight inside the chart (`PixataChartTitle`, `PixataChartLegend`, `PixataChartTooltip`, `PixataChartNoDataTemplate` and `PixataChartDonutCenterTemplate`), inside a series (`PixataChartSeriesStack`, `PixataChartSeriesLabels`, `PixataChartSeriesMarkers` and `PixataChartSeriesTooltip`), or inside an axis (its title, labels and grid lines).
 
 None of these components render anything themselves. They pass their settings up to the chart, which redraws whenever one of them changes. Arrays (such as `Categories` and `AxisCrossingValue`) are compared by their contents, so it is fine to create them inline in the markup.
 
@@ -69,8 +69,8 @@ Every parameter is optional. A setting you leave out gets the default described 
 | `Class` | `string` | Extra CSS classes for the chart's outer `div` |
 | `Id` | `string` | The `id` of the outer `div` |
 | `Transitions` | `bool` | Whether the columns grow and the lines and segments fade in when the chart first appears. `true` by default, and always off for users who have asked for reduced motion |
-| `OnSeriesClick` | `EventCallback<PixataChartSeriesClickEventArgs>` | Raised when the user clicks or taps a column, line point or pie segment, or presses Enter or Space on one |
-| `OnLegendItemClick` | `EventCallback<PixataChartLegendItemClickEventArgs>` | Raised when the user clicks a legend item, after its series (or pie segment) has been shown or hidden |
+| `OnSeriesClick` | `EventCallback<PixataChartSeriesClickEventArgs>` | Raised when the user clicks or taps a column, line point or pie or donut segment, or presses Enter or Space on one |
+| `OnLegendItemClick` | `EventCallback<PixataChartLegendItemClickEventArgs>` | Raised when the user clicks a legend item, after its series (or pie or donut segment) has been shown or hidden |
 
 Any other attributes are added to the outer `div`.
 
@@ -99,7 +99,7 @@ Passing a new list (`_sales = [.. _sales, newMonth]`) redraws the chart without 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `Type` | `PixataChartSeriesType` | `Column` (the default), `Line` or `Pie` |
+| `Type` | `PixataChartSeriesType` | `Column` (the default), `Line`, `Pie` or `Donut` |
 | `Data` | `IEnumerable<object>` | The data. Either a list of objects, with `Field` naming the property that holds the value, or a list of numbers |
 | `Field` | `string` | The property holding each item's value. Nested properties are separated with dots (`Totals.Net`) |
 | `CategoryField` | `string` | The property holding each item's category. Without it, items are matched to the category axis's `Categories` by position |
@@ -116,10 +116,11 @@ Passing a new list (`_sales = [.. _sales, newMonth]`) redraws the chart without 
 | `Opacity` | `double` | The opacity of the series, from 0 to 1 |
 | `Visible` | `bool` | Whether the series is shown. A hidden series keeps its legend item, so the user can show it again |
 | `VisibleInLegend` | `bool` | Whether the series has a legend item |
-| `VisibleInLegendField` | `string` | For a pie, the property saying whether each segment has a legend item |
-| `ExplodeField` | `string` | For a pie, the property saying whether each segment is pulled out from the centre |
-| `StartAngle` | `double` | For a pie, the angle at which the first segment starts, in degrees. 0 is three o'clock and angles go anticlockwise, so the default of 90 starts at twelve o'clock. The segments go clockwise from there |
-| `Size` | `double` | For a pie, the radius in pixels. By default the pie is as big as will fit |
+| `VisibleInLegendField` | `string` | For a pie or donut, the property saying whether each segment has a legend item |
+| `ExplodeField` | `string` | For a pie or donut, the property saying whether each segment is pulled out from the centre |
+| `StartAngle` | `double` | For a pie or donut, the angle at which the first segment starts, in degrees. 0 is three o'clock and angles go anticlockwise, so the default of 90 starts at twelve o'clock. The segments go clockwise from there |
+| `Size` | `double` | For a pie, the radius in pixels, and for a donut, its outer radius (taken from the outer ring). By default it is as big as will fit |
+| `HoleSize` | `double` | For a donut, the size of the hole as a percentage of the donut's diameter, from 0 (no hole) to 100. 50 by default, and taken from the inner ring |
 
 Null values are left out: a column chart has no column for them, a pie has no segment, and a line follows its `MissingValues` setting.
 
@@ -130,6 +131,36 @@ Null values are left out: a column chart has no column for them, a pie has no se
 Column and line series share the category axis, so you can put any number of each on one chart, and their points line up. The columns are drawn first, so lines and their markers are always on top.
 
 A chart with a pie series shows only that pie. Each data item is a segment, and has its own legend item.
+
+### Donuts
+
+A donut is a pie with a hole in the middle. Set the series' `Type` to `PixataChartSeriesType.Donut`, and everything that works on a pie (labels, colours, exploded segments, the start angle and so on) works the same way...
+
+```xml
+<PixataChart Height="360px">
+  <PixataChartTooltip Visible="true" Format="{0:C0}" />
+  <PixataChartDonutCenterTemplate>
+    <strong>@_revenue.Sum(r => r.ThisYear).ToString("C0")</strong>
+    <span>this year</span>
+  </PixataChartDonutCenterTemplate>
+  <PixataChartSeriesItems>
+    <PixataChartSeries Type="PixataChartSeriesType.Donut" Name="Last year" Data="@_revenue" Field="@nameof(ProductRevenue.LastYear)" CategoryField="@nameof(ProductRevenue.Product)" HoleSize="55" />
+    <PixataChartSeries Type="PixataChartSeriesType.Donut" Name="This year" Data="@_revenue" Field="@nameof(ProductRevenue.ThisYear)" CategoryField="@nameof(ProductRevenue.Product)">
+      <PixataChartSeriesLabels Visible="true" Template="#= category #: #= format('{0:P0}', percentage) #" />
+    </PixataChartSeries>
+  </PixataChartSeriesItems>
+</PixataChart>
+```
+
+Each donut series is a ring. The first one declared is on the inside, and the rings share the space between the hole and the edge, with a small gap between them. Hiding a ring (with its `Visible` parameter) gives its space to the others.
+
+The rings' segments take the palette colours by position, so when the rings have the same categories in the same order, each category is the same colour in every ring. The legend lists each category once, and clicking it shows or hides that category in every ring. Segments without a category each get their own legend item.
+
+Labels outside the donut only fit round the outer ring, so the labels of the rings inside it go in the middle of their segments, unless their `Position` is `InsideEnd`. A tooltip's template gets the ring's name as its `SeriesName`, and when there is more than one ring, screen readers hear the ring's name before the category.
+
+`PixataChartDonutCenterTemplate` puts its content in the hole, centred and given the largest square that fits inside it. It is HTML, so it can be anything, and is redrawn whenever the page renders. Content too big for the square is not cut off. It isn't shown on a chart that isn't a donut, or that has no hole.
+
+A chart shows either a pie or donuts, whichever series comes first. Column and line series on the same chart are ignored.
 
 ### Stacking
 
@@ -187,7 +218,7 @@ The positions are...
 | --- | --- |
 | Column | `OutsideEnd` (the default, just past the end of the column), `InsideEnd`, `Center` and `InsideBase` |
 | Line | `Above` (the default), `Below`, `Left`, `Right` and `Center` |
-| Pie | `OutsideEnd` (the default, outside the pie with a line to the segment), `InsideEnd` and `Center` |
+| Pie and donut | `OutsideEnd` (the default, outside the pie with a line to the segment), `InsideEnd` and `Center` |
 
 Labels outside a pie are moved up or down so they don't overlap, and shortened (with an ellipsis) when there isn't room for them. Labels on the points have a light halo so they can be read over grid lines and other series.
 
@@ -268,7 +299,7 @@ The grid lines are `PixataChartCategoryAxisMajorGridLines` (the vertical lines b
 | `Reverse` | `bool` | Lists the items in reverse order, which is handy for stacked series, as the legend then matches the stack |
 | `Visible` | `bool` | Whether the legend is shown |
 
-Clicking a legend item hides its series (or, for a pie, its segment), and clicking it again shows it. The value axes are worked out again from the series that are left. Legend items are buttons, so they can be reached with the Tab key and toggled with Enter or Space, and they report whether they are pressed to screen readers.
+Clicking a legend item hides its series (or, for a pie or donut, its segment), and clicking it again shows it. The value axes are worked out again from the series that are left. Legend items are buttons, so they can be reached with the Tab key and toggled with Enter or Space, and they report whether they are pressed to screen readers.
 
 ## Tooltips
 
@@ -277,7 +308,7 @@ Tooltips are off unless you turn them on, with a `PixataChartTooltip` inside the
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `Visible` | `bool` | Whether tooltips are shown |
-| `Shared` | `bool` | Shows one tooltip for the whole category, listing every series, rather than one for the point under the pointer. Ignored by pies |
+| `Shared` | `bool` | Shows one tooltip for the whole category, listing every series, rather than one for the point under the pointer. Ignored by pies and donuts |
 | `Format` | `string` | The format of the value |
 | `Template` | `RenderFragment<PixataChartSeriesTooltipTemplateContext>` | The content of the tooltip |
 | `SharedTemplate` | `RenderFragment<PixataChartSeriesTooltipSharedTemplateContext>` | The content of a shared tooltip |
@@ -298,23 +329,43 @@ The template's context has the point's details (see the click event below), and 
 
 The shared template's context has the `Category`, and `Points`, a list with one entry for each series that has a value in that category.
 
+## No data
+
+When none of the series has any data (their `Data` is null or empty, or there are no series), the chart shows "No data" over its plot area. A series that has data but is hidden still counts as having data.
+
+To show something else, put a `PixataChartNoDataTemplate` inside the chart...
+
+```xml
+<PixataChart>
+  <PixataChartNoDataTemplate>
+    <strong>No sales yet.</strong>
+    <span>They will appear here once the first order is in.</span>
+  </PixataChartNoDataTemplate>
+  ...
+</PixataChart>
+```
+
+Its content is centred over the plot area, and laid out as a column. To show the empty chart (with its axes) and nothing over it, use `<PixataChartNoDataTemplate Visible="false" />`.
+
+The overlay has the class `pixata-blazor-chart-no-data`, with the default text in a `pixata-blazor-chart-no-data-text`, and is styled by the `--pixata-blazor-chart-no-data-*` variables (see below).
+
 ## Events
 
 `OnSeriesClick` gets a `PixataChartSeriesClickEventArgs` with these properties...
 
 | Property | Description |
 | --- | --- |
-| `Category` | The category (or for a pie, the segment's category) |
+| `Category` | The category (or for a pie or donut, the segment's category) |
 | `CategoryIndex` | The position of the category |
 | `SeriesIndex` | The position of the series in the chart |
 | `SeriesName` | The series' `Name` |
 | `SeriesColor` | The point's colour. For palette colours this is the default hex value, even if you have changed the CSS variable |
 | `DataItem` | The item from `Data`, or the number for a series of numbers |
 | `Value` | The value |
-| `Percentage` | For a pie, the segment's share of the whole. For a stacked series, the point's share of its category |
+| `Percentage` | For a pie or donut, the segment's share of the whole (of its ring, for a donut). For a stacked series, the point's share of its category |
 | `Total` | The total that `Percentage` is a share of |
 
-`OnLegendItemClick` gets a `PixataChartLegendItemClickEventArgs`, with the `SeriesIndex`, the `PointIndex` (for a pie segment), the item's `Text`, and `Visible`, whether the series or segment is now shown.
+`OnLegendItemClick` gets a `PixataChartLegendItemClickEventArgs`, with the `SeriesIndex`, the `PointIndex` (for a pie or donut segment), the item's `Text`, and `Visible`, whether the series or segment is now shown.
 
 ## Phones, touch and the keyboard
 
@@ -330,7 +381,7 @@ The chart can be reached with the Tab key. Once it has the focus...
 
 | Key | What it does |
 | --- | --- |
-| Left and Right arrows | Move to the previous or next point in the series (or segment of a pie) |
+| Left and Right arrows | Move to the previous or next point in the series (or segment of a pie or donut ring) |
 | Up and Down arrows | Move to the same category in the previous or next series |
 | Home and End | Move to the first or last point in the series |
 | Enter or Space | Raises `OnSeriesClick` for the point |
@@ -367,6 +418,9 @@ The chart uses the stylesheet's general variables (font, text colour and so on),
 | `--pixata-blazor-chart-shared-tooltip-bg` | The base background | Shared tooltips |
 | `--pixata-blazor-chart-tooltip-z-index` | `3` | Tooltips |
 | `--pixata-blazor-chart-transition` | `.5s ease-out` | The opening animation |
+| `--pixata-blazor-chart-no-data-bg` | The surface colour, a little transparent | The no-data overlay |
+| `--pixata-blazor-chart-no-data-color` | A mid grey | The no-data overlay's text |
+| `--pixata-blazor-chart-no-data-font-size` | `1rem` | The no-data overlay's text |
 
 So to use your brand colours for every chart...
 
@@ -382,5 +436,5 @@ The parts of the chart have classes starting `pixata-blazor-chart-` (`pixata-bla
 ## Limitations
 
 - Only one category axis is used, and it is always along the bottom of the chart.
-- A chart shows only one pie. Any other series on a pie chart are ignored.
+- A chart shows only one pie. Any other series on a pie chart are ignored, and so are any column or line series on a donut chart.
 - Label templates support the placeholders listed above, but not general expressions. Use `TextTemplate` for anything else.

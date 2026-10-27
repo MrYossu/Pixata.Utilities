@@ -23,7 +23,7 @@ public class PixataChartSeriesItems : ComponentBase {
 }
 
 /// <summary>
-/// A series of data drawn on the chart, as columns, a line or a pie. Put it inside <see cref="PixataChartSeriesItems"/>
+/// A series of data drawn on the chart, as columns, a line, a pie or a donut ring. Put it inside <see cref="PixataChartSeriesItems"/>
 /// </summary>
 public class PixataChartSeries : PixataChartSettingsBase {
   /// <summary>
@@ -134,29 +134,37 @@ public class PixataChartSeries : PixataChartSettingsBase {
   public bool? VisibleInLegend { get; set; }
 
   /// <summary>
-  /// The property of a pie's data items that says whether the segment has an item in the legend
+  /// The property of a pie's (or donut's) data items that says whether the segment has an item in the legend
   /// </summary>
   [Parameter]
   public string? VisibleInLegendField { get; set; }
 
   /// <summary>
-  /// The property of a pie's data items that says whether the segment is pulled out from the centre
+  /// The property of a pie's (or donut's) data items that says whether the segment is pulled out from the centre
   /// </summary>
   [Parameter]
   public string? ExplodeField { get; set; }
 
   /// <summary>
-  /// The angle, in degrees, at which a pie's first segment starts. 0 is three o'clock and angles go anticlockwise, so the
+  /// The angle, in degrees, at which a pie's (or donut ring's) first segment starts. 0 is three o'clock and angles go anticlockwise, so the
   /// default of 90 starts at twelve o'clock. The segments go clockwise from there
   /// </summary>
   [Parameter]
   public double? StartAngle { get; set; }
 
   /// <summary>
-  /// The radius of a pie, in pixels. By default the pie is as big as will fit
+  /// The radius of a pie, or the outer radius of a donut, in pixels. By default it is as big as will fit. A donut takes this
+  /// from its outermost ring
   /// </summary>
   [Parameter]
   public double? Size { get; set; }
+
+  /// <summary>
+  /// The size of a donut's hole, as a percentage of its diameter: 0 leaves no hole and 100 is all hole. 50 by default. A
+  /// donut with several rings takes this from its innermost ring
+  /// </summary>
+  [Parameter]
+  public double? HoleSize { get; set; }
 
   /// <summary>
   /// The series' labels, markers, stacking and tooltip settings
@@ -178,7 +186,7 @@ public class PixataChartSeries : PixataChartSettingsBase {
   internal bool? VisibleOverride { get; set; }
 
   /// <summary>
-  /// The pie segments the user has hidden with their legend items
+  /// The pie or donut segments the user has hidden with their legend items
   /// </summary>
   internal HashSet<int> HiddenPoints { get; } = [];
 

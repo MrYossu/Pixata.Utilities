@@ -12,6 +12,21 @@ internal sealed class PixataChartScene {
   public double Width { get; init; }
   public double Height { get; init; }
   public bool IsPie { get; set; }
+
+  /// <summary>
+  /// Whether the pie is a donut (in which case <see cref="IsPie"/> is true as well)
+  /// </summary>
+  public bool IsDonut { get; set; }
+
+  /// <summary>
+  /// The centre and radius of a donut's hole
+  /// </summary>
+  public (double X, double Y, double Radius) Hole { get; set; }
+
+  /// <summary>
+  /// Whether any series has any data, as without it the chart shows its no-data overlay
+  /// </summary>
+  public bool HasData { get; set; }
   public PixataChartBox Plot { get; set; }
   public List<object?> Categories { get; } = [];
   public PixataChartCategoryScale? CategoryScale { get; set; }
@@ -52,7 +67,7 @@ internal sealed record PixataChartSceneLine(double X1, double Y1, double X2, dou
 internal sealed record PixataChartSceneText(string[] Lines, double X, double Y, string Anchor, string Class, double LineHeight, double Rotation = 0, string? Colour = null, string? Font = null, string? Background = null, double Width = 0, double FontSize = 12, string? Title = null);
 
 /// <summary>
-/// A line series' line, or a pie label's connector
+/// A line series' line, or a pie or donut label's connector
 /// </summary>
 internal sealed record PixataChartScenePath(string D, string Class, int SeriesIndex, string? Colour = null, double? Width = null, string? DashArray = null, double? Opacity = null);
 
@@ -64,7 +79,7 @@ internal enum PixataChartPointKind {
 
 /// <summary>
 /// A data point the user can hover over, tap, click and move the keyboard focus to: a column, a line point (drawn as a
-/// marker) or a pie segment
+/// marker) or a pie or donut segment
 /// </summary>
 internal sealed class PixataChartScenePoint {
   public required PixataChartSeries Series { get; init; }
@@ -99,7 +114,7 @@ internal sealed class PixataChartScenePoint {
   public double Height { get; init; }
 
   /// <summary>
-  /// The outline of a pie segment, or of a marker that isn't a circle or square
+  /// The outline of a pie or donut segment, or of a marker that isn't a circle or square
   /// </summary>
   public string? Path { get; init; }
 
@@ -143,9 +158,10 @@ internal sealed class PixataChartScenePoint {
 }
 
 /// <summary>
-/// An item in the legend
+/// An item in the legend. <see cref="Linked"/> holds the segments (series and point indexes) of a donut's other rings that
+/// have the same category, which the item shows and hides along with its own
 /// </summary>
-internal sealed record PixataChartLegendEntry(int SeriesIndex, int? PointIndex, string Text, string Colour, PixataChartSeriesType Type, bool Visible, string? DashArray);
+internal sealed record PixataChartLegendEntry(int SeriesIndex, int? PointIndex, string Text, string Colour, PixataChartSeriesType Type, bool Visible, string? DashArray, IReadOnlyList<(int Series, int Point)>? Linked = null);
 
 /// <summary>
 /// The default series colours, and a little colour arithmetic for tooltip text

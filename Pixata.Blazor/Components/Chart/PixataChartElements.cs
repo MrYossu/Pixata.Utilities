@@ -176,3 +176,65 @@ public class PixataChartTooltip : PixataChartSettingsBase {
     }
   }
 }
+
+/// <summary>
+/// What the chart shows over its plot area when none of its series has any data. Without one, the chart shows "No data".
+/// Put it inside a <see cref="PixataChart"/>
+/// </summary>
+public class PixataChartNoDataTemplate : PixataChartSettingsBase {
+  /// <summary>
+  /// Whether anything is shown when there is no data. Set it to false to show the empty chart
+  /// </summary>
+  [Parameter]
+  public bool? Visible { get; set; }
+
+  /// <summary>
+  /// The content shown in place of the default "No data"
+  /// </summary>
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  internal override void Attach() {
+    if (Chart is not null) {
+      Chart.NoDataTemplate = this;
+    }
+  }
+
+  internal override void Detach() {
+    if (Chart?.NoDataTemplate == this) {
+      Chart.NoDataTemplate = null;
+    }
+  }
+
+  // The content usually shows the page's own state, so the chart draws it again whenever the page gives it new content
+  protected override void OnParametersSet() {
+    base.OnParametersSet();
+    Chart?.Invalidate();
+  }
+}
+
+/// <summary>
+/// Content shown in the hole of a donut chart, such as a total. Put it inside a <see cref="PixataChart"/>
+/// </summary>
+public class PixataChartDonutCenterTemplate : PixataChartSettingsBase {
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  internal override void Attach() {
+    if (Chart is not null) {
+      Chart.DonutCenterTemplate = this;
+    }
+  }
+
+  internal override void Detach() {
+    if (Chart?.DonutCenterTemplate == this) {
+      Chart.DonutCenterTemplate = null;
+    }
+  }
+
+  // The content usually shows the page's own state, so the chart draws it again whenever the page gives it new content
+  protected override void OnParametersSet() {
+    base.OnParametersSet();
+    Chart?.Invalidate();
+  }
+}

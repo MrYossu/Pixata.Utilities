@@ -6,7 +6,7 @@ using static Pixata.Blazor.Components.PixataChartFormatter;
 namespace Pixata.Blazor.Components;
 
 /// <summary>
-/// A pie segment. Angles are in degrees, measured anticlockwise from three o'clock; segments go clockwise, so
+/// A pie or donut segment. Angles are in degrees, measured anticlockwise from three o'clock; segments go clockwise, so
 /// <see cref="EndAngle"/> is less than <see cref="StartAngle"/>
 /// </summary>
 internal readonly record struct PixataChartPieSlice(int Index, double StartAngle, double EndAngle, double Percentage, double Total) {
@@ -73,6 +73,28 @@ internal static class PixataChartPie {
     (double x2, double y2) = PointAt(cx, cy, radius, endAngle);
     int large = sweep > 180 ? 1 : 0;
     return $"M {Svg(cx)} {Svg(cy)} L {Svg(x1)} {Svg(y1)} A {Svg(radius)} {Svg(radius)} 0 {large} 1 {Svg(x2)} {Svg(y2)} Z";
+  }
+
+  /// <summary>
+  /// The SVG path of a donut segment, between <paramref name="inner"/> and <paramref name="outer"/>. With no inner radius it
+  /// is a pie segment
+  /// </summary>
+  public static string RingSegmentPath(double cx, double cy, double inner, double outer, double startAngle, double endAngle) {
+    if (inner <= 0) {
+      return SegmentPath(cx, cy, outer, startAngle, endAngle);
+    }
+    double sweep = startAngle - endAngle;
+    if (sweep >= 359.99) {
+      // The outer circle goes clockwise and the inner one anticlockwise, so the inner one is a hole under the nonzero fill rule
+      return $"M {Svg(cx - outer)} {Svg(cy)} A {Svg(outer)} {Svg(outer)} 0 1 1 {Svg(cx + outer)} {Svg(cy)} A {Svg(outer)} {Svg(outer)} 0 1 1 {Svg(cx - outer)} {Svg(cy)} Z "
+        + $"M {Svg(cx - inner)} {Svg(cy)} A {Svg(inner)} {Svg(inner)} 0 1 0 {Svg(cx + inner)} {Svg(cy)} A {Svg(inner)} {Svg(inner)} 0 1 0 {Svg(cx - inner)} {Svg(cy)} Z";
+    }
+    (double ox1, double oy1) = PointAt(cx, cy, outer, startAngle);
+    (double ox2, double oy2) = PointAt(cx, cy, outer, endAngle);
+    (double ix1, double iy1) = PointAt(cx, cy, inner, endAngle);
+    (double ix2, double iy2) = PointAt(cx, cy, inner, startAngle);
+    int large = sweep > 180 ? 1 : 0;
+    return $"M {Svg(ox1)} {Svg(oy1)} A {Svg(outer)} {Svg(outer)} 0 {large} 1 {Svg(ox2)} {Svg(oy2)} L {Svg(ix1)} {Svg(iy1)} A {Svg(inner)} {Svg(inner)} 0 {large} 0 {Svg(ix2)} {Svg(iy2)} Z";
   }
 
   /// <summary>
