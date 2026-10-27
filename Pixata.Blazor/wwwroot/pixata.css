@@ -9506,10 +9506,15 @@
   margin-bottom: calc(var(--pixata-blazor-spacing) * 2);
 }
 
-/* 24 columns don't fit on a phone, so the grid scrolls sideways rather than squashing the cells */
+/*
+  24 columns don't fit on a phone, so the grid scrolls sideways rather than squashing the cells. The zero width stops the
+  table's width counting towards the width of whatever holds the heatmap, so a flex item (with its default min-width: auto)
+  doesn't stretch to fit the table and push the page wider than the screen. min-width: 100% then fills the space there is
+*/
 .pixata-blazor-heatmap-scroll {
   overflow-x: auto;
-  max-width: 100%;
+  width: 0;
+  min-width: 100%;
 }
 
 .pixata-blazor-heatmap-table {
