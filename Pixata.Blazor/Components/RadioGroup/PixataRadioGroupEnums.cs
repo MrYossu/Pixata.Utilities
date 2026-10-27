@@ -29,3 +29,18 @@ public enum PixataRadioGroupLabelPosition {
   /// </summary>
   After
 }
+
+/// <summary>
+/// How the picked radio button in a <see cref="PixataRadioGroup{TItem, TValue}"/> is drawn
+/// </summary>
+public enum PixataRadioGroupCheckedStyle {
+  /// <summary>
+  /// A solid dot in the middle of the radio button
+  /// </summary>
+  Filled,
+
+  /// <summary>
+  /// The radio button filled with a thick ring, around a hollow (white) middle
+  /// </summary>
+  Ring
+}

@@ -7142,7 +7142,7 @@
 /* ========== PixataRadioGroup ========== */
 
 /*
-  pixata-blazor-radiogroup is the list, plus -vertical or -horizontal, and pixata-blazor-disabled or pixata-blazor-invalid
+  pixata-blazor-radiogroup is the list, plus -vertical or -horizontal, -filled or -ring, and pixata-blazor-disabled or pixata-blazor-invalid
   when they apply. Each pixata-blazor-radiogroup-item holds a native radio button (pixata-blazor-radiogroup-radio, plus -sm,
   -md or -lg) and its pixata-blazor-radiogroup-label; the checked item also has pixata-blazor-radiogroup-item-checked
 */
@@ -7221,10 +7221,20 @@
   box-shadow: var(--pixata-blazor-radiogroup-focus-shadow);
 }
 
+/* CheckedStyle="Ring": a disc in the checked colour, with a dot in the dot colour (white by default), so the middle looks hollow */
 .pixata-blazor-radiogroup-radio:checked {
   border-color: var(--pixata-blazor-radiogroup-checked-border-color);
   background-color: var(--pixata-blazor-radiogroup-checked-bg);
   background-image: radial-gradient(circle closest-side, var(--pixata-blazor-radiogroup-dot-color) 0 var(--pixata-blazor-radiogroup-dot-size), transparent calc(var(--pixata-blazor-radiogroup-dot-size) + 1px));
+}
+
+/*
+  CheckedStyle="Filled" (the default): a solid dot in the checked colour in the middle, so the picked one stands out. The
+  -filled-* variables fall back here rather than on :root, so overriding -radio-bg or -checked-bg on a container carries through
+*/
+.pixata-blazor-radiogroup-filled .pixata-blazor-radiogroup-radio:checked {
+  background-color: var(--pixata-blazor-radiogroup-filled-bg, var(--pixata-blazor-radiogroup-radio-bg));
+  background-image: radial-gradient(circle closest-side, var(--pixata-blazor-radiogroup-filled-dot-color, var(--pixata-blazor-radiogroup-checked-bg)) 0 var(--pixata-blazor-radiogroup-dot-size), transparent calc(var(--pixata-blazor-radiogroup-dot-size) + 1px));
 }
 
 .pixata-blazor-radiogroup-radio:checked:focus-visible {

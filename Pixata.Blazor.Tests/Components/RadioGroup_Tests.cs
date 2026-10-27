@@ -180,6 +180,17 @@ public class RadioGroup_Tests {
     Assert.AreEqual("INPUT", item.Children[0].TagName);
     Assert.AreEqual("LABEL", item.Children[1].TagName);
     Assert.IsTrue(cut.Find("input").ClassList.Contains("pixata-blazor-radiogroup-radio-md"));
+    Assert.IsTrue(cut.Find("ul").ClassList.Contains("pixata-blazor-radiogroup-filled"));
+  }
+
+  [TestMethod]
+  public void RingCheckedStyle_IsApplied() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataRadioGroup<string, string>> cut = context.Render<PixataRadioGroup<string, string>>(p => p
+      .Add(c => c.Data, Sizes)
+      .Add(c => c.CheckedStyle, PixataRadioGroupCheckedStyle.Ring));
+    Assert.IsTrue(cut.Find("ul").ClassList.Contains("pixata-blazor-radiogroup-ring"));
+    Assert.IsFalse(cut.Find("ul").ClassList.Contains("pixata-blazor-radiogroup-filled"));
   }
 
   [TestMethod]

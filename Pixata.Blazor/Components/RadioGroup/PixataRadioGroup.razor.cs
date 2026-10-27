@@ -62,6 +62,13 @@ public partial class PixataRadioGroup<TItem, TValue> {
   public PixataRadioGroupLabelPosition LabelPosition { get; set; } = PixataRadioGroupLabelPosition.After;
 
   /// <summary>
+  /// How the picked radio button is drawn: with a solid dot in the middle (<see cref="PixataRadioGroupCheckedStyle.Filled"/>,
+  /// the default) or as a thick ring around a hollow middle (<see cref="PixataRadioGroupCheckedStyle.Ring"/>)
+  /// </summary>
+  [Parameter]
+  public PixataRadioGroupCheckedStyle CheckedStyle { get; set; } = PixataRadioGroupCheckedStyle.Filled;
+
+  /// <summary>
   /// The size of the radio buttons: <c>sm</c>, <c>md</c> (the default) or <c>lg</c>. See <see cref="PixataThemeConstants.Size"/>
   /// </summary>
   [Parameter]
@@ -112,6 +119,7 @@ public partial class PixataRadioGroup<TItem, TValue> {
     PixataCss.Classes("pixata-blazor-radiogroup",
       Layout == PixataRadioGroupLayout.Horizontal ? "pixata-blazor-radiogroup-horizontal" : "pixata-blazor-radiogroup-vertical",
       LabelPosition == PixataRadioGroupLabelPosition.Before ? "pixata-blazor-radiogroup-label-before" : null,
+      CheckedStyle == PixataRadioGroupCheckedStyle.Ring ? "pixata-blazor-radiogroup-ring" : "pixata-blazor-radiogroup-filled",
       PixataCss.Disabled(Enabled),
       InvalidClass,
       Class);

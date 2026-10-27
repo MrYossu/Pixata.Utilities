@@ -70,6 +70,16 @@
   </ChildContent>
 </ComponentSample>
 
+<ComponentSample Title="Checked style">
+  <Description>
+    <p><code>CheckedStyle</code> sets how the picked radio button is drawn: <code>Filled</code> (the default) puts a solid dot in the middle, and <code>Ring</code> fills it with a thick ring around a hollow middle.</p>
+  </Description>
+  <ChildContent>
+    <PixataRadioGroup Data="_sizes" Value="@("Medium")" CheckedStyle="PixataRadioGroupCheckedStyle.Filled" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Filled" />
+    <PixataRadioGroup Data="_sizes" Value="@("Medium")" CheckedStyle="PixataRadioGroupCheckedStyle.Ring" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Ring" />
+  </ChildContent>
+</ComponentSample>
+
 <ComponentSample Title="Inside an EditForm">
   <Description>
     <p>The group takes part in validation. Click Submit without choosing anything to see the invalid state.</p>

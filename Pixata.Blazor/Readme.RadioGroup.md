@@ -77,6 +77,7 @@ On touch screens each option is at least `--pixata-blazor-touch-target` (2.5rem)
 | `ItemTemplate` | `RenderFragment<TItem>` | | Renders each item's label, with the item as the context |
 | `Layout` | `PixataRadioGroupLayout` | `Vertical` | `Vertical` stacks the options; `Horizontal` puts them in a row that wraps when it runs out of room |
 | `LabelPosition` | `PixataRadioGroupLabelPosition` | `After` | Whether each label comes `Before` or `After` its radio button |
+| `CheckedStyle` | `PixataRadioGroupCheckedStyle` | `Filled` | How the picked radio button is drawn: `Filled` puts a solid dot in the middle; `Ring` fills it with a thick ring around a hollow middle |
 | `Size` | `string` | `"md"` | The size of the radio buttons: `"sm"`, `"md"` or `"lg"`. The values are in `PixataThemeConstants.Size` |
 | `Enabled` | `bool` | `true` | When false, every radio button is disabled |
 | `Id` | `string` | | The `id` of the group. The radio buttons get `{Id}-0`, `{Id}-1` and so on. If you don't set it, a unique one is generated |
@@ -168,7 +169,7 @@ The group is made up of these elements and classes...
 
 | Class | Element |
 | --- | --- |
-| `pixata-blazor-radiogroup` | The `<ul>`. It also has `pixata-blazor-radiogroup-vertical` or `pixata-blazor-radiogroup-horizontal`, `pixata-blazor-radiogroup-label-before` when the labels come first, and `pixata-blazor-disabled` or `pixata-blazor-invalid` when they apply |
+| `pixata-blazor-radiogroup` | The `<ul>`. It also has `pixata-blazor-radiogroup-vertical` or `pixata-blazor-radiogroup-horizontal`, `pixata-blazor-radiogroup-filled` or `pixata-blazor-radiogroup-ring` (from `CheckedStyle`), `pixata-blazor-radiogroup-label-before` when the labels come first, and `pixata-blazor-disabled` or `pixata-blazor-invalid` when they apply |
 | `pixata-blazor-radiogroup-item` | Each `<li>`, holding a radio button and its label. The picked one also has `pixata-blazor-radiogroup-item-checked`, and a disabled one `pixata-blazor-disabled` |
 | `pixata-blazor-radiogroup-radio` | The radio button, plus `pixata-blazor-radiogroup-radio-sm`, `-md` or `-lg` |
 | `pixata-blazor-radiogroup-label` | The label |
@@ -180,9 +181,11 @@ The colours and sizes come from these custom properties, which you can override 
 | `--pixata-blazor-radiogroup-radio-size-sm`, `-md`, `-lg` | `12px`, `16px`, `20px` | The size of the radio buttons |
 | `--pixata-blazor-radiogroup-radio-bg` | `#fff` | The background of an unpicked radio button |
 | `--pixata-blazor-radiogroup-radio-border-color` | `--pixata-blazor-border-color` | The border of an unpicked radio button |
-| `--pixata-blazor-radiogroup-checked-bg` | `--pixata-blazor-primary` | The background of the picked radio button |
+| `--pixata-blazor-radiogroup-checked-bg` | `--pixata-blazor-primary` | The colour of the picked radio button: its dot when `Filled`, its background when `Ring` |
 | `--pixata-blazor-radiogroup-checked-border-color` | `--pixata-blazor-primary` | The border of the picked radio button |
-| `--pixata-blazor-radiogroup-dot-color` | `--pixata-blazor-primary-color` | The dot in the picked radio button |
+| `--pixata-blazor-radiogroup-filled-dot-color` | `--pixata-blazor-radiogroup-checked-bg` | The dot in the picked radio button when `Filled` |
+| `--pixata-blazor-radiogroup-filled-bg` | `--pixata-blazor-radiogroup-radio-bg` | The background around the dot when `Filled` |
+| `--pixata-blazor-radiogroup-dot-color` | `--pixata-blazor-primary-color` | The hollow middle of the picked radio button when `Ring` |
 | `--pixata-blazor-radiogroup-dot-size` | `57%` | The size of the dot, as a percentage of the inside of the radio button |
 | `--pixata-blazor-radiogroup-focus-shadow` | A faint 2px ring | The focus ring on an unpicked radio button, when focused from the keyboard |
 | `--pixata-blazor-radiogroup-checked-focus-shadow` | A 2px ring in the primary colour | The focus ring on the picked radio button |
