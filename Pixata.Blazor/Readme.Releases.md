@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.18.0** adds `PixataNumericTextBox`, a text box for numbers with optional spin buttons, `Min`, `Max`, `Step`, `Decimals` and a display `Format`, which has the same parameters as Telerik's NumericTextBox. It works with `int`, `long`, `short`, `decimal`, `double`, `float` and their nullable versions, inside an `EditForm` or on its own. See the [numeric text box documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.NumericTextBox.md) (#113)
+
 >**Version 5.17.0** hides the clear button in the filter row for `PixataTextGridColumn` and `PixataNumericGridColumn` (`PixataEnumGridColumn` never showed it), as it's easy enough to delete what was typed. **Behaviour change:** set `ShowFilterClearButton="true"` on the column to get it back. See [typed columns](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns)
 
 >**Version 5.16.0** adds `DisplayStyle` to `PixataEnumGridColumn`, which sets how values whose names are several words are shown, in the cells and in the filter's drop-down: `LowerCamelCase` ("Awaiting signature", the default), `UpperCamelCase` ("Awaiting Signature") or `NotSplit` ("AwaitingSignature"). **Behaviour change:** enum columns used to show the names as they are, so set `DisplayStyle="PixataEnumDisplayStyle.NotSplit"` to keep the old look. See [typed columns](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns)
