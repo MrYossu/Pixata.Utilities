@@ -1,0 +1,83 @@
+@page "/NumericTextBoxSample"
+@using System.ComponentModel.DataAnnotations
+
+<SitePageTitle>Numeric text box</SitePageTitle>
+
+<h3>Numeric text box</h3>
+
+<p><code>PixataNumericTextBox</code> is a text box for numbers, with optional spin buttons, a minimum and maximum, rounding and a display format. Click in a box to see the plain number, and click out to see it formatted. The up and down arrow keys change the value too. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.NumericTextBox.md">the documentation</a>.</p>
+
+<ComponentSample Title="Basic use">
+  <Description>
+    <p>A <code>decimal</code> with <code>Format="C2"</code> and <code>Decimals="2"</code>. The value updates as you type, and <code>OnChange</code> fires when you press Enter or leave the box.</p>
+  </Description>
+  <ChildContent>
+    <label for="pixata-amount">Amount</label>
+    <PixataNumericTextBox Id="pixata-amount" @bind-Value="_amount" Format="C2" Decimals="2" Width="200px" OnChange="@((object? v) => _log = $"OnChange: {v}")" />
+    <p class="mt-2">Value: <strong>@_amount</strong><br />@_log</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Nullable, with a placeholder">
+  <Description>
+    <p>Bound to an <code>int?</code>. Clearing the box sets the value to null.</p>
+  </Description>
+  <ChildContent>
+    <PixataNumericTextBox @bind-Value="_quantity" Placeholder="Quantity" Width="150px" aria-label="Quantity" />
+    <p class="mt-2">Value: <strong>@(_quantity?.ToString() ?? "null")</strong></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Min, max and step">
+  <Description>
+    <p>A <code>double</code> from 0 to 10, in steps of 0.5. A value outside the range is brought back into it when you leave the box.</p>
+  </Description>
+  <ChildContent>
+    <PixataNumericTextBox @bind-Value="_rating" Min="0d" Max="10d" Step="0.5d" Width="150px" aria-label="Rating" />
+    <p class="mt-2">Value: <strong>@_rating</strong></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Sizes, no arrows, read only and disabled">
+  <Description>
+    <p><code>Size</code> takes <code>sm</code>, <code>md</code> or <code>lg</code>. <code>Arrows="false"</code> hides the spin buttons.</p>
+  </Description>
+  <ChildContent>
+    <PixataNumericTextBox @bind-Value="_amount" Size="sm" Format="N2" Width="150px" aria-label="Small" />
+    <PixataNumericTextBox @bind-Value="_amount" Size="lg" Format="N2" Width="150px" aria-label="Large" Class="ms-2" />
+    <PixataNumericTextBox @bind-Value="_amount" Arrows="false" Format="N2" Width="150px" aria-label="No arrows" Class="ms-2" />
+    <PixataNumericTextBox @bind-Value="_amount" ReadOnly="true" Format="N2" Width="150px" aria-label="Read only" Class="ms-2" />
+    <PixataNumericTextBox @bind-Value="_amount" Enabled="false" Format="N2" Width="150px" aria-label="Disabled" Class="ms-2" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="In a form">
+  <Description>
+    <p>Inside an <code>EditForm</code> with a <code>[Range]</code> attribute. Enter 0 or more than 1,000 and submit to see the validation.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_payment" OnValidSubmit="@(() => _submitted = $"Saved {_payment.Amount:C2}")">
+      <DataAnnotationsValidator />
+      <FormSingle Label="Payment" Id="pixata-payment" Required="true">
+        <PixataNumericTextBox Id="pixata-payment" @bind-Value="_payment.Amount" Format="N2" Decimals="2" Width="200px" />
+        <ValidationMessage For="() => _payment.Amount" />
+      </FormSingle>
+      <button type="submit" class="btn btn-primary mt-2">Save</button>
+      <p class="mt-2">@_submitted</p>
+    </EditForm>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private decimal _amount = 1234.5m;
+  private string _log = "";
+  private int? _quantity;
+  private double _rating = 7.5;
+  private readonly Payment _payment = new();
+  private string _submitted = "";
+
+  private class Payment {
+    [Range(0.01, 1000, ErrorMessage = "The payment must be between 0.01 and 1,000")]
+    public decimal Amount { get; set; }
+  }
+}
