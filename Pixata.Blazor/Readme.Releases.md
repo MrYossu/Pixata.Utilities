@@ -2,6 +2,10 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.18.1** fixes two things in `AuditViewer`...
+>- When the user left the page the viewer was on, it reloaded for the page that was going away, as Blazor tells components about a new location before it disposes the old page. With a scoped `DbContext`, that could clash with the new page's own queries. It now ignores locations on other pages. If loading fails, the viewer now shows the error rather than letting it end a Blazor Server circuit (#111)
+>- The "View history" buttons kept their text colour on hover only if the host's stylesheet didn't colour links on hover, so the text could vanish into the button. They now keep `--pixata-primary-color` whatever the host does with links (#112)
+
 >**Version 5.18.0** adds `PixataNumericTextBox`, a text box for numbers with optional spin buttons, `Min`, `Max`, `Step`, `Decimals` and a display `Format`, which has the same parameters as Telerik's NumericTextBox. It works with `int`, `long`, `short`, `decimal`, `double`, `float` and their nullable versions, inside an `EditForm` or on its own. See the [numeric text box documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.NumericTextBox.md) (#113)
 
 >**Version 5.17.0** hides the clear button in the filter row for `PixataTextGridColumn` and `PixataNumericGridColumn` (`PixataEnumGridColumn` never showed it), as it's easy enough to delete what was typed. **Behaviour change:** set `ShowFilterClearButton="true"` on the column to get it back. See [typed columns](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#typed-columns)
