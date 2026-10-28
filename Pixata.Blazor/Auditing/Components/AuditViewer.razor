@@ -1,13 +1,18 @@
 @namespace Pixata.Blazor.Auditing.Components
 @inject AuditViewerServiceInterface AuditViewerService
 @inject NavigationManager NavigationManager
+@inject ILogger<AuditViewer> Logger
 @using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.Extensions.Logging
 @using Pixata.Extensions.Auditing.Models
 @using Pixata.Extensions.Auditing.Services
 @using Pixata.Blazor.Auditing.Services
 @implements IDisposable
 
 <div class="pixata-blazor-audit-viewer">
+  @if (_errorMessage is not null) {
+    <div class="pixata-blazor-audit-error-state" role="alert">@_errorMessage</div>
+  }
   @if (_selectedEntityId is not null && _selectedEntityType is not null) {
     <div class="pixata-blazor-audit-history-view">
       <button class="pixata-blazor-audit-back-btn" @onclick="BackToEntityList">← Back to entity list</button>
@@ -302,6 +307,9 @@
   private bool _isLoadingEntities;
   private bool _isLoadingHistory;
   private bool _suppressLocationChanged;
+  private bool _disposed;
+  private string _viewerPath = "";
+  private string? _errorMessage;
   private List<string> _auditedEntityIds = [];
   private List<AuditEntryViewModel> _auditEntries = [];
   private int _currentPage = 1;
@@ -346,8 +354,11 @@
     _defaultHorizontalView = DefaultHorizontalView;
     _horizontalView = DefaultHorizontalView;
     _isLoadingEntityTypes = true;
-    _entityTypes = await AuditViewerService.GetEntityTypes();
+    bool loaded = await Load("the entity types", async () => _entityTypes = await AuditViewerService.GetEntityTypes());
     _isLoadingEntityTypes = false;
+    if (!loaded) {
+      return;
+    }
 
     // Default: all entity types checked
     _checkedEntityTypes = _entityTypes.Select(et => et.FullName).ToHashSet();
@@ -358,6 +369,7 @@
     }
 
     ReadQueryString();
+    _viewerPath = PagePath(NavigationManager.Uri);
     NavigationManager.LocationChanged += OnLocationChanged;
 
     if (_showAllView) {
@@ -467,25 +479,62 @@
     NavigationManager.NavigateTo(uri, replace: true);
   }
 
+  // LocationChanged fires before the old page is disposed, so when the user leaves the viewer's page, this would otherwise
+  // reload for a page that's going away. As it's async void, an exception mustn't escape, as that would end a Blazor
+  // Server circuit. The loads show their own errors, so the catch is a last resort
   private async void OnLocationChanged(object? sender, LocationChangedEventArgs args) {
+    if (_disposed || !IsViewerPage(args.Location)) {
+      return;
+    }
     if (_suppressLocationChanged) {
       _suppressLocationChanged = false;
       return;
     }
-    ReadQueryString();
-    if (_showAllView) {
-      await LoadAllViewEntries();
-    } else if (_selectedEntityType is not null) {
-      await LoadAuditedEntities();
-      if (_selectedEntityId is not null) {
-        await LoadAuditHistory();
-      }
+    try {
+      await InvokeAsync(async () => {
+        ReadQueryString();
+        if (_showAllView) {
+          await LoadAllViewEntries();
+        } else if (_selectedEntityType is not null) {
+          await LoadAuditedEntities();
+          if (_selectedEntityId is not null) {
+            await LoadAuditHistory();
+          }
+        }
+        StateHasChanged();
+      });
     }
-    await InvokeAsync(StateHasChanged);
+    catch (Exception ex) {
+      Logger.LogError(ex, "The audit viewer couldn't update after the location changed to {Location}", args.Location);
+    }
   }
 
-  public void Dispose() =>
+  // The viewer only ever changes the query string, so a location with another path means the user is leaving the page
+  private bool IsViewerPage(string location) =>
+    string.Equals(PagePath(location), _viewerPath, StringComparison.OrdinalIgnoreCase);
+
+  private string PagePath(string uri) =>
+    NavigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path).TrimEnd('/');
+
+  // Runs a call to the service, showing any error in the viewer rather than letting it end the circuit, and returns
+  // whether it worked
+  private async Task<bool> Load(string what, Func<Task> load) {
+    try {
+      await load();
+      _errorMessage = null;
+      return true;
+    }
+    catch (Exception ex) {
+      Logger.LogError(ex, "The audit viewer couldn't load {What}", what);
+      _errorMessage = $"Couldn't load {what}. {ex.Message}";
+      return false;
+    }
+  }
+
+  public void Dispose() {
+    _disposed = true;
     NavigationManager.LocationChanged -= OnLocationChanged;
+  }
 
   private void OnShowOnlyChangedChanged(bool value) {
     _showOnlyChanged = value;
@@ -585,7 +634,8 @@
     StateHasChanged();
 
     IEnumerable<string> typesToLoad = _entityTypes.Select(et => et.FullName);
-    _allViewEntries = await AuditViewerService.GetAllAuditEntries(typesToLoad, FilterDateToUtc(_allViewFilterFrom), FilterDateToUtc(_allViewFilterTo), _allViewFilterUser);
+    await Load("the audit entries", async () =>
+      _allViewEntries = await AuditViewerService.GetAllAuditEntries(typesToLoad, FilterDateToUtc(_allViewFilterFrom), FilterDateToUtc(_allViewFilterTo), _allViewFilterUser));
 
     RecalcAllViewPages();
 
@@ -638,7 +688,8 @@
     _isLoadingEntities = true;
     StateHasChanged();
 
-    _auditedEntityIds = await AuditViewerService.GetDistinctEntityIds(_selectedEntityType.FullName);
+    string entityType = _selectedEntityType.FullName;
+    await Load("the audited entities", async () => _auditedEntityIds = await AuditViewerService.GetDistinctEntityIds(entityType));
 
     if (!string.IsNullOrWhiteSpace(_searchTerm)) {
       _auditedEntityIds = _auditedEntityIds.Where(entityId => entityId.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -681,13 +732,16 @@
     _isLoadingHistory = true;
     StateHasChanged();
 
-    _auditEntries = await AuditViewerService.GetAuditHistory(
-      _selectedEntityType.FullName,
-      _selectedEntityId,
-      FilterDateToUtc(_filterFromDate),
-      FilterDateToUtc(_filterToDate),
-      _filterUser,
-      _filterOperation);
+    string entityType = _selectedEntityType.FullName;
+    string entityId = _selectedEntityId;
+    await Load("the audit history", async () =>
+      _auditEntries = await AuditViewerService.GetAuditHistory(
+        entityType,
+        entityId,
+        FilterDateToUtc(_filterFromDate),
+        FilterDateToUtc(_filterToDate),
+        _filterUser,
+        _filterOperation));
 
     _isLoadingHistory = false;
     StateHasChanged();

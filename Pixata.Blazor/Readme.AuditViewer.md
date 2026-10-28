@@ -105,6 +105,8 @@ Checking the "Show only changed properties" checkbox works here too...
 
 The current view is kept in the query string, so refreshing the page (or sending someone the link) preserves what you were looking at.
 
+If the audit entries can't be loaded, for example because the database can't be reached, the viewer shows the error at the top, and logs it. Before v5.18.1, the error ended the Blazor Server circuit.
+
 ## Parameters
 
 ```xml
@@ -143,6 +145,6 @@ The viewer's styles are in pixata.css (see [Styling](https://github.com/MrYossu/
 
 The drop-downs' shadow is `--pixata-popup-shadow`.
 
-Every class the viewer uses starts with `pixata-blazor-audit-`, so you can restyle any part of it without `!important`, and without the risk of its styles clashing with yours.
+Every class the viewer uses starts with `pixata-blazor-audit-`, so you can restyle any part of it without `!important`, and without the risk of its styles clashing with yours. An error is shown in `pixata-blazor-audit-error-state`, coloured with `--pixata-danger`.
 
 >**Changed in v5.4.0.** The styles used to be in a `<style>` block inside the component, with hard-coded colours and global class names such as `view-btn` and `filters`. If you overrode any of those, add `pixata-blazor-audit-` to the front of the class name, dropping any `audit-` it started with, eg `view-btn` is now `pixata-blazor-audit-view-btn`, and `audit-timeline` is now `pixata-blazor-audit-timeline`.
