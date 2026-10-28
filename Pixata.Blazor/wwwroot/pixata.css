@@ -2925,6 +2925,15 @@
   animation: pixata-spin .7s linear infinite;
 }
 
+.pixata-blazor-audit-error-state {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  color: var(--pixata-danger);
+  background: color-mix(in srgb, var(--pixata-danger) 8%, transparent);
+  border: 1px solid var(--pixata-danger);
+  border-radius: var(--pixata-border-radius);
+}
+
 .pixata-blazor-audit-empty-state {
   text-align: center;
   padding: 2rem;
