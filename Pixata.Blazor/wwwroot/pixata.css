@@ -1341,6 +1341,105 @@
   }
 }
 
+/* ---------- Numeric text box ---------- */
+
+/* Uses the date input's variables, so the two look the same side by side in a form */
+.pixata-blazor-numerictextbox {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  vertical-align: middle;
+  overflow: hidden;
+  font-size: var(--pixata-datepicker-font-size);
+  line-height: var(--pixata-datepicker-line-height);
+  color: var(--pixata-datepicker-color);
+  background-color: var(--pixata-datepicker-bg);
+  border: 1px solid var(--pixata-datepicker-border-color);
+  border-radius: var(--pixata-datepicker-border-radius);
+}
+
+.pixata-blazor-numerictextbox:hover {
+  border-color: var(--pixata-datepicker-hover-border-color);
+}
+
+.pixata-blazor-numerictextbox:focus-within {
+  border-color: var(--pixata-datepicker-hover-border-color);
+  box-shadow: var(--pixata-datepicker-focus-shadow);
+}
+
+.pixata-blazor-numerictextbox-invalid,
+.pixata-blazor-numerictextbox-invalid:hover,
+.pixata-blazor-numerictextbox-invalid:focus-within {
+  border-color: var(--pixata-datepicker-invalid-border-color);
+}
+
+.pixata-blazor-numerictextbox-disabled {
+  opacity: .6;
+  pointer-events: none;
+}
+
+.pixata-blazor-numerictextbox-input {
+  flex: 1 1 0%;
+  width: 100%;
+  min-width: 0;
+  padding: .25rem .5rem;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: none;
+  font: inherit;
+  text-align: inherit;
+}
+
+.pixata-blazor-numerictextbox-input::placeholder {
+  color: var(--pixata-datepicker-subtle-color);
+  opacity: 1;
+}
+
+.pixata-blazor-numerictextbox-spinner {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  width: 28px;
+}
+
+.pixata-blazor-numerictextbox-spinner button {
+  display: flex;
+  flex: 1 1 50%;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-inline-start: 1px solid var(--pixata-datepicker-border-color);
+  color: inherit;
+  background-color: var(--pixata-datepicker-button-bg);
+  cursor: pointer;
+}
+
+.pixata-blazor-numerictextbox-spinner button:hover {
+  background-color: var(--pixata-datepicker-button-hover-bg);
+}
+
+.pixata-blazor-numerictextbox-spinner svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pixata-blazor-numerictextbox-sm .pixata-blazor-numerictextbox-input {
+  padding: .125rem .5rem;
+}
+
+.pixata-blazor-numerictextbox-lg {
+  font-size: var(--pixata-blazor-font-size-lg);
+  line-height: var(--pixata-blazor-line-height-lg);
+}
+
+.pixata-blazor-numerictextbox-lg .pixata-blazor-numerictextbox-input {
+  padding: .5rem .5rem;
+}
+
 /* ---------- Date range picker ---------- */
 
 .pixata-blazor-daterangepicker {
@@ -2741,9 +2840,18 @@
   display: inline-block;
 }
 
+/* The "View history" buttons are links, so the colour and underline are set for every state, or a host's a:hover or
+   a:visited rule (which beats a single class) would decide them */
+.pixata-blazor-audit-view-btn:link, .pixata-blazor-audit-view-btn:visited, .pixata-blazor-audit-view-btn:focus, .pixata-blazor-audit-view-btn:active {
+  color: var(--pixata-primary-color);
+  text-decoration: none;
+}
+
 .pixata-blazor-audit-view-btn:hover, .pixata-blazor-audit-back-btn:hover, .pixata-blazor-audit-filter-btn:hover {
   background: var(--pixata-primary-hover);
   border-color: var(--pixata-primary-hover);
+  color: var(--pixata-primary-color);
+  text-decoration: none;
 }
 
 .pixata-blazor-audit-back-btn {
@@ -2815,6 +2923,15 @@
   border-top-color: var(--pixata-primary);
   border-radius: 50%;
   animation: pixata-spin .7s linear infinite;
+}
+
+.pixata-blazor-audit-error-state {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  color: var(--pixata-danger);
+  background: color-mix(in srgb, var(--pixata-danger) 8%, transparent);
+  border: 1px solid var(--pixata-danger);
+  border-radius: var(--pixata-border-radius);
 }
 
 .pixata-blazor-audit-empty-state {

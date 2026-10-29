@@ -16,21 +16,21 @@
         <span class="oi oi-home" aria-hidden="true"></span> Home
       </NavLink>
     </li>
-    @foreach (NavSection section in Sections) {
-      bool open = _open.Contains(section.Title);
+    @foreach (NavSection navSection in Sections) {
+      bool open = _open.Contains(navSection.Title);
       <li class="nav-section px-3">
         <button type="button"
                 class="nav-section-toggle"
                 aria-expanded="@(open ? "true" : "false")"
-                @onclick="() => ToggleSection(section)"
+                @onclick="() => ToggleSection(navSection)"
                 @onclick:stopPropagation="true">
-          <span class="@section.Icon" aria-hidden="true"></span>
-          <span class="nav-section-title">@section.Title</span>
+          <span class="@navSection.Icon" aria-hidden="true"></span>
+          <span class="nav-section-title">@navSection.Title</span>
           <span class="nav-section-arrow @(open ? "nav-section-arrow-open" : null)" aria-hidden="true"></span>
         </button>
         @if (open) {
           <ul class="nav flex-column nav-section-items">
-            @foreach (NavItem item in section.Items) {
+            @foreach (NavItem item in navSection.Items) {
               <li class="nav-item">
                 <NavLink class="nav-link text-truncate" href="@item.Href" Match="NavLinkMatch.All">
                   <span class="@item.Icon" aria-hidden="true"></span> @item.Title
@@ -69,6 +69,7 @@
       new("FormSample", "Forms", "oi oi-data-transfer-download"),
       new("DropDownsSample", "Drop-downs", "far fa-caret-square-down"),
       new("RadioGroupSample", "Radio group", "far fa-dot-circle"),
+      new("NumericTextBoxSample", "Numeric text box", "fas fa-sort-numeric-up"),
       new("SwitchSample", "Switch", "fas fa-toggle-on"),
       new("EditorSample", "Editor", "far fa-edit"),
       new("FileUploadSample", "File select and upload", "fas fa-upload")

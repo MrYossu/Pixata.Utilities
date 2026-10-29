@@ -1,0 +1,38 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+
+@* A number input with optional spin buttons, as in Telerik's NumericTextBox *@
+<span class="@WrapperClass" style="@WidthStyle">
+  <input @attributes="AdditionalAttributes"
+         class="pixata-blazor-numerictextbox-input"
+         id="@Id"
+         type="text"
+         value="@_text"
+         placeholder="@Placeholder"
+         inputmode="@EffectiveInputMode"
+         autocomplete="off"
+         disabled="@(!Enabled)"
+         readonly="@ReadOnly"
+         tabindex="@TabIndex"
+         role="spinbutton"
+         aria-valuenow="@CurrentNumber"
+         aria-valuemin="@MinNumber"
+         aria-valuemax="@MaxNumber"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         @onfocus="OnFocus"
+         @onblur="OnInputBlur"
+         @oninput="OnInput"
+         @onkeydown="OnKeyDown" />
+  @if (Arrows) {
+    <span class="pixata-blazor-numerictextbox-spinner">
+      <button type="button" class="pixata-blazor-numerictextbox-increase" tabindex="-1" title="Increase value" aria-label="Increase value" disabled="@(!Enabled || ReadOnly)"
+              @onmousedown="KeepFocus" @onmousedown:preventDefault="true" @onclick="() => Spin(1)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10h8L8 5z" /></svg>
+      </button>
+      <button type="button" class="pixata-blazor-numerictextbox-decrease" tabindex="-1" title="Decrease value" aria-label="Decrease value" disabled="@(!Enabled || ReadOnly)"
+              @onmousedown="KeepFocus" @onmousedown:preventDefault="true" @onclick="() => Spin(-1)">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6h8l-4 5z" /></svg>
+      </button>
+    </span>
+  }
+</span>
