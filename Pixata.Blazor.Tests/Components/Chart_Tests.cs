@@ -1168,7 +1168,7 @@ public class Chart_Tests {
   [TestMethod]
   public async Task Chart_RemovedWhileItsScriptIsAttaching_IsDetachedWhenTheScriptAnswers() {
     using BunitContext context = PixataTestContext.Create();
-    BunitJSModuleInterop module = context.JSInterop.SetupModule("./_content/Pixata.Blazor/Components/Chart/PixataChart.razor.js");
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(PixataChart.ModulePath);
     // attach() returns a private type, so its handler is set up by reflection
     Type resultType = typeof(PixataChart).GetNestedType("AttachResult", BindingFlags.NonPublic)!;
     MethodInfo setup = typeof(BunitJSInteropSetupExtensions).GetMethod(nameof(BunitJSInteropSetupExtensions.Setup), [typeof(BunitJSInterop), typeof(string), typeof(InvocationMatcher)])!.MakeGenericMethod(resultType);

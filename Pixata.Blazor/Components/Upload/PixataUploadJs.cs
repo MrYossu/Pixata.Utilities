@@ -10,7 +10,7 @@ namespace Pixata.Blazor.Components;
 /// <see cref="IJSRuntime"/>
 /// </summary>
 internal static class PixataUploadJs {
-  public const string ModulePath = "./_content/Pixata.Blazor/pixata-upload.js";
+  public static readonly string ModulePath = PixataBlazorScript.Versioned("pixata-upload.js");
 
   private static readonly ConditionalWeakTable<IJSRuntime, Task<IJSObjectReference>> Modules = new();
 

@@ -62,7 +62,7 @@
       return;
     }
     try {
-      IJSObjectReference module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Pixata.Blazor/Components/VirtualiseWithState.razor.js");
+      IJSObjectReference module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Versioned("Components/VirtualiseWithState.razor.js"));
       // The user can leave the page while the module is being imported, in which case the scroll container has already gone
       if (_disposed) {
         await module.DisposeAsync();

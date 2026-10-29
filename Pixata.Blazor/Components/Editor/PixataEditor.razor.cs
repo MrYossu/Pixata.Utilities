@@ -15,7 +15,7 @@ namespace Pixata.Blazor.Components;
 /// the HTML both when it is given a value and when it emits one
 /// </summary>
 public partial class PixataEditor : PixataInputBase<string>, IAsyncDisposable {
-  internal const string ModulePath = "./_content/Pixata.Blazor/pixata-editor.js";
+  internal static readonly string ModulePath = PixataBlazorScript.Versioned("pixata-editor.js");
   internal const string CustomToolNameKey = "PixataEditorCustomToolName";
 
   // Until the browser reports the selection, assume an empty document: nothing to undo, outdent, unlink or do to a table

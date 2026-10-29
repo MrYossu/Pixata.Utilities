@@ -10,7 +10,7 @@ namespace Pixata.Blazor.Components;
 /// ignoring the errors you get when the circuit has gone or JavaScript isn't available yet (prerendering)
 /// </summary>
 internal static class PixataDropDownJs {
-  public const string ModulePath = "./_content/Pixata.Blazor/pixata-dropdowns.js";
+  public static readonly string ModulePath = PixataBlazorScript.Versioned("pixata-dropdowns.js");
 
   private static readonly ConditionalWeakTable<IJSRuntime, Task<IJSObjectReference>> Modules = new();
 

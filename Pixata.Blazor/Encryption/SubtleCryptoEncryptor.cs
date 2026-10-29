@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
+using Pixata.Blazor.Components;
 using Pixata.Extensions.Encryption;
 
 namespace Pixata.Blazor.Encryption;
@@ -27,7 +28,7 @@ public class SubtleCryptoEncryptor(IJSRuntime js, IHttpClientFactory httpClientF
       }
 
       _module = await js.InvokeAsync<IJSObjectReference>(
-        "import", "./_content/Pixata.Blazor/crypto-interop.js");
+        "import", PixataBlazorScript.Versioned("crypto-interop.js"));
 
       byte[] clientPublicKey = await _module.InvokeAsync<byte[]>("generateKeyPair");
 

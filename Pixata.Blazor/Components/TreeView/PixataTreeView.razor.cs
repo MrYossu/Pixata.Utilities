@@ -15,8 +15,7 @@ namespace Pixata.Blazor.Components;
 /// <see cref="TreeViewBindings"/>
 /// </summary>
 public partial class PixataTreeView {
-  private static readonly string ModulePath =
-    $"./_content/Pixata.Blazor/Components/TreeView/PixataTreeView.razor.js?v={typeof(PixataTreeView).Assembly.ManifestModule.ModuleVersionId:N}";
+  private static readonly string ModulePath = PixataBlazorScript.Versioned("Components/TreeView/PixataTreeView.razor.js");
 
   /// <summary>
   /// The items. For flat data, every item is in this collection, and each says which is its parent through its

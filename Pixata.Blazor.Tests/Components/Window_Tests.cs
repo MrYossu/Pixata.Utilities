@@ -14,7 +14,7 @@ namespace Pixata.Blazor.Tests.Components;
 
 [TestClass]
 public class Window_Tests {
-  private const string ModulePath = "./_content/Pixata.Blazor/pixata-dialogs.js";
+  private static readonly string ModulePath = PixataLayerJs.ModulePath;
 
   private static RenderFragment Actions(params string[] names) =>
     builder => {

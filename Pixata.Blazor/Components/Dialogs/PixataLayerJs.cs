@@ -10,7 +10,7 @@ namespace Pixata.Blazor.Components;
 /// <see cref="IJSRuntime"/> (so once per circuit in Blazor Server and once per app in WASM), so that they all share one stack
 /// </summary>
 internal static class PixataLayerJs {
-  public const string ModulePath = "./_content/Pixata.Blazor/pixata-dialogs.js";
+  public static readonly string ModulePath = PixataBlazorScript.Versioned("pixata-dialogs.js");
 
   private static readonly ConditionalWeakTable<IJSRuntime, Task<IJSObjectReference>> Modules = new();
 

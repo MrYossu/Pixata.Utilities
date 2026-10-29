@@ -15,7 +15,7 @@ namespace Pixata.Blazor.Tests.Components;
 
 [TestClass]
 public class Dialogs_Tests {
-  private const string ModulePath = "./_content/Pixata.Blazor/pixata-dialogs.js";
+  private static readonly string ModulePath = PixataLayerJs.ModulePath;
 
   private static readonly KeyboardEventArgs Escape = new() { Key = "Escape" };
 

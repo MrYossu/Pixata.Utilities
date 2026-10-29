@@ -13,7 +13,7 @@ namespace Pixata.Blazor.Tests.Components;
 
 [TestClass]
 public class TabStrip_Tests {
-  private const string ModulePath = "./_content/Pixata.Blazor/Components/TabStrip/PixataTabStrip.razor.js";
+  private static readonly string ModulePath = PixataTabStrip.ModulePath;
 
   private record TabSpec(string Id, bool Disabled = false, bool Visible = true, bool Closeable = false);
 

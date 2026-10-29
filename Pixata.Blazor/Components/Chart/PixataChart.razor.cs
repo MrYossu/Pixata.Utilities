@@ -18,7 +18,7 @@ namespace Pixata.Blazor.Components;
 /// It resizes with its container
 /// </summary>
 public partial class PixataChart : IAsyncDisposable {
-  private const string ModulePath = "./_content/Pixata.Blazor/Components/Chart/PixataChart.razor.js";
+  internal static readonly string ModulePath = PixataBlazorScript.Versioned("Components/Chart/PixataChart.razor.js");
 
   /// <summary>
   /// Below this width (in pixels) the chart is laid out for a phone: a legend on the left or right moves underneath

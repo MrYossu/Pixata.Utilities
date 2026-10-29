@@ -16,7 +16,7 @@ namespace Pixata.Blazor.Tests.Components;
 
 [TestClass]
 public class Editor_Tests {
-  private const string ModulePath = "./_content/Pixata.Blazor/pixata-editor.js";
+  private static readonly string ModulePath = PixataEditor.ModulePath;
 
   private class Notes {
     public string Text { get; set; } = "";

@@ -12,7 +12,7 @@ namespace Pixata.Blazor.Components;
 /// A set of tabs, each showing its own content when selected. Declare the tabs with <see cref="PixataTab"/> components
 /// </summary>
 public partial class PixataTabStrip {
-  private const string ModulePath = "./_content/Pixata.Blazor/Components/TabStrip/PixataTabStrip.razor.js";
+  internal static readonly string ModulePath = PixataBlazorScript.Versioned("Components/TabStrip/PixataTabStrip.razor.js");
   private static readonly string[] NavigationKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
 
   /// <summary>

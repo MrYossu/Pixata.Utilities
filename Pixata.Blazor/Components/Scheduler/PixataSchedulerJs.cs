@@ -10,7 +10,7 @@ namespace Pixata.Blazor.Components;
 /// dragging and resizing appointments, and scrolling the views
 /// </summary>
 internal static class PixataSchedulerJs {
-  public const string ModulePath = "./_content/Pixata.Blazor/pixata-scheduler.js";
+  public static readonly string ModulePath = PixataBlazorScript.Versioned("pixata-scheduler.js");
 
   private static readonly ConditionalWeakTable<IJSRuntime, Task<IJSObjectReference>> Modules = new();
 
