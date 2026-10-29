@@ -109,14 +109,14 @@
             <label class="form-label mb-0">Min date</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <input type="date" class="form-control form-control-sm" style="max-width: 180px;" @bind="_minDate" />
+            <PixataDatePicker @bind-Value="_minDate" Min="@EarliestDate" Max="@LatestDate" Width="180px" Size="sm" />
           </div>
 
           <div class="col-sm-4 col-md-3">
             <label class="form-label mb-0">Max date</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <input type="date" class="form-control form-control-sm" style="max-width: 180px;" @bind="_maxDate" />
+            <PixataDatePicker @bind-Value="_maxDate" Min="@EarliestDate" Max="@LatestDate" Width="180px" Size="sm" />
           </div>
         </div>
 
@@ -200,6 +200,9 @@
 
 @code {
   private DateTime _date = DateTime.Today;
+  // The picker defaults to 1900 to 2099, which would rule out the Hebrew calendar range's own defaults
+  private static readonly DateTime EarliestDate = new(1, 1, 1);
+  private static readonly DateTime LatestDate = new(9999, 12, 31);
   private DateTime _minDate = new(1584, 1, 1);
   private DateTime _maxDate = new(2238, 9, 29);
   private string _width = "320px";

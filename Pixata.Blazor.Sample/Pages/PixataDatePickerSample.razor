@@ -34,10 +34,10 @@
 
 <PixataCalendar @bind-Value="_calendarDate" ShowWeekNumbers="_weekNumbers" />
 
-<label>
-  <input type="checkbox" @bind="_weekNumbers" />
-  Show week numbers
-</label>
+<span>
+  <PixataSwitch Id="week-numbers-switch" @bind-Value="_weekNumbers" Size="sm" />
+  <label for="week-numbers-switch">Show week numbers</label>
+</span>
 
 @code {
   private DateTime _date = new(2026, 1, 31);

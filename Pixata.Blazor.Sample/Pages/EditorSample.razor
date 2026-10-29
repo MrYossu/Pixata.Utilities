@@ -50,8 +50,8 @@
 <ComponentSample Title="Read-only and disabled">
   <Description>
     <p>A read-only editor's content can be selected and copied but not changed, and its tools are disabled. A disabled editor can't be used at all.</p>
-    <label class="me-3"><input type="checkbox" @bind="_readOnly" /> ReadOnly</label>
-    <label><input type="checkbox" @bind="_enabled" /> Enabled</label>
+    <span class="me-3"><PixataSwitch Id="read-only-switch" @bind-Value="_readOnly" Size="sm" /> <label for="read-only-switch">ReadOnly</label></span>
+    <span><PixataSwitch Id="enabled-switch" @bind-Value="_enabled" Size="sm" /> <label for="enabled-switch">Enabled</label></span>
   </Description>
   <ChildContent>
     <PixataEditor @bind-Value="_pixataReadOnly" ReadOnly="_readOnly" Enabled="_enabled" Height="180px" AriaLabel="Read-only editor" />

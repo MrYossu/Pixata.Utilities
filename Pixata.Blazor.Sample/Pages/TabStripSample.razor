@@ -1,4 +1,5 @@
 @page "/TabStripSample"
+@using Pixata.Blazor.Sample.Models
 
 <SitePageTitle>Tab strip</SitePageTitle>
 
@@ -42,7 +43,7 @@
     <code>ActiveTabId</code> is set one way, and the page handles <code>ActiveTabIdChanged</code> itself, so the tab doesn't
     change until the page sets <code>ActiveTabId</code>. Here the "Statements" tab takes a second to load its data, and isn't
     shown until it has. With "Locked" ticked, the handler doesn't set <code>ActiveTabId</code>, so the tab doesn't change at all.
-    <label class="ml-3"><input type="checkbox" @bind="_ownedLocked" /> Locked</label>
+    <span class="ml-3"><PixataSwitch Id="owned-locked-switch" @bind-Value="_ownedLocked" Size="sm" /> <label for="owned-locked-switch">Locked</label></span>
   </Description>
   <ChildContent>
     <PixataTabStrip ActiveTabId="@_ownedTab" ActiveTabIdChanged="OwnedTabChanged">
@@ -64,25 +65,13 @@
 <ComponentSample Title="Position, alignment and size">
   <Description>
     <label>Position
-      <select @bind="_position">
-        @foreach (PixataTabPosition position in Enum.GetValues<PixataTabPosition>()) {
-          <option value="@position">@position</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataTabPosition>())" @bind-Value="_position" AriaLabel="Position" Width="12em" Size="sm" />
     </label>
     <label class="ml-3">Alignment
-      <select @bind="_alignment">
-        @foreach (PixataTabStripTabAlignment alignment in Enum.GetValues<PixataTabStripTabAlignment>()) {
-          <option value="@alignment">@alignment</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataTabStripTabAlignment>())" @bind-Value="_alignment" AriaLabel="Alignment" Width="12em" Size="sm" />
     </label>
     <label class="ml-3">Size
-      <select @bind="_size">
-        <option value="sm">Small</option>
-        <option value="md">Medium</option>
-        <option value="lg">Large</option>
-      </select>
+      <PixataDropDownList Data="@Sizes" @bind-Value="_size" AriaLabel="Size" Width="12em" Size="sm" />
     </label>
   </Description>
   <ChildContent>
@@ -99,18 +88,10 @@
     When there are more tabs than fit, a scrollable tab strip keeps them on one line. Swipe the tabs on a phone, or use the
     scroll buttons.
     <label class="ml-3">Buttons
-      <select @bind="_scrollButtonsPosition">
-        @foreach (PixataTabStripScrollButtonsPosition position in Enum.GetValues<PixataTabStripScrollButtonsPosition>()) {
-          <option value="@position">@position</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataTabStripScrollButtonsPosition>())" @bind-Value="_scrollButtonsPosition" AriaLabel="Buttons" Width="12em" Size="sm" />
     </label>
     <label class="ml-3">Visibility
-      <select @bind="_scrollButtonsVisibility">
-        @foreach (PixataTabStripScrollButtonsVisibility visibility in Enum.GetValues<PixataTabStripScrollButtonsVisibility>()) {
-          <option value="@visibility">@visibility</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataTabStripScrollButtonsVisibility>())" @bind-Value="_scrollButtonsVisibility" AriaLabel="Visibility" Width="12em" Size="sm" />
     </label>
   </Description>
   <ChildContent>
@@ -156,7 +137,7 @@
   <Description>
     Type something into the text boxes, switch tabs and come back. With <code>PersistTabContent</code> turned on, what you
     typed is still there, as the tab's content was kept rather than created afresh.
-    <label class="ml-3"><input type="checkbox" @bind="_persist" /> PersistTabContent</label>
+    <span class="ml-3"><PixataSwitch Id="persist-switch" @bind-Value="_persist" Size="sm" /> <label for="persist-switch">PersistTabContent</label></span>
   </Description>
   <ChildContent>
     <PixataTabStrip PersistTabContent="_persist">
@@ -186,6 +167,7 @@
   private string _pixataBasicTab = "advanced";
   private PixataTabPosition _position = PixataTabPosition.Top;
   private PixataTabStripTabAlignment _alignment = PixataTabStripTabAlignment.Start;
+  private static readonly SampleOption[] Sizes = [new("Small", "sm"), new("Medium", "md"), new("Large", "lg")];
   private string _size = "md";
   private PixataTabStripScrollButtonsPosition _scrollButtonsPosition = PixataTabStripScrollButtonsPosition.Split;
   private PixataTabStripScrollButtonsVisibility _scrollButtonsVisibility = PixataTabStripScrollButtonsVisibility.Auto;

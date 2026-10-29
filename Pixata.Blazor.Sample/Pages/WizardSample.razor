@@ -17,20 +17,12 @@
       or focus the steps and use the arrow keys, Home and End to move, and Enter or Space to select.
     </p>
     <label>Step type
-      <select @bind="_stepType">
-        @foreach (PixataStepperStepType stepType in Enum.GetValues<PixataStepperStepType>()) {
-          <option value="@stepType">@stepType</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataStepperStepType>())" @bind-Value="_stepType" AriaLabel="Step type" Width="12em" Size="sm" />
     </label>
     <label class="ml-3">Orientation
-      <select @bind="_orientation">
-        @foreach (PixataStepperOrientation orientation in Enum.GetValues<PixataStepperOrientation>()) {
-          <option value="@orientation">@orientation</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataStepperOrientation>())" @bind-Value="_orientation" AriaLabel="Orientation" Width="12em" Size="sm" />
     </label>
-    <label class="ml-3"><input type="checkbox" @bind="_linear" /> Linear</label>
+    <span class="ml-3"><PixataSwitch Id="linear-switch" @bind-Value="_linear" Size="sm" /> <label for="linear-switch">Linear</label></span>
   </Description>
   <ChildContent>
     <PixataStepper @bind-Value="_pixataStep" StepType="_stepType" Orientation="_orientation" Linear="_linear" Height="@(IsVertical ? "320px" : null)">
@@ -72,22 +64,14 @@
       hidden one keeps its index.
     </p>
     <label>Stepper position
-      <select @bind="_stepperPosition">
-        @foreach (PixataWizardStepperPosition position in Enum.GetValues<PixataWizardStepperPosition>()) {
-          <option value="@position">@position</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataWizardStepperPosition>())" @bind-Value="_stepperPosition" AriaLabel="Stepper position" Width="12em" Size="sm" />
     </label>
     <label class="ml-3">Step type
-      <select @bind="_wizardStepType">
-        @foreach (PixataStepperStepType stepType in Enum.GetValues<PixataStepperStepType>()) {
-          <option value="@stepType">@stepType</option>
-        }
-      </select>
+      <PixataDropDownList Data="@(Enum.GetValues<PixataStepperStepType>())" @bind-Value="_wizardStepType" AriaLabel="Step type" Width="12em" Size="sm" />
     </label>
-    <label class="ml-3"><input type="checkbox" @bind="_wizardLinear" /> Linear</label>
-    <label class="ml-3"><input type="checkbox" @bind="_showPager" /> ShowPager</label>
-    <label class="ml-3"><input type="checkbox" @bind="_showExtras" /> Show the extras step</label>
+    <span class="ml-3"><PixataSwitch Id="wizard-linear-switch" @bind-Value="_wizardLinear" Size="sm" /> <label for="wizard-linear-switch">Linear</label></span>
+    <span class="ml-3"><PixataSwitch Id="show-pager-switch" @bind-Value="_showPager" Size="sm" /> <label for="show-pager-switch">ShowPager</label></span>
+    <span class="ml-3"><PixataSwitch Id="show-extras-switch" @bind-Value="_showExtras" Size="sm" /> <label for="show-extras-switch">Show the extras step</label></span>
   </Description>
   <ChildContent>
     <PixataWizard @bind-Value="_pixataWizardStep" StepperPosition="_stepperPosition" ShowPager="_showPager" Height="@WizardHeight" OnFinish="@(() => _pixataFinished = DateTime.Now)">

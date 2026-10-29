@@ -63,9 +63,9 @@
       under it, and with <code>CheckParents</code>, an item is checked when all its children are, and shows a dash when only
       some are.
     </p>
-    <label class="me-3"><input type="checkbox" @bind="_checkChildren" /> CheckChildren</label>
-    <label class="me-3"><input type="checkbox" @bind="_checkParents" /> CheckParents</label>
-    <label><input type="checkbox" @bind="_checkOnClick" /> CheckOnClick</label>
+    <span class="me-3"><PixataSwitch Id="check-children-switch" @bind-Value="_checkChildren" Size="sm" /> <label for="check-children-switch">CheckChildren</label></span>
+    <span class="me-3"><PixataSwitch Id="check-parents-switch" @bind-Value="_checkParents" Size="sm" /> <label for="check-parents-switch">CheckParents</label></span>
+    <span><PixataSwitch Id="check-on-click-switch" @bind-Value="_checkOnClick" Size="sm" /> <label for="check-on-click-switch">CheckOnClick</label></span>
   </Description>
   <ChildContent>
     <PixataTreeView Data="_checkFiles"

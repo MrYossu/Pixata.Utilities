@@ -34,24 +34,15 @@
 <ComponentSample Title="Options">
   <Description>
     <div class="dialogs-sample-options">
-      <label><input type="checkbox" @bind="_showCloseButton" /> ShowCloseButton</label>
-      <label><input type="checkbox" @bind="_closeOnOverlayClick" /> CloseOnOverlayClick</label>
+      <span><PixataSwitch Id="show-close-button-switch" @bind-Value="_showCloseButton" Size="sm" /> <label for="show-close-button-switch">ShowCloseButton</label></span>
+      <span><PixataSwitch Id="close-on-overlay-click-switch" @bind-Value="_closeOnOverlayClick" Size="sm" /> <label for="close-on-overlay-click-switch">CloseOnOverlayClick</label></span>
       <label>
         ButtonsLayout
-        <select @bind="_buttonsLayout">
-          @foreach (PixataDialogButtonsLayout value in Enum.GetValues<PixataDialogButtonsLayout>()) {
-            <option value="@value">@value</option>
-          }
-        </select>
+        <PixataDropDownList Data="@(Enum.GetValues<PixataDialogButtonsLayout>())" @bind-Value="_buttonsLayout" AriaLabel="ButtonsLayout" Width="12em" Size="sm" />
       </label>
       <label>
         ThemeColor (Pixata only)
-        <select @bind="_themeColor">
-          <option value="">(none)</option>
-          @foreach (string colour in ThemeColours) {
-            <option value="@colour">@colour</option>
-          }
-        </select>
+        <PixataDropDownList Data="@ThemeColours" @bind-Value="_themeColor" DefaultText="(none)" AriaLabel="ThemeColor" Width="12em" Size="sm" />
       </label>
     </div>
     Without a close button, Esc doesn't close the dialog either. The ThemeColor colours the titlebar.
@@ -116,7 +107,7 @@
     <button type="button" class="@BaseButton" @onclick="() => _outerPixata = true">Open the first dialog</button>
     <PixataDialog Visible="_outerPixata" VisibleChanged="OuterPixataVisibleChanged" Title="First dialog" Width="460px">
       <DialogContent>
-        <p><label><input type="checkbox" @bind="_unsavedPixata" /> Unsaved changes</label></p>
+        <p><span><PixataSwitch Id="unsaved-pixata-switch" @bind-Value="_unsavedPixata" Size="sm" /> <label for="unsaved-pixata-switch">Unsaved changes</label></span></p>
         <p>
           <button type="button" class="@BaseButton" @onclick="() => _innerPixata = true">Open a second dialog</button>
           <button type="button" class="@BaseButton" @onclick="ConfirmFromPixata">Confirm something</button>
@@ -198,7 +189,7 @@
   private bool _showCloseButton = true;
   private bool _closeOnOverlayClick;
   private PixataDialogButtonsLayout _buttonsLayout = PixataDialogButtonsLayout.Stretch;
-  private string _themeColor = "";
+  private string? _themeColor;
 
   private bool _formPixata;
   private Contact _contactPixata = new();

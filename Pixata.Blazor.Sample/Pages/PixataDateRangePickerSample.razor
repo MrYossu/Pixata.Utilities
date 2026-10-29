@@ -15,14 +15,14 @@
 <p>Start: @_start.ToString("dd MMM yyyy", CultureInfo.CurrentCulture), end: @_end.ToString("dd MMM yyyy", CultureInfo.CurrentCulture)</p>
 <p>Last OnChange: @(_lastChange ?? "none yet")</p>
 
-<label>
-  <input type="checkbox" @bind="_weekNumbers" />
-  Show week numbers
-</label>
-<label>
-  <input type="checkbox" @bind="_allowReverse" />
-  Allow reverse
-</label>
+<span>
+  <PixataSwitch Id="week-numbers-switch" @bind-Value="_weekNumbers" Size="sm" />
+  <label for="week-numbers-switch">Show week numbers</label>
+</span>
+<span>
+  <PixataSwitch Id="allow-reverse-switch" @bind-Value="_allowReverse" Size="sm" />
+  <label for="allow-reverse-switch">Allow reverse</label>
+</span>
 
 <h4>Nullable, with placeholders, custom labels and clear buttons</h4>
 

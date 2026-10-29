@@ -142,7 +142,7 @@
     <p><code>OnOpen</code> and <code>OnClose</code> are raised before the menu opens and closes, and either can be cancelled. Tick the box to stop this menu opening.</p>
   </Description>
   <ChildContent>
-    <label class="d-block mb-2"><input type="checkbox" @bind="_cancelOpen" /> Cancel opening</label>
+    <span class="d-block mb-2"><PixataSwitch Id="cancel-open-switch" @bind-Value="_cancelOpen" Size="sm" /> <label for="cancel-open-switch">Cancel opening</label></span>
     <PixataDropDownButton OnOpen="HandleOpen" OnClose="@(() => _events.Add("OnClose"))">
       <DropDownButtonContent>Events</DropDownButtonContent>
       <DropDownButtonItems>@PixataItems</DropDownButtonItems>

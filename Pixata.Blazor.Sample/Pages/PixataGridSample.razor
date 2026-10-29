@@ -19,16 +19,12 @@
 <div class="pixata-blazor-grid-sample-options">
   <label>
     Size
-    <select @bind="_size">
-      @foreach (PixataGridSize size in Enum.GetValues<PixataGridSize>()) {
-        <option value="@size">@size</option>
-      }
-    </select>
+    <PixataDropDownList Data="@(Enum.GetValues<PixataGridSize>())" @bind-Value="_size" AriaLabel="Size" Width="12em" Size="sm" />
   </label>
-  <label>
-    <input type="checkbox" @bind="_empty" />
-    No data
-  </label>
+  <span>
+    <PixataSwitch Id="empty-switch" @bind-Value="_empty" Size="sm" />
+    <label for="empty-switch">No data</label>
+  </span>
 </div>
 
 <h4>Declared columns</h4>
@@ -53,19 +49,11 @@
 <div class="pixata-blazor-grid-sample-options">
   <label>
     Pager input
-    <select @bind="_pagerInputType">
-      @foreach (PixataGridPagerInputType inputType in Enum.GetValues<PixataGridPagerInputType>()) {
-        <option value="@inputType">@inputType</option>
-      }
-    </select>
+    <PixataDropDownList Data="@(Enum.GetValues<PixataGridPagerInputType>())" @bind-Value="_pagerInputType" AriaLabel="Pager input" Width="12em" Size="sm" />
   </label>
   <label>
     Pager position
-    <select @bind="_pagerPosition">
-      @foreach (PixataGridPagerPosition position in Enum.GetValues<PixataGridPagerPosition>()) {
-        <option value="@position">@position</option>
-      }
-    </select>
+    <PixataDropDownList Data="@(Enum.GetValues<PixataGridPagerPosition>())" @bind-Value="_pagerPosition" AriaLabel="Pager position" Width="12em" Size="sm" />
   </label>
   <span>Page @_page, page size @_pageSize</span>
 </div>
@@ -86,10 +74,10 @@
 <p>Click a header to sort by that column. Clicking again sorts the other way, and a third click removes the sort. In multiple mode, each click adds to the sort, and the header shows the order. City is a nested field.</p>
 
 <div class="pixata-blazor-grid-sample-options">
-  <label>
-    <input type="checkbox" @bind="_multipleSort" />
-    Sort by several columns
-  </label>
+  <span>
+    <PixataSwitch Id="multiple-sort-switch" @bind-Value="_multipleSort" Size="sm" />
+    <label for="multiple-sort-switch">Sort by several columns</label>
+  </span>
 </div>
 
 <PixataGrid Data="Data" Size="_size" Sortable="true" SortMode="@(_multipleSort ? PixataGridSortMode.Multiple : PixataGridSortMode.Single)" Pageable="true" PageSize="5">
@@ -108,11 +96,7 @@
 <div class="pixata-blazor-grid-sample-options">
   <label>
     Filter mode
-    <select @bind="_filterMode">
-      <option value="row">Filter row</option>
-      <option value="menu">Filter menu</option>
-      <option value="checkbox">Filter menu with checkbox lists</option>
-    </select>
+    <PixataDropDownList Data="@FilterModes" @bind-Value="_filterMode" AriaLabel="Filter mode" Width="18em" Size="sm" />
   </label>
 </div>
 
@@ -141,11 +125,7 @@
 <div class="pixata-blazor-grid-sample-options">
   <label>
     Display style
-    <select @bind="_enumDisplayStyle">
-      @foreach (PixataEnumDisplayStyle style in Enum.GetValues<PixataEnumDisplayStyle>()) {
-        <option value="@style">@style</option>
-      }
-    </select>
+    <PixataDropDownList Data="@(Enum.GetValues<PixataEnumDisplayStyle>())" @bind-Value="_enumDisplayStyle" AriaLabel="Display style" Width="12em" Size="sm" />
   </label>
 </div>
 
@@ -250,11 +230,7 @@
 <div class="pixata-blazor-grid-sample-options">
   <label>
     Edit mode
-    <select @bind="_editMode">
-      <option value="inline">Inline</option>
-      <option value="popup">Popup</option>
-      <option value="incell">In cell</option>
-    </select>
+    <PixataDropDownList Data="@EditModes" @bind-Value="_editMode" AriaLabel="Edit mode" Width="12em" Size="sm" />
   </label>
 </div>
 
@@ -539,7 +515,7 @@
 <p>The toolbar buttons save the grid as a CSV or Excel file. The checkbox exports every row rather than just the page. The button under the grid shows what it exports.</p>
 
 <div class="pixata-blazor-grid-sample-options">
-  <label><input type="checkbox" @bind="_exportAllPages" /> Export all pages</label>
+  <span><PixataSwitch Id="export-all-pages-switch" @bind-Value="_exportAllPages" Size="sm" /> <label for="export-all-pages-switch">Export all pages</label></span>
 </div>
 
 <PixataGrid @ref="_exportGrid" Data="Data" Size="_size" Pageable="true" PageSize="5" Sortable="true">
@@ -672,7 +648,7 @@
   private PixataGrid<GridSampleEmployee>? _groupedGrid;
   private string _columnEvent = "";
   private List<PixataGridHighlightedCell<GridSampleEmployee>> _pixataHighlightedCells =>
-    [new(Data.First(), nameof(GridSampleEmployee.Salary))];
+    Data.Count == 0 ? [] : [new(Data.First(), nameof(GridSampleEmployee.Salary))];
 
   // Some of the grid's text in Hebrew, to show translation
   private static readonly PixataGridMessages HebrewMessages = new() {
@@ -758,6 +734,7 @@
     }
   }
 
+  private static readonly SampleOption[] EditModes = [new("Inline", "inline"), new("Popup", "popup"), new("In cell", "incell")];
   private string _editMode = "inline";
 
   private PixataGridEditMode PixataEditMode => _editMode switch {
@@ -822,6 +799,7 @@
     return (field, $"{field} {n}");
   })];
 
+  private static readonly SampleOption[] FilterModes = [new("Filter row", "row"), new("Filter menu", "menu"), new("Filter menu with checkbox lists", "checkbox")];
   private string _filterMode = "row";
   private PixataEnumDisplayStyle _enumDisplayStyle = PixataEnumDisplayStyle.LowerCamelCase;
 
