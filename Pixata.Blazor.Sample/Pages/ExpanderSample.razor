@@ -9,7 +9,11 @@
   <div class="col card mx-3 rounded-10">
     <div class="h3 card-title border-bottom p-3 pt-4 d-flex justify-content-between">
       <div><span class="fa fa-bell-on text-danger"></span> Reminders for the next 30 days</div>
-      <div><button @onclick="()=>_reminderExpander.Toggle()">+/-</button></div>
+      <div>
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="@(_remindersExpanded ? PixataSvgIcons.Minus : PixataSvgIcons.Plus)"
+                      FillMode="@PixataThemeConstants.Button.FillMode.Outline" AriaLabel="@(_remindersExpanded ? "Hide the reminders" : "Show the reminders")"
+                      Title="@(_remindersExpanded ? "Hide the reminders" : "Show the reminders")" OnClick="ToggleReminders" />
+      </div>
     </div>
     <div class="card-body py-0">
       <Expander @ref="_reminderExpander" Expanded="false">
@@ -38,6 +42,12 @@
 
 @code {
   private Expander _reminderExpander = null!;
+  private bool _remindersExpanded;
+
+  private void ToggleReminders() {
+    _reminderExpander.Toggle();
+    _remindersExpanded = !_remindersExpanded;
+  }
 
   private readonly List<ReminderOverview> _reminders = new() {
     new ReminderOverview { Investor = "Billy Shears", Due = DateTime.Today, Text = "Ring Jim and arrange a meeting" },
