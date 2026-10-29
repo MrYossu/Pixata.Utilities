@@ -45,6 +45,7 @@ The documentation is split over the following pages...
 | [Wizard and stepper](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Wizard.md) | `PixataWizard` and `PixataStepper` |
 | [Radio group](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.RadioGroup.md) | `PixataRadioGroup` |
 | [Numeric text box](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.NumericTextBox.md) | `PixataNumericTextBox`, for typing numbers, with spin buttons, a minimum and maximum, rounding and a display format |
+| [Text box](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TextBox.md) | `PixataTextBox`, a single-line text box or password box, with a clear button, a prefix and suffix, and an optional debounce |
 | [Switch](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Switch.md) | `PixataSwitch`, a toggle switch for booleans |
 | [Charts](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Charts.md) | `PixataChart`, with column, line, pie and donut series |
 | [Heatmap](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Heatmap.md) | `PixataHeatmap`, a grid of values shown as coloured cells, such as the days of the week against the hours of the day |

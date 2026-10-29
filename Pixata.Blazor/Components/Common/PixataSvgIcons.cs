@@ -36,4 +36,6 @@ public static partial class PixataSvgIcons {
   public static readonly PixataSvgIcon Exclamation = new("exclamation", "<path d=\"M12 4v10M12 19.5v.5\"/>");
   public static readonly PixataSvgIcon Bell = new("bell", "<path d=\"M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z\"/><path d=\"M10 20.5a2 2 0 0 0 4 0M12 3v2\"/>");
   public static readonly PixataSvgIcon Cancel = new("cancel", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M5.6 5.6l12.8 12.8\"/>");
+  public static readonly PixataSvgIcon Eye = new("eye", "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>");
+  public static readonly PixataSvgIcon EyeOff = new("eye-off", "<path d=\"M10.6 5.1Q11.3 5 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6C3.7 8.5 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6\"/><path d=\"M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18\"/>");
 }

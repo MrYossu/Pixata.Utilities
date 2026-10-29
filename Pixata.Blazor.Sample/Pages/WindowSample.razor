@@ -63,8 +63,8 @@
         <PixataWindowAction Name="Close" />
       </WindowActions>
       <WindowContent>
-        <p><label>Current password<br /><input type="password" /></label></p>
-        <p><label>New password<br /><input type="password" /></label></p>
+        <p><label>Current password<br /><PixataTextBox Password="true" ShowPasswordButton="true" AutoComplete="current-password" /></label></p>
+        <p><label>New password<br /><PixataTextBox Password="true" ShowPasswordButton="true" AutoComplete="new-password" /></label></p>
       </WindowContent>
       <WindowFooter>
         <button type="button" class="@PrimaryButton" @onclick="() => _modalPixata = false">Change</button>
@@ -147,7 +147,7 @@
       </WindowActions>
       <WindowContent>
         <p>Type something, minimise the window and restore it: it's still there.</p>
-        <input placeholder="Notes" />
+        <PixataTextBox Placeholder="Notes" aria-label="Notes" />
       </WindowContent>
     </PixataWindow>
   </ChildContent>

@@ -4178,6 +4178,36 @@
   opacity: 1;
 }
 
+/* ---------- Text box and text area ---------- */
+
+/* The text box is a pixata-blazor-input, so it matches the drop-downs. These are the parts only it has */
+.pixata-blazor-textbox-prefix,
+.pixata-blazor-textbox-suffix {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  padding: 0 calc(var(--pixata-blazor-spacing) * 2);
+  color: var(--pixata-blazor-placeholder-color);
+}
+
+.pixata-blazor-textbox-prefix.pixata-blazor-textbox-separator {
+  border-inline-end: 1px solid var(--pixata-blazor-border-color);
+}
+
+.pixata-blazor-textbox-suffix.pixata-blazor-textbox-separator {
+  border-inline-start: 1px solid var(--pixata-blazor-border-color);
+}
+
+/* Edge has its own show-password button, which would sit next to ours */
+.pixata-blazor-textbox:has(.pixata-blazor-textbox-reveal) .pixata-blazor-textbox-input::-ms-reveal {
+  display: none;
+}
+
+.pixata-blazor-input-inner[readonly] {
+  cursor: default;
+}
+
 /* ---------- Popups and lists ---------- */
 
 .pixata-blazor-popup {

@@ -81,9 +81,9 @@
       <DialogContent>
         <EditForm id="pixata-contact-form" Model="_contactPixata" OnValidSubmit="() => SaveContact(true)">
           <DataAnnotationsValidator />
-          <p><label>Name<br /><InputText @bind-Value="_contactPixata.Name" /></label></p>
+          <p><label>Name<br /><PixataTextBox @bind-Value="_contactPixata.Name" /></label></p>
           <ValidationMessage For="() => _contactPixata.Name" />
-          <p><label>Email<br /><InputText id="pixata-email" @bind-Value="_contactPixata.Email" /></label></p>
+          <p><label>Email<br /><PixataTextBox Id="pixata-email" @bind-Value="_contactPixata.Email" InputMode="email" AutoComplete="email" /></label></p>
           <ValidationMessage For="() => _contactPixata.Email" />
           <p>@LongText</p>
         </EditForm>

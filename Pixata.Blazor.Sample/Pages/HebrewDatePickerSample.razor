@@ -43,14 +43,14 @@
             <label class="form-label mb-0">Width</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <input class="form-control form-control-sm" style="max-width: 120px;" @bind="_width" />
+            <PixataTextBox @bind-Value="_width" DebounceDelay="400" Size="sm" Width="120px" />
           </div>
 
           <div class="col-sm-4 col-md-3">
             <label class="form-label mb-0">Class</label>
           </div>
           <div class="col-sm-8 col-md-9">
-            <input class="form-control form-control-sm" style="max-width: 240px;" @bind="_class" placeholder="(none)" />
+            <PixataTextBox @bind-Value="_class" DebounceDelay="400" Placeholder="(none)" Size="sm" Width="240px" />
           </div>
 
           <div class="col-sm-4 col-md-3">

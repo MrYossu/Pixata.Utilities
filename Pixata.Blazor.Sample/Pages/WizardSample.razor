@@ -118,12 +118,12 @@
             <DataAnnotationsValidator />
             <div class="sample-field">
               <label for="pixata-email">Email</label>
-              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-email" class="pixata-blazor-input-inner" @bind-Value="_pixataAccount.Email" /></span>
+              <PixataTextBox Id="pixata-email" @bind-Value="_pixataAccount.Email" InputMode="email" AutoComplete="email" />
               <ValidationMessage For="() => _pixataAccount.Email" />
             </div>
             <div class="sample-field">
               <label for="pixata-password">Password</label>
-              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-password" type="password" class="pixata-blazor-input-inner" @bind-Value="_pixataAccount.Password" /></span>
+              <PixataTextBox Id="pixata-password" @bind-Value="_pixataAccount.Password" Password="true" ShowPasswordButton="true" AutoComplete="new-password" />
               <ValidationMessage For="() => _pixataAccount.Password" />
             </div>
           </Content>
@@ -133,12 +133,12 @@
             <DataAnnotationsValidator />
             <div class="sample-field">
               <label for="pixata-name">Name</label>
-              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-name" class="pixata-blazor-input-inner" @bind-Value="_pixataPersonal.Name" /></span>
+              <PixataTextBox Id="pixata-name" @bind-Value="_pixataPersonal.Name" AutoComplete="name" />
               <ValidationMessage For="() => _pixataPersonal.Name" />
             </div>
             <div class="sample-field">
               <label for="pixata-city">City</label>
-              <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-city" class="pixata-blazor-input-inner" @bind-Value="_pixataPersonal.City" /></span>
+              <PixataTextBox Id="pixata-city" @bind-Value="_pixataPersonal.City" />
               <ValidationMessage For="() => _pixataPersonal.City" />
             </div>
           </Content>
@@ -169,12 +169,12 @@
             <Content>
               <div class="sample-field">
                 <label for="pixata-product">Product</label>
-                <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-product" class="pixata-blazor-input-inner" @bind-Value="_pixataOrder.Product" /></span>
+                <PixataTextBox Id="pixata-product" @bind-Value="_pixataOrder.Product" />
                 <ValidationMessage For="() => _pixataOrder.Product" />
               </div>
               <div class="sample-field">
                 <label for="pixata-quantity">Quantity</label>
-                <span class="@PixataCss.Input(null, null, null)"><InputNumber id="pixata-quantity" class="pixata-blazor-input-inner" @bind-Value="_pixataOrder.Quantity" /></span>
+                <PixataNumericTextBox Id="pixata-quantity" @bind-Value="_pixataOrder.Quantity" Width="100%" />
                 <ValidationMessage For="() => _pixataOrder.Quantity" />
               </div>
             </Content>
@@ -183,7 +183,7 @@
             <Content>
               <div class="sample-field">
                 <label for="pixata-order-email">Email</label>
-                <span class="@PixataCss.Input(null, null, null)"><InputText id="pixata-order-email" class="pixata-blazor-input-inner" @bind-Value="_pixataOrder.Email" /></span>
+                <PixataTextBox Id="pixata-order-email" @bind-Value="_pixataOrder.Email" InputMode="email" AutoComplete="email" />
                 <ValidationMessage For="() => _pixataOrder.Email" />
               </div>
             </Content>

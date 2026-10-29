@@ -1,0 +1,108 @@
+@page "/TextBoxSample"
+@using System.ComponentModel.DataAnnotations
+
+<SitePageTitle>Text box</SitePageTitle>
+
+<h3>Text box</h3>
+
+<p><code>PixataTextBox</code> is a single-line text box, which can also be a password box. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TextBox.md">the documentation</a>.</p>
+
+<ComponentSample Title="Basic use">
+  <Description>
+    <p>The value updates as you type, and <code>OnChange</code> fires when you press Enter or leave the box.</p>
+  </Description>
+  <ChildContent>
+    <label for="pixata-name">Name</label>
+    <PixataTextBox Id="pixata-name" @bind-Value="_name" Placeholder="Your name" Width="250px" OnChange="@((object? v) => _log = $"OnChange: {v}")" />
+    <p class="mt-2">Value: <strong>@_name</strong><br />@_log</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Debounced">
+  <Description>
+    <p>With <code>DebounceDelay="500"</code>, the value only changes half a second after you stop typing, or straight away when you press Enter or leave the box.</p>
+  </Description>
+  <ChildContent>
+    <PixataTextBox @bind-Value="_search" DebounceDelay="500" Placeholder="Search" ShowClearButton="true" Width="250px" aria-label="Search">
+      <TextBoxPrefixTemplate><PixataIcon Icon="PixataSvgIcons.Search" /></TextBoxPrefixTemplate>
+    </PixataTextBox>
+    <p class="mt-2">Value: <strong>@_search</strong></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Password">
+  <Description>
+    <p><code>Password="true"</code> shows the text as dots, and <code>ShowPasswordButton="true"</code> adds a button to show and hide it.</p>
+  </Description>
+  <ChildContent>
+    <label for="pixata-password">Password</label>
+    <PixataTextBox Id="pixata-password" @bind-Value="_password" Password="true" ShowPasswordButton="true" AutoComplete="new-password" Width="250px" />
+    <p class="mt-2">Length: <strong>@(_password?.Length ?? 0)</strong></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Prefix and suffix">
+  <Description>
+    <p><code>TextBoxPrefixTemplate</code> and <code>TextBoxSuffixTemplate</code> put content inside the box. The second has <code>ShowSuffixSeparator="false"</code>.</p>
+  </Description>
+  <ChildContent>
+    <PixataTextBox @bind-Value="_website" Width="300px" aria-label="Website">
+      <TextBoxPrefixTemplate>https://</TextBoxPrefixTemplate>
+      <TextBoxSuffixTemplate>.co.uk</TextBoxSuffixTemplate>
+    </PixataTextBox>
+    <PixataTextBox @bind-Value="_weight" Width="150px" InputMode="decimal" ShowSuffixSeparator="false" aria-label="Weight" Class="ms-2">
+      <TextBoxSuffixTemplate>kg</TextBoxSuffixTemplate>
+    </PixataTextBox>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Sizes, fill modes, rounding, read only and disabled">
+  <Description>
+    <p><code>Size</code> takes <code>sm</code>, <code>md</code> or <code>lg</code>, <code>FillMode</code> takes <code>solid</code>, <code>flat</code> or <code>outline</code>, and <code>Rounded</code> takes <code>none</code>, <code>sm</code>, <code>md</code>, <code>lg</code> or <code>full</code>.</p>
+  </Description>
+  <ChildContent>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+      <PixataTextBox @bind-Value="_name" Size="sm" Placeholder="Small" Width="150px" aria-label="Small" />
+      <PixataTextBox @bind-Value="_name" Size="lg" Placeholder="Large" Width="150px" aria-label="Large" />
+      <PixataTextBox @bind-Value="_name" FillMode="flat" Placeholder="Flat" Width="150px" aria-label="Flat" />
+      <PixataTextBox @bind-Value="_name" FillMode="outline" Placeholder="Outline" Width="150px" aria-label="Outline" />
+      <PixataTextBox @bind-Value="_name" Rounded="full" Placeholder="Rounded full" Width="150px" aria-label="Rounded full" />
+      <PixataTextBox @bind-Value="_name" ReadOnly="true" Placeholder="Read only" Width="150px" aria-label="Read only" />
+      <PixataTextBox @bind-Value="_name" Enabled="false" Placeholder="Disabled" Width="150px" aria-label="Disabled" />
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="In a form">
+  <Description>
+    <p>Inside an <code>EditForm</code> with <code>[Required]</code> and <code>[EmailAddress]</code> attributes. Submit without an email address, or with a bad one, to see the validation.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_contact" OnValidSubmit="@(() => _submitted = $"Saved {_contact.Email}")">
+      <DataAnnotationsValidator />
+      <FormSingle Label="Email" Id="pixata-email" Required="true">
+        <PixataTextBox Id="pixata-email" @bind-Value="_contact.Email" InputMode="email" AutoComplete="email" Width="300px" />
+        <ValidationMessage For="() => _contact.Email" />
+      </FormSingle>
+      <PixataPrimaryButton Class="mt-2">Save</PixataPrimaryButton>
+      <p class="mt-2">@_submitted</p>
+    </EditForm>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private string? _name = "Avrohom";
+  private string _log = "";
+  private string? _search;
+  private string? _password;
+  private string? _website;
+  private string? _weight;
+  private readonly Contact _contact = new();
+  private string _submitted = "";
+
+  private class Contact {
+    [Required(ErrorMessage = "Please enter your email address")]
+    [EmailAddress(ErrorMessage = "That isn't an email address")]
+    public string? Email { get; set; }
+  }
+}

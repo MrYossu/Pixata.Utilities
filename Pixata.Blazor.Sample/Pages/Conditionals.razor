@@ -5,7 +5,7 @@
 <h1>Conditionals</h1>
 
 <p><code>If</code> and <code>Switch</code> can be tested using the controls below. Enter a number and click the button to set the variable to that number. The display should change depending on the value of the number.</p>
-<input type="text" @bind-value="@_input" />
+<PixataNumericTextBox @bind-Value="_input" Width="120px" aria-label="Number" />
 <button @onclick="Set">Set</button>
 
 <h2>If</h2>

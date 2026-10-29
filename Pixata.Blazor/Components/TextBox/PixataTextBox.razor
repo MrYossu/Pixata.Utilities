@@ -1,0 +1,48 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataInputBase<string?>
+
+@* A single-line text box, or a password box with Password="true", as in Telerik's TextBox *@
+<span class="@WrapperClass" style="@WidthStyle">
+  @if (TextBoxPrefixTemplate is not null) {
+    <span class="@PixataCss.Classes("pixata-blazor-textbox-prefix", ShowPrefixSeparator ? "pixata-blazor-textbox-separator" : null)">@TextBoxPrefixTemplate</span>
+  }
+  <input @ref="_input"
+         @attributes="AdditionalAttributes"
+         class="pixata-blazor-input-inner pixata-blazor-textbox-input"
+         id="@Id"
+         type="@InputType"
+         value="@_text"
+         placeholder="@Placeholder"
+         maxlength="@MaxLength"
+         autocomplete="@AutoComplete"
+         autocapitalize="@AutoCapitalize"
+         spellcheck="@SpellCheckAttribute"
+         inputmode="@InputMode"
+         title="@Title"
+         disabled="@(!Enabled)"
+         readonly="@ReadOnly"
+         tabindex="@TabIndex"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         @oninput="OnInput"
+         @onchange="OnInputChange"
+         @onblur="OnInputBlur" />
+  @if (ShowClearButton && !string.IsNullOrEmpty(_text) && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-clear-value" role="button" aria-label="@ClearButtonText" title="@ClearButtonText" @onclick="Clear">
+      <PixataIcon Icon="@PixataSvgIcons.X" />
+    </span>
+  }
+  @if (Password && ShowPasswordButton) {
+    <button type="button"
+            class="pixata-blazor-input-button pixata-blazor-textbox-reveal"
+            aria-label="@(_revealed ? HidePasswordText : ShowPasswordText)"
+            title="@(_revealed ? HidePasswordText : ShowPasswordText)"
+            aria-pressed="@(_revealed ? "true" : "false")"
+            disabled="@(!Enabled)"
+            @onclick="() => _revealed = !_revealed">
+      <PixataIcon Icon="@(_revealed ? PixataSvgIcons.EyeOff : PixataSvgIcons.Eye)" />
+    </button>
+  }
+  @if (TextBoxSuffixTemplate is not null) {
+    <span class="@PixataCss.Classes("pixata-blazor-textbox-suffix", ShowSuffixSeparator ? "pixata-blazor-textbox-separator" : null)">@TextBoxSuffixTemplate</span>
+  }
+</span>
