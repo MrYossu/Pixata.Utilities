@@ -2,6 +2,16 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.19.0** adds three components, an option for the date picker, and a new default colour scheme...
+>- **Behaviour change:** the default colours are now those of Bootstrap 5.3's default theme, in place of the bright orange (and the other loud colours) the components had before. The primary colour is Bootstrap's blue (`#0d6efd`), the theme colours, chart series and notification icons use Bootstrap's palette, and focus rings are blue. The grid's and date pickers' accent colours now follow `--pixata-blazor-primary`, so setting that on `:root` changes them too. To get the old look back, set `--pixata-blazor-primary` to `#ff6358` (and `--pixata-blazor-primary-hover` to `#eb5b51`) on `:root`. See [styling](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Styling.md) (#117)
+>- `PixataTextBox`, a text box with Telerik's parameter names, with a password mode (and an optional show/hide button), a clear button, prefix and suffix templates and an optional debounce. See the [text box documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TextBox.md) (#121)
+>- `PixataTextArea`, which can grow with its text, and can show a character count. See the [text area documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TextArea.md) (#122)
+>- `PixataSlider`, a slider for numbers with Telerik's parameter names, buttons, ticks and labels, horizontal or vertical. See the [slider documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Slider.md) (#120)
+>- `ShowTime="true"` on `PixataDatePicker` lets the user pick a time as well as a date. See the [date picker documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md) (#123)
+>- The grid's number filters and editors now use `PixataNumericTextBox`, and `PixataGridNumericTextBox` has gone. `PixataNumericTextBox` gains `IncreaseValueText` and `DecreaseValueText` for its spin buttons' labels (#119)
+>- Every JavaScript file the components load now has the package's version in its address, so browsers don't keep an old copy after an upgrade
+>- `PixataDatePicker` no longer logs an unhandled `TaskCanceledException` when the circuit closes (#116)
+
 >**Version 5.18.1** fixes two things in `AuditViewer`...
 >- When the user left the page the viewer was on, it reloaded for the page that was going away, as Blazor tells components about a new location before it disposes the old page. With a scoped `DbContext`, that could clash with the new page's own queries. It now ignores locations on other pages. If loading fails, the viewer now shows the error rather than letting it end a Blazor Server circuit (#111)
 >- The "View history" buttons kept their text colour on hover only if the host's stylesheet didn't colour links on hover, so the text could vanish into the button. They now keep `--pixata-primary-color` whatever the host does with links (#112)
