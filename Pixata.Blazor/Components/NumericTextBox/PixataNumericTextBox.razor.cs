@@ -84,6 +84,18 @@ public partial class PixataNumericTextBox<TValue> : IDisposable {
   public bool Arrows { get; set; } = true;
 
   /// <summary>
+  /// The tooltip and accessible name of the up spin button, for translating. Defaults to "Increase value"
+  /// </summary>
+  [Parameter]
+  public string IncreaseValueText { get; set; } = "Increase value";
+
+  /// <summary>
+  /// The tooltip and accessible name of the down spin button, for translating. Defaults to "Decrease value"
+  /// </summary>
+  [Parameter]
+  public string DecreaseValueText { get; set; } = "Decrease value";
+
+  /// <summary>
   /// Shown when the input is empty
   /// </summary>
   [Parameter]

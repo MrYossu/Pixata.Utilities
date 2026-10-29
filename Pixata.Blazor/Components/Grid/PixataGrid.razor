@@ -656,7 +656,7 @@
     return EditorTypeFor(column) switch {
       PixataGridEditorType.NumericTextBox =>
         @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
-          <PixataGridNumericTextBox Messages="Text" Value="ToDecimal(value)" ValueChanged="d => SetEditValue(column, FromDecimal(column, d))" AriaLabel="@label" />
+          <PixataNumericTextBox TValue="decimal?" Value="ToDecimal(value)" ValueChanged="d => SetEditValue(column, FromDecimal(column, d))" IncreaseValueText="@Text.IncreaseValue" DecreaseValueText="@Text.DecreaseValue" aria-label="@label" />
         </span>,
       PixataGridEditorType.DatePicker =>
         @<span class="@Css.Join("pixata-blazor-grid-editor", invalid)" title="@message">
@@ -765,7 +765,7 @@
   // before filtering, which is only wanted for typing in the filter row
   private RenderFragment Editor(PixataGridColumn<TItem> column, object? value, Func<object?, bool, Task> changed, bool inRow) => column.FilterKind switch {
     FilterKind.Number =>
-      @<PixataGridNumericTextBox Messages="Text" Value="ToDecimal(value)" ValueChanged="d => changed(FromDecimal(column, d), inRow)" AriaLabel="@Text.FilterEditor(column.HeaderText)" />,
+      @<PixataNumericTextBox TValue="decimal?" Value="ToDecimal(value)" ValueChanged="d => changed(FromDecimal(column, d), inRow)" IncreaseValueText="@Text.IncreaseValue" DecreaseValueText="@Text.DecreaseValue" aria-label="@Text.FilterEditor(column.HeaderText)" Class="pixata-blazor-grid-filter-numeric" />,
     FilterKind.Date =>
       @<PixataDatePicker TValue="DateTime?" Value="ToDate(value)" ValueChanged="d => changed(FromDate(column, d), false)" Class="pixata-blazor-grid-filter-date" />,
     FilterKind.Boolean =>

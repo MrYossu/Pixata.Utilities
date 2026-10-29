@@ -201,6 +201,16 @@ public class PixataNumericTextBox_Tests {
   }
 
   [TestMethod]
+  public void SpinButtonText_CanBeTranslated() {
+    IRenderedComponent<PixataNumericTextBox<int>> box = _ctx.Render<PixataNumericTextBox<int>>(p => p
+      .Add(c => c.IncreaseValueText, "Plus")
+      .Add(c => c.DecreaseValueText, "Moins"));
+
+    Assert.AreEqual("Plus", box.Find(".pixata-blazor-numerictextbox-increase").GetAttribute("aria-label"));
+    Assert.AreEqual("Moins", box.Find(".pixata-blazor-numerictextbox-decrease").GetAttribute("title"));
+  }
+
+  [TestMethod]
   public void UnsupportedType_Throws() =>
     Assert.ThrowsException<InvalidOperationException>(() => _ctx.Render<PixataNumericTextBox<string>>());
 

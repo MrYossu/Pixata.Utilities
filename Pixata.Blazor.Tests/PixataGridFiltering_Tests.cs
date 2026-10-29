@@ -106,6 +106,24 @@ public class PixataGridFiltering_Tests {
   }
 
   [TestMethod]
+  public void FilterRow_NumberFilter_IsANumericTextBoxWithTheGridsMessages() {
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People())
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
+      .Add(g => g.Messages, new PixataGridMessages { IncreaseValue = "Plus", DecreaseValue = "Moins" })
+      .Add(g => g.GridColumns, b => Columns(b)));
+
+    IElement box = FilterCell(grid, 1).QuerySelector(".pixata-blazor-numerictextbox")!;
+    Assert.AreEqual("Plus", box.QuerySelector(".pixata-blazor-numerictextbox-increase")!.GetAttribute("aria-label"));
+    Assert.AreEqual("Moins", box.QuerySelector(".pixata-blazor-numerictextbox-decrease")!.GetAttribute("aria-label"));
+
+    box.QuerySelector("input")!.Input("39");
+    box.QuerySelector(".pixata-blazor-numerictextbox-increase")!.Click();
+    grid.WaitForAssertion(() => Assert.AreEqual("Bob", Names(grid)));
+    Assert.AreEqual("40", FilterCell(grid, 1).QuerySelector("input")!.GetAttribute("value"));
+  }
+
+  [TestMethod]
   public void FilterRow_Clear_RemovesTheFilter() {
     IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.FilterRow);
     Pick(grid, FilterCell(grid, 2).QuerySelector(".pixata-blazor-grid-filter-editor")!, "is true");

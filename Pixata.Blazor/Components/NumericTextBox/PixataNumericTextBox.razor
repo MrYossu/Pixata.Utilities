@@ -25,11 +25,11 @@
          @onkeydown="OnKeyDown" />
   @if (Arrows) {
     <span class="pixata-blazor-numerictextbox-spinner">
-      <button type="button" class="pixata-blazor-numerictextbox-increase" tabindex="-1" title="Increase value" aria-label="Increase value" disabled="@(!Enabled || ReadOnly)"
+      <button type="button" class="pixata-blazor-numerictextbox-increase" tabindex="-1" title="@IncreaseValueText" aria-label="@IncreaseValueText" disabled="@(!Enabled || ReadOnly)"
               @onmousedown="KeepFocus" @onmousedown:preventDefault="true" @onclick="() => Spin(1)">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10h8L8 5z" /></svg>
       </button>
-      <button type="button" class="pixata-blazor-numerictextbox-decrease" tabindex="-1" title="Decrease value" aria-label="Decrease value" disabled="@(!Enabled || ReadOnly)"
+      <button type="button" class="pixata-blazor-numerictextbox-decrease" tabindex="-1" title="@DecreaseValueText" aria-label="@DecreaseValueText" disabled="@(!Enabled || ReadOnly)"
               @onmousedown="KeepFocus" @onmousedown:preventDefault="true" @onclick="() => Spin(-1)">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6h8l-4 5z" /></svg>
       </button>

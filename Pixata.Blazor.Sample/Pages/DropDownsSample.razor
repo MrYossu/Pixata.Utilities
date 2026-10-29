@@ -66,9 +66,7 @@
   </Description>
   <ChildContent>
     <div style="display: flex; gap: 4px; align-items: center; width: 230px;">
-      <span class="pixata-blazor-input pixata-blazor-input-md pixata-blazor-rounded-md pixata-blazor-input-solid">
-        <input type="number" class="pixata-blazor-input-inner" @bind="_iconAmount" placeholder="Amount" aria-label="Amount" />
-      </span>
+      <PixataNumericTextBox @bind-Value="_iconAmount" Placeholder="Amount" aria-label="Amount" Width="100%" />
       <PixataDropDownList Data="@AmountOperators" @bind-Value="@_iconOperator" AriaLabel="Operator">
         <IconTemplate><strong>@(_iconOperator == "Greater than" ? ">" : "<")</strong></IconTemplate>
       </PixataDropDownList>

@@ -1530,9 +1530,8 @@
   box-shadow: var(--pixata-grid-focus-shadow);
 }
 
-/* Inputs inside the grid: text boxes, number boxes and the search box */
+/* Inputs inside the grid: text boxes and the search box */
 .pixata-blazor-grid-textbox,
-.pixata-blazor-grid-numeric,
 .pixata-blazor-grid-search {
   display: flex;
   align-items: stretch;
@@ -1545,13 +1544,11 @@
 }
 
 .pixata-blazor-grid-textbox:hover,
-.pixata-blazor-grid-numeric:hover,
 .pixata-blazor-grid-search:hover {
   border-color: rgba(0, 0, 0, .16);
 }
 
 .pixata-blazor-grid-textbox:focus-within,
-.pixata-blazor-grid-numeric:focus-within,
 .pixata-blazor-grid-search:focus-within {
   border-color: rgba(0, 0, 0, .16);
   box-shadow: var(--pixata-grid-focus-shadow);
@@ -1582,38 +1579,6 @@
 }
 
 .pixata-blazor-grid-search-icon svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
-
-.pixata-blazor-grid-numeric-spinner {
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: column;
-  width: 28px;
-}
-
-.pixata-blazor-grid-numeric-spinner button {
-  display: flex;
-  flex: 0 0 auto;
-  height: 14px;
-  overflow: hidden;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  border-inline-start: 1px solid var(--pixata-grid-border-color);
-  color: inherit;
-  background-color: var(--pixata-grid-picker-bg);
-  cursor: pointer;
-}
-
-.pixata-blazor-grid-numeric-spinner button:hover {
-  background-color: var(--pixata-grid-picker-hover-bg);
-}
-
-.pixata-blazor-grid-numeric-spinner svg {
   width: 16px;
   height: 16px;
   fill: currentColor;
@@ -1664,7 +1629,8 @@
   height: 30px;
 }
 
-.pixata-blazor-grid-filter-date {
+.pixata-blazor-grid-filter-date,
+.pixata-blazor-grid-filter-numeric {
   width: 100%;
   min-width: 0;
 }
@@ -1964,7 +1930,7 @@
   width: 100%;
 }
 
-.pixata-blazor-grid-editor > .pixata-blazor-grid-numeric,
+.pixata-blazor-grid-editor > .pixata-blazor-numerictextbox,
 .pixata-blazor-grid-editor > .pixata-blazor-dateinput,
 .pixata-blazor-grid-editor > .pixata-blazor-grid-dropdown {
   flex: 1 1 auto;
@@ -1980,7 +1946,7 @@
 /* An editor whose value failed validation, as Telerik's k-invalid */
 .pixata-blazor-grid-invalid,
 .pixata-blazor-grid-invalid:hover,
-.pixata-blazor-grid-invalid > .pixata-blazor-grid-numeric,
+.pixata-blazor-grid-invalid > .pixata-blazor-numerictextbox,
 .pixata-blazor-grid-invalid > .pixata-blazor-dateinput,
 .pixata-blazor-grid-invalid .pixata-blazor-grid-dropdown-button {
   border-color: var(--pixata-grid-error-color);

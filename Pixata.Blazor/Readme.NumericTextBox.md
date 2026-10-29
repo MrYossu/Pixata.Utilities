@@ -50,6 +50,7 @@ Pasted text such as `£1,234.50` is accepted, using the current culture's curren
 | `Decimals` | `int?` | The number of decimal places to round to. Whole number types always round to whole numbers |
 | `Format` | `string?` | A .NET number format, such as `N2` or `C2`, for when the input doesn't have focus |
 | `Arrows` | `bool` | Shows the spin buttons. Defaults to `true` |
+| `IncreaseValueText`, `DecreaseValueText` | `string` | The spin buttons' tooltips and accessible names, for translating. Default to "Increase value" and "Decrease value" |
 | `Placeholder` | `string?` | Shown when the input is empty |
 | `Enabled` | `bool` | Defaults to `true` |
 | `ReadOnly` | `bool` | The value can be seen and copied but not changed |

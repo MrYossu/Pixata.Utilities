@@ -53,8 +53,8 @@
       <label>Stack
         <PixataDropDownList Data="@StackOptions" @bind-Value="_stack" AriaLabel="Stack" Width="12em" Size="sm" />
       </label>
-      <label>Gap <input type="number" step="0.25" min="0" max="5" @bind="_gap" /></label>
-      <label>Spacing <input type="number" step="0.1" min="0" max="2" @bind="_spacing" /></label>
+      <label>Gap <PixataNumericTextBox @bind-Value="_gap" Step="0.25" Min="0.0" Max="5.0" Width="6em" Size="sm" /></label>
+      <label>Spacing <PixataNumericTextBox @bind-Value="_spacing" Step="0.1" Min="0.0" Max="2.0" Width="6em" Size="sm" /></label>
     </div>
     The stack settings go on the first series and apply to the others of the same type. The shared tooltip lists every
     series in the category.
