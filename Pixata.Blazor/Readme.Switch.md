@@ -27,7 +27,13 @@ There is nothing to register. Add the stylesheet to your host page if you haven'
 }
 ```
 
-The switch is a `<button>` with `role="switch"` and `aria-checked`, so screen readers announce it as a switch, and the `Id` lets a `<label for="...">` name it. If there is no visible label, give it an `AriaLabel` instead.
+The switch is a `<button>` with `role="switch"` and `aria-checked`, so screen readers announce it as a switch, and the `Id` lets a `<label for="...">` name it. It can also go inside its label, as a checkbox often does, in which case it doesn't need an `Id`. Clicking either the switch or the label's text toggles it once...
+
+```xml
+<label><PixataSwitch @bind-Value="_notifications" /> Notifications</label>
+```
+
+If there is no visible label, give it an `AriaLabel` instead.
 
 It can be bound to a `bool?` as well as a `bool`. A null value is shown as off, and the first toggle sets it to true...
 
