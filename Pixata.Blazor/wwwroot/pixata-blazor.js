@@ -1029,3 +1029,17 @@ export function initSlider(input) {
     input.dispatchEvent(new Event("change", { bubbles: true }));
   });
 }
+
+// Scrolls each list box in the element so its selected option is in the middle, without scrolling the page, as
+// scrollIntoView would. The date picker's time lists use it when the popup opens
+export function scrollSelectedOptionsIntoView(element) {
+  if (!element) {
+    return;
+  }
+  for (const list of element.querySelectorAll("[role=listbox]")) {
+    const selected = list.querySelector("[aria-selected=true]");
+    if (selected) {
+      list.scrollTop = selected.offsetTop - list.offsetTop - (list.clientHeight - selected.offsetHeight) / 2;
+    }
+  }
+}

@@ -1,9 +1,10 @@
 @namespace Pixata.Blazor.Components
 @typeparam TValue
 @inherits PixataDateInputBase<TValue>
+@using System.Globalization
 @using Microsoft.JSInterop
 
-@* A date input with a button that opens a calendar, as in Telerik's DatePicker *@
+@* A date input with a button that opens a calendar, as in Telerik's DatePicker. With ShowTime, the popup has a time selector too *@
 <span @ref="_wrapper" class="@WrapperClass" style="@WidthStyle">
   <input @ref="InputElement"
          class="pixata-blazor-dateinput-input"
@@ -17,7 +18,7 @@
          disabled="@(!Enabled)"
          readonly="@ReadOnly"
          tabindex="@TabIndex"
-         aria-haspopup="grid"
+         aria-haspopup="@(ShowTime ? "dialog" : "grid")"
          aria-expanded="@(_open ? "true" : "false")"
          aria-invalid="@(IsInvalid ? "true" : null)"
          @onkeydown="OnInputKeyDown" />
@@ -35,9 +36,9 @@
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 1h1v2h4V1h1v2h3v12H2V3h3zm8 5H3v8h10zM3 5h10V4H3zm1 2h2v2H4zm3 0h2v2H7zm3 0h2v2h-2zm-6 3h2v2H4zm3 0h2v2H7z" /></svg>
   </button>
   @if (_open) {
-    <div @ref="_popup" class="@DatePickerCss.Join("pixata-blazor-datepicker-popup", PopupClass)">
+    <div @ref="_popup" class="@DatePickerCss.Join("pixata-blazor-datepicker-popup", ShowTime ? "pixata-blazor-datetimepicker-popup" : null, PopupClass)">
       <PixataCalendar @ref="_calendar"
-                      Value="CurrentDate"
+                      Value="@(ShowTime ? _pendingDate : CurrentDate)"
                       ValueChanged="OnCalendarChanged"
                       Min="Min"
                       Max="Max"
@@ -47,6 +48,42 @@
                       ShowWeekNumbers="ShowWeekNumbers"
                       ShowOtherMonthDays="ShowOtherMonthDays"
                       OnEscape="CloseAndFocus" />
+      @if (ShowTime) {
+        <div class="pixata-blazor-timeselector" @onkeydown="OnTimeKeyDown">
+          <div class="pixata-blazor-timeselector-lists">
+            <div class="pixata-blazor-timeselector-list" role="listbox" aria-label="@HoursText">
+              @foreach (int hour in HourOptions) {
+                <button type="button" role="option" class="@OptionClass(hour == DisplayHour)" aria-selected="@(hour == DisplayHour ? "true" : "false")"
+                        @onclick="() => SetHour(hour)">@hour.ToString("00", CultureInfo.CurrentCulture)</button>
+              }
+            </div>
+            <div class="pixata-blazor-timeselector-list" role="listbox" aria-label="@MinutesText">
+              @foreach (int minute in MinuteOptions) {
+                <button type="button" role="option" class="@OptionClass(minute == _pendingTime.Minutes)" aria-selected="@(minute == _pendingTime.Minutes ? "true" : "false")"
+                        @onclick="() => SetMinute(minute)">@minute.ToString("00", CultureInfo.CurrentCulture)</button>
+              }
+            </div>
+            @if (TimeHasSeconds) {
+              <div class="pixata-blazor-timeselector-list" role="listbox" aria-label="@SecondsText">
+                @foreach (int second in Enumerable.Range(0, 60)) {
+                  <button type="button" role="option" class="@OptionClass(second == _pendingTime.Seconds)" aria-selected="@(second == _pendingTime.Seconds ? "true" : "false")"
+                          @onclick="() => SetSecond(second)">@second.ToString("00", CultureInfo.CurrentCulture)</button>
+                }
+              </div>
+            }
+            @if (IsTwelveHour) {
+              <div class="pixata-blazor-timeselector-list" role="listbox" aria-label="@AmPmText">
+                <button type="button" role="option" class="@OptionClass(!IsPm)" aria-selected="@(!IsPm ? "true" : "false")" @onclick="() => SetPm(false)">@CultureInfo.CurrentCulture.DateTimeFormat.AMDesignator</button>
+                <button type="button" role="option" class="@OptionClass(IsPm)" aria-selected="@(IsPm ? "true" : "false")" @onclick="() => SetPm(true)">@CultureInfo.CurrentCulture.DateTimeFormat.PMDesignator</button>
+              </div>
+            }
+          </div>
+          <div class="pixata-blazor-timeselector-footer">
+            <button type="button" class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, null, null, PixataThemeConstants.Size.Small)" @onclick="CloseAndFocus">@CancelText</button>
+            <button type="button" class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, PixataThemeConstants.Size.Small)" @onclick="SetDateAndTime">@SetText</button>
+          </div>
+        </div>
+      }
     </div>
   }
 </span>
@@ -88,12 +125,60 @@
   [Parameter]
   public EventCallback OnClose { get; set; }
 
+  /// <summary>
+  /// Lets the user pick a time as well as a date. The popup gets hour and minute lists (and seconds and AM/PM if the format
+  /// has them) next to the calendar, with Set and Cancel buttons, and the format defaults to the culture's short date and
+  /// time. Only for <see cref="DateTime"/> values. Defaults to false
+  /// </summary>
+  [Parameter]
+  public bool ShowTime { get; set; }
+
+  /// <summary>
+  /// With <see cref="ShowTime"/>, the gap in minutes between the times in the minutes list. Defaults to 1. Any minute can
+  /// still be typed
+  /// </summary>
+  [Parameter]
+  public int TimeStep { get; set; } = 1;
+
+  /// <summary>
+  /// The text of the button that sets the date and time, for translating. Defaults to "Set"
+  /// </summary>
+  [Parameter]
+  public string SetText { get; set; } = "Set";
+
+  /// <summary>
+  /// The text of the button that closes the popup without changing the value, for translating. Defaults to "Cancel"
+  /// </summary>
+  [Parameter]
+  public string CancelText { get; set; } = "Cancel";
+
+  /// <summary>
+  /// The accessible names of the time lists, for translating. Default to "Hours", "Minutes", "Seconds" and "AM/PM"
+  /// </summary>
+  [Parameter]
+  public string HoursText { get; set; } = "Hours";
+
+  [Parameter]
+  public string MinutesText { get; set; } = "Minutes";
+
+  [Parameter]
+  public string SecondsText { get; set; } = "Seconds";
+
+  [Parameter]
+  public string AmPmText { get; set; } = "AM/PM";
+
+  private static readonly Type UnderlyingType = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
+
   private ElementReference _wrapper;
   private ElementReference _popup;
   private PixataCalendar? _calendar;
   private DotNetObjectReference<PixataDatePicker<TValue>>? _pickerRef;
   private bool _open;
   private bool _justOpened;
+  private bool _formatSet;
+  // With ShowTime, what the user has picked in the popup, which only becomes the value when they click Set
+  private DateTime _pendingDate;
+  private TimeSpan _pendingTime;
 
   private string WrapperClass =>
     DatePickerCss.Join("pixata-blazor-dateinput", "pixata-blazor-datepicker", SizeClass, IsInvalid ? "pixata-blazor-dateinput-invalid" : null,
@@ -102,6 +187,46 @@
   private string? WidthStyle =>
     Width is null ? null : $"width: {Width}";
 
+  // The culture's short date and time, unless the page sets a Format
+  protected override string EffectiveFormat =>
+    ShowTime && !_formatSet ? "g" : Format;
+
+  private bool FormatHas(DateInputModel.SegmentType type) =>
+    Model.Segments.Any(s => s.Type == type);
+
+  private bool IsTwelveHour =>
+    FormatHas(DateInputModel.SegmentType.AmPm) || Model.Segments.Any(s => s.Type == DateInputModel.SegmentType.Hour && s.Format[0] == 'h');
+
+  private bool TimeHasSeconds =>
+    FormatHas(DateInputModel.SegmentType.Second);
+
+  private bool IsPm =>
+    _pendingTime.Hours >= 12;
+
+  private IEnumerable<int> HourOptions =>
+    IsTwelveHour ? [12, .. Enumerable.Range(1, 11)] : Enumerable.Range(0, 24);
+
+  private int DisplayHour =>
+    IsTwelveHour ? (_pendingTime.Hours % 12 == 0 ? 12 : _pendingTime.Hours % 12) : _pendingTime.Hours;
+
+  private IEnumerable<int> MinuteOptions =>
+    Enumerable.Range(0, 60).Where(m => m % Math.Max(1, TimeStep) == 0);
+
+  private static string OptionClass(bool selected) =>
+    DatePickerCss.Join("pixata-blazor-timeselector-option", selected ? "pixata-blazor-timeselector-option-selected" : null);
+
+  public override Task SetParametersAsync(ParameterView parameters) {
+    _formatSet |= parameters.TryGetValue(nameof(Format), out string? _);
+    return base.SetParametersAsync(parameters);
+  }
+
+  protected override void OnInitialized() {
+    base.OnInitialized();
+    if (ShowTime && UnderlyingType == typeof(DateOnly)) {
+      throw new InvalidOperationException("PixataDatePicker can't use ShowTime with a DateOnly value, which has no time. Use DateTime or DateTime? instead");
+    }
+  }
+
   /// <summary>
   /// Opens the calendar
   /// </summary>
@@ -109,6 +234,9 @@
     if (_open || !Enabled || ReadOnly) {
       return;
     }
+    DateTime start = CurrentDate ?? DateTime.Today;
+    _pendingDate = start.Date;
+    _pendingTime = start.TimeOfDay;
     _open = true;
     _justOpened = true;
     await OnOpen.InvokeAsync();
@@ -149,6 +277,9 @@
       _pickerRef ??= DotNetObjectReference.Create(this);
       try {
         await Module.InvokeVoidAsync("openPopup", _wrapper, _popup, _pickerRef);
+        if (ShowTime) {
+          await Module.InvokeVoidAsync("scrollSelectedOptionsIntoView", _popup);
+        }
         // The keyboard focus goes into the calendar, so the arrow keys move around it
         if (_calendar is not null) {
           await _calendar.FocusAsync();
@@ -175,9 +306,46 @@
   }
 
   private async Task OnCalendarChanged(DateTime date) {
+    if (ShowTime) {
+      // Picking a day keeps the time, and the popup stays open until Set
+      _pendingDate = date.Date;
+      return;
+    }
     await SetValue(date);
     await CloseAndFocus();
     await RaiseChangeIfNeeded();
+  }
+
+  private void SetHour(int hour) {
+    int hour24 = IsTwelveHour ? hour % 12 + (IsPm ? 12 : 0) : hour;
+    _pendingTime = new(hour24, _pendingTime.Minutes, _pendingTime.Seconds);
+  }
+
+  private void SetMinute(int minute) =>
+    _pendingTime = new(_pendingTime.Hours, minute, _pendingTime.Seconds);
+
+  private void SetSecond(int second) =>
+    _pendingTime = new(_pendingTime.Hours, _pendingTime.Minutes, second);
+
+  private void SetPm(bool pm) {
+    if (pm != IsPm) {
+      _pendingTime = _pendingTime.Add(TimeSpan.FromHours(pm ? 12 : -12));
+    }
+  }
+
+  private async Task SetDateAndTime() {
+    DateTime chosen = _pendingDate.Date + _pendingTime;
+    // Min and Max include the time, so a time outside them is brought back to the nearest one allowed
+    DateTime clamped = chosen < Min ? Min : chosen > Max ? Max : chosen;
+    await SetValue(clamped);
+    await CloseAndFocus();
+    await RaiseChangeIfNeeded();
+  }
+
+  private async Task OnTimeKeyDown(KeyboardEventArgs e) {
+    if (e.Key == "Escape") {
+      await CloseAndFocus();
+    }
   }
 
   // Alt+Down opens the calendar, and Alt+Up or Escape closes it, as in Telerik's date picker

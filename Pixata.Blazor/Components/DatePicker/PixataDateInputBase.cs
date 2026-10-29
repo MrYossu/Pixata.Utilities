@@ -170,10 +170,17 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
     }
   }
 
+  /// <summary>
+  /// The format the input uses, which is <see cref="Format"/> unless a derived component picks a different default
+  /// </summary>
+  protected virtual string EffectiveFormat =>
+    Format;
+
   protected override async Task OnParametersSetAsync() {
-    if (Format != _modelFormat) {
-      Model = new(Format) { AutoSwitchParts = AutoSwitchParts, TwoDigitYearMax = TwoDigitYearMax, Min = Min, Max = Max };
-      _modelFormat = Format;
+    string format = EffectiveFormat;
+    if (format != _modelFormat) {
+      Model = new(format) { AutoSwitchParts = AutoSwitchParts, TwoDigitYearMax = TwoDigitYearMax, Min = Min, Max = Max };
+      _modelFormat = format;
       Model.SetValue(CurrentDate);
       _lastValue = CurrentDate;
       if (!_initialised) {

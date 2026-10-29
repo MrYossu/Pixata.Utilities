@@ -197,11 +197,11 @@
                 <ValidationMessage For="() => context.Item.Title" />
                 <label>
                   Début
-                  <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="context.Item.Start" />
+                  <PixataDatePicker @bind-Value="context.Item.Start" ShowTime="true" TimeStep="15" SetText="Valider" CancelText="Annuler" HoursText="Heures" />
                 </label>
                 <label>
                   Fin
-                  <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="context.Item.End" />
+                  <PixataDatePicker @bind-Value="context.Item.End" ShowTime="true" TimeStep="15" SetText="Valider" CancelText="Annuler" HoursText="Heures" />
                 </label>
                 <ValidationMessage For="() => context.Item.End" />
                 <label>

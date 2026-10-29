@@ -17,6 +17,13 @@
 <PixataDatePicker @bind-Value="_nullableDate" Placeholder="Pick a date" ShowClearButton="true" Id="pixata-dp-nullable" />
 <p>Value: @(_nullableDate?.ToString("dd MMM yyyy", CultureInfo.CurrentCulture) ?? "null")</p>
 
+<h4>Date and time</h4>
+
+<p>With <code>ShowTime="true"</code>, the popup has a time selector next to the calendar, and the format defaults to the culture's short date and time. This one has <code>TimeStep="15"</code>, so the minutes list goes up in quarters of an hour.</p>
+
+<PixataDatePicker @bind-Value="_appointment" ShowTime="true" TimeStep="15" Id="pixata-dp-time" />
+<p>Value: @_appointment.ToString("dd MMM yyyy HH:mm", CultureInfo.CurrentCulture)</p>
+
 <h4>Date input, with a DateOnly value and a custom format</h4>
 
 <PixataDateInput @bind-Value="_dateOnly" Format="dd/MM/yyyy" />
@@ -41,6 +48,7 @@
 
 @code {
   private DateTime _date = new(2026, 1, 31);
+  private DateTime _appointment = new(2026, 1, 31, 14, 30, 0);
   private DateTime? _nullableDate;
   private DateTime _calendarDate = new(2026, 10, 13);
   private readonly DateTime _min = new(2000, 1, 1);

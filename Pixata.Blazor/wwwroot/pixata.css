@@ -1153,6 +1153,79 @@
   border-radius: 0;
 }
 
+/* With ShowTime, the time selector sits next to the calendar, or under it if there isn't room */
+.pixata-blazor-datetimepicker-popup {
+  flex-wrap: wrap;
+  max-width: calc(100vw - 16px);
+}
+
+.pixata-blazor-timeselector {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--pixata-datepicker-font-size);
+  line-height: var(--pixata-datepicker-line-height);
+  color: var(--pixata-datepicker-color);
+  border-inline-start: 1px solid var(--pixata-datepicker-border-color);
+}
+
+.pixata-blazor-timeselector-lists {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.pixata-blazor-timeselector-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 16em;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+  border-inline-start: 1px solid var(--pixata-datepicker-border-color);
+  scrollbar-width: thin;
+}
+
+.pixata-blazor-timeselector-list:first-child {
+  border-inline-start: 0;
+}
+
+.pixata-blazor-timeselector-option {
+  flex: none;
+  min-width: 3em;
+  margin: 0;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: var(--pixata-datepicker-border-radius);
+  color: inherit;
+  background: none;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pixata-blazor-timeselector-option:hover {
+  background-color: var(--pixata-datepicker-button-hover-bg);
+}
+
+.pixata-blazor-timeselector-option:focus-visible {
+  outline: 0;
+  box-shadow: inset var(--pixata-datepicker-focus-shadow);
+}
+
+.pixata-blazor-timeselector-option-selected,
+.pixata-blazor-timeselector-option-selected:hover {
+  color: var(--pixata-datepicker-primary-color);
+  background-color: var(--pixata-datepicker-primary);
+}
+
+.pixata-blazor-timeselector-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid var(--pixata-datepicker-border-color);
+}
+
 .pixata-blazor-calendar-header {
   display: flex;
   align-items: center;

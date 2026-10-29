@@ -63,10 +63,30 @@ The date picker also has...
 | `ShowWeekNumbers`, `ShowOtherMonthDays` | `bool` | Passed to the calendar |
 | `PopupClass` | `string` | A CSS class for the popup |
 | `OnOpen`, `OnClose` | `EventCallback` | Fire when the calendar opens and closes |
+| `ShowTime` | `bool` | Lets the user pick a time as well. See below. Defaults to false |
+| `TimeStep` | `int` | With `ShowTime`, the gap in minutes between the times in the minutes list. Defaults to 1 |
+| `SetText`, `CancelText` | `string` | With `ShowTime`, the text of the popup's buttons, for translating. Default to "Set" and "Cancel" |
+| `HoursText`, `MinutesText`, `SecondsText`, `AmPmText` | `string` | With `ShowTime`, the accessible names of the time lists, for translating |
 
 and `Open()` and `Close()` methods. Both components have `FocusAsync()`.
 
 The calendar opens from the button, or with Alt+Down in the input. It closes when a date is picked, on Escape or Alt+Up, or when the user clicks somewhere else. It's positioned with fixed positioning, so it isn't cut off by a container with hidden overflow (such as a grid cell), and it stays inside the window.
+
+### Date and time
+
+`ShowTime="true"` lets the user pick a time as well as a date...
+
+```razor
+<PixataDatePicker @bind-Value="_appointment" ShowTime="true" TimeStep="15" />
+```
+
+The format then defaults to the culture's short date and time (`g`, such as `13/10/2026 14:30` in the UK), unless you set `Format`. The popup has lists of hours and minutes next to the calendar, plus seconds if the format has them, and AM and PM if it uses a 12-hour clock. Picking a day keeps the time, and nothing changes until the user clicks Set. Cancel, Escape or clicking elsewhere closes the popup without changing the value. `Min` and `Max` include the time, so a time outside them is brought back to the nearest one allowed.
+
+The time can also be typed into the input, as with the date, whatever the `TimeStep`.
+
+`ShowTime` only works with `DateTime` and `DateTime?` values. Using it with a `DateOnly` throws an `InvalidOperationException`, as a `DateOnly` has nowhere to keep the time.
+
+Without `ShowTime`, picking a day from the calendar sets the value to that day at midnight, as it always has, even if the value had a time.
 
 ### Forms
 
