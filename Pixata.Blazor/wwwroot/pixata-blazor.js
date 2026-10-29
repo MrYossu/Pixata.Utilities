@@ -993,3 +993,39 @@ export function autoSizeTextArea(element) {
   }
   element.pixataAutoSize();
 }
+
+// Sets up a slider's range input: Page Up and Page Down move it by its large step (the browser's own jump is a tenth of the
+// range), a read-only slider ignores the keys that would change it, and the coloured part of the track follows the thumb
+// while it's dragged, without waiting for .NET
+export function initSlider(input) {
+  if (!input || input.pixataSlider) {
+    return;
+  }
+  input.pixataSlider = true;
+  const fill = () => {
+    const min = Number(input.min);
+    const max = Number(input.max);
+    const fraction = max > min ? (Number(input.value) - min) / (max - min) : 0;
+    input.style.setProperty("--pixata-blazor-slider-fraction", String(Math.min(1, Math.max(0, fraction))));
+  };
+  const changingKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End"];
+  input.addEventListener("input", fill);
+  input.addEventListener("keydown", e => {
+    if (input.dataset.readonly === "true") {
+      if (changingKeys.includes(e.key)) {
+        e.preventDefault();
+      }
+      return;
+    }
+    if (e.key !== "PageUp" && e.key !== "PageDown") {
+      return;
+    }
+    e.preventDefault();
+    const large = Number(input.dataset.largeStep) || Number(input.step) * 10;
+    const next = Number(input.value) + (e.key === "PageUp" ? large : -large);
+    input.value = String(Math.min(Number(input.max), Math.max(Number(input.min), next)));
+    fill();
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+}

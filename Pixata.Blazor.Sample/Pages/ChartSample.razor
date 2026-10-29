@@ -116,7 +116,7 @@
 <ComponentSample Title="Pie with labels, an exploded segment and a start angle">
   <Description>
     <div class="chart-sample-controls">
-      <label>Start angle <input type="range" min="0" max="360" step="15" @bind="_startAngle" @bind:event="oninput" /> @_startAngle°</label>
+      <label>Start angle <PixataSlider @bind-Value="_startAngle" Max="360.0" SmallStep="15.0" LargeStep="90.0" ShowButtons="false" TickPosition="PixataSliderTickPosition.None" Width="180px" /> @_startAngle°</label>
       <label>Legend
         <PixataDropDownList Data="@(Enum.GetValues<PixataChartLegendPosition>())" @bind-Value="_legendPosition" AriaLabel="Legend" Width="12em" Size="sm" />
       </label>
@@ -141,7 +141,7 @@
 <ComponentSample Title="Donut with rings, a hole size and a centre template">
   <Description>
     <div class="chart-sample-controls">
-      <label>Hole size <input type="range" min="0" max="90" step="5" @bind="_holeSize" @bind:event="oninput" /> @_holeSize%</label>
+      <label>Hole size <PixataSlider @bind-Value="_holeSize" Max="90.0" SmallStep="5.0" LargeStep="30.0" ShowButtons="false" TickPosition="PixataSliderTickPosition.None" Width="180px" /> @_holeSize%</label>
       <span><PixataSwitch Id="two-rings-switch" @bind-Value="_twoRings" Size="sm" /> <label for="two-rings-switch">Last year as an inner ring</label></span>
       <span><PixataSwitch Id="donut-labels-switch" @bind-Value="_donutLabels" Size="sm" /> <label for="donut-labels-switch">Labels</label></span>
     </div>

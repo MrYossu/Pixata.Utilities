@@ -9773,3 +9773,313 @@
 }
 
 /* ========== end of PixataHeatmap ========== */
+
+/* ========== PixataSlider ========== */
+
+/*
+  pixata-blazor-slider is the outer element, with -horizontal or -vertical, and -readonly when it can't be changed. Inside it
+  are the decrease and increase buttons (pixata-blazor-slider-button) and the track wrap, which holds the range input
+  (pixata-blazor-slider-input) and the ticks (pixata-blazor-slider-ticks, -before and -after, made of pixata-blazor-slider-tick,
+  -tick-large and -label). The input's --pixata-blazor-slider-fraction (0 to 1) is how far along the value is, and each
+  tick's --pixata-blazor-slider-at is where it goes
+*/
+:root {
+  --pixata-blazor-slider-track-size: 4px;
+  --pixata-blazor-slider-track-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 15%, transparent);
+  --pixata-blazor-slider-selection-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-slider-thumb-size: 16px;
+  --pixata-blazor-slider-thumb-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-slider-thumb-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-slider-thumb-focus-shadow: 0 0 0 4px color-mix(in srgb, var(--pixata-blazor-primary) 25%, transparent);
+  --pixata-blazor-slider-tick-color: color-mix(in srgb, var(--pixata-blazor-text-color) 35%, transparent);
+  --pixata-blazor-slider-tick-size: 4px;
+  --pixata-blazor-slider-tick-large-size: 8px;
+  --pixata-blazor-slider-label-font-size: .8em;
+  --pixata-blazor-slider-vertical-height: 200px;
+}
+
+.pixata-blazor-slider {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  vertical-align: middle;
+}
+
+.pixata-blazor-slider-horizontal {
+  width: 100%;
+}
+
+.pixata-blazor-slider-vertical {
+  flex-direction: column-reverse;
+  height: var(--pixata-blazor-slider-vertical-height);
+}
+
+.pixata-blazor-slider-track-wrap {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-track-wrap {
+  flex-direction: column;
+  align-self: stretch;
+  justify-content: center;
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-track-wrap {
+  flex-direction: row;
+  justify-content: center;
+}
+
+/* The input is the thumb's travel, with the track drawn as its background so the part before the thumb can be coloured */
+.pixata-blazor-slider-input {
+  --pixata-blazor-slider-fill-to: calc(var(--pixata-blazor-slider-thumb-size) / 2 + (100% - var(--pixata-blazor-slider-thumb-size)) * var(--pixata-blazor-slider-fraction, 0));
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-input {
+  width: 100%;
+  height: var(--pixata-blazor-slider-thumb-size);
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-input {
+  width: var(--pixata-blazor-slider-thumb-size);
+  height: 100%;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+.pixata-blazor-slider-input::-webkit-slider-runnable-track {
+  border-radius: var(--pixata-blazor-slider-track-size);
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-input::-webkit-slider-runnable-track {
+  height: var(--pixata-blazor-slider-track-size);
+  background: linear-gradient(to right, var(--pixata-blazor-slider-selection-bg) var(--pixata-blazor-slider-fill-to), var(--pixata-blazor-slider-track-bg) var(--pixata-blazor-slider-fill-to));
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-input:dir(rtl)::-webkit-slider-runnable-track {
+  background: linear-gradient(to left, var(--pixata-blazor-slider-selection-bg) var(--pixata-blazor-slider-fill-to), var(--pixata-blazor-slider-track-bg) var(--pixata-blazor-slider-fill-to));
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-input::-webkit-slider-runnable-track {
+  width: var(--pixata-blazor-slider-track-size);
+  background: linear-gradient(to top, var(--pixata-blazor-slider-selection-bg) var(--pixata-blazor-slider-fill-to), var(--pixata-blazor-slider-track-bg) var(--pixata-blazor-slider-fill-to));
+}
+
+.pixata-blazor-slider-input::-moz-range-track {
+  border-radius: var(--pixata-blazor-slider-track-size);
+  background: var(--pixata-blazor-slider-track-bg);
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-input::-moz-range-track {
+  height: var(--pixata-blazor-slider-track-size);
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-input::-moz-range-track {
+  width: var(--pixata-blazor-slider-track-size);
+}
+
+.pixata-blazor-slider-input::-moz-range-progress {
+  border-radius: var(--pixata-blazor-slider-track-size);
+  background: var(--pixata-blazor-slider-selection-bg);
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-input::-moz-range-progress {
+  height: var(--pixata-blazor-slider-track-size);
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-input::-moz-range-progress {
+  width: var(--pixata-blazor-slider-track-size);
+}
+
+.pixata-blazor-slider-input::-webkit-slider-thumb {
+  box-sizing: border-box;
+  width: var(--pixata-blazor-slider-thumb-size);
+  height: var(--pixata-blazor-slider-thumb-size);
+  border: 1px solid var(--pixata-blazor-slider-thumb-border-color);
+  border-radius: 50%;
+  background: var(--pixata-blazor-slider-thumb-bg);
+  appearance: none;
+  transition: box-shadow var(--pixata-blazor-transition);
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-input::-webkit-slider-thumb {
+  margin-top: calc((var(--pixata-blazor-slider-track-size) - var(--pixata-blazor-slider-thumb-size)) / 2);
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-input::-webkit-slider-thumb {
+  margin-left: calc((var(--pixata-blazor-slider-track-size) - var(--pixata-blazor-slider-thumb-size)) / 2);
+}
+
+.pixata-blazor-slider-input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--pixata-blazor-slider-thumb-size);
+  height: var(--pixata-blazor-slider-thumb-size);
+  border: 1px solid var(--pixata-blazor-slider-thumb-border-color);
+  border-radius: 50%;
+  background: var(--pixata-blazor-slider-thumb-bg);
+}
+
+.pixata-blazor-slider-input:focus {
+  outline: 0;
+}
+
+.pixata-blazor-slider-input:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--pixata-blazor-slider-thumb-focus-shadow);
+}
+
+.pixata-blazor-slider-input:focus-visible::-moz-range-thumb {
+  box-shadow: var(--pixata-blazor-slider-thumb-focus-shadow);
+}
+
+.pixata-blazor-slider-readonly .pixata-blazor-slider-input {
+  pointer-events: none;
+}
+
+.pixata-blazor-slider.pixata-blazor-invalid {
+  --pixata-blazor-slider-selection-bg: var(--pixata-blazor-error);
+  --pixata-blazor-slider-thumb-bg: var(--pixata-blazor-error);
+  --pixata-blazor-slider-thumb-border-color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-slider-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pixata-blazor-border-color);
+  border-radius: 50%;
+  background-color: var(--pixata-blazor-base-bg);
+  color: var(--pixata-blazor-base-color);
+  cursor: pointer;
+}
+
+.pixata-blazor-slider-button:hover:not(:disabled) {
+  background-color: var(--pixata-blazor-base-hover-bg);
+}
+
+.pixata-blazor-slider-button:disabled {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  cursor: default;
+}
+
+.pixata-blazor-slider-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* The ticks line up with the middle of the thumb, which never gets nearer the ends than half its own size */
+.pixata-blazor-slider-ticks {
+  position: relative;
+  flex: none;
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-ticks {
+  height: var(--pixata-blazor-slider-tick-large-size);
+  margin: 0 calc(var(--pixata-blazor-slider-thumb-size) / 2);
+}
+
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-ticks {
+  width: var(--pixata-blazor-slider-tick-large-size);
+  margin: calc(var(--pixata-blazor-slider-thumb-size) / 2) 0;
+}
+
+/*
+  The labels' room goes on the outer element, so the track stays in the middle of the track wrap and lines up with the
+  buttons. Ticks on one side only get the same space on the other side, for the same reason
+*/
+.pixata-blazor-slider-horizontal:has(.pixata-blazor-slider-label) {
+  padding-bottom: 1.5em;
+}
+
+.pixata-blazor-slider-vertical:has(.pixata-blazor-slider-label) {
+  padding-inline-end: 2.5em;
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-track-wrap:has(.pixata-blazor-slider-ticks-after):not(:has(.pixata-blazor-slider-ticks-before)) {
+  padding-top: var(--pixata-blazor-slider-tick-large-size);
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-track-wrap:has(.pixata-blazor-slider-ticks-before):not(:has(.pixata-blazor-slider-ticks-after)) {
+  padding-bottom: var(--pixata-blazor-slider-tick-large-size);
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-track-wrap:has(.pixata-blazor-slider-ticks-after):not(:has(.pixata-blazor-slider-ticks-before)) {
+  padding-left: var(--pixata-blazor-slider-tick-large-size);
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-track-wrap:has(.pixata-blazor-slider-ticks-before):not(:has(.pixata-blazor-slider-ticks-after)) {
+  padding-right: var(--pixata-blazor-slider-tick-large-size);
+}
+
+.pixata-blazor-slider-tick {
+  position: absolute;
+  background-color: var(--pixata-blazor-slider-tick-color);
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-tick {
+  inset-inline-start: calc(var(--pixata-blazor-slider-at) * 100%);
+  width: 1px;
+  height: var(--pixata-blazor-slider-tick-size);
+  translate: -50% 0;
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-ticks-before .pixata-blazor-slider-tick {
+  bottom: 0;
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-tick-large {
+  height: var(--pixata-blazor-slider-tick-large-size);
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-tick {
+  bottom: calc(var(--pixata-blazor-slider-at) * 100%);
+  width: var(--pixata-blazor-slider-tick-size);
+  height: 1px;
+  translate: 0 50%;
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-ticks-before .pixata-blazor-slider-tick {
+  right: 0;
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-tick-large {
+  width: var(--pixata-blazor-slider-tick-large-size);
+}
+
+.pixata-blazor-slider-label {
+  position: absolute;
+  font-size: var(--pixata-blazor-slider-label-font-size);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pixata-blazor-slider-horizontal .pixata-blazor-slider-label {
+  top: calc(var(--pixata-blazor-slider-tick-large-size) + 4px);
+  left: 50%;
+  translate: -50% 0;
+}
+
+.pixata-blazor-slider-vertical .pixata-blazor-slider-label {
+  top: 50%;
+  left: calc(var(--pixata-blazor-slider-tick-large-size) + 4px);
+  translate: 0 -50%;
+}
+
+/* ========== end of PixataSlider ========== */

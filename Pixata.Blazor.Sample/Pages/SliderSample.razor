@@ -1,0 +1,94 @@
+@page "/SliderSample"
+@using System.ComponentModel.DataAnnotations
+
+<SitePageTitle>Slider</SitePageTitle>
+
+<h3>Slider</h3>
+
+<p><code>PixataSlider</code> is for picking a number by dragging. Click the slider and use the arrow keys to move it a small step, Page Up and Page Down for a large step, or Home and End to go to the ends. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Slider.md">the documentation</a>.</p>
+
+<ComponentSample Title="Basic use">
+  <Description>
+    <p>An <code>int</code> from 0 to 10 (the defaults), with ticks every step and labels every five. The value updates as you drag, and <code>OnChange</code> fires when you let go.</p>
+  </Description>
+  <ChildContent>
+    <label for="pixata-volume">Volume</label>
+    <PixataSlider Id="pixata-volume" @bind-Value="_volume" Width="300px" OnChange="@((object? v) => _log = $"OnChange: {v}")" />
+    <p class="mt-2">Value: <strong>@_volume</strong><br />@_log</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Decimals and a label template">
+  <Description>
+    <p>A <code>decimal</code> from 0 to 1 in steps of 0.05, rounded to two places, with <code>LabelTemplate</code> showing the large ticks as percentages.</p>
+  </Description>
+  <ChildContent>
+    <PixataSlider @bind-Value="_opacity" Max="1m" SmallStep="0.05m" LargeStep="0.25m" Decimals="2" Width="300px" AriaLabel="Opacity">
+      <LabelTemplate>@context.ToString("P0")</LabelTemplate>
+    </PixataSlider>
+    <p class="mt-2">Value: <strong>@_opacity</strong></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Ticks">
+  <Description>
+    <p><code>TickPosition</code> takes <code>Both</code> (the default), <code>Before</code>, <code>After</code> or <code>None</code>. With too many steps for small ticks, only the large ones are drawn.</p>
+  </Description>
+  <ChildContent>
+    <div style="display: flex; flex-direction: column; gap: 16px; width: 300px;">
+      <PixataSlider @bind-Value="_volume" TickPosition="PixataSliderTickPosition.Before" AriaLabel="Ticks before" />
+      <PixataSlider @bind-Value="_volume" TickPosition="PixataSliderTickPosition.After" AriaLabel="Ticks after" />
+      <PixataSlider @bind-Value="_volume" TickPosition="PixataSliderTickPosition.None" ShowButtons="false" AriaLabel="No ticks or buttons" />
+      <PixataSlider @bind-Value="_price" Max="1000" LargeStep="250" TickPosition="PixataSliderTickPosition.After" AriaLabel="Price" />
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Vertical">
+  <Description>
+    <p><code>Orientation="PixataSliderOrientation.Vertical"</code>, with the lowest value at the bottom.</p>
+  </Description>
+  <ChildContent>
+    <PixataSlider @bind-Value="_volume" Orientation="PixataSliderOrientation.Vertical" Height="220px" AriaLabel="Vertical volume" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Read only and disabled">
+  <ChildContent>
+    <div style="display: flex; flex-direction: column; gap: 16px; width: 300px;">
+      <PixataSlider @bind-Value="_volume" ReadOnly="true" AriaLabel="Read only" />
+      <PixataSlider @bind-Value="_volume" Enabled="false" AriaLabel="Disabled" />
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="In a form">
+  <Description>
+    <p>Inside an <code>EditForm</code> with a <code>[Range]</code> attribute. Submit with a rating below 3 to see the validation.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_review" OnValidSubmit="@(() => _submitted = $"Saved a rating of {_review.Rating}")">
+      <DataAnnotationsValidator />
+      <FormSingle Label="Rating" Id="pixata-rating" Required="true">
+        <PixataSlider Id="pixata-rating" @bind-Value="_review.Rating" Max="5" LargeStep="1" Width="300px" />
+        <ValidationMessage For="() => _review.Rating" />
+      </FormSingle>
+      <PixataPrimaryButton Class="mt-2">Save</PixataPrimaryButton>
+      <p class="mt-2">@_submitted</p>
+    </EditForm>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private int _volume = 4;
+  private string _log = "";
+  private decimal _opacity = .5m;
+  private int _price = 400;
+  private readonly Review _review = new();
+  private string _submitted = "";
+
+  private class Review {
+    [Range(3, 5, ErrorMessage = "Please give a rating of at least 3")]
+    public int Rating { get; set; } = 1;
+  }
+}

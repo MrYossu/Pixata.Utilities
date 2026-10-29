@@ -1,0 +1,77 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+@inherits PixataInputBase<TValue>
+@using System.Globalization
+
+@*
+  A slider for picking a number, as in Telerik's Slider. The thumb is a native range input, so dragging, the arrow keys, Home
+  and End work without any script, and screen readers announce it as a slider. Page Up and Page Down move by LargeStep
+*@
+<div class="@CssClass" style="@SizeStyle">
+  @if (ShowButtons) {
+    <button type="button" class="pixata-blazor-slider-button pixata-blazor-slider-decrease" tabindex="-1"
+            title="@DecreaseButtonText" aria-label="@DecreaseButtonText" disabled="@(!Enabled || ReadOnly || CurrentNumber <= MinNumber)"
+            @onclick="() => Spin(-1)">
+      <PixataIcon Icon="@PixataSvgIcons.Minus" />
+    </button>
+  }
+  <div class="pixata-blazor-slider-track-wrap">
+    @if (TickPosition is PixataSliderTickPosition.Before or PixataSliderTickPosition.Both) {
+      <div class="pixata-blazor-slider-ticks pixata-blazor-slider-ticks-before" aria-hidden="true">
+        @RenderTicks(TickPosition == PixataSliderTickPosition.Before)
+      </div>
+    }
+    <input @ref="_input"
+           @attributes="AdditionalAttributes"
+           type="range"
+           class="pixata-blazor-slider-input"
+           id="@Id"
+           min="@Invariant(MinNumber)"
+           max="@Invariant(MaxNumber)"
+           step="@Invariant(SmallStepNumber)"
+           value="@Invariant(CurrentNumber)"
+           style="@($"--pixata-blazor-slider-fraction:{Invariant(Fraction(CurrentNumber))};")"
+           data-large-step="@Invariant(LargeStepNumber)"
+           data-readonly="@(ReadOnly ? "true" : null)"
+           disabled="@(!Enabled)"
+           tabindex="@TabIndex"
+           aria-orientation="@(Orientation == PixataSliderOrientation.Vertical ? "vertical" : null)"
+           aria-readonly="@(ReadOnly ? "true" : null)"
+           aria-invalid="@(IsInvalid ? "true" : null)"
+           aria-label="@AriaLabel"
+           aria-labelledby="@AriaLabelledBy"
+           @oninput="OnInput"
+           @onchange="OnInputChange" />
+    @if (TickPosition is PixataSliderTickPosition.After or PixataSliderTickPosition.Both) {
+      <div class="pixata-blazor-slider-ticks pixata-blazor-slider-ticks-after" aria-hidden="true">
+        @RenderTicks(true)
+      </div>
+    }
+  </div>
+  @if (ShowButtons) {
+    <button type="button" class="pixata-blazor-slider-button pixata-blazor-slider-increase" tabindex="-1"
+            title="@IncreaseButtonText" aria-label="@IncreaseButtonText" disabled="@(!Enabled || ReadOnly || CurrentNumber >= MaxNumber)"
+            @onclick="() => Spin(1)">
+      <PixataIcon Icon="@PixataSvgIcons.Plus" />
+    </button>
+  }
+</div>
+
+@code {
+  private RenderFragment RenderTicks(bool withLabels) => __builder => {
+    foreach (Tick tick in Ticks()) {
+      <span class="@PixataCss.Classes("pixata-blazor-slider-tick", tick.Large ? "pixata-blazor-slider-tick-large" : null)"
+            style="@($"--pixata-blazor-slider-at:{Invariant(tick.Fraction)};")">
+        @if (withLabels && tick.Large) {
+          <span class="pixata-blazor-slider-label">
+            @if (LabelTemplate is not null) {
+              @LabelTemplate(FromNumber(tick.Value))
+            } else {
+              @tick.Value.ToString("G29", CultureInfo.CurrentCulture)
+            }
+          </span>
+        }
+      </span>
+    }
+  };
+}

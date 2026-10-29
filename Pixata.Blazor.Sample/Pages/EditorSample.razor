@@ -40,7 +40,7 @@
 <ComponentSample Title="Adaptive toolbar">
   <Description>
     <p>With <code>Adaptive="true"</code> the toolbar stays on one line, and the tools that don't fit go into a menu at its end. Without it (the default) the toolbar wraps. Drag the slider to change the editors' width.</p>
-    <label>Width: <input type="range" min="260" max="900" step="10" @bind="_adaptiveWidth" @bind:event="oninput" /> @(_adaptiveWidth)px</label>
+    <label>Width: <PixataSlider @bind-Value="_adaptiveWidth" Min="260" Max="900" SmallStep="10" LargeStep="100" ShowButtons="false" TickPosition="PixataSliderTickPosition.None" Width="250px" /> @(_adaptiveWidth)px</label>
   </Description>
   <ChildContent>
     <PixataEditor @bind-Value="_pixataAdaptive" Tools="PixataEditorToolSets.All" Adaptive="true" Width="@($"min(100%, {_adaptiveWidth}px)")" Height="200px" AriaLabel="Adaptive editor" />
