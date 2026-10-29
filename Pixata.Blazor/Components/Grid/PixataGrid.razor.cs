@@ -416,7 +416,7 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
           await _module.InvokeVoidAsync("disposeHeaderDrag", _gridId);
         }
         await _module.DisposeAsync();
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The circuit has gone
       }
     }

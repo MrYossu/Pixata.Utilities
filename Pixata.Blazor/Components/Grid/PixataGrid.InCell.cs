@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -183,7 +184,7 @@ public partial class PixataGrid<TItem> {
       _watchingOutside = true;
     } catch (JSException) {
       // The cell has gone
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // So has the page
     }
   }
@@ -195,7 +196,7 @@ public partial class PixataGrid<TItem> {
         await _module.InvokeVoidAsync("unwatchOutside", EditCellId);
       } catch (JSException) {
         // Nothing to stop
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }

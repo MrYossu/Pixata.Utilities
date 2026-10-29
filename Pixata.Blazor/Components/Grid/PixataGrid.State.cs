@@ -428,7 +428,7 @@ public partial class PixataGrid<TItem> {
       await storage.SetItemAsync(StorageKey!, state);
     } catch (InvalidOperationException) {
       // Prerendering
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The page has gone
     }
   }

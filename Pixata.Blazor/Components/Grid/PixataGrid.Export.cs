@@ -220,7 +220,7 @@ public partial class PixataGrid<TItem> {
       _module ??= await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       using DotNetStreamReference reference = new(stream);
       await _module.InvokeVoidAsync("downloadFile", $"{export.FileName}{export.FileExtension}", export.ContentType, reference);
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The page has gone
     }
   }

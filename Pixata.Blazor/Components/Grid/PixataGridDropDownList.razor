@@ -116,7 +116,7 @@
         await _module.InvokeVoidAsync("closePopup", _list);
       } catch (JSException) {
         // The list has already gone
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // So has the page
       }
     }
@@ -137,7 +137,7 @@
         await _module.InvokeVoidAsync("openPopup", _wrapper, _list, _self);
       } catch (JSException) {
         // The list was closed again before it could be positioned
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
@@ -189,7 +189,7 @@
         await _module.DisposeAsync();
       } catch (JSException) {
         // Nothing to clean up
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The circuit has gone
       }
     }

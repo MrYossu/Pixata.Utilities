@@ -213,7 +213,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
         }
       } catch (JSException) {
         // The input has gone from the page
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // So has the page
       }
     }
@@ -320,7 +320,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
         await _module.InvokeVoidAsync("setDateInputState", InputElement, State());
       } catch (JSException) {
         // The input has gone from the page
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // So has the page
       }
     }
@@ -351,7 +351,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
         await _module.DisposeAsync();
       } catch (JSException) {
         // The input has already gone
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The circuit has gone, so there's nothing to clean up
       }
     }

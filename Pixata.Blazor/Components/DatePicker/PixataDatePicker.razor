@@ -130,7 +130,7 @@
         await Module.InvokeVoidAsync("closePopup", _popup);
       } catch (JSException) {
         // The popup has already gone from the page
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
@@ -155,7 +155,7 @@
         }
       } catch (JSException) {
         // The popup was closed again before it could be positioned
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
@@ -200,7 +200,7 @@
     if (_open && Module is not null) {
       try {
         await Module.InvokeVoidAsync("closePopup", _popup);
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The circuit has gone
       }
     }

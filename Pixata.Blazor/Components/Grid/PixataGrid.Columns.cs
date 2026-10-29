@@ -249,7 +249,7 @@ public partial class PixataGrid<TItem> {
       PixataGridColumnWidth[]? widths = await _module.InvokeAsync<PixataGridColumnWidth[]?>("autoFitColumns", _gridId, columns.Select(c => c.Key).ToArray());
       SetWidths(widths ?? []);
       StateHasChanged();
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The page has gone
     }
   }

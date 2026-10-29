@@ -227,7 +227,7 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
     if (firstRender) {
       try {
         _module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
@@ -241,7 +241,7 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
         }
       } catch (JSException) {
         // The popup was closed again before it could be positioned
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
@@ -268,7 +268,7 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
         await _module.InvokeVoidAsync("closePopup", _popup);
       } catch (JSException) {
         // The popup has already gone from the page
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
@@ -398,7 +398,7 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
           await _module.InvokeVoidAsync("closePopup", _popup);
         }
         await _module.DisposeAsync();
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The circuit has gone
       }
     }

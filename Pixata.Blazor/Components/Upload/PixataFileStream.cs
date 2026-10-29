@@ -111,7 +111,7 @@ internal sealed class PixataFileStream(long length, long maxAllowedSize, Func<Ca
     try {
       await reference.DisposeAsync();
     }
-    catch (JSDisconnectedException) {
+    catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
     }
     catch (InvalidOperationException) {
     }

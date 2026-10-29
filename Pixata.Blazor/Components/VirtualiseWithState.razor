@@ -77,7 +77,7 @@
       }
     } catch (JSException) {
       // The scroll container has gone from the page
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // So has the page
     }
   }
@@ -130,7 +130,7 @@
     }
     catch (JSException) {
     }
-    catch (JSDisconnectedException) {
+    catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
     }
     _dotNetReference?.Dispose();
   }

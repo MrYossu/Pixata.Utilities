@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ public partial class PixataGrid<TItem> {
       _module ??= await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       _self ??= DotNetObjectReference.Create(this);
       await _module.InvokeVoidAsync("initNavigation", _gridId, _self);
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The page has gone
     }
   }

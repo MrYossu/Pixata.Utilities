@@ -89,7 +89,7 @@ public partial class PixataGrid<TItem> {
       _module ??= await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       _self ??= DotNetObjectReference.Create(this);
       await _module.InvokeVoidAsync("initVirtualScroll", _contentElement, _self);
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The page has gone
     }
   }
@@ -106,7 +106,7 @@ public partial class PixataGrid<TItem> {
     _scrollTarget = null;
     try {
       await _module.InvokeVoidAsync("scrollContentTo", _contentElement, top);
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The page has gone
     }
   }

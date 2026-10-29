@@ -196,7 +196,7 @@ public partial class PixataGrid<TItem> {
       _module ??= await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       _self ??= DotNetObjectReference.Create(this);
       await _module.InvokeVoidAsync("initHeaderDrag", _gridId, _self);
-    } catch (JSDisconnectedException) {
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The circuit has gone
     }
   }

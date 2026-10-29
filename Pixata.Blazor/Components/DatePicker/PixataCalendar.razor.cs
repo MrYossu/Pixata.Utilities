@@ -210,7 +210,7 @@ public partial class PixataCalendar : IAsyncDisposable {
         await _module.InvokeVoidAsync("preventNavigationKeys", _viewsElement);
       } catch (JSException) {
         // The calendar has gone from the page
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
@@ -566,7 +566,7 @@ public partial class PixataCalendar : IAsyncDisposable {
         await _module.DisposeAsync();
       } catch (JSException) {
         // The calendar has already gone
-      } catch (JSDisconnectedException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The circuit has gone
       }
     }
