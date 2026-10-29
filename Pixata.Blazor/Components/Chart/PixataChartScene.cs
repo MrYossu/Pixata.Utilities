@@ -167,7 +167,7 @@ internal sealed record PixataChartLegendEntry(int SeriesIndex, int? PointIndex, 
 /// The default series colours, and a little colour arithmetic for tooltip text
 /// </summary>
 internal static class PixataChartPalette {
-  public static readonly string[] Defaults = ["#ff6358", "#ffd246", "#78d237", "#28b4c8", "#2d73f5", "#aa46be"];
+  public static readonly string[] Defaults = ["#0d6efd", "#198754", "#ffc107", "#dc3545", "#6f42c1", "#0dcaf0"];
 
   private static readonly char[] UnsafeCharacters = [';', ':', '{', '}', '<', '>', '"', '\'', '\\', '@'];
 

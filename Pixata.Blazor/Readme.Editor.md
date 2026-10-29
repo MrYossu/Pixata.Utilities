@@ -252,10 +252,10 @@ The editor uses the shared `--pixata-blazor-*` custom properties (see [Styling](
 | `--pixata-blazor-editor-bg` | the input background | The document's background |
 | `--pixata-blazor-editor-toolbar-bg` | the alternative surface colour | The toolbar's background |
 | `--pixata-blazor-editor-content-padding` | `.5rem .75rem` | The space around the document's content |
-| `--pixata-blazor-editor-link-color` | `#0058e9` | Links in the document |
+| `--pixata-blazor-editor-link-color` | `#0d6efd` | Links in the document |
 | `--pixata-blazor-editor-table-border-color` | `#c6c6c6` | Table cell borders and horizontal rules |
 | `--pixata-blazor-editor-selected-cell-bg` | a light blue | Selected table cells |
-| `--pixata-blazor-editor-selected-node-outline` | `2px solid #8cb2f7` | A selected image |
+| `--pixata-blazor-editor-selected-node-outline` | `2px solid #86b7fe` | A selected image |
 | `--pixata-blazor-editor-code-bg` | `#f5f5f5` | Code blocks |
 | `--pixata-blazor-editor-quote-border-color` | `#d6d6d6` | Block quotes |
 | `--pixata-blazor-editor-dialog-width` | `400px` | The link and image dialogs |

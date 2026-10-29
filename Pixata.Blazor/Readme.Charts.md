@@ -395,7 +395,7 @@ The chart uses the stylesheet's general variables (font, text colour and so on),
 
 | Variable | Default | Used for |
 | --- | --- | --- |
-| `--pixata-blazor-chart-series-1` to `-6` | `#ff6358`, `#ffd246`, `#78d237`, `#28b4c8`, `#2d73f5`, `#aa46be` | The series palette. The seventh series uses the first colour again |
+| `--pixata-blazor-chart-series-1` to `-6` | `#0d6efd`, `#198754`, `#ffc107`, `#dc3545`, `#6f42c1`, `#0dcaf0` | The series palette. The seventh series uses the first colour again |
 | `--pixata-blazor-chart-height` | `400px` | The height of a chart without a `Height` |
 | `--pixata-blazor-chart-bg` | `transparent` | The chart background |
 | `--pixata-blazor-chart-text-color` | The general text colour | Titles and labels |

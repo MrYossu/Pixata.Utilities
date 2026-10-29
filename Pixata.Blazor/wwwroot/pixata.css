@@ -4,8 +4,8 @@
   The components in this package used to rely on the host app having Bootstrap loaded, for a fairly small set of layout, form,
   button and utility classes. This file provides those styles, so the components look right on their own.
 
-  The sizes and colours match Bootstrap 4.3.1 (MIT licensed, https://github.com/twbs/bootstrap), which is what the components
-  were written against, so they look the same as they always did. Every class is prefixed with "pixata-", so nothing here can
+  The sizes match Bootstrap 4.3.1 (MIT licensed, https://github.com/twbs/bootstrap), which is what the components were
+  written against, and the colours match Bootstrap 5.3's default theme. Every class is prefixed with "pixata-", so nothing here can
   clash with your own CSS, whether or not you use Bootstrap.
 
   To fit the components to your own theme, override the custom properties below, either on :root or on any container...
@@ -21,8 +21,8 @@
   --pixata-line-height: 1.5;
   --pixata-color: #212529;
   --pixata-muted-color: #6c757d;
-  --pixata-primary: #007bff;
-  --pixata-primary-hover: #0069d9;
+  --pixata-primary: #0d6efd;
+  --pixata-primary-hover: #0b5ed7;
   --pixata-primary-color: #fff;
   --pixata-secondary: #6c757d;
   --pixata-secondary-hover: #5a6268;
@@ -48,20 +48,21 @@
   --pixata-border-radius: .25rem;
   --pixata-gutter: 15px;
   --pixata-spacer: 1rem;
-  --pixata-focus-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+  --pixata-focus-shadow: 0 0 0 .2rem rgba(13, 110, 253, .25);
   --pixata-transition: .15s ease-in-out;
-  /* The grid's own values match Telerik's Default theme rather than Bootstrap, so a PixataGrid looks like a Telerik grid */
+  /* The grid's own sizes match Telerik's Default theme, so a PixataGrid looks like a Telerik grid. Its accent colour is the
+     components' primary colour, so setting --pixata-blazor-primary on :root changes the grid and date pickers too */
   --pixata-grid-font-size: .875rem;
   --pixata-grid-line-height: 1.4285;
-  --pixata-grid-color: #3d3d3d;
+  --pixata-grid-color: #212529;
   --pixata-grid-bg: #fff;
   --pixata-grid-border-color: rgba(0, 0, 0, .08);
-  --pixata-grid-header-bg: #fafafa;
+  --pixata-grid-header-bg: #f8f9fa;
   --pixata-grid-alt-row-bg: rgba(61, 61, 61, .05);
   --pixata-grid-hover-bg: rgba(61, 61, 61, .11);
-  --pixata-grid-primary: #ff6358;
-  --pixata-grid-primary-hover: #ea5a51;
-  --pixata-grid-primary-color: #fff;
+  --pixata-grid-primary: var(--pixata-blazor-primary);
+  --pixata-grid-primary-hover: var(--pixata-blazor-primary-hover);
+  --pixata-grid-primary-color: var(--pixata-blazor-primary-color);
   --pixata-grid-input-bg: #fff;
   --pixata-grid-picker-bg: #f5f5f5;
   --pixata-grid-picker-hover-bg: #ebebeb;
@@ -71,28 +72,28 @@
   --pixata-grid-skeleton-bg: rgba(61, 61, 61, .2);
   --pixata-grid-focus-color: rgba(61, 61, 61, .3);
   --pixata-grid-highlight-bg: rgba(255, 192, 0, .25);
-  --pixata-grid-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
+  --pixata-grid-focus-shadow: 0 0 0 2px rgba(13, 110, 253, .25);
   --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-grid-border-radius: 4px;
-  --pixata-grid-error-color: #ca1400;
-  /* The date input, date picker and calendar, again matching Telerik's Default theme */
+  --pixata-grid-error-color: #dc3545;
+  /* The date input, date picker and calendar, again sized like Telerik's Default theme */
   --pixata-datepicker-font-size: .875rem;
   --pixata-datepicker-line-height: 1.4285;
-  --pixata-datepicker-color: #3d3d3d;
-  --pixata-datepicker-subtle-color: #666;
+  --pixata-datepicker-color: #212529;
+  --pixata-datepicker-subtle-color: #6c757d;
   --pixata-datepicker-bg: #fff;
   --pixata-datepicker-border-color: rgba(0, 0, 0, .08);
   --pixata-datepicker-hover-border-color: rgba(0, 0, 0, .16);
-  --pixata-datepicker-invalid-border-color: #ca1400;
+  --pixata-datepicker-invalid-border-color: #dc3545;
   --pixata-datepicker-button-bg: #f5f5f5;
   --pixata-datepicker-button-hover-bg: #ebebeb;
-  --pixata-datepicker-primary: #ff6358;
-  --pixata-datepicker-primary-hover: #ea5a51;
-  --pixata-datepicker-primary-color: #fff;
-  --pixata-datepicker-focus-shadow: 0 0 0 2px rgba(61, 61, 61, .08);
+  --pixata-datepicker-primary: var(--pixata-blazor-primary);
+  --pixata-datepicker-primary-hover: var(--pixata-blazor-primary-hover);
+  --pixata-datepicker-primary-color: var(--pixata-blazor-primary-color);
+  --pixata-datepicker-focus-shadow: 0 0 0 2px rgba(13, 110, 253, .25);
   --pixata-datepicker-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-datepicker-border-radius: 4px;
-  --pixata-datepicker-range-bg: rgba(255, 99, 88, .15);
+  --pixata-datepicker-range-bg: color-mix(in srgb, var(--pixata-datepicker-primary) 15%, transparent);
   --pixata-label-font-size: inherit;
   --pixata-label-font-weight: inherit;
   --pixata-label-color: inherit;
@@ -112,11 +113,11 @@
   --pixata-notification-border-radius: var(--pixata-border-radius);
   --pixata-notification-shadow: 0 6px 16px rgba(47, 52, 58, .1);
   --pixata-notification-icon-color: #fff;
-  --pixata-notification-general-bg: #00b7d6;
-  --pixata-notification-info-bg: #00d6ce;
-  --pixata-notification-success-bg: #00d67f;
-  --pixata-notification-warning-bg: #ffbe00;
-  --pixata-notification-error-bg: #ff0000;
+  --pixata-notification-general-bg: #6c757d;
+  --pixata-notification-info-bg: #0dcaf0;
+  --pixata-notification-success-bg: #198754;
+  --pixata-notification-warning-bg: #ffc107;
+  --pixata-notification-error-bg: #dc3545;
 }
 
 /*
@@ -1952,7 +1953,7 @@
 .pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate {
   border-color: var(--pixata-grid-border-color);
   background-color: var(--pixata-grid-input-bg);
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff6358' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M4,8 h8'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%230d6efd' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M4,8 h8'/%3e%3c/svg%3e");
 }
 
 /* PixataGridBoolFilter, whose box is a button so it can show three states */
@@ -3668,77 +3669,77 @@
   --pixata-blazor-font-size-lg: 1rem;
   --pixata-blazor-line-height: 1.4285714286;
   --pixata-blazor-line-height-lg: 1.5;
-  --pixata-blazor-text-color: #3d3d3d;
-  --pixata-blazor-subtle-color: #666;
+  --pixata-blazor-text-color: #212529;
+  --pixata-blazor-subtle-color: #6c757d;
   --pixata-blazor-surface-bg: #fff;
-  --pixata-blazor-surface-alt-bg: #fafafa;
+  --pixata-blazor-surface-alt-bg: #f8f9fa;
   --pixata-blazor-border-color: rgba(0, 0, 0, .08);
   --pixata-blazor-border-alt-color: rgba(0, 0, 0, .16);
   --pixata-blazor-border-radius: .25rem;
   --pixata-blazor-border-radius-sm: .125rem;
   --pixata-blazor-border-radius-lg: .375rem;
   --pixata-blazor-spacing: .25rem;
-  --pixata-blazor-base-bg: #f5f5f5;
-  --pixata-blazor-base-hover-bg: #ebebeb;
-  --pixata-blazor-base-active-bg: #d6d6d6;
-  --pixata-blazor-base-color: #3d3d3d;
-  --pixata-blazor-primary: #ff6358;
-  --pixata-blazor-primary-hover: #eb5b51;
-  --pixata-blazor-primary-active: #d6534a;
+  --pixata-blazor-base-bg: #f8f9fa;
+  --pixata-blazor-base-hover-bg: #e9ecef;
+  --pixata-blazor-base-active-bg: #dee2e6;
+  --pixata-blazor-base-color: #212529;
+  --pixata-blazor-primary: #0d6efd;
+  --pixata-blazor-primary-hover: #0b5ed7;
+  --pixata-blazor-primary-active: #0a58ca;
   --pixata-blazor-primary-color: #fff;
-  --pixata-blazor-primary-subtle: #ffe9e7;
-  --pixata-blazor-secondary: #666;
-  --pixata-blazor-secondary-hover: #525252;
-  --pixata-blazor-secondary-active: #3d3d3d;
+  --pixata-blazor-primary-subtle: #cfe2ff;
+  --pixata-blazor-secondary: #6c757d;
+  --pixata-blazor-secondary-hover: #5c636a;
+  --pixata-blazor-secondary-active: #565e64;
   --pixata-blazor-secondary-color: #fff;
-  --pixata-blazor-tertiary: #03a9f4;
-  --pixata-blazor-tertiary-hover: #0399dc;
-  --pixata-blazor-tertiary-active: #0388c4;
+  --pixata-blazor-tertiary: #6f42c1;
+  --pixata-blazor-tertiary-hover: #5e38a4;
+  --pixata-blazor-tertiary-active: #59359a;
   --pixata-blazor-tertiary-color: #fff;
-  --pixata-blazor-info: #0058e9;
-  --pixata-blazor-info-hover: #0052d6;
-  --pixata-blazor-info-active: #004ac2;
-  --pixata-blazor-info-color: #fff;
-  --pixata-blazor-success: #37b400;
-  --pixata-blazor-success-hover: #32a500;
-  --pixata-blazor-success-active: #2d9600;
+  --pixata-blazor-info: #0dcaf0;
+  --pixata-blazor-info-hover: #31d2f2;
+  --pixata-blazor-info-active: #3dd5f3;
+  --pixata-blazor-info-color: #000;
+  --pixata-blazor-success: #198754;
+  --pixata-blazor-success-hover: #157347;
+  --pixata-blazor-success-active: #146c43;
   --pixata-blazor-success-color: #fff;
-  --pixata-blazor-warning: #ffc000;
-  --pixata-blazor-warning-hover: #eaaf00;
-  --pixata-blazor-warning-active: #d59f00;
-  --pixata-blazor-warning-color: #3d3d3d;
-  --pixata-blazor-error: #f31700;
-  --pixata-blazor-error-hover: #df1600;
-  --pixata-blazor-error-active: #ca1400;
+  --pixata-blazor-warning: #ffc107;
+  --pixata-blazor-warning-hover: #ffca2c;
+  --pixata-blazor-warning-active: #ffcd39;
+  --pixata-blazor-warning-color: #000;
+  --pixata-blazor-error: #dc3545;
+  --pixata-blazor-error-hover: #bb2d3b;
+  --pixata-blazor-error-active: #b02a37;
   --pixata-blazor-error-color: #fff;
-  --pixata-blazor-dark: #3d3d3d;
-  --pixata-blazor-dark-hover: #333;
-  --pixata-blazor-dark-active: #292929;
+  --pixata-blazor-dark: #212529;
+  --pixata-blazor-dark-hover: #424649;
+  --pixata-blazor-dark-active: #4d5154;
   --pixata-blazor-dark-color: #fff;
-  --pixata-blazor-light: #ebebeb;
-  --pixata-blazor-light-hover: #e0e0e0;
-  --pixata-blazor-light-active: #d6d6d6;
-  --pixata-blazor-light-color: #3d3d3d;
-  --pixata-blazor-inverse: #3d3d3d;
-  --pixata-blazor-inverse-hover: #333;
-  --pixata-blazor-inverse-active: #292929;
+  --pixata-blazor-light: #f8f9fa;
+  --pixata-blazor-light-hover: #d3d4d5;
+  --pixata-blazor-light-active: #c6c7c8;
+  --pixata-blazor-light-color: #000;
+  --pixata-blazor-inverse: #212529;
+  --pixata-blazor-inverse-hover: #424649;
+  --pixata-blazor-inverse-active: #4d5154;
   --pixata-blazor-inverse-color: #fff;
   --pixata-blazor-hover-bg: #f0f0f0;
-  --pixata-blazor-selected-bg: #ff6358;
-  --pixata-blazor-selected-hover-bg: #eb5b51;
+  --pixata-blazor-selected-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-selected-hover-bg: var(--pixata-blazor-primary-hover);
   --pixata-blazor-selected-color: #fff;
   --pixata-blazor-list-item-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 6%, transparent);
   --pixata-blazor-list-item-selected-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 12%, transparent);
   --pixata-blazor-list-item-selected-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 18%, transparent);
   --pixata-blazor-list-item-selected-color: var(--pixata-blazor-text-color);
-  --pixata-blazor-focus-shadow: 0 0 0 .25rem rgba(0, 0, 0, .1);
+  --pixata-blazor-focus-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25);
   --pixata-blazor-focus-ring: inset 0 0 0 2px rgba(0, 0, 0, .13);
   --pixata-blazor-input-bg: #fff;
   --pixata-blazor-input-border-color: rgba(0, 0, 0, .16);
   --pixata-blazor-input-hover-border-color: rgba(0, 0, 0, .24);
-  --pixata-blazor-input-focus-border-color: rgba(0, 0, 0, .24);
-  --pixata-blazor-input-focus-shadow: 0 0 0 2px rgba(0, 0, 0, .06);
-  --pixata-blazor-placeholder-color: #666;
+  --pixata-blazor-input-focus-border-color: #86b7fe;
+  --pixata-blazor-input-focus-shadow: 0 0 0 2px rgba(13, 110, 253, .25);
+  --pixata-blazor-placeholder-color: #6c757d;
   --pixata-blazor-disabled-opacity: .6;
   --pixata-blazor-popup-bg: #fff;
   --pixata-blazor-popup-border-color: rgba(0, 0, 0, .08);
@@ -5239,10 +5240,10 @@
   --pixata-blazor-editor-bg: var(--pixata-blazor-input-bg);
   --pixata-blazor-editor-toolbar-bg: var(--pixata-blazor-surface-alt-bg);
   --pixata-blazor-editor-content-padding: .5rem .75rem;
-  --pixata-blazor-editor-link-color: #0058e9;
+  --pixata-blazor-editor-link-color: #0d6efd;
   --pixata-blazor-editor-table-border-color: #c6c6c6;
-  --pixata-blazor-editor-selected-cell-bg: rgba(0, 88, 233, .12);
-  --pixata-blazor-editor-selected-node-outline: 2px solid #8cb2f7;
+  --pixata-blazor-editor-selected-cell-bg: rgba(13, 110, 253, .12);
+  --pixata-blazor-editor-selected-node-outline: 2px solid #86b7fe;
   --pixata-blazor-editor-code-bg: #f5f5f5;
   --pixata-blazor-editor-quote-border-color: #d6d6d6;
   --pixata-blazor-editor-dialog-width: 400px;
@@ -7721,12 +7722,12 @@
   passed to it in the --pixata-blazor-chart-point-color property
 */
 :root {
-  --pixata-blazor-chart-series-1: #ff6358;
-  --pixata-blazor-chart-series-2: #ffd246;
-  --pixata-blazor-chart-series-3: #78d237;
-  --pixata-blazor-chart-series-4: #28b4c8;
-  --pixata-blazor-chart-series-5: #2d73f5;
-  --pixata-blazor-chart-series-6: #aa46be;
+  --pixata-blazor-chart-series-1: #0d6efd;
+  --pixata-blazor-chart-series-2: #198754;
+  --pixata-blazor-chart-series-3: #ffc107;
+  --pixata-blazor-chart-series-4: #dc3545;
+  --pixata-blazor-chart-series-5: #6f42c1;
+  --pixata-blazor-chart-series-6: #0dcaf0;
   --pixata-blazor-chart-height: 400px;
   --pixata-blazor-chart-bg: transparent;
   --pixata-blazor-chart-text-color: var(--pixata-blazor-text-color);

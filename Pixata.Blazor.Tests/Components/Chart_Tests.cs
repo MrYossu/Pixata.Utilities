@@ -395,9 +395,9 @@ public class Chart_Tests {
 
   [TestMethod]
   public void Palette_Css_UsesTheSeriesVariables() {
-    Assert.AreEqual("var(--pixata-blazor-chart-series-1, #ff6358)", PixataChartPalette.Css(0));
-    Assert.AreEqual("var(--pixata-blazor-chart-series-1, #ff6358)", PixataChartPalette.Css(6));
-    Assert.AreEqual("#aa46be", PixataChartPalette.Hex(5));
+    Assert.AreEqual("var(--pixata-blazor-chart-series-1, #0d6efd)", PixataChartPalette.Css(0));
+    Assert.AreEqual("var(--pixata-blazor-chart-series-1, #0d6efd)", PixataChartPalette.Css(6));
+    Assert.AreEqual("#0dcaf0", PixataChartPalette.Hex(5));
   }
 
   #endregion
@@ -571,7 +571,7 @@ public class Chart_Tests {
     ]);
     Assert.AreEqual("red", scene.Points[0].Colour);
     Assert.AreEqual(PixataChartPalette.Css(0), scene.Points[1].Colour);
-    Assert.AreEqual("#ff6358", scene.Points[1].ReportedColour);
+    Assert.AreEqual("#0d6efd", scene.Points[1].ReportedColour);
     Assert.AreEqual("#123456", scene.Points[2].Colour);
   }
 
@@ -841,7 +841,7 @@ public class Chart_Tests {
     Assert.AreEqual(20, clicked.Value);
     Assert.AreEqual("Amount", clicked.SeriesName);
     Assert.AreEqual(0, clicked.SeriesIndex);
-    Assert.AreEqual("#ff6358", clicked.SeriesColor);
+    Assert.AreEqual("#0d6efd", clicked.SeriesColor);
     Assert.AreSame(sales[1], clicked.DataItem);
   }
 

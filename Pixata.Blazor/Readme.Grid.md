@@ -405,13 +405,13 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 | --- | --- | --- |
 | `--pixata-grid-font-size` | `.875rem` | The font size |
 | `--pixata-grid-line-height` | `1.4285` | The line height (20px with the default font size) |
-| `--pixata-grid-color` | `#3d3d3d` | The text colour |
+| `--pixata-grid-color` | `#212529` | The text colour |
 | `--pixata-grid-bg` | `#fff` | The background |
 | `--pixata-grid-border-color` | `rgba(0, 0, 0, .08)` | The outer border and the lines between columns |
-| `--pixata-grid-header-bg` | `#fafafa` | The header background |
+| `--pixata-grid-header-bg` | `#f8f9fa` | The header background |
 | `--pixata-grid-alt-row-bg` | `rgba(61, 61, 61, .05)` | The background of every other row |
 | `--pixata-grid-hover-bg` | `rgba(61, 61, 61, .11)` | The background of the row under the mouse |
-| `--pixata-grid-primary`, `--pixata-grid-primary-hover`, `--pixata-grid-primary-color` | `#ff6358`, `#ea5a51`, `#fff` | The accent colour: the current page, sort arrows, the active filter icon, selected items and primary buttons |
+| `--pixata-grid-primary`, `--pixata-grid-primary-hover`, `--pixata-grid-primary-color` | `--pixata-blazor-primary`, `--pixata-blazor-primary-hover`, `--pixata-blazor-primary-color` | The accent colour: the current page, sort arrows, the active filter icon, selected items and primary buttons |
 | `--pixata-grid-input-bg` | `#fff` | The background of text boxes, number boxes, popups and dropdown lists |
 | `--pixata-grid-picker-bg`, `--pixata-grid-picker-hover-bg` | `#f5f5f5`, `#ebebeb` | The background of dropdowns and solid buttons |
 | `--pixata-grid-chip-bg`, `--pixata-grid-chip-border-color` | `#ebebeb`, `#c2c2c2` | The chips in the group panel |
@@ -419,10 +419,10 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 | `--pixata-grid-skeleton-bg` | `rgba(61, 61, 61, .2)` | The placeholders shown while virtual rows load |
 | `--pixata-grid-focus-color` | `rgba(61, 61, 61, .3)` | The ring round the cell the keyboard is on, in a `Navigable` grid |
 | `--pixata-grid-highlight-bg` | `rgba(255, 192, 0, .25)` | Highlighted rows and cells |
-| `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The focus ring on inputs and buttons |
+| `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(13, 110, 253, .25)` | The focus ring on inputs and buttons |
 | `--pixata-grid-popup-shadow` | A soft two-layer shadow | The shadow under dropdown lists and filter menus |
 | `--pixata-grid-border-radius` | `4px` | Rounded corners on inputs and buttons |
-| `--pixata-grid-error-color` | `#ca1400` | The message shown when `OnRead` reports an error |
+| `--pixata-grid-error-color` | `#dc3545` | The message shown when `OnRead` reports an error |
 
 The grid's elements all have classes starting with `pixata-blazor-grid-`, so you can target them in your own CSS. It doesn't use any other library's classes, so it isn't affected by another library's theme on the same page.
 

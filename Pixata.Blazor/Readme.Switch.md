@@ -148,8 +148,8 @@ For example, to have green switches...
 
 ```css
 :root {
-  --pixata-blazor-switch-on-track-bg: #37b400;
-  --pixata-blazor-switch-on-track-border-color: #37b400;
+  --pixata-blazor-switch-on-track-bg: #198754;
+  --pixata-blazor-switch-on-track-border-color: #198754;
 }
 ```
 

@@ -206,18 +206,18 @@ The colours and sizes come from these custom properties, which you can override 
 | --- | --- | --- |
 | `--pixata-datepicker-font-size` | `.875rem` | The font size |
 | `--pixata-datepicker-line-height` | `1.4285` | The line height |
-| `--pixata-datepicker-color` | `#3d3d3d` | The text colour |
-| `--pixata-datepicker-subtle-color` | `#666` | Placeholders, day names, week numbers and days from other months |
+| `--pixata-datepicker-color` | `#212529` | The text colour |
+| `--pixata-datepicker-subtle-color` | `#6c757d` | Placeholders, day names, week numbers and days from other months |
 | `--pixata-datepicker-bg` | `#fff` | The background |
 | `--pixata-datepicker-border-color` | `rgba(0, 0, 0, .08)` | Borders |
 | `--pixata-datepicker-hover-border-color` | `rgba(0, 0, 0, .16)` | The input's border on hover and focus |
-| `--pixata-datepicker-invalid-border-color` | `#ca1400` | The input's border when the date is invalid |
+| `--pixata-datepicker-invalid-border-color` | `#dc3545` | The input's border when the date is invalid |
 | `--pixata-datepicker-button-bg`, `--pixata-datepicker-button-hover-bg` | `#f5f5f5`, `#ebebeb` | The calendar button |
-| `--pixata-datepicker-primary`, `--pixata-datepicker-primary-hover`, `--pixata-datepicker-primary-color` | `#ff6358`, `#ea5a51`, `#fff` | The selected date, today, and the calendar title |
-| `--pixata-datepicker-focus-shadow` | `0 0 0 2px rgba(61, 61, 61, .08)` | The input's focus ring |
+| `--pixata-datepicker-primary`, `--pixata-datepicker-primary-hover`, `--pixata-datepicker-primary-color` | `--pixata-blazor-primary`, `--pixata-blazor-primary-hover`, `--pixata-blazor-primary-color` | The selected date, today, and the calendar title |
+| `--pixata-datepicker-focus-shadow` | `0 0 0 2px rgba(13, 110, 253, .25)` | The input's focus ring |
 | `--pixata-datepicker-popup-shadow` | A soft two-layer shadow | The calendar popup's shadow |
 | `--pixata-datepicker-border-radius` | `4px` | Rounded corners |
-| `--pixata-datepicker-range-bg` | `rgba(255, 99, 88, .15)` | The shading of the days in a range |
+| `--pixata-datepicker-range-bg` | `--pixata-datepicker-primary` at 15% | The shading of the days in a range |
 
 All the classes start with `pixata-blazor-dateinput-`, `pixata-blazor-datepicker-`, `pixata-blazor-daterangepicker-` or `pixata-blazor-calendar-` (for example `pixata-blazor-calendar-title`, `pixata-blazor-calendar-selected` and `pixata-blazor-datepicker-popup`), so you can target any part of them in your own CSS.
 

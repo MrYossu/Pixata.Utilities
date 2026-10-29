@@ -80,12 +80,12 @@ public class NotificationHelper {
   [Obsolete("The icons are now coloured by the --pixata-notification-* variables in pixata.css, so the colours returned here are only the defaults. Use GetDisplayIcon() for the icon, and GetColourClass() for the colour")]
   public static (string, string) GetIcon(NotificationType type) =>
     type switch {
-      NotificationType.General => (GeneralIcon, "00b7d6"),
-      NotificationType.Info => (InfoIcon, "00d6ce"),
-      NotificationType.Success => (SuccessIcon, "00d67f"),
-      NotificationType.Warning => (WarningIcon, "ffbe00"),
-      NotificationType.Error => (ErrorIcon, "ff0000"),
-      _ => (GeneralIcon, "00b7d6"),
+      NotificationType.General => (GeneralIcon, "6c757d"),
+      NotificationType.Info => (InfoIcon, "0dcaf0"),
+      NotificationType.Success => (SuccessIcon, "198754"),
+      NotificationType.Warning => (WarningIcon, "ffc107"),
+      NotificationType.Error => (ErrorIcon, "dc3545"),
+      _ => (GeneralIcon, "6c757d"),
     };
 
   // The classes for an icon font's icons, eg "fas fa-check". Left empty, the built-in SVG icon is shown, so no icon font is needed. See

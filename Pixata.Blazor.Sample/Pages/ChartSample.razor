@@ -25,7 +25,7 @@
       <PixataChartSeriesItems>
         <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)" />
         <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
-        <PixataChartSeries Type="PixataChartSeriesType.Line" Name="Margin" Data="@_sales" Field="@nameof(MonthlySales.Margin)" CategoryField="@nameof(MonthlySales.Month)" Axis="margin">
+        <PixataChartSeries Type="PixataChartSeriesType.Line" Name="Margin" Data="@_sales" Field="@nameof(MonthlySales.Margin)" CategoryField="@nameof(MonthlySales.Month)" Axis="margin" Color="#dc3545">
           <PixataChartSeriesTooltip Format="{0:P0}" />
         </PixataChartSeries>
       </PixataChartSeriesItems>
@@ -39,7 +39,7 @@
           <PixataChartValueAxisTitle Text="Sales" />
           <PixataChartValueAxisLabels Format="{0:C0}" />
         </PixataChartValueAxis>
-        <PixataChartValueAxis Name="margin" Min="0" Max="0.4" Color="#78d237">
+        <PixataChartValueAxis Name="margin" Min="0" Max="0.4" Color="#dc3545">
           <PixataChartValueAxisLabels Format="{0:P0}" />
         </PixataChartValueAxis>
       </PixataChartValueAxes>
@@ -236,7 +236,7 @@
         <PixataChartSeries Name="Hardware" Data="@_growingSales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)">
           <PixataChartSeriesLabels Visible="true" TextTemplate="@(c => $"{c.Value / 1000:0}k")" />
         </PixataChartSeries>
-        <PixataChartSeries Name="Services" Data="@_growingSales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" Color="#2d73f5" />
+        <PixataChartSeries Name="Services" Data="@_growingSales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" Color="#20c997" />
       </PixataChartSeriesItems>
     </PixataChart>
   </ChildContent>

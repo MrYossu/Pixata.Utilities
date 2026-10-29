@@ -12,7 +12,7 @@ As of v3.0.0, the package brings its own styles. Add this line to your `App.razo
 
 ...and you no longer need Bootstrap for these components. If you do use Bootstrap (or Tailwind, or anything else), you can carry on doing so. Every class in the file is prefixed with `pixata-`, so nothing in it can clash with your own styles.
 
-The sizes and colours are copied from Bootstrap 4.3.1 (MIT licensed), which is what the components were written against, so they look the same as they always did.
+The sizes are copied from Bootstrap 4.3.1 (MIT licensed), which is what the components were written against, and as of v5.19.0 the colours of all the components are those of Bootstrap 5.3's default theme.
 
 ## Making them fit your theme
 
@@ -27,7 +27,7 @@ The stylesheet is written in terms of CSS custom properties, so you can restyle 
 }
 ```
 
-The full list (including `--pixata-label-font-size`, `--pixata-label-font-weight` and `--pixata-label-color` for the form labels) is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter. The `--pixata-grid-*` properties are for `PixataGrid`, and have their own defaults rather than Bootstrap's. See [Grid](Readme.Grid.md#styling).
+The full list (including `--pixata-label-font-size`, `--pixata-label-font-weight` and `--pixata-label-color` for the form labels) is at the top of [pixata.css](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/wwwroot/pixata.css), and covers colours, borders, spacing, the focus ring and the grid gutter. The `--pixata-grid-*` properties are for `PixataGrid`, and have their own defaults, though their accent colour is `--pixata-blazor-primary`. See [Grid](Readme.Grid.md#styling).
 
 The [audit viewer](Readme.AuditViewer.md#styling), [`Confirm` and `Inform`](Readme.Containers.md#styling-confirm-and-inform) and the [notifications](Readme.Notifications.md#icons-and-colours) use these variables too, along with a few of their own, which are listed on their pages. Prior to v5.4.0, their colours were hard-coded. As of v5.5.0, the notifications also take their background and text colours from `--pixata-blazor-surface-bg` and `--pixata-blazor-text-color`, so they follow a dark theme, and the cross on a `pixata-btn-close` button is drawn in the colour of the text around it (or `--pixata-close-button-color`).
 

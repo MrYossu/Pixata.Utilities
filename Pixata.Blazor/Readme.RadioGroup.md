@@ -198,7 +198,7 @@ For example, to have darker borders and green radio buttons...
 ```css
 :root {
   --pixata-blazor-radiogroup-radio-border-color: rgba(0, 0, 0, .4);
-  --pixata-blazor-radiogroup-checked-bg: #37b400;
-  --pixata-blazor-radiogroup-checked-border-color: #37b400;
+  --pixata-blazor-radiogroup-checked-bg: #198754;
+  --pixata-blazor-radiogroup-checked-border-color: #198754;
 }
 ```
