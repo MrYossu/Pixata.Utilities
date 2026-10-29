@@ -152,7 +152,7 @@ public class Switch_Tests {
       .Add(c => c.ValueChanged, (bool v) => values.Add(v)));
     // In a right-to-left page, the thumb of a switch that is off is at its right-hand end
     string thumb = cut.Find(".pixata-blazor-switch-thumb").GetAttribute("blazor:elementReference")!;
-    BunitJSModuleInterop module = context.JSInterop.SetupModule("./_content/Pixata.Blazor/pixata-blazor.js");
+    BunitJSModuleInterop module = context.JSInterop.SetupModule(PixataJs.ModulePath);
     module.Setup<PixataSwitchBox?>("getBoundingRect", i => ((ElementReference)i.Arguments[0]!).Id == thumb).SetResult(new() { Left = 30, Width = 30 });
     module.Setup<PixataSwitchBox?>("getBoundingRect", i => ((ElementReference)i.Arguments[0]!).Id != thumb).SetResult(new() { Left = 0, Width = 60 });
     cut.Find("button").PointerDown(new PointerEventArgs { ClientX = from });

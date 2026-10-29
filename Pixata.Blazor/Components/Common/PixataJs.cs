@@ -11,7 +11,8 @@ namespace Pixata.Blazor.Components;
 /// anything having to be registered
 /// </summary>
 internal static class PixataJs {
-  public const string ModulePath = "./_content/Pixata.Blazor/pixata-blazor.js";
+  // With the build's version, so browsers don't keep an old copy (without functions added since) after an upgrade
+  public static readonly string ModulePath = PixataBlazorScript.Path;
 
   private static readonly ConditionalWeakTable<IJSRuntime, Task<IJSObjectReference>> Modules = new();
 

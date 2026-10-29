@@ -12,7 +12,7 @@ namespace Pixata.Blazor.Tests.Components;
 
 [TestClass]
 public class RadioGroup_Tests {
-  private const string ModulePath = "./_content/Pixata.Blazor/pixata-blazor.js";
+  private static readonly string ModulePath = PixataJs.ModulePath;
 
   private class ContactMethod {
     public int Id { get; set; }

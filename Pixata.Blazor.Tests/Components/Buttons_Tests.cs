@@ -14,7 +14,7 @@ namespace Pixata.Blazor.Tests.Components;
 
 [TestClass]
 public class Buttons_Tests {
-  private const string ModulePath = "./_content/Pixata.Blazor/pixata-blazor.js";
+  private static readonly string ModulePath = PixataJs.ModulePath;
 
   // Items for a drop-down button: "One", "Two" (disabled when twoEnabled is false) and "Three", which add their text to clicked
   private static RenderFragment DropDownItems(List<string> clicked, bool twoEnabled = true) => builder => {
