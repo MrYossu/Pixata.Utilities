@@ -4199,6 +4199,45 @@
   border-inline-start: 1px solid var(--pixata-blazor-border-color);
 }
 
+/* The text area's wrapper is what the user resizes, so the border and focus ring go with it, and the text area fills it */
+.pixata-blazor-textarea {
+  flex-direction: column;
+}
+
+.pixata-blazor-textarea-resize-vertical {
+  resize: vertical;
+}
+
+.pixata-blazor-textarea-resize-horizontal {
+  resize: horizontal;
+}
+
+.pixata-blazor-textarea-resize-both {
+  resize: both;
+}
+
+.pixata-blazor-textarea-input {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow: auto;
+  white-space: pre-wrap;
+  text-overflow: clip;
+  resize: none;
+}
+
+.pixata-blazor-textarea-resize-auto .pixata-blazor-textarea-input {
+  overflow: hidden;
+}
+
+.pixata-blazor-textarea-count {
+  flex: none;
+  align-self: flex-end;
+  padding: 0 calc(var(--pixata-blazor-spacing) * 2) var(--pixata-blazor-spacing);
+  color: var(--pixata-blazor-placeholder-color);
+  font-size: .85em;
+}
+
 /* Edge has its own show-password button, which would sit next to ours */
 .pixata-blazor-textbox:has(.pixata-blazor-textbox-reveal) .pixata-blazor-textbox-input::-ms-reveal {
   display: none;

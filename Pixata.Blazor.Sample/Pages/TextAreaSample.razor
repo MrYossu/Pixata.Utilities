@@ -1,0 +1,88 @@
+@page "/TextAreaSample"
+@using System.ComponentModel.DataAnnotations
+
+<SitePageTitle>Text area</SitePageTitle>
+
+<h3>Text area</h3>
+
+<p><code>PixataTextArea</code> is a multi-line text box. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TextArea.md">the documentation</a>.</p>
+
+<ComponentSample Title="Basic use">
+  <Description>
+    <p>Five rows high. Drag the bottom corner to make it taller or shorter. <code>OnChange</code> fires when you leave the box.</p>
+  </Description>
+  <ChildContent>
+    <label for="pixata-notes">Notes</label>
+    <PixataTextArea Id="pixata-notes" @bind-Value="_notes" Rows="5" Width="400px" OnChange="@((object? v) => _log = $"OnChange: {v?.ToString()?.Length ?? 0} characters")" />
+    <p class="mt-2">@_log</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Growing with its text">
+  <Description>
+    <p>With <code>ResizeMode="PixataTextAreaResizeMode.Auto"</code>, it starts at two rows and grows (and shrinks) to fit what you type. The button sets the text from code, which resizes it too.</p>
+  </Description>
+  <ChildContent>
+    <PixataTextArea @bind-Value="_auto" Rows="2" ResizeMode="PixataTextAreaResizeMode.Auto" Width="400px" Placeholder="Keep typing..." aria-label="Growing text area" />
+    <div class="mt-2"><PixataButton OnClick="@(() => _auto = LongText)">Set a long text</PixataButton></div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Character count">
+  <Description>
+    <p><code>MaxLength="200"</code> with <code>ShowCharacterCount="true"</code>.</p>
+  </Description>
+  <ChildContent>
+    <PixataTextArea @bind-Value="_bio" MaxLength="200" ShowCharacterCount="true" Width="400px" Placeholder="Tell us about yourself" aria-label="About you" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Resize modes, fill modes, read only and disabled">
+  <Description>
+    <p><code>ResizeMode</code> takes <code>Vertical</code> (the default), <code>Horizontal</code>, <code>Both</code>, <code>None</code> or <code>Auto</code>.</p>
+  </Description>
+  <ChildContent>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;">
+      <PixataTextArea @bind-Value="_notes" ResizeMode="PixataTextAreaResizeMode.Both" Width="200px" aria-label="Both" Placeholder="Both" />
+      <PixataTextArea @bind-Value="_notes" ResizeMode="PixataTextAreaResizeMode.None" Width="200px" aria-label="None" Placeholder="None" />
+      <PixataTextArea @bind-Value="_notes" FillMode="flat" Width="200px" aria-label="Flat" Placeholder="Flat" />
+      <PixataTextArea @bind-Value="_notes" ReadOnly="true" Width="200px" aria-label="Read only" Placeholder="Read only" />
+      <PixataTextArea @bind-Value="_notes" Enabled="false" Width="200px" aria-label="Disabled" Placeholder="Disabled" />
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="In a form">
+  <Description>
+    <p>Inside an <code>EditForm</code> with a <code>[MinLength]</code> attribute. Submit with fewer than 20 characters to see the validation.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_feedback" OnValidSubmit="@(() => _submitted = "Thank you for your feedback")">
+      <DataAnnotationsValidator />
+      <FormSingle Label="Feedback" Id="pixata-feedback" Required="true">
+        <PixataTextArea Id="pixata-feedback" @bind-Value="_feedback.Text" Rows="4" Width="400px" />
+        <ValidationMessage For="() => _feedback.Text" />
+      </FormSingle>
+      <PixataPrimaryButton Class="mt-2">Send</PixataPrimaryButton>
+      <p class="mt-2">@_submitted</p>
+    </EditForm>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private const string LongText = "This text was set from code. It's long enough to need several lines, so the text area grows to fit "
+    + "it rather than scrolling. Delete some of it and the text area shrinks again, but never below the two rows it started with.";
+
+  private string? _notes = "Some notes\nover two lines";
+  private string _log = "";
+  private string? _auto;
+  private string? _bio;
+  private readonly Feedback _feedback = new();
+  private string _submitted = "";
+
+  private class Feedback {
+    [Required(ErrorMessage = "Please tell us what you think")]
+    [MinLength(20, ErrorMessage = "Please write at least 20 characters")]
+    public string? Text { get; set; }
+  }
+}

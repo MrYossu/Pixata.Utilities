@@ -1,0 +1,30 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataTextInputBase
+
+@* A multi-line text box, as in Telerik's TextArea *@
+<span class="@WrapperClass" style="@WidthStyle">
+  <textarea @ref="InputElement"
+            @attributes="AdditionalAttributes"
+            class="pixata-blazor-input-inner pixata-blazor-textarea-input"
+            id="@Id"
+            rows="@Rows"
+            value="@Text"
+            placeholder="@Placeholder"
+            maxlength="@MaxLength"
+            autocomplete="@AutoComplete"
+            autocapitalize="@AutoCapitalize"
+            spellcheck="@SpellCheckAttribute"
+            inputmode="@InputMode"
+            title="@Title"
+            disabled="@(!Enabled)"
+            readonly="@ReadOnly"
+            tabindex="@TabIndex"
+            aria-invalid="@(IsInvalid ? "true" : null)"
+            aria-describedby="@DescribedBy"
+            @oninput="OnInput"
+            @onchange="OnInputChange"
+            @onblur="OnInputBlur"></textarea>
+  @if (ShowCharacterCount) {
+    <span class="pixata-blazor-textarea-count" id="@CountId">@CharacterCount</span>
+  }
+</span>

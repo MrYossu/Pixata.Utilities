@@ -1,17 +1,17 @@
 @namespace Pixata.Blazor.Components
-@inherits PixataInputBase<string?>
+@inherits PixataTextInputBase
 
 @* A single-line text box, or a password box with Password="true", as in Telerik's TextBox *@
 <span class="@WrapperClass" style="@WidthStyle">
   @if (TextBoxPrefixTemplate is not null) {
     <span class="@PixataCss.Classes("pixata-blazor-textbox-prefix", ShowPrefixSeparator ? "pixata-blazor-textbox-separator" : null)">@TextBoxPrefixTemplate</span>
   }
-  <input @ref="_input"
+  <input @ref="InputElement"
          @attributes="AdditionalAttributes"
          class="pixata-blazor-input-inner pixata-blazor-textbox-input"
          id="@Id"
          type="@InputType"
-         value="@_text"
+         value="@Text"
          placeholder="@Placeholder"
          maxlength="@MaxLength"
          autocomplete="@AutoComplete"
@@ -26,7 +26,7 @@
          @oninput="OnInput"
          @onchange="OnInputChange"
          @onblur="OnInputBlur" />
-  @if (ShowClearButton && !string.IsNullOrEmpty(_text) && Enabled && !ReadOnly) {
+  @if (ShowClearButton && !string.IsNullOrEmpty(Text) && Enabled && !ReadOnly) {
     <span class="pixata-blazor-clear-value" role="button" aria-label="@ClearButtonText" title="@ClearButtonText" @onclick="Clear">
       <PixataIcon Icon="@PixataSvgIcons.X" />
     </span>

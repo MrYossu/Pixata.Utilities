@@ -976,3 +976,20 @@ export function disposeNavigation(gridId) {
   navigations.get(gridId)?.();
   navigations.delete(gridId);
 }
+
+// Makes a text area grow and shrink to fit its text, rather than scroll. The first call adds a listener that does it as the
+// user types; every call does it now, for text set from .NET
+export function autoSizeTextArea(element) {
+  if (!element) {
+    return;
+  }
+  if (!element.pixataAutoSize) {
+    element.pixataAutoSize = () => {
+      element.style.height = "auto";
+      // scrollHeight doesn't include the borders, which the height does with border-box sizing
+      element.style.height = `${element.scrollHeight + element.offsetHeight - element.clientHeight}px`;
+    };
+    element.addEventListener("input", element.pixataAutoSize);
+  }
+  element.pixataAutoSize();
+}
