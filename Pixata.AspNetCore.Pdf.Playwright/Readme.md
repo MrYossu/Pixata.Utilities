@@ -8,6 +8,8 @@ Playwright (Apache 2.0) and Chromium (BSD) are free, with no licence key. Chromi
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwright/) is available for this project.
 
+>**Version 1.1.0** shortens the paths Chromium needs below your app's folder by about 40 characters, so that it fits in an ordinary project folder on Windows without long paths. **Deployment change:** Chromium is now copied to `.pw\<revision>` (eg `.pw\1243`) in the build and publish output, in place of `.playwright-browsers\chromium_headless_shell-<revision>`, so `PlaywrightPdfConverter.BrowsersFolder` is now `".pw"`. Deploy the new `.pw` folder with the rest of the app as usual, and delete the old `.playwright-browsers` folder from the server once the new version is running. If you've told antivirus or your host about `.playwright-browsers`, tell them about `.pw` instead. On Windows without long paths, a build or publish to a folder that's still too deep now stops with one error saying what to do, rather than an error for every file that can't be copied. See [long paths on Windows](#long-paths-on-windows) (#126)
+
 >**Version 1.0.2** changes the package description and this readme to say that this is the recommended converter. No code changes.
 
 >**Version 1.0.1** fixes blocked images showing as light blue boxes in the PDF. The blank image used in place of a blocked one was meant to be transparent, but was half-transparent blue, so each blocked image (one that isn't on the site in `PdfOptions.BaseUrl`, see [images and style sheets](#images-and-style-sheets)) appeared as a blue rectangle the size of the image. It now leaves a gap, as intended.
