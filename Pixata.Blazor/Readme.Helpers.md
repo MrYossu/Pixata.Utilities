@@ -131,6 +131,44 @@ builder.Services.AddScoped<PixataBaseClientService>();
 
 Relative URIs are resolved against the `NavigationManager`'s base URI, and anything starting with "http" is used as it stands.
 
+## Saving and printing files
+
+>Note that this feature is only available from v5.20.0 onwards
+
+`PixataFiles` (in `Pixata.Blazor.Extensions`) has the browser save a file that your app has made, or print an HTML document, without leaving the page. It uses the package's own JavaScript, so there's nothing to register, and it works in Blazor Server and WASM. Pass it the page's `IJSRuntime`...
+
+```csharp
+@inject IJSRuntime Js
+
+private async Task DownloadPdf() {
+  byte[] pdf = await _documents.CreatePdfFromTemplate<InvoiceTemplate>(("Invoice", _invoice));
+  ApiResponse<Yunit> saved = await PixataFiles.SaveFile(Js, $"Invoice {_invoice.Number}.pdf", "application/pdf", pdf);
+  if (!saved) {
+    _error = saved.Message;
+  }
+}
+
+private async Task Print() {
+  string html = await _documents.CreateHtmlFromTemplate<InvoiceTemplate>(("Invoice", _invoice));
+  ApiResponse<Yunit> printed = await PixataFiles.PrintHtml(Js, html);
+  if (!printed) {
+    _error = printed.Message;
+  }
+}
+```
+
+`SaveFile()` takes the file name the browser suggests, the MIME type, and the file as a `byte[]` or a `Stream`. The file is streamed to the browser, so it isn't limited by the size of a SignalR message. A `Stream` is read from its current position (so rewind a `MemoryStream` you've just written to), and is left open for you to dispose. This is what the grid's CSV and Excel exports use.
+
+`PrintHtml()` takes a whole HTML document, such as one from `DocumentTemplateHelper.CreateHtmlFromTemplate` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md), and opens the browser's print dialog for it. Only that document is printed, not the page the user is on. A few things to know...
+
+- **Scripts in the document don't run.** It's put in a hidden `iframe` whose `sandbox` doesn't allow scripts, so anything user-supplied in it can't do any harm.
+- **Relative URLs resolve against the page's address**, so an image or style sheet from your site can be given as `/images/logo.png`.
+- **It returns once the document is in the frame**, not when the dialog closes, and the browser doesn't say whether the user went on to print. Waiting for the dialog would time out (Blazor Server waits a minute for JavaScript) if the user left it open.
+- **The frame is left on the page until the next print**, as some browsers carry on printing after the dialog closes. The focus goes back to whatever had it (usually your Print button) when the dialog closes.
+- Use `@media print` and `@page` in the document's CSS to set the margins and page breaks, as you would for a PDF.
+
+Both return an [`ApiResponse<Yunit>`](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.ApiResponse.md) rather than throwing, as an exception that escapes an event handler ends a Blazor Server circuit. A failure's message is the exception's, prefixed with its type, eg `"(JSException) ..."`. If the user has closed the page (a `JSDisconnectedException`), there's no one to tell, so they return success. Call them from an event handler or after the first render, as JavaScript isn't available while the page is being prerendered.
+
 ## TemplateHelper
 
 Are you fed up of writing code like this (it's the same for any grid that takes a template)...

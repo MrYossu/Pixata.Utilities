@@ -1,0 +1,68 @@
+@page "/FilesSample"
+@using System.Text
+@using Pixata.Blazor.Extensions
+@using Pixata.Extensions
+@inject IJSRuntime Js
+
+<SitePageTitle>Saving and printing files</SitePageTitle>
+
+<h3>Saving and printing files</h3>
+
+<p><code>PixataFiles</code> has the browser save a file that the app has made, or print an HTML document, without leaving the page. Both return an <code>ApiResponse&lt;Yunit&gt;</code>, so a failure is shown rather than ending the circuit.</p>
+
+<ComponentSample Title="Saving a file">
+  <Description>
+    <p><code>PixataFiles.SaveFile()</code> takes the file name, the MIME type and a <code>byte[]</code> or a <code>Stream</code>, and the browser saves it as if it had been downloaded.</p>
+  </Description>
+  <ChildContent>
+    <PixataPrimaryButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Download" OnClick="Save">Save a text file</PixataPrimaryButton>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Printing a document">
+  <Description>
+    <p><code>PixataFiles.PrintHtml()</code> puts a whole HTML document (such as one from <code>DocumentTemplateHelper.CreateHtmlFromTemplate</code>) in a hidden frame, where scripts can't run, and opens the print dialog for it. Only the document is printed, not this page.</p>
+  </Description>
+  <ChildContent>
+    <PixataPrimaryButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.File" OnClick="Print">Print an invoice</PixataPrimaryButton>
+  </ChildContent>
+</ComponentSample>
+
+@if (_error != "") {
+  <p class="text-danger">@_error</p>
+}
+
+@code {
+  private string _error = "";
+
+  private async Task Save() {
+    byte[] content = Encoding.UTF8.GetBytes($"Saved by the Pixata.Blazor sample at {DateTime.Now:HH:mm:ss}");
+    Show(await PixataFiles.SaveFile(Js, "Pixata sample.txt", "text/plain", content));
+  }
+
+  private async Task Print() =>
+    Show(await PixataFiles.PrintHtml(Js, $@"
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Invoice 1234</title>
+        <style>
+          body {{ font-family: sans-serif; margin: 2cm; }}
+          table {{ border-collapse: collapse; width: 100%; }}
+          th, td {{ border-bottom: 1px solid #ccc; padding: 4px; text-align: left; }}
+        </style>
+      </head>
+      <body>
+        <h1>Invoice 1234</h1>
+        <p>Printed at {DateTime.Now:HH:mm:ss}</p>
+        <table>
+          <tr><th>Item</th><th>Price</th></tr>
+          <tr><td>Widget</td><td>£10.00</td></tr>
+          <tr><td>Gadget</td><td>£25.00</td></tr>
+        </table>
+      </body>
+      </html>"));
+
+  private void Show(ApiResponse<Yunit> response) =>
+    _error = response ? "" : response.Message;
+}
