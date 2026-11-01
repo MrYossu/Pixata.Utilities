@@ -6,6 +6,8 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
+>**Version 3.2.0** works with SMTP servers that don't need a login, such as an internal relay that allows your app's IP address, or a local test server such as smtp4dev or Papercut. The service no longer logs in when `UserName` is empty, or when the server doesn't offer logins (which used to fail with "The SMTP server does not support authentication"). See [servers that don't need a login](#servers-that-dont-need-a-login) below (#127)
+
 >**Version 3.1.0** adds `SendEmailsAsync`, which sends several emails over one connection to the SMTP server, which is much quicker than sending them one by one. See [sending several emails at once](#sending-several-emails-at-once) below.
 
 >**Version 3.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
