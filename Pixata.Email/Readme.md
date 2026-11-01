@@ -6,6 +6,8 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
+>**Version 3.3.0** can send through Microsoft 365 with OAuth, as Microsoft is retiring user name and password logins for SMTP. `PixataGraphEmailService` sends with Microsoft Graph, which works even where SMTP logins are turned off for the mailbox, and saves the emails in Sent Items. `SmtpSettings.AccessToken` logs in to an SMTP server with OAuth (XOAUTH2) instead of the password, for Microsoft 365 or Gmail. Both services implement the new `PixataEmailSenderInterface`, so your app can choose between them. See [Microsoft 365, Gmail and OAuth](#microsoft-365-gmail-and-oauth) below (#128)
+
 >**Version 3.2.0** works with SMTP servers that don't need a login, such as an internal relay that allows your app's IP address, or a local test server such as smtp4dev or Papercut. The service no longer logs in when `UserName` is empty, or when the server doesn't offer logins (which used to fail with "The SMTP server does not support authentication"). See [servers that don't need a login](#servers-that-dont-need-a-login) below (#127)
 
 >**Version 3.1.0** adds `SendEmailsAsync`, which sends several emails over one connection to the SMTP server, which is much quicker than sending them one by one. See [sending several emails at once](#sending-several-emails-at-once) below.
