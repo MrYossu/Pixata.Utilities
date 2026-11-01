@@ -27,9 +27,15 @@ namespace Pixata.Email {
     public string UserName { get; set; } = "";
 
     /// <summary>
-    /// The password to log in to the SMTP server with. Ignored when <see cref="UserName"/> is empty
+    /// The password to log in to the SMTP server with. Ignored when <see cref="UserName"/> is empty, or when <see cref="AccessToken"/> is set
     /// </summary>
     public string Password { get; set; } = "";
+
+    /// <summary>
+    /// An OAuth access token to log in with (XOAUTH2), in place of the password, eg for Microsoft 365 or Gmail. <see cref="UserName"/> must be
+    /// the mailbox's email address. Getting the token, and getting a new one when it expires, is up to the app
+    /// </summary>
+    public string AccessToken { get; set; } = "";
     public string FromEmail { get; set; } = "";
     public string FromName { get; set; } = "";
     public string ReplyTo { get; set; } = "";

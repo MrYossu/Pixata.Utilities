@@ -7,7 +7,7 @@ using MimeKit;
 using Pixata.Extensions;
 
 namespace Pixata.Email {
-  public class PixataEmailService(SmtpSettings smtpSettings) : PixataEmailServiceInterface {
+  public class PixataEmailService(SmtpSettings smtpSettings) : PixataEmailServiceInterface, PixataEmailSenderInterface {
     /// <summary>
     /// The settings for the SMTP server. You would normally pass these in to the constructor, but they are exposed as a property to allow you to override them in case you want to send emails from a different account
     /// </summary>
@@ -91,12 +91,24 @@ namespace Pixata.Email {
     }
 
     // Logs in, unless there's no user name to log in with, or the server doesn't take logins (such as an internal relay that allows the app's
-    // IP address, or a local test server such as smtp4dev or Papercut). MailKit would throw a NotSupportedException for the latter
+    // IP address, or a local test server such as smtp4dev or Papercut). MailKit would throw a NotSupportedException for the latter. With an
+    // access token, logs in with OAuth (XOAUTH2) rather than the password
     private async Task Authenticate(SmtpClient client) {
-      if (string.IsNullOrWhiteSpace(SmtpSettings.UserName) || !client.Capabilities.HasFlag(SmtpCapabilities.Authentication)) {
+      bool hasToken = !string.IsNullOrWhiteSpace(SmtpSettings.AccessToken);
+      if (string.IsNullOrWhiteSpace(SmtpSettings.UserName)) {
+        if (hasToken) {
+          throw new InvalidOperationException($"{nameof(SmtpSettings)}.{nameof(SmtpSettings.UserName)} must be the mailbox's email address when {nameof(SmtpSettings.AccessToken)} is set, as it is sent with the token");
+        }
         return;
       }
-      await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
+      if (!client.Capabilities.HasFlag(SmtpCapabilities.Authentication)) {
+        return;
+      }
+      if (hasToken) {
+        await client.AuthenticateAsync(new SaslMechanismOAuth2(SmtpSettings.UserName, SmtpSettings.AccessToken));
+      } else {
+        await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
+      }
     }
 
     private MimeMessage CreateMailMessage(EmailParameters parameters) {

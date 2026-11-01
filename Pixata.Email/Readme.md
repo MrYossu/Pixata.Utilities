@@ -94,6 +94,8 @@ If you are into interfaces, you can register that instead...
 services.AddTransient<PixataEmailServiceInterface, PixataEmailService>();
 ```
 
+`PixataEmailSenderInterface` (from v3.3.0) has just the methods that don't depend on how the email is sent, and is implemented by both `PixataEmailService` and [`PixataGraphEmailService`](#sending-with-microsoft-graph), so use that one if your app can send either way.
+
 ### Allowing multiple email servers or accounts
 
 >Note that this feature is only available from v1.2.4 onwards
@@ -167,6 +169,100 @@ A few things to note...
 - The emails are sent one after the other, not in parallel, so this won't exceed the sending rate of providers that limit it, such as Amazon SES. It's quicker because each email doesn't need its own connection, not because the emails are sent any faster.
 
 It's a separate method, rather than another `SendEmailAsync` overload, because an overload taking a collection would make existing calls such as `SendEmailAsync(new("Hello", body, "billy@shears.com"))` ambiguous.
+
+## Microsoft 365, Gmail and OAuth
+
+>Note that this feature is only available from v3.3.0 onwards
+
+Microsoft is [retiring basic authentication for SMTP AUTH](https://techcommunity.microsoft.com/blog/exchange/exchange-online-to-retire-basic-auth-for-client-submission-smtp/4114750) (logging in to `smtp.office365.com` with a user name and password) in Exchange Online, so a `UserName` and `Password` will stop working for Microsoft 365 mailboxes. Pixata.Email has two ways to log in with an OAuth access token instead...
+
+| | [Microsoft Graph](#sending-with-microsoft-graph) | [SMTP with OAuth](#logging-in-to-smtp-with-oauth) |
+| --- | --- | --- |
+| Use | `PixataGraphEmailService` | `PixataEmailService`, with `SmtpSettings.AccessToken` |
+| Works with | Microsoft 365 | Microsoft 365, Gmail, and any other server that takes XOAUTH2 |
+| Needs SMTP AUTH turned on for the mailbox | No | Yes, which many Microsoft 365 tenants turn off |
+| Saves the email in Sent Items | Yes (you can turn this off) | No |
+| Largest email | About 3MB of attachments | The server's limit (eg 35MB for Microsoft 365) |
+
+For Microsoft 365, Graph is usually the better choice.
+
+Either way, getting the token is up to your app. That means having the user sign in and consent (or an administrator consent for the whole organisation), keeping the refresh token, and getting a new access token when the old one expires, which is after about an hour. [MSAL](https://learn.microsoft.com/entra/msal/dotnet/) (`Microsoft.Identity.Client`) or [Microsoft.Identity.Web](https://learn.microsoft.com/entra/msal/dotnet/microsoft-identity-web/) will do this for you. Pixata.Email just takes the token.
+
+### Sending with Microsoft Graph
+
+`PixataGraphEmailService` sends with Graph's [`sendMail`](https://learn.microsoft.com/graph/api/user-sendmail). It needs a token for Microsoft Graph with the `Mail.Send` permission, which can be either...
+
+- **Delegated**, so the app sends as a user who has signed in and consented. Ask for `Mail.Send` and `offline_access` (for a refresh token, so the app can carry on sending after the user has gone). The email is sent from that user's mailbox.
+- **Application**, so the app sends as itself, from any mailbox in the organisation, once an administrator has consented. Ask for `https://graph.microsoft.com/.default` with the client credentials flow, and set `UserId` to the mailbox to send from. You can limit which mailboxes the app can use with an [application access policy](https://learn.microsoft.com/graph/auth-limit-mailbox-access).
+
+Register it with an `HttpClient`...
+
+```c#
+builder.Services.AddHttpClient<PixataGraphEmailService>();
+```
+
+...and give it the token before you send...
+
+```c#
+string token = await _tokens.GetGraphToken(company); // Your code, eg with MSAL
+_graphEmailService.Settings = new() { AccessToken = token };
+ApiResponse<Yunit> response = await _graphEmailService.SendEmailAsync(emailParameters);
+if (response.State == ApiResponseStates.Unauthorised) {
+  // The token has expired or been revoked (or doesn't have permission, see the message), so get a new one, or ask the user to connect their
+  // mailbox again
+}
+```
+
+You can also pass a `GraphEmailSettings` to the constructor, or register one, but as the token changes, it's usually easiest to set `Settings` before sending. Set it to a new `GraphEmailSettings`, as above, rather than changing the properties of one that other users of your app might share.
+
+| `GraphEmailSettings` | Default | What it does |
+| --- | --- | --- |
+| `AccessToken` | `""` | The access token. Without one, sending fails without calling Graph |
+| `UserId` | `""` | The mailbox to send from, as the user's id or user principal name (usually their email address), for an application token. Leave empty to send from the signed-in user's mailbox (`/me`) |
+| `SaveToSentItems` | `true` | Whether a copy of each email is saved in Sent Items |
+| `BaseUrl` | `https://graph.microsoft.com/v1.0/` | Only change this for a [national cloud](https://learn.microsoft.com/graph/deployments) |
+
+It takes the same `EmailParameters` as `PixataEmailService`, and has the same `SendEmailAsync` and `SendEmailsAsync` methods (but not the overload that takes `SecureSocketOptions`, which only means anything for SMTP). A few things are different...
+
+- **The email is from the mailbox**, so there are no `FromEmail` and `FromName` settings. If you set `EmailParameters.From`, the mailbox needs permission to send as (or on behalf of) that address.
+- **Attachments are limited to about 3MB in all**, as `sendMail` takes requests of up to 4MB, and the attachments are base64 encoded. For larger files, send a link, or use SMTP.
+- **Failures have more specific states.** A token that has expired or been revoked (401), or that doesn't allow the email to be sent (403, eg one without `Mail.Send`, or a `From` address the mailbox can't send as), gives `Unauthorised`, Graph throttling the app or being busy (429 or 503) gives `ServiceUnavailable`, and not being able to reach Graph gives `HttpFailure`. Anything else is a `Failure`. The message is Graph's, with the status and its error code, eg `"(401 InvalidAuthenticationToken) Lifetime validation failed, the token is expired."`.
+- **`SendEmailsAsync` sends one request per email**, as Graph takes them separately, so it's no quicker than sending them one by one. It's there so that you can swap between the two services.
+
+### Logging in to SMTP with OAuth
+
+To log in to an SMTP server with OAuth (XOAUTH2) instead of a password, set `AccessToken` in the `SmtpSettings`, with `UserName` the mailbox's email address. `Password` is ignored when there's a token...
+
+```c#
+_emailService.SmtpSettings = new() {
+  Server = "smtp.office365.com",
+  Port = 587,
+  UserName = "jim@spriggs.com",
+  AccessToken = token, // Your code, eg with MSAL
+  FromEmail = "jim@spriggs.com",
+  FromName = "Jim Spriggs"
+};
+```
+
+The token needs the right scope for the server...
+
+| Server | Scope |
+| --- | --- |
+| Microsoft 365 (`smtp.office365.com`) | `https://outlook.office.com/SMTP.Send` (with `offline_access` for a refresh token). The mailbox also needs [SMTP AUTH turned on](https://learn.microsoft.com/exchange/clients-and-mobile-in-exchange-online/authenticated-client-smtp-submission) |
+| Gmail (`smtp.gmail.com`) | `https://mail.google.com/` |
+
+If the token has expired, the server refuses the login, and the failure message is an `AuthenticationException` with the server's reason. Get a new token and send again.
+
+### Choosing between them
+
+If your app lets each customer use their own mail server or their own Microsoft 365 mailbox, use `PixataEmailSenderInterface`, which both services implement...
+
+```c#
+PixataEmailSenderInterface sender = company.UsesMicrosoft365
+  ? new PixataGraphEmailService(_httpClientFactory.CreateClient(), new() { AccessToken = await _tokens.GetGraphToken(company) })
+  : new PixataEmailService(company.SmtpSettings);
+ApiResponse<Yunit> response = await sender.SendEmailAsync(emailParameters);
+```
 
 ## Breaking change in version 2.0.0
 
