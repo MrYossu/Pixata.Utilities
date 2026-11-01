@@ -37,7 +37,7 @@ Pixata.Extensions          — no project deps; the shared kernel
   │     ├── Pixata.AspNetCore.Pdf.Telerik     — PdfConverterInterface via Telerik Document Processing
   │     ├── Pixata.AspNetCore.Pdf.Playwright  — PdfConverterInterface via Playwright and Chromium
   │     └── Pixata.AspNetCore.Pdf.WkHtmlToPdf — obsolete wkhtmltopdf converter, kept for one release
-  ├── Pixata.Email         — MailKit wrapper
+  ├── Pixata.Email         — MailKit wrapper, plus sending through Microsoft 365 with Graph
   └── Pixata.SimilarityChooser
 
 Pixata.Blazor.Grid.Excel         — Excel export for PixataGrid (ClosedXML), kept out of Pixata.Blazor

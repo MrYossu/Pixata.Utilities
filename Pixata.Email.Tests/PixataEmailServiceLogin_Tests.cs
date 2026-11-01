@@ -51,6 +51,36 @@ public class PixataEmailServiceLogin_Tests {
   }
 
   [TestMethod]
+  public async Task AccessToken_LogsInWithOAuth() {
+    await using FakeSmtpServer server = new("PLAIN LOGIN XOAUTH2");
+    SmtpSettings settings = server.Settings("jim@spriggs.com", "not used");
+    settings.AccessToken = "the-token";
+    PixataEmailService service = new(settings);
+
+    ApiResponse<Yunit> response = await service.SendEmailAsync(Email());
+
+    Assert.AreEqual(ApiResponseStates.Success, response.State, response.Message);
+    string auth = server.AuthCommands.Single();
+    StringAssert.StartsWith(auth, "AUTH XOAUTH2 ");
+    Assert.AreEqual("user=jim@spriggs.com\u0001auth=Bearer the-token\u0001\u0001", Decode(auth.Split(' ').Last()));
+    Assert.AreEqual(1, server.Messages.Count);
+  }
+
+  [TestMethod]
+  public async Task AccessTokenWithoutAUserName_SaysTheUserNameIsNeeded() {
+    await using FakeSmtpServer server = new("XOAUTH2");
+    SmtpSettings settings = server.Settings();
+    settings.AccessToken = "the-token";
+    PixataEmailService service = new(settings);
+
+    ApiResponse<Yunit> response = await service.SendEmailAsync(Email());
+
+    Assert.AreEqual(ApiResponseStates.Failure, response.State);
+    StringAssert.Contains(response.Message, "UserName must be the mailbox's email address");
+    Assert.AreEqual(0, server.Messages.Count);
+  }
+
+  [TestMethod]
   public async Task WithSocketOptions_NoUserName_DoesNotLogIn() {
     await using FakeSmtpServer server = new("PLAIN LOGIN");
     PixataEmailService service = new(server.Settings());
