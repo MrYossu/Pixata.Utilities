@@ -14,9 +14,11 @@ namespace Pixata.AspNetCore.Pdf.Playwright;
 /// </summary>
 public partial class PlaywrightPdfConverter(PlaywrightPdfOptions options, IHostEnvironment? hostEnvironment = null) : PdfConverterInterface, IAsyncDisposable, IDisposable {
   /// <summary>
-  /// The folder in the app's output that the browser is copied to, by the targets in this package
+  /// The folder in the app's output that the browser is copied to, by the targets in this package. The browser goes in a folder named
+  /// after its revision, eg <c>.pw/1243</c>. Short, to leave as much room as possible for the paths below it on Windows machines where long
+  /// paths aren't enabled
   /// </summary>
-  public const string BrowsersFolder = ".playwright-browsers";
+  public const string BrowsersFolder = ".pw";
 
   // The document is never actually fetched from here. Requests for it are answered with the HTML, so that relative URLs resolve against the
   // base URL, as they would on the site. This host is used when there is no base URL, and .invalid can never resolve to a real address
@@ -268,13 +270,13 @@ public partial class PlaywrightPdfConverter(PlaywrightPdfOptions options, IHostE
     }
     string browsers = Path.Combine(AppContext.BaseDirectory, BrowsersFolder);
     string revision = ExpectedRevision();
-    string folder = Path.Combine(browsers, $"chromium_headless_shell-{revision}");
+    string folder = Path.Combine(browsers, revision);
     string executableName = OperatingSystem.IsWindows() ? "chrome-headless-shell.exe" : "chrome-headless-shell";
     if (Directory.Exists(folder) && Directory.EnumerateFiles(folder, executableName, SearchOption.AllDirectories).FirstOrDefault() is { } executable) {
       return executable;
     }
     string[] others = Directory.Exists(browsers) ? Directory.GetDirectories(browsers).Select(Path.GetFileName).OfType<string>().ToArray() : [];
-    string found = others.Length == 0 ? $"{browsers} has no browsers in it" : $"{browsers} only has {string.Join(", ", others)}, which doesn't match the version of Microsoft.Playwright the app uses";
+    string found = others.Length == 0 ? $"{browsers} has no browsers in it" : $"{browsers} only has revision {string.Join(", ", others)}, which doesn't match the version of Microsoft.Playwright the app uses";
     throw new InvalidOperationException($"Chromium headless shell revision {revision} should be in {folder}, but {found}. "
       + $"The Pixata.AspNetCore.Pdf.Playwright package copies it there when the app is built or published. Check that the {BrowsersFolder} folder was "
       + "uploaded along with the rest of the published files, and was published from a machine running the same operating system as the server");
