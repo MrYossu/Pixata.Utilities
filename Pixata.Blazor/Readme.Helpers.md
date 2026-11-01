@@ -133,7 +133,7 @@ Relative URIs are resolved against the `NavigationManager`'s base URI, and anyth
 
 ## Saving and printing files
 
->Note that this feature is only available from v5.20.0 onwards
+>Note that this feature is only available from v5.24.0 onwards
 
 `PixataFiles` (in `Pixata.Blazor.Extensions`) has the browser save a file that your app has made, or print an HTML document, without leaving the page. It uses the package's own JavaScript, so there's nothing to register, and it works in Blazor Server and WASM. Pass it the page's `IJSRuntime`...
 
