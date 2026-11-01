@@ -800,7 +800,7 @@ export function disposeRowDrag(gridId) {
   rowDrags.delete(gridId);
 }
 
-// ---------- Saving files ----------
+// ---------- Saving and printing files ----------
 
 // Has the browser save a file that .NET has sent as a stream
 export async function downloadFile(fileName, contentType, streamReference) {
@@ -813,6 +813,36 @@ export async function downloadFile(fileName, contentType, streamReference) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+const printFrameId = "pixata-blazor-print-frame";
+
+// Prints an HTML document from a hidden frame. The sandbox has no allow-scripts, so nothing in the document can run, and
+// allow-modals lets the frame open the print dialog. The frame is left in place until the next print, as some browsers carry on
+// printing after print() returns. Returns once the frame has been added, rather than when the dialog closes, as .NET would time
+// out waiting for a user who leaves the dialog open
+export function printHtml(html) {
+  document.getElementById(printFrameId)?.remove();
+  const returnFocusTo = document.activeElement;
+  const frame = document.createElement("iframe");
+  frame.id = printFrameId;
+  frame.setAttribute("sandbox", "allow-same-origin allow-modals");
+  frame.setAttribute("aria-hidden", "true");
+  frame.tabIndex = -1;
+  frame.style.cssText = "position: fixed; right: 0; bottom: 0; width: 0; height: 0; border: 0; visibility: hidden";
+  frame.addEventListener("load", () => {
+    const printing = frame.contentWindow;
+    // Printing moves the focus to the frame, so give it back to whatever had it (usually the Print button) when the dialog closes
+    printing.addEventListener("afterprint", () => {
+      if (returnFocusTo instanceof HTMLElement && returnFocusTo.isConnected) {
+        returnFocusTo.focus();
+      }
+    }, { once: true });
+    printing.focus();
+    printing.print();
+  }, { once: true });
+  frame.srcdoc = html;
+  document.body.appendChild(frame);
 }
 
 // ---------- Keyboard navigation ----------
