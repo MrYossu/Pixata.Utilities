@@ -64,11 +64,11 @@ The browser isn't started until the first PDF is created, so registering the con
 
 ## How Chromium gets to the server
 
-Microsoft.Playwright copies its driver (a `.playwright` folder, about 100MB) into your app's output. This package adds Chromium's headless shell (a `.playwright-browsers` folder, about 230MB), so that everything the converter needs is in the published files.
+Microsoft.Playwright copies its driver (a `.playwright` folder, about 100MB) into your app's output. This package adds Chromium's headless shell (a `.pw` folder, about 230MB), so that everything the converter needs is in the published files.
 
 - **When the app is built**, the package works out which build of Chromium the referenced version of Playwright needs. If the build machine doesn't have it yet, it downloads it, once, into the machine's Playwright browser cache (`%LOCALAPPDATA%\ms-playwright` on Windows). You'll see a message in the build output when this happens. The build machine needs internet access the first time; the server never does.
 - **The browser is then copied** into `bin` with the rest of the app, and into the publish folder when you publish, whether that's `dotnet publish`, a Visual Studio publish profile, or a CI pipeline. Upload the publish folder as usual. It never goes under `wwwroot`, so it can't be downloaded from your site.
-- **When you upgrade** Microsoft.Playwright (directly, or by upgrading this package), the next build downloads and copies the matching Chromium automatically. Old ones are left in the build machine's cache. Deploy the new `.playwright` and `.playwright-browsers` folders with the rest of the app. Most upload tools skip files that haven't changed, so these only take a while when the version changes.
+- **When you upgrade** Microsoft.Playwright (directly, or by upgrading this package), the next build downloads and copies the matching Chromium automatically. Old ones are left in the build machine's cache. Deploy the new `.playwright` and `.pw` folders with the rest of the app. Most upload tools skip files that haven't changed, so these only take a while when the version changes.
 - **Only en-US locale files are copied**, which saves about 40MB. Chromium only uses them for its own messages, not for the text in your PDFs.
 - **Build on the same operating system as the server.** The browser downloaded is the one for the build machine's operating system, so publish for a Windows server from Windows.
 
@@ -79,10 +79,29 @@ You can control this with MSBuild properties in your app's project file...
 | `PixataPlaywrightBundleBrowser` | `true` | Set to `false` to not copy Chromium, eg if you use the `Channel` or `BrowserExecutablePath` [options](#options) |
 | `PixataPlaywrightAllLocales` | `false` | Set to `true` to copy all of Chromium's locale files |
 | `PixataPlaywrightBrowserCache` | Playwright's cache | Where the build machine keeps downloaded browsers. Uses `PLAYWRIGHT_BROWSERS_PATH` if that's set on the build machine |
+| `PixataPlaywrightCheckPathLength` | `true` | Set to `false` to not stop the build when Chromium's paths would be too long for Windows (see [long paths on Windows](#long-paths-on-windows)) |
 
 If you reference this project with a `ProjectReference` rather than as a NuGet package, MSBuild doesn't import the package's targets, so also add `<Import Project="path\to\Pixata.AspNetCore.Pdf.Playwright\build\Pixata.AspNetCore.Pdf.Playwright.targets" />` to the app's project file.
 
-The longest path Chromium adds is about 120 characters below the app's folder. If Windows long paths aren't enabled on the build machine, a build or publish in a very deeply nested folder can fail with "could not copy" errors. Build somewhere with a shorter path if so.
+### Long paths on Windows
+
+Unless long paths are enabled, Windows can't use a path of 260 characters or more, and Chromium's deepest file is about 105 characters below the build or publish folder...
+
+```
+.pw\1243\chrome-headless-shell-win64\PrivacySandboxAttestationsPreloaded\privacy-sandbox-attestations.dat
+```
+
+So the build output folder (eg `C:\Users\Jim\source\repos\MyApp\MyApp\bin\Release\net10.0\`) and the publish folder need to be shorter than about 155 characters. A Visual Studio publish to a folder copies the files twice, first to `obj\Release\net10.0\PubTmp\Out\` in the project and then to the folder in the publish profile, so both need to fit. A [git worktree](https://git-scm.com/docs/git-worktree) inside the project folder adds its path to all of these.
+
+When long paths aren't enabled on a Windows build machine, the build checks this before it copies anything. If a path would be too long, it stops with one error that gives the path and its length, rather than an MSB3021 "could not copy" error for every file. To fix it, do one of these...
+
+- **Enable long paths in Windows.** Set `LongPathsEnabled` to `1` in `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem` (or turn on the "Enable Win32 long paths" group policy, under Computer Configuration > Administrative Templates > System > Filesystem), then restart Visual Studio. You need to be an administrator to do this. This is the setting MSBuild itself checks.
+- **Build or publish to a folder with a shorter path**, eg by moving the solution nearer the root of the drive, or by setting the publish profile's folder to something like `C:\Publish\MyApp`.
+- **Don't copy Chromium.** Set `PixataPlaywrightBundleBrowser` to `false`, and use the `Channel` [option](#options) to use a browser installed on the server, or `BrowserExecutablePath` to point at one you deploy yourself.
+
+The files are uploaded to the server with the same paths below the app's folder, so keep that short too. Most hosts' site folders (eg `C:\inetpub\wwwroot\MySite`) are.
+
+If you know the check is wrong for your machine, set `PixataPlaywrightCheckPathLength` to `false` in the project file to turn it off.
 
 ## Deploying to shared hosting
 
@@ -91,7 +110,7 @@ The converter is designed to work where you have no access to the server: nothin
 What the converter can't fix is a host that doesn't allow it at all. Some shared hosts...
 
 - don't let a site start other processes, or run `.exe` files from its folder;
-- have antivirus that removes or blocks files in `.playwright-browsers`;
+- have antivirus that removes or blocks files in `.pw`;
 - limit a site's memory to less than Chromium needs (see [performance](#performance) for how much it uses);
 - don't let the site write to the server's temporary folder. If so, set the `TempFolder` [option](#options) to a folder inside the app, eg `App_Data/PdfTemp`.
 

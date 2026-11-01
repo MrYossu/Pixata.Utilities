@@ -1,7 +1,7 @@
 <Project>
 
   <!--
-    Copies the Chromium headless shell into the app's build and publish output (in a .playwright-browsers folder), so that the app can be
+    Copies the Chromium headless shell into the app's build and publish output (in a .pw folder), so that the app can be
     deployed to a server without installing anything there. The browser is downloaded once, by the Playwright driver that comes with
     Microsoft.Playwright, into the build machine's Playwright browser cache, so it always matches the version of Playwright the app uses.
 
@@ -9,11 +9,16 @@
       PixataPlaywrightBundleBrowser  false to not copy the browser (eg when you set Channel or BrowserExecutablePath)
       PixataPlaywrightAllLocales     true to copy all of Chromium's locale files, rather than just en-US (about 40MB more)
       PixataPlaywrightBrowserCache   where the build machine keeps downloaded browsers. Defaults to Playwright's own cache
+      PixataPlaywrightCheckPathLength  false to not stop the build when Chromium's paths would be too long for Windows
+
+    The browser goes in .pw\<revision>, rather than in a folder named like the cache's chromium_headless_shell-<revision>, to leave as
+    much room as possible below the output folder on Windows machines where long paths aren't enabled
   -->
 
   <PropertyGroup>
     <PixataPlaywrightBundleBrowser Condition="'$(PixataPlaywrightBundleBrowser)' == ''">true</PixataPlaywrightBundleBrowser>
     <PixataPlaywrightAllLocales Condition="'$(PixataPlaywrightAllLocales)' == ''">false</PixataPlaywrightAllLocales>
+    <PixataPlaywrightCheckPathLength Condition="'$(PixataPlaywrightCheckPathLength)' == ''">true</PixataPlaywrightCheckPathLength>
     <PixataPlaywrightBrowserCache Condition="'$(PixataPlaywrightBrowserCache)' == ''">$(PLAYWRIGHT_BROWSERS_PATH)</PixataPlaywrightBrowserCache>
     <PixataPlaywrightBrowserCache Condition="'$(PixataPlaywrightBrowserCache)' == '' AND $([MSBuild]::IsOSPlatform('Windows'))">$(LOCALAPPDATA)\ms-playwright</PixataPlaywrightBrowserCache>
     <PixataPlaywrightBrowserCache Condition="'$(PixataPlaywrightBrowserCache)' == '' AND $([MSBuild]::IsOSPlatform('OSX'))">$(HOME)/Library/Caches/ms-playwright</PixataPlaywrightBrowserCache>
@@ -58,6 +63,8 @@
     <PropertyGroup>
       <_PixataPlaywrightBrowserFolderName>chromium_headless_shell-$(_PixataPlaywrightRevision)</_PixataPlaywrightBrowserFolderName>
       <_PixataPlaywrightBrowserFolder>$([MSBuild]::EnsureTrailingSlash('$(PixataPlaywrightBrowserCache)'))$(_PixataPlaywrightBrowserFolderName)</_PixataPlaywrightBrowserFolder>
+      <!-- Must match PlaywrightPdfConverter.BrowsersFolder -->
+      <_PixataPlaywrightBrowserLink>.pw\$(_PixataPlaywrightRevision)\</_PixataPlaywrightBrowserLink>
     </PropertyGroup>
 
     <!-- Playwright writes INSTALLATION_COMPLETE once a download has been unpacked, so a download that was interrupted is tried again. Not run in
@@ -74,7 +81,7 @@
       <_PixataPlaywrightBrowserFiles Remove="$(_PixataPlaywrightBrowserFolder)\**\locales\*.pak" Condition="'$(PixataPlaywrightAllLocales)' != 'true'" />
       <_PixataPlaywrightBrowserFiles Include="$(_PixataPlaywrightBrowserFolder)\**\locales\en-US.pak" Condition="'$(PixataPlaywrightAllLocales)' != 'true'" />
       <Content Include="@(_PixataPlaywrightBrowserFiles)">
-        <Link>.playwright-browsers\$(_PixataPlaywrightBrowserFolderName)\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        <Link>$(_PixataPlaywrightBrowserLink)%(RecursiveDir)%(Filename)%(Extension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         <PublishState>Included</PublishState>
@@ -82,6 +89,52 @@
         <Pack>false</Pack>
       </Content>
     </ItemGroup>
+
+    <PropertyGroup>
+      <!-- The same setting MSBuild itself reads to decide whether it can use long paths -->
+      <_PixataPlaywrightLongPathsEnabled Condition="$([MSBuild]::IsOSPlatform('Windows'))">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem', 'LongPathsEnabled', null, RegistryView.Registry64, RegistryView.Registry32))</_PixataPlaywrightLongPathsEnabled>
+      <_PixataPlaywrightCheckPathLength>false</_PixataPlaywrightCheckPathLength>
+      <_PixataPlaywrightCheckPathLength Condition="'$(PixataPlaywrightCheckPathLength)' == 'true' AND '$(DesignTimeBuild)' != 'true' AND $([MSBuild]::IsOSPlatform('Windows')) AND '$(_PixataPlaywrightLongPathsEnabled)' != '1'">true</_PixataPlaywrightCheckPathLength>
+      <_PixataPlaywrightOutputFolder>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutDir)'))</_PixataPlaywrightOutputFolder>
+    </PropertyGroup>
+
+    <!-- Without long paths, Windows (and so MSBuild's Copy task) can't use a path of 260 characters or more. Checked here, so that the build
+         stops with one error that says what to do, rather than an MSB3021 for every file that can't be copied -->
+    <ItemGroup Condition="'$(_PixataPlaywrightCheckPathLength)' == 'true'">
+      <_PixataPlaywrightOutputPath Include="@(_PixataPlaywrightBrowserFiles->'$(_PixataPlaywrightOutputFolder)$(_PixataPlaywrightBrowserLink)%(RecursiveDir)%(Filename)%(Extension)')" />
+      <_PixataPlaywrightTooLong Include="@(_PixataPlaywrightOutputPath)" Condition="$([System.String]::new('%(Identity)').Length) &gt;= 260" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(_PixataPlaywrightTooLong)' != ''">
+      <_PixataPlaywrightTooLongExample>@(_PixataPlaywrightTooLong)</_PixataPlaywrightTooLongExample>
+      <_PixataPlaywrightTooLongExample>$([System.Text.RegularExpressions.Regex]::Replace('$(_PixataPlaywrightTooLongExample)', ';.*$', ''))</_PixataPlaywrightTooLongExample>
+    </PropertyGroup>
+
+    <Error Condition="'@(_PixataPlaywrightTooLong)' != ''"
+           Text="Pixata.AspNetCore.Pdf.Playwright can't copy Chromium into the build output, as long paths aren't enabled on this machine, and some of its files would have paths of 260 characters or more, such as $(_PixataPlaywrightTooLongExample) ($(_PixataPlaywrightTooLongExample.Length) characters). To fix this, enable long paths in Windows (set LongPathsEnabled to 1 in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem, then restart Visual Studio), build in a folder with a shorter path, or set PixataPlaywrightBundleBrowser to false in the project file and use the Channel option. See https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright#long-paths-on-windows" />
+  </Target>
+
+  <!-- The same check for publishing, which copies the browser again, to the publish folder. A Visual Studio publish to a folder copies it
+       once more, from obj\...\PubTmp\Out (the PublishDir) to the folder in the profile (the PublishUrl) -->
+  <Target Name="PixataPlaywrightCheckPublishPathLength" AfterTargets="ComputeResolvedFilesToPublishList" Condition="'$(_PixataPlaywrightCheckPathLength)' == 'true'">
+    <PropertyGroup>
+      <_PixataPlaywrightPublishFolder>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_PixataPlaywrightPublishFolder>
+      <_PixataPlaywrightPublishUrlFolder Condition="'$(WebPublishMethod)' == 'FileSystem' AND '$(PublishUrl)' != ''">$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishUrl)'))</_PixataPlaywrightPublishUrlFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_PixataPlaywrightPublishPath Include="@(_PixataPlaywrightBrowserFiles->'$(_PixataPlaywrightPublishFolder)$(_PixataPlaywrightBrowserLink)%(RecursiveDir)%(Filename)%(Extension)')" />
+      <_PixataPlaywrightPublishPath Include="@(_PixataPlaywrightBrowserFiles->'$(_PixataPlaywrightPublishUrlFolder)$(_PixataPlaywrightBrowserLink)%(RecursiveDir)%(Filename)%(Extension)')" Condition="'$(_PixataPlaywrightPublishUrlFolder)' != ''" />
+      <_PixataPlaywrightPublishTooLong Include="@(_PixataPlaywrightPublishPath)" Condition="$([System.String]::new('%(Identity)').Length) &gt;= 260" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(_PixataPlaywrightPublishTooLong)' != ''">
+      <_PixataPlaywrightPublishTooLongExample>@(_PixataPlaywrightPublishTooLong)</_PixataPlaywrightPublishTooLongExample>
+      <_PixataPlaywrightPublishTooLongExample>$([System.Text.RegularExpressions.Regex]::Replace('$(_PixataPlaywrightPublishTooLongExample)', ';.*$', ''))</_PixataPlaywrightPublishTooLongExample>
+    </PropertyGroup>
+
+    <Error Condition="'@(_PixataPlaywrightPublishTooLong)' != ''"
+           Text="Pixata.AspNetCore.Pdf.Playwright can't copy Chromium into the publish folder, as long paths aren't enabled on this machine, and some of its files would have paths of 260 characters or more, such as $(_PixataPlaywrightPublishTooLongExample) ($(_PixataPlaywrightPublishTooLongExample.Length) characters). To fix this, enable long paths in Windows (set LongPathsEnabled to 1 in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem, then restart Visual Studio), publish to a folder with a shorter path, or set PixataPlaywrightBundleBrowser to false in the project file and use the Channel option. See https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright#long-paths-on-windows" />
   </Target>
 
 </Project>
