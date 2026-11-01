@@ -25,8 +25,8 @@ First thing you need to do is add your SMTP server and "From" details to your ap
     "Server": "your.smtp.server",
     "Port": 999,
     "SocketOptions": "StartTls", // Optional, see below
-    "UserName": "your.username",
-    "Password": "your.password",
+    "UserName": "your.username", // Optional, see below
+    "Password": "your.password", // Optional, see below
     "FromEmail": "jim@spriggs.com",
     "FromName": "Jim Spriggs",
     "ReplyTo": "jim@spriggs.com" // Optional
@@ -47,6 +47,26 @@ Unless your name is Jim Spriggs, you'll need to change these to you own name and
 If you need an unencrypted connection (a local test server such as Papercut or smtp4dev, for example), set `"SocketOptions": "None"` explicitly.
 
 Prior to version 3.0.0, the connection was controlled by a `UseSsl` flag, which MailKit maps to `SslOnConnect` (true) or `StartTlsWhenAvailable` (false). That meant `true` failed with a handshake error on port 587, and `false` only used STARTTLS if the server offered it. `UseSsl` still works, but is marked `[Obsolete]`, and is ignored if you set `SocketOptions`. If you read `UseSsl` in your own code, note that it is now a `bool?`, and is null unless you set it.
+
+### Servers that don't need a login
+
+>Note that this feature is only available from v3.2.0 onwards
+
+Some SMTP servers don't take a user name and password, such as an internal relay that accepts email from your app's IP address, or a local test server such as [smtp4dev](https://github.com/rnwood/smtp4dev) or [Papercut](https://github.com/ChangemakerStudios/Papercut-SMTP). For those, leave out `UserName` and `Password` (or set them to `""`)...
+
+```json
+  "Smtp": {
+    "Server": "localhost",
+    "Port": 25,
+    "SocketOptions": "None", // A local test server doesn't usually have TLS
+    "FromEmail": "jim@spriggs.com",
+    "FromName": "Jim Spriggs"
+  }
+```
+
+The service only logs in when `UserName` has a value *and* the server offers logins (it lists AUTH in its reply to EHLO). So if your users enter their own mail server's settings, a user name for a server that doesn't take one doesn't stop the email being sent. If the server does need a login and you didn't give one, it rejects the email, and the failure message is the server's reason, eg `"(SmtpCommandException) 5.7.1 Client was not authenticated"`.
+
+Note that a server that only offers logins over an encrypted connection won't offer them if `SocketOptions` is `None`, so the service won't log in. Use `StartTls` or `SslOnConnect` (the defaults) for those.
 
 Then add the following lines...
 

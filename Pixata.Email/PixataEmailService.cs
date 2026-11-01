@@ -55,7 +55,7 @@ namespace Pixata.Email {
           // Connects before the first email, and again if the server dropped the connection after a failed one
           if (!client.IsConnected) {
             await client.ConnectAsync(SmtpSettings.Server, SmtpSettings.Port, SmtpSettings.EffectiveSocketOptions());
-            await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
+            await Authenticate(client);
           }
           await client.SendAsync(CreateMailMessage(emailParameters));
           responses.Add(new ApiResponse<Yunit>(ApiResponseStates.Success));
@@ -79,7 +79,7 @@ namespace Pixata.Email {
       try {
         using SmtpClient client = new();
         await connectFunc(client);
-        await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
+        await Authenticate(client);
         await client.SendAsync(msg);
         await client.DisconnectAsync(true);
         return new ApiResponse<Yunit>(ApiResponseStates.Success);
@@ -88,6 +88,15 @@ namespace Pixata.Email {
         string message = includeExceptionType ? $"({ex.GetType().Name}) {ex.Message}" : ex.Message;
         return new ApiResponse<Yunit>(ApiResponseStates.Failure, Message: message);
       }
+    }
+
+    // Logs in, unless there's no user name to log in with, or the server doesn't take logins (such as an internal relay that allows the app's
+    // IP address, or a local test server such as smtp4dev or Papercut). MailKit would throw a NotSupportedException for the latter
+    private async Task Authenticate(SmtpClient client) {
+      if (string.IsNullOrWhiteSpace(SmtpSettings.UserName) || !client.Capabilities.HasFlag(SmtpCapabilities.Authentication)) {
+        return;
+      }
+      await client.AuthenticateAsync(SmtpSettings.UserName, SmtpSettings.Password);
     }
 
     private MimeMessage CreateMailMessage(EmailParameters parameters) {

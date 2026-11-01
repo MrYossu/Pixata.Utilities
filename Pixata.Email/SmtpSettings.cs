@@ -20,7 +20,15 @@ namespace Pixata.Email {
     [Obsolete("Use SocketOptions instead. UseSsl = true fails on port 587, and UseSsl = false only uses STARTTLS if the server offers it")]
     public bool? UseSsl { get; set; }
 
+    /// <summary>
+    /// The user name to log in to the SMTP server with. Leave this empty for a server that doesn't need a login, such as an internal relay
+    /// that allows the app's IP address, or a local test server. The service also doesn't log in if the server doesn't offer it
+    /// </summary>
     public string UserName { get; set; } = "";
+
+    /// <summary>
+    /// The password to log in to the SMTP server with. Ignored when <see cref="UserName"/> is empty
+    /// </summary>
     public string Password { get; set; } = "";
     public string FromEmail { get; set; } = "";
     public string FromName { get; set; } = "";
