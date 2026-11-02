@@ -8,8 +8,11 @@ on:
 
 jobs:  
   build_pixata: 
-    runs-on: windows-latest  
-    steps:  
+    runs-on: windows-latest
+    permissions:
+      id-token: write # lets NuGet/login swap GitHub's OIDC token for a temporary nuget.org API key (Trusted Publishing)
+      contents: write # the publish steps push a tag for each version they publish
+    steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
@@ -251,77 +254,84 @@ jobs:
 
 # ***************** PUBLISHING **************** #
 
+    # The key this returns lasts about an hour, so this stays just before the publish steps rather than at the start of the job
+    - name: NuGet login
+      id: nuget_login
+      uses: NuGet/login@v1
+      with:
+        user: MrYossu
+
     - name: Publish Pixata.Blazor
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
        PROJECT_FILE_PATH: Pixata.Blazor/Pixata.Blazor.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
 
     - name: Publish Pixata.Blazor.Grid.Excel
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.Blazor.Grid.Excel/Pixata.Blazor.Grid.Excel.csproj
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}}
 
     - name: Publish Pixata.Blazor.TelerikComponents
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
        PROJECT_FILE_PATH: Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
 
     - name: Publish Pixata.AspNetCore
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.AspNetCore/Pixata.AspNetCore.csproj
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}}
 
     - name: Publish Pixata.AspNetCore.Pdf.Telerik
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.AspNetCore.Pdf.Telerik/Pixata.AspNetCore.Pdf.Telerik.csproj
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}}
 
     - name: Publish Pixata.AspNetCore.Pdf.WkHtmlToPdf
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.AspNetCore.Pdf.WkHtmlToPdf/Pixata.AspNetCore.Pdf.WkHtmlToPdf.csproj
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}}
 
     - name: Publish Pixata.AspNetCore.Pdf.Playwright
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.AspNetCore.Pdf.Playwright/Pixata.AspNetCore.Pdf.Playwright.csproj
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}}
 
     - name: Publish Pixata.AspNetCore.Telerik
       uses: alirezanet/publish-nuget@v3.0.4
       with:
        PROJECT_FILE_PATH: Pixata.AspNetCore.Telerik/Pixata.AspNetCore.Telerik.csproj
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}}
 
     - name: Publish Pixata.Extensions
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
         PROJECT_FILE_PATH: Pixata.Extensions/Pixata.Extensions.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+        NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
 
     - name: Publish Pixata.Email
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
        PROJECT_FILE_PATH: Pixata.Email/Pixata.Email.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
 
     - name: Publish Pixata.SimilarityChooser
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
         PROJECT_FILE_PATH: Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+        NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
 
     - name: Publish Pixata.Google
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
         PROJECT_FILE_PATH: Pixata.Google/Pixata.Google.csproj  
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+        NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
 
   # Publish Pixata.Blazor.Sample
     - name: Rename _app_offline.htm to app_offline.htm to stop the site
