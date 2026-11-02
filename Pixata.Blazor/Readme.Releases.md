@@ -2,6 +2,9 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.22.0** lets `PixataCheckBox` be posted with a form. Give it a `name` and it renders a native `<input type="checkbox" value="true">` in place of the button, styled the same way, so it works in statically rendered pages such as the Identity log in page. See [posting with a form](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.CheckBox.md#posting-with-a-form) (#124)
+
+
 >**Version 5.21.0** makes `PixataGrid` say why it has no rows. When it isn't filtered it shows "No data available", and when its column filters or search text leave nothing it shows "Sorry, nothing matched your filters. Please widen your search criteria". Both come from `PixataGridMessages` (`NoRecords` and the new `NoMatchingRecords`), so they can be changed for every grid or for one, and the new `NoMatchingDataTemplate` sits alongside `NoDataTemplate` for the filtered case. The new `IsFiltered` property says whether the grid is filtered. See [when there are no rows](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#when-there-are-no-rows) (#133)
 >- **Behaviour change:** the unfiltered message was "No records available.", and is now "No data available". Set `NoRecords` in `PixataGridMessages` to keep the old text
 
