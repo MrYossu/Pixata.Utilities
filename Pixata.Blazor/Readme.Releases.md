@@ -2,6 +2,9 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.21.0** makes `PixataGrid` say why it has no rows. When it isn't filtered it shows "No data available", and when its column filters or search text leave nothing it shows "Sorry, nothing matched your filters. Please widen your search criteria". Both come from `PixataGridMessages` (`NoRecords` and the new `NoMatchingRecords`), so they can be changed for every grid or for one, and the new `NoMatchingDataTemplate` sits alongside `NoDataTemplate` for the filtered case. The new `IsFiltered` property says whether the grid is filtered. See [when there are no rows](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#when-there-are-no-rows) (#133)
+>- **Behaviour change:** the unfiltered message was "No records available.", and is now "No data available". Set `NoRecords` in `PixataGridMessages` to keep the old text
+
 >**Version 5.20.0** adds `PixataCheckBox`, a checkbox for `bool` and `bool?` values with the same parameters as Telerik's CheckBox, including `Indeterminate`, `OnChange`, `Size` and `Rounded`. It works on its own or inside an `EditForm`, and has the same focus ring as the other inputs. See the [checkbox documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.CheckBox.md) (#124)
 >- `FormRowCheckbox` now uses a `PixataCheckBox` in place of a plain `<input type="checkbox">`
 >- **Behaviour change:** the checkboxes in the grid and tree view are drawn by the same styles, so they now take their colours from the new `--pixata-blazor-checkbox-*` variables rather than the `--pixata-grid-*` ones. Their border is a little darker (the inputs' border colour), they show the inputs' focus ring, and the dash in an indeterminate box follows the primary colour
