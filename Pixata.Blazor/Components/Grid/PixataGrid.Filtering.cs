@@ -289,6 +289,12 @@ public partial class PixataGrid<TItem> {
   private List<GridCompositeFilterDescriptor> CurrentFilters =>
     [.. _filters.Values];
 
+  /// <summary>
+  /// Whether any column filter or search text is narrowing down the rows
+  /// </summary>
+  public bool IsFiltered =>
+    _filters.Count > 0 || _search is not null;
+
   // ---------- The filter menu ----------
 
   private string MenuAnchorId(PixataGridColumn<TItem> column) =>

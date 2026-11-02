@@ -73,10 +73,18 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   public PixataGridAdaptiveMode AdaptiveMode { get; set; } = PixataGridAdaptiveMode.None;
 
   /// <summary>
-  /// What to show when there are no items. Defaults to "No records available."
+  /// What to show when there are no items and the grid isn't filtered. Defaults to the messages'
+  /// <see cref="PixataGridMessages.NoRecords"/>, "No data available"
   /// </summary>
   [Parameter]
   public RenderFragment? NoDataTemplate { get; set; }
+
+  /// <summary>
+  /// What to show when the grid's column filters or search text leave no items. Defaults to the messages'
+  /// <see cref="PixataGridMessages.NoMatchingRecords"/>, "Sorry, nothing matched your filters. Please widen your search criteria"
+  /// </summary>
+  [Parameter]
+  public RenderFragment? NoMatchingDataTemplate { get; set; }
 
   /// <summary>
   /// The content of each row, in place of the cells the grid would render. The context is the row's item, and the template

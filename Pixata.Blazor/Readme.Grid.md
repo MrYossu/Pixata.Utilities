@@ -46,7 +46,8 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Width` | `string` | A CSS width. If not set, the grid fills its container |
 | `Class` | `string` | A CSS class for the grid's outer element |
 | `Size` | `PixataGridSize` | `Medium` (the default) or `Small`, which sets the padding around the cells |
-| `NoDataTemplate` | `RenderFragment` | What to show when there are no items. Defaults to "No records available." |
+| `NoDataTemplate` | `RenderFragment` | What to show when there are no items and the grid isn't filtered. Defaults to "No data available". See [when there are no rows](#when-there-are-no-rows) |
+| `NoMatchingDataTemplate` | `RenderFragment` | What to show when the filters or search text leave no items. Defaults to "Sorry, nothing matched your filters. Please widen your search criteria". See [when there are no rows](#when-there-are-no-rows) |
 | `GridSettings` | `RenderFragment` | Settings for parts of the grid, such as the [pager](#paging) |
 | `Pageable` | `bool` | Splits the rows into pages, with a pager. See [paging](#paging) |
 | `PageSize` | `int` | The number of rows on a page. Defaults to 10. Can be two-way bound |
@@ -234,6 +235,39 @@ The editor and the operators depend on the field's type...
 Nullable numbers, dates and enums also get Is null and Is not null. Columns of other types can't be filtered unless you give them a template.
 
 Text comparisons ignore case, and filtering (or searching) goes back to the first page.
+
+### When there are no rows
+
+When the grid has no rows to show, what it says depends on whether it's filtered (by a column filter or the [search box](#search-box)). If it isn't, there just isn't any data, and it says "No data available". If it is, it says "Sorry, nothing matched your filters. Please widen your search criteria". The grid's `IsFiltered` property tells you which it is.
+
+Both are easy to change. For every grid, register a `PixataGridMessages` with your text (see [translation](#translation))...
+
+```csharp
+builder.Services.AddSingleton(new PixataGridMessages {
+  NoRecords = "There are no orders yet",
+  NoMatchingRecords = "No orders matched. Try clearing some filters"
+});
+```
+
+...or for one grid, pass one to its `Messages` parameter...
+
+```razor
+<PixataGrid Data="_orders" Messages="@(new PixataGridMessages { NoRecords = "There are no orders yet" })">...</PixataGrid>
+```
+
+For more than text, use `NoDataTemplate` (no data at all) and `NoMatchingDataTemplate` (nothing matched the filters)...
+
+```razor
+<PixataGrid Data="_orders" FilterMode="PixataGridFilterMode.FilterRow">
+  <NoDataTemplate>
+    No orders yet. <a href="/orders/new">Add the first one</a>
+  </NoDataTemplate>
+  <NoMatchingDataTemplate>
+    Nothing matched. <button @onclick="ClearFilters">Clear the filters</button>
+  </NoMatchingDataTemplate>
+  <GridColumns>...</GridColumns>
+</PixataGrid>
+```
 
 ### Typed columns
 

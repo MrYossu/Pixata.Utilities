@@ -17,7 +17,16 @@ public class PixataGridMessages {
 
   // ---------- Rows ----------
 
-  public string NoRecords { get; init; } = "No records available.";
+  /// <summary>
+  /// Shown when the grid has no rows and isn't filtered, so there just isn't any data
+  /// </summary>
+  public string NoRecords { get; init; } = "No data available";
+
+  /// <summary>
+  /// Shown when the grid has no rows because of its column filters or search text
+  /// </summary>
+  public string NoMatchingRecords { get; init; } = "Sorry, nothing matched your filters. Please widen your search criteria";
+
   public string ReadFailed { get; init; } = "The data couldn't be loaded";
   public string Loading { get; init; } = "Loading";
   public string Toolbar { get; init; } = "Grid toolbar";

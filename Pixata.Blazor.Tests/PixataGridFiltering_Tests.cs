@@ -85,6 +85,61 @@ public class PixataGridFiltering_Tests {
   }
 
   [TestMethod]
+  public void NoRows_Unfiltered_ShowsNoData() {
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, [])
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
+      .Add(g => g.GridColumns, b => Columns(b)));
+
+    Assert.IsFalse(grid.Instance.IsFiltered);
+    Assert.AreEqual("No data available", grid.Find(".pixata-blazor-grid-norecords td").TextContent.Trim());
+  }
+
+  [TestMethod]
+  public void NoRows_Filtered_ShowsNothingMatched() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.FilterRow);
+
+    FilterCell(grid, 0).QuerySelector("input")!.Input("Zed");
+
+    grid.WaitForAssertion(() => Assert.AreEqual("Sorry, nothing matched your filters. Please widen your search criteria",
+      grid.Find(".pixata-blazor-grid-norecords td").TextContent.Trim()));
+    Assert.IsTrue(grid.Instance.IsFiltered);
+  }
+
+  [TestMethod]
+  public void NoRows_Messages_AreCustomisable() {
+    PixataGridMessages messages = new() { NoRecords = "Empty", NoMatchingRecords = "No matches" };
+    IRenderedComponent<PixataGrid<Person>> empty = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, [])
+      .Add(g => g.Messages, messages)
+      .Add(g => g.GridColumns, b => Columns(b)));
+    IRenderedComponent<PixataGrid<Person>> filtered = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People())
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
+      .Add(g => g.Messages, messages)
+      .Add(g => g.GridColumns, b => Columns(b)));
+
+    FilterCell(filtered, 0).QuerySelector("input")!.Input("Zed");
+
+    Assert.AreEqual("Empty", empty.Find(".pixata-blazor-grid-norecords td").TextContent.Trim());
+    filtered.WaitForAssertion(() => Assert.AreEqual("No matches", filtered.Find(".pixata-blazor-grid-norecords td").TextContent.Trim()));
+  }
+
+  [TestMethod]
+  public void NoRows_Filtered_UsesNoMatchingDataTemplate() {
+    IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People())
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterRow)
+      .Add(g => g.NoDataTemplate, b => b.AddContent(0, "Nobody here"))
+      .Add(g => g.NoMatchingDataTemplate, b => b.AddContent(0, "Nobody matched"))
+      .Add(g => g.GridColumns, b => Columns(b)));
+
+    FilterCell(grid, 0).QuerySelector("input")!.Input("Zed");
+
+    grid.WaitForAssertion(() => Assert.AreEqual("Nobody matched", grid.Find(".pixata-blazor-grid-norecords td").TextContent.Trim()));
+  }
+
+  [TestMethod]
   public void FilterRow_TextFilters_AfterAShortDelay() {
     IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.FilterRow);
 

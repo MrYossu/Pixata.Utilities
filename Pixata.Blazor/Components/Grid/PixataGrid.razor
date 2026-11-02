@@ -103,7 +103,13 @@
             @if (_readError is null && _items.Count == 0 && !(_editing && _isNew && EditMode is PixataGridEditMode.Inline or PixataGridEditMode.InCell)) {
               <tr class="pixata-blazor-grid-norecords">
                 <td class="pixata-blazor-grid-td" colspan="@span">
-                  @if (NoDataTemplate is null) {
+                  @if (IsFiltered) {
+                    @if (NoMatchingDataTemplate is null) {
+                      @Text.NoMatchingRecords
+                    } else {
+                      @NoMatchingDataTemplate
+                    }
+                  } else if (NoDataTemplate is null) {
                     @Text.NoRecords
                   } else {
                     @NoDataTemplate

@@ -203,7 +203,7 @@ public class PixataGrid_Tests {
       .Add(g => g.Data, [])
       .Add(g => g.NoDataTemplate, b => b.AddContent(0, "Nobody here")));
 
-    Assert.AreEqual("No records available.", plain.Find(".pixata-blazor-grid-norecords td").TextContent.Trim());
+    Assert.AreEqual("No data available", plain.Find(".pixata-blazor-grid-norecords td").TextContent.Trim());
     Assert.AreEqual("Nobody here", templated.Find(".pixata-blazor-grid-norecords td").TextContent.Trim());
   }
 
