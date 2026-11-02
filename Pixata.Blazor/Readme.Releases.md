@@ -2,6 +2,10 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.20.0** adds `PixataCheckBox`, a checkbox for `bool` and `bool?` values with the same parameters as Telerik's CheckBox, including `Indeterminate`, `OnChange`, `Size` and `Rounded`. It works on its own or inside an `EditForm`, and has the same focus ring as the other inputs. See the [checkbox documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.CheckBox.md) (#124)
+>- `FormRowCheckbox` now uses a `PixataCheckBox` in place of a plain `<input type="checkbox">`
+>- **Behaviour change:** the checkboxes in the grid and tree view are drawn by the same styles, so they now take their colours from the new `--pixata-blazor-checkbox-*` variables rather than the `--pixata-grid-*` ones. Their border is a little darker (the inputs' border colour), they show the inputs' focus ring, and the dash in an indeterminate box follows the primary colour
+
 >**Version 5.19.0** adds three components, an option for the date picker, and a new default colour scheme...
 >- **Behaviour change:** the default colours are now those of Bootstrap 5.3's default theme, in place of the bright orange (and the other loud colours) the components had before. The primary colour is Bootstrap's blue (`#0d6efd`), the theme colours, chart series and notification icons use Bootstrap's palette, and focus rings are blue. The grid's and date pickers' accent colours now follow `--pixata-blazor-primary`, so setting that on `:root` changes them too. To get the old look back, set `--pixata-blazor-primary` to `#ff6358` (and `--pixata-blazor-primary-hover` to `#eb5b51`) on `:root`. See [styling](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Styling.md) (#117)
 >- `PixataTextBox`, a text box with Telerik's parameter names, with a password mode (and an optional show/hide button), a clear button, prefix and suffix templates and an optional debounce. See the [text box documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TextBox.md) (#121)
