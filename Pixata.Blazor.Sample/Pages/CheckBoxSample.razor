@@ -91,7 +91,28 @@
   </ChildContent>
 </ComponentSample>
 
+<ComponentSample Title="Posted with a form">
+  <Description>
+    <p>Give the checkbox a <code>name</code> and it is a native checkbox, posted with the form as <code>true</code> when ticked (and not at all when not), as <code>InputCheckbox</code> is. This lets it go in statically rendered pages, such as the Identity log in page. This plain HTML form is sent back to this page, which shows what was posted.</p>
+  </Description>
+  <ChildContent>
+    <form method="get" action="CheckBoxSample">
+      <label><PixataCheckBox @bind-Value="_rememberMe" name="RememberMe" /> Remember me</label>
+      <button type="submit" class="btn btn-primary btn-sm ms-3">Post</button>
+      <span class="ms-2">Posted: @(RememberMe ?? "nothing")</span>
+    </form>
+  </ChildContent>
+</ComponentSample>
+
 @code {
+  [SupplyParameterFromQuery]
+  public string? RememberMe { get; set; }
+
+  private bool _rememberMe;
+
+  protected override void OnParametersSet() =>
+    _rememberMe = RememberMe == "true";
+
   private bool _canLogIn = true;
   private string _log = "";
   private bool _globalAdmin;

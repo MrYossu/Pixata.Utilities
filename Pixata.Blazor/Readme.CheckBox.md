@@ -37,7 +37,7 @@ The checkbox can go inside its label, as above, or a `<label for="...">` can poi
 
 If there is no visible label, give it an `AriaLabel` instead.
 
-The checkbox is a `<button>` with `role="checkbox"` and `aria-checked`, rather than a native `<input type="checkbox">`, so it can show the indeterminate state without any script. Screen readers announce it as a checkbox, and Space (or Enter) toggles it.
+The checkbox is a `<button>` with `role="checkbox"` and `aria-checked`, rather than a native `<input type="checkbox">`, so it can show the indeterminate state without any script. Screen readers announce it as a checkbox, and Space (or Enter) toggles it. If it has a `name`, it is a native checkbox instead (see [Posting with a form](#posting-with-a-form)).
 
 ## Three states
 
@@ -64,13 +64,14 @@ Using any type other than `bool` or `bool?` throws an `InvalidOperationException
 | `Rounded` | `string` | `"md"` | The roundness of the corners: `"none"`, `"sm"`, `"md"`, `"lg"` or `"full"` (a circle). The values are in `PixataThemeConstants.Rounded` |
 | `Enabled` | `bool` | `true` | When false, the checkbox is greyed out, can't be focused and can't be changed |
 | `Id` | `string` | | The `id` of the button, so a `<label for="...">` can point at it |
+| `Name` | `string` | | The form field name. When set, the checkbox is a native `<input type="checkbox" value="true">`, so it is posted with the form. See [Posting with a form](#posting-with-a-form) |
 | `TabIndex` | `int?` | | The `tabindex` of the button |
 | `Class` | `string` | | Extra CSS classes for the button |
 | `AriaLabel` | `string` | | The `aria-label`, for when there is no visible label |
 | `AriaLabelledBy` | `string` | | The `aria-labelledby` |
 | `AriaDescribedBy` | `string` | | The `aria-describedby` |
 
-Any other attributes you add (`title`, `data-*` and so on) are rendered on the button.
+Any other attributes you add (`title`, `data-*` and so on) are rendered on the button (or the native checkbox, if it has a `name`).
 
 ## Events
 
@@ -107,6 +108,22 @@ Bind it with `@bind-Value` and it takes part in validation like any other input.
 ```
 
 `FormRowCheckbox` (see [Forms](Readme.Forms.md)) uses a `PixataCheckBox` too.
+
+## Posting with a form
+
+Statically rendered pages, such as the Identity pages (log in, reset password and so on), are plain HTML forms posted back to the server, so their values have to come from real form fields with a `name`, and there is no circuit to handle the button's clicks. Give the checkbox a `name` and it renders a native `<input type="checkbox" value="true">` instead of the button, styled the same way. It is posted as `true` when ticked and not at all when not, as `InputCheckbox` is, so it can replace the "Remember me" box on the log in page...
+
+```xml
+<EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+  ...
+  <label><PixataCheckBox @bind-Value="Input.RememberMe" name="Input.RememberMe" /> Remember me</label>
+  ...
+</EditForm>
+```
+
+Unlike `InputCheckbox`, the name isn't worked out from `@bind-Value`, so you have to give it yourself. The checkbox still works in an interactive page, where it raises `ValueChanged` and `OnChange` as usual.
+
+A native checkbox can only show the indeterminate state (a `null` `bool?`, or `Indeterminate`) by its look, as screen readers can't be told about it without script. An indeterminate checkbox isn't ticked, so it isn't posted. As with any native checkbox, a disabled one isn't posted either, and on touch screens its tappable area is its own size rather than `--pixata-blazor-touch-target`.
 
 ## Styling
 

@@ -180,4 +180,83 @@ public class CheckBox_Tests {
     button.Click();
     Assert.AreEqual(true, checkedValue);
   }
+
+  [TestMethod]
+  public void Name_RendersANativeCheckBoxThatIsPosted() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataCheckBox<bool>> cut = context.Render<PixataCheckBox<bool>>(p => p
+      .AddUnmatched("name", "Input.RememberMe")
+      .Add(c => c.Value, true)
+      .Add(c => c.Id, "remember-me")
+      .Add(c => c.Size, PixataThemeConstants.Size.Large));
+    Assert.AreEqual(0, cut.FindAll("button").Count);
+    IElement input = cut.Find("input");
+    Assert.AreEqual("checkbox", input.GetAttribute("type"));
+    Assert.AreEqual("Input.RememberMe", input.GetAttribute("name"));
+    Assert.AreEqual("true", input.GetAttribute("value"));
+    Assert.AreEqual("remember-me", input.GetAttribute("id"));
+    Assert.IsTrue(input.HasAttribute("checked"));
+    Assert.IsTrue(input.ClassList.Contains("pixata-blazor-checkbox"));
+    Assert.IsTrue(input.ClassList.Contains("pixata-blazor-checkbox-lg"));
+  }
+
+  [TestMethod]
+  public void Name_UncheckedIsNotChecked() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataCheckBox<bool>> cut = context.Render<PixataCheckBox<bool>>(p => p
+      .Add(c => c.Name, "Accepted")
+      .Add(c => c.Value, false));
+    Assert.IsFalse(cut.Find("input").HasAttribute("checked"));
+  }
+
+  [TestMethod]
+  public void Name_ChangeTogglesTheValueAndRaisesOnChange() {
+    using BunitContext context = PixataTestContext.Create();
+    List<string> events = [];
+    IRenderedComponent<PixataCheckBox<bool>> cut = context.Render<PixataCheckBox<bool>>(p => p
+      .Add(c => c.Name, "Accepted")
+      .Add(c => c.Value, false)
+      .Add(c => c.ValueChanged, (bool v) => events.Add($"ValueChanged {v}"))
+      .Add(c => c.OnChange, (object v) => events.Add($"OnChange {v}")));
+    cut.Find("input").Change(true);
+    CollectionAssert.AreEqual(new[] { "ValueChanged True", "OnChange True" }, events);
+    Assert.IsTrue(cut.Find("input").HasAttribute("checked"));
+  }
+
+  [TestMethod]
+  public void Name_NullableNullIsIndeterminateAndNotChecked() {
+    using BunitContext context = PixataTestContext.Create();
+    List<bool?> values = [];
+    IRenderedComponent<PixataCheckBox<bool?>> cut = context.Render<PixataCheckBox<bool?>>(p => p
+      .Add(c => c.Name, "Subscribed")
+      .Add(c => c.Value, null)
+      .Add(c => c.ValueChanged, (bool? v) => values.Add(v)));
+    IElement input = cut.Find("input");
+    Assert.IsTrue(input.ClassList.Contains("pixata-blazor-checkbox-indeterminate"));
+    Assert.IsFalse(input.HasAttribute("checked"));
+    input.Change(true);
+    CollectionAssert.AreEqual(new bool?[] { true }, values);
+    Assert.IsFalse(cut.Find("input").ClassList.Contains("pixata-blazor-checkbox-indeterminate"));
+  }
+
+  [TestMethod]
+  public async Task Name_InsideAnEditForm_ShowsTheInvalidState() {
+    using BunitContext context = PixataTestContext.Create();
+    Model model = new();
+    EditContext editContext = new(model);
+    ValidationMessageStore messages = new(editContext);
+    IRenderedComponent<EditForm> cut = context.Render<EditForm>(p => p
+      .Add(f => f.EditContext, editContext)
+      .Add(f => f.ChildContent, (EditContext _) => builder => {
+        builder.OpenComponent<PixataCheckBox<bool>>(0);
+        builder.AddAttribute(1, "Name", "Accepted");
+        builder.AddAttribute(2, "Value", model.Accepted);
+        builder.AddAttribute(3, "ValueExpression", (System.Linq.Expressions.Expression<Func<bool>>)(() => model.Accepted));
+        builder.CloseComponent();
+      }));
+    messages.Add(() => model.Accepted, "You must agree");
+    await cut.InvokeAsync(editContext.NotifyValidationStateChanged);
+    Assert.IsTrue(cut.Find("input").ClassList.Contains("pixata-blazor-invalid"));
+    Assert.AreEqual("true", cut.Find("input").GetAttribute("aria-invalid"));
+  }
 }

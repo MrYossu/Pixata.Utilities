@@ -33,6 +33,14 @@ public partial class PixataCheckBox<TValue> {
   [Parameter]
   public string? Rounded { get; set; }
 
+  /// <summary>
+  /// The form field name. When set, the checkbox is a native <c>&lt;input type="checkbox" value="true"&gt;</c> rather than a
+  /// button, so it is posted with the form (as <c>true</c> when ticked, and not at all when not), and can be toggled in a
+  /// statically rendered page. Matches <c>name="..."</c> in markup
+  /// </summary>
+  [Parameter]
+  public string? Name { get; set; }
+
   [Parameter]
   public int? TabIndex { get; set; }
 
@@ -50,6 +58,9 @@ public partial class PixataCheckBox<TValue> {
   /// </summary>
   [Parameter]
   public EventCallback<object> OnChange { get; set; }
+
+  private bool IsNative =>
+    !string.IsNullOrWhiteSpace(Name);
 
   private bool IsChecked =>
     Value is true;

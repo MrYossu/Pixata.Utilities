@@ -7764,6 +7764,16 @@
   background-size: 50% 2px;
 }
 
+/* A named PixataCheckBox (a native checkbox) that was indeterminate and has been ticked in a statically rendered page, where
+   the server can't take the -indeterminate class away. It is never rendered both checked and indeterminate, so this only
+   happens after the user's click */
+input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
+  border-color: var(--pixata-blazor-checkbox-checked-border-color);
+  background-color: var(--pixata-blazor-checkbox-checked-bg);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M3,8 l3,3 l7-7'/%3e%3c/svg%3e");
+  background-size: auto;
+}
+
 .pixata-blazor-checkbox.pixata-blazor-invalid {
   border-color: var(--pixata-blazor-error);
 }

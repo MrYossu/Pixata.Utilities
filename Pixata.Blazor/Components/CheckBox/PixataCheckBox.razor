@@ -3,19 +3,38 @@
 @inherits PixataInputBase<TValue>
 
 @*
-  A checkbox for a bool or bool? value. It is a button with role="checkbox" rather than a native checkbox, so it can show the
-  indeterminate state without any script. Space and Enter toggle it, and it can go inside a label or be pointed at by one
+  A checkbox for a bool or bool? value. It is normally a button with role="checkbox" rather than a native checkbox, so it can
+  show the indeterminate state without any script. Space and Enter toggle it, and it can go inside a label or be pointed at by one.
+  When it has a Name, it is a native <input type="checkbox" value="true"> instead, so it is posted with the form and works in
+  statically rendered pages (eg the Identity log in page), where there is no circuit to handle the button's clicks
 *@
-<button type="button"
-        role="checkbox"
-        id="@Id"
-        class="@CssClass"
-        tabindex="@TabIndex"
-        disabled="@(!Enabled)"
-        aria-checked="@(IsIndeterminate ? "mixed" : IsChecked ? "true" : "false")"
-        aria-invalid="@(IsInvalid ? "true" : null)"
-        aria-label="@AriaLabel"
-        aria-labelledby="@AriaLabelledBy"
-        aria-describedby="@AriaDescribedBy"
-        @onclick="Toggle"
-        @attributes="AdditionalAttributes"></button>
+@if (IsNative) {
+  <input type="checkbox"
+         name="@Name"
+         value="true"
+         id="@Id"
+         class="@CssClass"
+         tabindex="@TabIndex"
+         disabled="@(!Enabled)"
+         checked="@(IsChecked && !IsIndeterminate)"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         aria-label="@AriaLabel"
+         aria-labelledby="@AriaLabelledBy"
+         aria-describedby="@AriaDescribedBy"
+         @onchange="Toggle"
+         @attributes="AdditionalAttributes" />
+} else {
+  <button type="button"
+          role="checkbox"
+          id="@Id"
+          class="@CssClass"
+          tabindex="@TabIndex"
+          disabled="@(!Enabled)"
+          aria-checked="@(IsIndeterminate ? "mixed" : IsChecked ? "true" : "false")"
+          aria-invalid="@(IsInvalid ? "true" : null)"
+          aria-label="@AriaLabel"
+          aria-labelledby="@AriaLabelledBy"
+          aria-describedby="@AriaDescribedBy"
+          @onclick="Toggle"
+          @attributes="AdditionalAttributes"></button>
+}
