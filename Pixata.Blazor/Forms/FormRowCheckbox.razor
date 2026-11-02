@@ -1,4 +1,4 @@
-﻿
+@using Pixata.Blazor.Components
 <div class="pixata-form-group pixata-row">
   <label for="@PropertyName" class="pixata-col-2 pixata-col-form-label">@(Caption ?? PropertyName)</label>
   <div class="pixata-col-10 pixata-input-group">
@@ -7,11 +7,7 @@
         <i class="@Icon"></i>
       </span>
     </div>
-    @if (Checked) {
-      <input type="checkbox" class="pixata-form-control pixata-col-1 @Class" checked="checked" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
-    } else {
-      <input type="checkbox" class="pixata-form-control pixata-col-1 @Class" id="@PropertyName" name="@PropertyName" @onchange="@OnChanged" />
-    }
+    <PixataCheckBox TValue="bool" Id="@PropertyName" Value="@Checked" ValueChanged="@OnChanged" Class="@Class" />
   </div>
 </div>
 
@@ -38,7 +34,7 @@
   [Parameter]
   public string? Class { get; set; }
 
-  private async Task OnChanged(ChangeEventArgs cea) =>
-  await CheckedChanged.InvokeAsync(((bool?)cea.Value) ?? false);
+  private async Task OnChanged(bool value) =>
+    await CheckedChanged.InvokeAsync(value);
 
 }

@@ -1,0 +1,120 @@
+@page "/CheckBoxSample"
+@using Pixata.Blazor.Sample.Models
+
+<SitePageTitle>Checkbox</SitePageTitle>
+
+<h3>Checkbox</h3>
+
+<p><code>PixataCheckBox</code> is a checkbox for <code>bool</code> and <code>bool?</code> values, with the same parameters as Telerik's CheckBox. Tab to a checkbox and press Space to toggle it.</p>
+
+<ComponentSample Title="Basic use">
+  <Description>
+    <p>Two-way binding with <code>@@bind-Value</code>, and the <code>OnChange</code> event, which is raised after the value changes. The checkbox is inside its <code>label</code>, so clicking the text toggles it too.</p>
+  </Description>
+  <ChildContent>
+    <label><PixataCheckBox @bind-Value="_canLogIn" OnChange="@((object v) => CanLogInChanged((bool)v))" /> Can log in?</label>
+    <p class="mt-2">Value: <strong>@_canLogIn</strong><br />@_log</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="A set of options">
+  <Description>
+    <p>A row of checkboxes reads as a set of options to pick from, where switches would look like settings. Each <code>label</code> points at its checkbox's <code>Id</code>.</p>
+  </Description>
+  <ChildContent>
+    <div class="d-flex flex-wrap gap-3">
+      <span><PixataCheckBox Id="role-global" @bind-Value="_globalAdmin" /> <label for="role-global">Global admin</label></span>
+      <span><PixataCheckBox Id="role-local" @bind-Value="_localAdmin" /> <label for="role-local">Local admin</label></span>
+      <span><PixataCheckBox Id="role-family" @bind-Value="_family" /> <label for="role-family">Family</label></span>
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Indeterminate">
+  <Description>
+    <p>A <code>bool?</code> that is null is shown with a dash, and so is any checkbox whose <code>Indeterminate</code> is true. Clicking an indeterminate checkbox ticks it, and clears <code>Indeterminate</code> (bind it with <code>@@bind-Indeterminate</code>). Here, the first box is ticked when all the others are, and shows a dash when only some are.</p>
+  </Description>
+  <ChildContent>
+    <div>
+      <label><PixataCheckBox Value="@AllToppings" Indeterminate="@SomeToppings" ValueChanged="@((bool v) => SetAllToppings(v))" /> All toppings</label>
+    </div>
+    @foreach (string topping in _toppings.Keys) {
+      <div class="ms-4">
+        <label><PixataCheckBox @bind-Value="_toppings[topping]" /> @topping</label>
+      </div>
+    }
+    <div class="mt-3">
+      <label><PixataCheckBox @bind-Value="_nullable" /> A <code>bool?</code></label>
+      <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => _nullable = null">Set to null</button>
+      <span class="ms-2">Value: <strong>@(_nullable?.ToString() ?? "null")</strong></span>
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Sizes and roundness">
+  <Description>
+    <p><code>Size</code> is <code>sm</code>, <code>md</code> (the default) or <code>lg</code>, and <code>Rounded</code> is <code>none</code>, <code>sm</code>, <code>md</code> (the default), <code>lg</code> or <code>full</code>.</p>
+  </Description>
+  <ChildContent>
+    <PixataCheckBox @bind-Value="_sizes" Size="@PixataThemeConstants.Size.Small" AriaLabel="Small" />
+    <PixataCheckBox @bind-Value="_sizes" Size="@PixataThemeConstants.Size.Medium" AriaLabel="Medium" Class="ms-3" />
+    <PixataCheckBox @bind-Value="_sizes" Size="@PixataThemeConstants.Size.Large" AriaLabel="Large" Class="ms-3" />
+    <PixataCheckBox @bind-Value="_sizes" Size="@PixataThemeConstants.Size.Large" Rounded="@PixataThemeConstants.Rounded.None" AriaLabel="Square" Class="ms-5" />
+    <PixataCheckBox @bind-Value="_sizes" Size="@PixataThemeConstants.Size.Large" Rounded="@PixataThemeConstants.Rounded.Full" AriaLabel="Round" Class="ms-3" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Disabled">
+  <Description>
+    <p>A disabled checkbox is greyed out and can't be focused or changed.</p>
+  </Description>
+  <ChildContent>
+    <PixataCheckBox Value="true" Enabled="false" AriaLabel="Disabled and ticked" />
+    <PixataCheckBox Value="false" Enabled="false" AriaLabel="Disabled and not ticked" Class="ms-3" />
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Inside an EditForm">
+  <Description>
+    <p>The checkbox takes part in validation. Click Submit without ticking the box to see the invalid state.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_model" OnValidSubmit="@(() => _submitted = "Submitted")">
+      <DataAnnotationsValidator />
+      <div>
+        <label><PixataCheckBox @bind-Value="_model.AcceptTerms" /> I agree to the terms</label>
+      </div>
+      <ValidationMessage For="() => _model.AcceptTerms" />
+      <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+      <span class="ms-2">@_submitted</span>
+    </EditForm>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private bool _canLogIn = true;
+  private string _log = "";
+  private bool _globalAdmin;
+  private bool _localAdmin = true;
+  private bool _family;
+  private readonly Dictionary<string, bool> _toppings = new() { ["Cheese"] = true, ["Olives"] = false, ["Mushrooms"] = false };
+  private bool? _nullable;
+  private bool _sizes = true;
+  private readonly SwitchSampleModel _model = new();
+  private string _submitted = "";
+
+  private bool AllToppings =>
+    _toppings.Values.All(v => v);
+
+  private bool SomeToppings =>
+    !AllToppings && _toppings.Values.Any(v => v);
+
+  private void CanLogInChanged(bool value) =>
+    _log = $"OnChange: {value}";
+
+  private void SetAllToppings(bool value) {
+    foreach (string topping in _toppings.Keys.ToList()) {
+      _toppings[topping] = value;
+    }
+  }
+}

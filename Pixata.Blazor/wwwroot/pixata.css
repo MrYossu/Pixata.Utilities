@@ -1830,30 +1830,7 @@
   user-select: none;
 }
 
-/* A checkbox drawn like Telerik's */
-.pixata-blazor-checkbox {
-  appearance: none;
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  background-color: var(--pixata-grid-input-bg);
-  border: 1px solid var(--pixata-grid-border-color);
-  border-radius: var(--pixata-grid-border-radius);
-  cursor: pointer;
-}
-
-.pixata-blazor-checkbox:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--pixata-grid-border-color);
-}
-
-.pixata-blazor-checkbox:checked,
-.pixata-blazor-checkbox.pixata-blazor-checkbox-checked {
-  border-color: var(--pixata-grid-primary);
-  background-color: var(--pixata-grid-primary);
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M3,8 l3,3 l7-7'/%3e%3c/svg%3e");
-}
+/* The grid's checkboxes are drawn by the pixata-blazor-checkbox rules in the PixataCheckBox section */
 
 /* The loading indicator shown over the grid while OnRead is slow, matching Telerik's: three dots chasing each other round a
    triangle, over a light overlay */
@@ -1946,14 +1923,6 @@
 
 .pixata-blazor-grid-checkbox-cell .pixata-blazor-checkbox {
   vertical-align: middle;
-}
-
-/* A "select all" box when only some rows are selected. It's drawn with a class rather than the indeterminate property, which
-   can only be set from JavaScript */
-.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate {
-  border-color: var(--pixata-grid-border-color);
-  background-color: var(--pixata-grid-input-bg);
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%230d6efd' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M4,8 h8'/%3e%3c/svg%3e");
 }
 
 /* PixataGridBoolFilter, whose box is a button so it can show three states */
@@ -7713,6 +7682,126 @@
 }
 
 /* ========== end of PixataSwitch ========== */
+
+/* ========== PixataCheckBox ========== */
+
+/*
+  pixata-blazor-checkbox draws every checkbox in the package: PixataCheckBox (a button with role="checkbox"), and the native
+  checkboxes in the grid and tree view. PixataCheckBox adds a size (-sm, -md, -lg), a pixata-blazor-rounded-* class, and
+  pixata-blazor-disabled or pixata-blazor-invalid when they apply. -checked and -indeterminate show those states on elements
+  that aren't native checkboxes (and indeterminate on native ones, as the indeterminate property can only be set from script)
+*/
+:root {
+  --pixata-blazor-checkbox-size-sm: 12px;
+  --pixata-blazor-checkbox-size-md: 16px;
+  --pixata-blazor-checkbox-size-lg: 20px;
+  --pixata-blazor-checkbox-bg: var(--pixata-blazor-input-bg);
+  --pixata-blazor-checkbox-border-color: var(--pixata-blazor-input-border-color);
+  --pixata-blazor-checkbox-hover-border-color: var(--pixata-blazor-input-hover-border-color);
+  --pixata-blazor-checkbox-checked-bg: var(--pixata-blazor-primary);
+  --pixata-blazor-checkbox-checked-border-color: var(--pixata-blazor-primary);
+  --pixata-blazor-checkbox-indeterminate-color: var(--pixata-blazor-primary);
+  --pixata-blazor-checkbox-focus-border-color: var(--pixata-blazor-input-focus-border-color);
+  --pixata-blazor-checkbox-focus-shadow: var(--pixata-blazor-input-focus-shadow);
+}
+
+.pixata-blazor-checkbox {
+  --pixata-blazor-checkbox-size: var(--pixata-blazor-checkbox-size-md);
+  box-sizing: border-box;
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: var(--pixata-blazor-checkbox-size);
+  height: var(--pixata-blazor-checkbox-size);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pixata-blazor-checkbox-border-color);
+  outline: 0;
+  background-color: var(--pixata-blazor-checkbox-bg);
+  background-position: center;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background-color var(--pixata-blazor-transition), border-color var(--pixata-blazor-transition), box-shadow var(--pixata-blazor-transition);
+}
+
+/* The grid's and tree view's checkboxes have no pixata-blazor-rounded-* class, so they get this. :where() keeps it from beating that class */
+:where(.pixata-blazor-checkbox) {
+  border-radius: var(--pixata-blazor-border-radius);
+}
+
+.pixata-blazor-checkbox-sm {
+  --pixata-blazor-checkbox-size: var(--pixata-blazor-checkbox-size-sm);
+}
+
+.pixata-blazor-checkbox-lg {
+  --pixata-blazor-checkbox-size: var(--pixata-blazor-checkbox-size-lg);
+}
+
+.pixata-blazor-checkbox:hover {
+  border-color: var(--pixata-blazor-checkbox-hover-border-color);
+}
+
+.pixata-blazor-checkbox:focus-visible {
+  border-color: var(--pixata-blazor-checkbox-focus-border-color);
+  box-shadow: var(--pixata-blazor-checkbox-focus-shadow);
+}
+
+.pixata-blazor-checkbox:checked,
+.pixata-blazor-checkbox.pixata-blazor-checkbox-checked {
+  border-color: var(--pixata-blazor-checkbox-checked-border-color);
+  background-color: var(--pixata-blazor-checkbox-checked-bg);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='square' stroke-linejoin='square' stroke-width='2' d='M3,8 l3,3 l7-7'/%3e%3c/svg%3e");
+}
+
+/* A dash in the middle, drawn with a gradient so it takes the theme's colour */
+.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate {
+  border-color: var(--pixata-blazor-checkbox-border-color);
+  background-color: var(--pixata-blazor-checkbox-bg);
+  background-image: linear-gradient(var(--pixata-blazor-checkbox-indeterminate-color), var(--pixata-blazor-checkbox-indeterminate-color));
+  background-size: 50% 2px;
+}
+
+.pixata-blazor-checkbox.pixata-blazor-invalid {
+  border-color: var(--pixata-blazor-error);
+}
+
+.pixata-blazor-checkbox.pixata-blazor-invalid:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-error) 25%, transparent);
+}
+
+.pixata-blazor-checkbox:disabled {
+  cursor: default;
+}
+
+/* In a FormRowCheckbox */
+.pixata-input-group > .pixata-blazor-checkbox {
+  align-self: center;
+  margin-inline: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* On a touch screen, the area you can tap is at least --pixata-blazor-touch-target square */
+@media (pointer: coarse) {
+  button.pixata-blazor-checkbox::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, var(--pixata-blazor-touch-target));
+    height: max(100%, var(--pixata-blazor-touch-target));
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-checkbox {
+    transition: none;
+  }
+}
+
+/* ========== end of PixataCheckBox ========== */
 
 /* ========== PixataChart ========== */
 
