@@ -19,7 +19,7 @@ internal sealed class PixataChartLayoutInput {
 /// <summary>
 /// Works out where everything on the chart goes, in plain C# so it can be tested without rendering anything
 /// </summary>
-internal static class PixataChartLayout {
+internal static partial class PixataChartLayout {
   public const double Padding = 6;
   public const double TickLength = 4;
   public const double LabelGap = 4;
@@ -56,6 +56,9 @@ internal static class PixataChartLayout {
       BuildPie(scene, input, [round], false);
     } else if (round >= 0) {
       BuildPie(scene, input, Enumerable.Range(0, input.Series.Count).Where(i => input.Series[i].SeriesType == PixataChartSeriesType.Donut).ToList(), true);
+    } else if (input.Series.Any(s => s.SeriesType == PixataChartSeriesType.Bar)) {
+      // Bars lie across the chart, so they can't share it with columns and lines, and a chart with bar series shows only those
+      BuildBar(scene, input);
     } else {
       BuildCartesian(scene, input);
     }
@@ -75,12 +78,28 @@ internal static class PixataChartLayout {
     public PixataChartStackedValue?[] Stacked { get; set; } = [];
     public bool Visible => Series.IsVisible;
     public bool IsColumn => Series.SeriesType == PixataChartSeriesType.Column;
+    public bool IsBar => Series.SeriesType == PixataChartSeriesType.Bar;
   }
 
-  private static void BuildCartesian(PixataChartScene scene, PixataChartLayoutInput input) {
-    PixataChartTextMeasurer measurer = input.Measurer;
+  /// <summary>
+  /// The series of a chart with category and value axes, read out and stacked, with the range of each value axis
+  /// </summary>
+  private sealed class CategoryData {
+    public required List<object?> Categories { get; init; }
+    public required List<SeriesInfo> All { get; init; }
+    public required List<SeriesInfo> Visible { get; init; }
+    public required double[] DataMin { get; init; }
+    public required double[] DataMax { get; init; }
+    public required bool[] Percent { get; init; }
+    public int Count => Categories.Count;
+  }
+
+  /// <summary>
+  /// Reads the categories and values of the series that <paramref name="include"/> picks, and stacks them
+  /// </summary>
+  private static CategoryData ReadCategoryData(PixataChartLayoutInput input, List<PixataChartValueAxis> axes, Func<PixataChartSeries, bool> include) {
     PixataChartCategoryAxis? categoryAxis = input.CategoryAxis;
-    List<PixataChartValueAxis> axes = input.ValueAxes.Count > 0 ? [.. input.ValueAxes] : [new()];
+    List<(PixataChartSeries Series, int Index)> included = input.Series.Select((s, i) => (s, i)).Where(s => include(s.s)).ToList();
 
     // Categories: the axis's own, then any new ones from series with a CategoryField
     List<object?> categories = [.. categoryAxis?.Categories ?? []];
@@ -90,7 +109,7 @@ internal static class PixataChartLayout {
         categoryIndex.TryAdd(c, i);
       }
     }
-    foreach (PixataChartSeries series in input.Series) {
+    foreach ((PixataChartSeries series, _) in included) {
       if (string.IsNullOrEmpty(series.CategoryField) || series.Data is null) {
         continue;
       }
@@ -101,7 +120,7 @@ internal static class PixataChartLayout {
       }
     }
     int count = categories.Count;
-    foreach (PixataChartSeries series in input.Series) {
+    foreach ((PixataChartSeries series, _) in included) {
       if (string.IsNullOrEmpty(series.CategoryField) && series.Data is not null) {
         count = Math.Max(count, series.Data.Count());
       }
@@ -109,12 +128,10 @@ internal static class PixataChartLayout {
     while (categories.Count < count) {
       categories.Add(null);
     }
-    scene.Categories.AddRange(categories);
 
     // Each series' values, by category
     List<SeriesInfo> all = [];
-    for (int i = 0; i < input.Series.Count; i++) {
-      PixataChartSeries series = input.Series[i];
+    foreach ((PixataChartSeries series, int i) in included) {
       double?[] values = new double?[count];
       object?[] items = new object?[count];
       if (series.Data is not null) {
@@ -137,7 +154,7 @@ internal static class PixataChartLayout {
     }
 
     // Stacking: a series' own stack settings, or those of the first series of its type
-    foreach (PixataChartSeriesType type in new[] { PixataChartSeriesType.Column, PixataChartSeriesType.Line }) {
+    foreach (PixataChartSeriesType type in new[] { PixataChartSeriesType.Column, PixataChartSeriesType.Line, PixataChartSeriesType.Bar }) {
       PixataChartSeriesStack? first = all.FirstOrDefault(s => s.Series.SeriesType == type)?.Series.Stack;
       bool firstEnabled = first is not null && (first.Enabled ?? true);
       foreach (SeriesInfo info in all.Where(s => s.Series.SeriesType == type)) {
@@ -174,7 +191,7 @@ internal static class PixataChartLayout {
           continue;
         }
         Include(info.AxisIndex, v.To);
-        if (info.IsColumn || info.StackKey is not null) {
+        if (info.IsColumn || info.IsBar || info.StackKey is not null) {
           Include(info.AxisIndex, v.From);
         }
       }
@@ -184,6 +201,23 @@ internal static class PixataChartLayout {
       dataMin[axis] = double.IsNaN(dataMin[axis]) ? value : Math.Min(dataMin[axis], value);
       dataMax[axis] = double.IsNaN(dataMax[axis]) ? value : Math.Max(dataMax[axis], value);
     }
+
+    return new() { Categories = categories, All = all, Visible = visible, DataMin = dataMin, DataMax = dataMax, Percent = percent };
+  }
+
+  private static void BuildCartesian(PixataChartScene scene, PixataChartLayoutInput input) {
+    PixataChartTextMeasurer measurer = input.Measurer;
+    PixataChartCategoryAxis? categoryAxis = input.CategoryAxis;
+    List<PixataChartValueAxis> axes = input.ValueAxes.Count > 0 ? [.. input.ValueAxes] : [new()];
+    CategoryData data = ReadCategoryData(input, axes, _ => true);
+    List<object?> categories = data.Categories;
+    int count = data.Count;
+    List<SeriesInfo> all = data.All;
+    List<SeriesInfo> visible = data.Visible;
+    double[] dataMin = data.DataMin;
+    double[] dataMax = data.DataMax;
+    bool[] percent = data.Percent;
+    scene.Categories.AddRange(categories);
 
     // Which side each value axis goes on
     bool[] onRight = new bool[axes.Count];
@@ -505,25 +539,36 @@ internal static class PixataChartLayout {
     return Math.Ceiling(width);
   }
 
-  private static void AddValueGridLines(PixataChartScene scene, PixataChartValueAxis axis, PixataChartValueScale scale, PixataChartBox plot, bool primary) {
+  /// <summary>
+  /// The value axis's grid lines: across the plot area, or up it when the value axis runs along the bottom (on a bar chart)
+  /// </summary>
+  private static void AddValueGridLines(PixataChartScene scene, PixataChartValueAxis axis, PixataChartValueScale scale, PixataChartBox plot, bool primary, bool vertical = false) {
+    PixataChartSceneLine Line(double at, string css) =>
+      vertical ? new(at, plot.Y, at, plot.Bottom, css) : new(plot.X, at, plot.Right, at, css);
     PixataChartGridLinesBase? minor = axis.MinorGridLines;
     if (minor?.Visible == true) {
-      AddGridLines(scene, minor, scale.MinorTicks().Select(scale.ToPixel), y => new(plot.X, y, plot.Right, y, "pixata-blazor-chart-gridline pixata-blazor-chart-gridline-minor"));
+      AddGridLines(scene, minor, scale.MinorTicks().Select(scale.ToPixel), at => Line(at, "pixata-blazor-chart-gridline pixata-blazor-chart-gridline-minor"));
     }
     PixataChartGridLinesBase? major = axis.MajorGridLines;
     if (major?.Visible ?? primary) {
-      AddGridLines(scene, major, scale.MajorTicks().Select(scale.ToPixel), y => new(plot.X, y, plot.Right, y, "pixata-blazor-chart-gridline"));
+      AddGridLines(scene, major, scale.MajorTicks().Select(scale.ToPixel), at => Line(at, "pixata-blazor-chart-gridline"));
     }
   }
 
-  private static void AddCategoryGridLines(PixataChartScene scene, PixataChartCategoryAxis? axis, PixataChartCategoryScale scale, PixataChartBox plot) {
+  /// <summary>
+  /// The category axis's grid lines: up the plot area, or across it when the category axis runs down the side (on a bar
+  /// chart)
+  /// </summary>
+  private static void AddCategoryGridLines(PixataChartScene scene, PixataChartCategoryAxis? axis, PixataChartCategoryScale scale, PixataChartBox plot, bool horizontal = false) {
+    PixataChartSceneLine Line(double at, string css) =>
+      horizontal ? new(plot.X, at, plot.Right, at, css) : new(at, plot.Y, at, plot.Bottom, css);
     PixataChartGridLinesBase? minor = axis?.MinorGridLines;
     if (minor?.Visible == true) {
-      AddGridLines(scene, minor, CategoryLinePositions(scale, false), x => new(x, plot.Y, x, plot.Bottom, "pixata-blazor-chart-gridline pixata-blazor-chart-gridline-minor"));
+      AddGridLines(scene, minor, CategoryLinePositions(scale, false), at => Line(at, "pixata-blazor-chart-gridline pixata-blazor-chart-gridline-minor"));
     }
     PixataChartGridLinesBase? major = axis?.MajorGridLines;
     if (major?.Visible ?? true) {
-      AddGridLines(scene, major, CategoryLinePositions(scale, true), x => new(x, plot.Y, x, plot.Bottom, "pixata-blazor-chart-gridline"));
+      AddGridLines(scene, major, CategoryLinePositions(scale, true), at => Line(at, "pixata-blazor-chart-gridline"));
     }
   }
 

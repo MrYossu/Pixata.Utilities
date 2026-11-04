@@ -7981,13 +7981,15 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
 }
 
 .pixata-blazor-chart-column,
+.pixata-blazor-chart-bar,
 .pixata-blazor-chart-segment,
 .pixata-blazor-chart-marker {
   cursor: pointer;
   transition: opacity var(--pixata-blazor-transition);
 }
 
-.pixata-blazor-chart-column {
+.pixata-blazor-chart-column,
+.pixata-blazor-chart-bar {
   fill: var(--pixata-blazor-chart-point-color);
   stroke: color-mix(in srgb, var(--pixata-blazor-chart-point-color), #000 var(--pixata-blazor-chart-column-border));
   stroke-width: 1px;
@@ -8025,6 +8027,7 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
 }
 
 .pixata-blazor-chart-column.pixata-blazor-chart-point-active,
+.pixata-blazor-chart-bar.pixata-blazor-chart-point-active,
 .pixata-blazor-chart-segment.pixata-blazor-chart-point-active {
   opacity: var(--pixata-blazor-chart-hover-opacity);
 }
@@ -8036,6 +8039,7 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
 
 /* The keyboard focus */
 .pixata-blazor-chart-column.pixata-blazor-chart-point-focused,
+.pixata-blazor-chart-bar.pixata-blazor-chart-point-focused,
 .pixata-blazor-chart-segment.pixata-blazor-chart-point-focused {
   stroke: var(--pixata-blazor-chart-focus-color);
   stroke-width: 2px;
@@ -8240,10 +8244,16 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
   background: var(--pixata-blazor-chart-no-data-bg);
 }
 
-/* The columns grow and everything else fades in when the chart first appears */
+/* The columns and bars grow and everything else fades in when the chart first appears */
 @keyframes pixata-blazor-chart-grow {
   from {
     transform: scaleY(0);
+  }
+}
+
+@keyframes pixata-blazor-chart-grow-across {
+  from {
+    transform: scaleX(0);
   }
 }
 
@@ -8261,6 +8271,16 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
 
 .pixata-blazor-chart-animate .pixata-blazor-chart-column-negative {
   transform-origin: 50% 0;
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-bar {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: pixata-blazor-chart-grow-across var(--pixata-blazor-chart-transition);
+}
+
+.pixata-blazor-chart-animate .pixata-blazor-chart-bar-negative {
+  transform-origin: 100% 50%;
 }
 
 .pixata-blazor-chart-animate .pixata-blazor-chart-line,
@@ -8300,6 +8320,7 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
 
 @media (prefers-reduced-motion: reduce) {
   .pixata-blazor-chart-animate .pixata-blazor-chart-column,
+  .pixata-blazor-chart-animate .pixata-blazor-chart-bar,
   .pixata-blazor-chart-animate .pixata-blazor-chart-line,
   .pixata-blazor-chart-animate .pixata-blazor-chart-marker,
   .pixata-blazor-chart-animate .pixata-blazor-chart-segment,
@@ -8308,6 +8329,7 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
   }
 
   .pixata-blazor-chart-column,
+  .pixata-blazor-chart-bar,
   .pixata-blazor-chart-segment,
   .pixata-blazor-chart-marker {
     transition: none;

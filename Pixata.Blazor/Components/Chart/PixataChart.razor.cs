@@ -11,7 +11,7 @@ using Microsoft.JSInterop;
 namespace Pixata.Blazor.Components;
 
 /// <summary>
-/// A chart drawn as SVG, with column, line, pie and donut series. Configure it with child components: the series go in
+/// A chart drawn as SVG, with column, bar, line, pie and donut series. Configure it with child components: the series go in
 /// <see cref="PixataChartSeriesItems"/>, the axes in <see cref="PixataChartCategoryAxes"/> and
 /// <see cref="PixataChartValueAxes"/>, plus an optional <see cref="PixataChartTitle"/>, <see cref="PixataChartLegend"/> and
 /// <see cref="PixataChartTooltip"/>, <see cref="PixataChartNoDataTemplate"/> and <see cref="PixataChartDonutCenterTemplate"/>.
@@ -35,7 +35,8 @@ public partial class PixataChart : IAsyncDisposable {
   public string? Width { get; set; }
 
   /// <summary>
-  /// The height of the chart, as a CSS length. 400px by default (set by the <c>--pixata-blazor-chart-height</c> variable)
+  /// The height of the chart, as a CSS length. 400px by default (set by the <c>--pixata-blazor-chart-height</c> variable). A
+  /// bar chart with more categories than fit in this height grows taller
   /// </summary>
   [Parameter]
   public string? Height { get; set; }
@@ -59,7 +60,7 @@ public partial class PixataChart : IAsyncDisposable {
   public RenderFragment? ChildContent { get; set; }
 
   /// <summary>
-  /// Raised when the user clicks or taps a column, line point or pie or donut segment, or presses Enter or Space when the keyboard
+  /// Raised when the user clicks or taps a column, bar, line point or pie or donut segment, or presses Enter or Space when the keyboard
   /// focus is on one
   /// </summary>
   [Parameter]
@@ -101,6 +102,11 @@ public partial class PixataChart : IAsyncDisposable {
   private double _plotWidth;
   private double _plotHeight;
   private PixataChartScene _scene = new();
+
+  // How much taller than its own height a bar chart has made itself to fit its categories, and how much taller it was when
+  // the browser last reported its size (so the height it would have without the extra is known)
+  private double _extraHeight;
+  private double _measuredExtraHeight;
 
   // The point (series index, point index) the pointer or keyboard is on, and whether the keyboard put it there
   private (int Series, int Point)? _activePoint;
@@ -224,11 +230,13 @@ public partial class PixataChart : IAsyncDisposable {
       Transitions ?? true ? "pixata-blazor-chart-animate" : null,
       _scene.IsPie ? "pixata-blazor-chart-pie" : null,
       _scene.IsDonut ? "pixata-blazor-chart-donut" : null,
+      _scene.IsBar ? "pixata-blazor-chart-bars" : null,
       Class);
 
   private string? ChartStyle {
     get {
-      string style = $"{(string.IsNullOrWhiteSpace(Width) ? "" : $"width:{Width};")}{(string.IsNullOrWhiteSpace(Height) ? "" : $"height:{Height};")}";
+      string height = string.IsNullOrWhiteSpace(Height) ? "var(--pixata-blazor-chart-height)" : Height;
+      string style = $"{(string.IsNullOrWhiteSpace(Width) ? "" : $"width:{Width};")}{(_extraHeight > 0 ? $"height:calc({height} + {Num(_extraHeight)}px);" : string.IsNullOrWhiteSpace(Height) ? "" : $"height:{Height};")}";
       return style == "" ? null : style;
     }
   }
@@ -242,7 +250,7 @@ public partial class PixataChart : IAsyncDisposable {
   /// Works out where everything goes, at the size the browser last reported (or a guess, before it has)
   /// </summary>
   private PixataChartScene BuildScene() {
-    (double width, double height) = _plotWidth > 0 && _plotHeight > 0 ? (_plotWidth, _plotHeight) : GuessSize();
+    (double width, double height) = _plotWidth > 0 && _plotHeight > 0 ? (_plotWidth, Math.Max(1, _plotHeight - _measuredExtraHeight)) : GuessSize();
     Reorder(_series, ref _declaredSeries);
     Reorder(_valueAxes, ref _declaredValueAxes);
     _measurer.ClearMissing();
@@ -254,6 +262,7 @@ public partial class PixataChart : IAsyncDisposable {
       Height = height,
       Measurer = _measurer
     });
+    _extraHeight = Math.Max(0, Math.Ceiling(_scene.Height - height));
     return _scene;
   }
 
@@ -349,6 +358,8 @@ public partial class PixataChart : IAsyncDisposable {
     _chartWidth = chartWidth;
     _plotWidth = width;
     _plotHeight = height;
+    // The size was measured after the last render, so it includes the extra height that render asked for
+    _measuredExtraHeight = _extraHeight;
     return changed;
   }
 
@@ -473,7 +484,7 @@ public partial class PixataChart : IAsyncDisposable {
       await OnSeriesClick.InvokeAsync(current.ToSeriesPoint<PixataChartSeriesClickEventArgs>());
       return;
     }
-    PixataChartScenePoint? next = _scene.IsPie ? NextInPie(points, current, e.Key) : NextInGrid(points, current, e.Key);
+    PixataChartScenePoint? next = _scene.IsPie ? NextInPie(points, current, e.Key) : NextInGrid(points, current, _scene.IsBar ? AcrossBars(e.Key) : e.Key);
     if (next is not null) {
       Focus(next);
     }
@@ -492,6 +503,18 @@ public partial class PixataChart : IAsyncDisposable {
       _ => null
     };
   }
+
+  /// <summary>
+  /// A bar chart's categories go down it, so up and down move between categories, and left and right between series
+  /// </summary>
+  private static string AcrossBars(string key) =>
+    key switch {
+      "ArrowDown" => "ArrowRight",
+      "ArrowUp" => "ArrowLeft",
+      "ArrowRight" => "ArrowDown",
+      "ArrowLeft" => "ArrowUp",
+      _ => key
+    };
 
   private static PixataChartScenePoint? NextInGrid(List<PixataChartScenePoint> points, PixataChartScenePoint current, string key) {
     List<PixataChartScenePoint> series = points.Where(p => p.SeriesIndex == current.SeriesIndex).ToList();

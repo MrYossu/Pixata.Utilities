@@ -627,6 +627,178 @@ public class Chart_Tests {
 
   // Empty data, all zero, all negative, one category, nulls, tiny and huge ranges, each stacked and not, with and without
   // labels, at a normal size and squashed, mustn't throw or put NaN or infinity into the SVG
+  private static PixataChartSeries BarSeries(string name, IEnumerable<object> data, string field = nameof(Sale.Amount)) =>
+    new() { Type = PixataChartSeriesType.Bar, Name = name, Data = data, Field = field, CategoryField = nameof(Sale.Month) };
+
+  [TestMethod]
+  public void Layout_Bars_LieAcrossWithTheFirstCategoryAtTheTop() {
+    List<Sale> sales = Sales();
+    PixataChartScene scene = Layout([BarSeries("A", sales), BarSeries("B", sales, nameof(Sale.Other))]);
+    Assert.IsTrue(scene.IsBar);
+    Assert.AreEqual(5, scene.Points.Count, "Feb's missing value has no bar");
+    Assert.IsTrue(scene.Points.All(p => p.Kind == PixataChartPointKind.Bar));
+    PixataChartScenePoint a0 = scene.Points.Single(p => p.SeriesIndex == 0 && p.PointIndex == 0);
+    PixataChartScenePoint a1 = scene.Points.Single(p => p.SeriesIndex == 0 && p.PointIndex == 1);
+    PixataChartScenePoint a2 = scene.Points.Single(p => p.SeriesIndex == 0 && p.PointIndex == 2);
+    PixataChartScenePoint b0 = scene.Points.Single(p => p.SeriesIndex == 1 && p.PointIndex == 0);
+    Assert.IsTrue(a0.Y < a1.Y && a1.Y < a2.Y, "Jan is at the top");
+    Assert.IsTrue(b0.Y > a0.Y && b0.Y < a1.Y, "The second series sits under the first, in the same category");
+    Assert.AreEqual(a0.X, b0.X, 1e-9, "Both start at zero");
+    Assert.AreEqual(scene.Plot.X, a0.X, 1e-9);
+    Assert.AreEqual(a0.Width * 3, a2.Width, 1e-6);
+    Assert.AreEqual(a0.Width, b0.Width * 2, 1e-6);
+    Assert.AreEqual(a0.X + a0.Width, a0.AnchorX, 1e-9, "The tooltip points at the end of the bar");
+    Assert.AreEqual(sales[0], a0.DataItem);
+    List<PixataChartSceneText> categoryLabels = scene.AxisTexts.Where(t => t.Lines[0] is "Jan" or "Feb" or "Mar").ToList();
+    Assert.AreEqual(3, categoryLabels.Count);
+    Assert.IsTrue(categoryLabels.All(t => t.Anchor == "end" && t.X < scene.Plot.X), "The categories are down the left");
+    List<PixataChartSceneText> valueLabels = scene.AxisTexts.Where(t => t.Class == PixataChartTextMeasurer.AxisLabel && t.Anchor == "middle").ToList();
+    Assert.IsTrue(valueLabels.Count > 2);
+    Assert.IsTrue(valueLabels.All(t => t.Y > scene.Plot.Bottom), "The values are along the bottom");
+    Assert.AreEqual("0", valueLabels[0].Lines[0]);
+    Assert.AreEqual(scene.Plot.X, valueLabels[0].X, 1e-9);
+  }
+
+  [TestMethod]
+  public void Layout_NegativeBars_RunLeftFromZero() {
+    PixataChartScene scene = Layout([new() { Type = PixataChartSeriesType.Bar, Data = [10.0, -5.0] }]);
+    PixataChartScenePoint positive = scene.Points[0];
+    PixataChartScenePoint negative = scene.Points[1];
+    Assert.AreEqual(positive.X, negative.X + negative.Width, 1e-9);
+    Assert.AreEqual(negative.X, negative.AnchorX, 1e-9);
+  }
+
+  [TestMethod]
+  public void Layout_StackedBars_SitEndToEnd() {
+    List<Sale> sales = Sales();
+    PixataChartSeries first = BarSeries("A", sales);
+    first.Stack = new();
+    PixataChartScene scene = Layout([first, BarSeries("B", sales, nameof(Sale.Other))]);
+    PixataChartScenePoint start = scene.Points.Single(p => p.SeriesIndex == 0 && p.PointIndex == 0);
+    PixataChartScenePoint end = scene.Points.Single(p => p.SeriesIndex == 1 && p.PointIndex == 0);
+    Assert.AreEqual(start.Y, end.Y);
+    Assert.AreEqual(start.Height, end.Height);
+    Assert.AreEqual(start.X + start.Width, end.X, 1e-9);
+  }
+
+  [TestMethod]
+  public void Layout_Stack100Bars_UseAPercentAxis() {
+    List<Sale> sales = Sales();
+    PixataChartSeries first = BarSeries("A", sales);
+    first.Stack = new() { Type = PixataChartSeriesStackType.Stack100 };
+    PixataChartScene scene = Layout([first, BarSeries("B", sales, nameof(Sale.Other))]);
+    string[] labels = scene.AxisTexts.Where(t => t.Class == PixataChartTextMeasurer.AxisLabel && t.Anchor == "middle").Select(t => t.Lines[0]).ToArray();
+    Assert.AreEqual("0%", labels[0]);
+    Assert.AreEqual("100%", labels[^1]);
+    PixataChartScenePoint end = scene.Points.Single(p => p.SeriesIndex == 1 && p.PointIndex == 0);
+    Assert.AreEqual(scene.Plot.Right, end.X + end.Width, 1e-6, "Each category adds up to 100%");
+    Assert.AreEqual(1 / 3.0, end.Percentage, 1e-9);
+  }
+
+  [TestMethod]
+  public void Layout_Bars_AreNotMixedWithColumnsOrLines() {
+    List<Sale> sales = Sales();
+    PixataChartScene scene = Layout([
+      new() { Name = "Column", Data = sales, Field = nameof(Sale.Amount), CategoryField = nameof(Sale.Month) },
+      BarSeries("Bar", sales),
+      new() { Type = PixataChartSeriesType.Line, Name = "Line", Data = sales, Field = nameof(Sale.Amount), CategoryField = nameof(Sale.Month) }
+    ]);
+    Assert.IsTrue(scene.IsBar);
+    Assert.AreEqual(3, scene.Points.Count);
+    Assert.IsTrue(scene.Points.All(p => p.SeriesIndex == 1 && p.Kind == PixataChartPointKind.Bar));
+    Assert.AreEqual(0, scene.Paths.Count);
+    Assert.AreEqual("Bar", scene.LegendEntries.Single().Text);
+    Assert.AreEqual(1, scene.LegendEntries.Single().SeriesIndex, "The legend item toggles the bar series, wherever it was declared");
+  }
+
+  [TestMethod]
+  public void Layout_ManyBars_MakeTheChartTaller() {
+    List<object> days = Enumerable.Range(0, 365).Select(i => (object)new Sale { Month = $"Day {i + 1}", Amount = i % 7 }).ToList();
+    PixataChartScene scene = Layout([BarSeries("Days", days)], height: 300);
+    Assert.IsTrue(scene.Height > 300);
+    Assert.IsTrue(scene.Plot.Bottom < scene.Height, "The value axis still fits under the plot area");
+    PixataChartScenePoint bar = scene.Points.First(p => p.Value > 0);
+    Assert.IsTrue(bar.Height >= PixataChartLayout.MinBarSize - 1e-9, "The bars are no thinner than the minimum");
+    List<PixataChartSceneText> labels = scene.AxisTexts.Where(t => t.Lines[0].StartsWith("Day ")).ToList();
+    Assert.AreEqual(365, labels.Count);
+    Assert.IsTrue(scene.CategoryScale!.BandWidth >= labels[0].LineHeight, "There's room for every label");
+    PixataChartScene few = Layout([BarSeries("Months", Sales())], height: 300);
+    Assert.AreEqual(300, few.Height, "A chart whose categories fit keeps its height");
+  }
+
+  [TestMethod]
+  public void Layout_ManyBars_WithALabelStep_GrowLess() {
+    List<object> days = Enumerable.Range(0, 365).Select(i => (object)new Sale { Month = $"Day {i + 1}", Amount = 1 }).ToList();
+    double every = Layout([BarSeries("Days", days)], height: 300).Height;
+    PixataChartScene weekly = Layout([BarSeries("Days", days)], new() { Labels = new PixataChartCategoryAxisLabels { Step = 7 } }, height: 300);
+    Assert.IsTrue(weekly.Height < every);
+    Assert.AreEqual(53, weekly.AxisTexts.Count(t => t.Lines[0].StartsWith("Day ")));
+  }
+
+  [TestMethod]
+  public void Layout_LongBarCategories_AreShortenedWithTheFullTextAsTheirTitle() {
+    string name = "A very long category name that would take up most of the chart";
+    PixataChartScene scene = Layout([BarSeries("A", [new Sale { Month = name, Amount = 1 }, new Sale { Month = "Short", Amount = 2 }])], width: 300);
+    PixataChartSceneText label = scene.AxisTexts.Single(t => t.Title == name);
+    Assert.IsTrue(label.Lines[0].EndsWith('…'));
+    Assert.IsTrue(scene.Plot.X < 300 * PixataChartLayout.MaxBarCategoryShare + 30, "The labels leave the bars most of the width");
+    Assert.IsNull(scene.AxisTexts.Single(t => t.Lines[0] == "Short").Title);
+  }
+
+  [TestMethod]
+  [DataRow(PixataChartSeriesLabelsPosition.OutsideEnd, "start")]
+  [DataRow(PixataChartSeriesLabelsPosition.InsideEnd, "end")]
+  [DataRow(PixataChartSeriesLabelsPosition.Center, "middle")]
+  [DataRow(PixataChartSeriesLabelsPosition.InsideBase, "start")]
+  public void Layout_BarLabels_FollowTheirPosition(PixataChartSeriesLabelsPosition position, string anchor) {
+    PixataChartSeries series = BarSeries("A", Sales());
+    series.Labels = new() { Visible = true, Position = position };
+    PixataChartScene scene = Layout([series]);
+    PixataChartScenePoint bar = scene.Points[2];
+    PixataChartSceneText label = scene.Labels[2];
+    Assert.AreEqual("30", label.Lines[0]);
+    Assert.AreEqual(anchor, label.Anchor);
+    double expected = position switch {
+      PixataChartSeriesLabelsPosition.OutsideEnd => bar.X + bar.Width + PixataChartLayout.LabelGap,
+      PixataChartSeriesLabelsPosition.InsideEnd => bar.X + bar.Width - PixataChartLayout.LabelGap,
+      PixataChartSeriesLabelsPosition.Center => bar.X + bar.Width / 2,
+      _ => bar.X + PixataChartLayout.LabelGap
+    };
+    Assert.AreEqual(expected, label.X, 1e-9);
+    Assert.IsTrue(label.Y > bar.Y && label.Y < bar.Y + bar.Height + label.FontSize);
+    if (position == PixataChartSeriesLabelsPosition.OutsideEnd) {
+      Assert.IsTrue(label.X + label.Width <= scene.Width, "There's room for the labels after the longest bar");
+    }
+  }
+
+  [TestMethod]
+  public void Layout_BarAxes_UseTheirSettings() {
+    PixataChartScene scene = Layout(
+      [BarSeries("A", Sales())],
+      new() { Title = new PixataChartCategoryAxisTitle { Text = "Month" }, MajorGridLines = new PixataChartCategoryAxisMajorGridLines { Visible = true } },
+      [new() { Min = 0, Max = 50, MajorUnit = 10, Title = new PixataChartValueAxisTitle { Text = "Amount" }, Labels = new PixataChartValueAxisLabels { Format = "N1" } }]);
+    string[] values = scene.AxisTexts.Where(t => t.Class == PixataChartTextMeasurer.AxisLabel && t.Anchor == "middle").Select(t => t.Lines[0]).ToArray();
+    CollectionAssert.AreEqual(new[] { "0.0", "10.0", "20.0", "30.0", "40.0", "50.0" }, values);
+    PixataChartSceneText valueTitle = scene.AxisTexts.Single(t => t.Lines[0] == "Amount");
+    Assert.AreEqual(0, valueTitle.Rotation);
+    Assert.IsTrue(valueTitle.Y > scene.Plot.Bottom);
+    PixataChartSceneText categoryTitle = scene.AxisTexts.Single(t => t.Lines[0] == "Month");
+    Assert.AreEqual(-90, categoryTitle.Rotation);
+    Assert.IsTrue(categoryTitle.X < scene.Plot.X);
+    Assert.AreEqual(scene.Plot.X + scene.Plot.Width * 30 / 50, scene.Points[2].X + scene.Points[2].Width, 1e-6);
+    List<PixataChartSceneLine> lines = scene.GridLines.Where(l => l.Class == "pixata-blazor-chart-gridline").ToList();
+    Assert.AreEqual(6, lines.Count(l => l.X1 == l.X2), "The value grid lines go up the plot area");
+    Assert.AreEqual(4, lines.Count(l => l.Y1 == l.Y2), "The category grid lines go across it, between the categories");
+  }
+
+  [TestMethod]
+  public void Layout_BarValueAxis_CanGoAlongTheTop() {
+    PixataChartScene scene = Layout([BarSeries("A", Sales())], new() { AxisCrossingValue = [10] });
+    List<PixataChartSceneText> values = scene.AxisTexts.Where(t => t.Class == PixataChartTextMeasurer.AxisLabel && t.Anchor == "middle").ToList();
+    Assert.IsTrue(values.Count > 2);
+    Assert.IsTrue(values.All(t => t.Y < scene.Plot.Y));
+  }
+
   private static void AssertFinite(PixataChartScene scene) {
     static string Text(object o) => o.ToString() ?? "";
     foreach (PixataChartScenePoint p in scene.Points) {
@@ -649,6 +821,7 @@ public class Chart_Tests {
   [DataRow(PixataChartSeriesType.Line)]
   [DataRow(PixataChartSeriesType.Pie)]
   [DataRow(PixataChartSeriesType.Donut)]
+  [DataRow(PixataChartSeriesType.Bar)]
   public void Layout_AwkwardData_IsDrawnWithFiniteNumbers(PixataChartSeriesType type) {
     object?[][] datasets = [
       [],
@@ -1234,11 +1407,90 @@ public class Chart_Tests {
     Assert.AreEqual(0, cut.FindAll(".pixata-blazor-chart-donut-center").Count);
   }
 
+  private static RenderFragment BarSeriesComponent(string name, IEnumerable<object> data, string field = nameof(Sale.Amount)) =>
+    Component<PixataChartSeries>((nameof(PixataChartSeries.Type), PixataChartSeriesType.Bar), (nameof(PixataChartSeries.Name), name), (nameof(PixataChartSeries.Data), data), (nameof(PixataChartSeries.Field), field), (nameof(PixataChartSeries.CategoryField), nameof(Sale.Month)));
+
+  [TestMethod]
+  public void Chart_RendersBarsThatClickAndToggle() {
+    using BunitContext context = PixataTestContext.Create();
+    List<Sale> sales = Sales();
+    PixataChartSeriesClickEventArgs? clicked = null;
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(Fragments(BarSeriesComponent("Amount", sales), BarSeriesComponent("Other", sales, nameof(Sale.Other)))),
+      p => p.Add(c => c.OnSeriesClick, (PixataChartSeriesClickEventArgs e) => clicked = e));
+    Assert.IsTrue(cut.Find("div.pixata-blazor-chart").ClassList.Contains("pixata-blazor-chart-bars"));
+    Assert.AreEqual(5, cut.FindAll("rect.pixata-blazor-chart-bar").Count);
+    Assert.AreEqual(0, cut.FindAll("rect.pixata-blazor-chart-column").Count);
+    IElement bar = cut.FindAll("rect.pixata-blazor-chart-bar")[1];
+    Assert.AreEqual("graphics-symbol", bar.GetAttribute("role"));
+    Assert.AreEqual("point", bar.GetAttribute("aria-roledescription"));
+    Assert.AreEqual("Amount, Feb: 20", bar.GetAttribute("aria-label"));
+    bar.Click();
+    Assert.AreEqual("Feb", clicked!.Category);
+    Assert.AreSame(sales[1], clicked.DataItem);
+    cut.FindAll("button.pixata-blazor-chart-legend-item")[0].Click();
+    Assert.AreEqual(2, cut.FindAll("rect.pixata-blazor-chart-bar").Count);
+  }
+
+  [TestMethod]
+  public void Chart_NegativeBars_AreMarkedSoTheyGrowLeftwards() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(Component<PixataChartSeries>(
+      (nameof(PixataChartSeries.Type), PixataChartSeriesType.Bar), (nameof(PixataChartSeries.Data), new List<object> { 5.0, -5.0 }))));
+    IReadOnlyList<IElement> bars = cut.FindAll("rect.pixata-blazor-chart-bar");
+    Assert.IsFalse(bars[0].ClassList.Contains("pixata-blazor-chart-bar-negative"));
+    Assert.IsTrue(bars[1].ClassList.Contains("pixata-blazor-chart-bar-negative"));
+  }
+
+  [TestMethod]
+  public void Chart_Keyboard_MovesDownTheBarsAndAcrossTheSeries() {
+    using BunitContext context = PixataTestContext.Create();
+    List<Sale> sales = Sales();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(Fragments(BarSeriesComponent("Amount", sales), BarSeriesComponent("Other", sales, nameof(Sale.Other)))));
+    cut.Find("svg").Focus();
+    string Focused() =>
+      cut.Find($"#{cut.Find("svg").GetAttribute("aria-activedescendant")}").GetAttribute("aria-label")!;
+    Assert.AreEqual("Amount, Jan: 10", Focused());
+    cut.Find("svg").KeyDown(new KeyboardEventArgs { Key = "ArrowDown" });
+    Assert.AreEqual("Amount, Feb: 20", Focused());
+    cut.Find("svg").KeyDown(new KeyboardEventArgs { Key = "ArrowRight" });
+    Assert.AreEqual("Other, Jan: 5", Focused(), "Feb has no point in Other, so it goes to the nearest");
+    cut.Find("svg").KeyDown(new KeyboardEventArgs { Key = "ArrowLeft" });
+    Assert.AreEqual("Amount, Jan: 10", Focused());
+  }
+
+  [TestMethod]
+  public void Chart_SharedTooltip_OnBars_UsesBandsAcrossThePlot() {
+    using BunitContext context = PixataTestContext.Create();
+    List<Sale> sales = Sales();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Fragments(
+      Component<PixataChartTooltip>((nameof(PixataChartTooltip.Visible), true), (nameof(PixataChartTooltip.Shared), true)),
+      Component<PixataChartSeriesItems>(Fragments(BarSeriesComponent("Amount", sales), BarSeriesComponent("Other", sales, nameof(Sale.Other))))));
+    IReadOnlyList<IElement> bands = cut.FindAll("rect.pixata-blazor-chart-band");
+    Assert.AreEqual(3, bands.Count);
+    Assert.AreEqual(bands[0].GetAttribute("x"), bands[2].GetAttribute("x"));
+    Assert.AreNotEqual(bands[0].GetAttribute("y"), bands[2].GetAttribute("y"));
+    bands[2].PointerEnter();
+    IElement tooltip = cut.Find(".pixata-blazor-chart-tooltip-shared");
+    Assert.AreEqual("Mar", tooltip.QuerySelector(".pixata-blazor-chart-tooltip-category")!.TextContent);
+    CollectionAssert.AreEqual(new[] { "30", "15" }, tooltip.QuerySelectorAll(".pixata-blazor-chart-tooltip-value").Select(e => e.TextContent).ToArray());
+  }
+
+  [TestMethod]
+  public void Chart_ManyBars_MakeTheChartTaller() {
+    using BunitContext context = PixataTestContext.Create();
+    List<object> days = Enumerable.Range(0, 100).Select(i => (object)new Sale { Month = $"Day {i + 1}", Amount = i }).ToList();
+    IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(BarSeriesComponent("Days", days)), p => p.Add(c => c.Height, "300px"));
+    StringAssert.StartsWith(cut.Find("div.pixata-blazor-chart").GetAttribute("style"), "height:calc(300px + ");
+    IRenderedComponent<PixataChart> few = RenderChart(context, Component<PixataChartSeriesItems>(BarSeriesComponent("Months", Sales())), p => p.Add(c => c.Height, "300px"));
+    Assert.AreEqual("height:300px;", few.Find("div.pixata-blazor-chart").GetAttribute("style"));
+  }
+
   [TestMethod]
   [DataRow(PixataChartSeriesType.Column)]
   [DataRow(PixataChartSeriesType.Line)]
   [DataRow(PixataChartSeriesType.Pie)]
   [DataRow(PixataChartSeriesType.Donut)]
+  [DataRow(PixataChartSeriesType.Bar)]
   public void Chart_WithNoData_ShowsNoData(PixataChartSeriesType type) {
     using BunitContext context = PixataTestContext.Create();
     IRenderedComponent<PixataChart> cut = RenderChart(context, Component<PixataChartSeriesItems>(

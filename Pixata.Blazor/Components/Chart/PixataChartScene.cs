@@ -10,8 +10,17 @@ namespace Pixata.Blazor.Components;
 /// </summary>
 internal sealed class PixataChartScene {
   public double Width { get; init; }
-  public double Height { get; init; }
+  /// <summary>
+  /// The height of the chart. A bar chart with more categories than fit makes this taller than the height it was given
+  /// </summary>
+  public double Height { get; set; }
+
   public bool IsPie { get; set; }
+
+  /// <summary>
+  /// Whether this is a bar chart, whose categories go down the side rather than along the bottom
+  /// </summary>
+  public bool IsBar { get; set; }
 
   /// <summary>
   /// Whether the pie is a donut (in which case <see cref="IsPie"/> is true as well)
@@ -74,12 +83,13 @@ internal sealed record PixataChartScenePath(string D, string Class, int SeriesIn
 internal enum PixataChartPointKind {
   Column,
   Marker,
-  Segment
+  Segment,
+  Bar
 }
 
 /// <summary>
-/// A data point the user can hover over, tap, click and move the keyboard focus to: a column, a line point (drawn as a
-/// marker) or a pie or donut segment
+/// A data point the user can hover over, tap, click and move the keyboard focus to: a column, a bar, a line point (drawn as
+/// a marker) or a pie or donut segment
 /// </summary>
 internal sealed class PixataChartScenePoint {
   public required PixataChartSeries Series { get; init; }
@@ -107,7 +117,7 @@ internal sealed class PixataChartScenePoint {
   /// </summary>
   public string ReportedColour { get; init; } = "";
 
-  // Columns: the rectangle. Markers: the centre in X and Y, and the size in Width
+  // Columns and bars: the rectangle. Markers: the centre in X and Y, and the size in Width
   public double X { get; init; }
   public double Y { get; init; }
   public double Width { get; init; }

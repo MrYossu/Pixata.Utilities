@@ -6,8 +6,8 @@
 <h3>Chart</h3>
 
 <p>
-  <code>PixataChart</code> draws column, line, pie and donut charts as SVG, with no JavaScript charting library. Hover over (or tap)
-  a column, point or segment to see its tooltip, click a legend item to hide or show its series, and tab to a chart to move
+  <code>PixataChart</code> draws column, bar, line, pie and donut charts as SVG, with no JavaScript charting library. Hover over (or tap)
+  a column, bar, point or segment to see its tooltip, click a legend item to hide or show its series, and tab to a chart to move
   round its points with the arrow keys. Make the window narrow to see the labels turn and thin out and the legend move below.
 </p>
 
@@ -69,6 +69,87 @@
         <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)" />
         <PixataChartSeries Type="PixataChartSeriesType.Column" Name="Services" Data="@_sales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)" />
       </PixataChartSeriesItems>
+    </PixataChart>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Bars: plain, stacked and 100% stacked">
+  <Description>
+    <div class="chart-sample-controls">
+      <label>Stack
+        <PixataDropDownList Data="@StackOptions" @bind-Value="_barStack" AriaLabel="Stack" Width="12em" Size="sm" />
+      </label>
+      <label>Labels
+        <PixataDropDownList Data="@BarLabelOptions" @bind-Value="_barLabels" AriaLabel="Labels" Width="12em" Size="sm" />
+      </label>
+    </div>
+    Bar series lie across the chart, with the categories down the left (the first at the top) and the values along the
+    bottom. They take the same settings as columns. Use the up and down arrow keys to move between the categories, and left
+    and right to move between the series.
+  </Description>
+  <ChildContent>
+    <PixataChart Height="340px">
+      <PixataChartLegend Position="PixataChartLegendPosition.Bottom" />
+      <PixataChartTooltip Visible="true" Format="{0:C0}" />
+      <PixataChartSeriesItems>
+        <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Hardware" Data="@_sales" Field="@nameof(MonthlySales.Hardware)" CategoryField="@nameof(MonthlySales.Month)">
+          <PixataChartSeriesStack Enabled="@(_barStack != "none")" Type="@(_barStack == "stack100" ? PixataChartSeriesStackType.Stack100 : PixataChartSeriesStackType.Normal)" />
+          <PixataChartSeriesLabels Visible="@(_barLabels != "none")" Position="@BarLabelPosition" TextTemplate="@BarLabel" />
+        </PixataChartSeries>
+        <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Software" Data="@_sales" Field="@nameof(MonthlySales.Software)" CategoryField="@nameof(MonthlySales.Month)">
+          <PixataChartSeriesLabels Visible="@(_barLabels != "none")" Position="@BarLabelPosition" TextTemplate="@BarLabel" />
+        </PixataChartSeries>
+        <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Services" Data="@_sales" Field="@nameof(MonthlySales.Services)" CategoryField="@nameof(MonthlySales.Month)">
+          <PixataChartSeriesLabels Visible="@(_barLabels != "none")" Position="@BarLabelPosition" TextTemplate="@BarLabel" />
+        </PixataChartSeries>
+      </PixataChartSeriesItems>
+      <PixataChartCategoryAxes>
+        <PixataChartCategoryAxis>
+          <PixataChartCategoryAxisTitle Text="Month" />
+        </PixataChartCategoryAxis>
+      </PixataChartCategoryAxes>
+      <PixataChartValueAxes>
+        <PixataChartValueAxis>
+          <PixataChartValueAxisTitle Text="Sales" />
+          <PixataChartValueAxisLabels Format="@(_barStack == "stack100" ? "{0:P0}" : "{0:C0}")" />
+        </PixataChartValueAxis>
+      </PixataChartValueAxes>
+    </PixataChart>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="A year of bars, stacked">
+  <Description>
+    <div class="chart-sample-controls">
+      <span><PixataSwitch Id="weekly-labels-switch" @bind-Value="_weeklyLabels" Size="sm" /> <label for="weekly-labels-switch">Label every seventh day</label></span>
+    </div>
+    A bar for each day of the year, stacked by request type. There are far more categories than fit in the chart's 400px,
+    so the bars thin down to their minimum and the chart grows taller, leaving room for every label. A <code>Step</code>
+    on the category labels (show every seventh, say) lets the bars get thinner before the chart grows.
+  </Description>
+  <ChildContent>
+    <PixataChart>
+      <PixataChartTitle Text="Requests per day" />
+      <PixataChartLegend Position="PixataChartLegendPosition.Top" />
+      <PixataChartTooltip Visible="true" Shared="true" />
+      <PixataChartSeriesItems>
+        <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Food" Data="@_requests" Field="@nameof(DailyRequests.Food)" CategoryField="@nameof(DailyRequests.Label)" Gap="0.5">
+          <PixataChartSeriesStack />
+        </PixataChartSeries>
+        <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Money" Data="@_requests" Field="@nameof(DailyRequests.Money)" CategoryField="@nameof(DailyRequests.Label)" />
+        <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Other" Data="@_requests" Field="@nameof(DailyRequests.Other)" CategoryField="@nameof(DailyRequests.Label)" />
+      </PixataChartSeriesItems>
+      <PixataChartCategoryAxes>
+        <PixataChartCategoryAxis>
+          <PixataChartCategoryAxisLabels Step="@(_weeklyLabels ? 7 : 1)" />
+          <PixataChartCategoryAxisMajorGridLines Visible="false" />
+        </PixataChartCategoryAxis>
+      </PixataChartCategoryAxes>
+      <PixataChartValueAxes>
+        <PixataChartValueAxis>
+          <PixataChartValueAxisTitle Text="Requests" />
+        </PixataChartValueAxis>
+      </PixataChartValueAxes>
     </PixataChart>
   </ChildContent>
 </ComponentSample>
@@ -312,6 +393,7 @@
 
 @code {
   private static readonly SampleOption[] StackOptions = [new("Not stacked", "none"), new("Stacked", "normal"), new("100% stacked", "stack100")];
+  private static readonly SampleOption[] BarLabelOptions = [new("None", "none"), new("Outside end", nameof(PixataChartSeriesLabelsPosition.OutsideEnd)), new("Inside end", nameof(PixataChartSeriesLabelsPosition.InsideEnd)), new("Centre", nameof(PixataChartSeriesLabelsPosition.Center)), new("Inside base", nameof(PixataChartSeriesLabelsPosition.InsideBase))];
 
   private readonly List<MonthlySales> _sales = ChartSampleData.Sales();
   private readonly List<MonthlySales> _growingSales = ChartSampleData.Sales().Take(5).ToList();
@@ -319,11 +401,15 @@
   private readonly List<ProductRevenue> _revenue = ChartSampleData.Revenue();
   private readonly object[] _months = ChartSampleData.MonthNames.ToArray<object>();
   private readonly object[] _regions = ChartSampleData.Regions.ToArray<object>();
+  private readonly List<DailyRequests> _requests = ChartSampleData.Requests();
   private readonly List<string> _log = [];
 
   private string _stack = "normal";
   private double _gap = 1.5;
   private double _spacing = 0.4;
+  private string _barStack = "none";
+  private string _barLabels = nameof(PixataChartSeriesLabelsPosition.OutsideEnd);
+  private bool _weeklyLabels;
   private PixataChartSeriesStyle _lineStyle = PixataChartSeriesStyle.Smooth;
   private PixataChartSeriesMissingValues _missingValues = PixataChartSeriesMissingValues.Gap;
   private PixataChartSeriesMarkersType _markerType = PixataChartSeriesMarkersType.Circle;
@@ -335,6 +421,13 @@
   private bool _donutLabels = true;
   private bool _hasData;
   private PixataChart? _eventsChart;
+
+  private PixataChartSeriesLabelsPosition? BarLabelPosition =>
+    Enum.TryParse(_barLabels, out PixataChartSeriesLabelsPosition position) ? position : null;
+
+  // Thousands, or a percentage when the bars are 100% stacked
+  private string BarLabel(PixataChartSeriesLabelsTemplateContext context) =>
+    _barStack == "stack100" ? context.Percentage.ToString("P0") : $"{context.Value / 1000:0}k";
 
   private void SeriesClicked(PixataChartSeriesClickEventArgs args) =>
     _log.Add($"Pixata OnSeriesClick: {args.SeriesName}, {args.Category}, {args.Value:C0}");

@@ -54,10 +54,13 @@
           <g class="pixata-blazor-chart-bands">
             @for (int i = 0; i < categoryScale.Count; i++) {
               int category = i;
-              double start = Math.Max(scene.Plot.X, categoryScale.BandStart(i));
-              double end = Math.Min(scene.Plot.Right, categoryScale.BandStart(i) + categoryScale.BandWidth);
+              // A bar chart's categories go down the plot area rather than across it
+              double start = Math.Max(scene.IsBar ? scene.Plot.Y : scene.Plot.X, categoryScale.BandStart(i));
+              double end = Math.Min(scene.IsBar ? scene.Plot.Bottom : scene.Plot.Right, categoryScale.BandStart(i) + categoryScale.BandWidth);
+              double length = Math.Max(0, end - start);
               <rect class="@PixataCss.Classes("pixata-blazor-chart-band", IsTooltipShared && _tooltipShown && _activeCategory == i ? "pixata-blazor-chart-band-active" : null)"
-                    x="@Num(start)" y="@Num(scene.Plot.Y)" width="@Num(Math.Max(0, end - start))" height="@Num(scene.Plot.Height)"
+                    x="@Num(scene.IsBar ? scene.Plot.X : start)" y="@Num(scene.IsBar ? start : scene.Plot.Y)"
+                    width="@Num(scene.IsBar ? scene.Plot.Width : length)" height="@Num(scene.IsBar ? length : scene.Plot.Height)"
                     @onpointerenter="() => PointerEnterBand(category)"
                     @onclick="() => ClickBand(category)" />
             }
@@ -71,6 +74,17 @@
               <rect @key="@($"c{p.SeriesIndex}-{p.PointIndex}")"
                     id="@PointId(p)"
                     class="@PointClass("column", p, p.AnchorY > p.Y ? "pixata-blazor-chart-column-negative" : null)"
+                    x="@Num(p.X)" y="@Num(p.Y)" width="@Num(Math.Max(p.Width, 0))" height="@Num(Math.Max(p.Height, 0))"
+                    style="@PointStyle(p)"
+                    role="graphics-symbol"
+                    aria-roledescription="point"
+                    aria-label="@p.Description"
+                    @onpointerenter="() => PointerEnterPoint(p)"
+                    @onclick="() => ClickPoint(p)" />
+            } else if (p.Kind == PixataChartPointKind.Bar) {
+              <rect @key="@($"b{p.SeriesIndex}-{p.PointIndex}")"
+                    id="@PointId(p)"
+                    class="@PointClass("bar", p, p.AnchorX < p.X + p.Width / 2 ? "pixata-blazor-chart-bar-negative" : null)"
                     x="@Num(p.X)" y="@Num(p.Y)" width="@Num(Math.Max(p.Width, 0))" height="@Num(Math.Max(p.Height, 0))"
                     style="@PointStyle(p)"
                     role="graphics-symbol"
@@ -215,8 +229,9 @@
       if (points.Count == 0) {
         return;
       }
-      double y = scene.Plot.Y + scene.Plot.Height / 2;
-      (string placement, string style) = TooltipPlacement(categoryScale.Centre(category), y, true, categoryScale.BandWidth);
+      (string placement, string style) = scene.IsBar
+        ? TooltipPlacement(scene.Plot.X + scene.Plot.Width / 2, categoryScale.BandStart(category) < 48 ? categoryScale.BandStart(category) + categoryScale.BandWidth : categoryScale.BandStart(category), false, 0)
+        : TooltipPlacement(categoryScale.Centre(category), scene.Plot.Y + scene.Plot.Height / 2, true, categoryScale.BandWidth);
       object? categoryValue = category < scene.Categories.Count ? scene.Categories[category] : null;
       string colours = Tooltip?.Background is null ? "" : $"--pixata-blazor-chart-shared-tooltip-bg:{Tooltip.Background};";
       colours += Tooltip?.Color is null ? "" : $"color:{Tooltip.Color};";

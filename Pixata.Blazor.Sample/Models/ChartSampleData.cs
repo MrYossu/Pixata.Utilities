@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pixata.Blazor.Sample.Models;
 
@@ -32,6 +34,17 @@ public class ProductRevenue {
   public double LastYear { get; set; }
   public double ThisYear { get; set; }
   public bool Explode { get; set; }
+}
+
+/// <summary>
+/// A day's requests, by type, used by the long bar chart on the chart sample page
+/// </summary>
+public class DailyRequests {
+  public DateTime Day { get; set; }
+  public string Label => Day.ToString("ddd d MMM");
+  public int Food { get; set; }
+  public int Money { get; set; }
+  public int Other { get; set; }
 }
 
 public static class ChartSampleData {
@@ -73,6 +86,24 @@ public static class ChartSampleData {
   public static List<object> TemperatureHigh => [7.0, 8.1, 11.0, 13.9, 17.2, 20.1, null!, 21.8, 18.9, 14.9, 10.4, 7.6];
 
   public static List<object> TemperatureLow => [1.2, 1.1, 2.8, 4.4, 7.3, 10.2, 12.4, 12.1, 9.8, 7.1, 3.9, 1.8];
+
+  /// <summary>
+  /// A made-up (but repeatable) request count for each day of a year, busier in the weeks before the middle of March
+  /// </summary>
+  public static List<DailyRequests> Requests() {
+    Random random = new(134);
+    DateTime start = new(2026, 1, 1);
+    return Enumerable.Range(0, 365).Select(i => {
+      DateTime day = start.AddDays(i);
+      double busy = Math.Max(0, 30 - Math.Abs(day.DayOfYear - 70)) / 3.0;
+      return new DailyRequests {
+        Day = day,
+        Food = (int)(random.Next(0, 4) + busy),
+        Money = (int)(random.Next(0, 3) + busy / 2),
+        Other = random.Next(0, 2)
+      };
+    }).ToList();
+  }
 
   public static List<string> MonthNames => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 }

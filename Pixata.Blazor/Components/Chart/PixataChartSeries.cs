@@ -23,7 +23,7 @@ public class PixataChartSeriesItems : ComponentBase {
 }
 
 /// <summary>
-/// A series of data drawn on the chart, as columns, a line, a pie or a donut ring. Put it inside <see cref="PixataChartSeriesItems"/>
+/// A series of data drawn on the chart, as columns, bars, a line, a pie or a donut ring. Put it inside <see cref="PixataChartSeriesItems"/>
 /// </summary>
 public class PixataChartSeries : PixataChartSettingsBase {
   /// <summary>
@@ -77,15 +77,15 @@ public class PixataChartSeries : PixataChartSettingsBase {
   public string? Axis { get; set; }
 
   /// <summary>
-  /// The space between the categories of a column chart, as a multiple of a column's width. 1.5 by default. The value of
-  /// the chart's first column series is used for all of them
+  /// The space between the categories of a column (or bar) chart, as a multiple of a column's width. 1.5 by default. The
+  /// value of the chart's first column (or bar) series is used for all of them
   /// </summary>
   [Parameter]
   public double? Gap { get; set; }
 
   /// <summary>
-  /// The space between the columns in a category, as a multiple of a column's width. 0.4 by default. The value of the
-  /// chart's first column series is used for all of them
+  /// The space between the columns (or bars) in a category, as a multiple of a column's width. 0.4 by default. The value of
+  /// the chart's first column (or bar) series is used for all of them
   /// </summary>
   [Parameter]
   public double? Spacing { get; set; }
@@ -216,7 +216,7 @@ public class PixataChartSeries : PixataChartSettingsBase {
 }
 
 /// <summary>
-/// Stacks the series on top of the others. The stack settings of the first series of each type (column or line) apply to
+/// Stacks the series on top of the others. The stack settings of the first series of each type (column, bar or line) apply to
 /// the series of that type after it, unless they have their own. Put it inside a <see cref="PixataChartSeries"/>
 /// </summary>
 public class PixataChartSeriesStack : PixataChartSettingsBase {

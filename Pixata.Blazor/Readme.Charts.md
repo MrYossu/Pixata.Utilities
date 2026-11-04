@@ -2,7 +2,7 @@
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataChart` draws column, line, pie and donut charts. Column and line series can be mixed on one chart, stacked, and plotted against more than one value axis. The chart is plain SVG, drawn by the component, with the title, legend and tooltip as ordinary HTML, so it can be styled with CSS and needs no charting library.
+`PixataChart` draws column, bar, line, pie and donut charts. Column and line series can be mixed on one chart, stacked, and plotted against more than one value axis, and bar series can be stacked in the same way. The chart is plain SVG, drawn by the component, with the title, legend and tooltip as ordinary HTML, so it can be styled with CSS and needs no charting library.
 
 You describe the chart with child components, one for each part...
 
@@ -65,11 +65,11 @@ Every parameter is optional. A setting you leave out gets the default described 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `Width` | `string` | The width, as a CSS length. By default the chart fills the width of its container, and redraws when the container changes size |
-| `Height` | `string` | The height, as a CSS length. 400px by default (from the `--pixata-blazor-chart-height` variable) |
+| `Height` | `string` | The height, as a CSS length. 400px by default (from the `--pixata-blazor-chart-height` variable). A bar chart with more categories than fit grows taller (see [Bars](#bars)) |
 | `Class` | `string` | Extra CSS classes for the chart's outer `div` |
 | `Id` | `string` | The `id` of the outer `div` |
-| `Transitions` | `bool` | Whether the columns grow and the lines and segments fade in when the chart first appears. `true` by default, and always off for users who have asked for reduced motion |
-| `OnSeriesClick` | `EventCallback<PixataChartSeriesClickEventArgs>` | Raised when the user clicks or taps a column, line point or pie or donut segment, or presses Enter or Space on one |
+| `Transitions` | `bool` | Whether the columns and bars grow and the lines and segments fade in when the chart first appears. `true` by default, and always off for users who have asked for reduced motion |
+| `OnSeriesClick` | `EventCallback<PixataChartSeriesClickEventArgs>` | Raised when the user clicks or taps a column, bar, line point or pie or donut segment, or presses Enter or Space on one |
 | `OnLegendItemClick` | `EventCallback<PixataChartLegendItemClickEventArgs>` | Raised when the user clicks a legend item, after its series (or pie or donut segment) has been shown or hidden |
 
 Any other attributes are added to the outer `div`.
@@ -99,7 +99,7 @@ Passing a new list (`_sales = [.. _sales, newMonth]`) redraws the chart without 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `Type` | `PixataChartSeriesType` | `Column` (the default), `Line`, `Pie` or `Donut` |
+| `Type` | `PixataChartSeriesType` | `Column` (the default), `Bar`, `Line`, `Pie` or `Donut` |
 | `Data` | `IEnumerable<object>` | The data. Either a list of objects, with `Field` naming the property that holds the value, or a list of numbers |
 | `Field` | `string` | The property holding each item's value. Nested properties are separated with dots (`Totals.Net`) |
 | `CategoryField` | `string` | The property holding each item's category. Without it, items are matched to the category axis's `Categories` by position |
@@ -107,8 +107,8 @@ Passing a new list (`_sales = [.. _sales, newMonth]`) redraws the chart without 
 | `Color` | `string` | The series colour, as any CSS colour. By default the series take the palette colours in turn |
 | `ColorField` | `string` | The property holding each item's colour, which overrides `Color`. As these colours can come from your data, anything that isn't a plain colour value (text containing `;`, `:`, braces, quotes or `url(`) is ignored, and the point gets the colour it would have had without it |
 | `Axis` | `string` | The `Name` of the value axis to plot the series against. The first value axis by default |
-| `Gap` | `double` | The space between categories, as a multiple of a column's width. 1.5 by default |
-| `Spacing` | `double` | The space between the columns in a category, as a multiple of a column's width. 0.4 by default |
+| `Gap` | `double` | The space between categories, as a multiple of a column's (or bar's) width. 1.5 by default |
+| `Spacing` | `double` | The space between the columns (or bars) in a category, as a multiple of a column's width. 0.4 by default |
 | `Style` | `PixataChartSeriesStyle` | How a line joins its points: `Normal` (straight lines), `Smooth` (a curve that doesn't overshoot the points) or `Step` |
 | `MissingValues` | `PixataChartSeriesMissingValues` | What a line does with a null value: `Gap`, `Interpolate` (the default) or `Zero` (the default for stacked series) |
 | `DashType` | `PixataChartDashType` | The pattern of a line: `Solid`, `Dot`, `Dash`, `LongDash`, `DashDot`, `LongDashDot` or `LongDashDotDot` |
@@ -122,15 +122,44 @@ Passing a new list (`_sales = [.. _sales, newMonth]`) redraws the chart without 
 | `Size` | `double` | For a pie, the radius in pixels, and for a donut, its outer radius (taken from the outer ring). By default it is as big as will fit |
 | `HoleSize` | `double` | For a donut, the size of the hole as a percentage of the donut's diameter, from 0 (no hole) to 100. 50 by default, and taken from the inner ring |
 
-Null values are left out: a column chart has no column for them, a pie has no segment, and a line follows its `MissingValues` setting.
+Null values are left out: a column (or bar) chart has no column (or bar) for them, a pie has no segment, and a line follows its `MissingValues` setting.
 
-`Gap` and `Spacing` apply to all the column series on the chart, and are taken from the first column series.
+`Gap` and `Spacing` apply to all the column (or bar) series on the chart, and are taken from the first of them.
 
 ### Mixing series
 
 Column and line series share the category axis, so you can put any number of each on one chart, and their points line up. The columns are drawn first, so lines and their markers are always on top.
 
 A chart with a pie series shows only that pie. Each data item is a segment, and has its own legend item.
+
+A chart with bar series shows only those (see [Bars](#bars)).
+
+### Bars
+
+Bar series lie across the chart: the categories go down the left, the first at the top, and the values along the bottom. Set the series' `Type` to `PixataChartSeriesType.Bar`, and everything that works on columns (`Gap` and `Spacing`, colours, labels, tooltips, stacking, `OnSeriesClick` and the legend) works the same way, turned on its side...
+
+```xml
+<PixataChart>
+  <PixataChartTooltip Visible="true" Shared="true" />
+  <PixataChartSeriesItems>
+    <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Food" Data="@_days" Field="@nameof(Day.Food)" CategoryField="@nameof(Day.Label)">
+      <PixataChartSeriesStack />
+    </PixataChartSeries>
+    <PixataChartSeries Type="PixataChartSeriesType.Bar" Name="Money" Data="@_days" Field="@nameof(Day.Money)" CategoryField="@nameof(Day.Label)" />
+  </PixataChartSeriesItems>
+  <PixataChartValueAxes>
+    <PixataChartValueAxis>
+      <PixataChartValueAxisTitle Text="Requests" />
+    </PixataChartValueAxis>
+  </PixataChartValueAxes>
+</PixataChart>
+```
+
+The axis settings apply to whichever axis they belong to, so the category axis's title, labels and grid lines are down the side, and the value axis's (with its `Min`, `Max`, label format and so on) are along the bottom. A value axis whose `AxisCrossingValue` is at or past the number of categories goes along the top instead.
+
+A bar chart with many categories stays readable. The bars get thinner to fit them in, down to 4 pixels, and below that (or when the category labels would overlap) the chart grows taller rather than squeezing them. So a bar for each day of a year makes a long chart that scrolls with the page. A `Step` on the category labels (showing every seventh, say) leaves fewer labels to fit, so the bars can get thinner before the chart grows. Long category labels are shortened with an ellipsis, so they take no more than about a third of the chart's width, and the full text is shown when you hover over them.
+
+Bars can't share a chart with columns or lines: a chart with bar series shows only those, and its column and line series are ignored.
 
 ### Donuts
 
@@ -160,7 +189,7 @@ Labels outside the donut only fit round the outer ring, so the labels of the rin
 
 `PixataChartDonutCenterTemplate` puts its content in the hole, centred and given the largest square that fits inside it. It is HTML, so it can be anything, and is redrawn whenever the page renders. Content too big for the square is not cut off. It isn't shown on a chart that isn't a donut, or that has no hole.
 
-A chart shows either a pie or donuts, whichever series comes first. Column and line series on the same chart are ignored.
+A chart shows either a pie or donuts, whichever series comes first. Column, bar and line series on the same chart are ignored.
 
 ### Stacking
 
@@ -174,7 +203,7 @@ Put a `PixataChartSeriesStack` inside a series to stack it on the series before 
 <PixataChartSeries Name="East" Data="@_east" />
 ```
 
-The stack settings of the first column series apply to all the column series after it, unless they have their own `PixataChartSeriesStack`, and the same goes for line series. So in the example above, all three series are stacked.
+The stack settings of the first column series apply to all the column series after it, unless they have their own `PixataChartSeriesStack`, and the same goes for bar and line series. So in the example above, all three series are stacked.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -182,7 +211,7 @@ The stack settings of the first column series apply to all the column series aft
 | `Type` | `PixataChartSeriesStackType` | `Normal` (the default) adds the values up. `Stack100` scales each category to 100%, and the value axis then runs from 0% to 100% |
 | `Group` | `string` | Series with the same group are stacked together, and different groups stand side by side in each category |
 
-Positive values stack upwards from zero and negative ones downwards. Line series stack in the same way, and treat missing values as zero unless they say otherwise.
+Positive values stack upwards from zero and negative ones downwards (or, for bars, to the right and left). Line series stack in the same way, and treat missing values as zero unless they say otherwise.
 
 ### Labels
 
@@ -216,7 +245,7 @@ The positions are...
 
 | Series | Positions |
 | --- | --- |
-| Column | `OutsideEnd` (the default, just past the end of the column), `InsideEnd`, `Center` and `InsideBase` |
+| Column and bar | `OutsideEnd` (the default, just past the end of the column or bar), `InsideEnd`, `Center` and `InsideBase`. The end of a bar is its right-hand end, or for a negative bar, its left |
 | Line | `Above` (the default), `Below`, `Left`, `Right` and `Center` |
 | Pie and donut | `OutsideEnd` (the default, outside the pie with a line to the segment), `InsideEnd` and `Center` |
 
@@ -237,7 +266,7 @@ Hidden markers can still be hovered, tapped and focused.
 
 ## Axes
 
-Column and line charts have one category axis along the bottom, and one or more value axes up the sides. Without any axis components, you get a category axis showing the categories in the data, and one value axis on the left.
+Column and line charts have one category axis along the bottom, and one or more value axes up the sides. Bar charts have them the other way round: the category axis down the left, and the value axes along the bottom. Without any axis components, you get a category axis showing the categories in the data, and one value axis on the left.
 
 ### Category axis
 
@@ -245,7 +274,7 @@ Column and line charts have one category axis along the bottom, and one or more 
 | --- | --- | --- |
 | `Categories` | `object[]` | The categories, for series without a `CategoryField`. Series with a `CategoryField` add any categories of their own after these |
 | `Justified` | `bool` | Puts the first and last line points on the edges of the chart, rather than in the middle of their categories. Ignored when there are column series |
-| `AxisCrossingValue` | `object[]` | Where each value axis crosses the category axis, in the order of the value axes. A category index at or past the number of categories puts that value axis on the right, so `new object[] { 0, 100 }` puts the first on the left and the second on the right |
+| `AxisCrossingValue` | `object[]` | Where each value axis crosses the category axis, in the order of the value axes. A category index at or past the number of categories puts that value axis on the right, so `new object[] { 0, 100 }` puts the first on the left and the second on the right. On a bar chart, such an index puts the value axis along the top rather than the bottom |
 | `Color` | `string` | The colour of the axis line and labels |
 | `Visible` | `bool` | Whether the axis is shown |
 
@@ -280,9 +309,9 @@ The labels (`PixataChartCategoryAxisLabels` or `PixataChartValueAxisLabels`) hav
 
 The labels can contain a `PixataChartCategoryAxisLabelsRotation` (or `PixataChartValueAxisLabelsRotation`) whose `Angle` is a number of degrees (negative is anticlockwise) or `"auto"`.
 
-Category labels look after themselves by default. When they don't fit side by side they are turned to -45 degrees, and if they still don't fit, only every second (or third, and so on) label is shown. Very long turned labels are shortened with an ellipsis, and the full text is shown when you hover over them.
+Category labels look after themselves by default. On a column or line chart, when they don't fit side by side they are turned to -45 degrees, and if they still don't fit, only every second (or third, and so on) label is shown. Very long turned labels are shortened with an ellipsis, and the full text is shown when you hover over them. On a bar chart they go down the side, so they are never turned, and the chart grows taller to fit them (see [Bars](#bars)).
 
-The grid lines are `PixataChartCategoryAxisMajorGridLines` (the vertical lines between categories, shown by default), `PixataChartCategoryAxisMinorGridLines` (through the middle of each category, hidden by default), `PixataChartValueAxisMajorGridLines` (shown by default) and `PixataChartValueAxisMinorGridLines` (hidden by default). They all have `Visible`, `Color`, `Width`, `DashType`, `Step` and `Skip` parameters.
+The grid lines are `PixataChartCategoryAxisMajorGridLines` (the lines between categories, shown by default), `PixataChartCategoryAxisMinorGridLines` (through the middle of each category, hidden by default), `PixataChartValueAxisMajorGridLines` (shown by default) and `PixataChartValueAxisMinorGridLines` (hidden by default). They all have `Visible`, `Color`, `Width`, `DashType`, `Step` and `Skip` parameters.
 
 ## Title and legend
 
@@ -372,10 +401,11 @@ The overlay has the class `pixata-blazor-chart-no-data`, with the default text i
 The chart redraws whenever its container changes size, and adapts to the space it has...
 
 - When the chart is narrower than 400 pixels, a legend on the left or right moves below the chart, and its items wrap across it.
-- Category labels turn and thin out (see above), and the value axis uses fewer divisions when the chart is short.
+- Category labels turn and thin out (see above), and the value axis uses fewer divisions when the chart is short (or, for a bar chart, narrow).
+- A bar chart with more categories than fit grows taller, and its category labels are shortened on a narrow chart.
 - Pie labels move closer to the pie, and are shortened if need be, leaving as much room for the pie as possible.
 
-On a touch screen, tapping a column, point or segment shows its tooltip (and raises `OnSeriesClick`), and tapping elsewhere on the chart hides it. Nothing depends on hovering, and the touch targets for line points and legend items are made larger on touch screens.
+On a touch screen, tapping a column, bar, point or segment shows its tooltip (and raises `OnSeriesClick`), and tapping elsewhere on the chart hides it. Nothing depends on hovering, and the touch targets for line points and legend items are made larger on touch screens.
 
 The chart can be reached with the Tab key. Once it has the focus...
 
@@ -384,6 +414,8 @@ The chart can be reached with the Tab key. Once it has the focus...
 | Left and Right arrows | Move to the previous or next point in the series (or segment of a pie or donut ring) |
 | Up and Down arrows | Move to the same category in the previous or next series |
 | Home and End | Move to the first or last point in the series |
+
+On a bar chart, whose categories go down the chart, the arrows are turned round to match: Up and Down move to the previous or next category, and Left and Right to the previous or next series.
 | Enter or Space | Raises `OnSeriesClick` for the point |
 | Escape | Hides the tooltip |
 
@@ -406,9 +438,9 @@ The chart uses the stylesheet's general variables (font, text colour and so on),
 | `--pixata-blazor-chart-major-lines`, `--pixata-blazor-chart-minor-lines` | Faint greys | Grid lines |
 | `--pixata-blazor-chart-axis-color` | A light grey | Axis lines and ticks |
 | `--pixata-blazor-chart-inactive` | A mid grey | Hidden series in the legend |
-| `--pixata-blazor-chart-column-border` | `20%` | How much darker a column's border is than its fill |
+| `--pixata-blazor-chart-column-border` | `20%` | How much darker a column's (or bar's) border is than its fill |
 | `--pixata-blazor-chart-marker-bg` | The surface colour | The fill of hollow markers |
-| `--pixata-blazor-chart-hover-opacity` | `.75` | The opacity of a hovered column or segment |
+| `--pixata-blazor-chart-hover-opacity` | `.75` | The opacity of a hovered column, bar or segment |
 | `--pixata-blazor-chart-label-halo` | Translucent white | The halo around point labels |
 | `--pixata-blazor-chart-connector-color` | A mid grey | The lines from pie labels to their segments |
 | `--pixata-blazor-chart-focus-color` | The text colour | The keyboard focus outline |
@@ -431,10 +463,13 @@ So to use your brand colours for every chart...
 }
 ```
 
-The parts of the chart have classes starting `pixata-blazor-chart-` (`pixata-blazor-chart-title`, `pixata-blazor-chart-legend`, `pixata-blazor-chart-column`, `pixata-blazor-chart-line`, `pixata-blazor-chart-segment`, `pixata-blazor-chart-tooltip` and so on), and each point's colour is passed to it in the `--pixata-blazor-chart-point-color` property, so you can restyle anything the variables don't cover.
+The parts of the chart have classes starting `pixata-blazor-chart-` (`pixata-blazor-chart-title`, `pixata-blazor-chart-legend`, `pixata-blazor-chart-column`, `pixata-blazor-chart-bar`, `pixata-blazor-chart-line`, `pixata-blazor-chart-segment`, `pixata-blazor-chart-tooltip` and so on), and each point's colour is passed to it in the `--pixata-blazor-chart-point-color` property, so you can restyle anything the variables don't cover. A bar chart has the class `pixata-blazor-chart-bars` on its outer `div`.
+
+A bar chart that grows taller does so by setting its own height, as `calc()` of its `Height` (or `--pixata-blazor-chart-height`) plus the extra it needs, so set its height with one of those, rather than with a class of your own.
 
 ## Limitations
 
-- Only one category axis is used, and it is always along the bottom of the chart.
+- Only one category axis is used, and it is always along the bottom of the chart (or down the left of a bar chart).
+- Bars can't be mixed with columns or lines on one chart, and bar category labels can't be turned.
 - A chart shows only one pie. Any other series on a pie chart are ignored, and so are any column or line series on a donut chart.
 - Label templates support the placeholders listed above, but not general expressions. Use `TextTemplate` for anything else.

@@ -23,7 +23,13 @@ public enum PixataChartSeriesType {
   /// A pie with a hole in the middle. Each donut series is a ring, the first declared on the inside, and a chart with donut
   /// series shows only those
   /// </summary>
-  Donut
+  Donut,
+
+  /// <summary>
+  /// Horizontal bars, one per category, with the categories down the side (the first at the top) and the values along the
+  /// bottom. A chart with bar series shows only those
+  /// </summary>
+  Bar
 }
 
 /// <summary>
@@ -94,7 +100,7 @@ public enum PixataChartSeriesMarkersType {
 }
 
 /// <summary>
-/// Where a data label goes, relative to its column, point or pie segment. Columns use <see cref="OutsideEnd"/> (the default),
+/// Where a data label goes, relative to its column, bar, point or pie segment. Columns and bars use <see cref="OutsideEnd"/> (the default),
 /// <see cref="InsideEnd"/>, <see cref="Center"/> and <see cref="InsideBase"/>; line points use <see cref="Above"/> (the
 /// default), <see cref="Below"/>, <see cref="Left"/>, <see cref="Right"/> and <see cref="Center"/>; pie segments use
 /// <see cref="OutsideEnd"/> (the default), <see cref="InsideEnd"/> and <see cref="Center"/>

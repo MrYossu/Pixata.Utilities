@@ -58,7 +58,8 @@ public abstract class PixataChartAxisBase : PixataChartSettingsBase {
   /// <summary>
   /// On the category axis, the category indexes at which each value axis crosses it, in the order of the value axes. An index
   /// at or past the number of categories puts that value axis on the right, so <c>new object[] { 0, 100 }</c> puts the first
-  /// value axis on the left and the second on the right
+  /// value axis on the left and the second on the right. On a bar chart, the value axes go along the bottom, and such an index
+  /// puts one along the top
   /// </summary>
   [Parameter]
   public object[]? AxisCrossingValue { get; set; }
@@ -81,7 +82,7 @@ public abstract class PixataChartAxisBase : PixataChartSettingsBase {
 }
 
 /// <summary>
-/// The axis along the bottom of a column or line chart, showing the categories. Put it inside
+/// The axis along the bottom of a column or line chart (or down the side of a bar chart), showing the categories. Put it inside
 /// <see cref="PixataChartCategoryAxes"/>
 /// </summary>
 public class PixataChartCategoryAxis : PixataChartAxisBase {
@@ -107,7 +108,8 @@ public class PixataChartCategoryAxis : PixataChartAxisBase {
 }
 
 /// <summary>
-/// An axis up the side of a column or line chart, showing values. Put one or more inside <see cref="PixataChartValueAxes"/>
+/// An axis up the side of a column or line chart (or along the bottom of a bar chart), showing values. Put one or more inside
+/// <see cref="PixataChartValueAxes"/>
 /// </summary>
 public class PixataChartValueAxis : PixataChartAxisBase {
   /// <summary>
