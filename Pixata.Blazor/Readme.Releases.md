@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.23.0** adds bar charts to `PixataChart`. A `PixataChartSeries` with `Type="PixataChartSeriesType.Bar"` draws horizontal bars, with the categories down the left (the first at the top) and the values along the bottom. Bars take everything columns do, including stacked and 100% stacked bars, data labels, tooltips, `OnSeriesClick` and legend toggling, and a chart with bar series shows only those. With more categories than fit, the bars thin down to 4 pixels and then the chart grows taller, so a bar for each day of a year stays readable. Long category labels are shortened, with the full text shown on hover. See the [charts documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Charts.md#bars) (#134)
+
 >**Version 5.22.0** lets `PixataCheckBox` be posted with a form. Give it a `name` and it renders a native `<input type="checkbox" value="true">` in place of the button, styled the same way, so it works in statically rendered pages such as the Identity log in page. See [posting with a form](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.CheckBox.md#posting-with-a-form) (#124)
 
 
