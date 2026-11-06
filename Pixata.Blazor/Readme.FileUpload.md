@@ -323,6 +323,7 @@ The components use these classes...
 | --- | --- | --- |
 | `--pixata-blazor-upload-bg` | the surface colour | The component's background |
 | `--pixata-blazor-upload-border-color` | the border colour | The component's border |
+| `--pixata-blazor-upload-border-radius` | the large border radius (`.375rem`) | The component's corners |
 | `--pixata-blazor-upload-dropzone-bg`, `--pixata-blazor-upload-dropzone-hover-bg` | the alternative surface colour | The area around the select button, normally and when files are dragged over it |
 | `--pixata-blazor-upload-button-min-width` | `7em` | The select button's minimum width |
 | `--pixata-blazor-upload-files-max-height` | `300px` | The height the file list grows to before it scrolls |
@@ -331,6 +332,7 @@ The components use these classes...
 | `--pixata-blazor-upload-success-color`, `--pixata-blazor-upload-error-color`, `--pixata-blazor-upload-invalid-color` | darkened success and error colours, the subtle colour | The messages under uploaded, failed and invalid files |
 | `--pixata-blazor-dropzone-height` | `220px` | A `PixataDropZone`'s height |
 | `--pixata-blazor-dropzone-bg`, `--pixata-blazor-dropzone-border-color` | the alternative surface and border colours | A `PixataDropZone`'s background and border |
+| `--pixata-blazor-dropzone-border-radius` | the large border radius (`.375rem`) | A `PixataDropZone`'s corners |
 | `--pixata-blazor-dropzone-icon-size`, `--pixata-blazor-dropzone-icon-color` | `3rem`, the subtle colour | Its icon |
 | `--pixata-blazor-dropzone-hover-color` | the primary colour | Its border and icon while files are dragged over it |
 
