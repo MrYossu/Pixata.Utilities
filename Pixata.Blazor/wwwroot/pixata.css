@@ -5996,6 +5996,7 @@
 :root {
   --pixata-blazor-upload-bg: var(--pixata-blazor-surface-bg);
   --pixata-blazor-upload-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-upload-border-radius: var(--pixata-blazor-border-radius-lg);
   --pixata-blazor-upload-dropzone-bg: var(--pixata-blazor-surface-alt-bg);
   --pixata-blazor-upload-dropzone-hover-bg: color-mix(in srgb, var(--pixata-blazor-text-color) 8%, var(--pixata-blazor-surface-alt-bg));
   --pixata-blazor-upload-button-min-width: 7em;
@@ -6011,6 +6012,7 @@
   --pixata-blazor-dropzone-height: 220px;
   --pixata-blazor-dropzone-bg: var(--pixata-blazor-surface-alt-bg);
   --pixata-blazor-dropzone-border-color: var(--pixata-blazor-border-color);
+  --pixata-blazor-dropzone-border-radius: var(--pixata-blazor-border-radius-lg);
   --pixata-blazor-dropzone-icon-size: 3rem;
   --pixata-blazor-dropzone-icon-color: var(--pixata-blazor-subtle-color);
   --pixata-blazor-dropzone-hover-color: var(--pixata-blazor-primary);
@@ -6022,6 +6024,7 @@
   display: block;
   overflow: clip;
   border: 1px solid var(--pixata-blazor-upload-border-color);
+  border-radius: var(--pixata-blazor-upload-border-radius);
   background-color: var(--pixata-blazor-upload-bg);
   color: var(--pixata-blazor-text-color);
   font-family: var(--pixata-blazor-font-family);
@@ -6284,6 +6287,7 @@
   justify-content: center;
   padding: calc(var(--pixata-blazor-spacing) * 2);
   border: 1px solid var(--pixata-blazor-dropzone-border-color);
+  border-radius: var(--pixata-blazor-dropzone-border-radius);
   background-color: var(--pixata-blazor-dropzone-bg);
   color: var(--pixata-blazor-text-color);
   text-align: center;
