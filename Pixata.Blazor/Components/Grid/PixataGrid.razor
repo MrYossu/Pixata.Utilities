@@ -196,8 +196,8 @@
             </div>
             <div class="pixata-blazor-window-content">@Text.ConfirmDelete</div>
             <div class="pixata-blazor-window-actions pixata-blazor-window-actions-end">
-              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="() => ConfirmDeleteAnswered(true)">@Text.Ok</button>
-              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => ConfirmDeleteAnswered(false)">@Text.Cancel</button>
+              <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="() => ConfirmDeleteAnswered(true)">@Text.Ok</button>
+              <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid" @onclick="() => ConfirmDeleteAnswered(false)">@Text.Cancel</button>
             </div>
           </div>
         </div>
@@ -735,11 +735,11 @@
                 @form.ButtonsTemplate
               </CascadingValue>
             } else {
-              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="SaveEdit">
+              <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="SaveEdit">
                 @PixataGridIcons.For(PixataGridIcon.Save)
                 <span class="pixata-blazor-button-text">@Text.Update</span>
               </button>
-              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="CancelEditCommand">
+              <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid" @onclick="CancelEditCommand">
                 @PixataGridIcons.For(PixataGridIcon.Cancel)
                 <span class="pixata-blazor-button-text">@Text.Cancel</span>
               </button>
@@ -814,7 +814,7 @@
             }
             @if (column.ShowFilterCellButtons && column.ShowFilterClearButton) {
               <button type="button"
-                      class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-icon pixata-blazor-grid-filter-clear"
+                      class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid pixata-blazor-button-icon pixata-blazor-grid-filter-clear"
                       title="@Text.Clear"
                       aria-label="@Text.Clear"
                       disabled="@(!HasFilter(column))"
@@ -881,11 +881,11 @@
                   }
                 </div>
                 <div class="pixata-blazor-grid-columnmenu-actions">
-                  <button type="button" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="ApplyChooser">
+                  <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid pixata-blazor-button-primary" @onclick="ApplyChooser">
                     @PixataGridIcons.For(PixataGridIcon.Check)
                     <span class="pixata-blazor-button-text">@Text.Apply</span>
                   </button>
-                  <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="ResetChooser">
+                  <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid" @onclick="ResetChooser">
                     @PixataGridIcons.For(PixataGridIcon.Reset)
                     <span class="pixata-blazor-button-text">@Text.Reset</span>
                   </button>
@@ -999,18 +999,18 @@
               <PixataGridDropDownList TValue="GridFilterOperator" Items="operators" Value="_menuState.Operator1" ValueChanged="op => _menuState.Operator1 = op" AriaLabel="@Text.FilterOperators" Class="pixata-blazor-grid-filter-editor" />
               @Editor(column, _menuState.Value1, (v, _) => SetMenuValue(1, v), false)
               <div class="pixata-blazor-grid-button-group" role="group">
-                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.And ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.And ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.And">@Text.And</button>
-                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.Or ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.Or ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.Or">@Text.Or</button>
+                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-grid-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.And ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.And ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.And">@Text.And</button>
+                <button type="button" class="@Css.Join("pixata-blazor-button", "pixata-blazor-grid-button", "pixata-blazor-button-solid", _menuState.Logic == GridFilterLogic.Or ? "pixata-blazor-button-selected" : null)" aria-pressed="@(_menuState.Logic == GridFilterLogic.Or ? "true" : "false")" @onclick="() => _menuState.Logic = GridFilterLogic.Or">@Text.Or</button>
               </div>
               <PixataGridDropDownList TValue="GridFilterOperator" Items="operators" Value="_menuState.Operator2" ValueChanged="op => _menuState.Operator2 = op" AriaLabel="@Text.FilterOperators" Class="pixata-blazor-grid-filter-editor" />
               @Editor(column, _menuState.Value2, (v, _) => SetMenuValue(2, v), false)
             }
             <div class="pixata-blazor-grid-filter-actions">
-              <button type="submit" class="pixata-blazor-button pixata-blazor-button-solid pixata-blazor-button-primary">
+              <button type="submit" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid pixata-blazor-button-primary">
                 @FilterIcon
                 @Text.Filter
               </button>
-              <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => templateContext is null ? ClearFilterMenu() : templateContext.ClearFilterAsync()">
+              <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid" @onclick="() => templateContext is null ? ClearFilterMenu() : templateContext.ClearFilterAsync()">
                 @FilterClearIcon
                 @Text.Clear
               </button>
