@@ -240,6 +240,7 @@ The dialogs use the shared `--pixata-blazor-*` colours and spacing (see [Styling
 | `--pixata-blazor-dialog-shadow` | a soft shadow | The dialog's shadow |
 | `--pixata-blazor-dialog-viewport-margin` | `1rem` | The space kept around a dialog at the edges of the viewport (halved on a phone) |
 | `--pixata-blazor-dialog-predefined-min-width` | `200px` | The smallest width of an alert, confirm or prompt dialog |
+| `--pixata-blazor-dialog-predefined-max-width` | `30rem` | The largest width of an alert, confirm or prompt dialog. A longer message wraps onto more lines (on a phone, the dialog takes the full width of the screen) |
 
 The `--pixata-blazor-window-*` variables are shared with `PixataWindow`, so dialogs and windows look the same.
 

@@ -6381,6 +6381,7 @@
   --pixata-blazor-dialog-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-blazor-dialog-viewport-margin: 1rem;
   --pixata-blazor-dialog-predefined-min-width: 200px;
+  --pixata-blazor-dialog-predefined-max-width: 30rem;
 }
 
 /* The placeholder left where the dialog or window was declared */
@@ -6674,8 +6675,10 @@
 
 /* ---------- The alert, confirm and prompt dialogs ---------- */
 
+/* They grow to fit their message, up to the maximum width, after which the message wraps */
 .pixata-blazor-dialog-predefined {
   min-width: var(--pixata-blazor-dialog-predefined-min-width);
+  max-width: min(var(--pixata-blazor-dialog-predefined-max-width), 100%);
 }
 
 .pixata-blazor-dialog-message {
@@ -6771,6 +6774,10 @@
 
   .pixata-blazor-dialog {
     width: 100%;
+  }
+
+  .pixata-blazor-dialog-predefined {
+    max-width: 100%;
   }
 }
 
