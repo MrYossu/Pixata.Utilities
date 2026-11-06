@@ -460,6 +460,8 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 
 The grid's elements all have classes starting with `pixata-blazor-grid-`, so you can target them in your own CSS. It doesn't use any other library's classes, so it isn't affected by another library's theme on the same page.
 
+The grid's own buttons (in the filter menu, the column menu, the popup editor and so on, and `PixataGridCommandButton`) have the class `pixata-blazor-grid-button`, which gives them the colours above. A `PixataButton` in a grid's toolbar or in a template keeps its own theme colour. To give a plain button of your own the grid's look, use `class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid"`, as in the Receipt button in [using the row in a command column](#using-the-row-in-a-command-column).
+
 ## Templates and row events
 
 A column's `Template` replaces the formatted value in each cell. The context is the row's item as an `object` (as in Telerik's grid), so cast it to your type. A template column doesn't need a `Field`, but if it has one, the column can be sorted and filtered by it...
@@ -621,7 +623,7 @@ The content of a `PixataGridCommandColumn` is a template that's given the row's 
   <PixataGridCommandButton Command="Edit" Icon="PixataGridIcon.Pencil">Edit</PixataGridCommandButton>
   @if (invoice.IsPaid) {
     @* A button of your own, which acts on the row *@
-    <button type="button" class="pixata-blazor-button pixata-blazor-button-solid" @onclick="() => ShowReceipt(invoice)">Receipt</button>
+    <button type="button" class="pixata-blazor-button pixata-blazor-grid-button pixata-blazor-button-solid" @onclick="() => ShowReceipt(invoice)">Receipt</button>
   } else {
     @* Only unpaid invoices can be deleted, with the grid's own Delete command (and ConfirmDelete, if it's set) *@
     <PixataGridCommandButton Command="Delete" Icon="PixataGridIcon.Trash">Delete</PixataGridCommandButton>

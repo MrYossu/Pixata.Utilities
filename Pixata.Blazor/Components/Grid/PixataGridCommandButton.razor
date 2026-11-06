@@ -3,7 +3,7 @@
 @* A button that runs a grid command. In a command column it acts on its row, and in the toolbar it can add a row *@
 @if (Visible) {
   <button type="button"
-          class="@Css.Join("pixata-blazor-button", "pixata-blazor-button-solid", ThemeColor == "primary" ? "pixata-blazor-button-primary" : null, Class)"
+          class="@Css.Join("pixata-blazor-button", "pixata-blazor-grid-button", "pixata-blazor-button-solid", ThemeColor == "primary" ? "pixata-blazor-button-primary" : null, Class)"
           title="@Title"
           disabled="@(!Enabled)"
           @onclick="Clicked"

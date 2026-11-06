@@ -1573,13 +1573,14 @@
   border-bottom: 1px solid var(--pixata-grid-border-color);
 }
 
-/* Solid buttons, such as the filter menu's Filter and Clear */
-.pixata-blazor-button-solid {
+/* The grid's own solid buttons, such as the filter menu's Filter and Clear. These rules are limited to pixata-blazor-grid-button,
+   so they leave PixataButton and other themed buttons alone, inside a grid or not */
+.pixata-blazor-grid-button.pixata-blazor-button-solid {
   border-color: var(--pixata-grid-border-color);
   background-color: var(--pixata-grid-picker-bg);
 }
 
-.pixata-blazor-button-solid:hover:not(:disabled) {
+.pixata-blazor-grid-button.pixata-blazor-button-solid:hover:not(:disabled) {
   background-color: var(--pixata-grid-picker-hover-bg);
 }
 
@@ -1587,20 +1588,20 @@
   display: none;
 }
 
-.pixata-blazor-button-primary,
-.pixata-blazor-button-solid.pixata-blazor-button-selected {
+.pixata-blazor-grid-button.pixata-blazor-button-primary,
+.pixata-blazor-grid-button.pixata-blazor-button-solid.pixata-blazor-button-selected {
   color: var(--pixata-grid-primary-color);
   border-color: var(--pixata-grid-primary);
   background-color: var(--pixata-grid-primary);
 }
 
-.pixata-blazor-button-primary:hover:not(:disabled),
-.pixata-blazor-button-solid.pixata-blazor-button-selected:hover {
+.pixata-blazor-grid-button.pixata-blazor-button-primary:hover:not(:disabled),
+.pixata-blazor-grid-button.pixata-blazor-button-solid.pixata-blazor-button-selected:hover {
   border-color: var(--pixata-grid-primary-hover);
   background-color: var(--pixata-grid-primary-hover);
 }
 
-.pixata-blazor-button-solid:focus-visible {
+.pixata-blazor-grid-button.pixata-blazor-button-solid:focus-visible {
   box-shadow: var(--pixata-grid-focus-shadow);
 }
 
