@@ -3,11 +3,12 @@
 @using Pixata.Blazor.Notifications
 @using static Pixata.Extensions.Yunit
 @typeparam T
-@inject PersistentStateHelper<ApiResponse<T>> StateHelper
+@implements IDisposable
+@inject PersistentComponentState ApplicationState
 @inject NavigationManager NavigationManager
 
 @if (FeedbackType == ApiResponseViewFeedbackType.Notifications) {
-  <NotificationArea NotificationHelper="NotificationHelper" />
+  <NotificationArea NotificationHelper="NotificationHelper" Fallback="true" />
 }
 
 @if (FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Top) {
@@ -78,6 +79,10 @@
 @code {
 
   private ApiResponse<T> _apiResponse = new(ApiResponseStates.Loading);
+  private PersistentStateHelper<ApiResponse<T>>? _stateHelper;
+
+  public void Dispose() =>
+    _stateHelper?.Dispose();
 
   [Inject]
   public NotificationHelper NotificationHelper { get; set; } = null!;
@@ -140,7 +145,10 @@
     _arvSuccessStyle = ManualLoading && !_manualLoadingComplete ? "position: absolute; left: 1000000px" : "";
     // Only a successful response is worth persisting. Persisting anything else hands a transient prerender failure to
     // the client as the answer, so the user sees the server's bad minute instead of the client simply trying again
-    _apiResponse = await StateHelper.Get(LoadApiResponse, Key, response => response.State == ApiResponseStates.Success);
+    // Each view has a helper of its own. The one registered in the container is scoped, so all the views of one type on a page
+    // shared it, and it only remembered the last one's data, which was then handed to the wrong view
+    _stateHelper ??= new(ApplicationState, NavigationManager);
+    _apiResponse = await _stateHelper.Get(LoadApiResponse, Key, response => response.State == ApiResponseStates.Success);
     if (IsUnauthorised(_apiResponse.State, _apiResponse.Message)) {
       NavigationManager.NavigateTo($"{ApiResponseViewConfig.LogInUrl}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
     }

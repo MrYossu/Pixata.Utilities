@@ -29,6 +29,12 @@ namespace Pixata.Blazor.Tests {
 
     public PersistentComponentState State { get; }
 
+    /// <summary>
+    /// The render mode each persisting callback was registered for, which decides whether the framework runs it
+    /// </summary>
+    public List<IComponentRenderMode?> RenderModes =>
+      [.. _registrations.Cast<object>().Select(r => (IComponentRenderMode?)RegistrationType.GetProperty("RenderMode")!.GetValue(r))];
+
     public PersistentComponentStateHarness(IDictionary<string, byte[]>? existingState = null) {
       _registrations = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(RegistrationType))!;
       State = (PersistentComponentState)StateType

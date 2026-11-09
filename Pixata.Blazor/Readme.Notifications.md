@@ -133,3 +133,7 @@ ApiResponseViewConfig.FeedbackType = ApiResponseViewFeedbackType.Notifications;
 ```
 
 ...and the view renders its own `NotificationArea`, so you don't need to add one to the page.
+
+The view's area is only a fallback, so a message is shown once however many views there are. If there's a `NotificationArea` of your own (in the layout, say), the message is shown there, and the views' areas stay empty. If there isn't, it's shown in the first view's area. You can make an area of your own a fallback with `Fallback="true"`.
+
+>**Changed in v5.26.0.** Each view's area showed every notification, so a page with three views in `Notifications` mode (or one view and an area in the layout) showed each message three times (or twice).

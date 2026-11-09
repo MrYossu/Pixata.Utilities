@@ -13,6 +13,15 @@ public partial class NotificationArea : IDisposable {
   public NotificationHelper NotificationHelper { get; set; } = null!;
   [Parameter]
   public EventCallback<Notification> OpenNotification { get; set; }
+
+  /// <summary>
+  /// When true, this area only shows notifications if there's no other area on the page without <c>Fallback</c>, and then only
+  /// if it's the first fallback area. Each <see cref="Pixata.Blazor.Containers.ApiResponseView{T}"/> in <c>Notifications</c>
+  /// mode has one of these, so a notification shows once, however many views there are, and not at all if the layout has
+  /// its own area
+  /// </summary>
+  [Parameter]
+  public bool Fallback { get; set; }
   [Inject]
   private ILogger<NotificationArea> Logger { get; set; } = null!;
 
@@ -23,15 +32,21 @@ public partial class NotificationArea : IDisposable {
   private readonly Dictionary<string, CancellationTokenSource> _timers = [];
   private readonly CancellationTokenSource _disposed = new();
 
-  // Kept in a field so that Dispose can unsubscribe the same delegate
-  private Action<Notification>? _receiveHandler;
-
   private const int FadeOutMs = 1900;
 
-  protected override void OnInitialized() {
-    _receiveHandler = notification => _ = OnNewNotification(notification);
-    NotificationHelper.Receive += _receiveHandler;
+  // The helper this area was added to, so Dispose removes it from the same one even if the parameter has changed since
+  private NotificationHelper? _helper;
+
+  protected override void OnParametersSet() {
+    if (!ReferenceEquals(_helper, NotificationHelper)) {
+      _helper?.RemoveArea(this);
+      _helper = NotificationHelper;
+      _helper.AddArea(this);
+    }
   }
+
+  internal void Show(Notification notification) =>
+    _ = OnNewNotification(notification);
 
   // This is started from an Action, so it must never throw, or the exception would be unobserved (and in Blazor Server, an exception in
   // async void code ends the circuit)
@@ -125,9 +140,8 @@ public partial class NotificationArea : IDisposable {
     Remove(notification);
 
   public void Dispose() {
-    if (_receiveHandler is not null) {
-      NotificationHelper.Receive -= _receiveHandler;
-    }
+    _helper?.RemoveArea(this);
+    _helper = null;
     _disposed.Cancel();
     foreach (CancellationTokenSource cts in _timers.Values) {
       cts.Dispose();

@@ -64,7 +64,9 @@ The component loads its data through [`PersistentStateHelper`](Readme.Helpers.md
 
 Only a successful response is persisted. Persisting anything else would hand a transient server-side failure to the client as if it were the answer, instead of letting the client simply try again.
 
-If you have more than one `ApiResponseView` on a page, give each one a distinct `Key`, as that is what the state is stored against.
+If you have more than one `ApiResponseView` on a page, give each one a distinct `Key`, as that is what the state is stored against. Without one, the key is the page's address, so the views share it. Rather than risk a view being given another's data, views that share a key don't persist their data, and each loads it again once the page is interactive.
+
+>**Changed in v5.26.0.** The data was only persisted when the page went on to run in WebAssembly, so in a Blazor Server app (or a page that is `InteractiveServer`), every view loaded its data twice. It is now persisted for both. Also, all the views of one type on a page shared one persisted value, so only the last one's data was kept, and the others either loaded theirs again or, if they had no `Key`, could be handed the last one's data. Each view now persists its own.
 
 ## Doing something with the data
 

@@ -14,7 +14,29 @@ The `PersistentStateHelper<T>` class in this package does that for you. Please s
 
 `Get()` also takes an optional `persistWhen` predicate, which says whether the data that was loaded is worth persisting. If you don't pass one, the data is persisted as long as it isn't null. This is useful if the data may represent a failure (as an `ApiResponse<T>` does), as persisting that would hand a transient server-side failure to the client as if it were the answer, rather than letting the client simply load the data again.
 
-If you use more than one of these on a page, pass a distinct `key` to each, as that is what the state is stored against.
+Each instance remembers one value, so each component needs its own. `AddPixataBlazor()` registers it as a scoped service, which is fine if one component on the page injects it, but two components that inject it get the same instance, and only the last one's data is persisted. Where there may be more than one, create one in the component, and dispose of it with the component...
+
+```razor
+@implements IDisposable
+@inject PersistentComponentState ApplicationState
+@inject NavigationManager NavigationManager
+
+@code {
+  private PersistentStateHelper<List<Person>>? _stateHelper;
+
+  protected override async Task OnInitializedAsync() {
+    _stateHelper ??= new(ApplicationState, NavigationManager);
+    _people = await _stateHelper.Get(() => PeopleService.GetPeople(), "people");
+  }
+
+  public void Dispose() =>
+    _stateHelper?.Dispose();
+}
+```
+
+If you use more than one of these on a page, pass a distinct `key` to each, as that is what the state is stored against. If two helpers are given the same key (including no key, which uses the page's address), neither is persisted, so neither can be given the other's data, and both load theirs again once the page is interactive.
+
+The data is persisted whichever way the page goes on to run, Server or WebAssembly. Before v5.26.0, it was only persisted for WebAssembly, so a Blazor Server page loaded it twice.
 
 [`ApiResponseView`](Readme.ApiResponseView.md) uses this internally, so if that is all you need it for, you get it for free.
 
