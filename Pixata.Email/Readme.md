@@ -6,6 +6,8 @@ An email service for use in .NET Core projects. Backed by Mailkit, it eases the 
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Email/) is available for this project.
 
+>**Version 3.4.0** adds `PixataGraphMailReader`, which reads the messages in a Microsoft 365 mailbox or shared mailbox with Microsoft Graph, such as the invoices that suppliers email to a shared address. It gets the messages in a folder, oldest first (optionally only unread ones, or those since a date), their attachments as streams, and can mark a message as read or move it to a folder such as "Processed". See [reading a mailbox with Microsoft Graph](#reading-a-mailbox-with-microsoft-graph) below (#142). `PixataGraphEmailService` can now also send attachments over 3MB, up to Microsoft 365's limit for the mailbox. An email too big for `sendMail` is created as a draft, its attachments are uploaded, and the draft is sent, which needs the `Mail.ReadWrite` permission as well as `Mail.Send`. Smaller emails are sent as before. See [sending with Microsoft Graph](#sending-with-microsoft-graph) below (#154)
+
 >**Version 3.3.0** can send through Microsoft 365 with OAuth, as Microsoft is retiring user name and password logins for SMTP. `PixataGraphEmailService` sends with Microsoft Graph, which works even where SMTP logins are turned off for the mailbox, and saves the emails in Sent Items. `SmtpSettings.AccessToken` logs in to an SMTP server with OAuth (XOAUTH2) instead of the password, for Microsoft 365 or Gmail. Both services implement the new `PixataEmailSenderInterface`, so your app can choose between them. See [Microsoft 365, Gmail and OAuth](#microsoft-365-gmail-and-oauth) below (#128)
 
 >**Version 3.2.0** works with SMTP servers that don't need a login, such as an internal relay that allows your app's IP address, or a local test server such as smtp4dev or Papercut. The service no longer logs in when `UserName` is empty, or when the server doesn't offer logins (which used to fail with "The SMTP server does not support authentication"). See [servers that don't need a login](#servers-that-dont-need-a-login) below (#127)
@@ -184,7 +186,7 @@ Microsoft is [retiring basic authentication for SMTP AUTH](https://techcommunity
 | Works with | Microsoft 365 | Microsoft 365, Gmail, and any other server that takes XOAUTH2 |
 | Needs SMTP AUTH turned on for the mailbox | No | Yes, which many Microsoft 365 tenants turn off |
 | Saves the email in Sent Items | Yes (you can turn this off) | No |
-| Largest email | About 3MB of attachments | The server's limit (eg 35MB for Microsoft 365) |
+| Largest email | The mailbox's limit (35MB for Microsoft 365 unless an administrator changes it). Over about 3MB of attachments needs `Mail.ReadWrite` as well | The server's limit (eg 35MB for Microsoft 365) |
 
 For Microsoft 365, Graph is usually the better choice.
 
@@ -227,7 +229,7 @@ You can also pass a `GraphEmailSettings` to the constructor, or register one, bu
 It takes the same `EmailParameters` as `PixataEmailService`, and has the same `SendEmailAsync` and `SendEmailsAsync` methods (but not the overload that takes `SecureSocketOptions`, which only means anything for SMTP). A few things are different...
 
 - **The email is from the mailbox**, so there are no `FromEmail` and `FromName` settings. If you set `EmailParameters.From`, the mailbox needs permission to send as (or on behalf of) that address.
-- **Attachments are limited to about 3MB in all**, as `sendMail` takes requests of up to 4MB, and the attachments are base64 encoded. For larger files, send a link, or use SMTP.
+- **Large attachments need the `Mail.ReadWrite` permission.** `sendMail` takes requests of up to 4MB, which is about 3MB of attachments, as they are base64 encoded. An email bigger than that is created as a draft in the mailbox, each attachment is added (through an [upload session](https://learn.microsoft.com/graph/outlook-large-attachments), in chunks, if it's 3MB or more), and the draft is sent. That needs `Mail.ReadWrite` (delegated or application, as for `Mail.Send`) to create the draft. Without it, sending a large email gives `Unauthorised`, with a message that says so. If anything fails along the way, the draft is deleted. Each attachment can be up to 150MB, but the whole email must be within the mailbox's limit, which is 35MB by default in Microsoft 365. With `SaveToSentItems` turned off, the draft is marked to be deleted once it's sent (with the `PidTagDeleteAfterSubmit` property), as sending a draft otherwise always saves it.
 - **Failures have more specific states.** A token that has expired or been revoked (401), or that doesn't allow the email to be sent (403, eg one without `Mail.Send`, or a `From` address the mailbox can't send as), gives `Unauthorised`, Graph throttling the app or being busy (429 or 503) gives `ServiceUnavailable`, and not being able to reach Graph gives `HttpFailure`. Anything else is a `Failure`. The message is Graph's, with the status and its error code, eg `"(401 InvalidAuthenticationToken) Lifetime validation failed, the token is expired."`.
 - **`SendEmailsAsync` sends one request per email**, as Graph takes them separately, so it's no quicker than sending them one by one. It's there so that you can swap between the two services.
 
@@ -265,6 +267,63 @@ PixataEmailSenderInterface sender = company.UsesMicrosoft365
   : new PixataEmailService(company.SmtpSettings);
 ApiResponse<Yunit> response = await sender.SendEmailAsync(emailParameters);
 ```
+
+### Reading a mailbox with Microsoft Graph
+
+`PixataGraphMailReader` reads the messages in a Microsoft 365 mailbox, eg to take in the invoices that suppliers email to a shared address. It takes the same `GraphEmailSettings` as `PixataGraphEmailService`, and getting the token is up to your app in the same way. The token needs...
+
+- `Mail.Read` to read the messages and their attachments, or `Mail.ReadWrite` to mark them as read, move them, or create folders.
+- For a shared mailbox with a **delegated** token, `Mail.Read.Shared` (or `Mail.ReadWrite.Shared`), with `UserId` set to the shared mailbox, which the user needs access to.
+- With an **application** token (client credentials), `Mail.Read` or `Mail.ReadWrite` as application permissions, and `UserId` set to the mailbox. As that lets the app read every mailbox in the organisation, limit it to the ones it needs with an [application access policy](https://learn.microsoft.com/graph/auth-limit-mailbox-access).
+
+Register it with an `HttpClient`...
+
+```c#
+builder.Services.AddHttpClient<PixataGraphMailReader>();
+```
+
+...then give it the token, and read the messages. This takes in the unread messages in the shared mailbox's inbox, saves their PDFs, and moves each one to a "Processed" folder, so it isn't picked up again...
+
+```c#
+_mailReader.Settings = new() { AccessToken = token, UserId = "invoices@spriggs.com" };
+ApiResponse<string> processed = await _mailReader.GetFolderId("Inbox/Processed", create: true);
+ApiResponse<List<ReceivedEmail>> messages = await _mailReader.GetMessages(new() { UnreadOnly = true });
+foreach (ReceivedEmail message in messages.Data ?? []) {
+  ApiResponse<List<ReceivedAttachment>> attachments = await _mailReader.GetAttachments(message.Id);
+  foreach (ReceivedAttachment attachment in (attachments.Data ?? []).Where(a => a.ContentType == "application/pdf")) {
+    ApiResponse<Stream> content = await _mailReader.OpenAttachment(message.Id, attachment.Id);
+    if (content) {
+      await using Stream pdf = content.Data!;
+      await _invoices.Import(message.From, attachment.Name, pdf); // Your code
+    }
+  }
+  await _mailReader.Move(message.Id, processed.Data!);
+}
+```
+
+| Method | What it does |
+| --- | --- |
+| `GetMessages(query)` | Gets the messages in a folder, oldest first. See `GraphMailQuery` below |
+| `GetAttachments(messageId, includeInline)` | Gets the details of a message's attachments (`Id`, `Name`, `ContentType`, `Size`, `IsInline` and `Kind`), without their content. Inline ones, such as images in a signature, are left out unless you ask for them |
+| `OpenAttachment(messageId, attachmentId)` | Opens an attachment's content as a stream, read from Graph as you read it, so a large attachment isn't held in memory. Dispose of it when you've finished. For an attached email (`Kind` is `Item`), the content is the email as a .eml file. A link to a file in OneDrive or SharePoint (`Kind` is `Reference`) has no content |
+| `MarkAsRead(messageId, isRead)` | Marks a message as read (or unread, with `false`) |
+| `Move(messageId, folder)` | Moves a message to a folder, given its id or a well-known name such as `archive` or `deleteditems`. A message's id changes when it's moved, so this returns the new one |
+| `GetFolderId(path, create)` | Gets a folder's id from its path, such as "Inbox/Processed". The first part can be a well-known name, such as `inbox`, which works whatever the mailbox's language. With `create: true`, it creates the folders that don't exist |
+
+| `GraphMailQuery` | Default | What it does |
+| --- | --- | --- |
+| `Folder` | `inbox` | The folder to read, as a well-known name or a folder's id (use `GetFolderId()` to get one from its path) |
+| `UnreadOnly` | `false` | Only gets messages that haven't been read |
+| `Since` | `null` | Only gets messages received at or after this time |
+| `MaxCount` | `100` | The most messages to get. As they're oldest first, you get the rest next time, once you've dealt with these |
+| `BodyAsText` | `false` | Gets the body as plain text, which Graph makes from the HTML |
+| `IncludeHeaders` | `false` | Gets the internet headers as well, in `Headers`. `Delivered-To` among them says which address a message was delivered to, when it was sent to a group or by BCC, so isn't in `To` or `Cc` |
+
+Each `ReceivedEmail` has the message's `Id`, `InternetMessageId`, `Subject`, `From`, `Sender`, `To`, `Cc`, `ReplyTo` (as MimeKit `MailboxAddress`es, so you can pass them to an `EmailParameters` to reply), `ReceivedAt`, `Body` (with `BodyIsHtml`), `IsRead`, `HasAttachments`, `ConversationId` and `Headers`. A sender inside the organisation sometimes has an Exchange address (such as `/O=EXCHANGELABS/...`) rather than an email address, in which case the `MailboxAddress` has the name and no address.
+
+The failures are as for sending, with one more: a message, attachment or folder that doesn't exist (eg a message that has been moved, so its id has changed) gives `NotFound`.
+
+If your mail isn't in Microsoft 365, MailKit's `ImapClient` (which this package already depends on) reads any IMAP server, and can log in with OAuth too.
 
 ## Breaking change in version 2.0.0
 
