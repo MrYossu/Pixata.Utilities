@@ -137,7 +137,7 @@ public class PixataGraphEmailService_Tests {
     ApiResponse<Yunit> response = await Service(graph).SendEmailAsync(Email());
 
     Assert.AreEqual(ApiResponseStates.Failure, response.State);
-    StringAssert.Contains(response.Message, "3MB of attachments");
+    StringAssert.Contains(response.Message, "up to 4MB");
   }
 
   [TestMethod]
