@@ -51,6 +51,16 @@ function onKeyDown(e) {
   if (!owner || !dropDowns.has(owner.id)) {
     return;
   }
+  // A drop-down in a disabled fieldset is disabled, as the native inputs in it are. pixata.css stops the mouse, but the drop-down
+  // list's own element can still take the focus, so its keys are stopped here (all but Tab, so the user can move on), before
+  // the component sees them
+  if (owner.root.closest("fieldset:disabled")) {
+    if (e.key !== "Tab") {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    return;
+  }
   const open = !!document.querySelector(`[${ownerAttribute}="${owner.id}"][aria-expanded='true'], [${ownerAttribute}="${owner.id}"] [aria-expanded='true']`);
   const textInput = e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA";
   let prevent = false;

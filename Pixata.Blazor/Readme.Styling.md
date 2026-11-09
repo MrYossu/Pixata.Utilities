@@ -51,6 +51,37 @@ The ones they all share (the font, the text and background colours, a set for ea
 
 Dialogs and windows are moved to the end of the page when they open, so variables set on a container don't reach them. Set theirs on `:root`, or on a class you give them through their `Class` parameter.
 
+### One height for every input
+
+Each kind of input has always had a height of its own, worked out from its padding, so a text box, a drop-down and a numeric text box in one form row could differ by a pixel or two. Set `--pixata-blazor-input-height` (and `--pixata-blazor-input-height-sm` and `--pixata-blazor-input-height-lg` for the small and large sizes) to give them all the same height...
+
+```css
+:root {
+  --pixata-blazor-input-height: 46px;
+}
+```
+
+That covers the text boxes, the first line of a text area, the numeric text boxes, the drop-downs, the date inputs and pickers, and `pixata-form-control` and `pixata-form-select`, with the padding worked out so the text stays in the middle, and the form labels beside them line up too. The variables aren't set by default, so nothing changes unless you set them. The inputs in a grid, the editor's toolbar and the scheduler's toolbar keep their own, smaller, height.
+
+### Read-only forms with a disabled fieldset
+
+A `<fieldset disabled>` disables the native inputs inside it, but on its own it didn't change the look of the components around them, nor stop their clear buttons, drop-down buttons and spin buttons from working. The components inside a disabled fieldset now look and behave as if each had `Enabled="false"`, so wrapping a form in one is an easy way to show it read-only...
+
+```razor
+<EditForm Model="_person">
+  <fieldset disabled="@(!_canEdit)">
+    <FormRowText PropertyName="@nameof(Person.Name)" @bind-Value="_person.Name" />
+    <PixataDropDownList Data="_countries" @bind-Value="_person.Country" />
+  </fieldset>
+</EditForm>
+```
+
+That covers the text boxes and text areas, numeric text boxes, drop-downs, date inputs and pickers, calendars, checkboxes, radio groups, switches, sliders, the editor and the uploads. A component the keyboard can still reach, as it isn't a native input (such as a drop-down list or the editor), won't open or take typing.
+
+### Icons in buttons
+
+A button fills its SVG icons with the button's text colour, so they follow the theme. An SVG that sets its own `fill` (such as `fill="none"` on an icon drawn with lines, as Lucide's and Feather's are) keeps it, so line-drawn icons are no longer filled in.
+
 ## If you were styling the components yourself
 
 The class names in the rendered markup have changed, so if you had CSS of your own targetting them, you'll need to update your selectors. The mapping is a simple one...
