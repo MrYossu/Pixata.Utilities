@@ -5,15 +5,16 @@ namespace Pixata.Email;
 /// </summary>
 public class GraphEmailSettings {
   /// <summary>
-  /// An access token for Microsoft Graph with the <c>Mail.Send</c> permission. Getting the token, and getting a new one when it expires (they
-  /// last about an hour), is up to the app
+  /// An access token for Microsoft Graph with the <c>Mail.Send</c> permission to send (and <c>Mail.ReadWrite</c> for emails with more than
+  /// about 3MB of attachments), or <c>Mail.Read</c> to read a mailbox. Getting the token, and getting a new one when it expires (they last
+  /// about an hour), is up to the app
   /// </summary>
   public string AccessToken { get; set; } = "";
 
   /// <summary>
-  /// The mailbox to send from, as the user's id or user principal name (usually their email address), for a token the app got for itself
-  /// (with the <c>Mail.Send</c> application permission). Leave this empty to send from the signed-in user's own mailbox, for a token got on
-  /// their behalf
+  /// The mailbox to send from or read, as the user's id or user principal name (usually their email address), for a token the app got for
+  /// itself (with application permissions), or a shared mailbox. Leave this empty to use the signed-in user's own mailbox, for a token got
+  /// on their behalf
   /// </summary>
   public string UserId { get; set; } = "";
 
