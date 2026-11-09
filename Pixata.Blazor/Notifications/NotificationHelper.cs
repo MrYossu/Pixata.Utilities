@@ -1,28 +1,63 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Components;
 using Pixata.Blazor.Components;
 
 namespace Pixata.Blazor.Notifications;
 
 public class NotificationHelper {
+  /// <summary>
+  /// Raised for every notification sent, in case you want to show them somewhere of your own as well. The
+  /// <see cref="NotificationArea"/>s on the page don't use this, so setting it doesn't stop them working
+  /// </summary>
   public Action<Notification>? Receive { get; set; }
 
+  // The areas on the page, in the order they were added. A notification goes to every area that isn't a fallback, or if there
+  // are none of those, to the first fallback (each ApiResponseView has one), so it is shown once however many views there are
+  private readonly List<NotificationArea> _areas = [];
+  private readonly object _lock = new();
+
+  internal void AddArea(NotificationArea area) {
+    lock (_lock) {
+      _areas.Add(area);
+    }
+  }
+
+  internal void RemoveArea(NotificationArea area) {
+    lock (_lock) {
+      _areas.Remove(area);
+    }
+  }
+
+  private void Deliver(Notification notification) {
+    Receive?.Invoke(notification);
+    NotificationArea[] targets;
+    lock (_lock) {
+      NotificationArea[] main = [.. _areas.Where(a => !a.Fallback)];
+      targets = main.Length > 0 ? main : [.. _areas.Take(1)];
+    }
+    foreach (NotificationArea area in targets) {
+      area.Show(notification);
+    }
+  }
+
   public void Send(NotificationType type, string message, DateTime dateTime, Action? onClick = null) =>
-    Receive?.Invoke(new() { Type = type, Message = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
+    Deliver(new() { Type = type, Message = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
 
   /// <summary>
   /// Sends a notification whose message is HTML, eg to bold a reference. The HTML is shown as it is, so encode anything in it that came
   /// from a user. The HTML is also put in the notification's <see cref="Notification.Message"/>
   /// </summary>
   public void Send(NotificationType type, MarkupString message, DateTime dateTime, Action? onClick = null) =>
-    Receive?.Invoke(new() { Type = type, Message = message.Value, Content = builder => builder.AddContent(0, message), DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
+    Deliver(new() { Type = type, Message = message.Value, Content = builder => builder.AddContent(0, message), DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
 
   /// <summary>
   /// Sends a notification whose message is a render fragment, eg a list of validation problems. As there's no text to compare, these
   /// aren't removed when an identical one arrives, as plain text ones are
   /// </summary>
   public void Send(NotificationType type, RenderFragment message, DateTime dateTime, Action? onClick = null) =>
-    Receive?.Invoke(new() { Type = type, Content = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
+    Deliver(new() { Type = type, Content = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
 
   /// <summary>
   /// The classes for a notification type's icon, from <see cref="GeneralIcon"/> and the other fields below. This is <c>""</c> for a type

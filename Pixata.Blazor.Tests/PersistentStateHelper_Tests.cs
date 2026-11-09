@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Extensions;
 using Pixata.Extensions;
@@ -92,6 +93,64 @@ namespace Pixata.Blazor.Tests {
       await harness.RunPersistCallbacks();
 
       Assert.IsTrue(harness.Persisted.ContainsKey(Key));
+    }
+
+    [TestMethod]
+    public void PersistentStateHelper_RegistersForBothServerAndWebAssembly() {
+      // With InteractiveWebAssembly, an app that prerenders InteractiveServer never persisted anything, so every page loaded its
+      // data twice. Auto is accepted by both the server's and WebAssembly's stores
+      PersistentComponentStateHarness harness = new();
+      using PersistentStateHelper<ApiResponse<TestDto>> helper = new(harness.State, new TestNavigationManager());
+
+      Assert.AreEqual(1, harness.RenderModes.Count);
+      Assert.IsInstanceOfType<InteractiveAutoRenderMode>(harness.RenderModes[0]);
+    }
+
+    [TestMethod]
+    public async Task PersistentStateHelper_Persist_TwoHelpersWithTheSameKey_PersistsNeither() {
+      // Whichever was persisted could be read back by the other, which would then show the wrong data
+      PersistentComponentStateHarness harness = new();
+      using PersistentStateHelper<ApiResponse<TestDto>> first = new(harness.State, new TestNavigationManager());
+      using PersistentStateHelper<ApiResponse<TestDto>> second = new(harness.State, new TestNavigationManager());
+      using PersistentStateHelper<ApiResponse<TestDto>> other = new(harness.State, new TestNavigationManager());
+
+      await first.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("First"))));
+      await second.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("Second"))));
+      await other.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("Other"))), "other");
+      await harness.RunPersistCallbacks();
+
+      Assert.IsFalse(harness.Persisted.ContainsKey(Key));
+      Assert.IsTrue(harness.Persisted.ContainsKey("other"));
+    }
+
+    [TestMethod]
+    public async Task PersistentStateHelper_Persist_AfterTheOtherHelperWithTheKeyIsDisposed_PersistsTheData() {
+      PersistentComponentStateHarness harness = new();
+      using PersistentStateHelper<ApiResponse<TestDto>> first = new(harness.State, new TestNavigationManager());
+      PersistentStateHelper<ApiResponse<TestDto>> second = new(harness.State, new TestNavigationManager());
+
+      await first.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("First"))));
+      await second.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("Second"))));
+      second.Dispose();
+      await harness.RunPersistCallbacks();
+
+      Assert.AreEqual(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("First")),
+        JsonSerializer.Deserialize<ApiResponse<TestDto>>(harness.Persisted[Key], new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+    }
+
+    [TestMethod]
+    public async Task PersistentStateHelper_Get_WithAnotherKey_ReleasesTheFirstKey() {
+      PersistentComponentStateHarness harness = new();
+      using PersistentStateHelper<ApiResponse<TestDto>> first = new(harness.State, new TestNavigationManager());
+      using PersistentStateHelper<ApiResponse<TestDto>> second = new(harness.State, new TestNavigationManager());
+
+      await first.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("First"))));
+      await second.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("Second"))));
+      await second.Get(() => Task.FromResult(new ApiResponse<TestDto>(ApiResponseStates.Success, new TestDto("Second again"))), "second");
+      await harness.RunPersistCallbacks();
+
+      Assert.IsTrue(harness.Persisted.ContainsKey(Key));
+      Assert.IsTrue(harness.Persisted.ContainsKey("second"));
     }
 
     #endregion

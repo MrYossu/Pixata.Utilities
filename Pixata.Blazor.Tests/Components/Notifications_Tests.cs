@@ -1,10 +1,13 @@
 using System;
+using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Containers;
 using Pixata.Blazor.Notifications;
+using Pixata.Extensions;
 
 namespace Pixata.Blazor.Tests.Components;
 
@@ -114,6 +117,68 @@ public class Notifications_Tests {
     helper.Send(NotificationType.Error, builder => builder.AddContent(0, "First"), DateTime.Now);
     helper.Send(NotificationType.Error, builder => builder.AddContent(0, "Second"), DateTime.Now);
     cut.WaitForAssertion(() => Assert.AreEqual(2, cut.FindAll(".pixata-blazor-notification-new").Count));
+  }
+
+  private static IRenderedComponent<NotificationArea> RenderFallbackArea(BunitContext context, NotificationHelper helper) =>
+    context.Render<NotificationArea>(p => p.Add(c => c.NotificationHelper, helper).Add(c => c.Fallback, true));
+
+  [TestMethod]
+  public void FallbackAreas_OnlyTheFirstShowsANotification() {
+    // As each ApiResponseView in Notifications mode has one, so a page with three views showed every message three times
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    IRenderedComponent<NotificationArea>[] areas = [RenderFallbackArea(context, helper), RenderFallbackArea(context, helper), RenderFallbackArea(context, helper)];
+    helper.Send(NotificationType.Error, "Couldn't save", DateTime.Now);
+    areas[0].WaitForAssertion(() => Assert.AreEqual(1, areas[0].FindAll(".pixata-blazor-notification").Count));
+    Assert.AreEqual(0, areas[1].FindAll(".pixata-blazor-notification").Count);
+    Assert.AreEqual(0, areas[2].FindAll(".pixata-blazor-notification").Count);
+  }
+
+  [TestMethod]
+  public void FallbackAreas_ShowNothingWhenThereIsAnAreaInTheLayout() {
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    IRenderedComponent<NotificationArea> fallback = RenderFallbackArea(context, helper);
+    IRenderedComponent<NotificationArea> layout = RenderArea(context, helper);
+    helper.Send(NotificationType.Error, "Couldn't save", DateTime.Now);
+    layout.WaitForAssertion(() => Assert.AreEqual(1, layout.FindAll(".pixata-blazor-notification").Count));
+    Assert.AreEqual(0, fallback.FindAll(".pixata-blazor-notification").Count);
+  }
+
+  [TestMethod]
+  public void FallbackArea_TakesOverWhenTheOneBeforeItGoes() {
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    IRenderedComponent<NotificationArea> first = RenderFallbackArea(context, helper);
+    IRenderedComponent<NotificationArea> second = RenderFallbackArea(context, helper);
+    first.Instance.Dispose();
+    helper.Send(NotificationType.Error, "Couldn't save", DateTime.Now);
+    second.WaitForAssertion(() => Assert.AreEqual(1, second.FindAll(".pixata-blazor-notification").Count));
+  }
+
+  [TestMethod]
+  public void AreasThatAreNotFallbacks_AllShowANotification_AndReceiveIsStillRaised() {
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    int received = 0;
+    // Assigning (rather than adding to) Receive used to unhook the areas
+    helper.Receive = _ => received++;
+    IRenderedComponent<NotificationArea> first = RenderArea(context, helper);
+    IRenderedComponent<NotificationArea> second = RenderArea(context, helper);
+    helper.Send(NotificationType.Info, "Saved", DateTime.Now);
+    first.WaitForAssertion(() => Assert.AreEqual(1, first.FindAll(".pixata-blazor-notification").Count));
+    second.WaitForAssertion(() => Assert.AreEqual(1, second.FindAll(".pixata-blazor-notification").Count));
+    Assert.AreEqual(1, received);
+  }
+
+  [TestMethod]
+  public void ApiResponseView_InNotificationsMode_HasAFallbackArea() {
+    using BunitContext context = PixataTestContext.Create();
+    context.Services.AddSingleton(new PersistentComponentStateHarness().State);
+    IRenderedComponent<ApiResponseView<string>> cut = context.Render<ApiResponseView<string>>(p => p
+      .Add(c => c.FeedbackType, ApiResponseViewFeedbackType.Notifications)
+      .Add(c => c.LoadApiResponse, () => Task.FromResult(new ApiResponse<string>(ApiResponseStates.Success, "Hello"))));
+    Assert.IsTrue(cut.FindComponent<NotificationArea>().Instance.Fallback);
   }
 
   [TestMethod]
