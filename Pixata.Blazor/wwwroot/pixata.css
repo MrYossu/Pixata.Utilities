@@ -54,6 +54,10 @@
      components' primary colour, so setting --pixata-blazor-primary on :root changes the grid and date pickers too */
   --pixata-grid-font-size: .875rem;
   --pixata-grid-line-height: 1.4285;
+  /* The space around the text in the cells and header cells. A grid with Size="Small" sets them to .25rem and .5rem on itself.
+     Make them smaller for a denser grid, on :root for every grid, or on a class of your own for one */
+  --pixata-grid-cell-padding-y: .5rem;
+  --pixata-grid-cell-padding-x: .75rem;
   --pixata-grid-color: #212529;
   --pixata-grid-bg: #fff;
   --pixata-grid-border-color: rgba(0, 0, 0, .08);
@@ -172,9 +176,10 @@
   margin-bottom: var(--pixata-spacer);
 }
 
+/* The label's text lines up with the text in a .pixata-form-control next to it, so it follows --pixata-blazor-input-height too */
 .pixata-col-form-label {
-  padding-top: calc(.375rem + 1px);
-  padding-bottom: calc(.375rem + 1px);
+  padding-top: max(0px, (var(--pixata-blazor-input-height, calc(1lh + .75rem + 2px)) - 1lh) / 2);
+  padding-bottom: max(0px, (var(--pixata-blazor-input-height, calc(1lh + .75rem + 2px)) - 1lh) / 2);
   margin-bottom: 0;
   font-size: inherit;
   line-height: var(--pixata-line-height);
@@ -184,7 +189,7 @@
   font-family: inherit;
   display: block;
   width: 100%;
-  padding: .375rem .75rem;
+  padding: max(0px, (var(--pixata-blazor-input-height, calc(1lh + .75rem + 2px)) - 1lh - 2px) / 2) .75rem;
   font-size: var(--pixata-font-size);
   font-weight: 400;
   line-height: var(--pixata-line-height);
@@ -194,6 +199,11 @@
   border: 1px solid var(--pixata-border-color);
   border-radius: var(--pixata-border-radius);
   transition: border-color var(--pixata-transition), box-shadow var(--pixata-transition);
+}
+
+/* A select doesn't size itself from its line height, so its height is set outright when the variable is */
+select.pixata-form-control:not([multiple]):not([size]) {
+  height: var(--pixata-blazor-input-height, auto);
 }
 
 .pixata-form-control:focus {
@@ -213,7 +223,7 @@
   font-family: inherit;
   display: inline-block;
   width: 100%;
-  padding: .375rem 1.75rem .375rem .75rem;
+  padding: max(0px, (var(--pixata-blazor-input-height, calc(1lh + .75rem + 2px)) - 1lh - 2px) / 2) 1.75rem max(0px, (var(--pixata-blazor-input-height, calc(1lh + .75rem + 2px)) - 1lh - 2px) / 2) .75rem;
   font-size: var(--pixata-font-size);
   font-weight: 400;
   line-height: var(--pixata-line-height);
@@ -223,6 +233,10 @@
   border: 1px solid var(--pixata-border-color);
   border-radius: var(--pixata-border-radius);
   appearance: none;
+}
+
+.pixata-form-select {
+  height: var(--pixata-blazor-input-height, auto);
 }
 
 .pixata-form-select:focus {
@@ -550,7 +564,7 @@
 .pixata-blazor-grid-th,
 .pixata-blazor-grid-td {
   box-sizing: content-box;
-  padding: .5rem .75rem;
+  padding: var(--pixata-grid-cell-padding-y) var(--pixata-grid-cell-padding-x);
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: start;
@@ -564,9 +578,9 @@
   border-inline-start-width: 0;
 }
 
-.pixata-blazor-grid-sm .pixata-blazor-grid-th,
-.pixata-blazor-grid-sm .pixata-blazor-grid-td {
-  padding: .25rem .5rem;
+.pixata-blazor-grid-sm {
+  --pixata-grid-cell-padding-y: .25rem;
+  --pixata-grid-cell-padding-x: .5rem;
 }
 
 .pixata-blazor-grid-thead {
@@ -590,11 +604,7 @@
 .pixata-blazor-grid-cell-inner {
   display: flex;
   align-items: center;
-  margin: -.5rem -.75rem;
-}
-
-.pixata-blazor-grid-sm .pixata-blazor-grid-cell-inner {
-  margin: -.25rem -.5rem;
+  margin: calc(var(--pixata-grid-cell-padding-y) * -1) calc(var(--pixata-grid-cell-padding-x) * -1);
 }
 
 .pixata-blazor-grid-link {
@@ -602,11 +612,7 @@
   flex: 1 1 auto;
   align-items: center;
   min-width: 0;
-  padding: .5rem .75rem;
-}
-
-.pixata-blazor-grid-sm .pixata-blazor-grid-link {
-  padding: .25rem .5rem;
+  padding: var(--pixata-grid-cell-padding-y) var(--pixata-grid-cell-padding-x);
 }
 
 .pixata-blazor-grid-sortable {
@@ -765,9 +771,16 @@
   padding: .25rem;
 }
 
+/*
+  The grid's own icons are filled shapes with no fill of their own. An SVG that sets its own fill, such as fill="none" on a
+  line-drawn icon (Pixata's own SVG icons, Lucide, Feather, Tabler, Heroicons outline and so on), keeps it
+*/
 .pixata-blazor-button svg {
   width: 16px;
   height: 16px;
+}
+
+.pixata-blazor-button svg:not([fill]) {
   fill: currentColor;
 }
 
@@ -1037,7 +1050,7 @@
   flex: 1 1 0%;
   width: 100%;
   min-width: 0;
-  padding: .25rem .5rem;
+  padding: max(0px, (var(--pixata-blazor-input-height, calc(1lh + .5rem + 2px)) - 1lh - 2px) / 2) .5rem;
   border: 0;
   outline: 0;
   color: inherit;
@@ -1083,6 +1096,8 @@
   color: inherit;
   background-color: var(--pixata-datepicker-button-bg);
   cursor: pointer;
+  /* So the input alone sets the height, which can then be less than the button's icon and padding */
+  contain: size;
 }
 
 .pixata-blazor-datepicker-button:hover {
@@ -1101,7 +1116,7 @@
 
 /* Sizes, as for the other inputs. Medium is the default above */
 .pixata-blazor-dateinput-sm .pixata-blazor-dateinput-input {
-  padding: .125rem .5rem;
+  padding: max(0px, (var(--pixata-blazor-input-height-sm, calc(1lh + .25rem + 2px)) - 1lh - 2px) / 2) .5rem;
 }
 
 .pixata-blazor-dateinput-sm .pixata-blazor-datepicker-button {
@@ -1115,7 +1130,7 @@
 }
 
 .pixata-blazor-dateinput-lg .pixata-blazor-dateinput-input {
-  padding: .5rem .5rem;
+  padding: max(0px, (var(--pixata-blazor-input-height-lg, calc(1lh + 1rem + 2px)) - 1lh - 2px) / 2) .5rem;
 }
 
 .pixata-blazor-dateinput-lg .pixata-blazor-datepicker-button {
@@ -1456,7 +1471,7 @@
   flex: 1 1 0%;
   width: 100%;
   min-width: 0;
-  padding: .25rem .5rem;
+  padding: max(0px, (var(--pixata-blazor-input-height, calc(1lh + .5rem + 2px)) - 1lh - 2px) / 2) .5rem;
   border: 0;
   outline: 0;
   color: inherit;
@@ -1470,11 +1485,26 @@
   opacity: 1;
 }
 
+/*
+  The spinner's two 16px icons made the numeric text box 34px high, rather than the 30px of the text box. It keeps that height
+  unless --pixata-blazor-input-height is set, when the size containment lets the input set the height on its own, and the
+  icons shrink to fit if they need to
+*/
 .pixata-blazor-numerictextbox-spinner {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
   width: 28px;
+  contain: size;
+  min-height: min(32px, var(--pixata-blazor-input-height, 100vh) - 2px);
+}
+
+.pixata-blazor-numerictextbox-sm .pixata-blazor-numerictextbox-spinner {
+  min-height: min(32px, var(--pixata-blazor-input-height-sm, 100vh) - 2px);
+}
+
+.pixata-blazor-numerictextbox-lg .pixata-blazor-numerictextbox-spinner {
+  min-height: min(32px, var(--pixata-blazor-input-height-lg, 100vh) - 2px);
 }
 
 .pixata-blazor-numerictextbox-spinner button {
@@ -1498,11 +1528,12 @@
 .pixata-blazor-numerictextbox-spinner svg {
   width: 16px;
   height: 16px;
+  max-height: 100%;
   fill: currentColor;
 }
 
 .pixata-blazor-numerictextbox-sm .pixata-blazor-numerictextbox-input {
-  padding: .125rem .5rem;
+  padding: max(0px, (var(--pixata-blazor-input-height-sm, calc(1lh + .25rem + 2px)) - 1lh - 2px) / 2) .5rem;
 }
 
 .pixata-blazor-numerictextbox-lg {
@@ -1511,7 +1542,7 @@
 }
 
 .pixata-blazor-numerictextbox-lg .pixata-blazor-numerictextbox-input {
-  padding: .5rem .5rem;
+  padding: max(0px, (var(--pixata-blazor-input-height-lg, calc(1lh + 1rem + 2px)) - 1lh - 2px) / 2) .5rem;
 }
 
 /* ---------- Date range picker ---------- */
@@ -1762,6 +1793,10 @@
 .pixata-blazor-button svg {
   width: 16px;
   height: 16px;
+}
+
+.pixata-blazor-grid-columnmenu-item svg:not([fill]),
+.pixata-blazor-button svg:not([fill]) {
   fill: currentColor;
 }
 
@@ -3720,6 +3755,9 @@
   --pixata-blazor-window-shadow: 0 6px 8px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-blazor-transition: .1s ease-in-out;
   --pixata-blazor-touch-target: 2.5rem;
+  /* --pixata-blazor-input-height, and -sm and -lg for the small and large sizes, aren't set here, so each kind of input keeps
+     the height it has always had. Set them (eg to 46px) to give the text boxes, text areas (their first line), numeric text
+     boxes, drop-downs, date inputs and .pixata-form-control all one height. Inputs in a grid or a toolbar keep their own */
 }
 
 /* ---------- Icons ---------- */
@@ -3764,6 +3802,25 @@
   cursor: default;
   pointer-events: none;
   filter: grayscale(.1);
+}
+
+/*
+  A disabled fieldset disables the native inputs inside it, but not the look of the components around them, nor their own
+  clear and open buttons, so they are disabled here, as if each had Enabled="false". That makes <fieldset disabled> an easy
+  way to show a form read-only. The editor's toolbar drop-downs are left to the editor, so they don't fade twice
+*/
+fieldset:disabled :is(.pixata-blazor-input, .pixata-blazor-checkbox, .pixata-blazor-radiogroup, .pixata-blazor-switch, .pixata-blazor-slider,
+  .pixata-blazor-editor, .pixata-blazor-upload, .pixata-blazor-external-dropzone):not(.pixata-blazor-editor *) {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  cursor: default;
+  pointer-events: none;
+  filter: grayscale(.1);
+}
+
+/* The numeric text box, the date inputs and the calendar have a disabled look of their own, so they get that one */
+fieldset:disabled :is(.pixata-blazor-numerictextbox, .pixata-blazor-dateinput, .pixata-blazor-calendar) {
+  opacity: .6;
+  pointer-events: none;
 }
 
 .pixata-blazor-rounded-none {
@@ -4139,6 +4196,16 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--pixata-blazor-error) 25%, transparent);
 }
 
+/* A grid's filters and editors, and the editor's and scheduler's toolbars, are laid out for their own sizes, so they ignore
+   --pixata-blazor-input-height. Set it on .pixata-blazor-grid (after pixata.css) if you want a grid's inputs to follow it */
+.pixata-blazor-grid,
+.pixata-blazor-editor-toolbar,
+.pixata-blazor-scheduler-toolbar {
+  --pixata-blazor-input-height: initial;
+  --pixata-blazor-input-height-sm: initial;
+  --pixata-blazor-input-height-lg: initial;
+}
+
 /* The text box (or the element showing the selected value) inside the wrapper */
 .pixata-blazor-input-inner {
   box-sizing: border-box;
@@ -4146,7 +4213,9 @@
   min-width: 0;
   width: 100%;
   margin: 0;
-  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  /* The padding above and below is what's left of --pixata-blazor-input-height once the line of text and the wrapper's border
+     are taken off it, so the input is that high. Without the variable, it's the spacing, as it always was */
+  padding: max(0px, (var(--pixata-blazor-input-height, calc(1lh + var(--pixata-blazor-spacing) * 2 + 2px)) - 1lh - 2px) / 2) calc(var(--pixata-blazor-spacing) * 2);
   border: 0;
   outline: 0;
   background: none;
@@ -4165,11 +4234,11 @@
 }
 
 .pixata-blazor-input-sm .pixata-blazor-input-inner {
-  padding: calc(var(--pixata-blazor-spacing) * .5) calc(var(--pixata-blazor-spacing) * 2);
+  padding: max(0px, (var(--pixata-blazor-input-height-sm, calc(1lh + var(--pixata-blazor-spacing) + 2px)) - 1lh - 2px) / 2) calc(var(--pixata-blazor-spacing) * 2);
 }
 
 .pixata-blazor-input-lg .pixata-blazor-input-inner {
-  padding: calc(var(--pixata-blazor-spacing) * 2) calc(var(--pixata-blazor-spacing) * 2);
+  padding: max(0px, (var(--pixata-blazor-input-height-lg, calc(1lh + var(--pixata-blazor-spacing) * 4 + 2px)) - 1lh - 2px) / 2) calc(var(--pixata-blazor-spacing) * 2);
 }
 
 /* The button at the end of an input (eg a drop-down's arrow), which looks like a flat base button */
@@ -4535,15 +4604,15 @@
   width: 1lh;
   height: calc(var(--pixata-blazor-font-size) * var(--pixata-blazor-line-height));
   height: 1lh;
-  padding: var(--pixata-blazor-spacing);
+  padding: max(0px, (var(--pixata-blazor-input-height, calc(1lh + var(--pixata-blazor-spacing) * 2 + 2px)) - 1lh - 2px) / 2);
 }
 
 .pixata-blazor-input-sm .pixata-blazor-dropdownlist-icon {
-  padding: calc(var(--pixata-blazor-spacing) * .5);
+  padding: max(0px, (var(--pixata-blazor-input-height-sm, calc(1lh + var(--pixata-blazor-spacing) + 2px)) - 1lh - 2px) / 2);
 }
 
 .pixata-blazor-input-lg .pixata-blazor-dropdownlist-icon {
-  padding: calc(var(--pixata-blazor-spacing) * 2);
+  padding: max(0px, (var(--pixata-blazor-input-height-lg, calc(1lh + var(--pixata-blazor-spacing) * 4 + 2px)) - 1lh - 2px) / 2);
 }
 
 .pixata-blazor-dropdownlist-icon .pixata-blazor-dropdown-loading {

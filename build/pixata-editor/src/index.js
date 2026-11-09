@@ -170,10 +170,17 @@ class EditorInstance {
     this.view = new EditorView(parent, {
       state: this.createState(this.options.value),
       attributes: () => this.attributes(),
-      editable: () => !this.options.readOnly,
+      editable: () => !this.options.readOnly && !this.inDisabledFieldset(),
       dispatchTransaction: tr => this.dispatch(tr),
       transformPastedHTML: html => cleanPastedHtml(html, this.pasteSettings),
       handleDOMEvents: {
+        // editable is only read when the view updates, so if the fieldset was disabled since, these stop the user changing the
+        // content until it does (the Tab key still moves the focus on)
+        keydown: (view, e) => this.blockIfDisabled(e, e.key !== "Tab"),
+        beforeinput: (view, e) => this.blockIfDisabled(e),
+        paste: (view, e) => this.blockIfDisabled(e),
+        cut: (view, e) => this.blockIfDisabled(e),
+        drop: (view, e) => this.blockIfDisabled(e),
         focus: () => {
           this.call("OnEditorFocus");
           return false;
@@ -191,6 +198,21 @@ class EditorInstance {
     }
     this.initToolbar();
     this.reportState();
+  }
+
+  // A disabled fieldset disables the native inputs in it, and the editor follows suit, so a form can be shown read-only by
+  // wrapping it in <fieldset disabled>. The host element is in the page even in iframe mode, where the content isn't
+  inDisabledFieldset() {
+    const element = this.host || this.mount;
+    return !!(element && element.closest && element.closest("fieldset:disabled"));
+  }
+
+  blockIfDisabled(e, block = true) {
+    if (block && this.inDisabledFieldset()) {
+      e.preventDefault();
+      return true;
+    }
+    return false;
   }
 
   // Tabbing to the iframe, or clicking below the content, puts the focus in the document

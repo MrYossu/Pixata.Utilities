@@ -327,6 +327,8 @@ private async Task ReadPeople(PixataGridReadEventArgs<Person> args) {
 }
 ```
 
+The dates picked in the filters have a `Kind` of `Unspecified`. If your database is PostgreSQL, which won't compare those with a `timestamp with time zone` column, or you store times in UTC and want "on 21/10/2026" to mean the user's day, pass a `GridQueryOptions` to `ToGridResultAsync()`, such as `GridQueryOptions.FromTimeZone(userTimeZone)`. See [dates, time zones and PostgreSQL](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Grid.md#dates-time-zones-and-postgresql).
+
 ### Search box
 
 Put a `PixataGridSearchBox` in the grid's toolbar to let the user search. It shows the rows where any of the text columns contain what they type, ignoring case, and works alongside any column filters...
@@ -438,6 +440,7 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 | Property | Default | What it sets |
 | --- | --- | --- |
 | `--pixata-grid-font-size` | `.875rem` | The font size |
+| `--pixata-grid-cell-padding-y`, `--pixata-grid-cell-padding-x` | `.5rem`, `.75rem` (`.25rem`, `.5rem` with `Size="PixataGridSize.Small"`) | The space above and below, and either side of, the text in each cell and header. Set them on a container around a grid to make a compact grid, with the line height, font size and inputs as they are |
 | `--pixata-grid-line-height` | `1.4285` | The line height (20px with the default font size) |
 | `--pixata-grid-color` | `#212529` | The text colour |
 | `--pixata-grid-bg` | `#fff` | The background |
