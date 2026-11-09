@@ -23,11 +23,21 @@ public static class GridFilterExpressions {
   /// Builds a predicate that is true for items that pass every composite filter. Within each composite, its filters are
   /// combined with its own AND or OR. Returns null if there's nothing to filter on
   /// </summary>
-  public static Expression<Func<T, bool>>? Predicate<T>(IEnumerable<GridCompositeFilterDescriptor> composites) {
+  public static Expression<Func<T, bool>>? Predicate<T>(IEnumerable<GridCompositeFilterDescriptor> composites) =>
+    Predicate<T>(composites, null);
+
+  /// <summary>
+  /// Builds a predicate that is true for items that pass every composite filter. Within each composite, its filters are
+  /// combined with its own AND or OR. Returns null if there's nothing to filter on
+  /// </summary>
+  /// <param name="composites">The filters</param>
+  /// <param name="options">How to treat the filter values, such as converting dates to UTC. Can be null</param>
+  public static Expression<Func<T, bool>>? Predicate<T>(IEnumerable<GridCompositeFilterDescriptor> composites, GridQueryOptions? options) {
     ParameterExpression item = Expression.Parameter(typeof(T), "item");
+    Func<DateTime, DateTime>? convertDateTime = options?.ConvertDateTime;
     Expression? body = null;
     foreach (GridCompositeFilterDescriptor composite in composites) {
-      Expression? part = Composite(item, composite);
+      Expression? part = Composite(item, composite, convertDateTime);
       if (part is not null) {
         body = body is null ? part : Expression.AndAlso(body, part);
       }
@@ -35,20 +45,20 @@ public static class GridFilterExpressions {
     return body is null ? null : Expression.Lambda<Func<T, bool>>(body, item);
   }
 
-  private static Expression? Composite(ParameterExpression item, GridCompositeFilterDescriptor composite) {
+  private static Expression? Composite(ParameterExpression item, GridCompositeFilterDescriptor composite, Func<DateTime, DateTime>? convertDateTime) {
     Expression? body = null;
     foreach (GridFilterDescriptor filter in composite.Filters) {
-      Expression part = Filter(item, filter);
+      Expression part = Filter(item, filter, convertDateTime);
       body = body is null ? part : composite.Logic == GridFilterLogic.And ? Expression.AndAlso(body, part) : Expression.OrElse(body, part);
     }
     return body;
   }
 
-  private static Expression Filter(ParameterExpression item, GridFilterDescriptor filter) {
+  private static Expression Filter(ParameterExpression item, GridFilterDescriptor filter, Func<DateTime, DateTime>? convertDateTime) {
     // The member access is null-safe for nested fields, as it is for sorting
     LambdaExpression lambda = FieldAccessor.Lambda(item.Type, filter.Member);
     Expression member = new ReplaceParameter(lambda.Parameters[0], item).Visit(lambda.Body);
-    return member.Type == typeof(string) ? StringFilter(member, filter) : ValueFilter(member, filter);
+    return member.Type == typeof(string) ? StringFilter(member, filter) : ValueFilter(member, filter, convertDateTime);
   }
 
   // String comparisons ignore case, as Telerik's do. ToLower() is used rather than a StringComparison, because EF Core can
@@ -89,7 +99,7 @@ public static class GridFilterExpressions {
     };
   }
 
-  private static Expression ValueFilter(Expression member, GridFilterDescriptor filter) {
+  private static Expression ValueFilter(Expression member, GridFilterDescriptor filter, Func<DateTime, DateTime>? convertDateTime) {
     Type type = member.Type;
     bool nullable = !type.IsValueType || Nullable.GetUnderlyingType(type) is not null;
     switch (filter.Operator) {
@@ -102,12 +112,15 @@ public static class GridFilterExpressions {
       case GridFilterOperator.IsNotEmpty:
         return Expression.Constant(true);
       case GridFilterOperator.IsContainedIn:
-        return Contained(member, filter.Value);
+        return Contained(member, filter.Value, convertDateTime);
     }
     object? converted = ConvertValue(filter.Value, type);
     Type underlying = Nullable.GetUnderlyingType(type) ?? type;
     if (filter.IgnoreTime && underlying == typeof(DateTime) && converted is DateTime date) {
-      return DateOnlyFilter(member, filter, date.Date, nullable);
+      return DateOnlyFilter(member, filter, date.Date, nullable, convertDateTime);
+    }
+    if (converted is DateTime dateTime && convertDateTime is not null) {
+      converted = convertDateTime(dateTime);
     }
     ConstantExpression value = Expression.Constant(converted, type);
     // Enums can only be compared for equality in an expression, so ordering comparisons use their underlying number
@@ -132,9 +145,10 @@ public static class GridFilterExpressions {
 
   // Compares a DateTime field with a day, ignoring the time, using the start of that day and of the next one, so that EF
   // Core can still use an index on the field
-  private static Expression DateOnlyFilter(Expression member, GridFilterDescriptor filter, DateTime day, bool nullable) {
-    ConstantExpression start = Expression.Constant(day, member.Type);
-    ConstantExpression next = Expression.Constant(day.AddDays(1), member.Type);
+  private static Expression DateOnlyFilter(Expression member, GridFilterDescriptor filter, DateTime day, bool nullable, Func<DateTime, DateTime>? convertDateTime) {
+    DateTime nextDay = day.AddDays(1);
+    ConstantExpression start = Expression.Constant(convertDateTime is null ? day : convertDateTime(day), member.Type);
+    ConstantExpression next = Expression.Constant(convertDateTime is null ? nextDay : convertDateTime(nextDay), member.Type);
     return filter.Operator switch {
       GridFilterOperator.IsEqualTo => Expression.AndAlso(Expression.GreaterThanOrEqual(member, start), Expression.LessThan(member, next)),
       // A null isn't on the day, as it isn't equal to it without IgnoreTime
@@ -150,7 +164,7 @@ public static class GridFilterExpressions {
   }
 
   // values.Contains(member), with the values converted to the member's type
-  private static Expression Contained(Expression member, object? values) {
+  private static Expression Contained(Expression member, object? values, Func<DateTime, DateTime>? convertDateTime = null) {
     Type listType = typeof(List<>).MakeGenericType(member.Type);
     IList list = (IList)Activator.CreateInstance(listType)!;
     IEnumerable source = values switch {
@@ -161,7 +175,8 @@ public static class GridFilterExpressions {
       _ => new[] { values }
     };
     foreach (object? value in source) {
-      list.Add(ConvertValue(value, member.Type));
+      object? converted = ConvertValue(value, member.Type);
+      list.Add(converted is DateTime dateTime && convertDateTime is not null ? convertDateTime(dateTime) : converted);
     }
     MethodInfo contains = typeof(Enumerable).GetMethods().First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2).MakeGenericMethod(member.Type);
     return Expression.Call(contains, Expression.Constant(list), member);

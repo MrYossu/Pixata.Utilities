@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Extensions.Grid;
@@ -190,4 +191,92 @@ public class GridFilter_Tests {
   [TestMethod]
   public void TextOperatorsOnNumbers_Throw() =>
     Assert.ThrowsException<ArgumentException>(() => Ids(new GridFilterDescriptor("Salary", GridFilterOperator.Contains, 1)));
+
+  // The DateTime values that went into the expression, which is what EF Core sends to the database
+  private static List<DateTime> DatesIn(Expression? expression) {
+    DateCollector collector = new();
+    collector.Visit(expression);
+    return collector.Dates;
+  }
+
+  private sealed class DateCollector : ExpressionVisitor {
+    public List<DateTime> Dates { get; } = [];
+
+    protected override Expression VisitConstant(ConstantExpression node) {
+      switch (node.Value) {
+        case DateTime date:
+          Dates.Add(date);
+          break;
+        case IEnumerable<DateTime> dates:
+          Dates.AddRange(dates);
+          break;
+        case IEnumerable<DateTime?> dates:
+          Dates.AddRange(dates.OfType<DateTime>());
+          break;
+      }
+      return node;
+    }
+  }
+
+  private static Expression<Func<Visit, bool>>? VisitPredicate(GridQueryOptions? options, params GridFilterDescriptor[] filters) =>
+    GridFilterExpressions.Predicate<Visit>([new GridCompositeFilterDescriptor(GridFilterLogic.And, [.. filters])], options);
+
+  [TestMethod]
+  public void WithoutOptions_FilterDatesAreLeftAsTheyAre() {
+    List<DateTime> dates = DatesIn(VisitPredicate(null, new GridFilterDescriptor("When", GridFilterOperator.IsGreaterThan, new DateTime(2026, 10, 21))));
+    Assert.AreEqual(1, dates.Count);
+    Assert.AreEqual(DateTimeKind.Unspecified, dates[0].Kind);
+  }
+
+  [TestMethod]
+  public void UtcOption_MarksEveryFilterDateAsUtc() {
+    List<DateTime> dates = DatesIn(VisitPredicate(GridQueryOptions.Utc,
+      new GridFilterDescriptor("When", GridFilterOperator.IsGreaterThan, new DateTime(2026, 10, 21, 9, 0, 0)),
+      new GridFilterDescriptor("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 21)) { IgnoreTime = true },
+      new GridFilterDescriptor("Left", GridFilterOperator.IsNotEqualTo, new DateTime(2026, 10, 22)) { IgnoreTime = true },
+      new GridFilterDescriptor("When", GridFilterOperator.IsContainedIn, new[] { new DateTime(2026, 10, 21), new DateTime(2026, 10, 22) })));
+    CollectionAssert.AreEqual(new[] {
+      new DateTime(2026, 10, 21, 9, 0, 0), new DateTime(2026, 10, 21), new DateTime(2026, 10, 22), new DateTime(2026, 10, 22), new DateTime(2026, 10, 23),
+      new DateTime(2026, 10, 21), new DateTime(2026, 10, 22)
+    }, dates);
+    Assert.IsTrue(dates.All(d => d.Kind == DateTimeKind.Utc));
+  }
+
+  [TestMethod]
+  public void FromTimeZone_ConvertsTheDayToUtc() {
+    TimeZoneInfo london = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+    // 21 October 2026 is in British Summer Time, so the day starts at 23:00 UTC on the 20th
+    List<DateTime> dates = DatesIn(VisitPredicate(GridQueryOptions.FromTimeZone(london),
+      new GridFilterDescriptor("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 21)) { IgnoreTime = true }));
+    CollectionAssert.AreEqual(new[] { new DateTime(2026, 10, 20, 23, 0, 0), new DateTime(2026, 10, 21, 23, 0, 0) }, dates);
+    Assert.IsTrue(dates.All(d => d.Kind == DateTimeKind.Utc));
+    // Visit 1 (23:59:59 on the 20th, read as UTC) is on the 21st in London, and visit 4 (midnight on the 22nd) is 1am on the 22nd there
+    CollectionAssert.AreEqual(new[] { 1, 2, 3 }, Visits.AsQueryable()
+      .ApplyFilters([new GridCompositeFilterDescriptor(GridFilterLogic.And, [new("When", GridFilterOperator.IsEqualTo, new DateTime(2026, 10, 21)) { IgnoreTime = true }])], GridQueryOptions.FromTimeZone(london))
+      .Select(v => v.Id).ToArray());
+  }
+
+  [TestMethod]
+  public void FromTimeZone_MovesATimeTheClocksSkippedToWhenTheyChanged() {
+    TimeZoneInfo london = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+    // The clocks went from 01:00 to 02:00 on 29 March 2026, so 01:30 didn't happen. 02:00 BST is 01:00 UTC
+    List<DateTime> dates = DatesIn(VisitPredicate(GridQueryOptions.FromTimeZone(london),
+      new GridFilterDescriptor("When", GridFilterOperator.IsGreaterThan, new DateTime(2026, 3, 29, 1, 30, 0))));
+    CollectionAssert.AreEqual(new[] { new DateTime(2026, 3, 29, 1, 0, 0, DateTimeKind.Utc) }, dates);
+  }
+
+  [TestMethod]
+  public void FromTimeZone_LeavesUtcDatesAlone() {
+    TimeZoneInfo london = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+    DateTime utc = new(2026, 7, 1, 12, 0, 0, DateTimeKind.Utc);
+    Assert.AreEqual(utc, GridQueryOptions.FromTimeZone(london).ConvertDateTime!(utc));
+  }
+
+  [TestMethod]
+  public void ToGridResult_WithOptions_ConvertsTheFilterDates() {
+    GridRequest request = new() { Filters = [new(GridFilterLogic.And, [new("When", GridFilterOperator.IsGreaterThanOrEqualTo, new DateTime(2026, 10, 21, 1, 0, 0))])] };
+    GridQueryOptions oneHourBehind = new() { ConvertDateTime = d => d.AddHours(-1) };
+    CollectionAssert.AreEqual(new[] { 2, 3, 4 }, Visits.ToGridResult(request, oneHourBehind).Data.Select(v => v.Id).ToArray());
+    CollectionAssert.AreEqual(new[] { 3, 4 }, Visits.ToGridResult(request).Data.Select(v => v.Id).ToArray());
+  }
 }

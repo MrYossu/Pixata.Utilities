@@ -14,8 +14,20 @@ public static class GridQueryExtensions {
   /// <param name="query">The data</param>
   /// <param name="request">What the grid wants</param>
   /// <returns>The requested page of data, and the total number of items before paging</returns>
-  public static GridResult<T> ToGridResult<T>(this IQueryable<T> query, GridRequest request) {
-    IQueryable<T> filtered = query.ApplyFilters(request.Search is null ? request.Filters : [.. request.Filters, request.Search]);
+  public static GridResult<T> ToGridResult<T>(this IQueryable<T> query, GridRequest request) =>
+    query.ToGridResult(request, null);
+
+  /// <summary>
+  /// Applies a <see cref="GridRequest"/> to a query. This only uses standard LINQ operators, so it works on an EF Core query
+  /// (where it is translated to SQL) as well as on in-memory data
+  /// </summary>
+  /// <param name="query">The data</param>
+  /// <param name="request">What the grid wants</param>
+  /// <param name="options">How to treat the filter values, such as <see cref="GridQueryOptions.FromTimeZone"/> to convert
+  /// the dates to UTC for PostgreSQL. Can be null</param>
+  /// <returns>The requested page of data, and the total number of items before paging</returns>
+  public static GridResult<T> ToGridResult<T>(this IQueryable<T> query, GridRequest request, GridQueryOptions? options) {
+    IQueryable<T> filtered = query.ApplyFilters(request.Search is null ? request.Filters : [.. request.Filters, request.Search], options);
     IQueryable<T> sorted = filtered.ApplySorts(SortsWithGroups(request));
     int total = sorted.Count();
     if (request.PageSize > 0) {
@@ -54,13 +66,33 @@ public static class GridQueryExtensions {
     data.AsQueryable().ToGridResult(request);
 
   /// <summary>
+  /// Applies a <see cref="GridRequest"/> to in-memory data
+  /// </summary>
+  /// <param name="data">The data</param>
+  /// <param name="request">What the grid wants</param>
+  /// <param name="options">How to treat the filter values. Can be null</param>
+  /// <returns>The requested page of data, and the total number of items before paging</returns>
+  public static GridResult<T> ToGridResult<T>(this IEnumerable<T> data, GridRequest request, GridQueryOptions? options) =>
+    data.AsQueryable().ToGridResult(request, options);
+
+  /// <summary>
   /// Filters a query, keeping the items that pass every composite filter. String comparisons ignore case, as Telerik's do
   /// </summary>
   /// <param name="query">The data</param>
   /// <param name="filters">The filters to apply</param>
   /// <returns>The filtered query</returns>
-  public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> query, IEnumerable<GridCompositeFilterDescriptor> filters) {
-    Expression<Func<T, bool>>? predicate = GridFilterExpressions.Predicate<T>(filters);
+  public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> query, IEnumerable<GridCompositeFilterDescriptor> filters) =>
+    query.ApplyFilters(filters, null);
+
+  /// <summary>
+  /// Filters a query, keeping the items that pass every composite filter. String comparisons ignore case, as Telerik's do
+  /// </summary>
+  /// <param name="query">The data</param>
+  /// <param name="filters">The filters to apply</param>
+  /// <param name="options">How to treat the filter values, such as converting dates to UTC. Can be null</param>
+  /// <returns>The filtered query</returns>
+  public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> query, IEnumerable<GridCompositeFilterDescriptor> filters, GridQueryOptions? options) {
+    Expression<Func<T, bool>>? predicate = GridFilterExpressions.Predicate<T>(filters, options);
     return predicate is null ? query : query.Where(predicate);
   }
 
