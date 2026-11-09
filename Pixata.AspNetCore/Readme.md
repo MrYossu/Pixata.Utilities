@@ -6,6 +6,8 @@ Server-side helpers for ASP.NET Core apps - entity auditing, payload encryption,
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore/) is available for this project.
 
+>**Version 2.4.0** fixes the audit viewer's date filters on PostgreSQL. `GetAuditsByEntityTypes()` now marks its dates as UTC (converting a `Local` one), as Npgsql refuses to compare a date whose `Kind` isn't `Utc` with a `timestamp with time zone` column (#143). It also adds an overload of `ToGridResultAsync()` that takes a `GridQueryOptions` (from Pixata.Extensions 2.24.0), which converts the dates in a grid's filters, to UTC or from the user's time zone, so date filters work on PostgreSQL too. See [dates, time zones and PostgreSQL](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Grid.md#dates-time-zones-and-postgresql) (#144)
+
 >**Version 2.3.2** depends on Pixata.Extensions 2.23.0, so `ToGridResultAsync()` honours the new `IgnoreTime` on grid filters (which compares a `DateTime` field's date only) when a WASM client sends a request with it. No code changes.
 
 >**Version 2.3.1** changes the documentation, and the XML comments on `PdfConverterInterface` and `RegisterPdfConverter`, to recommend [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) for creating PDFs. No code changes.
