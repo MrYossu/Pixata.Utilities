@@ -56,6 +56,8 @@ public class AuditService : AuditServiceInterface {
 
   public async Task<List<Audit>> GetAuditsByEntityTypes(IEnumerable<string> entityTypes, DateTime? fromDate, DateTime? toDate, string? user) {
     List<string> types = entityTypes.ToList();
+    fromDate = AsUtc(fromDate);
+    toDate = AsUtc(toDate);
     return await Read(context => {
       IQueryable<Audit> query = context.Set<Audit>().AsNoTracking().Where(a => types.Contains(a.EntityType));
       if (fromDate.HasValue) {
@@ -70,6 +72,16 @@ public class AuditService : AuditServiceInterface {
       return query.OrderByDescending(a => a.ChangedAt).ToListAsync();
     });
   }
+
+  // The audit times are stored in UTC, so a filter date that doesn't say what it is (eg one from a date input, or a query
+  // string without a Z) is taken to be UTC as well. It is marked as such, as Npgsql refuses to compare a DateTime whose Kind
+  // isn't Utc with a timestamp with time zone column
+  private static DateTime? AsUtc(DateTime? date) =>
+    date?.Kind switch {
+      null => null,
+      DateTimeKind.Local => date.Value.ToUniversalTime(),
+      _ => DateTime.SpecifyKind(date.Value, DateTimeKind.Utc)
+    };
 
   private async Task<T> Read<T>(Func<DbContext, Task<T>> query) {
     if (_context is not null) {

@@ -284,13 +284,16 @@
   private string FormatChangedAt(DateTime changedAt) =>
     TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(changedAt, DateTimeKind.Utc), TimeZone).ToString(DateFormat);
 
-  // The filter dates are entered in the display time zone, but the audit times are stored in UTC
+  // The filter dates are entered in the display time zone, but the audit times are stored in UTC. The result is always marked
+  // as UTC, as Npgsql refuses to compare a DateTime whose Kind isn't Utc with a timestamp with time zone column
   private DateTime? FilterDateToUtc(DateTime? date) {
-    if (date is null || TimeZone == TimeZoneInfo.Utc) {
-      return date;
+    if (date is null) {
+      return null;
     }
     DateTime unspecified = DateTime.SpecifyKind(date.Value, DateTimeKind.Unspecified);
-    return TimeZone.IsInvalidTime(unspecified) ? date : TimeZoneInfo.ConvertTimeToUtc(unspecified, TimeZone);
+    return TimeZone == TimeZoneInfo.Utc || TimeZone.IsInvalidTime(unspecified)
+      ? DateTime.SpecifyKind(date.Value, DateTimeKind.Utc)
+      : TimeZoneInfo.ConvertTimeToUtc(unspecified, TimeZone);
   }
 
   private bool _defaultHorizontalView = true;
