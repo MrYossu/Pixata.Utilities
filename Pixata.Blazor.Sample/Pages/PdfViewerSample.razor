@@ -1,0 +1,103 @@
+@page "/PdfViewerSample"
+@using System.IO
+@using Pixata.Blazor.PdfViewer
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Environment
+
+<SitePageTitle>PDF viewer</SitePageTitle>
+
+<h3>PDF viewer</h3>
+
+<p><code>PixataPdfViewer</code>, from the Pixata.Blazor.PdfViewer package, shows a PDF in the page, using PDF.js. Use the toolbar to move between pages, zoom, rotate, search, download and print, or hold Ctrl and use the mouse wheel to zoom. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.PdfViewer/Readme.md">the documentation</a>.</p>
+
+<ComponentSample Title="Basic use">
+  <Description>
+    <p>A PDF from a URL, here a file in the sample site's <code>wwwroot</code>. Without a <code>Height</code>, the viewer fills the height of its container.</p>
+  </Description>
+  <ChildContent>
+    <div style="height: 500px;">
+      <PixataPdfViewer Url="sample-invoice.pdf" FileName="INV-1042.pdf" />
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Beside a form">
+  <Description>
+    <p>The PDF given as a <code>byte[]</code> (as it would be from a database), next to the form it's checked against, with <code>@@bind-Page</code> showing the page the user is on and <code>Zoom="PixataPdfViewerZoom.FitPage"</code>.</p>
+  </Description>
+  <ChildContent>
+    <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr); gap: 1rem; height: 70vh; min-height: 30rem;">
+      <PixataPdfViewer Data="_invoice" FileName="INV-1042.pdf" Zoom="PixataPdfViewerZoom.FitPage" @bind-Page="_page" OnLoaded="@(e => _pageCount = e.PageCount)" />
+      <div>
+        <p>Page @_page of @_pageCount</p>
+        <FormSingle Label="Invoice number" Id="pdf-invoice-number">
+          <PixataTextBox Id="pdf-invoice-number" @bind-Value="_invoiceNumber" />
+        </FormSingle>
+        <FormSingle Label="Total" Id="pdf-total">
+          <PixataNumericTextBox Id="pdf-total" @bind-Value="_total" Format="C2" />
+        </FormSingle>
+        <FormSingle Label="Due" Id="pdf-due">
+          <PixataDatePicker Id="pdf-due" @bind-Value="_due" />
+        </FormSingle>
+        <div class="d-flex gap-2 mt-2">
+          <PixataSecondaryButton ButtonType="PixataButtonType.Button" OnClick="@(() => _page = 3)">Show the delivery note</PixataSecondaryButton>
+        </div>
+      </div>
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Choosing the tools">
+  <Description>
+    <p><code>ShowToolbar</code>, <code>ShowSearch</code>, <code>ShowRotate</code>, <code>ShowDownload</code> and <code>ShowPrint</code> switch parts of the toolbar off. <code>OnDownload</code> can change the file name or cancel the download.</p>
+  </Description>
+  <ChildContent>
+    <div class="d-flex flex-wrap gap-3 mb-2">
+      <label><PixataCheckBox @bind-Value="_showSearch" /> Search</label>
+      <label><PixataCheckBox @bind-Value="_showRotate" /> Rotate</label>
+      <label><PixataCheckBox @bind-Value="_showDownload" /> Download</label>
+      <label><PixataCheckBox @bind-Value="_showPrint" /> Print</label>
+      <label><PixataCheckBox @bind-Value="_showToolbar" /> Toolbar</label>
+    </div>
+    <PixataPdfViewer Url="sample-invoice.pdf" Height="400px" Zoom="1m" ShowToolbar="_showToolbar" ShowSearch="_showSearch" ShowRotate="_showRotate" ShowDownload="_showDownload" ShowPrint="_showPrint" OnDownload="Downloading" />
+    <p class="mt-2">@_downloaded</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Errors">
+  <Description>
+    <p>When a PDF can't be shown, the viewer says why, and <code>OnError</code> fires.</p>
+  </Description>
+  <ChildContent>
+    <div class="d-flex gap-2 mb-2">
+      <PixataSecondaryButton ButtonType="PixataButtonType.Button" OnClick="@(() => _brokenUrl = "no-such-file.pdf")">A missing file</PixataSecondaryButton>
+      <PixataSecondaryButton ButtonType="PixataButtonType.Button" OnClick="@(() => _brokenUrl = "css/site.css")">A file that isn't a PDF</PixataSecondaryButton>
+    </div>
+    <PixataPdfViewer Url="@_brokenUrl" Height="200px" OnError="@(e => _errorLog = $"OnError: {e.Kind} ({e.Detail})")" />
+    <p class="mt-2">@_errorLog</p>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private byte[]? _invoice;
+  private int _page = 1;
+  private int _pageCount;
+  private string _invoiceNumber = "INV-1042";
+  private decimal _total = 1784.99m;
+  private DateTime? _due = new DateTime(2026, 11, 28);
+  private bool _showToolbar = true;
+  private bool _showSearch = true;
+  private bool _showRotate = true;
+  private bool _showDownload = true;
+  private bool _showPrint = true;
+  private string _downloaded = "";
+  private string? _brokenUrl;
+  private string _errorLog = "";
+
+  protected override async Task OnInitializedAsync() =>
+    _invoice = await File.ReadAllBytesAsync(Path.Combine(Environment.WebRootPath, "sample-invoice.pdf"));
+
+  private void Downloading(PixataPdfViewerDownloadEventArgs args) {
+    args.FileName = $"Invoice {DateTime.Now:yyyy-MM-dd HHmm}.pdf";
+    _downloaded = $"OnDownload: saving as {args.FileName}";
+  }
+}

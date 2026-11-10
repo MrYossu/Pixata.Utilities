@@ -56,6 +56,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Pdf", "Pixata.Pdf\Pi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Pdf.Tests", "Pixata.Pdf.Tests\Pixata.Pdf.Tests.csproj", "{8A23D4E9-1B1D-4BCB-8576-07EE0D065E64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixata.Blazor.PdfViewer", "Pixata.Blazor.PdfViewer\Pixata.Blazor.PdfViewer.csproj", "{D8F6D0D4-917A-4F9A-9525-546EF25C6690}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -318,6 +320,18 @@ Global
 		{8A23D4E9-1B1D-4BCB-8576-07EE0D065E64}.Release|x64.Build.0 = Release|Any CPU
 		{8A23D4E9-1B1D-4BCB-8576-07EE0D065E64}.Release|x86.ActiveCfg = Release|Any CPU
 		{8A23D4E9-1B1D-4BCB-8576-07EE0D065E64}.Release|x86.Build.0 = Release|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Debug|x64.Build.0 = Debug|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Debug|x86.Build.0 = Debug|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Release|x64.ActiveCfg = Release|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Release|x64.Build.0 = Release|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Release|x86.ActiveCfg = Release|Any CPU
+		{D8F6D0D4-917A-4F9A-9525-546EF25C6690}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

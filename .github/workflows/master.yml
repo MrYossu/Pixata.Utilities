@@ -59,6 +59,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Blazor.PdfViewer
+    - name: Restore - Pixata.Blazor.PdfViewer Dependencies
+      run: dotnet restore Pixata.Blazor.PdfViewer/Pixata.Blazor.PdfViewer.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.Blazor.PdfViewer.csproj
+      run: dotnet build Pixata.Blazor.PdfViewer/Pixata.Blazor.PdfViewer.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.Blazor.TelerikComponents
     - name: Restore - Pixata.Blazor.TelerikComponents Dependencies
       run: dotnet restore Pixata.Blazor.TelerikComponents/Pixata.Blazor.TelerikComponents.csproj  --configfile ./nuget.config
