@@ -512,20 +512,25 @@
 
 <h4>Export</h4>
 
-<p>The toolbar buttons save the grid as a CSV or Excel file. The checkbox exports every row rather than just the page. The button under the grid shows what it exports.</p>
+<p>The toolbar buttons save the grid as a CSV or Excel file. The checkbox exports every row rather than just the page. The button under the grid shows what it exports. The Excel file has the salary total and the count of first names under the rows, as formulas. Group the grid by dragging a header into the panel, and switch on group rows to have the Excel file show the groups, each with its own totals.</p>
 
 <div class="pixata-blazor-grid-sample-options">
   <span><PixataSwitch Id="export-all-pages-switch" @bind-Value="_exportAllPages" Size="sm" /> <label for="export-all-pages-switch">Export all pages</label></span>
+  <span><PixataSwitch Id="export-group-rows-switch" @bind-Value="_exportGroupRows" Size="sm" /> <label for="export-group-rows-switch">Group rows in Excel</label></span>
 </div>
 
-<PixataGrid @ref="_exportGrid" Data="Data" Size="_size" Pageable="true" PageSize="5" Sortable="true">
+<PixataGrid @ref="_exportGrid" Data="Data" Size="_size" Pageable="true" PageSize="5" Sortable="true" Groupable="true">
+  <GridAggregates>
+    <PixataGridAggregate Field="@nameof(GridSampleEmployee.Salary)" Aggregate="@Pixata.Extensions.Grid.GridAggregateType.Sum" />
+    <PixataGridAggregate Field="@nameof(GridSampleEmployee.FirstName)" Aggregate="@Pixata.Extensions.Grid.GridAggregateType.Count" />
+  </GridAggregates>
   <GridToolBarTemplate>
     <PixataGridCommandButton Command="CsvExport" Icon="PixataGridIcon.FileCsv">Export to CSV</PixataGridCommandButton>
     <PixataGridCommandButton Command="ExcelExport" Icon="PixataGridIcon.FileExcel">Export to Excel</PixataGridCommandButton>
   </GridToolBarTemplate>
   <GridExport>
     <PixataGridCsvExport FileName="pixata-grid-export" AllPages="_exportAllPages" />
-    <PixataGridExcelExport FileName="pixata-grid-export" AllPages="_exportAllPages" />
+    <PixataGridExcelExport FileName="pixata-grid-export" AllPages="_exportAllPages" GroupRows="_exportGroupRows" />
   </GridExport>
   <GridColumns>
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Id)" Width="80px" />
@@ -557,6 +562,28 @@
     <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" DisplayFormat="{0:C0}" />
   </GridColumns>
 </PixataGrid>
+
+<h4>Pasting from a spreadsheet</h4>
+
+<p>
+  In a grid with <code>EditMode="InCell"</code> and <code>Navigable="true"</code>, cells copied from Excel or Google Sheets can be
+  pasted into the grid. Click a cell (or move to it with the keyboard) and paste, and the values fill the cells to the right and
+  below, as they would in the spreadsheet. Each row that changes raises <code>OnUpdate</code>. The total can't be edited, so it's
+  skipped. Copy a block of numbers from a spreadsheet to try it. Anything that isn't a number is left out, and listed under the grid.
+</p>
+
+<PixataGrid TItem="BudgetLine" Data="_budget" Size="_size" EditMode="PixataGridEditMode.InCell" Navigable="true"
+            OnUpdate="@((PixataGridCommandEventArgs<BudgetLine> args) => _budget[_budget.FindIndex(b => b.Account == args.Item.Account)] = args.Item)"
+            OnPaste="@((PixataGridPasteEventArgs<BudgetLine> args) => _pasteMessage = $"Cells pasted: {args.Cells.Count(c => c.Error is null)}" + string.Concat(args.Cells.Where(c => c.Error is not null).Select(c => $". {c.Error}")))">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(BudgetLine.Account)" Editable="false" />
+    <PixataGridColumn Field="@nameof(BudgetLine.January)" DisplayFormat="{0:N0}" />
+    <PixataGridColumn Field="@nameof(BudgetLine.February)" DisplayFormat="{0:N0}" />
+    <PixataGridColumn Field="@nameof(BudgetLine.March)" DisplayFormat="{0:N0}" />
+    <PixataGridColumn Field="@nameof(BudgetLine.Total)" DisplayFormat="{0:N0}" />
+  </GridColumns>
+</PixataGrid>
+<p>@_pasteMessage</p>
 
 <h4>Highlighting</h4>
 
@@ -674,6 +701,7 @@
     SortedDescending = "ממוין בסדר יורד"
   };
   private bool _exportAllPages;
+  private bool _exportGroupRows;
   private PixataGrid<GridSampleEmployee>? _exportGrid;
 
   private string? _exports;
@@ -820,5 +848,16 @@
 
   private List<GridSampleEmployee> Data =>
     _empty ? [] : _employees;
+
+  public class BudgetLine {
+    public string Account { get; set; } = "";
+    public decimal January { get; set; }
+    public decimal February { get; set; }
+    public decimal March { get; set; }
+    public decimal Total => January + February + March;
+  }
+
+  private List<BudgetLine> _budget = [new() { Account = "Salaries" }, new() { Account = "Rent" }, new() { Account = "Travel" }];
+  private string _pasteMessage = "";
 
 }

@@ -2,7 +2,7 @@
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataGrid` is a data grid with paging, sorting, filtering, searching, selection, editing, grouping and aggregates, resizable, movable and frozen columns, virtual scrolling, detail rows, row dragging, export, keyboard navigation, translation and right-to-left layout. It renders on the client or the server, so it can be used in WASM as well as Blazor Server apps.
+`PixataGrid` is a data grid with paging, sorting, filtering, searching, selection, editing (including pasting cells from a spreadsheet), grouping and aggregates, resizable, movable and frozen columns, virtual scrolling, detail rows, row dragging, export, keyboard navigation, translation and right-to-left layout. It renders on the client or the server, so it can be used in WASM as well as Blazor Server apps.
 
 The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataGridSample.razor) shows each feature.
 
@@ -72,6 +72,8 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Groupable` | `bool` | Shows a panel above the grid that the user can drag column headers into, to group the rows. See [grouping](#grouping-and-aggregates) |
 | `GridAggregates` | `RenderFragment` | The aggregates to calculate, as `PixataGridAggregate`s, for the footer templates |
 | `Navigable` | `bool` | Makes the grid one tab stop, with the keyboard moving between cells. See [keyboard navigation](#keyboard-navigation-and-accessibility) |
+| `PasteFromSpreadsheets` | `bool` | Whether cells copied from a spreadsheet can be pasted into a navigable in-cell grid. Defaults to true. See [pasting from a spreadsheet](#pasting-from-a-spreadsheet) |
+| `OnPaste` | `EventCallback<PixataGridPasteEventArgs<TItem>>` | Fires when cells are pasted, before they're changed, so you can check, change or cancel them |
 | `HighlightedItems` | `IEnumerable<TItem>` | Rows to draw attention to. See [highlighting](#highlighting) |
 | `HighlightedCells` | `IEnumerable<PixataGridHighlightedCell<TItem>>` | Cells to draw attention to |
 | `Messages` | `PixataGridMessages` | The grid's text, to translate it. See [translation](#translation) |
@@ -599,6 +601,38 @@ With `EditMode="PixataGridEditMode.InCell"`, clicking a cell edits just that cel
 
 Each cell is saved with `OnUpdate`, whose `args.Field` and `args.Value` say which field changed. A value that fails validation keeps the cell open (with a red border) until it's fixed or cancelled. Add puts a new row at the top with its first editable cell open; the user can move around it with Tab, and it's created (with `OnCreate`) when they press Enter or click elsewhere.
 
+### Pasting from a spreadsheet
+
+With `Navigable="true"` as well, cells copied from a spreadsheet such as Excel or Google Sheets can be pasted into the grid, which is handy for entering a budget or a schedule that's already in a spreadsheet. Click a cell (or move to it with the keyboard) and paste, and the values fill the cells to the right and below, as they would in the spreadsheet...
+
+```razor
+<PixataGrid Data="Budget" EditMode="PixataGridEditMode.InCell" Navigable="true" OnUpdate="Update" OnPaste="Pasted">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(BudgetLine.Account)" Editable="false" />
+    <PixataGridColumn Field="@nameof(BudgetLine.January)" DisplayFormat="{0:N0}" />
+    <PixataGridColumn Field="@nameof(BudgetLine.February)" DisplayFormat="{0:N0}" />
+    ...
+  </GridColumns>
+</PixataGrid>
+```
+
+- The values go into the columns shown, in order, starting with the one pasted into, and the rows shown, starting with the one pasted into. A column that can't be edited (such as a total) is skipped, rather than the values moving along to fill it, so the grid lines up with the spreadsheet. Anything past the last column or row is left out, as the paste doesn't add rows
+- Each value is converted to its field's type, as the current culture writes it. Numbers can have thousands separators, a currency symbol, or brackets for a negative amount. "15%" is 0.15 in a column shown as a percentage, and 15 in any other. True and false can be TRUE and FALSE, yes and no, or 1 and 0. Enums can be their names or the text the grid shows. An empty cell clears a field that can be empty
+- A value that can't be converted, or that breaks the field's validation attributes (such as `[Range]`), leaves its cell as it was, and the rest still go in. With a `ValidatorTemplate` (such as FluentValidation), only the conversion is checked here, so check the rest in `OnUpdate`
+- Each row that changes raises `OnUpdate` once, with the row's edited copy, as saving a cell does. If only one of its cells changed, `args.Field` and `args.Value` say which; if more did, `args.Field` is null
+- If a cell was being edited, its edit is cancelled first, as the paste replaces it
+
+Pasting one value into a cell's editor works as normal, as does pasting lines of text into a multi-line editor. Only text with tabs or line breaks is spread over the cells (or any text pasted into a cell that isn't being edited). Set `PasteFromSpreadsheets="false"` to turn it off.
+
+`OnPaste` fires before anything changes, with the pasted `Rows` (each a list of cells' text), and the `Cells` the text lands on. Each cell has the row's `Item`, the `Field`, the `Text`, the converted `Value`, and an `Error` if it can't go in. Change the values, set or clear errors, or set `IsCancelled` to apply them yourself. The errors' text comes from the `PasteInvalidValueFormat` and `PasteEmptyValueFormat` [messages](#translation), so you can show them to the user...
+
+```csharp
+private void Pasted(PixataGridPasteEventArgs<BudgetLine> args) =>
+  _pasteErrors = [.. args.Cells.Where(c => c.Error is not null).Select(c => c.Error!)];
+```
+
+`SpreadsheetText.Parse()` and `SpreadsheetText.Convert()` do the splitting and converting, if you need them yourself.
+
 ### Command buttons
 
 `PixataGridCommandButton` runs one of the built-in commands, `Add`, `Edit`, `Save`, `Cancel` or `Delete`. For anything else, leave out `Command` and handle `OnClick`, which is given the row's item. In a command column, a button shows when the row isn't being edited, or, with `ShowInEdit="true"`, when it is. `ThemeColor="primary"` makes it stand out.
@@ -768,6 +802,7 @@ With `Navigable="true"`, the grid is a single tab stop, and the keyboard moves b
 | Space | Select the row (or the cell, when selecting cells) |
 | Alt+Down | On a header, open its column menu or filter menu |
 | Escape | Cancel editing |
+| Ctrl+V | In `InCell` mode, paste cells copied from a spreadsheet, filling the cells to the right and below. See [pasting from a spreadsheet](#pasting-from-a-spreadsheet) |
 
 A `Navigable` grid's table has the ARIA `grid` role, with `aria-rowcount` and `aria-colcount` for all the data (not just the rows rendered), and each data row has its `aria-rowindex`, so screen readers can say where the user is. Without `Navigable`, the grid is a normal table, which screen readers can also read, and its sortable headers are each a tab stop. Either way, sorted headers have `aria-sort`, selected rows `aria-selected`, menus are dialogs with labels, and the buttons have labels.
 
@@ -832,12 +867,14 @@ The grid can be saved as a CSV file, with a command button in the toolbar or fro
 | --- | --- | --- |
 | `FileName` | `string` | The file name, without its extension. Defaults to "Grid" |
 | `AllPages` | `bool` | Exports all the rows (filtered and sorted as in the grid), rather than just the page shown. With `OnRead`, the handler is called with a request for all the rows (a `PageSize` of zero) |
-| `OnBeforeExport` | `EventCallback<PixataGridBeforeExportEventArgs<TItem>>` | Fires before the export, with the `Columns` (each with a `Field`, `Title`, `Width` and `DisplayFormat`) and `Data`, which you can change. Set `IsCancelled` to stop it |
+| `OnBeforeExport` | `EventCallback<PixataGridBeforeExportEventArgs<TItem>>` | Fires before the export, with the `Columns` (each with a `Field`, `Title`, `Width`, `DisplayFormat` and the `Aggregates` the grid's `GridAggregates` ask for on it), the `Data`, and the `Groups` the grid is grouped by, all of which you can change. Set `IsCancelled` to stop it. The CSV export doesn't use the aggregates or groups, but the [Excel export](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Grid.Excel/Readme.md#totals) does |
 | `OnAfterExport` | `EventCallback<PixataGridAfterExportEventArgs>` | Fires after the export, with the file as a `Stream` |
 
 Without a `PixataGridCsvExport`, the `CsvExport` command still works, with the defaults. From code, `SaveAsCsvFile()` exports and has the browser save the file, and `ExportToCsv()` returns it as a `MemoryStream` (or null if `OnBeforeExport` cancelled it).
 
 The CSV has a heading row with the column titles, then a row for each item. Only columns that are shown and have a `Field` are exported, so command, checkbox and drag columns are left out. The values aren't formatted with the `DisplayFormat`, so the file can be read back accurately: numbers have a full stop for the decimal point and no thousands separators, true and false are written as TRUE and FALSE, and dates as the current culture writes them. Values with a comma, quote or line break are quoted. The file is UTF-8, with a byte order mark so Excel reads it correctly.
+
+To add a format of your own, derive from `PixataGridExportBase<TItem>`, which is what the CSV and Excel exports do. Implement `Write(columns, data, culture)`, and, if the format can show the grid's grouping, override `Write(PixataGridBeforeExportEventArgs<TItem> export, CultureInfo culture)` as well, which is the one the grid calls, and is given the groups too.
 
 ## Virtual scrolling
 
