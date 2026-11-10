@@ -8,6 +8,8 @@ Playwright (Apache 2.0) and Chromium (BSD) are free, with no licence key. Chromi
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwright/) is available for this project.
 
+>**Version 1.1.1** works in Linux containers. The Playwright driver's `node` executable was copied into the build and publish output so that only the user who built the app could run it, so an app in an image based on `mcr.microsoft.com/dotnet/aspnet` (which runs as the `app` user) couldn't start it. The build now makes it executable by everyone, and if it still can't be run, the error says why. The readme has a new section on [Linux and Docker](#linux-and-docker), with a sample Dockerfile, the libraries Chromium needs, and how much it adds to the image (#145)
+
 >**Version 1.1.0** shortens the paths Chromium needs below your app's folder by about 40 characters, so that it fits in an ordinary project folder on Windows without long paths. **Deployment change:** Chromium is now copied to `.pw\<revision>` (eg `.pw\1243`) in the build and publish output, in place of `.playwright-browsers\chromium_headless_shell-<revision>`, so `PlaywrightPdfConverter.BrowsersFolder` is now `".pw"`. Deploy the new `.pw` folder with the rest of the app as usual, and delete the old `.playwright-browsers` folder from the server once the new version is running. If you've told antivirus or your host about `.playwright-browsers`, tell them about `.pw` instead. On Windows without long paths, a build or publish to a folder that's still too deep now stops with one error saying what to do, rather than an error for every file that can't be copied. See [long paths on Windows](#long-paths-on-windows) (#126)
 
 >**Version 1.0.2** changes the package description and this readme to say that this is the recommended converter. No code changes.
@@ -19,6 +21,7 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwrigh
 - [Setup](#setup)
 - [How Chromium gets to the server](#how-chromium-gets-to-the-server)
 - [Deploying to shared hosting](#deploying-to-shared-hosting)
+- [Linux and Docker](#linux-and-docker)
 - [Writing templates for this converter](#writing-templates-for-this-converter)
 - [Images and style sheets](#images-and-style-sheets)
 - [Letterheads](#letterheads)
@@ -68,11 +71,11 @@ The browser isn't started until the first PDF is created, so registering the con
 
 Microsoft.Playwright copies its driver (a `.playwright` folder, about 100MB) into your app's output. This package adds Chromium's headless shell (a `.pw` folder, about 230MB), so that everything the converter needs is in the published files.
 
-- **When the app is built**, the package works out which build of Chromium the referenced version of Playwright needs. If the build machine doesn't have it yet, it downloads it, once, into the machine's Playwright browser cache (`%LOCALAPPDATA%\ms-playwright` on Windows). You'll see a message in the build output when this happens. The build machine needs internet access the first time; the server never does.
+- **When the app is built**, the package works out which build of Chromium the referenced version of Playwright needs. If the build machine doesn't have it yet, it downloads it, once, into the machine's Playwright browser cache (`%LOCALAPPDATA%\ms-playwright` on Windows, `~/.cache/ms-playwright` on Linux). You'll see a message in the build output when this happens. The build machine needs internet access the first time; the server never does.
 - **The browser is then copied** into `bin` with the rest of the app, and into the publish folder when you publish, whether that's `dotnet publish`, a Visual Studio publish profile, or a CI pipeline. Upload the publish folder as usual. It never goes under `wwwroot`, so it can't be downloaded from your site.
 - **When you upgrade** Microsoft.Playwright (directly, or by upgrading this package), the next build downloads and copies the matching Chromium automatically. Old ones are left in the build machine's cache. Deploy the new `.playwright` and `.pw` folders with the rest of the app. Most upload tools skip files that haven't changed, so these only take a while when the version changes.
 - **Only en-US locale files are copied**, which saves about 40MB. Chromium only uses them for its own messages, not for the text in your PDFs.
-- **Build on the same operating system as the server.** The browser downloaded is the one for the build machine's operating system, so publish for a Windows server from Windows.
+- **Build on the same operating system as the server.** The browser downloaded is the one for the build machine's operating system, so publish for a Windows server from Windows, and for a Linux server or container from Linux (see [Linux and Docker](#linux-and-docker)).
 
 You can control this with MSBuild properties in your app's project file...
 
@@ -119,6 +122,56 @@ What the converter can't fix is a host that doesn't allow it at all. Some shared
 So, before you rely on it, deploy the app and create a test PDF. If the browser can't be found or started, the first PDF throws an `InvalidOperationException` saying what it tried, where it looked, and what to check. Show your host that message if you need them to change something.
 
 Taking the app offline (eg with `app_offline.htm`, which Visual Studio and Web Deploy do for you) shuts the app down, and the converter closes Chromium when that happens, so its files aren't locked when the new version is uploaded. Chromium is also closed if the app is stopped or recycled. If the app process is killed outright, the Playwright driver notices and closes Chromium itself.
+
+## Linux and Docker
+
+The converter works on Linux, including in a container, but Chromium needs some shared libraries that a minimal Linux install (and the `mcr.microsoft.com/dotnet/aspnet` images) doesn't have. Without them, the first PDF throws an `InvalidOperationException` whose message includes Chromium's own error, such as `error while loading shared libraries: libglib-2.0.so.0`.
+
+### A sample Dockerfile
+
+This publishes the app in a Linux build stage, so the Chromium copied into the output is the Linux one, and then installs the libraries Chromium needs in the runtime image...
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet publish MyApp/MyApp.csproj -c Release -o /app
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+# The Playwright driver knows which libraries its Chromium needs, and how they're named in the image's version of Linux, so let it install
+# them. It's copied first, so that this layer is only rebuilt when the version of Playwright changes, not every time the app does
+COPY --from=build /app/.playwright .playwright
+RUN .playwright/node/linux-x64/node .playwright/package/cli.js install-deps chromium-headless-shell \
+ && rm -rf /var/lib/apt/lists/*
+COPY --from=build /app .
+USER $APP_UID
+ENTRYPOINT ["dotnet", "MyApp.dll"]
+```
+
+A few things to know...
+
+- **The build stage needs internet access**, to download Chromium the first time (from `cdn.playwright.dev`), as well as for the NuGet packages. The image never does, as Chromium is in the published files. On an ARM64 machine, use `linux-arm64` in place of `linux-x64`.
+- **`install-deps` uses `apt-get`**, so it works in the Debian and Ubuntu images (the .NET 8 images are Debian 12 by default, and the .NET 10 ones Ubuntu 24.04), but not in the Alpine ones, which Chromium doesn't support. It must run before `USER`, as root.
+- **If you'd rather list the packages yourself**, this is what Chromium needs on Ubuntu 24.04 (the .NET 10 images, or `8.0-noble`)...
+
+  ```dockerfile
+  RUN apt-get update \
+   && apt-get install -y --no-install-recommends libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 libatspi2.0-0t64 libcairo2 libcups2t64 \
+        libdbus-1-3 libdrm2 libgbm1 libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 \
+        libxfixes3 libxkbcommon0 libxrandr2 fonts-liberation fonts-noto-color-emoji \
+   && rm -rf /var/lib/apt/lists/*
+  ```
+
+  On Debian 12 (the .NET 8 images), drop the `t64` from the ends of the names. This is about 90MB smaller than what `install-deps` adds, as that also installs fonts for Chinese, Japanese, Thai and the rest, and `xvfb`, which the headless shell doesn't need.
+- **Fonts.** The images have no fonts at all. `install-deps` adds Liberation (which has the same widths as Arial, Times New Roman and Courier New, so text fits as it would on Windows), FreeFont (which has Hebrew and Greek, among others), and fonts for Chinese, Japanese, Thai and emoji. The shorter list above only has Liberation and emoji, so add the fonts you need (such as `fonts-noto-core`), or load them as web fonts from your site. Microsoft's own fonts, such as Arial and Calibri, aren't there, so a template that asks for them gets Liberation or another font in their place.
+- **The app's user.** The .NET images run the app as the `app` user, not as root. The build makes the Playwright driver executable by everyone (versions before 1.1.1 didn't), and Chromium already is. If you see "Permission denied" when the first PDF is created, run `chmod a+x .playwright/node/*/node` in the build stage, after publishing.
+- **A read-only root filesystem.** Chromium and the Playwright driver need somewhere to write their temporary files, which is `/tmp` unless you say otherwise. With `docker run --read-only`, add `--tmpfs /tmp` (or an `emptyDir` volume at `/tmp` in Kubernetes). Or mount a writable folder elsewhere, and set the `TempFolder` [option](#options) to it. `/dev/shm` isn't needed, as Playwright tells Chromium not to use it, so Docker's small default size for it doesn't matter.
+- **The base URL.** In a container, the address the app is reached on from outside (through a reverse proxy, or a port mapping) may not be one the container can reach itself on. The converter fetches the template's images and style sheets from the [base URL](#the-base-url), so if they come out missing, set `PixataAspNetCoreOptions.DocumentBaseUrl` to an address that works from inside the container, such as `http://localhost:8080` (the port the .NET images listen on).
+
+As a rough guide, with Microsoft.Playwright 1.63 on x64, Chromium (`.pw`) adds about 215MB to the published app, and the Playwright driver (`.playwright`) about 135MB, of which 120MB is its own copy of Node.js. The libraries and fonts that `install-deps` installs add about 330MB more, or 240MB with the shorter list, so the image is about 700MB bigger than the app alone would be. In a test container, the first PDF took about 0.75 seconds (most of it starting Chromium), and each one after that about 75ms. With Chromium running, the whole container used about 170MB of memory, of which the app was about 65MB. See [performance](#performance) for more.
+
+CI runs this package's tests, which create real PDFs, on Linux as well as Windows.
 
 ## Writing templates for this converter
 

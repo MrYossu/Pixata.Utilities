@@ -241,6 +241,35 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+  # The PDF converter copies the build machine's Chromium into the app, so a Linux server or container needs the app built on Linux. This
+  # creates real PDFs on Linux, as the Windows job's run of the same tests does on Windows (issue #145)
+  test_pdf_linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8 and 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          10.0.x
+
+    - name: Build - Pixata.AspNetCore.Pdf.Playwright.Tests
+      run: dotnet build Pixata.AspNetCore.Pdf.Playwright.Tests/Pixata.AspNetCore.Pdf.Playwright.Tests.csproj --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    # The libraries Chromium needs, installed the way the readme's sample Dockerfile does it
+    - name: Install Chromium's libraries
+      working-directory: Pixata.AspNetCore.Pdf.Playwright.Tests/bin/Release/net8.0
+      run: sudo .playwright/node/linux-x64/node .playwright/package/cli.js install-deps chromium-headless-shell
+
+    - name: Run Tests - Pixata.AspNetCore.Pdf.Playwright.Tests (Linux)
+      run: dotnet test Pixata.AspNetCore.Pdf.Playwright.Tests/Pixata.AspNetCore.Pdf.Playwright.Tests.csproj --configuration Release --no-build --verbosity normal
+
 # ***************** PUBLISHING **************** #
 
 # nuget pushes moved to release.yml workflow

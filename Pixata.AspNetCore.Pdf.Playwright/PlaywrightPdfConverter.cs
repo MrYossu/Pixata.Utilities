@@ -224,6 +224,15 @@ public partial class PlaywrightPdfConverter(PlaywrightPdfOptions options, IHostE
         _browser = await _playwright.Chromium.LaunchAsync(launchOptions);
         return _browser;
       }
+      catch (System.ComponentModel.Win32Exception ex) when (!OperatingSystem.IsWindows() && ex.NativeErrorCode == PermissionDenied) {
+        _playwright?.Dispose();
+        _playwright = null;
+        throw new InvalidOperationException($"Couldn't start the Playwright driver: {ex.Message}. The user the app runs as isn't allowed to run its node "
+          + "executable (in .playwright/node), which happens when the app runs as a different user from the one that built it, as it does in a "
+          + "container based on mcr.microsoft.com/dotnet/aspnet. Version 1.1.1 of this package makes it executable when the app is built or published, "
+          + "so publish it again, or run chmod a+x on .playwright/node/*/node. See "
+          + "https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright#linux-and-docker", ex);
+      }
       catch (Exception ex) when (ex is PlaywrightException or TimeoutException or System.ComponentModel.Win32Exception or IOException or UnauthorizedAccessException) {
         _playwright?.Dispose();
         _playwright = null;
@@ -236,6 +245,9 @@ public partial class PlaywrightPdfConverter(PlaywrightPdfOptions options, IHostE
       _launchLock.Release();
     }
   }
+
+  // EACCES, which is what starting a process that isn't executable gives on Linux and macOS
+  private const int PermissionDenied = 13;
 
   private async Task<IPlaywright> CreatePlaywright() {
     if (string.IsNullOrWhiteSpace(options.TempFolder)) {
