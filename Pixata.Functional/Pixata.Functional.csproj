@@ -11,7 +11,6 @@
     <Description>C# classes for functional programming</Description>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Functional</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Functional</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Functional</RepositoryUrl>
     <Copyright>Copyright 2022 Pixata Ltd</Copyright>
     <PackageTags>C# functional-programming language-ext</PackageTags>
     <PackageIcon>Explorer.png</PackageIcon>

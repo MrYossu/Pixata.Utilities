@@ -14,6 +14,8 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Telerik/) is 
 
 >**Version 2.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
 
+>**Version 2.0.2** declares the package's MIT licence, which its metadata didn't, so nuget.org and licence scanners show it, and points its repository link at the repository rather than a folder in it (#156). No code changes.
+
 ## Extension method to improve the performance of the Telerik Blazor grid
 Whilst the Telerik Blazor grid does an amazing job, it has its limitations. One of these is the way it computes aggregates. For large tables, this can be slow.
 

@@ -11,7 +11,6 @@
     <Description>Utilities classes for working with Google</Description>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Google</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Google</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Google</RepositoryUrl>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# Google</PackageTags>
     <PackageIcon>PixataGoogle.png</PackageIcon>

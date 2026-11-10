@@ -6,6 +6,8 @@
 
 >This package exists so that apps that used the PDF generation in Pixata.AspNetCore before v2.0.0 can upgrade without changing their templates straight away. wkhtmltopdf was archived in January 2023 and does not get any new fixes, security fixes included. It is built on an old QtWebKit, with known server-side request forgery and local file read problems when it renders HTML that contains anything user-supplied. It is recommended to move to [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright) as this provides for a much better level of conversion, and depends on external packages that will be maintained and updated.
 
+>**Version 1.0.4** declares the package's MIT licence, which its metadata didn't, so nuget.org and licence scanners show it, and points its repository link at the repository rather than a folder in it (#156). No code changes.
+
 >**Version 1.0.3** changes the `[Obsolete]` messages to recommend only Pixata.AspNetCore.Pdf.Playwright. No other changes.
 
 >**Version 1.0.2** changes the package description to recommend Pixata.AspNetCore.Pdf.Playwright. No other changes.

@@ -11,7 +11,6 @@
     <Description>Server-side helpers for the Telerik Blazor components, split out of Pixata.Blazor.TelerikComponents so that the component package can be used client-side without pulling in EF Core and SQL Server</Description>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Telerik</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Telerik</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Telerik</RepositoryUrl>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageIcon>CorbeilePleine.png</PackageIcon>
     <PackageTags>C# Blazor Telerik</PackageTags>

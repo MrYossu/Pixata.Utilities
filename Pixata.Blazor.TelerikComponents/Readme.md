@@ -8,6 +8,8 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.TelerikComponents
 
 >Note that as of version 12.2.0, the major and minor package versions will correspond to the version of the Telerik.Blazor package that is required. The patch version will be used for updates to this package. The build number will indicate my own internal versioning. Thus, version 12.2.0 is based on the Telerik Blazor package version 12.2.x, where x is my own incremental build number.
 
+>**Version 15.0.2** declares the package's MIT licence, which its metadata didn't, so nuget.org and licence scanners show it, and points its repository link at the repository rather than a folder in it (#156). No code changes.
+
 >**Version 15.0.1** references a patched version of `System.Security.Cryptography.Pkcs`, as the one pulled in transitively had known vulnerabilities ([GHSA-846f-f764-76mx](https://github.com/advisories/GHSA-846f-f764-76mx), [GHSA-2fmv-rv2c-59x7](https://github.com/advisories/GHSA-2fmv-rv2c-59x7)). No code changes.
 
 ## Breaking changes in version 15.0.0

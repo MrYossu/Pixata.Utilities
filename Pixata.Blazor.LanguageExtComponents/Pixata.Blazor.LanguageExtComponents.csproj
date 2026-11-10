@@ -12,7 +12,6 @@
     <Copyright>Copyright 2022 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.LanguageExtComponents</RepositoryUrl>
     <PackageIcon>performance systeme OS.png</PackageIcon>
     <PackageTags>Blazor C# languageext</PackageTags>
   </PropertyGroup>

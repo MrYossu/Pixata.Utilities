@@ -115,5 +115,8 @@ You can find more detail on the [project page](https://github.com/MrYossu/Pixata
 ## Pixata.Blazor.LanguageExtComponents and Pixata.Functional
 Please note that I am no longer maintaining these projects, as I am moving away from LanguageExt. This is no reflection on that excellent package, it's more a reflection of my lack of understanding of how to use it properly! I am leaving the code here in case it is useful to anyone else.
 
+## Licence
+All the packages are free to use under the [MIT licence](https://github.com/MrYossu/Pixata.Utilities/blob/master/LICENSE.md), which each package declares, so nuget.org and licence scanners show it. Some depend on packages with licences of their own, such as Telerik's, which need a licence from Telerik.
+
 ## Blog
 Random thoughts and notes that are sometimes useful, and sometimes related to these components can be found on [my blog](https://www.pixata.co.uk/).

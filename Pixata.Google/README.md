@@ -8,6 +8,8 @@ Note that the Google logo is &copy;Google, and is used without permission. I hop
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Google/) is available for this project.
 
+>**Version 2.9.5** declares the package's MIT licence, which its metadata didn't, so nuget.org and licence scanners show it, and points its repository link at the repository rather than a folder in it (#156). No code changes.
+
 >**Version 2.9.4** references a patched version of `System.IdentityModel.Tokens.Jwt`, as the one pulled in by `Google.Apis.Auth` had a known vulnerability ([GHSA-59j7-ghrg-fj52](https://github.com/advisories/GHSA-59j7-ghrg-fj52)). No code changes.
 
 ## Setting up Google authentication
