@@ -8,6 +8,8 @@ A PDF converter for the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Telerik/) is available for this project.
 
+>**Version 1.0.4** declares the package's MIT licence, which its metadata didn't, so nuget.org and licence scanners show it, and points its repository link at the repository rather than a folder in it (#156). No code changes.
+
 >**Version 1.0.3** changes the package description and this readme to recommend Pixata.AspNetCore.Pdf.Playwright. No code changes.
 
 >**Version 1.0.2** fixes the image at the top of this readme. No code changes.

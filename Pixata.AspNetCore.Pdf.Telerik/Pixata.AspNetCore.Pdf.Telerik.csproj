@@ -12,7 +12,6 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Telerik</RepositoryUrl>
     <PackageIcon>ordinateuroff.png</PackageIcon>
     <PackageTags>C# ASP.NET Core PDF</PackageTags>
     <ImplicitUsings>enable</ImplicitUsings>

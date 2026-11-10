@@ -12,7 +12,6 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Grid.Excel</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Grid.Excel</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Grid.Excel</RepositoryUrl>
     <PackageIcon>avion.png</PackageIcon>
     <PackageTags>C# Blazor Grid Excel</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>

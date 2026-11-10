@@ -12,7 +12,6 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</RepositoryUrl>
     <PackageIcon>pdf.png</PackageIcon>
     <PackageTags>C# PDF combine merge join markup annotation flatten</PackageTags>
     <ImplicitUsings>enable</ImplicitUsings>

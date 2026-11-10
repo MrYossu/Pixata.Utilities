@@ -11,7 +11,6 @@
     <Description>A set of C# extension methods that I found useful. See the GitHub page for more information</Description>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Extensions</RepositoryUrl>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# extension-methods</PackageTags>
     <PackageIcon>VroumVroum.png</PackageIcon>

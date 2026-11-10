@@ -11,7 +11,6 @@
     <Description>A utility for finding matching elements in a collection</Description>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.SimilarityChooser</RepositoryUrl>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <PackageTags>C# extension-methods</PackageTags>
     <PackageIcon>recherche.png</PackageIcon>

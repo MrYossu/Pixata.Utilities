@@ -12,7 +12,6 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.TelerikComponents</RepositoryUrl>
     <PackageIcon>MailOldSchool.png</PackageIcon>
     <PackageTags>C# Blazor Telerik</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>

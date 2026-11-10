@@ -12,7 +12,6 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</RepositoryUrl>
     <PackageIcon>avion.png</PackageIcon>
     <PackageTags>C# Blazor PDF Viewer PDF.js annotation markup</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>

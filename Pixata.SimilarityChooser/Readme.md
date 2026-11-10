@@ -8,6 +8,8 @@ SQL Server offers something similar with its free-text search, but this is very 
 
 The similarity chooser uses a Metaphone search, which means it matches words phonetically. This means that if the user entered "humus" it would match "hummous," or one of various other variations. This makes it much more powerful than free-text searches.
 
+>**Version 2.0.1** declares the package's MIT licence, which its metadata didn't, so nuget.org and licence scanners show it, and points its repository link at the repository rather than a folder in it (#156). No code changes.
+
 >**Version 2.0.0** changes how names are matched, so that one common word (such as "Ltd") no longer makes two names match. See [breaking changes in v2.0.0](#breaking-changes-in-v200) below.
 
 ## Breaking changes in v2.0.0

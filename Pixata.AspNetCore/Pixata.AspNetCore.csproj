@@ -12,7 +12,6 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore</RepositoryUrl>
     <PackageIcon>ConnectionReseau.png</PackageIcon>
     <PackageTags>C# ASP.NET Core</PackageTags>
     <ImplicitUsings>enable</ImplicitUsings>

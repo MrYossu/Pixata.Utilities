@@ -51,6 +51,8 @@ Pixata.Blazor.Sample             — consumes the packages via ProjectReference;
 
 The recurring architectural rule is **the client/server split**: anything that needs EF Core, SQL Server, or `HttpContext` must not land in a package a WASM project references. That is why `Pixata.AspNetCore.Telerik` exists (server half of the Telerik grid helpers), why the audit viewer's server service lives in `Pixata.AspNetCore` while its components live in `Pixata.Blazor`, and why `Pixata.Extensions` deliberately has no EF Core dependency. When adding something, decide which side it belongs on before choosing a project.
 
+`Directory.Build.props` at the root holds the package metadata every package shares: the MIT licence expression and the repository URL. Each `.csproj` keeps its own version, description, tags, readme and `PackageProjectUrl` (its folder), so don't add `RepositoryUrl` or a licence to a new package's `.csproj`.
+
 Multi-targeting: the actively maintained packages target `net8.0;net10.0` with per-TFM `PackageReference` blocks (8.0.x vs 10.0.0). `Pixata.Google` and `Pixata.SimilarityChooser` are still `net8.0` only. The Telerik packages reference Telerik.UI.for.Blazor 15.x, which is on nuget.org, so they restore without the Telerik feed. Adding a dependency to a multi-targeted project means adding it to *both* conditional `ItemGroup`s.
 
 ## Cross-cutting features (each spans several packages)

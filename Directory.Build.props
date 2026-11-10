@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Package metadata that's the same for every Pixata package. Each package's .csproj has its own version, description,
+       tags, readme and project URL (its folder in this repository) -->
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>
