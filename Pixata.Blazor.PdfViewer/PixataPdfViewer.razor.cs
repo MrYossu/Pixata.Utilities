@@ -2,11 +2,16 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using Pixata.Blazor.Components;
+using Pixata.Extensions.Pdf;
 
 namespace Pixata.Blazor.PdfViewer;
 
@@ -136,6 +141,50 @@ public partial class PixataPdfViewer {
   public PixataPdfViewerMessages? Messages { get; set; }
 
   /// <summary>
+  /// The mark-up shown over the pages: notes, highlights, strike-through, drawing and text. It's kept apart from the PDF, so
+  /// store it yourself (<see cref="PdfMarkup.ToJson"/> makes JSON of it), and the PDF itself is never changed. Use
+  /// <c>@bind-Markup</c> to have it changed as the user adds to it. To change it from code, give the viewer a new list, as
+  /// changes to the list it has aren't noticed
+  /// </summary>
+  [Parameter]
+  public IReadOnlyList<PdfMarkupItem>? Markup { get; set; }
+
+  /// <summary>
+  /// Fires with the new mark-up when the user adds, changes or deletes some. Use <c>@bind-Markup</c>
+  /// </summary>
+  [Parameter]
+  public EventCallback<IReadOnlyList<PdfMarkupItem>> MarkupChanged { get; set; }
+
+  /// <summary>
+  /// Fires when the user adds, changes or deletes mark-up, with the item and what happened to it, for an app that stores each
+  /// item on its own
+  /// </summary>
+  [Parameter]
+  public EventCallback<PixataPdfViewerMarkupChangedEventArgs> OnMarkupChanged { get; set; }
+
+  /// <summary>
+  /// The name of the user, which is recorded with the mark-up they add. When it's set, the toolbar has the mark-up tools, and
+  /// the user can change or delete their own mark-up. Other people's is shown, but can't be changed. When it isn't set, all
+  /// the mark-up is shown, and none of it can be changed
+  /// </summary>
+  [Parameter]
+  public string? MarkupAuthor { get; set; }
+
+  /// <summary>
+  /// The id of the user, such as their user id, recorded with the mark-up they add. When it's set, mark-up whose
+  /// <see cref="PdfMarkupItem.AuthorId"/> is the same is the user's, rather than mark-up with the same author name, so two
+  /// people with the same name can't change each other's
+  /// </summary>
+  [Parameter]
+  public string? MarkupAuthorId { get; set; }
+
+  /// <summary>
+  /// Shows the mark-up, and the tools for adding it. Defaults to true. Printing includes the mark-up when it's shown
+  /// </summary>
+  [Parameter]
+  public bool ShowMarkup { get; set; } = true;
+
+  /// <summary>
   /// Fires when a PDF has been opened, with its number of pages
   /// </summary>
   [Parameter]
@@ -184,6 +233,17 @@ public partial class PixataPdfViewer {
   private int _pageInputVersion;
   private bool _printing;
 
+  // The mark-up, the parameter it last came from, and what the script needs to be told
+  private List<PdfMarkupItem> _markup = [];
+  private IReadOnlyList<PdfMarkupItem>? _markupParameter;
+  private string? _markupEditor;
+  private bool _markupDirty = true;
+  private bool? _markupShown;
+  private PixataPdfViewerMarkupTool _tool;
+  private bool _toolDirty;
+  private string _highlightColour = PdfMarkup.DefaultHighlightColour;
+  private string _penColour = PdfMarkup.DefaultColour;
+
   private PixataPdfViewerMessages Text =>
     Messages ?? PixataPdfViewerMessages.Default;
 
@@ -220,6 +280,38 @@ public partial class PixataPdfViewer {
   public int CurrentPage =>
     _page;
 
+  /// <summary>
+  /// The mark-up being shown, including what the user has added
+  /// </summary>
+  public IReadOnlyList<PdfMarkupItem> CurrentMarkup =>
+    _markup;
+
+  /// <summary>
+  /// The mark-up tool chosen on the toolbar
+  /// </summary>
+  public PixataPdfViewerMarkupTool MarkupTool =>
+    _tool;
+
+  // Whether the user can add mark-up
+  private bool CanAddMarkup =>
+    ShowMarkup && !string.IsNullOrWhiteSpace(MarkupAuthor);
+
+  // Whether the user can change or delete an item, which is when it's theirs
+  private bool CanEdit(PdfMarkupItem item) =>
+    CanAddMarkup && (string.IsNullOrWhiteSpace(MarkupAuthorId) ? item.Author == MarkupAuthor : item.AuthorId == MarkupAuthorId);
+
+  // The mark-up tools on the toolbar, in order
+  private IEnumerable<(PixataPdfViewerMarkupTool Tool, object Icon, string Label)> MarkupToolButtons => [
+    (PixataPdfViewerMarkupTool.Note, PixataPdfViewerIcons.Note, Text.AddNote),
+    (PixataPdfViewerMarkupTool.Highlight, PixataPdfViewerIcons.Highlight, Text.Highlight),
+    (PixataPdfViewerMarkupTool.StrikeThrough, PixataSvgIcons.Strikethrough, Text.StrikeThrough),
+    (PixataPdfViewerMarkupTool.Ink, PixataSvgIcons.Pencil, Text.Draw),
+    (PixataPdfViewerMarkupTool.Text, PixataPdfViewerIcons.Text, Text.AddText)
+  ];
+
+  private string ToolColour =>
+    _tool == PixataPdfViewerMarkupTool.Highlight ? _highlightColour : _penColour;
+
   protected override void OnParametersSet() {
     int sources = (string.IsNullOrWhiteSpace(Url) ? 0 : 1) + (Data is null ? 0 : 1) + (Stream is null ? 0 : 1);
     if (sources > 1) {
@@ -251,11 +343,74 @@ public partial class PixataPdfViewer {
         _ = Call("goToPage", Page);
       }
     }
+    // The mark-up is only replaced when the parameter changes, as for the page, so a parent that doesn't bind it doesn't lose
+    // what the user has added. A parent that does bind it gives back the list this sent it, which needn't be sent again
+    if (!ReferenceEquals(Markup, _markupParameter)) {
+      _markupParameter = Markup;
+      if (!ReferenceEquals(Markup, _markup)) {
+        _markup = Markup is null ? [] : [.. Markup];
+        _markupDirty = true;
+      }
+    }
+    string editor = $"{(CanAddMarkup ? MarkupAuthor : null)}\n{MarkupAuthorId}";
+    if (editor != _markupEditor) {
+      _markupEditor = editor;
+      _markupDirty = true;
+    }
+    if (!CanAddMarkup && _tool != PixataPdfViewerMarkupTool.None) {
+      _tool = PixataPdfViewerMarkupTool.None;
+      _toolDirty = true;
+    }
   }
 
   // What the script needs to know when it creates the viewer. The page is given with each PDF
   private string Options() =>
-    System.Text.Json.JsonSerializer.Serialize(new { zoom = _zoom.Value });
+    JsonSerializer.Serialize(new {
+      zoom = _zoom.Value,
+      buttonClass = PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, PixataThemeConstants.Button.FillMode.Solid, null, PixataThemeConstants.Button.Size.Small),
+      inputClass = PixataCss.Input(PixataThemeConstants.Size.Small, null, null),
+      markupText = new {
+        newNote = Text.NewNote,
+        note = Text.Note,
+        notePlaceholder = Text.NotePlaceholder,
+        text = Text.Text,
+        textPlaceholder = Text.TextPlaceholder,
+        delete = Text.DeleteMarkup,
+        close = Text.CloseMarkup
+      }
+    });
+
+  // The mark-up for the script, with whether the user can change each item. Created is given as UTC, so the browser shows it
+  // in the user's time zone
+  private string MarkupJson() {
+    JsonArray items = [];
+    foreach (PdfMarkupItem item in _markup) {
+      JsonObject node = JsonSerializer.SerializeToNode(item, PdfMarkup.JsonOptions)!.AsObject();
+      node["created"] = DateTime.SpecifyKind(item.Created, DateTimeKind.Utc);
+      node["editable"] = CanEdit(item);
+      items.Add(node);
+    }
+    return items.ToJsonString();
+  }
+
+  // Tells the script what's changed in the mark-up
+  private async Task SendMarkup() {
+    if (_module is null) {
+      return;
+    }
+    if (_markupShown != ShowMarkup) {
+      _markupShown = ShowMarkup;
+      await Call("showMarkup", ShowMarkup);
+    }
+    if (_markupDirty) {
+      _markupDirty = false;
+      await Call("setMarkup", MarkupJson(), CanAddMarkup);
+    }
+    if (_toolDirty) {
+      _toolDirty = false;
+      await Call("setMarkupTool", _tool == PixataPdfViewerMarkupTool.None ? "" : _tool.ToString(), ToolColour);
+    }
+  }
 
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (_disposed || _loading) {
@@ -277,6 +432,7 @@ public partial class PixataPdfViewer {
           return;
         }
       }
+      await SendMarkup();
       if (_openPending) {
         _openPending = false;
         await Open();
@@ -396,6 +552,63 @@ public partial class PixataPdfViewer {
     StateHasChanged();
   }
 
+  /// <summary>
+  /// Called by the script when the user adds mark-up. The item is recorded as the user's, added now
+  /// </summary>
+  [JSInvokable]
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public async Task MarkupAdded(string json) {
+    PdfMarkupItem? item = JsonSerializer.Deserialize<PdfMarkupItem>(json, PdfMarkup.JsonOptions);
+    if (!CanAddMarkup || item is null || item.Page < 1 || (IsLoaded && item.Page > _pageCount)) {
+      return;
+    }
+    item.Id = Guid.NewGuid().ToString("N");
+    item.Author = MarkupAuthor!;
+    item.AuthorId = string.IsNullOrWhiteSpace(MarkupAuthorId) ? null : MarkupAuthorId;
+    item.Created = DateTime.UtcNow;
+    item.Modified = null;
+    await MarkupChange([.. _markup, item], item, PixataPdfViewerMarkupChange.Added);
+  }
+
+  /// <summary>
+  /// Called by the script when the user changes the text of a note, or of text they've written on the page
+  /// </summary>
+  [JSInvokable]
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public async Task MarkupTextChanged(string id, string text) {
+    int index = _markup.FindIndex(item => item.Id == id);
+    if (index < 0 || !CanEdit(_markup[index])) {
+      return;
+    }
+    PdfMarkupItem changed = _markup[index].Clone();
+    changed.Text = text;
+    changed.Modified = DateTime.UtcNow;
+    List<PdfMarkupItem> markup = [.. _markup];
+    markup[index] = changed;
+    await MarkupChange(markup, changed, PixataPdfViewerMarkupChange.Changed);
+  }
+
+  /// <summary>
+  /// Called by the script when the user deletes mark-up
+  /// </summary>
+  [JSInvokable]
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public async Task MarkupDeleted(string id) {
+    PdfMarkupItem? item = _markup.FirstOrDefault(i => i.Id == id);
+    if (item is null || !CanEdit(item)) {
+      return;
+    }
+    await MarkupChange([.. _markup.Where(i => i != item)], item, PixataPdfViewerMarkupChange.Deleted);
+  }
+
+  private async Task MarkupChange(List<PdfMarkupItem> markup, PdfMarkupItem item, PixataPdfViewerMarkupChange change) {
+    _markup = markup;
+    _markupDirty = true;
+    await SendMarkup();
+    await MarkupChanged.InvokeAsync(markup);
+    await OnMarkupChanged.InvokeAsync(new() { Item = item, Change = change, Markup = markup });
+  }
+
   // ---------- The toolbar, and the same things from code ----------
 
   /// <summary>
@@ -465,6 +678,41 @@ public partial class PixataPdfViewer {
       "Enter" => SearchNext(),
       _ => Task.CompletedTask
     };
+
+  /// <summary>
+  /// Chooses a mark-up tool, as the toolbar does. It's ignored unless <see cref="MarkupAuthor"/> is set and the mark-up is
+  /// shown
+  /// </summary>
+  public async Task SetMarkupTool(PixataPdfViewerMarkupTool tool) {
+    if (!CanAddMarkup && tool != PixataPdfViewerMarkupTool.None) {
+      return;
+    }
+    _tool = tool;
+    _toolDirty = true;
+    await SendMarkup();
+    StateHasChanged();
+  }
+
+  // Clicking the tool that's chosen puts it down
+  private Task ChooseTool(PixataPdfViewerMarkupTool tool) =>
+    SetMarkupTool(_tool == tool ? PixataPdfViewerMarkupTool.None : tool);
+
+  private Task ColourChosen(ChangeEventArgs e) {
+    if (e.Value?.ToString() is not { Length: > 0 } colour) {
+      return Task.CompletedTask;
+    }
+    if (_tool == PixataPdfViewerMarkupTool.Highlight) {
+      _highlightColour = colour;
+    } else {
+      _penColour = colour;
+    }
+    _toolDirty = true;
+    return SendMarkup();
+  }
+
+  // Escape puts the mark-up tool down
+  private Task ContainerKey(KeyboardEventArgs e) =>
+    e.Key == "Escape" && _tool != PixataPdfViewerMarkupTool.None ? SetMarkupTool(PixataPdfViewerMarkupTool.None) : Task.CompletedTask;
 
   /// <summary>
   /// Downloads the PDF, as the toolbar's download button does, raising <see cref="OnDownload"/> first

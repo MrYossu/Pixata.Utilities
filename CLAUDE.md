@@ -38,11 +38,11 @@ Pixata.Extensions          — no project deps; the shared kernel
   │     ├── Pixata.AspNetCore.Pdf.Playwright  — PdfConverterInterface via Playwright and Chromium
   │     └── Pixata.AspNetCore.Pdf.WkHtmlToPdf — obsolete wkhtmltopdf converter, kept for one release
   ├── Pixata.Email         — MailKit wrapper, plus sending and reading mail in Microsoft 365 with Graph
-  ├── Pixata.Pdf           — PdfCombiner, using PdfPig (Apache 2.0; PDFsharp went AGPL in 6.5, so don't use it)
+  ├── Pixata.Pdf           — PdfCombiner and PdfMarkupFlattener, using PdfPig (Apache 2.0; PDFsharp went AGPL in 6.5, so don't use it)
   └── Pixata.SimilarityChooser
 
 Pixata.Blazor.Grid.Excel         — Excel export for PixataGrid (ClosedXML), kept out of Pixata.Blazor
-Pixata.Blazor.PdfViewer          — PixataPdfViewer, PDF.js bundled from build/pixata-pdfviewer (5MB), kept out of Pixata.Blazor
+Pixata.Blazor.PdfViewer          — PixataPdfViewer, PDF.js bundled from build/pixata-pdfviewer (5MB), kept out of Pixata.Blazor; its mark-up types are in Pixata.Extensions/Pdf
 Pixata.Blazor.TelerikComponents  — Telerik components, client-safe
 Pixata.AspNetCore.Telerik        — server half of the above (EF Core + SqlClient)
 Pixata.Google, Pixata.Functional, Pixata.Blazor.LanguageExtComponents — legacy/unmaintained (LanguageExt)

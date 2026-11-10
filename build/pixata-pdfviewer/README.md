@@ -10,6 +10,8 @@ files don't build it, and nothing here is packed into the NuGet package except t
 | --- | --- |
 | `src/global.js` | Puts PDF.js where its viewer components look for it (`globalThis.pdfjsLib`). It's imported first, so that happens before they load |
 | `src/index.js` | The functions the .NET component calls: creating the viewer, opening a PDF from a URL or a stream, zoom, pages, rotation, search, download and print, and the events it sends back |
+| `src/markup.js` | Draws the mark-up over a page, as SVG. Pixata.Pdf's `PdfMarkupFlattener` draws the same mark-up into a PDF, so change the two together, and check that a flattened PDF still looks like the viewer |
+| `src/markup-editor.js` | The mark-up tools: adding notes, highlights, strike-through, drawing and text, the pop-up that shows them, keeping the mark-up on the pages as PDF.js draws them again, and printing it |
 | `build.mjs` | Builds the bundle, with PDF.js's licence notice in its header, and copies the worker, the viewer's stylesheet, the character maps, the standard fonts and the image decoders next to it |
 
 ## Rebuilding
@@ -28,8 +30,9 @@ npm run build
 The package versions in `package.json` are pinned exactly, and `package-lock.json` is committed, so a rebuild gives the same
 files. To update PDF.js, install the new version with `npm install --save-exact pdfjs-dist@<version>`, rebuild, and check the
 viewer on the sample site's `/PdfViewerSample` page: pages, zoom (including Ctrl and the mouse wheel), rotation, search,
-download, print, and the error messages. PDF.js's viewer components aren't a stable API, so read its release notes for
-changes to the events and options `src/index.js` uses.
+download, print, the error messages, and each mark-up tool, at another zoom and rotation, and printed. PDF.js's viewer components aren't a stable API, so read its release notes for
+changes to the events and options `src/index.js` and `src/markup-editor.js` use. The mark-up relies on PDF.js's
+`pagerender` and `pagerendered` events, and on its page views' `viewport`, `pdfPage` and `div`.
 
 ## What's left out
 

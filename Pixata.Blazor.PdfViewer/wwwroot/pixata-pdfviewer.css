@@ -5,7 +5,12 @@
   pixata-blazor-pdfviewer is the outer element. Inside it are the toolbar (pixata-blazor-pdfviewer-toolbar, made of groups of
   tools, pixata-blazor-pdfviewer-tools) and the body (pixata-blazor-pdfviewer-body), which holds the scrolling container the
   pages are drawn in (pixata-blazor-pdfviewer-container) and, while there's no PDF to show, a message
-  (pixata-blazor-pdfviewer-status, with pixata-blazor-pdfviewer-error for an error)
+  (pixata-blazor-pdfviewer-status, with pixata-blazor-pdfviewer-error for an error).
+
+  The mark-up on each page is an SVG (pixata-blazor-pdfviewer-markup) over it, with an element for each item
+  (pixata-blazor-pdfviewer-markup-item, and pixata-blazor-pdfviewer-markup-note, -highlight and so on). Clicking an item shows
+  it in a pop-up (pixata-blazor-pdfviewer-popover), and text is written on the page in a text box
+  (pixata-blazor-pdfviewer-text-editor)
 */
 :root {
   --pixata-blazor-pdfviewer-min-height: 20rem;
@@ -16,6 +21,8 @@
   --pixata-blazor-pdfviewer-page-gap: .75rem;
   --pixata-blazor-pdfviewer-match-bg: rgba(255, 213, 0, .45);
   --pixata-blazor-pdfviewer-current-match-bg: rgba(255, 140, 0, .6);
+  --pixata-blazor-pdfviewer-markup-selected-color: var(--pixata-blazor-primary);
+  --pixata-blazor-pdfviewer-popover-width: 18rem;
 }
 
 .pixata-blazor-pdfviewer {
@@ -143,4 +150,141 @@
 
 .pixata-blazor-pdfviewer-error {
   color: var(--pixata-blazor-error);
+}
+
+/* ---------- Mark-up ---------- */
+
+.pixata-blazor-pdfviewer-colour {
+  box-sizing: border-box;
+  inline-size: 2rem;
+  block-size: 1.75rem;
+  padding: 2px;
+  border: 1px solid var(--pixata-blazor-input-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background: transparent;
+  cursor: pointer;
+}
+
+.pixata-blazor-pdfviewer-colour:disabled {
+  opacity: var(--pixata-blazor-disabled-opacity);
+  cursor: default;
+}
+
+.pixata-blazor-pdfviewer-toolbar .pixata-blazor-pdfviewer-chosen {
+  background-color: var(--pixata-blazor-selected-bg);
+  color: var(--pixata-blazor-selected-color);
+}
+
+/* Over the page, but only catching the pointer when a tool that needs it is chosen, or on an item when none is */
+.pixata-blazor-pdfviewer-markup {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.pixata-blazor-pdfviewer-markup-hidden .pixata-blazor-pdfviewer-markup {
+  display: none;
+}
+
+.pixata-blazor-pdfviewer-markup-highlight rect {
+  mix-blend-mode: multiply;
+}
+
+.pixata-blazor-pdfviewer-container:not([data-markup-tool]) .pixata-blazor-pdfviewer-markup-item[data-id] {
+  pointer-events: visiblePainted;
+  cursor: pointer;
+}
+
+.pixata-blazor-pdfviewer-container:is([data-markup-tool="Note"], [data-markup-tool="Ink"], [data-markup-tool="Text"]) .pixata-blazor-pdfviewer-markup {
+  pointer-events: all;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.pixata-blazor-pdfviewer-container[data-markup-tool="Text"] .pixata-blazor-pdfviewer-markup {
+  cursor: text;
+}
+
+.pixata-blazor-pdfviewer-container:is([data-markup-tool="Highlight"], [data-markup-tool="StrikeThrough"]) .page {
+  cursor: crosshair;
+}
+
+.pixata-blazor-pdfviewer-markup-selected {
+  filter: drop-shadow(0 0 1px var(--pixata-blazor-pdfviewer-markup-selected-color)) drop-shadow(0 0 2px var(--pixata-blazor-pdfviewer-markup-selected-color));
+}
+
+.pixata-blazor-pdfviewer-markup-pending {
+  opacity: .75;
+}
+
+.pixata-blazor-pdfviewer-popover {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pixata-blazor-spacing);
+  width: min(var(--pixata-blazor-pdfviewer-popover-width), calc(100% - 8px));
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  border: 1px solid var(--pixata-blazor-popup-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  background-color: var(--pixata-blazor-popup-bg);
+  box-shadow: var(--pixata-blazor-popup-shadow);
+  color: var(--pixata-blazor-text-color);
+}
+
+.pixata-blazor-pdfviewer-popover-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 var(--pixata-blazor-spacing);
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+}
+
+.pixata-blazor-pdfviewer-popover-header strong {
+  color: var(--pixata-blazor-text-color);
+}
+
+.pixata-blazor-pdfviewer-popover-input {
+  width: 100%;
+  height: auto;
+}
+
+.pixata-blazor-pdfviewer-popover-input textarea {
+  min-height: 4.5em;
+  resize: vertical;
+}
+
+.pixata-blazor-pdfviewer-popover-text {
+  max-height: 12rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.pixata-blazor-pdfviewer-popover-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--pixata-blazor-spacing);
+}
+
+/* The same font, size and line spacing as the text will have on the page */
+.pixata-blazor-pdfviewer-text-editor {
+  position: absolute;
+  z-index: 5;
+  box-sizing: content-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: 1px dashed currentColor;
+  background-color: rgba(255, 255, 255, .85);
+  font-family: Helvetica, Arial, sans-serif;
+  line-height: 1.2;
+  resize: none;
+  overflow: hidden;
 }

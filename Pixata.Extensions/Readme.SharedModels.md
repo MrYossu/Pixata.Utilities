@@ -51,6 +51,20 @@ Namespace `Pixata.Extensions.Encryption`...
 
 `UploadFileDto` is a record of `(string JoinGuid, string FileName, byte[] Buffer)`, used to send a file from a Blazor client to an API endpoint. `PixataBaseClientService` in Pixata.Blazor has a `PostBson()` method that posts one of these as BSON, which avoids the base64 inflation you get from sending a byte array as JSON.
 
+## PDF mark-up
+
+The mark-up that users add to a PDF in `PixataPdfViewer`, in [Pixata.Blazor.PdfViewer](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer#mark-up), and that `PdfMarkupFlattener`, in [Pixata.Pdf](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf#drawing-mark-up-into-a-pdf), draws into a copy of the PDF. The types are here so that a WASM client and the server that stores the mark-up can share them.
+
+Namespace `Pixata.Extensions.Pdf`...
+
+| Type | What it is |
+| --- | --- |
+| `PdfMarkupItem` | One piece of mark-up. `Id`, `Type` (a `PdfMarkupType`), `Page` (counting from 1), `Author` and `AuthorId` (who added it), `Created` and `Modified` (in UTC), `Colour` (a CSS hex colour), and, depending on its type, `Position`, `Rects`, `Strokes`, `LineWidth`, `FontSize` and `Text`. `Clone()` copies it, with copies of its lists |
+| `PdfMarkupType` | `Note` (pinned to `Position`, with its text in `Text`), `Highlight` and `StrikeThrough` (covering `Rects`, usually one for each line of text), `Ink` (freehand drawing, made of the lines in `Strokes`) and `Text` (written on the page, with its top left corner at `Position`) |
+| `PdfMarkupPoint` | `X` and `Y`, in points (1/72 of an inch) from the bottom left of the page, before it's turned by its `/Rotate`, which are the coordinates a PDF uses for its annotations. So mark-up stays in place whatever the zoom or rotation it was added at |
+| `PdfMarkupRect` | `Left`, `Bottom`, `Right` and `Top`, in the same coordinates, with `Width` and `Height` |
+| `PdfMarkup` | `ToJson(markup)` and `FromJson(json)`, to store a list of items, say in a column next to the PDF. They use camel case names, and the types as strings, rather than numbers. `FromJson()` gives an empty list for null or blank JSON. `DefaultHighlightColour` and `DefaultColour` are the colours the viewer starts with |
+
 ## Grid requests
 
 The `PixataGrid` component in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md) describes the data it wants with a `GridRequest`. The types are here, rather than in Pixata.Blazor, so a WASM client can send a request to an API and the server can apply it to a query using the same types. The grid is a work in progress, so the request may gain more as the grid does.
