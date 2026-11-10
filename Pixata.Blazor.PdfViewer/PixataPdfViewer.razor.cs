@@ -253,9 +253,9 @@ public partial class PixataPdfViewer {
     }
   }
 
-  // What the script needs to know when it creates the viewer
+  // What the script needs to know when it creates the viewer. The page is given with each PDF
   private string Options() =>
-    System.Text.Json.JsonSerializer.Serialize(new { zoom = _zoom.Value, page = Page });
+    System.Text.Json.JsonSerializer.Serialize(new { zoom = _zoom.Value });
 
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (_disposed || _loading) {
@@ -293,16 +293,16 @@ public partial class PixataPdfViewer {
     }
     switch (_source) {
       case string url:
-        await _module.InvokeVoidAsync("openUrl", _key, url);
+        await _module.InvokeVoidAsync("openUrl", _key, url, Page);
         break;
       case byte[] data:
         using (DotNetStreamReference stream = new(new MemoryStream(data, false))) {
-          await _module.InvokeVoidAsync("openData", _key, stream);
+          await _module.InvokeVoidAsync("openData", _key, stream, Page);
         }
         break;
       case Stream stream:
         using (DotNetStreamReference reference = new(stream, leaveOpen: true)) {
-          await _module.InvokeVoidAsync("openData", _key, reference);
+          await _module.InvokeVoidAsync("openData", _key, reference, Page);
         }
         break;
       default:
@@ -333,9 +333,13 @@ public partial class PixataPdfViewer {
   public async Task Loaded(int pageCount) {
     _status = ViewerStatus.Loaded;
     _pageCount = pageCount;
+    // The script shows the page asked for, or the last page if there aren't that many
     _page = Math.Clamp(Page, 1, Math.Max(pageCount, 1));
     StateHasChanged();
     await OnLoaded.InvokeAsync(new() { PageCount = pageCount });
+    if (_page != Page) {
+      await PageChanged.InvokeAsync(_page);
+    }
   }
 
   /// <summary>

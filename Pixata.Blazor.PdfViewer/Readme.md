@@ -108,7 +108,7 @@ Printing draws each page as an image at 150 dots per inch, and prints them from 
 | `PixataPdfViewerZoom.FitPage` | Each page fits inside the viewer, so a whole page can be seen at once |
 | A number, such as `1.5m` or `PixataPdfViewerZoom.Scale(1.5m)` | At that scale, where 1 is 100%. It's kept between 0.1 and 25 |
 
-Changing either parameter changes what's shown. A parent that sets them without binding them, such as `Zoom="1m"`, doesn't undo what the user has done whenever it renders, as only a change to the parameter's value counts.
+Each PDF is opened at `Page`, or at its last page if it hasn't that many, in which case `PageChanged` says so. So when you show another PDF, set `Page` back to 1 as well if you bind it. Changing either parameter changes what's shown. A parent that sets them without binding them, such as `Zoom="1m"`, doesn't undo what the user has done whenever it renders, as only a change to the parameter's value counts.
 
 ## Events
 
