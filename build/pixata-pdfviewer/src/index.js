@@ -80,13 +80,13 @@ export function create(key, containerId, dotNet, optionsJson) {
     abortSignal: abort.signal
   });
   linkService.setViewer(viewer);
-  const state = { key, container, dotNet, eventBus, linkService, findController, viewer, abort, zoom: options.zoom, task: null, document: null };
+  const state = { key, container, dotNet, eventBus, linkService, findController, viewer, abort, zoom: options.zoom, page: 1, opening: 0, task: null, document: null };
   viewers.set(key, state);
 
   eventBus.on("pagesinit", () => {
     viewer.currentScaleValue = state.zoom;
-    if (options.page > 1) {
-      viewer.currentPageNumber = Math.min(options.page, viewer.pagesCount);
+    if (state.page > 1) {
+      viewer.currentPageNumber = Math.min(state.page, viewer.pagesCount);
     }
   });
   eventBus.on("pagechanging", ({ pageNumber }) => call(state, "PageShown", pageNumber));
@@ -146,8 +146,10 @@ function close(state) {
   state.linkService.setDocument(null);
 }
 
-async function open(state, source) {
+// Opens a PDF, showing a page of it once it's laid out
+async function open(state, source, page) {
   close(state);
+  state.page = page;
   const task = getDocument({ ...documentOptions, ...source });
   state.task = task;
   try {
@@ -171,18 +173,24 @@ async function open(state, source) {
   }
 }
 
-export function openUrl(key, url) {
+export function openUrl(key, url, page) {
   const state = viewers.get(key);
-  return state ? open(state, { url }) : Promise.resolve();
+  if (state) {
+    state.opening++;
+    return open(state, { url }, page);
+  }
+  return Promise.resolve();
 }
 
 // The PDF's bytes, sent from .NET as a stream, so a large file doesn't have to fit in one message
-export async function openData(key, stream) {
+export async function openData(key, stream, page) {
   const state = viewers.get(key);
   if (state) {
+    // Another PDF may be asked for while this one is being read, in which case this one isn't wanted
+    const opening = ++state.opening;
     const data = new Uint8Array(await stream.arrayBuffer());
-    if (viewers.get(key) === state) {
-      await open(state, { data });
+    if (viewers.get(key) === state && state.opening === opening) {
+      await open(state, { data }, page);
     }
   }
 }
@@ -191,6 +199,7 @@ export async function openData(key, stream) {
 export function clear(key) {
   const state = viewers.get(key);
   if (state) {
+    state.opening++;
     close(state);
   }
 }

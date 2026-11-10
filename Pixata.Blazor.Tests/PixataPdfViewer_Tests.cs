@@ -73,7 +73,7 @@ public class PixataPdfViewer_Tests {
 
     JSRuntimeInvocation create = _module.Invocations["create"].Single();
     Assert.AreEqual(viewer.Find(".pixata-blazor-pdfviewer-container").Id, create.Arguments[1]);
-    CollectionAssert.AreEqual(new object[] { Key(), "invoice.pdf" }, _module.Invocations["openUrl"].Single().Arguments.ToArray());
+    CollectionAssert.AreEqual(new object[] { Key(), "invoice.pdf", 1 }, _module.Invocations["openUrl"].Single().Arguments.ToArray());
     Assert.AreEqual("Loading...", viewer.Find(".pixata-blazor-pdfviewer-status").TextContent);
   }
 
@@ -184,10 +184,23 @@ public class PixataPdfViewer_Tests {
   }
 
   [TestMethod]
-  public void ThePageParameter_IsTheFirstPageShown() {
-    Render(p => p.Add(c => c.Page, 2));
+  public void ThePageParameter_IsThePageEachPdfIsOpenedAt() {
+    IRenderedComponent<PixataPdfViewer> viewer = Render(p => p.Add(c => c.Page, 2));
+    viewer.Render(p => p.Add(c => c.Data, [37, 80, 68, 70]).Add(c => c.Url, null));
 
-    Assert.AreEqual(2, JsonDocument.Parse((string)_module.Invocations["create"].Single().Arguments[3]!).RootElement.GetProperty("page").GetInt32());
+    Assert.AreEqual(2, _module.Invocations["openUrl"].Single().Arguments[2]);
+    Assert.AreEqual(2, _module.Invocations["openData"].Single().Arguments[2]);
+  }
+
+  [TestMethod]
+  public void APageAfterTheLast_ShowsTheLast_AndSaysSo() {
+    int changed = 0;
+    IRenderedComponent<PixataPdfViewer> viewer = Render(p => p.Add(c => c.Page, 9).Add(c => c.PageChanged, EventCallback.Factory.Create<int>(this, page => changed = page)));
+
+    viewer.InvokeAsync(() => viewer.Instance.Loaded(3));
+
+    Assert.AreEqual(3, viewer.Instance.CurrentPage);
+    Assert.AreEqual(3, changed);
   }
 
   // ---------- Zoom ----------
