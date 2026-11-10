@@ -152,6 +152,20 @@ public class PixataGridMessages {
   public string Apply { get; init; } = "Apply";
   public string Reset { get; init; } = "Reset";
 
+  // ---------- Pasting ----------
+
+  /// <summary>
+  /// Why a value pasted from a spreadsheet can't go in a cell, given to <c>OnPaste</c>. {0} is the value, and {1} the
+  /// column's title
+  /// </summary>
+  public string PasteInvalidValueFormat { get; init; } = "\"{0}\" isn't a valid value for {1}";
+
+  /// <summary>
+  /// Why an empty cell pasted from a spreadsheet can't go in a cell whose field must have a value, given to <c>OnPaste</c>.
+  /// {0} is the column's title
+  /// </summary>
+  public string PasteEmptyValueFormat { get; init; } = "{0} can't be empty";
+
   public string PagerInfo(int first, int last, int total) =>
     string.Format(CultureInfo.CurrentCulture, PagerInfoFormat, first, last, total);
 
@@ -166,6 +180,12 @@ public class PixataGridMessages {
 
   public string FilterMenu(string title) =>
     string.Format(CultureInfo.CurrentCulture, FilterMenuFormat, title);
+
+  public string PasteInvalidValue(string value, string title) =>
+    string.Format(CultureInfo.CurrentCulture, PasteInvalidValueFormat, value, title);
+
+  public string PasteEmptyValue(string title) =>
+    string.Format(CultureInfo.CurrentCulture, PasteEmptyValueFormat, title);
 
   // A filter operator's name. Dates have before and after rather than less than and greater than
   internal string Operator(GridFilterOperator op, bool date) =>

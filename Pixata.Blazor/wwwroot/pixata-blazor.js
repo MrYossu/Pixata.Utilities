@@ -976,6 +976,27 @@ export function initNavigation(gridId, dotNet) {
   const focusOut = e => {
     hadFocus = table.contains(e.relatedTarget);
   };
+  // Text pasted into a cell of an in-cell grid, such as cells copied from a spreadsheet, is spread over the cells to the right
+  // and below. In a cell's editor, only text with tabs or line breaks is, and in a text area only text with tabs, so that
+  // pasting one value, or lines of text, into an editor works as normal
+  const paste = e => {
+    if (grid.dataset.pixataPaste !== "true") {
+      return;
+    }
+    const cell = e.target.closest?.("td");
+    const row = cell?.closest("tr[data-pixata-row-index]");
+    if (!row || cell.closest("table") !== table || !cell.dataset.pixataColumnKey) {
+      return;
+    }
+    const text = e.clipboardData?.getData("text/plain") ?? "";
+    const block = text.replace(/(\r\n|\n|\r)$/, "");
+    const inEditor = e.target !== cell;
+    if (text === "" || (inEditor && (e.target.tagName === "TEXTAREA" ? !block.includes("\t") : !/[\t\r\n]/.test(block)))) {
+      return;
+    }
+    e.preventDefault();
+    dotNet.invokeMethodAsync("Paste", Number(row.dataset.pixataRowIndex), cell.dataset.pixataColumnKey, text);
+  };
   // After a render, the tab stop is put back, and if the focused cell was replaced (such as by paging), its replacement is
   // focused
   let pending = false;
@@ -993,12 +1014,14 @@ export function initNavigation(gridId, dotNet) {
   table.addEventListener("keydown", keyDown);
   table.addEventListener("focusin", focusIn);
   table.addEventListener("focusout", focusOut);
+  table.addEventListener("paste", paste);
   apply(false);
   navigations.set(gridId, () => {
     observer.disconnect();
     table.removeEventListener("keydown", keyDown);
     table.removeEventListener("focusin", focusIn);
     table.removeEventListener("focusout", focusOut);
+    table.removeEventListener("paste", paste);
   });
 }
 

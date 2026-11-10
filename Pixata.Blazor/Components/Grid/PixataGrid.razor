@@ -20,7 +20,7 @@
       List<List<HeaderCell>> headerRows = HeaderRows();
       _headerRowCount = headerRows.Count + (FilterMode == PixataGridFilterMode.FilterRow ? 1 : 0);
     }
-    <div class="@Css.Join(GridClass, DragToSelect ? "pixata-blazor-grid-drag-select" : null)" style="@GridStyle" id="@_gridId" @onmouseup="DragEnd">
+    <div class="@Css.Join(GridClass, DragToSelect ? "pixata-blazor-grid-drag-select" : null)" style="@GridStyle" id="@_gridId" data-pixata-paste="@(CanPaste ? "true" : null)" @onmouseup="DragEnd">
       @if (GridToolBarTemplate is not null) {
         <div class="pixata-blazor-grid-toolbar" role="toolbar" aria-label="@Text.Toolbar">
           @GridToolBarTemplate
@@ -605,12 +605,12 @@
     }
     if (column.Field is not null && column.Field == _editField) {
       return
-        @<td style="@column.StickyStyle" id="@EditCellId" class="@Css.Join(column.CellClass, "pixata-blazor-grid-edit-cell")" @onkeydown="EditCellKeyDown">
+        @<td style="@column.StickyStyle" id="@EditCellId" class="@Css.Join(column.CellClass, "pixata-blazor-grid-edit-cell")" data-pixata-column-key="@(Navigable ? column.Key : null)" @onkeydown="EditCellKeyDown">
           @Editor(column, editItem)
         </td>;
     }
     return
-      @<td style="@column.StickyStyle" class="@column.CellClass" @onclick="() => StartCellEdit(_isNew ? editItem : _originalEditItem!, column)">
+      @<td style="@column.StickyStyle" class="@column.CellClass" data-pixata-column-key="@(Navigable && !_isNew ? column.Key : null)" @onclick="() => StartCellEdit(_isNew ? editItem : _originalEditItem!, column)">
         @if (column.Template is null) {
           @column.CellText(editItem)
         } else {
