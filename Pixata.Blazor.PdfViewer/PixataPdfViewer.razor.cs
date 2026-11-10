@@ -311,15 +311,16 @@ public partial class PixataPdfViewer {
     }
   }
 
-  // Calls the script, if it's loaded and the page is still there
+  // Calls the script, if it's loaded and the page is still there. A failure here would only mean that a toolbar button
+  // didn't work, so it isn't allowed to end a Blazor Server circuit
   private async Task Call(string method, params object?[] args) {
     if (_module is null) {
       return;
     }
     try {
       await _module.InvokeVoidAsync(method, [_key, .. args]);
-    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
-      // The page has gone
+    } catch (Exception ex) when (ex is JSDisconnectedException or JSException or OperationCanceledException) {
+      // The page has gone, or the script couldn't do it
     }
   }
 

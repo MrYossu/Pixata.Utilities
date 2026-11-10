@@ -323,6 +323,18 @@ public class PixataPdfViewer_Tests {
     Assert.AreEqual(Key(), _module.Invocations["print"].Single().Arguments[0]);
   }
 
+  [TestMethod]
+  public void AToolThatFailsInTheScript_DoesntThrow_AndCanBeUsedAgain() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render());
+    _module.SetupVoid("print", _ => true).SetException(new JSException("The PDF was closed"));
+
+    Button(viewer, "Print").Click();
+    Button(viewer, "Print").Click();
+
+    Assert.AreEqual(2, _module.Invocations["print"].Count);
+    Assert.IsFalse(Button(viewer, "Print").HasAttribute("disabled"));
+  }
+
   // ---------- Appearance ----------
 
   [TestMethod]

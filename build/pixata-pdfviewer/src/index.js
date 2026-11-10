@@ -265,7 +265,14 @@ export async function download(key, fileName) {
   if (!pdf) {
     return;
   }
-  const url = URL.createObjectURL(new Blob([await pdf.getData()], { type: "application/pdf" }));
+  let data;
+  try {
+    data = await pdf.getData();
+  } catch {
+    // Another PDF was opened, or the viewer was closed, while this one was being read
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([data], { type: "application/pdf" }));
   const link = document.createElement("a");
   link.href = url;
   link.download = fileName;
@@ -289,25 +296,31 @@ export async function print(key) {
   const rotation = state.viewer.pagesRotation;
   const images = [];
   let pageSize = null;
-  for (let number = 1; number <= pdf.numPages; number++) {
-    const page = await pdf.getPage(number);
-    const turned = (page.rotate + rotation) % 360;
-    if (!pageSize) {
-      const actual = page.getViewport({ scale: 1, rotation: turned });
-      pageSize = `${actual.width}pt ${actual.height}pt`;
+  try {
+    for (let number = 1; number <= pdf.numPages; number++) {
+      const page = await pdf.getPage(number);
+      const turned = (page.rotate + rotation) % 360;
+      if (!pageSize) {
+        const actual = page.getViewport({ scale: 1, rotation: turned });
+        pageSize = `${actual.width}pt ${actual.height}pt`;
+      }
+      const viewport = page.getViewport({ scale: 150 / 72, rotation: turned });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: context, canvas, viewport, intent: "print", annotationMode: AnnotationMode.ENABLE_FORMS }).promise;
+      const blob = await new Promise(resolve => canvas.toBlob(resolve));
+      images.push(URL.createObjectURL(blob));
+      canvas.width = canvas.height = 0;
+      page.cleanup();
     }
-    const viewport = page.getViewport({ scale: 150 / 72, rotation: turned });
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.floor(viewport.width);
-    canvas.height = Math.floor(viewport.height);
-    const context = canvas.getContext("2d");
-    context.fillStyle = "#fff";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    await page.render({ canvasContext: context, canvas, viewport, intent: "print", annotationMode: AnnotationMode.ENABLE_FORMS }).promise;
-    const blob = await new Promise(resolve => canvas.toBlob(resolve));
-    images.push(URL.createObjectURL(blob));
-    canvas.width = canvas.height = 0;
-    page.cleanup();
+  } catch {
+    // Another PDF was opened, or the viewer was closed, while the pages were being drawn
+    images.forEach(url => URL.revokeObjectURL(url));
+    return;
   }
   document.getElementById(printFrameId)?.remove();
   const returnFocusTo = document.activeElement;
