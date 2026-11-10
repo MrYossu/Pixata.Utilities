@@ -35,6 +35,12 @@ public class PixataGridExportColumn {
   /// The .NET format string for the values, such as "{0:C0}"
   /// </summary>
   public string? DisplayFormat { get; set; }
+
+  /// <summary>
+  /// The aggregates the grid's <c>GridAggregates</c> ask for on this column's field. Formats that write totals, such as
+  /// Excel's, write these. Change them to change the totals
+  /// </summary>
+  public List<GridAggregateType> Aggregates { get; set; } = [];
 }
 
 /// <summary>
@@ -43,6 +49,12 @@ public class PixataGridExportColumn {
 public class PixataGridBeforeExportEventArgs<TItem> {
   public List<PixataGridExportColumn> Columns { get; set; } = [];
   public List<TItem> Data { get; set; } = [];
+
+  /// <summary>
+  /// The fields the grid is grouped by, outermost first, with their titles and formats. The data is in group order. Formats
+  /// that write group rows, such as Excel's, use them. Clear it to export without the groups
+  /// </summary>
+  public List<PixataGridExportColumn> Groups { get; set; } = [];
 
   /// <summary>
   /// Set to true to stop the export
@@ -108,6 +120,14 @@ public abstract class PixataGridExportBase<TItem> : ComponentBase, IDisposable {
   /// Writes the file
   /// </summary>
   public abstract Task<MemoryStream> Write(List<PixataGridExportColumn> columns, List<TItem> data, CultureInfo culture);
+
+  /// <summary>
+  /// Writes the file, given everything <c>OnBeforeExport</c> was given (after any changes it made), including the grid's
+  /// grouping. This is what the grid calls. By default it calls the other <c>Write</c>, so override this one in a format that
+  /// can show the groups
+  /// </summary>
+  public virtual Task<MemoryStream> Write(PixataGridBeforeExportEventArgs<TItem> export, CultureInfo culture) =>
+    Write(export.Columns, export.Data, culture);
 
   protected override void OnInitialized() {
     if (Grid is null) {
@@ -230,17 +250,27 @@ public partial class PixataGrid<TItem> {
   /// packages
   /// </summary>
   public async Task<MemoryStream?> ExportWith(PixataGridExportBase<TItem> export) {
+    List<GridAggregateDescriptor> aggregates = AggregateDescriptors;
     PixataGridBeforeExportEventArgs<TItem> before = new() {
       Columns = [.. RenderedColumns()
         .Where(c => !string.IsNullOrWhiteSpace(c.Field) && c is not PixataGridCommandColumn<TItem> and not PixataGridCheckboxColumn<TItem> and not PixataGridDragColumn<TItem>)
-        .Select(c => new PixataGridExportColumn { Field = c.Field!, Title = c.HeaderText, Width = c.CurrentWidth, DisplayFormat = c.Format })],
-      Data = export.AllPages ? await AllData() : [.. _items]
+        .Select(c => new PixataGridExportColumn {
+          Field = c.Field!,
+          Title = c.HeaderText,
+          Width = c.CurrentWidth,
+          DisplayFormat = c.Format,
+          Aggregates = [.. aggregates.Where(a => a.Member == c.Field).Select(a => a.Aggregate)]
+        })],
+      Data = export.AllPages ? await AllData() : [.. _items],
+      Groups = [.. _groups.Select(g => ColumnFor(g.Member) is PixataGridColumn<TItem> column
+        ? new PixataGridExportColumn { Field = g.Member, Title = column.HeaderText, DisplayFormat = column.Format }
+        : new PixataGridExportColumn { Field = g.Member, Title = g.Member })]
     };
     await export.OnBeforeExport.InvokeAsync(before);
     if (before.IsCancelled) {
       return null;
     }
-    MemoryStream stream = await export.Write(before.Columns, before.Data, CultureInfo.CurrentCulture);
+    MemoryStream stream = await export.Write(before, CultureInfo.CurrentCulture);
     await export.OnAfterExport.InvokeAsync(new(stream));
     stream.Position = 0;
     return stream;
