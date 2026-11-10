@@ -68,7 +68,7 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor/) is available fo
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor).
 
 ## Pixata.Blazor.Grid.Excel
-Excel export for `PixataGrid`, the data grid in Pixata.Blazor. It's a separate package because it uses ClosedXML, which would otherwise add weight to every app that uses Pixata.Blazor, including WASM apps that don't need it.
+Excel export for `PixataGrid`, the data grid in Pixata.Blazor, keeping numbers and dates as such, with the grid's totals as formulas, and its groups if you want them. It's a separate package because it uses ClosedXML, which would otherwise add weight to every app that uses Pixata.Blazor, including WASM apps that don't need it.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.Grid.Excel/) is available for this project.
 
