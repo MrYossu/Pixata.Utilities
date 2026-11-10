@@ -1,0 +1,84 @@
+@namespace Pixata.Blazor.PdfViewer
+@implements IAsyncDisposable
+
+@*
+  A PDF viewer. This renders the toolbar and an empty container, and the script (wwwroot/pdfjs/pixata-pdfviewer.js, built from
+  build/pixata-pdfviewer) has PDF.js draw the pages in the container. The script tells this component the page, zoom and
+  search matches as they change, so the toolbar can show them
+*@
+<div id="@Id" class="@PixataCss.Classes("pixata-blazor-pdfviewer", Class)" style="@Style">
+  @if (ShowToolbar) {
+    <div class="pixata-blazor-pdfviewer-toolbar" role="toolbar" aria-label="@Text.Toolbar" aria-controls="@ContainerId">
+      <div class="pixata-blazor-pdfviewer-tools">
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.ChevronLeft" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.PreviousPage" AriaLabel="@Text.PreviousPage" Enabled="@(IsLoaded && _page > 1)" OnClick="@(() => GoToPage(_page - 1))" />
+        <span class="pixata-blazor-pdfviewer-page">
+          <span class="@PixataCss.Input(PixataThemeConstants.Size.Small, null, null) pixata-blazor-pdfviewer-page-input">
+            <input @key="_pageInputVersion" class="pixata-blazor-input-inner" type="text" inputmode="numeric" value="@(IsLoaded ? _page : "")" aria-label="@Text.PageNumber" disabled="@(!IsLoaded)" @onchange="PageEntered" />
+          </span>
+          @if (IsLoaded) {
+            <span class="pixata-blazor-pdfviewer-page-count">@Text.PageCount(_pageCount)</span>
+          }
+        </span>
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.ChevronRight" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.NextPage" AriaLabel="@Text.NextPage" Enabled="@(IsLoaded && _page < _pageCount)" OnClick="@(() => GoToPage(_page + 1))" />
+      </div>
+      <div class="pixata-blazor-pdfviewer-tools">
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataPdfViewerIcons.ZoomOut" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.ZoomOut" AriaLabel="@Text.ZoomOut" Enabled="IsLoaded" OnClick="@(() => ZoomBy(-1))" />
+        <span class="@PixataCss.Input(PixataThemeConstants.Size.Small, null, null) pixata-blazor-pdfviewer-zoom">
+          <select class="pixata-blazor-input-inner" aria-label="@Text.Zoom" disabled="@(!IsLoaded)" value="@_zoom.Value" @onchange="ZoomChosen">
+            <option value="@PixataPdfViewerZoom.FitWidth.Value">@Text.FitWidth</option>
+            <option value="@PixataPdfViewerZoom.FitPage.Value">@Text.FitPage</option>
+            @if (CustomScale is decimal custom) {
+              <option value="@_zoom.Value">@Percent(custom)</option>
+            }
+            @foreach (decimal scale in Scales) {
+              <option value="@PixataPdfViewerZoom.Scale(scale).Value">@Percent(scale)</option>
+            }
+          </select>
+        </span>
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataPdfViewerIcons.ZoomIn" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.ZoomIn" AriaLabel="@Text.ZoomIn" Enabled="IsLoaded" OnClick="@(() => ZoomBy(1))" />
+      </div>
+      @if (ShowRotate) {
+        <div class="pixata-blazor-pdfviewer-tools">
+          <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataPdfViewerIcons.RotateAnticlockwise" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.RotateAnticlockwise" AriaLabel="@Text.RotateAnticlockwise" Enabled="IsLoaded" OnClick="@(() => Rotate(false))" />
+          <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataPdfViewerIcons.RotateClockwise" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.RotateClockwise" AriaLabel="@Text.RotateClockwise" Enabled="IsLoaded" OnClick="@(() => Rotate(true))" />
+        </div>
+      }
+      @if (ShowSearch) {
+        <div class="pixata-blazor-pdfviewer-tools pixata-blazor-pdfviewer-search" role="search">
+          <span class="@PixataCss.Input(PixataThemeConstants.Size.Small, null, null) pixata-blazor-pdfviewer-search-input">
+            <input class="pixata-blazor-input-inner" type="search" placeholder="@Text.Search" aria-label="@Text.Search" value="@_query" disabled="@(!IsLoaded)" @oninput="SearchTyped" @onkeydown="SearchKey" />
+          </span>
+          @if (!string.IsNullOrEmpty(_query)) {
+            <span class="pixata-blazor-pdfviewer-matches" role="status">@(_matchTotal == 0 ? Text.NoMatches : Text.Matches(_matchCurrent, _matchTotal))</span>
+          }
+          <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.ChevronUp" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.PreviousMatch" AriaLabel="@Text.PreviousMatch" Enabled="@(_matchTotal > 0)" OnClick="SearchPrevious" />
+          <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.ChevronDown" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.NextMatch" AriaLabel="@Text.NextMatch" Enabled="@(_matchTotal > 0)" OnClick="SearchNext" />
+        </div>
+      }
+      @if (ShowDownload || ShowPrint) {
+        <div class="pixata-blazor-pdfviewer-tools pixata-blazor-pdfviewer-end">
+          @if (ShowDownload) {
+            <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Download" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.Download" AriaLabel="@Text.Download" Enabled="IsLoaded" OnClick="Download" />
+          }
+          @if (ShowPrint) {
+            <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataPdfViewerIcons.Print" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.Print" AriaLabel="@Text.Print" Enabled="IsLoaded" IsBusy="_printing" OnClick="Print" />
+          }
+        </div>
+      }
+    </div>
+  }
+  <div class="pixata-blazor-pdfviewer-body">
+    <div id="@ContainerId" class="pixata-blazor-pdfviewer-container" tabindex="0" role="region" aria-label="@Text.Pages"><div class="pdfViewer"></div></div>
+    @switch (_status) {
+      case ViewerStatus.Empty:
+        <div class="pixata-blazor-pdfviewer-status">@Text.NoDocument</div>
+        break;
+      case ViewerStatus.Loading:
+        <div class="pixata-blazor-pdfviewer-status" role="status">@Text.Loading</div>
+        break;
+      case ViewerStatus.Failed:
+        <div class="pixata-blazor-pdfviewer-status pixata-blazor-pdfviewer-error" role="alert">@Text.Error(_error)</div>
+        break;
+    }
+  </div>
+</div>

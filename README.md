@@ -74,6 +74,13 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.Grid.Excel/) is a
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Grid.Excel).
 
+## Pixata.Blazor.PdfViewer
+`PixataPdfViewer`, a Blazor component that shows a PDF in the page, with page navigation, zoom, rotation, search, download and print, so that it can sit beside a form that's being filled in from it. It uses Mozilla's PDF.js, which is part of the package, so nothing is loaded from a CDN. It's a separate package because PDF.js and its files come to about 5MB, which would otherwise be in every app that uses Pixata.Blazor.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Blazor.PdfViewer/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer).
+
 ## Pixata.Blazor.Sample
 The source code for a sample web project that uses the Blazor components. You can see a [live version of this sample](https://test.pixata.co.uk/), or [browse the source code](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Sample).
 

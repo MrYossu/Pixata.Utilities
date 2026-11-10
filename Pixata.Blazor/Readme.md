@@ -55,6 +55,7 @@ The documentation is split over the following pages...
 | [Tooltip](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Tooltip.md) | `PixataTooltip`, which shows any content next to an element when it's hovered, focused, tapped or clicked, for one element or for every element a CSS selector matches |
 | [Buttons](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md) | `PixataButton`, `PixataPrimaryButton`, `PixataSecondaryButton`, `PixataDropDownButton` and `PixataSplitButton` |
 | [Scheduler](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Scheduler.md) | `PixataScheduler`, for showing and editing appointments in day, multi-day, week, month, timeline and agenda views |
+| [PDF viewer](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.PdfViewer/Readme.md) | `PixataPdfViewer`, which shows a PDF with page navigation, zoom, rotation, search, download and print. It's in the [Pixata.Blazor.PdfViewer](https://www.nuget.org/packages/Pixata.Blazor.PdfViewer/) package, as PDF.js would otherwise add 5MB to every app that uses Pixata.Blazor |
 
 ## Registering dependencies
 

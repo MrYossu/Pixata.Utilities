@@ -1,0 +1,146 @@
+/*
+  PixataPdfViewer, from Pixata.Blazor.PdfViewer. Add this after Pixata.Blazor's pixata.css. PDF.js's own styles, which lay out
+  the pages, their text (so it can be selected) and their links, are added to the page by the viewer's script.
+
+  pixata-blazor-pdfviewer is the outer element. Inside it are the toolbar (pixata-blazor-pdfviewer-toolbar, made of groups of
+  tools, pixata-blazor-pdfviewer-tools) and the body (pixata-blazor-pdfviewer-body), which holds the scrolling container the
+  pages are drawn in (pixata-blazor-pdfviewer-container) and, while there's no PDF to show, a message
+  (pixata-blazor-pdfviewer-status, with pixata-blazor-pdfviewer-error for an error)
+*/
+:root {
+  --pixata-blazor-pdfviewer-min-height: 20rem;
+  --pixata-blazor-pdfviewer-border-color: var(--pixata-blazor-input-border-color);
+  --pixata-blazor-pdfviewer-toolbar-bg: var(--pixata-blazor-surface-alt-bg);
+  --pixata-blazor-pdfviewer-bg: #e9ecef;
+  --pixata-blazor-pdfviewer-page-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+  --pixata-blazor-pdfviewer-page-gap: .75rem;
+  --pixata-blazor-pdfviewer-match-bg: rgba(255, 213, 0, .45);
+  --pixata-blazor-pdfviewer-current-match-bg: rgba(255, 140, 0, .6);
+}
+
+.pixata-blazor-pdfviewer {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: var(--pixata-blazor-pdfviewer-min-height);
+  overflow: hidden;
+  border: 1px solid var(--pixata-blazor-pdfviewer-border-color);
+  border-radius: var(--pixata-blazor-border-radius);
+  color: var(--pixata-blazor-text-color);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-font-size);
+  line-height: var(--pixata-blazor-line-height);
+}
+
+/* ---------- Toolbar ---------- */
+
+.pixata-blazor-pdfviewer-toolbar {
+  --pixata-blazor-input-height: initial;
+  --pixata-blazor-input-height-sm: initial;
+  --pixata-blazor-input-height-lg: initial;
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 4);
+  padding: var(--pixata-blazor-spacing) calc(var(--pixata-blazor-spacing) * 2);
+  border-bottom: 1px solid var(--pixata-blazor-pdfviewer-border-color);
+  background-color: var(--pixata-blazor-pdfviewer-toolbar-bg);
+}
+
+.pixata-blazor-pdfviewer-tools {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-pdfviewer-end {
+  margin-inline-start: auto;
+}
+
+.pixata-blazor-pdfviewer-page {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+  white-space: nowrap;
+}
+
+.pixata-blazor-pdfviewer-page-input {
+  width: 3.5em;
+}
+
+.pixata-blazor-pdfviewer-page-input input {
+  text-align: center;
+}
+
+.pixata-blazor-pdfviewer-zoom {
+  width: 7.5em;
+}
+
+.pixata-blazor-pdfviewer-search-input {
+  width: 11em;
+}
+
+.pixata-blazor-pdfviewer-matches {
+  color: var(--pixata-blazor-subtle-color);
+  font-size: var(--pixata-blazor-font-size-sm);
+  white-space: nowrap;
+}
+
+/* ---------- Pages ---------- */
+
+.pixata-blazor-pdfviewer-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background-color: var(--pixata-blazor-pdfviewer-bg);
+}
+
+/* PDF.js needs the container to be absolutely positioned */
+.pixata-blazor-pdfviewer-container {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  outline: none;
+}
+
+.pixata-blazor-pdfviewer-container:focus-visible {
+  box-shadow: inset var(--pixata-blazor-focus-shadow);
+}
+
+/* PDF.js draws a transparent border round each page, and a negative margin to overlap them. Here the pages have a gap
+   between them and a shadow instead */
+.pixata-blazor-pdfviewer .pdfViewer {
+  --page-margin: 0 auto var(--pixata-blazor-pdfviewer-page-gap);
+  --page-border: none;
+  padding-block: var(--pixata-blazor-pdfviewer-page-gap) 0;
+}
+
+.pixata-blazor-pdfviewer .pdfViewer .page {
+  box-shadow: var(--pixata-blazor-pdfviewer-page-shadow);
+}
+
+.pixata-blazor-pdfviewer .textLayer .highlight {
+  --highlight-bg-color: var(--pixata-blazor-pdfviewer-match-bg);
+  --highlight-selected-bg-color: var(--pixata-blazor-pdfviewer-current-match-bg);
+}
+
+.pixata-blazor-pdfviewer-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--pixata-blazor-subtle-color);
+  text-align: center;
+  pointer-events: none;
+}
+
+.pixata-blazor-pdfviewer-error {
+  color: var(--pixata-blazor-error);
+}
