@@ -8,13 +8,13 @@
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Blazor.PdfViewer</Product>
-    <Description>A PDF viewer for Blazor, with page navigation, zoom, rotation, text search, download and print, using PDF.js.</Description>
+    <Description>A PDF viewer for Blazor, with page navigation, zoom, rotation, text search, download and print, using PDF.js. Users can mark it up with notes, highlights, strike-through, drawing and text, kept apart from the PDF.</Description>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</RepositoryUrl>
     <PackageIcon>avion.png</PackageIcon>
-    <PackageTags>C# Blazor PDF Viewer PDF.js</PackageTags>
+    <PackageTags>C# Blazor PDF Viewer PDF.js annotation markup</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Pixata.Blazor\Pixata.Blazor.csproj" />
+    <ProjectReference Include="..\Pixata.Extensions\Pixata.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

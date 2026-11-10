@@ -1,7 +1,12 @@
 @page "/PdfViewerSample"
 @using System.IO
+@using System.Text.Json
+@using Pixata.Blazor.Extensions
 @using Pixata.Blazor.PdfViewer
+@using Pixata.Extensions.Pdf
+@using Pixata.Pdf
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Environment
+@inject IJSRuntime Js
 
 <SitePageTitle>PDF viewer</SitePageTitle>
 
@@ -43,6 +48,35 @@
         </div>
       </div>
     </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Mark-up">
+  <Description>
+    <p>With <code>MarkupAuthor</code> set, the toolbar has tools for adding notes, highlighting and striking through text (or an area, on a scanned page), drawing, and writing text, such as a corrected figure. Each item records who added it and when. The mark-up is kept apart from the PDF, in <code>@@bind-Markup</code>, for the app to store, here as the JSON below. Click an item to see who added it, and to change or delete it if it's yours. Change the user to see that other people's mark-up can't be changed.</p>
+    <p>The download button saves the original PDF. <code>PdfMarkupFlattener</code>, from Pixata.Pdf, draws the mark-up into a copy of it, as the button below does.</p>
+  </Description>
+  <ChildContent>
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+      <label for="pdf-markup-user">Signed in as</label>
+      <span class="@PixataCss.Input(null, null, null)" style="width: 14rem;">
+        <select id="pdf-markup-user" class="pixata-blazor-input-inner" @bind="_markupUser">
+          <option value="Approver">Approver</option>
+          <option value="Accounts">Accounts</option>
+          <option value="">Nobody (read only)</option>
+        </select>
+      </span>
+      <PixataSecondaryButton ButtonType="PixataButtonType.Button" OnClick="DownloadWithMarkup">Download with mark-up</PixataSecondaryButton>
+      <PixataSecondaryButton ButtonType="PixataButtonType.Button" OnClick="@(() => _markup = SampleMarkup())">Reset the mark-up</PixataSecondaryButton>
+    </div>
+    <div style="height: 600px;">
+      <PixataPdfViewer Data="_invoice" FileName="INV-1042.pdf" @bind-Markup="_markup" MarkupAuthor="@(_markupUser == "" ? null : _markupUser)" OnMarkupChanged="@(e => _markupLog = $"OnMarkupChanged: {e.Item.Author} {e.Change.ToString().ToLowerInvariant()} a {e.Item.Type.ToString().ToLowerInvariant()} on page {e.Item.Page}")" />
+    </div>
+    <p class="mt-2">@_markupLog</p>
+    <details>
+      <summary>The mark-up as JSON</summary>
+      <pre style="max-height: 20rem; overflow: auto;">@JsonSerializer.Serialize(_markup, new JsonSerializerOptions(PdfMarkup.JsonOptions) { WriteIndented = true })</pre>
+    </details>
   </ChildContent>
 </ComponentSample>
 
@@ -92,6 +126,25 @@
   private string _downloaded = "";
   private string? _brokenUrl;
   private string _errorLog = "";
+
+  private string _markupUser = "Approver";
+  private IReadOnlyList<PdfMarkupItem> _markup = SampleMarkup();
+  private string _markupLog = "";
+
+  // Mark-up added by someone else, so it can't be changed by the approver
+  private static List<PdfMarkupItem> SampleMarkup() => [
+    new() { Type = PdfMarkupType.Highlight, Page = 1, Author = "Accounts", Created = new(2026, 11, 3, 9, 15, 0, DateTimeKind.Utc), Rects = [new(56.5, 697.3, 202, 709.9)], Text = "VAT number GB 123 4567 89" },
+    new() { Type = PdfMarkupType.Note, Page = 1, Author = "Accounts", Created = new(2026, 11, 3, 9, 16, 0, DateTimeKind.Utc), Colour = "#ff9800", Position = new(212, 703.6), Text = "VAT number checked against the supplier record." }
+  ];
+
+  private async Task DownloadWithMarkup() {
+    Pixata.Extensions.ApiResponse<byte[]> flattened = PdfMarkupFlattener.Flatten(_invoice!, _markup);
+    if (flattened.State == Pixata.Extensions.ApiResponseStates.Success) {
+      await PixataFiles.SaveFile(Js, "INV-1042 with mark-up.pdf", "application/pdf", flattened.Data!);
+    } else {
+      _markupLog = flattened.Message;
+    }
+  }
 
   protected override async Task OnInitializedAsync() =>
     _invoice = await File.ReadAllBytesAsync(Path.Combine(Environment.WebRootPath, "sample-invoice.pdf"));

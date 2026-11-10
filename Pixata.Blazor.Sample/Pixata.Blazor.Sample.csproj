@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Pixata.Blazor.Grid.Excel\Pixata.Blazor.Grid.Excel.csproj" />
     <ProjectReference Include="..\Pixata.Blazor.PdfViewer\Pixata.Blazor.PdfViewer.csproj" />
     <ProjectReference Include="..\Pixata.Email\Pixata.Email.csproj" />
+    <ProjectReference Include="..\Pixata.Pdf\Pixata.Pdf.csproj" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

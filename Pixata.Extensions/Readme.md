@@ -8,6 +8,8 @@ This is the shared kernel of the Pixata packages. It has no dependency on EF Cor
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Extensions/) is available for this project.
 
+>**Version 2.25.0** adds `PdfMarkupItem` and the other types for mark-up on a PDF (notes, highlights, strike-through, drawing and text), which Pixata.Blazor.PdfViewer's viewer adds and Pixata.Pdf's `PdfMarkupFlattener` draws into a PDF, with `PdfMarkup.ToJson()` and `FromJson()` to store it. See [PDF mark-up](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md#pdf-mark-up) (#140)
+
 >**Version 2.24.0** adds `GridQueryOptions`, which `ToGridResult()` and `ApplyFilters()` now take, to convert the dates in a grid's filters before they go into the query. The dates picked in a grid's filters have a `Kind` of `Unspecified`, which Npgsql (PostgreSQL) refuses to compare with a `timestamp with time zone` column, so a date filter failed on PostgreSQL. Pass `GridQueryOptions.Utc` to mark them as UTC, or `GridQueryOptions.FromTimeZone(zone)` to convert them from the user's time zone. Without options, nothing changes. See [grid requests](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md#grid-requests) (#144)
 
 >**Version 2.23.0** adds `IgnoreTime` to `GridFilterDescriptor`, which makes a filter on a `DateTime` field compare the date only, so "is equal to 21/10/2026" finds anything that day, and `GridRequest.RemoveTime()`, which sets it on the filters for the fields you name, as `TelerikFilterHelper.RemoveTime()` does for Telerik's grid. See [grid requests](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md#grid-requests).
@@ -29,7 +31,7 @@ The documentation is split over the following pages...
 | [Exception extension methods](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Exceptions.md) | Flattening the `InnerException` stack into readable text |
 | [Enum helpers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Enums.md) | Listing the members of an `enum` with display-friendly names |
 | [Caching](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.Caching.md) | `GetOrCreateSafe()`, which adds cache stampede protection to `IMemoryCache`, and the trouble with caching EF Core entities |
-| [Shared models](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md) | The auditing models, the encryption DTOs, the grid request types and `UploadFileDto`, which are shared between the client-side and server-side packages |
+| [Shared models](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Extensions/Readme.SharedModels.md) | The auditing models, the encryption DTOs, the grid request types, the PDF mark-up types and `UploadFileDto`, which are shared between the client-side and server-side packages |
 
 ## Related packages
 

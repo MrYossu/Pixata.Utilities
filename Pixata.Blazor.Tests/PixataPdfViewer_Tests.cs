@@ -1,13 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.PdfViewer;
+using Pixata.Extensions.Pdf;
 
 namespace Pixata.Blazor.Tests;
 
@@ -333,6 +336,216 @@ public class PixataPdfViewer_Tests {
 
     Assert.AreEqual(2, _module.Invocations["print"].Count);
     Assert.IsFalse(Button(viewer, "Print").HasAttribute("disabled"));
+  }
+
+  // ---------- Mark-up ----------
+
+  private static List<PdfMarkupItem> SomeMarkup() => [
+    new() { Id = "mine", Type = PdfMarkupType.Note, Author = "Approver", Position = new(100, 700), Text = "Check this", Created = new(2026, 11, 9, 10, 0, 0, DateTimeKind.Utc) },
+    new() { Id = "theirs", Type = PdfMarkupType.Highlight, Author = "Accounts", Rects = [new(50, 690, 200, 705)] }
+  ];
+
+  private JsonArray SentMarkup() =>
+    JsonNode.Parse((string)_module.Invocations["setMarkup"].Last().Arguments[1]!)!.AsArray();
+
+  private static string Added(PdfMarkupType type, int page = 1) =>
+    PdfMarkup.ToJson([new() { Id = "", Type = type, Page = page, Author = "Someone else", Position = new(10, 20), Text = "Hello" }]).Trim('[', ']');
+
+  [TestMethod]
+  public void TheMarkupTools_AreOnlyShownWhenThereIsAnAuthor() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render());
+    Assert.AreEqual(0, viewer.FindAll(".pixata-blazor-pdfviewer-markup-tools").Count);
+
+    viewer.Render(p => p.Add(c => c.MarkupAuthor, "Approver"));
+    Assert.AreEqual(5, viewer.FindAll(".pixata-blazor-pdfviewer-markup-tools button").Count);
+    Assert.IsNotNull(Button(viewer, "Add a note"));
+    Assert.AreEqual(1, viewer.FindAll("input.pixata-blazor-pdfviewer-colour").Count);
+
+    viewer.Render(p => p.Add(c => c.ShowMarkup, false));
+    Assert.AreEqual(0, viewer.FindAll(".pixata-blazor-pdfviewer-markup-tools").Count);
+    Assert.IsFalse((bool)_module.Invocations["showMarkup"].Last().Arguments[1]!);
+  }
+
+  [TestMethod]
+  public void TheMarkup_IsSentToTheScript_SayingWhichTheUserCanChange() {
+    Render(p => p.Add(c => c.Markup, SomeMarkup()).Add(c => c.MarkupAuthor, "Approver"));
+
+    JsonArray sent = SentMarkup();
+    Assert.AreEqual(2, sent.Count);
+    Assert.AreEqual("Note", (string)sent[0]!["type"]!);
+    Assert.IsTrue((bool)sent[0]!["editable"]!);
+    Assert.IsFalse((bool)sent[1]!["editable"]!);
+    Assert.AreEqual("2026-11-09T10:00:00Z", (string)sent[0]!["created"]!);
+    Assert.IsTrue((bool)_module.Invocations["setMarkup"].Last().Arguments[2]!);
+  }
+
+  [TestMethod]
+  public void WithoutAnAuthor_NothingCanBeChanged() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p.Add(c => c.Markup, SomeMarkup())));
+
+    Assert.IsFalse((bool)SentMarkup()[0]!["editable"]!);
+    Assert.IsFalse((bool)_module.Invocations["setMarkup"].Last().Arguments[2]!);
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupAdded(Added(PdfMarkupType.Note)));
+    viewer.InvokeAsync(() => viewer.Instance.MarkupDeleted("mine"));
+    Assert.AreEqual(2, viewer.Instance.CurrentMarkup.Count);
+  }
+
+  [TestMethod]
+  public void AddedMarkup_IsTheUsers_AndRaisesTheEvents() {
+    IReadOnlyList<PdfMarkupItem>? bound = null;
+    PixataPdfViewerMarkupChangedEventArgs? changed = null;
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p
+      .Add(c => c.Markup, SomeMarkup())
+      .Add(c => c.MarkupAuthor, "Approver")
+      .Add(c => c.MarkupAuthorId, "u1")
+      .Add(c => c.MarkupChanged, EventCallback.Factory.Create<IReadOnlyList<PdfMarkupItem>>(this, m => bound = m))
+      .Add(c => c.OnMarkupChanged, EventCallback.Factory.Create<PixataPdfViewerMarkupChangedEventArgs>(this, e => changed = e))));
+    DateTime before = DateTime.UtcNow;
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupAdded(Added(PdfMarkupType.Note, 2)));
+
+    Assert.AreEqual(3, bound!.Count);
+    PdfMarkupItem item = bound[2];
+    Assert.AreEqual(PixataPdfViewerMarkupChange.Added, changed!.Change);
+    Assert.AreSame(item, changed.Item);
+    Assert.AreSame(bound, changed.Markup);
+    Assert.AreEqual("Approver", item.Author);
+    Assert.AreEqual("u1", item.AuthorId);
+    Assert.AreEqual(32, item.Id.Length);
+    Assert.AreEqual(2, item.Page);
+    Assert.AreEqual("Hello", item.Text);
+    Assert.IsTrue(item.Created >= before && item.Created.Kind == DateTimeKind.Utc);
+    Assert.AreEqual(3, SentMarkup().Count);
+    Assert.IsTrue((bool)SentMarkup()[2]!["editable"]!);
+  }
+
+  [TestMethod]
+  public void MarkupOnAPageThePdfDoesntHave_IsIgnored() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p.Add(c => c.MarkupAuthor, "Approver")), 3);
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupAdded(Added(PdfMarkupType.Note, 4)));
+    viewer.InvokeAsync(() => viewer.Instance.MarkupAdded(Added(PdfMarkupType.Note, 0)));
+
+    Assert.AreEqual(0, viewer.Instance.CurrentMarkup.Count);
+  }
+
+  [TestMethod]
+  public void AParentThatDoesntBindTheMarkup_DoesntLoseWhatsAdded() {
+    List<PdfMarkupItem> markup = SomeMarkup();
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p.Add(c => c.Markup, markup).Add(c => c.MarkupAuthor, "Approver")));
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupAdded(Added(PdfMarkupType.Text)));
+    viewer.Render(p => p.Add(c => c.Markup, markup));
+
+    Assert.AreEqual(3, viewer.Instance.CurrentMarkup.Count);
+    Assert.AreEqual(2, markup.Count);
+
+    viewer.Render(p => p.Add(c => c.Markup, new List<PdfMarkupItem>()));
+    Assert.AreEqual(0, viewer.Instance.CurrentMarkup.Count);
+    Assert.AreEqual(0, SentMarkup().Count);
+  }
+
+  [TestMethod]
+  public void TheUser_CanOnlyChangeAndDeleteTheirOwnMarkup() {
+    List<PixataPdfViewerMarkupChangedEventArgs> changes = [];
+    List<PdfMarkupItem> markup = SomeMarkup();
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p
+      .Add(c => c.Markup, markup)
+      .Add(c => c.MarkupAuthor, "Approver")
+      .Add(c => c.OnMarkupChanged, EventCallback.Factory.Create<PixataPdfViewerMarkupChangedEventArgs>(this, changes.Add))));
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupTextChanged("theirs", "Mine now"));
+    viewer.InvokeAsync(() => viewer.Instance.MarkupDeleted("theirs"));
+    Assert.AreEqual(0, changes.Count);
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupTextChanged("mine", "Checked"));
+    Assert.AreEqual(PixataPdfViewerMarkupChange.Changed, changes.Single().Change);
+    Assert.AreEqual("Checked", viewer.Instance.CurrentMarkup[0].Text);
+    Assert.IsNotNull(viewer.Instance.CurrentMarkup[0].Modified);
+    Assert.AreEqual("Check this", markup[0].Text, "The parent's item isn't changed");
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupDeleted("mine"));
+    Assert.AreEqual(PixataPdfViewerMarkupChange.Deleted, changes.Last().Change);
+    Assert.AreEqual("theirs", viewer.Instance.CurrentMarkup.Single().Id);
+  }
+
+  [TestMethod]
+  public void WithAnAuthorId_ItsTheIdThatSaysWhoseMarkupItIs() {
+    List<PdfMarkupItem> markup = [
+      new() { Id = "a", Type = PdfMarkupType.Note, Author = "Sam", AuthorId = "1", Position = new(1, 1) },
+      new() { Id = "b", Type = PdfMarkupType.Note, Author = "Sam", AuthorId = "2", Position = new(1, 1) }
+    ];
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p.Add(c => c.Markup, markup).Add(c => c.MarkupAuthor, "Sam").Add(c => c.MarkupAuthorId, "2")));
+
+    Assert.IsFalse((bool)SentMarkup()[0]!["editable"]!);
+    Assert.IsTrue((bool)SentMarkup()[1]!["editable"]!);
+
+    viewer.InvokeAsync(() => viewer.Instance.MarkupDeleted("a"));
+    Assert.AreEqual(2, viewer.Instance.CurrentMarkup.Count);
+  }
+
+  [TestMethod]
+  public void ChoosingATool_TellsTheScript_AndChoosingItAgainPutsItDown() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p.Add(c => c.MarkupAuthor, "Approver")));
+
+    Button(viewer, "Highlight").Click();
+    Assert.AreEqual("true", Button(viewer, "Highlight").GetAttribute("aria-pressed"));
+    Assert.AreEqual("false", Button(viewer, "Draw").GetAttribute("aria-pressed"));
+    Assert.AreEqual(PixataPdfViewerMarkupTool.Highlight, viewer.Instance.MarkupTool);
+    Assert.AreEqual("Highlight", _module.Invocations["setMarkupTool"].Last().Arguments[1]);
+    Assert.AreEqual(PdfMarkup.DefaultHighlightColour, _module.Invocations["setMarkupTool"].Last().Arguments[2]);
+
+    Button(viewer, "Draw").Click();
+    Assert.AreEqual("Ink", _module.Invocations["setMarkupTool"].Last().Arguments[1]);
+    Assert.AreEqual(PdfMarkup.DefaultColour, _module.Invocations["setMarkupTool"].Last().Arguments[2]);
+
+    Button(viewer, "Draw").Click();
+    Assert.AreEqual(PixataPdfViewerMarkupTool.None, viewer.Instance.MarkupTool);
+    Assert.AreEqual("", _module.Invocations["setMarkupTool"].Last().Arguments[1]);
+  }
+
+  [TestMethod]
+  public void Escape_PutsTheToolDown() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p.Add(c => c.MarkupAuthor, "Approver")));
+    Button(viewer, "Add text").Click();
+
+    viewer.Find(".pixata-blazor-pdfviewer-container").KeyDown("Escape");
+
+    Assert.AreEqual(PixataPdfViewerMarkupTool.None, viewer.Instance.MarkupTool);
+  }
+
+  [TestMethod]
+  public void TheColour_IsKeptForHighlightsAndForTheOtherTools() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render(p => p.Add(c => c.MarkupAuthor, "Approver")));
+
+    Button(viewer, "Highlight").Click();
+    viewer.Find("input.pixata-blazor-pdfviewer-colour").Change("#00ff00");
+    Assert.AreEqual("#00ff00", _module.Invocations["setMarkupTool"].Last().Arguments[2]);
+
+    Button(viewer, "Draw").Click();
+    Assert.AreEqual(PdfMarkup.DefaultColour, _module.Invocations["setMarkupTool"].Last().Arguments[2]);
+    viewer.Find("input.pixata-blazor-pdfviewer-colour").Change("#0000ff");
+
+    Button(viewer, "Highlight").Click();
+    Assert.AreEqual("#00ff00", _module.Invocations["setMarkupTool"].Last().Arguments[2]);
+    Assert.AreEqual("#00ff00", viewer.Find("input.pixata-blazor-pdfviewer-colour").GetAttribute("value"));
+  }
+
+  [TestMethod]
+  public void SetMarkupTool_IsIgnoredWithoutAnAuthor_AndLosingTheAuthorPutsTheToolDown() {
+    IRenderedComponent<PixataPdfViewer> viewer = Loaded(Render());
+
+    viewer.InvokeAsync(() => viewer.Instance.SetMarkupTool(PixataPdfViewerMarkupTool.Ink));
+    Assert.AreEqual(PixataPdfViewerMarkupTool.None, viewer.Instance.MarkupTool);
+
+    viewer.Render(p => p.Add(c => c.MarkupAuthor, "Approver"));
+    viewer.InvokeAsync(() => viewer.Instance.SetMarkupTool(PixataPdfViewerMarkupTool.Ink));
+    Assert.AreEqual(PixataPdfViewerMarkupTool.Ink, viewer.Instance.MarkupTool);
+
+    viewer.Render(p => p.Add(c => c.MarkupAuthor, ""));
+    Assert.AreEqual(PixataPdfViewerMarkupTool.None, viewer.Instance.MarkupTool);
+    Assert.AreEqual("", _module.Invocations["setMarkupTool"].Last().Arguments[1]);
   }
 
   // ---------- Appearance ----------

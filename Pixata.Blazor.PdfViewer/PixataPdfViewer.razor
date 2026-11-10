@@ -55,6 +55,15 @@
           <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.ChevronDown" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@Text.NextMatch" AriaLabel="@Text.NextMatch" Enabled="@(_matchTotal > 0)" OnClick="SearchNext" />
         </div>
       }
+      @if (CanAddMarkup) {
+        <div class="pixata-blazor-pdfviewer-tools pixata-blazor-pdfviewer-markup-tools" role="group" aria-label="@Text.MarkupTools">
+          @foreach ((PixataPdfViewerMarkupTool tool, object icon, string label) in MarkupToolButtons) {
+            bool chosen = _tool == tool;
+            <PixataButton ButtonType="PixataButtonType.Button" Icon="icon" FillMode="@PixataThemeConstants.Button.FillMode.Flat" Size="@PixataThemeConstants.Button.Size.Small" Title="@label" AriaLabel="@label" Enabled="IsLoaded" Class="@(chosen ? "pixata-blazor-pdfviewer-chosen" : null)" aria-pressed="@(chosen ? "true" : "false")" OnClick="@(() => ChooseTool(tool))" />
+          }
+          <input class="pixata-blazor-pdfviewer-colour" type="color" value="@ToolColour" title="@Text.MarkupColour" aria-label="@Text.MarkupColour" disabled="@(!IsLoaded)" @onchange="ColourChosen" />
+        </div>
+      }
       @if (ShowDownload || ShowPrint) {
         <div class="pixata-blazor-pdfviewer-tools pixata-blazor-pdfviewer-end">
           @if (ShowDownload) {
@@ -68,7 +77,7 @@
     </div>
   }
   <div class="pixata-blazor-pdfviewer-body">
-    <div id="@ContainerId" class="pixata-blazor-pdfviewer-container" tabindex="0" role="region" aria-label="@Text.Pages"><div class="pdfViewer"></div></div>
+    <div id="@ContainerId" class="pixata-blazor-pdfviewer-container" tabindex="0" role="region" aria-label="@Text.Pages" @onkeydown="ContainerKey"><div class="pdfViewer"></div></div>
     @switch (_status) {
       case ViewerStatus.Empty:
         <div class="pixata-blazor-pdfviewer-status">@Text.NoDocument</div>

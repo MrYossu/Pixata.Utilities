@@ -4,6 +4,7 @@
 import "./global.js";
 import { AnnotationEditorType, AnnotationMode, getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import { EventBus, FindState, LinkTarget, PDFFindController, PDFLinkService, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
+import { drawMarkupForPrint, resetMarkup, setMarkup as applyMarkup, setTool, setUpMarkup, setVisible } from "./markup-editor.js";
 
 // The files PDF.js needs are next to this module. The query string it was loaded with changes with each build of the
 // package, so it's added to the worker's URL, as a browser mustn't use an old worker with a new library
@@ -82,6 +83,7 @@ export function create(key, containerId, dotNet, optionsJson) {
   linkService.setViewer(viewer);
   const state = { key, container, dotNet, eventBus, linkService, findController, viewer, abort, zoom: options.zoom, page: 1, opening: 0, task: null, document: null };
   viewers.set(key, state);
+  setUpMarkup(state, options);
 
   eventBus.on("pagesinit", () => {
     viewer.currentScaleValue = state.zoom;
@@ -138,6 +140,7 @@ export function create(key, containerId, dotNet, optionsJson) {
 }
 
 function close(state) {
+  resetMarkup(state);
   state.task?.destroy();
   state.task = null;
   state.document = null;
@@ -312,6 +315,7 @@ export async function print(key) {
       context.fillStyle = "#fff";
       context.fillRect(0, 0, canvas.width, canvas.height);
       await page.render({ canvasContext: context, canvas, viewport, intent: "print", annotationMode: AnnotationMode.ENABLE_FORMS }).promise;
+      await drawMarkupForPrint(state, page, number, turned, context, canvas.width, canvas.height);
       const blob = await new Promise(resolve => canvas.toBlob(resolve));
       images.push(URL.createObjectURL(blob));
       canvas.width = canvas.height = 0;
@@ -352,6 +356,29 @@ div:last-child { break-after: auto; }
 img { max-width: 100%; max-height: 100%; }
 </style></head><body>${images.map(url => `<div><img src="${url}" alt=""></div>`).join("")}</body></html>`;
   document.body.appendChild(frame);
+}
+
+// The mark-up to show, as JSON, each item with whether the user can change it
+export function setMarkup(key, json, canEdit) {
+  const state = viewers.get(key);
+  if (state) {
+    applyMarkup(state, JSON.parse(json), canEdit);
+  }
+}
+
+// The mark-up tool chosen on the toolbar (Note, Highlight, StrikeThrough, Ink or Text), or "" for none, and its colour
+export function setMarkupTool(key, tool, colour) {
+  const state = viewers.get(key);
+  if (state) {
+    setTool(state, tool, colour);
+  }
+}
+
+export function showMarkup(key, visible) {
+  const state = viewers.get(key);
+  if (state) {
+    setVisible(state, visible);
+  }
 }
 
 export function destroy(key) {
