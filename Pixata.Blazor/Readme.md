@@ -52,6 +52,7 @@ The documentation is split over the following pages...
 | [Checkbox](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.CheckBox.md) | `PixataCheckBox`, a checkbox for booleans, with an indeterminate state |
 | [Charts](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Charts.md) | `PixataChart`, with column, bar, line, pie and donut series |
 | [Heatmap](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Heatmap.md) | `PixataHeatmap`, a grid of values shown as coloured cells, such as the days of the week against the hours of the day |
+| [Tooltip](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Tooltip.md) | `PixataTooltip`, which shows any content next to an element when it's hovered, focused, tapped or clicked, for one element or for every element a CSS selector matches |
 | [Buttons](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Buttons.md) | `PixataButton`, `PixataPrimaryButton`, `PixataSecondaryButton`, `PixataDropDownButton` and `PixataSplitButton` |
 | [Scheduler](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Scheduler.md) | `PixataScheduler`, for showing and editing appointments in day, multi-day, week, month, timeline and agenda views |
 

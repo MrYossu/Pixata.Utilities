@@ -1,0 +1,118 @@
+@page "/TooltipSample"
+
+<SitePageTitle>Tooltip</SitePageTitle>
+
+<h3>Tooltip</h3>
+
+<p><code>PixataTooltip</code> shows a small panel next to an element when the pointer is over it, it has the keyboard focus, or it's tapped on a touch screen. Tab to the buttons below to see it work from the keyboard, and press Escape to hide it. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Tooltip.md">the documentation</a>.</p>
+
+<ComponentSample Title="Basic use">
+  <Description>
+    <p>The target is the child content, and the tooltip shows its <code>title</code>, instead of the browser's own tooltip.</p>
+  </Description>
+  <ChildContent>
+    <PixataTooltip>
+      <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Refresh" AriaLabel="Refresh" Title="Get the latest figures" />
+    </PixataTooltip>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Position">
+  <Description>
+    <p><code>Position</code> takes <code>Top</code> (the default), <code>Bottom</code>, <code>Left</code>, <code>Right</code> or <code>Auto</code>. If there isn't room on the side asked for, the tooltip goes on the opposite side, so scroll the page until a button is near the top of the window to see the top one move underneath. <code>Text</code> sets what it says, if the target has no title.</p>
+  </Description>
+  <ChildContent>
+    <div class="d-flex flex-wrap gap-2">
+      @foreach (PixataTooltipPosition position in Enum.GetValues<PixataTooltipPosition>()) {
+        <PixataTooltip Position="position" Text="@($"Position=\"{position}\"")">
+          <PixataSecondaryButton ButtonType="PixataButtonType.Button">@position</PixataSecondaryButton>
+        </PixataTooltip>
+      }
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="A selector and a template">
+  <Description>
+    <p>One tooltip for many targets: <code>TargetSelector=".invoice-status"</code> matches each status icon in the table. The <code>Template</code> is given the icon's id, title and <code>data-</code> attributes, which say which invoice it's for, so it can show that invoice's details. Targets added later are matched too: <button type="button" class="btn btn-link p-0 align-baseline" @onclick="AddInvoice">add an invoice</button>.</p>
+  </Description>
+  <ChildContent>
+    <table class="table table-sm" style="width: auto;">
+      <thead>
+        <tr><th>Invoice</th><th>Customer</th><th class="text-end">Amount</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        @foreach (Invoice invoice in _invoices) {
+          <tr>
+            <td>@invoice.Number</td>
+            <td>@invoice.Customer</td>
+            <td class="text-end">@invoice.Amount.ToString("C")</td>
+            <td>
+              <span class="invoice-status @(invoice.Paid ? "text-success" : "text-danger")" tabindex="0" role="img" aria-label="@(invoice.Paid ? "Paid" : "Overdue")" data-invoice="@invoice.Number">
+                <i class="@(invoice.Paid ? "fas fa-check-circle" : "fas fa-exclamation-circle")" aria-hidden="true"></i>
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <PixataTooltip TargetSelector=".invoice-status" Position="PixataTooltipPosition.Right" Width="14rem">
+      <Template>
+        @if (_invoices.FirstOrDefault(i => i.Number == context.DataAttributes.GetValueOrDefault("invoice")) is Invoice invoice) {
+          <div><strong>@invoice.Number</strong> for @invoice.Customer</div>
+          @if (invoice.Paid) {
+            <div>Paid on @(invoice.Due.AddDays(-3).ToString("d MMM yyyy"))</div>
+          } else {
+            <div>@((DateTime.Today - invoice.Due).Days) days overdue (due @(invoice.Due.ToString("d MMM yyyy")))</div>
+          }
+        }
+      </Template>
+    </PixataTooltip>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Every title in a toolbar">
+  <Description>
+    <p>With child content and a <code>TargetSelector</code>, the targets are the elements in the content that match it. Here, <code>TargetSelector="[title]"</code> gives each button in the toolbar a tooltip from its title, with <code>Position="Bottom"</code> and no delay.</p>
+  </Description>
+  <ChildContent>
+    <PixataTooltip TargetSelector="[title]" Position="PixataTooltipPosition.Bottom" ShowDelay="0">
+      <div class="d-flex gap-1">
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Download" AriaLabel="Download" Title="Download as a spreadsheet" FillMode="@PixataThemeConstants.Button.FillMode.Flat" />
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Refresh" AriaLabel="Refresh" Title="Refresh" FillMode="@PixataThemeConstants.Button.FillMode.Flat" />
+        <PixataButton ButtonType="PixataButtonType.Button" Icon="PixataSvgIcons.Trash" AriaLabel="Delete" Title="Delete the selected rows" FillMode="@PixataThemeConstants.Button.FillMode.Flat" />
+      </div>
+    </PixataTooltip>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Shown by a click">
+  <Description>
+    <p>With <code>ShowOn="PixataTooltipShowEvent.Click"</code>, a click (or Enter or Space) shows the tooltip, and another click, a click elsewhere or Escape hides it. As it stays until then, it can hold a link.</p>
+  </Description>
+  <ChildContent>
+    <span>VAT number</span>
+    <PixataTooltip ShowOn="PixataTooltipShowEvent.Click" Position="PixataTooltipPosition.Right">
+      <Template>
+        Your VAT registration number, nine digits starting with GB.
+        <a href="https://www.gov.uk/check-uk-vat-number" target="_blank" rel="noopener">Check a VAT number</a>
+      </Template>
+      <ChildContent>
+        <span class="text-primary" role="button" tabindex="0" aria-label="About VAT numbers"><i class="fas fa-question-circle" aria-hidden="true"></i></span>
+      </ChildContent>
+    </PixataTooltip>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private record Invoice(string Number, string Customer, decimal Amount, DateTime Due, bool Paid);
+
+  private readonly List<Invoice> _invoices = [
+    new("INV-1041", "Hartley and Sons", 1250m, DateTime.Today.AddDays(-40), true),
+    new("INV-1042", "Mason Joinery", 384.5m, DateTime.Today.AddDays(-12), false),
+    new("INV-1043", "Greenway Florists", 92m, DateTime.Today.AddDays(-20), true)
+  ];
+
+  private void AddInvoice() =>
+    _invoices.Add(new($"INV-{1041 + _invoices.Count}", "Brook Lane Bakery", 57.25m * _invoices.Count, DateTime.Today.AddDays(-5 * _invoices.Count), _invoices.Count % 2 == 0));
+}

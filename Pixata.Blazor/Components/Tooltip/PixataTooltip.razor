@@ -1,0 +1,24 @@
+@namespace Pixata.Blazor.Components
+@implements IAsyncDisposable
+
+@*
+  A tooltip: a small panel shown next to an element when the pointer is over it, it has the keyboard focus, or it's tapped,
+  as in Telerik's Tooltip. The targets are the child content, or the elements a CSS selector matches (within the child
+  content, if there is any). The script (PixataTooltip.razor.js) watches for the targets being hovered, focused and tapped,
+  tells this component which one to show the tooltip for, and places the tooltip next to it once it has rendered. The
+  tooltip is position: fixed, so a scrolling container doesn't clip it
+*@
+@if (ChildContent is not null) {
+  <span id="@TargetsId" class="pixata-blazor-tooltip-targets">@ChildContent</span>
+}
+@if (_context is not null) {
+  <div id="@TooltipId" class="@PixataCss.Classes("pixata-blazor-tooltip", Class)" role="tooltip">
+    <div class="pixata-blazor-tooltip-content" style="@ContentStyle">
+      @if (Template is not null) {
+        @Template(_context)
+      } else {
+        @(Text ?? _context.Title)
+      }
+    </div>
+  </div>
+}
