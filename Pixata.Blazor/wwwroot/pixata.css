@@ -10359,3 +10359,118 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
 }
 
 /* ========== end of PixataSlider ========== */
+
+/* ========== PixataTooltip ========== */
+
+/*
+  pixata-blazor-tooltip is the tooltip, and pixata-blazor-tooltip-content holds what it shows. The script places it next to
+  its target, setting data-position to the side it went on, and data-placed once it has (it's hidden until then). Its
+  ::before is the arrow, --pixata-blazor-tooltip-arrow along the side facing the target. Child content is wrapped in
+  pixata-blazor-tooltip-targets, which has display: contents, so it doesn't change the layout
+*/
+:root {
+  --pixata-blazor-tooltip-bg: var(--pixata-blazor-dark);
+  --pixata-blazor-tooltip-color: var(--pixata-blazor-dark-color);
+  --pixata-blazor-tooltip-font-size: var(--pixata-blazor-font-size-sm);
+  --pixata-blazor-tooltip-padding: .25rem .5rem;
+  --pixata-blazor-tooltip-max-width: 20rem;
+  --pixata-blazor-tooltip-border-radius: var(--pixata-blazor-border-radius);
+  --pixata-blazor-tooltip-shadow: var(--pixata-blazor-popup-shadow);
+  --pixata-blazor-tooltip-z-index: calc(var(--pixata-blazor-popup-z-index) + 1);
+  --pixata-blazor-tooltip-arrow-size: 6px;
+  --pixata-blazor-tooltip-gap: 8px;
+}
+
+.pixata-blazor-tooltip-targets {
+  display: contents;
+}
+
+.pixata-blazor-tooltip {
+  box-sizing: border-box;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: var(--pixata-blazor-tooltip-z-index);
+  max-width: min(var(--pixata-blazor-tooltip-max-width), calc(100vw - 8px));
+  border-radius: var(--pixata-blazor-tooltip-border-radius);
+  background: var(--pixata-blazor-tooltip-bg);
+  color: var(--pixata-blazor-tooltip-color);
+  box-shadow: var(--pixata-blazor-tooltip-shadow);
+  font-family: var(--pixata-blazor-font-family);
+  font-size: var(--pixata-blazor-tooltip-font-size);
+  line-height: var(--pixata-blazor-line-height);
+  text-align: start;
+  white-space: normal;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .15s ease-in;
+}
+
+.pixata-blazor-tooltip[data-placed] {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixata-blazor-tooltip {
+    transition: none;
+  }
+}
+
+.pixata-blazor-tooltip-content {
+  box-sizing: border-box;
+  max-height: calc(100vh - 8px);
+  padding: var(--pixata-blazor-tooltip-padding);
+  overflow: auto;
+  overflow-wrap: break-word;
+  border-radius: inherit;
+}
+
+.pixata-blazor-tooltip-content a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.pixata-blazor-tooltip::before {
+  content: "";
+  position: absolute;
+  border: var(--pixata-blazor-tooltip-arrow-size) solid transparent;
+}
+
+.pixata-blazor-tooltip[data-position="top"]::before,
+.pixata-blazor-tooltip[data-position="bottom"]::before {
+  left: var(--pixata-blazor-tooltip-arrow, 50%);
+  translate: -50% 0;
+}
+
+.pixata-blazor-tooltip[data-position="left"]::before,
+.pixata-blazor-tooltip[data-position="right"]::before {
+  top: var(--pixata-blazor-tooltip-arrow, 50%);
+  translate: 0 -50%;
+}
+
+.pixata-blazor-tooltip[data-position="top"]::before {
+  top: 100%;
+  border-bottom-width: 0;
+  border-top-color: var(--pixata-blazor-tooltip-bg);
+}
+
+.pixata-blazor-tooltip[data-position="bottom"]::before {
+  bottom: 100%;
+  border-top-width: 0;
+  border-bottom-color: var(--pixata-blazor-tooltip-bg);
+}
+
+.pixata-blazor-tooltip[data-position="left"]::before {
+  left: 100%;
+  border-right-width: 0;
+  border-left-color: var(--pixata-blazor-tooltip-bg);
+}
+
+.pixata-blazor-tooltip[data-position="right"]::before {
+  right: 100%;
+  border-left-width: 0;
+  border-right-color: var(--pixata-blazor-tooltip-bg);
+}
+
+/* ========== end of PixataTooltip ========== */
