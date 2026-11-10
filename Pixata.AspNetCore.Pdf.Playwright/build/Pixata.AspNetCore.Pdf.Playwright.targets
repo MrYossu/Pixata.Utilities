@@ -114,6 +114,18 @@
            Text="Pixata.AspNetCore.Pdf.Playwright can't copy Chromium into the build output, as long paths aren't enabled on this machine, and some of its files would have paths of 260 characters or more, such as $(_PixataPlaywrightTooLongExample) ($(_PixataPlaywrightTooLongExample.Length) characters). To fix this, enable long paths in Windows (set LongPathsEnabled to 1 in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem, then restart Visual Studio), build in a folder with a shorter path, or set PixataPlaywrightBundleBrowser to false in the project file and use the Channel option. See https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright#long-paths-on-windows" />
   </Target>
 
+  <!-- NuGet unpacks the Playwright driver's node executable so that only its owner can run it, and the copies in the build and publish output
+       keep that, so an app that runs as a different user from the one that built it can't start the driver. That's usual in a container, as
+       the images based on mcr.microsoft.com/dotnet/aspnet run the app as the app user, and the files are copied in from a build stage that
+       ran as root. So it's made executable by everyone, as Chromium already is. Windows doesn't have this problem -->
+  <Target Name="PixataPlaywrightMakeDriverExecutable" AfterTargets="CopyFilesToOutputDirectory" Condition="!$([MSBuild]::IsOSPlatform('Windows')) AND Exists('$(OutDir).playwright/node')">
+    <Exec Command="chmod a+x &quot;$(OutDir).playwright/node/&quot;*/node" ContinueOnError="true" StandardOutputImportance="low" />
+  </Target>
+
+  <Target Name="PixataPlaywrightMakePublishedDriverExecutable" AfterTargets="Publish" Condition="!$([MSBuild]::IsOSPlatform('Windows')) AND Exists('$(PublishDir).playwright/node')">
+    <Exec Command="chmod a+x &quot;$(PublishDir).playwright/node/&quot;*/node" ContinueOnError="true" StandardOutputImportance="low" />
+  </Target>
+
   <!-- The same check for publishing, which copies the browser again, to the publish folder. A Visual Studio publish to a folder copies it
        once more, from obj\...\PubTmp\Out (the PublishDir) to the folder in the profile (the PublishUrl) -->
   <Target Name="PixataPlaywrightCheckPublishPathLength" AfterTargets="ComputeResolvedFilesToPublishList" Condition="'$(_PixataPlaywrightCheckPathLength)' == 'true'">

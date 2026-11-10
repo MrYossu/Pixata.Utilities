@@ -21,4 +21,8 @@
     <ProjectReference Include="..\Pixata.AspNetCore.Pdf.Playwright\Pixata.AspNetCore.Pdf.Playwright.csproj" />
   </ItemGroup>
 
+  <!-- Copies Chromium into the test output, as an app that uses the package would get it, so the conversion tests use a real browser on
+       whichever operating system they run on. A ProjectReference doesn't import a package's targets, so this does it -->
+  <Import Project="..\Pixata.AspNetCore.Pdf.Playwright\build\Pixata.AspNetCore.Pdf.Playwright.targets" />
+
 </Project>
