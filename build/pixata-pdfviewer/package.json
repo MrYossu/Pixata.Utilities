@@ -1,0 +1,16 @@
+{
+  "name": "pixata-pdfviewer",
+  "private": true,
+  "description": "Builds Pixata.Blazor.PdfViewer/wwwroot/pdfjs, the browser half of PixataPdfViewer",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "pdfjs-dist": "6.5.438"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
