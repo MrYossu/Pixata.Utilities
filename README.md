@@ -41,6 +41,13 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwrigh
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
 
+## Pixata.Pdf
+Helpers for PDFs you already have. `PdfCombiner` joins several PDFs into one, keeping each page's size and orientation, such as a cover page your app made followed by a document the user uploaded. It uses PdfPig, which is Apache 2.0 licensed, so it needs no licence.
+
+A [Nuget package](https://www.nuget.org/packages/Pixata.Pdf/) is available for this project.
+
+You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf).
+
 ## Pixata.AspNetCore.Pdf.Telerik
 A PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Telerik Document Processing, which needs a Telerik licence. Pixata.AspNetCore.Pdf.Playwright is free, and gives much better results, so is recommended instead.
 

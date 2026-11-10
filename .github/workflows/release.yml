@@ -182,6 +182,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Pdf
+    - name: Restore - Pixata.Pdf Dependencies
+      run: dotnet restore Pixata.Pdf/Pixata.Pdf.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.Pdf.csproj
+      run: dotnet build Pixata.Pdf/Pixata.Pdf.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.SimilarityChooser
     - name: Restore - Pixata.SimilarityChooser Dependencies
       run: dotnet restore Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configfile ./nuget.config
@@ -258,6 +271,12 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    - name: Run Tests - Pixata.Pdf.Tests
+      run: dotnet test Pixata.Pdf.Tests/Pixata.Pdf.Tests.csproj --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
 # ***************** PUBLISHING **************** #
 
     # The key this returns lasts about an hour, so this stays just before the publish steps rather than at the start of the job
@@ -325,6 +344,12 @@ jobs:
       uses: alirezanet/publish-nuget@v3.0.4  
       with:   
        PROJECT_FILE_PATH: Pixata.Email/Pixata.Email.csproj  
+       NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
+
+    - name: Publish Pixata.Pdf
+      uses: alirezanet/publish-nuget@v3.0.4  
+      with:   
+       PROJECT_FILE_PATH: Pixata.Pdf/Pixata.Pdf.csproj  
        NUGET_KEY: ${{steps.nuget_login.outputs.NUGET_API_KEY}} 
 
     - name: Publish Pixata.SimilarityChooser

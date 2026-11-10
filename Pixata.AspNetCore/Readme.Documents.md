@@ -48,6 +48,8 @@ builder.Services.AddSingleton<PdfConverterInterface, MyPdfConverter>();
 
 If no converter is registered, `CreateHtmlFromTemplate` works as normal, and `CreatePdfFromTemplate` throws an `InvalidOperationException` saying what's missing.
 
+To join the PDF you made to others, such as a cover page followed by a document the user uploaded, use `PdfCombiner` from [Pixata.Pdf](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf).
+
 ## Writing a template
 
 Create a Blazor component that will be the template for the document you wish to generate. It needs to accept two parameters as follows...
