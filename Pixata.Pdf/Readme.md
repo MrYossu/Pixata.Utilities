@@ -1,5 +1,7 @@
 ﻿# Pixata.Pdf [![Pixata.Pdf Nuget package](https://img.shields.io/nuget/v/Pixata.Pdf)](https://www.nuget.org/packages/Pixata.Pdf/)
 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Pdf/pdf.png "Pixata")
+
 Helpers for working with PDFs that you already have, such as joining a cover page your app made to a document the user uploaded, or drawing the notes and highlights users added in `PixataPdfViewer` into a copy of a PDF. To make PDFs from Blazor components, see the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md), with the [Playwright converter](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
 
 It uses [PdfPig](https://github.com/UglyToad/PdfPig), which is Apache 2.0 licensed, so it's free to use in any app. (PDFsharp, the better known library, moved to the AGPL licence in version 6.5, which would oblige most apps using it to publish their source code.) It doesn't depend on ASP.NET Core, so it can be used in any .NET 8 or 10 app.

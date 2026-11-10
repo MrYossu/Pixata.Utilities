@@ -1,5 +1,7 @@
 # Pixata.Blazor.PdfViewer [![Pixata.Blazor.PdfViewer Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor.PdfViewer)](https://www.nuget.org/packages/Pixata.Blazor.PdfViewer/)
 
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor.PdfViewer/pdfviewer.png "Pixata")
+
 `PixataPdfViewer` shows a PDF in a Blazor page, with page navigation, zoom (fit width, fit page and percentages), rotation, text that can be selected and searched, and download and print buttons. Users can mark it up with notes, highlights, strike-through, drawing and text, which is kept apart from the PDF. It fills its container, so it can sit beside a form in a split layout, which is what it was written for: checking invoices against the details typed in from them.
 
 The PDF is drawn by [PDF.js](https://mozilla.github.io/pdf.js/), Mozilla's PDF engine, which is part of this package, so nothing is loaded from a CDN. It works in Blazor Server and WebAssembly, and is styled by the same `--pixata-blazor-*` variables as the components in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor), which it uses for its toolbar.

@@ -12,7 +12,7 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.PdfViewer</PackageProjectUrl>
-    <PackageIcon>avion.png</PackageIcon>
+    <PackageIcon>pdfviewer.png</PackageIcon>
     <PackageTags>C# Blazor PDF Viewer PDF.js annotation markup</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <Nullable>enable</Nullable>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="avion.png" Pack="true" PackagePath="\" />
+    <None Include="pdfviewer.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 

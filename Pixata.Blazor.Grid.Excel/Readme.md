@@ -1,8 +1,10 @@
-# Pixata.Blazor.Grid.Excel
+# Pixata.Blazor.Grid.Excel [![Pixata.Blazor.Grid.Excel Nuget package](https://img.shields.io/nuget/v/Pixata.Blazor.Grid.Excel)](https://www.nuget.org/packages/Pixata.Blazor.Grid.Excel/)
+
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Blazor.Grid.Excel/grid.excel.png "Pixata")
 
 Excel export for `PixataGrid`, the data grid in [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md). It's a separate package because it uses [ClosedXML](https://github.com/ClosedXML/ClosedXML), which would otherwise add weight to every app that uses Pixata.Blazor, including WASM apps that don't need it.
 
->**Version 1.1.0** writes the grid's aggregates as a row of totals under the data, as Excel formulas, and, with the new `GroupRows` parameter, writes a grouped grid with a heading and totals for each group, in an outline that can be collapsed. Set `Totals="false"` for the sheet as it was. See [totals](#totals) and [groups](#groups). It needs Pixata.Blazor 5.27.0 (#150).
+>**Version 1.1.0** writes the grid's aggregates as a row of totals under the data, as Excel formulas, and, with the new `GroupRows` parameter, writes a grouped grid with a heading and totals for each group, in an outline that can be collapsed. Set `Totals="false"` for the sheet as it was. See [totals](#totals) and [groups](#groups). It needs Pixata.Blazor 5.27.0 (#150). The package also has its own icon, in place of Pixata.Blazor's.
 
 >**Version 1.0.1** has no changes of its own. It depends on Pixata.Blazor 5.5.0, so adding this package on its own brings in a Pixata.Blazor (and Pixata.Extensions) whose grid works. Version 1.0.0 depended on Pixata.Blazor 5.0.0, which depended on a Pixata.Extensions without the grid types, so the grid threw a `TypeLoadException`.
 

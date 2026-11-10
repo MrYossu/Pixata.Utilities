@@ -12,7 +12,7 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Grid.Excel</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Blazor.Grid.Excel</PackageProjectUrl>
-    <PackageIcon>avion.png</PackageIcon>
+    <PackageIcon>grid.excel.png</PackageIcon>
     <PackageTags>C# Blazor Grid Excel</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <Nullable>enable</Nullable>
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="avion.png" Pack="true" PackagePath="\" />
+    <None Include="grid.excel.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
 
