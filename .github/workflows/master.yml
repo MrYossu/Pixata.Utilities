@@ -164,6 +164,19 @@ jobs:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
 
+    # Pixata.Pdf
+    - name: Restore - Pixata.Pdf Dependencies
+      run: dotnet restore Pixata.Pdf/Pixata.Pdf.csproj  --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Build - Pixata.Pdf.csproj
+      run: dotnet build Pixata.Pdf/Pixata.Pdf.csproj  --configuration Release --configfile ./nuget.config
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
     # Pixata.SimilarityChooser
     - name: Restore - Pixata.SimilarityChooser Dependencies
       run: dotnet restore Pixata.SimilarityChooser/Pixata.SimilarityChooser.csproj --configfile ./nuget.config
@@ -237,6 +250,12 @@ jobs:
 
     - name: Run Tests - Pixata.Email.Tests
       run: dotnet test Pixata.Email.Tests/Pixata.Email.Tests.csproj --verbosity normal
+      env:
+        TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
+        TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}
+
+    - name: Run Tests - Pixata.Pdf.Tests
+      run: dotnet test Pixata.Pdf.Tests/Pixata.Pdf.Tests.csproj --verbosity normal
       env:
         TELERIK_USERNAME: ${{secrets.MYTELERIKACCOUNTUSERNAME}}
         TELERIK_PASSWORD: ${{secrets.MYTELERIKACCOUNTPASSWORD}}

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <Company>Pixata Ltd</Company>
+    <Authors>Avrohom Yisroel Silver</Authors>
+    <Product>Pixata.Pdf</Product>
+    <Description>Combines several PDFs into one, keeping each page's size and orientation, such as a generated cover page followed by a document the user uploaded. Uses PdfPig (Apache 2.0), so needs no licence</Description>
+    <Copyright>Copyright 2026 Pixata Ltd</Copyright>
+    <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</ProjectUrl>
+    <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</RepositoryUrl>
+    <PackageIcon>pdf.png</PackageIcon>
+    <PackageTags>C# PDF combine merge join</PackageTags>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="pdf.png" Pack="true" PackagePath="\" />
+    <None Include="Readme.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PdfPig" Version="0.1.16" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pixata.Extensions\Pixata.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>
