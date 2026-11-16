@@ -87,17 +87,23 @@ The elements have the classes `pixata-blazor-confirm-overlay` and `pixata-blazor
 Displays a message in a coloured alert box, with an optional close button. Used by [`ApiResponseView`](Readme.ApiResponseView.md) to show the error from a failed `ApiResponse`, but it is perfectly usable on its own.
 
 ```xml
-<MessageView Message="@_message" Error="false" />
+<MessageView Message="@_message" Type="NotificationType.Success" />
 ```
 
 | Parameter | Default | What it does |
 | --- | --- | --- |
 | `Message` | `""` | The message to show. Nothing is rendered when this is empty, so you can bind it to a variable and leave the component in the markup |
-| `Error` | `true` | `true` styles it as a danger alert, `false` as a success one |
+| `Type` | Not set | A `NotificationType`, which sets the colour: red for `Error`, green for `Success`, yellow for `Warning`, blue for `Info`, and grey for `General` (and `Payment`). When it isn't set, `Error` chooses |
+| `Error` | `true` | `true` styles it as a danger alert, `false` as a success one. Ignored when `Type` is set |
+| `MessageIsHtml` | `false` | Whether the message is rendered as HTML rather than as text |
 | `ShowCloseButton` | `true` | Whether to show the button that clears the message |
 | `Class` | `""` | Extra CSS classes for the alert |
 
-The message is rendered as raw HTML, so you can include markup in it. Don't pass anything a user typed without sanitising it first.
+The message is shown as text, so a message that quotes something a user typed (such as "Couldn't save 'Smith & Sons'") is shown exactly as they typed it, and can't add markup or script to the page. If you want markup in a message, set `MessageIsHtml="true"`, but only for a message you wrote yourself. Never pass one that includes something a user typed, unless you have HTML-encoded it first.
+
+The colours come from the `--pixata-alert-danger-*`, `--pixata-alert-success-*`, `--pixata-alert-warning-*`, `--pixata-alert-info-*` and `--pixata-alert-secondary-*` variables (each has `-color`, `-bg` and `-border`), which you can set on `:root` to fit your theme.
+
+>**Changed in v5.29.0.** The message was rendered as HTML, so any markup in it was used, and a name such as `<img src=x onerror=alert(1)>` ran script in the browser. It is now shown as text unless `MessageIsHtml` is true. `Type`, and the warning, info and general colours, are new.
 
 ## Expander
 

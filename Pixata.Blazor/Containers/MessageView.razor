@@ -1,7 +1,12 @@
+@using Pixata.Blazor.Notifications
+
 @if (!string.IsNullOrEmpty(Message)) {
-  string statusMessageClass = Error ? "danger" : "success";
-  <div class="pixata-d-flex pixata-justify-content-between pixata-alert pixata-alert-@statusMessageClass @Class" role="alert">
-    <HtmlRaw Html="@Message" />
+  <div class="pixata-d-flex pixata-justify-content-between pixata-alert pixata-alert-@AlertClass @Class" role="alert">
+    @if (MessageIsHtml) {
+      <HtmlRaw Html="@Message" />
+    } else {
+      <div>@Message</div>
+    }
     <If Condition="@ShowCloseButton">
       <Then>
         <div>
@@ -14,17 +19,43 @@
 
 @code {
 
+  /// <summary>
+  /// Whether to show the message as an error (the default) or as a success. Ignored when <see cref="Type"/> is set
+  /// </summary>
   [Parameter]
   public bool Error { get; set; } = true; // Assume that most of the time, we'll only be using this to show errors
 
+  /// <summary>
+  /// The kind of message, which sets its colour: red for an error, green for a success, yellow for a warning, blue for information, and
+  /// grey for a general message. When this isn't set, <see cref="Error"/> chooses between an error and a success
+  /// </summary>
+  [Parameter]
+  public NotificationType? Type { get; set; }
+
   [Parameter]
   public string Message { get; set; } = "";
+
+  /// <summary>
+  /// When true, the message is rendered as HTML, so it can include markup. Only set this for a message you wrote yourself, never one that
+  /// includes something a user typed, as that could then run script in the page. By default the message is shown as text
+  /// </summary>
+  [Parameter]
+  public bool MessageIsHtml { get; set; }
 
   [Parameter]
   public string Class { get; set; } = "";
 
   [Parameter]
   public bool ShowCloseButton { get; set; } = true;
+
+  private string AlertClass =>
+    (Type ?? (Error ? NotificationType.Error : NotificationType.Success)) switch {
+      NotificationType.Error => "danger",
+      NotificationType.Success => "success",
+      NotificationType.Warning => "warning",
+      NotificationType.Info => "info",
+      _ => "secondary"
+    };
 
   private void Close() =>
     Message = "";

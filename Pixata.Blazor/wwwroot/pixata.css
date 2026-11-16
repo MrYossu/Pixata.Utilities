@@ -45,6 +45,15 @@
   --pixata-alert-success-color: #155724;
   --pixata-alert-success-bg: #d4edda;
   --pixata-alert-success-border: #c3e6cb;
+  --pixata-alert-warning-color: #856404;
+  --pixata-alert-warning-bg: #fff3cd;
+  --pixata-alert-warning-border: #ffeeba;
+  --pixata-alert-info-color: #0c5460;
+  --pixata-alert-info-bg: #d1ecf1;
+  --pixata-alert-info-border: #bee5eb;
+  --pixata-alert-secondary-color: #383d41;
+  --pixata-alert-secondary-bg: #e2e3e5;
+  --pixata-alert-secondary-border: #d6d8db;
   --pixata-border-radius: .25rem;
   --pixata-gutter: 15px;
   --pixata-spacer: 1rem;
@@ -513,6 +522,24 @@ select.pixata-form-control:not([multiple]):not([size]) {
   color: var(--pixata-alert-success-color);
   background-color: var(--pixata-alert-success-bg);
   border-color: var(--pixata-alert-success-border);
+}
+
+.pixata-alert-warning {
+  color: var(--pixata-alert-warning-color);
+  background-color: var(--pixata-alert-warning-bg);
+  border-color: var(--pixata-alert-warning-border);
+}
+
+.pixata-alert-info {
+  color: var(--pixata-alert-info-color);
+  background-color: var(--pixata-alert-info-bg);
+  border-color: var(--pixata-alert-info-border);
+}
+
+.pixata-alert-secondary {
+  color: var(--pixata-alert-secondary-color);
+  background-color: var(--pixata-alert-secondary-bg);
+  border-color: var(--pixata-alert-secondary-border);
 }
 
 .pixata-badge {

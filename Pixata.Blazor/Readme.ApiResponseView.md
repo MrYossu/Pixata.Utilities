@@ -54,7 +54,9 @@ ApiResponseViewConfig.NotFound = _ => @<div>Sorry, we couldn't find that</div>;
 
 `LogInUrl` is the one you really do need to set, as it is where the component sends a user whose session has expired.
 
-You can also set `MessagePosition` and `FeedbackType` there, which control how error messages raised by `Do()` (see below) are shown.
+You can also set `MessagePosition`, `FeedbackType` and `MessageIsHtml` there, which control how the messages raised by `Do()` and `Notify()` (see below) are shown.
+
+The default `Failure` fragment shows a general "Sorry, something went wrong" message, and puts the failure's message in an HTML comment, so you can see what went wrong on a live site with view source or the browser's developer tools. If you'd rather that wasn't visible, set your own `Failure`. Any `--` in the message has a space put in the middle (`- -`), so a message that contains `-->` can't end the comment early and have the rest of it rendered as HTML.
 
 **Remember** that if you are working on a mixed-mode app, you will need to do this in both `Program.cs` files.
 
@@ -89,6 +91,18 @@ private async Task Delete(Team team) =>
 
 Pass `changeStateOnNotSuccess: true` if you would rather the whole view switched to its failure display than show a message over the top of the data.
 
+You can show a message of your own with `Notify()`, such as a success message once something has been saved...
+
+```csharp
+_view.Notify(NotificationType.Success, "Saved");
+```
+
+With `FeedbackType` set to `Notifications`, the message goes to the [notification area](Readme.Notifications.md). Otherwise it's shown in the view's [`MessageView`](Readme.Containers.md#messageview), in the colour for its type, so a success is green and a warning yellow. A message you set with the `Message` property is shown as an error.
+
+The messages are shown as text, as they often quote something a user typed. If your app puts markup in its messages on purpose, set `MessageIsHtml="true"` on the view, or `ApiResponseViewConfig.MessageIsHtml = true` for every view, but then make sure that anything a user typed is HTML-encoded before it goes into a message.
+
+>**Changed in v5.29.0.** The messages in the `MessageView` were rendered as HTML, and they were always shown as errors, even when `Notify()` was given another type, so a success message was shown in red.
+
 `HandleResponse()` does the same for a response you already have, and `Reload()` re-runs `LoadApiResponse`. The `Data` property gets or sets the loaded data, which is handy when you have changed one item and don't want to hit the server again.
 
 ## Manual loading
@@ -102,5 +116,6 @@ Some components (a data grid with its own paging, for example) want to load thei
 | `Key` | `""` | The key used to persist the loaded data across prerendering. Needed if there is more than one view on a page |
 | `HideNonSuccess` | `false` | Renders nothing at all for any state other than `Success`. Useful for a panel that should just not appear if its data isn't available |
 | `MessageCssClass` | `""` | Extra classes for the `MessageView` that shows error messages |
+| `MessageIsHtml` | `ApiResponseViewConfig.MessageIsHtml`, which is `false` | Whether the messages in the `MessageView` are rendered as HTML rather than as text |
 | `MessagePosition` | `Top` | `Top`, `Bottom` or `None` |
 | `FeedbackType` | `MessageView` | `MessageView` shows errors in an inline alert, `Notifications` shows them in a [notification area](Readme.Notifications.md) |
