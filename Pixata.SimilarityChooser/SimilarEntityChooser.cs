@@ -29,7 +29,7 @@ public class SimilarEntityChooser<T> {
   /// </summary>
   /// <param name="entities">A collection of entities that contains a string property to be used for the similarity search</param>
   /// <param name="options">Words to ignore, and how close a name has to be to match. See <see cref="SimilarEntityChooserOptions"/></param>
-  public static SimilarEntityChooser<T> CreateMap<T>(IEnumerable<MatchingEntityOverview<T>> entities, SimilarEntityChooserOptions? options = null) =>
+  public static SimilarEntityChooser<T> CreateMap(IEnumerable<MatchingEntityOverview<T>> entities, SimilarEntityChooserOptions? options = null) =>
     new(entities, options ?? new());
 
   private SimilarEntityChooser(IEnumerable<MatchingEntityOverview<T>> entities, SimilarEntityChooserOptions options) {
@@ -53,16 +53,27 @@ public class SimilarEntityChooser<T> {
 
   /// <summary>
   /// Find the entities whose names are similar to the text passed in. Assumes that CreateMap() has already been called to build the
-  /// SimilarityChooser. The closest matches come first
+  /// SimilarityChooser. The closest matches come first. Use <see cref="FindSimilarWithScores"/> to find out how close each one is
   /// </summary>
   /// <param name="word">The text to be used for comparison. This can be one word or several</param>
   /// <returns>A collection of potential matches</returns>
-  public List<MatchingEntityOverview<T>> FindSimilar(string word) {
+  public List<MatchingEntityOverview<T>> FindSimilar(string word) =>
+    [.. FindSimilarWithScores(word).Select(match => match.Entity)];
+
+  /// <summary>
+  /// Find the entities whose names are similar to the text passed in, with how close each one is, in the same order as
+  /// <see cref="FindSimilar"/>. The score goes from 0 to 1. It is the number of words in the name and the search text that are close to a
+  /// word in the other, out of the number of words in both, leaving out the ignored words, so 1 means every word matched. Use it to only
+  /// accept a match that is close enough, or one that is clearly closer than the next
+  /// </summary>
+  /// <param name="word">The text to be used for comparison. This can be one word or several</param>
+  /// <returns>A collection of potential matches, each with its score</returns>
+  public List<(MatchingEntityOverview<T> Entity, double Score)> FindSimilarWithScores(string word) {
     List<Word> searchWords = GetWords(word);
     if (searchWords.Count == 0) {
       return [];
     }
-    return searchWords
+    return [.. searchWords
       .SelectMany(IndexKeys)
       .Where(_index.ContainsKey)
       .SelectMany(key => _index[key])
@@ -73,8 +84,8 @@ public class SimilarEntityChooser<T> {
       .ThenBy(match => match.Name.Words.Count)
       .ThenBy(match => match.Index)
       .GroupBy(match => match.Name.Entity.ID)
-      .Select(group => group.First().Name.Entity)
-      .ToList();
+      .Select(group => group.First())
+      .Select(match => (Entity: match.Name.Entity, Score: match.Score!.Value))];
   }
 
   // How much of the two names matched, from 0 to 1, or null if they don't match

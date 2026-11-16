@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Pixata.SimilarityChooser.Tests;
@@ -111,4 +113,76 @@ public class SimilarEntityChooser_Tests {
     ]);
     CollectionAssert.AreEqual(new[] { "Acme" }, chooser.FindSimilar("acme").Select(match => match.Entity).ToList());
   }
+
+  private static List<(string Name, double Score)> FindSimilarWithScores(IEnumerable<string> names, string search, SimilarEntityChooserOptions? options = null) =>
+    [.. CreateMap(names, options).FindSimilarWithScores(search).Select(match => (match.Entity.Entity, Math.Round(match.Score, 3)))];
+
+  [TestMethod]
+  public void SimilarEntityChooser_FindSimilarWithScores_GivesHowMuchOfEachNameMatched() =>
+    CollectionAssert.AreEqual(new[] { ("Acme", 1d), ("Acme Widgets", 0.667), ("Acme Widgets Direct", 0.5) },
+      FindSimilarWithScores(["Acme Widgets Direct", "Acme Widgets", "Acme"], "Acme"));
+
+  [TestMethod]
+  public void SimilarEntityChooser_FindSimilarWithScores_IsInTheSameOrderAsFindSimilar() {
+    string[] names = ["Smith Ltd", "Smyth Ltd", "Smith Jones Ltd", "Jones Ltd", "Smithson Ltd"];
+    CollectionAssert.AreEqual(FindSimilar(names, "Smith", CompanyOptions), FindSimilarWithScores(names, "Smith", CompanyOptions).Select(match => match.Name).ToList());
+  }
+
+  [TestMethod]
+  public void SimilarEntityChooser_FindSimilarWithScores_ShowsATie() {
+    List<(string Name, double Score)> matches = FindSimilarWithScores(["Smith Ltd", "Smyth Ltd"], "Smith", CompanyOptions);
+    Assert.AreEqual(2, matches.Count);
+    Assert.AreEqual(1, matches[0].Score);
+    Assert.AreEqual(1, matches[1].Score);
+  }
+
+  [TestMethod]
+  public void SimilarEntityChooser_FindSimilarWithScores_SeparatesOneSharedWordFromAFullMatch() =>
+    CollectionAssert.AreEqual(new[] { ("Müller Bau", 1d), ("Schmidt Bau", 0.5) },
+      FindSimilarWithScores(["Schmidt Bau", "Müller Bau"], "Müller Bau", new() { MatchAllWords = false }));
+
+  [TestMethod]
+  public void SimilarEntityChooser_FindSimilarWithScores_SameIdKeepsTheBestScore() {
+    SimilarEntityChooser<string> chooser = SimilarEntityChooser<string>.CreateMap([
+      new MatchingEntityOverview<string> { ID = 1, MatchText = "Acme Widgets", Entity = "Acme Widgets" },
+      new MatchingEntityOverview<string> { ID = 1, MatchText = "Acme", Entity = "Acme" }
+    ]);
+    List<(MatchingEntityOverview<string> Entity, double Score)> matches = chooser.FindSimilarWithScores("acme");
+    Assert.AreEqual(1, matches.Count);
+    Assert.AreEqual("Acme", matches[0].Entity.Entity);
+    Assert.AreEqual(1, matches[0].Score);
+  }
+
+  [TestMethod]
+  public void SimilarEntityChooser_FindSimilarWithScores_NoWords_FindsNothing() =>
+    Assert.AreEqual(0, CreateMap(["Acme"]).FindSimilarWithScores(" - ").Count);
+
+  [TestMethod]
+  public void SimilarEntityChooser_CreateMap_UsesTheClassesTypeArgument() {
+    MethodInfo createMap = typeof(SimilarEntityChooser<string>).GetMethod(nameof(SimilarEntityChooser<string>.CreateMap))!;
+    Assert.IsFalse(createMap.IsGenericMethodDefinition);
+    Assert.AreEqual(typeof(SimilarEntityChooser<string>), createMap.ReturnType);
+  }
+
+  private static SimilarEntityChooserOptions EuropeanOptions => new() {
+    IgnoredWords = [.. SimilarEntityChooserOptions.CompanyNameWords, .. SimilarEntityChooserOptions.EuropeanCompanyNameWords]
+  };
+
+  [DataRow("Schmidt Bau GmbH", "Schmidt Bau AG")]
+  [DataRow("Müller UG (haftungsbeschränkt)", "Müller GmbH")]
+  [DataRow("Schmidt GmbH & Co. KG", "Schmidt AG")]
+  [DataRow("Dupont et Fils SARL", "Dupont Fils S.A.")]
+  [DataRow("Van Dijk B.V.", "Van Dijk NV")]
+  [DataRow("Rossi S.p.A.", "Rossi Srl")]
+  [DataRow("Weber & Schulz e.K.", "Weber und Schulz")]
+  [DataTestMethod]
+  public void SimilarEntityChooser_EuropeanCompanyNameWords_AreLeftOut(string name, string search) {
+    Assert.AreEqual(0, FindSimilar([name], search, CompanyOptions).Count);
+    CollectionAssert.AreEqual(new[] { name }, FindSimilar([name], search, EuropeanOptions));
+  }
+
+  // Some of the European forms are English words, such as "Spa", so they aren't left out unless asked for
+  [TestMethod]
+  public void SimilarEntityChooser_CompanyNameWords_DoesNotHaveTheEuropeanForms() =>
+    Assert.AreEqual(0, SimilarEntityChooserOptions.CompanyNameWords.Intersect(SimilarEntityChooserOptions.EuropeanCompanyNameWords.Except(["Co"])).Count());
 }

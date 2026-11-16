@@ -28,10 +28,22 @@ public class SimilarEntityChooserOptions {
   public bool RequireCloseSpelling { get; set; } = true;
 
   /// <summary>
-  /// Words that are common in company names, for use as <see cref="IgnoredWords"/>
+  /// Words that are common in UK and US company names, for use as <see cref="IgnoredWords"/>. Add <see cref="EuropeanCompanyNameWords"/>
+  /// for European companies
   /// </summary>
   public static IReadOnlyList<string> CompanyNameWords { get; } = [
     "Ltd", "Limited", "LLP", "PLC", "CIC", "Inc", "LLC", "Co", "Company", "Services", "Business", "Management", "Group", "Holdings",
     "Solutions", "UK", "The", "And", "Of"
+  ];
+
+  /// <summary>
+  /// The common legal forms of European companies (eg "GmbH", "SARL" and "BV"), and the words for "and" that join names, for use as
+  /// <see cref="IgnoredWords"/>, usually with <see cref="CompanyNameWords"/>: <c>[.. CompanyNameWords, .. EuropeanCompanyNameWords]</c>.
+  /// These aren't in <see cref="CompanyNameWords"/>, as some of them are words in English, such as "Spa". An ampersand doesn't need to be
+  /// in the list, as punctuation is always left out
+  /// </summary>
+  public static IReadOnlyList<string> EuropeanCompanyNameWords { get; } = [
+    "GmbH", "mbH", "AG", "KG", "OHG", "GbR", "UG", "Haftungsbeschränkt", "eK", "Co", "SE", "SA", "SAS", "SARL", "BV", "NV", "Srl", "SpA",
+    "Und", "Et"
   ];
 }
