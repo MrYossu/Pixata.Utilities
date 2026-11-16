@@ -244,8 +244,11 @@ public partial class PixataGrid<TItem> {
     }
   }
 
+  // The column for a group's field, for its title, format and templates. Grouping by a column that is hidden is common (every row in a
+  // group has the same value), so a hidden column is used when no shown column has the field
   private PixataGridColumn<TItem>? ColumnFor(string member) =>
-    RenderedColumns().FirstOrDefault(c => c.Field == member);
+    RenderedColumns().FirstOrDefault(c => c.Field == member)
+    ?? AllColumns().FirstOrDefault(c => !c.IsGroupColumn && c.Field == member);
 
   private string GroupTitle(GridGroup<TItem> group) {
     PixataGridColumn<TItem>? column = ColumnFor(group.Member);

@@ -958,6 +958,7 @@ A few things to know...
 - The rows are striped across groups, rather than starting again in each one
 - Clicking a chip does nothing, and the groups are in ascending order
 - Grouping goes back to the first page, and expands all the groups
+- You can group by a hidden column (`Visible="false"`), which is handy when every row in a group would show the same value. The group rows and the chip still use the column's `Title`, `DisplayFormat` and `GroupHeaderTemplate`, as does an export's `Groups`. If a field has a column that's shown as well as one that's hidden, the shown one is used. Before v5.29.1, a hidden column was ignored, so the group rows showed the field's name and its raw value
 
 With `OnRead`, the request includes the groups and aggregates, and `ToGridResult()` and `ToGridResultAsync()` fill in the result's `Groups` and `Aggregates`, which `SetResult()` passes on. If you set `Data` and `Total` yourself and leave out `Groups`, the grid groups the page it's given, but then the group counts and aggregates only cover that page.
 
