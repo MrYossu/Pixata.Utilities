@@ -202,6 +202,60 @@ public class PixataGridGrouping_Tests {
     Assert.AreEqual("Team A has 2", grid.Find(".pixata-blazor-grid-group-row").TextContent.Trim());
   }
 
+  // A column that is hidden, with a title, a format or a group header template of its own
+  private IRenderedComponent<PixataGrid<Person>> RenderWithHiddenColumn(string field, string title, string? format = null,
+    RenderFragment<PixataGridGroupTemplateContext>? groupHeader = null, bool shownToo = false) =>
+    _ctx.Render<PixataGrid<Person>>(p => p
+      .Add(g => g.Data, People)
+      .Add(g => g.Groupable, true)
+      .Add(g => g.GridColumns, b => {
+        Column(b, nameof(Person.Id));
+        if (shownToo) {
+          Column(b, field);
+        }
+        b.OpenComponent<PixataGridColumn<Person>>(10);
+        b.AddAttribute(11, "Field", field);
+        b.AddAttribute(12, "Title", title);
+        b.AddAttribute(13, "Visible", false);
+        if (format is not null) {
+          b.AddAttribute(14, "DisplayFormat", format);
+        }
+        if (groupHeader is not null) {
+          b.AddAttribute(15, "GroupHeaderTemplate", groupHeader);
+        }
+        b.CloseComponent();
+      }));
+
+  [TestMethod]
+  public void GroupingByAHiddenColumn_UsesItsTitleAndFormat() {
+    IRenderedComponent<PixataGrid<Person>> grid = RenderWithHiddenColumn(nameof(Person.Salary), "Pay", "{0:0.00}");
+
+    grid.InvokeAsync(() => grid.Instance.GroupBy(nameof(Person.Salary)));
+
+    Assert.AreEqual(0, grid.FindAll("th").Count(th => th.TextContent.Contains("Pay")));
+    Assert.AreEqual("group:Pay: 10.00", Rows(grid)[0]);
+    CollectionAssert.AreEqual(new[] { "Pay" }, Chips(grid));
+  }
+
+  [TestMethod]
+  public void GroupingByAHiddenColumn_UsesItsGroupHeaderTemplate() {
+    IRenderedComponent<PixataGrid<Person>> grid = RenderWithHiddenColumn(nameof(Person.Team), "Department",
+      groupHeader: ctx => Text($"Department {ctx.Value} has {ctx.ItemsCount}"));
+
+    grid.InvokeAsync(() => grid.Instance.GroupBy(nameof(Person.Team)));
+
+    Assert.AreEqual("Department A has 2", grid.Find(".pixata-blazor-grid-group-row").TextContent.Trim());
+  }
+
+  [TestMethod]
+  public void GroupingByAFieldThatIsShownAndHidden_UsesTheShownColumn() {
+    IRenderedComponent<PixataGrid<Person>> grid = RenderWithHiddenColumn(nameof(Person.Team), "Department", shownToo: true);
+
+    grid.InvokeAsync(() => grid.Instance.GroupBy(nameof(Person.Team)));
+
+    Assert.AreEqual("group:Team: A", Rows(grid)[0]);
+  }
+
   [TestMethod]
   public void RemovingAChip_Ungroups() {
     IRenderedComponent<PixataGrid<Person>> grid = Render();
