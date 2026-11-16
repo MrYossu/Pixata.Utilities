@@ -1,9 +1,17 @@
+@using System.Text.RegularExpressions
+
 @code {
 
   public static string LogInUrl = "";
 
   public static ApiResponseViewMessagePositions MessagePosition = ApiResponseViewMessagePositions.Top;
   public static ApiResponseViewFeedbackType FeedbackType = ApiResponseViewFeedbackType.MessageView;
+
+  /// <summary>
+  /// When true, the messages that an ApiResponseView shows in its MessageView are rendered as HTML. They are shown as text by default, as
+  /// they often include something a user typed. Can be overridden for one view with its MessageIsHtml parameter
+  /// </summary>
+  public static bool MessageIsHtml = false;
 
   public static RenderFragment<Yunit> Loader = _ =>@<Loader />;
 
@@ -15,8 +23,13 @@
   public static RenderFragment<string> Failure = ex => @<div>
                                                          <h2>Sorry, something went wrong</h2>
                                                          <div>Please reload the page and try again. If the problem persists, please contact us</div>
-                                                         <HtmlRaw Html="@($"<!--\nEx: {ex}\n-->")" />
+                                                         <HtmlRaw Html="@($"<!--\nEx: {ForComment(ex)}\n-->")" />
                                                        </div>;
+
+  // The text with a space between every two hyphens in a row, so it can go inside an HTML comment. A "-->" in it would otherwise end the
+  // comment, and whatever came after it would be rendered as HTML
+  internal static string ForComment(string? text) =>
+    Regex.Replace(text ?? "", "-(?=-)", "- ");
 
   public static RenderFragment<string> RequiresLogIn = _ =>
     @<div class="pixata-p-3">

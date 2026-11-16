@@ -12,7 +12,7 @@
 }
 
 @if (FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Top) {
-  <MessageView Message="@Message" Class="@MessageCssClass" />
+  <MessageView Message="@Message" Type="@MessageType" MessageIsHtml="@MessageIsHtml" Class="@MessageCssClass" />
 }
 
 @switch (_apiResponse.State) {
@@ -73,7 +73,7 @@
 }
 
 @if (FeedbackType == ApiResponseViewFeedbackType.MessageView && MessagePosition == ApiResponseViewMessagePositions.Bottom) {
-  <MessageView Message="@Message" Class="@MessageCssClass" />
+  <MessageView Message="@Message" Type="@MessageType" MessageIsHtml="@MessageIsHtml" Class="@MessageCssClass" />
 }
 
 @code {
@@ -129,6 +129,13 @@
   [Parameter]
   public string MessageCssClass { get; set; } = "";
 
+  /// <summary>
+  /// When true, the messages shown in the MessageView are rendered as HTML. By default they are shown as text, as they often include
+  /// something a user typed. Defaults to <see cref="ApiResponseViewConfig.MessageIsHtml"/>
+  /// </summary>
+  [Parameter]
+  public bool MessageIsHtml { get; set; } = ApiResponseViewConfig.MessageIsHtml;
+
   [Parameter]
   public bool ManualLoading { get; set; }
 
@@ -139,7 +146,23 @@
 
   private string _arvSuccessStyle = "";
 
-  public string Message { get; set; } = "";
+  private string _message = "";
+
+  /// <summary>
+  /// The message shown in the MessageView. One set here is shown as an error. Use <see cref="Notify"/> to show one of another type
+  /// </summary>
+  public string Message {
+    get => _message;
+    set {
+      _message = value;
+      MessageType = NotificationType.Error;
+    }
+  }
+
+  /// <summary>
+  /// The type of the message shown in the MessageView, which sets its colour
+  /// </summary>
+  public NotificationType MessageType { get; private set; } = NotificationType.Error;
 
   protected override async Task OnInitializedAsync() {
     _arvSuccessStyle = ManualLoading && !_manualLoadingComplete ? "position: absolute; left: 1000000px" : "";
@@ -256,11 +279,15 @@
   private void NavigateToLogIn() =>
     NavigationManager.NavigateTo($"{NavigationManager.ToAbsoluteUri(ApiResponseViewConfig.LogInUrl)}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
 
+  /// <summary>
+  /// Shows a message, in a notification or in the MessageView, depending on <see cref="FeedbackType"/>. Either way, its type sets its colour
+  /// </summary>
   public void Notify(NotificationType type, string message, DateTime? dateTime = null, Action? onClick = null) {
     if (FeedbackType == ApiResponseViewFeedbackType.Notifications) {
       NotificationHelper.Send(type, message, dateTime ?? DateTime.Now, onClick);
     } else {
       Message = message;
+      MessageType = type;
     }
   }
 
