@@ -276,6 +276,23 @@ public class PixataGridFiltering_Tests {
   }
 
   [TestMethod]
+  public void FilterMenu_OnlyACheckBoxListIsAsWideAsItsContent() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.FilterMenu, extra: (b, field, seq) => {
+      if (field == "Age") {
+        b.AddAttribute(seq, "FilterMenuType", PixataGridFilterMenuType.CheckBoxList);
+      }
+    });
+
+    grid.FindAll(".pixata-blazor-grid-filter-menu-button")[0].Click();
+    Assert.IsFalse(grid.Find(".pixata-blazor-grid-filter-popup").ClassList.Contains("pixata-blazor-grid-filter-list-popup"));
+    grid.FindAll(".pixata-blazor-grid-filter-menu-button")[1].Click();
+
+    IElement popup = grid.Find(".pixata-blazor-grid-filter-popup");
+    Assert.IsTrue(popup.ClassList.Contains("pixata-blazor-grid-filter-menu-popup"));
+    Assert.IsTrue(popup.ClassList.Contains("pixata-blazor-grid-filter-list-popup"));
+  }
+
+  [TestMethod]
   public void FilterMenu_Clear_RemovesTheFilter() {
     IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.FilterMenu);
     grid.FindAll(".pixata-blazor-grid-filter-menu-button")[0].Click();
