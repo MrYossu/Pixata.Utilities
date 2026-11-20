@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.31.1** puts `.25rem` of padding under the calendar's last row of days (or months, years or decades), as there is at the sides, so it no longer touches the bottom edge of the date picker's popup or the calendar's border. See [styling the date pickers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#styling) (#178)
+
 >**Version 5.31.0** fixes two things in the grid's filter menus...
 >- A `CheckBoxList` filter menu is now as wide as its longest value, up to the new `--pixata-grid-filter-menu-max-width` (22rem), and a longer value wraps, with its checkbox beside the first line. The list used to scroll sideways for a value longer than about 25 characters, taking the checkboxes out of sight. The search box above the list now fills the menu. The other filter menus are still 232px wide. See [filtering](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#filtering) (#176)
 >- A filter menu that doesn't fit above or below its column (in a short window, with the grid part way down) no longer runs off the bottom of the window, taking the Filter and Clear buttons with it. It opens on the side with more room, as tall as the room there, and a `CheckBoxList`'s list gets shorter so the search box and the buttons stay in view. Other menus, and the column menu, scroll. The grid's drop-down lists are limited in the same way. See [filtering](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#filtering) (#177)
