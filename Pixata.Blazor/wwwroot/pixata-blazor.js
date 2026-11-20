@@ -306,15 +306,32 @@ const gridPopups = new WeakMap();
 // fixed positioning, so it isn't clipped by containers with overflow hidden, such as a grid cell
 function positionGridPopup(anchor, popup) {
   const a = anchor.getBoundingClientRect();
-  // A list is at least as wide as the control it drops down from
-  popup.style.minWidth = `${a.width}px`;
+  // Measured at the left of the window with no height limit, so a popup that's as wide as its content isn't squeezed by
+  // where it was last time, and its full height is known
+  popup.style.position = "fixed";
+  popup.style.left = "0px";
+  popup.style.maxHeight = "";
+  // A list is at least as wide as the control it drops down from, and a popup with a minimum width of its own (such as the
+  // grid's filter menu, which drops down from a small button) keeps that
+  popup.style.minWidth = "";
+  const ownMinWidth = parseFloat(getComputedStyle(popup).minWidth) || 0;
+  popup.style.minWidth = `${Math.max(a.width, ownMinWidth)}px`;
   const p = popup.getBoundingClientRect();
-  const below = window.innerHeight - a.bottom;
-  const top = below >= p.height || below >= a.top ? a.bottom : a.top - p.height;
+  const below = window.innerHeight - a.bottom - viewportMargin;
+  const above = a.top - viewportMargin;
+  // Below if it fits, or if there's more room there than above. If it doesn't fit on the side it goes, and it can scroll (as
+  // the filter menu can), its height is limited to the room there, so its bottom (or top) isn't lost off the window
+  const down = p.height <= below || below >= above;
+  const room = Math.max(0, down ? below : above);
+  let height = p.height;
+  if (height > room && getComputedStyle(popup).overflowY !== "visible") {
+    popup.style.maxHeight = `${room}px`;
+    height = room;
+  }
+  const top = down ? a.bottom : a.top - height;
   // In a right-to-left page, the popup lines up with the anchor's right edge
   const start = getComputedStyle(anchor).direction === "rtl" ? a.right - p.width : a.left;
   const left = Math.max(0, Math.min(start, window.innerWidth - p.width));
-  popup.style.position = "fixed";
   popup.style.top = `${Math.max(0, top)}px`;
   popup.style.left = `${left}px`;
 }

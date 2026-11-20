@@ -89,6 +89,8 @@
   --pixata-grid-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-grid-border-radius: 4px;
   --pixata-grid-error-color: #dc3545;
+  /* The widest a filter menu gets, for a long choice in a CheckBoxList. It's never wider than the window, less 2rem */
+  --pixata-grid-filter-menu-max-width: 22rem;
   /* The date input, date picker and calendar, again sized like Telerik's Default theme */
   --pixata-datepicker-font-size: .875rem;
   --pixata-datepicker-line-height: 1.4285;
@@ -1811,17 +1813,52 @@ select.pixata-form-control:not([multiple]):not([size]) {
   background-color: var(--pixata-grid-primary);
 }
 
-/* The filter menu itself, positioned by the JavaScript */
+/*
+  The filter menu itself, positioned by the JavaScript. When it doesn't fit above or below its column, the JavaScript gives it
+  a max-height, and it scrolls
+*/
 .pixata-blazor-grid-filter-popup {
   position: fixed;
   z-index: 10002;
   width: 232px;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-size: var(--pixata-grid-font-size);
   line-height: var(--pixata-grid-line-height);
   color: var(--pixata-grid-color);
   background-color: var(--pixata-grid-input-bg);
   border: 1px solid var(--pixata-grid-border-color);
   box-shadow: var(--pixata-grid-popup-shadow);
+}
+
+/*
+  The filter menu's parts (but not the column menu's) are in a column, so that when it has a max-height, a CheckBoxList's list
+  of choices gets shorter (it's a scroll container, so it can shrink to nothing), keeping the search box and the buttons in view
+*/
+.pixata-blazor-grid-filter-menu-popup {
+  display: flex;
+  flex-direction: column;
+}
+
+.pixata-blazor-grid-filter-menu-popup > .pixata-blazor-grid-filter-menu,
+.pixata-blazor-grid-filter-menu-popup .pixata-blazor-grid-filter-menu-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/*
+  A CheckBoxList filter menu is as wide as its longest choice, from 232px up to the maximum, and a longer choice wraps. The
+  search box's input doesn't count towards that, as it would otherwise make the menu wider than the choices need
+*/
+.pixata-blazor-grid-filter-list-popup {
+  width: auto;
+  min-width: 232px;
+  max-width: min(var(--pixata-grid-filter-menu-max-width), calc(100vw - 2rem));
+}
+
+.pixata-blazor-grid-filter-list-popup .pixata-blazor-grid-search .pixata-blazor-grid-input-inner {
+  width: 0;
 }
 
 .pixata-blazor-grid-columnmenu-item {
@@ -1861,6 +1898,11 @@ select.pixata-form-control:not([multiple]):not([size]) {
   width: 100%;
 }
 
+/* The CheckBoxList's search box fills the menu, rather than being as wide as the one in the toolbar */
+.pixata-blazor-grid-filter-menu-container > .pixata-blazor-grid-search {
+  width: auto;
+}
+
 .pixata-blazor-grid-button-group {
   display: flex;
 }
@@ -1885,13 +1927,16 @@ select.pixata-form-control:not([multiple]):not([size]) {
   flex: 1 1 0%;
 }
 
+/* A choice too long for the menu wraps, so the list never scrolls sideways */
 .pixata-blazor-grid-multicheck {
   max-height: 300px;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   list-style: none;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .pixata-blazor-grid-multicheck-item {
@@ -1905,6 +1950,11 @@ select.pixata-form-control:not([multiple]):not([size]) {
   gap: .25rem;
   cursor: pointer;
   user-select: none;
+}
+
+/* The checkbox stays beside the first line of a choice that wraps */
+.pixata-blazor-grid-multicheck .pixata-blazor-grid-checkbox-label {
+  align-items: flex-start;
 }
 
 /* The grid's checkboxes are drawn by the pixata-blazor-checkbox rules in the PixataCheckBox section */
@@ -2565,6 +2615,9 @@ select.pixata-form-control:not([multiple]):not([size]) {
   .pixata-blazor-grid-adaptive .pixata-blazor-grid-filter-popup {
     inset: 0 !important;
     width: auto;
+    min-width: 0 !important;
+    max-width: none;
+    max-height: none !important;
     overflow-y: auto;
     border: 0;
   }

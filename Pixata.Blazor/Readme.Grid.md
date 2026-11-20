@@ -215,7 +215,7 @@ Setting the initial sort from code will be possible through the grid's state, wh
 Set `FilterMode` to choose how the user filters...
 
 - `FilterRow` adds a row under the headers, with an editor for each column. Text and numbers are filtered a moment after the user stops typing (150 milliseconds, unless you set `FilterRowDebounceDelay`; make it longer, say 350, when the data comes from the server through `OnRead`, so the server isn't asked on every key), and the other editors filter straight away. The button next to each editor picks the operator (such as "Starts with"), and the one beside it clears the filter
-- `FilterMenu` puts a filter icon in each header. It opens a menu with two conditions joined by And or Or, which are applied when the user clicks Filter. Set a column's `FilterMenuType` to `CheckBoxList` for a list of the column's values to tick instead. The icon is coloured when the column has a filter
+- `FilterMenu` puts a filter icon in each header. It opens a menu with two conditions joined by And or Or, which are applied when the user clicks Filter. Set a column's `FilterMenuType` to `CheckBoxList` for a list of the column's values to tick instead, with a search box above it. The icon is coloured when the column has a filter
 
 ```razor
 <PixataGrid Data="_people" FilterMode="PixataGridFilterMode.FilterMenu">
@@ -238,6 +238,10 @@ The editor and the operators depend on the field's type...
 | `bool` | A dropdown of (All), is true and is false | None |
 
 Nullable numbers, dates and enums also get Is null and Is not null. Columns of other types can't be filtered unless you give them a template.
+
+A filter menu opens below its column's header, or above it if there's more room there. If it doesn't fit on either side (in a short window, with the grid part way down), it's made as tall as the room on that side, and a `CheckBoxList`'s list of values gets shorter, so the search box and the Filter and Clear buttons stay in view. The other menus, and the column menu, scroll.
+
+A `CheckBoxList` menu is as wide as its longest value, from 232px up to `--pixata-grid-filter-menu-max-width` (22rem, and never wider than the window less 2rem), and a value longer than that wraps, with its checkbox beside the first line. The other filter menus are 232px wide, as in Telerik's grid.
 
 Text comparisons ignore case, and filtering (or searching) goes back to the first page.
 
@@ -463,6 +467,7 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 | `--pixata-grid-highlight-bg` | `rgba(255, 192, 0, .25)` | Highlighted rows and cells |
 | `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(13, 110, 253, .25)` | The focus ring on inputs and buttons |
 | `--pixata-grid-popup-shadow` | A soft two-layer shadow | The shadow under dropdown lists and filter menus |
+| `--pixata-grid-filter-menu-max-width` | `22rem` | The widest a `CheckBoxList` filter menu gets for a long value, which wraps if it's longer. It's never wider than the window, less 2rem |
 | `--pixata-grid-border-radius` | `4px` | Rounded corners on inputs and buttons |
 | `--pixata-grid-error-color` | `#dc3545` | The message shown when `OnRead` reports an error |
 

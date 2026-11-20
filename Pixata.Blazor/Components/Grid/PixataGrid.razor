@@ -829,8 +829,9 @@
 
   private RenderFragment FilterMenu(PixataGridColumn<TItem> column) {
     PixataGridFilterTemplateContext? templateContext = column.FilterMenuTemplate is null ? null : TemplateContext(column);
+    bool list = templateContext is null && column.FilterMenuType == PixataGridFilterMenuType.CheckBoxList;
     return
-      @<div @ref="_menuPopup" class="pixata-blazor-grid-filter-popup" role="dialog" aria-label="@Text.FilterMenu(column.HeaderText)">
+      @<div @ref="_menuPopup" class="@Css.Join("pixata-blazor-grid-filter-popup", "pixata-blazor-grid-filter-menu-popup", list ? "pixata-blazor-grid-filter-list-popup" : null)" role="dialog" aria-label="@Text.FilterMenu(column.HeaderText)">
         @AdaptiveHeader(column.HeaderText)
         <div class="pixata-blazor-grid-columnmenu-item">
           @FilterIcon
