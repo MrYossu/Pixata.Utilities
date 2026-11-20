@@ -239,6 +239,6 @@ and the calendar's range and multi-view parts are...
 | `pixata-blazor-calendar-range-start`, `pixata-blazor-calendar-range-end` | The days at the ends of the range (which also have `pixata-blazor-calendar-selected`) |
 | `pixata-blazor-calendar-range-middle` | The days between them |
 | `pixata-blazor-calendar-multiview` | The calendar, when `Views` is more than 1 |
-| `pixata-blazor-calendar-view`, `pixata-blazor-calendar-view-extra` | Each view, and the views after the first, which are hidden on a phone |
+| `pixata-blazor-calendar-view`, `pixata-blazor-calendar-view-extra` | Each view, and the views after the first, which are hidden on a phone. A view has `.25rem` of padding at the sides and the bottom, so the last row isn't against the calendar's edge |
 | `pixata-blazor-calendar-caption` | The month (or year, decade or century) above each view, also hidden on a phone |
 | `pixata-blazor-calendar-title-multi`, `pixata-blazor-calendar-title-single` | The title for all the views, and the one for just the first, which is shown instead on a phone |
