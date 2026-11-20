@@ -2,6 +2,10 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.30.0** adds two things to the grid's columns...
+>- A column without a `Width` can no longer be squeezed to nothing when the other columns' widths fill the grid. The grid now scrolls sideways once such a column would be narrower than its new `MinWidth`, or the grid's new `ColumnMinWidth` if it hasn't got one. **Behaviour change:** `ColumnMinWidth` defaults to "5rem", so a grid whose columns without a width were narrower than that now scrolls sideways rather than squeezing them. Set `ColumnMinWidth="@null"` for the old behaviour. See [column widths and long titles](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#column-widths-and-long-titles) (#175)
+>- The new `WrapHeaders` parameter lets the header titles go onto more lines rather than being cut short with an ellipsis. The filter and column menu buttons now go beside the last line of the title (which, for a title on one line, is where they were), so they stay level along the header when some titles wrap, including when an app wraps them in its own CSS. See [column widths and long titles](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#column-widths-and-long-titles) (#179)
+
 >**Version 5.29.1** fixes grouping by a column that isn't shown (`Visible="false"`). The group rows, the group panel's chip and an export's `Groups` showed the field's name and raw value (such as "CategoryName: Tools"), and ignored the column's `GroupHeaderTemplate`. They now use the hidden column's title, format and template, as they do for one that's shown. See [grouping and aggregates](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Grid.md#grouping-and-aggregates) (#168)
 
 >**Version 5.29.0** fixes three things in the messages that `MessageView` and `ApiResponseView` show...
