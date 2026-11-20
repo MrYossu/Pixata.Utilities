@@ -49,7 +49,7 @@
               <col style="@column.WidthStyle" data-pixata-column-key="@column.Key" />
             }
           </colgroup>
-          <thead class="pixata-blazor-grid-thead">
+          <thead class="@Css.Join("pixata-blazor-grid-thead", WrapHeaders ? "pixata-blazor-grid-wrap-headers" : null)">
             @for (int row = 0; row < headerRows.Count; row++) {
               <tr>
                 @if (row == 0) {

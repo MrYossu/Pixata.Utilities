@@ -314,6 +314,21 @@
   </GridColumns>
 </PixataGrid>
 
+<h4>Column widths and long titles</h4>
+
+<p>Email address has no width, and a <code>MinWidth</code> of 14rem, so in a window too narrow for it and the other columns, the grid scrolls sideways rather than squeezing it. The figures have narrow columns with long titles, which <code>WrapHeaders="true"</code> puts onto more than one line, with the filter buttons beside each title's last line.</p>
+
+<PixataGrid Data="Data" Size="_size" WrapHeaders="true" FilterMode="PixataGridFilterMode.FilterMenu" Sortable="true" Pageable="true" PageSize="5">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.FirstName)" Width="140px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Surname)" Width="140px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Email)" MinWidth="14rem" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.DateOfBirth)" Width="120px" />
+    <PixataGridColumn Field="@nameof(GridSampleEmployee.Salary)" Title="Salary before tax" DisplayFormat="{0:C0}" Width="110px" TextAlign="PixataGridTextAlign.Right" />
+    <PixataGridColumn Field="Address.City" Title="City" Width="140px" FilterMenuType="PixataGridFilterMenuType.CheckBoxList" />
+  </GridColumns>
+</PixataGrid>
+
 <h4>Resizing and reordering columns</h4>
 
 <p>Drag the edge of a header to resize its column, or double-click the edge to fit the column to its content. Drag a header onto another to move it. First name can't be made narrower than 80px, and salary can't be wider than 200px. Email can't be resized, and date of birth can't be moved.</p>

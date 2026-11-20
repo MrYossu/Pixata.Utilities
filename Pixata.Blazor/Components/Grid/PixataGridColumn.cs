@@ -130,6 +130,14 @@ public class PixataGridColumn<TItem> : PixataGridColumnBase<TItem> {
   public string? Width { get; set; }
 
   /// <summary>
+  /// For a column without a <see cref="Width"/>, the narrowest it can be squeezed to, as a CSS width, such as "12rem". When the
+  /// other columns leave it less than this, the grid scrolls sideways instead. If not set, the grid's <c>ColumnMinWidth</c> is
+  /// used. Unlike <see cref="MinResizableWidth"/>, this doesn't limit what the user can resize the column to
+  /// </summary>
+  [Parameter]
+  public string? MinWidth { get; set; }
+
+  /// <summary>
   /// A .NET format string for the value, such as "{0:dd MMM yyyy}" or "{0:C2}". If not set, the grid uses the
   /// <c>[DisplayFormat(DataFormatString = "...")]</c> attribute on the field if there is one
   /// </summary>

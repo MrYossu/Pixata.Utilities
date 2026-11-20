@@ -129,6 +129,82 @@ public class PixataGridColumns_Tests {
     Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-locked").Count);
   }
 
+  // ---------- Minimum widths ----------
+
+  [TestMethod]
+  public void AColumnWithoutAWidth_KeepsTheTableWideEnoughForTheDefaultMinimum() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(Columns(
+      Column(nameof(Person.Id), ("Width", "100px")),
+      Column(nameof(Person.First)),
+      Column(nameof(Person.Age), ("Width", "4rem"))));
+
+    Assert.AreEqual("min-width: calc(100px + 4rem + 5rem);", grid.Find("table").GetAttribute("style"));
+  }
+
+  [TestMethod]
+  public void ColumnsWithoutAWidth_EachGetTheLargestMinimum_AsTheyShareTheSpaceEqually() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(Columns(
+      Column(nameof(Person.Id), ("Width", "100")),
+      Column(nameof(Person.First), ("MinWidth", "12rem")),
+      Column(nameof(Person.Last)),
+      Column(nameof(Person.Email), ("MinWidth", "12rem"))));
+
+    Assert.AreEqual("min-width: calc(100px + 3 * max(12rem, 5rem));", grid.Find("table").GetAttribute("style"));
+  }
+
+  [TestMethod]
+  public void ColumnMinWidth_SetsTheDefaultMinimum() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(Columns(
+      Column(nameof(Person.Id), ("Width", "100px")),
+      Column(nameof(Person.First)),
+      Column(nameof(Person.Last))), p => p.Add(g => g.ColumnMinWidth, "8em"));
+
+    Assert.AreEqual("min-width: calc(100px + 2 * 8em);", grid.Find("table").GetAttribute("style"));
+  }
+
+  [TestMethod]
+  public void PercentageWidths_AreAllowedForAsAShareOfTheTable() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(Columns(
+      Column(nameof(Person.Id), ("Width", "20%")),
+      Column(nameof(Person.Age), ("Width", "60px")),
+      Column(nameof(Person.First))));
+
+    Assert.AreEqual("min-width: calc((60px + 5rem) / 0.8);", grid.Find("table").GetAttribute("style"));
+  }
+
+  [TestMethod]
+  public void WithNoMinimum_OrEveryColumnSized_TheTableHasNoMinimumWidth() {
+    IRenderedComponent<PixataGrid<Person>> unlimited = Render(Columns(
+      Column(nameof(Person.Id), ("Width", "100px")),
+      Column(nameof(Person.First))), p => p.Add(g => g.ColumnMinWidth, null));
+    IRenderedComponent<PixataGrid<Person>> sized = Render(Columns(
+      Column(nameof(Person.Id), ("Width", "100px")),
+      Column(nameof(Person.First), ("Width", "10rem"), ("MinWidth", "12rem"))));
+
+    Assert.IsNull(unlimited.Find("table").GetAttribute("style"));
+    Assert.IsNull(sized.Find("table").GetAttribute("style"));
+  }
+
+  [TestMethod]
+  public void TheMinimumWidth_AllowsForTheDetailColumn() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(Columns(
+      Column(nameof(Person.Id), ("Width", "100px")),
+      Column(nameof(Person.First))), p => p.Add(g => g.DetailTemplate, (RenderFragment<Person>)(person => b => b.AddContent(0, person.Email))));
+
+    Assert.AreEqual("min-width: calc(100px + 32px + 5rem);", grid.Find("table").GetAttribute("style"));
+  }
+
+  // ---------- Wrapping headers ----------
+
+  [TestMethod]
+  public void WrapHeaders_MarksTheHeader() {
+    IRenderedComponent<PixataGrid<Person>> plain = Render(Columns(Column(nameof(Person.Id))));
+    IRenderedComponent<PixataGrid<Person>> wrapped = Render(Columns(Column(nameof(Person.Id))), p => p.Add(g => g.WrapHeaders, true));
+
+    Assert.IsFalse(plain.Find("thead").ClassList.Contains("pixata-blazor-grid-wrap-headers"));
+    Assert.IsTrue(wrapped.Find("thead").ClassList.Contains("pixata-blazor-grid-wrap-headers"));
+  }
+
   // ---------- Resizing ----------
 
   [TestMethod]

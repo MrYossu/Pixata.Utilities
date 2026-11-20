@@ -626,12 +626,19 @@ select.pixata-form-control:not([multiple]):not([size]) {
 
 /*
   As in Telerik's grid, the header content is pulled out over the cell's padding and then padded again, so the whole cell is
-  the click target for sorting
+  the click target for sorting. The content is at the bottom, as the header cells are, so that the filter and column menu
+  buttons can go beside the last line of a title that wraps
 */
 .pixata-blazor-grid-cell-inner {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   margin: calc(var(--pixata-grid-cell-padding-y) * -1) calc(var(--pixata-grid-cell-padding-x) * -1);
+}
+
+/* With WrapHeaders="true", the titles go onto more lines rather than being cut short */
+.pixata-blazor-grid-wrap-headers .pixata-blazor-grid-th,
+.pixata-blazor-grid-wrap-headers .pixata-blazor-grid-column-title {
+  white-space: normal;
 }
 
 .pixata-blazor-grid-link {
@@ -1769,6 +1776,11 @@ select.pixata-form-control:not([multiple]):not([size]) {
 }
 
 /* The filter menu icon in a header, which is coloured when the column has a filter */
+/*
+  The middle of the 30px button goes on the middle of the title's last line, which is the padding and half a line up from the
+  bottom, so the buttons are level along the header when some titles wrap. With a one-line title, that's the middle of the
+  header, as before. The first margin is for browsers that don't know the lh unit
+*/
 .pixata-blazor-grid-header-menu {
   display: flex;
   flex: 0 0 auto;
@@ -1778,6 +1790,8 @@ select.pixata-form-control:not([multiple]):not([size]) {
   height: 30px;
   padding: .25rem;
   margin-inline-end: .25rem;
+  margin-bottom: calc(var(--pixata-grid-cell-padding-y) + (var(--pixata-grid-line-height) * 1em - 30px) / 2);
+  margin-bottom: calc(var(--pixata-grid-cell-padding-y) + (1lh - 30px) / 2);
   cursor: pointer;
 }
 
