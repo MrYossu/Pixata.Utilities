@@ -44,6 +44,8 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `AutoGenerateColumns` | `bool` | Adds a column for each simple property of `TItem`. See [auto-generated columns](#auto-generated-columns) |
 | `Height` | `string` | A CSS height, such as "400px". If set, the rows scroll under a fixed header. If not, the grid is as tall as its rows |
 | `Width` | `string` | A CSS width. If not set, the grid fills its container |
+| `ColumnMinWidth` | `string` | The narrowest a column without a `Width` can be squeezed to, unless it has a `MinWidth` of its own. Defaults to "5rem". Set it to `null` to let such columns be squeezed to nothing. See [column widths and long titles](#column-widths-and-long-titles) |
+| `WrapHeaders` | `bool` | Lets the header titles go onto more than one line, rather than being cut short. See [column widths and long titles](#column-widths-and-long-titles) |
 | `Class` | `string` | A CSS class for the grid's outer element |
 | `Size` | `PixataGridSize` | `Medium` (the default) or `Small`, which sets the padding around the cells |
 | `NoDataTemplate` | `RenderFragment` | What to show when there are no items and the grid isn't filtered. Defaults to "No data available". See [when there are no rows](#when-there-are-no-rows) |
@@ -101,6 +103,7 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `Field` | `string` | The property to show, such as `nameof(Person.Name)`, or a path to a nested one, such as "Address.City". This is case sensitive, and a name that doesn't match a public property or field throws an `ArgumentException` when the grid is rendered. If anything along a nested path is null, the cell is empty |
 | `Title` | `string` | The header text. See below for the default |
 | `Width` | `string` | A CSS width, such as "120px" or "20%". Columns without a width share the space that's left |
+| `MinWidth` | `string` | For a column without a `Width`, the narrowest it can be squeezed to, such as "12rem", in place of the grid's `ColumnMinWidth`. See [column widths and long titles](#column-widths-and-long-titles) |
 | `DisplayFormat` | `string` | A .NET format string, such as "{0:dd MMM yyyy}" or "{0:C2}". Values are formatted using the current culture |
 | `Visible` | `bool?` | Set to `false` to hide the column. `null` is treated as `true` |
 | `TextAlign` | `PixataGridTextAlign?` | `Left`, `Center` or `Right`, for the data cells. The header isn't affected, so use `HeaderClass` if you want that aligned too |
@@ -684,6 +687,26 @@ In `Popup` mode, the item is edited in a form in a window, titled "Edit" (or "Ad
 | --- | --- |
 | `PixataGridPopupEditSettings` | `Title`, `Width`, `MaxHeight` and `Class` for the window |
 | `PixataGridPopupEditFormSettings` | `Columns` (the number of columns the fields are laid out in), `ButtonsLayout` (`Start`, `Center`, `End` or `Stretch`), `FormTemplate` (your own form, given the item) and `ButtonsTemplate` (your own buttons) |
+
+## Column widths and long titles
+
+A column with a `Width` is always that wide. The columns without one share what's left of the grid's width equally, so when the widths add up to most of the grid (in a narrow window, or a grid with many fixed-width columns), they get squeezed. Rather than let one be squeezed to nothing, the grid scrolls sideways once they would be narrower than their minimum width. That's the column's `MinWidth` if it has one, otherwise the grid's `ColumnMinWidth`, which is "5rem" unless you change it. So give the column that matters most, such as a name, a `MinWidth` big enough to read...
+
+```razor
+<PixataGrid Data="_orders">
+  <GridColumns>
+    <PixataGridColumn Field="@nameof(Order.Customer)" MinWidth="12rem" />
+    <PixataGridColumn Field="@nameof(Order.Date)" Width="120px" />
+    <PixataGridColumn Field="@nameof(Order.Total)" Width="100px" />
+  </GridColumns>
+</PixataGrid>
+```
+
+The grid does this by setting its table's `min-width` to the widths plus the minimums, so you don't need to change anything when the columns change. As the columns without a width share the space equally, each of them is kept at least as wide as the biggest of their minimums. Percentage widths are allowed for (as a share of the table), but a width such as `calc(20% + 1rem)` isn't, and then the grid can't keep the minimums. `MinWidth` doesn't limit what the user can resize a column to (that's `MinResizableWidth`), and once a column has been resized, every column has a width, so the minimums no longer matter. Set `ColumnMinWidth="@null"` to let the columns be squeezed to nothing, as they were before version 5.30.0.
+
+The minimums (like the widths) count towards how wide the grid needs to be. So if the grid is inside a flex item, such as the `main` element in the Blazor template's layout, give that item `min-width: 0`. Otherwise the flex item, and so the page, grows wide enough for the columns, and the page scrolls sideways rather than the grid.
+
+A title that's too long for its column is cut short with an ellipsis. Set `WrapHeaders="true"` to let the titles go onto more lines instead, which suits a narrow column of figures with a long title. The filter and column menu buttons go beside the last line of a title, so they stay level along the header whether or not a title wraps. That's also the case when you let the titles wrap in your own CSS.
 
 ## Resizing, moving and freezing columns
 

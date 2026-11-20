@@ -54,6 +54,21 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
   public string? Width { get; set; }
 
   /// <summary>
+  /// The narrowest a column without a <c>Width</c> can be squeezed to, as a CSS width, unless it has a <c>MinWidth</c> of its
+  /// own. When the columns with widths leave less than this for each of the others, the grid scrolls sideways rather than
+  /// squeezing them. Defaults to "5rem". Set it to null to let them be squeezed to nothing
+  /// </summary>
+  [Parameter]
+  public string? ColumnMinWidth { get; set; } = "5rem";
+
+  /// <summary>
+  /// Lets the header titles go onto more than one line, rather than being cut short with an ellipsis, so a narrow column can
+  /// have a long title
+  /// </summary>
+  [Parameter]
+  public bool WrapHeaders { get; set; }
+
+  /// <summary>
   /// A CSS class to add to the grid's outer element
   /// </summary>
   [Parameter]

@@ -179,9 +179,57 @@ public partial class PixataGrid<TItem> {
     column.StickyStyle = FormattableString.Invariant($"inset-inline-start: {left}px; inset-inline-end: {right}px;");
   }
 
-  // Once the user has resized a column, the table is as wide as its columns
+  // Once the user has resized a column, the table is as wide as its columns. Until then, it's kept wide enough for the columns
+  // without a width to have their minimum widths, so it scrolls sideways rather than squeezing them
   private string? TableStyle(List<PixataGridColumn<TItem>> leaves) =>
-    TableWidthPixels(leaves) is double width ? FormattableString.Invariant($"width: {width}px;") : null;
+    TableWidthPixels(leaves) is double width
+      ? FormattableString.Invariant($"width: {width}px;")
+      : TableMinWidth(leaves) is string minWidth ? $"min-width: {minWidth};" : null;
+
+  // The columns without a width share what the others leave equally, so each gets at least the largest of their minimums
+  // when the table is as wide as the other columns plus that many times it. A column with a percentage width takes that
+  // share of the whole table, so the rest is divided by what the percentages leave
+  private string? TableMinWidth(List<PixataGridColumn<TItem>> leaves) {
+    List<PixataGridColumn<TItem>> unsized = [.. leaves.Where(c => !HasWidth(c))];
+    List<string> minimums = [.. unsized
+      .Select(c => CssLength(string.IsNullOrWhiteSpace(c.MinWidth) ? ColumnMinWidth : c.MinWidth))
+      .OfType<string>()
+      .Distinct()];
+    if (minimums.Count == 0) {
+      return null;
+    }
+    List<string> parts = [];
+    double percent = 0;
+    foreach (string width in leaves.Where(HasWidth).Select(c => CssLength(c.CurrentWidth)!)) {
+      if (!width.Contains('%')) {
+        parts.Add(width);
+      } else if (width.EndsWith('%') && double.TryParse(width[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out double share)) {
+        percent += share;
+      } else {
+        // Something like calc(20% + 1rem), which can't be allowed for
+        return null;
+      }
+    }
+    if (percent >= 100) {
+      return null;
+    }
+    if (LeadingColumns > 0) {
+      parts.Add($"{LeadingColumns * 32}px");
+    }
+    string minimum = minimums.Count == 1 ? minimums[0] : $"max({string.Join(", ", minimums)})";
+    parts.Add(unsized.Count == 1 ? minimum : $"{unsized.Count} * {minimum}");
+    string total = string.Join(" + ", parts);
+    return percent > 0 ? FormattableString.Invariant($"calc(({total}) / {Math.Round((100 - percent) / 100, 4)})") : $"calc({total})";
+  }
+
+  private static bool HasWidth(PixataGridColumn<TItem> column) =>
+    CssLength(column.CurrentWidth) is string width && !width.Equals("auto", StringComparison.OrdinalIgnoreCase);
+
+  // A width as CSS, with a bare number taken as pixels, as it is for frozen columns
+  private static string? CssLength(string? width) =>
+    string.IsNullOrWhiteSpace(width)
+      ? null
+      : double.TryParse(width.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out _) ? $"{width.Trim()}px" : width.Trim();
 
   private double? TableWidthPixels(List<PixataGridColumn<TItem>> leaves) {
     if (!_fixedWidths) {
