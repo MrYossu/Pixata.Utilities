@@ -2,6 +2,9 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.32.0** adds `Satisfies`, a FluentValidation rule to use in place of `Must` and `Custom`. In a published (Release) Blazor WebAssembly app, just constructing a validator that uses `Must` or `Custom` stops the .NET runtime with a Mono assertion (`loader.c:1826`), leaving the form's page stuck on its loading indicator, though it works perfectly in a Debug build. `Satisfies` does the same job as `Must`, with the same overloads and default message, and works. See the [validation documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Validation.md)
+>- The package now references FluentValidation 12.2.0 directly
+
 >**Version 5.31.1** puts `.25rem` of padding under the calendar's last row of days (or months, years or decades), as there is at the sides, so it no longer touches the bottom edge of the date picker's popup or the calendar's border. See [styling the date pickers](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#styling) (#178)
 
 >**Version 5.31.0** fixes two things in the grid's filter menus...
