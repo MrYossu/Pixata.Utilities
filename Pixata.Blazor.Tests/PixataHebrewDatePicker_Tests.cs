@@ -140,7 +140,8 @@ public class PixataHebrewDatePicker_Tests {
     IElement other = Day(calendar, 21);
     Assert.IsFalse(other.ClassList.Contains("pixata-blazor-calendar-shaded"));
     Assert.IsNull(other.GetAttribute("style"));
-    Assert.AreEqual("Wednesday 21 October 2026", other.GetAttribute("title"));
+    // The long date pattern differs between systems: Windows puts a comma after the day's name, and Linux doesn't
+    Assert.AreEqual(new DateTime(2026, 10, 21).ToString("D", CultureInfo.CurrentCulture), other.GetAttribute("title"));
     Assert.IsNull(other.QuerySelector(".pixata-blazor-calendar-secondary"));
   }
 
