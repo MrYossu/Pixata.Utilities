@@ -21,7 +21,9 @@
          aria-haspopup="@(ShowTime ? "dialog" : "grid")"
          aria-expanded="@(_open ? "true" : "false")"
          aria-invalid="@(IsInvalid ? "true" : null)"
-         @onkeydown="OnInputKeyDown" />
+         @onkeydown="OnInputKeyDown"
+         @onfocus="OpenOnInputFocus"
+         @onblur="() => _refocusing = false" />
   @if (ShowClearButton && IsNullable && HasValue && Enabled && !ReadOnly) {
     <span class="pixata-blazor-dateinput-clear" role="button" title="Clear" aria-label="Clear" @onclick="Clear">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 7.3 3.6-3.6.7.7L8.7 8l3.6 3.6-.7.7L8 8.7l-3.6 3.6-.7-.7L7.3 8 3.7 4.4l.7-.7z" /></svg>
@@ -45,6 +47,7 @@
                       View="View"
                       BottomView="BottomView"
                       DisabledDates="DisabledDates"
+                      DayInfo="DayInfo"
                       ShowWeekNumbers="ShowWeekNumbers"
                       ShowOtherMonthDays="ShowOtherMonthDays"
                       OnEscape="CloseAndFocus" />
@@ -107,11 +110,25 @@
   [Parameter]
   public List<DateTime>? DisabledDates { get; set; }
 
+  /// <summary>
+  /// Called for each day the calendar shows, to shade it, give it a tooltip or put a second line of text under its number,
+  /// such as for holidays or the date in another calendar. See <see cref="PixataCalendar.DayInfo"/>
+  /// </summary>
+  [Parameter]
+  public Func<DateTime, PixataCalendarDayInfo?>? DayInfo { get; set; }
+
   [Parameter]
   public bool ShowWeekNumbers { get; set; }
 
   [Parameter]
   public bool ShowOtherMonthDays { get; set; } = true;
+
+  /// <summary>
+  /// Opens the calendar when the input gets the focus, as well as from the button. The focus stays in the input, so the user
+  /// can still type the date; Alt+Down moves it into the calendar. Defaults to false
+  /// </summary>
+  [Parameter]
+  public bool OpenOnFocus { get; set; }
 
   /// <summary>
   /// A CSS class for the popup
@@ -173,6 +190,10 @@
   private DotNetObjectReference<PixataDatePicker<TValue>>? _pickerRef;
   private bool _open;
   private bool _justOpened;
+  // Whether the calendar takes the focus when it opens (not when it opens because the input got the focus)
+  private bool _focusCalendar;
+  // True while the picker is putting the focus back in the input, which shouldn't open the calendar again
+  private bool _refocusing;
   private bool _formatSet;
   // With ShowTime, what the user has picked in the popup, which only becomes the value when they click Set
   private DateTime _pendingDate;
@@ -228,10 +249,14 @@
   /// <summary>
   /// Opens the calendar
   /// </summary>
-  public async Task Open() {
+  public Task Open() =>
+    Open(true);
+
+  private async Task Open(bool focusCalendar) {
     if (_open || !Enabled || ReadOnly) {
       return;
     }
+    _focusCalendar = focusCalendar;
     DateTime start = CurrentDate ?? DateTime.Today;
     _pendingDate = start.Date;
     _pendingTime = start.TimeOfDay;
@@ -272,7 +297,7 @@
           await Module.InvokeVoidAsync("scrollSelectedOptionsIntoView", _popup);
         }
         // The keyboard focus goes into the calendar, so the arrow keys move around it
-        if (_calendar is not null) {
+        if (_calendar is not null && _focusCalendar) {
           await _calendar.FocusAsync();
         }
       } catch (JSException) {
@@ -293,7 +318,18 @@
 
   private async Task CloseAndFocus() {
     await Close();
+    _refocusing = OpenOnFocus;
     await FocusAsync();
+  }
+
+  private async Task OpenOnInputFocus() {
+    if (_refocusing) {
+      _refocusing = false;
+      return;
+    }
+    if (OpenOnFocus) {
+      await Open(false);
+    }
   }
 
   private async Task OnCalendarChanged(DateTime date) {
@@ -342,8 +378,16 @@
   // Alt+Down opens the calendar, and Alt+Up or Escape closes it, as in Telerik's date picker
   private async Task OnInputKeyDown(KeyboardEventArgs e) {
     switch (e.Key) {
+      case "ArrowDown" when e.AltKey && _open && _calendar is not null:
+        // The calendar was opened when the input got the focus, so the focus is still here
+        await _calendar.FocusAsync();
+        break;
       case "ArrowDown" when e.AltKey:
         await Open();
+        break;
+      case "Tab" when _open:
+        // The focus is leaving the input, so the calendar closes
+        await Close();
         break;
       case "ArrowUp" when e.AltKey:
       case "Escape":

@@ -128,6 +128,13 @@ public partial class PixataCalendar : IAsyncDisposable {
   public List<DateTime>? DisabledDates { get; set; }
 
   /// <summary>
+  /// Called for each day shown in the month view, to shade it, give it a tooltip or put a second line of text under its
+  /// number. Return null to show the day as usual. See <see cref="PixataCalendarDayInfo"/>
+  /// </summary>
+  [Parameter]
+  public Func<DateTime, PixataCalendarDayInfo?>? DayInfo { get; set; }
+
+  /// <summary>
   /// Shows the ISO-8601 week number at the start of each week
   /// </summary>
   [Parameter]
@@ -300,6 +307,7 @@ public partial class PixataCalendar : IAsyncDisposable {
   };
 
   private record Cell(DateTime Date, string Text, string Title, bool OtherPeriod, bool Disabled, bool Weekend) {
+    public PixataCalendarDayInfo? Info { get; init; }
     public bool Selected { get; init; }
     public bool Today { get; init; }
     public bool Focused { get; init; }
@@ -338,7 +346,7 @@ public partial class PixataCalendar : IAsyncDisposable {
         row.Add(other && !showOther
           ? null
           : Mark(new(date, date.Day.ToString(CultureInfo.CurrentCulture), date.ToString("D", CultureInfo.CurrentCulture), other, IsDisabled(date),
-                     date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) { Today = date == DateTime.Today }));
+                     date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) { Today = date == DateTime.Today, Info = DayInfo?.Invoke(date) }));
       }
       rows.Add(row);
     }
@@ -565,7 +573,12 @@ public partial class PixataCalendar : IAsyncDisposable {
       cell.OtherPeriod ? "pixata-blazor-calendar-other-month" : null,
       cell.Weekend ? "pixata-blazor-calendar-weekend" : null,
       cell.Disabled ? "pixata-blazor-calendar-disabled" : null,
-      cell.Focused && _tableHasFocus ? "pixata-blazor-calendar-focus" : null);
+      cell.Focused && _tableHasFocus ? "pixata-blazor-calendar-focus" : null,
+      string.IsNullOrWhiteSpace(cell.Info?.BackgroundColour) ? null : "pixata-blazor-calendar-shaded",
+      cell.Info?.Class);
+
+  private static string? CellStyle(Cell cell) =>
+    string.IsNullOrWhiteSpace(cell.Info?.BackgroundColour) ? null : $"--pixata-blazor-calendar-day-bg: {cell.Info!.BackgroundColour};";
 
   public async ValueTask DisposeAsync() {
     _disposed = true;

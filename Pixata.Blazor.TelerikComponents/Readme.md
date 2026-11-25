@@ -133,6 +133,8 @@ The parameters worth knowing about...
 
 `ShowDiagnostics` puts the conversion details on screen, which is handy if you think a date is coming out wrong.
 
+>Pixata.Blazor 5.43.0 has [`PixataHebrewDatePicker`](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#hebrew-date-picker), which takes the same parameters and doesn't need Telerik. See [moving from TelerikHebrewDatePicker](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#moving-from-telerikhebrewdatepicker).
+
 ## Grid column helpers
 
 Telerik's default filter operators offer far more options than most users need, and the extra ones only get in the way. These subclasses of `GridColumn` are drop-in replacements that cut the list down to the ones people actually use...

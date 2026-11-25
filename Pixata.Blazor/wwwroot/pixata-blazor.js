@@ -147,6 +147,33 @@ export function preventDefaultKeys(element, keys) {
   preventedKeys.set(element, handler);
 }
 
+// A picker's popup closes when Tab is pressed in its input, but the popup comes next in the page, so the browser would move
+// the focus into it just as it goes, and the focus would be lost. Making the input's following siblings inert until the
+// browser has moved the focus means Tab goes on to the next field instead
+function tabPastPopup(input, e) {
+  if (e.key !== "Tab" || e.shiftKey || e.altKey || e.ctrlKey || e.metaKey || input.getAttribute("aria-expanded") !== "true") {
+    return;
+  }
+  const made = [];
+  for (let element = input.nextElementSibling; element; element = element.nextElementSibling) {
+    if (!element.inert) {
+      element.inert = true;
+      made.push(element);
+    }
+  }
+  setTimeout(() => made.forEach(element => element.inert = false), 0);
+}
+
+const popupTabbers = new WeakSet();
+
+export function skipPopupOnTab(input) {
+  if (!input || popupTabbers.has(input)) {
+    return;
+  }
+  input.addEventListener("keydown", e => tabPastPopup(input, e));
+  popupTabbers.add(input);
+}
+
 export function releaseDefaultKeys(element) {
   const handler = element ? preventedKeys.get(element) : null;
   if (handler) {
@@ -251,6 +278,7 @@ export function initDateInput(input, dotNet) {
   const call = async (method, ...args) => applyDateInputState(input, await dotNet.invokeMethodAsync(method, ...args));
   const handlers = {
     keydown: e => {
+      tabPastPopup(input, e);
       // Alt+arrows open and close a picker's popup, and Enter and Escape are handled in C#, so they're left alone here. The
       // browser would scroll the page on Alt+Up and Alt+Down, moving the input away from the popup it's opening
       if (e.altKey && (e.key === "ArrowDown" || e.key === "ArrowUp") && input.hasAttribute("aria-haspopup")) {

@@ -90,6 +90,13 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
   public List<DateTime>? DisabledDates { get; set; }
 
   /// <summary>
+  /// Called for each day the calendar shows, to shade it, give it a tooltip or put a second line of text under its number. See
+  /// <see cref="PixataCalendar.DayInfo"/>
+  /// </summary>
+  [Parameter]
+  public Func<DateTime, PixataCalendarDayInfo?>? DayInfo { get; set; }
+
+  /// <summary>
   /// Whether picking an end date before the start in the calendar swaps them round. When false (the default), that date
   /// becomes the new start instead
   /// </summary>

@@ -1206,6 +1206,34 @@ select.pixata-form-control:not([multiple]):not([size]) {
   border-radius: 0;
 }
 
+/* PixataHebrewDatePicker's popup is a PixataPopup holding the calendar, with the Hebrew months it spans above it */
+.pixata-blazor-hebrewdatepicker-popup {
+  background-color: var(--pixata-datepicker-bg);
+  border-color: var(--pixata-datepicker-border-color);
+  box-shadow: var(--pixata-datepicker-popup-shadow);
+}
+
+.pixata-blazor-hebrewdatepicker-popup .pixata-blazor-calendar {
+  border: 0;
+  border-radius: 0;
+}
+
+.pixata-blazor-hebrewdatepicker-months {
+  padding: .5rem .5rem 0;
+  font-size: .8125rem;
+  text-align: center;
+  color: var(--pixata-datepicker-subtle-color);
+}
+
+/* The text box can't be typed in, and clicking it opens the calendar */
+.pixata-blazor-hebrewdatepicker-input {
+  cursor: pointer;
+}
+
+.pixata-blazor-hebrewdatepicker-input:disabled {
+  cursor: default;
+}
+
 /* With ShowTime, the time selector sits next to the calendar, or under it if there isn't room */
 .pixata-blazor-datetimepicker-popup {
   flex-wrap: wrap;
@@ -1418,6 +1446,30 @@ select.pixata-form-control:not([multiple]):not([size]) {
 .pixata-blazor-calendar-td:hover .pixata-blazor-calendar-link {
   color: var(--pixata-datepicker-color);
   background-color: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+/* A day shaded by the calendar's DayInfo, such as a holiday. These come before the rules for selected days, which win */
+.pixata-blazor-calendar-td.pixata-blazor-calendar-shaded .pixata-blazor-calendar-link {
+  background-color: var(--pixata-blazor-calendar-day-bg);
+}
+
+.pixata-blazor-calendar-td.pixata-blazor-calendar-shaded:hover .pixata-blazor-calendar-link {
+  background-color: color-mix(in srgb, var(--pixata-blazor-calendar-day-bg), currentColor 10%);
+}
+
+/* A day with a second line of text under its number, from the calendar's DayInfo */
+.pixata-blazor-calendar-link-two-lines {
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px;
+  line-height: 1;
+}
+
+.pixata-blazor-calendar-secondary {
+  font-size: .65em;
+  font-weight: normal;
+  opacity: .8;
+  white-space: nowrap;
 }
 
 .pixata-blazor-calendar-other-month {

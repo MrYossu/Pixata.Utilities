@@ -88,12 +88,20 @@
       <td class="pixata-blazor-calendar-td pixata-blazor-calendar-empty" role="gridcell"></td>
     } else {
       <td class="@CellClass(cell)"
+          style="@CellStyle(cell)"
           role="gridcell"
-          title="@cell.Title"
+          title="@(string.IsNullOrEmpty(cell.Info?.Title) ? cell.Title : cell.Info!.Title)"
           aria-selected="@(cell.Selected ? "true" : "false")"
           aria-disabled="@(cell.Disabled ? "true" : null)"
           @onclick="() => CellClicked(cell)">
-        <span class="pixata-blazor-calendar-link">@cell.Text</span>
+        @if (cell.Info?.SecondaryText is { Length: > 0 } secondary) {
+          <span class="pixata-blazor-calendar-link pixata-blazor-calendar-link-two-lines">
+            <span class="pixata-blazor-calendar-day-text">@cell.Text</span>
+            <span class="pixata-blazor-calendar-secondary">@secondary</span>
+          </span>
+        } else {
+          <span class="pixata-blazor-calendar-link">@cell.Text</span>
+        }
       </td>
     }
   };
