@@ -19,6 +19,11 @@
 <button @onclick="@Time">Show the time</button>
 <div>@_msg</div>
 
+<p class="mt-2">You can give a notification a time of its own, rather than the one for its type, and take it away from code. The first button shows a code that stays for a minute (or until you click the second), as a sign-in code someone is waiting for might...</p>
+
+<button @onclick="@ShowCode">Send a code</button>
+<button @onclick="@CodeCopied">I've copied the code</button>
+
 <p class="mt-2">A notification can show formatted text, such as a list, by sending a render fragment (or a <code>MarkupString</code>) rather than a string...</p>
 
 <button @onclick="@Problems">Show some problems</button>
@@ -36,6 +41,18 @@
     NotificationHelper.Send(NotificationType.Error, "Oops! Something went wrong.", DateTime.Now);
 
   private string _msg = "";
+
+  private Notification? _code;
+
+  private void ShowCode() =>
+    _code = NotificationHelper.Send(NotificationType.Info, $"Your code is {Random.Shared.Next(100000, 1000000)}", DateTime.Now, closeAfter: TimeSpan.FromMinutes(1));
+
+  private void CodeCopied() {
+    if (_code is not null) {
+      NotificationHelper.Remove(_code);
+      _code = null;
+    }
+  }
 
   private void Problems() =>
     NotificationHelper.Send(NotificationType.Warning, @<div>

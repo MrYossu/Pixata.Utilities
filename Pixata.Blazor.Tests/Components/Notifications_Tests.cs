@@ -119,6 +119,67 @@ public class Notifications_Tests {
     cut.WaitForAssertion(() => Assert.AreEqual(2, cut.FindAll(".pixata-blazor-notification-new").Count));
   }
 
+  [TestMethod]
+  public void CloseAfter_FadesTheNotificationOutWhenItsTimeIsUp_ThenRemovesIt() {
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    IRenderedComponent<NotificationArea> cut = RenderArea(context, helper);
+
+    // An error stays until it's dismissed, unless it's given a time
+    Notification notification = helper.Send(NotificationType.Error, "Your code is 123456", DateTime.Now, closeAfter: TimeSpan.FromMilliseconds(100));
+
+    Assert.AreEqual(TimeSpan.FromMilliseconds(100), notification.CloseAfter);
+    cut.WaitForAssertion(() => Assert.AreEqual(1, cut.FindAll(".pixata-blazor-notification-remove").Count));
+    cut.WaitForAssertion(() => Assert.AreEqual(0, cut.FindAll(".pixata-blazor-notification").Count), TimeSpan.FromSeconds(4));
+  }
+
+  [DataRow(0)]
+  [DataRow(-1)]
+  [DataTestMethod]
+  public async Task CloseAfter_ZeroOrInfinite_StaysUntilDismissed(int milliseconds) {
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    IRenderedComponent<NotificationArea> cut = RenderArea(context, helper);
+
+    // Success normally goes after 5 seconds
+    helper.Send(NotificationType.Success, "New email", DateTime.Now, closeAfter: TimeSpan.FromMilliseconds(milliseconds));
+    await Task.Delay(300);
+
+    Assert.AreEqual(1, cut.FindAll(".pixata-blazor-notification-new").Count);
+  }
+
+  [TestMethod]
+  public void Send_ReturnsTheNotification_WhichRemoveFadesOut() {
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    IRenderedComponent<NotificationArea> cut = RenderArea(context, helper);
+    Notification code = helper.Send(NotificationType.Info, "Your code is 123456", DateTime.Now, closeAfter: TimeSpan.FromMinutes(1));
+    helper.Send(NotificationType.Info, "New email", DateTime.Now);
+    cut.WaitForAssertion(() => Assert.AreEqual(2, cut.FindAll(".pixata-blazor-notification-new").Count));
+
+    helper.Remove(code);
+
+    cut.WaitForAssertion(() => Assert.AreEqual("Your code is 123456", cut.Find(".pixata-blazor-notification-remove").TextContent.Trim()));
+    Assert.AreEqual("New email", cut.Find(".pixata-blazor-notification-new").TextContent.Trim());
+    cut.WaitForAssertion(() => Assert.AreEqual(1, cut.FindAll(".pixata-blazor-notification").Count), TimeSpan.FromSeconds(4));
+  }
+
+  [TestMethod]
+  public void Remove_ById_RemovesItFromEveryArea_AndIgnoresOneThatHasGone() {
+    using BunitContext context = PixataTestContext.Create();
+    NotificationHelper helper = new();
+    IRenderedComponent<NotificationArea> first = RenderArea(context, helper);
+    IRenderedComponent<NotificationArea> second = RenderArea(context, helper);
+    Notification notification = helper.Send(NotificationType.Error, builder => builder.AddContent(0, "Your code is 123456"), DateTime.Now);
+    first.WaitForAssertion(() => Assert.AreEqual(1, first.FindAll(".pixata-blazor-notification-new").Count));
+
+    helper.Remove(notification.Id);
+    helper.Remove("not-a-notification");
+
+    first.WaitForAssertion(() => Assert.AreEqual(1, first.FindAll(".pixata-blazor-notification-remove").Count));
+    second.WaitForAssertion(() => Assert.AreEqual(1, second.FindAll(".pixata-blazor-notification-remove").Count));
+  }
+
   private static IRenderedComponent<NotificationArea> RenderFallbackArea(BunitContext context, NotificationHelper helper) =>
     context.Render<NotificationArea>(p => p.Add(c => c.NotificationHelper, helper).Add(c => c.Fallback, true));
 
