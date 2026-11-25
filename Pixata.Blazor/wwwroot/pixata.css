@@ -10637,3 +10637,289 @@ input.pixata-blazor-checkbox.pixata-blazor-checkbox-indeterminate:checked {
 }
 
 /* ========== end of PixataTooltip ========== */
+
+/* ========== PixataColorPicker ========== */
+
+.pixata-blazor-colorpicker-wrapper {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* The button showing the colour, which looks like the other inputs */
+.pixata-blazor-colorpicker {
+  width: auto;
+  cursor: pointer;
+}
+
+.pixata-blazor-colorpicker:disabled {
+  cursor: default;
+}
+
+.pixata-blazor-colorpicker .pixata-blazor-input-inner {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+}
+
+/* A colour, over a chequerboard so a see-through colour shows as one */
+.pixata-blazor-colorpicker-swatch {
+  box-sizing: border-box;
+  display: inline-block;
+  flex: none;
+  width: var(--pixata-blazor-colorpicker-swatch-width, 2.5em);
+  height: 1lh;
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  background: linear-gradient(var(--pixata-blazor-colorpicker-swatch-colour), var(--pixata-blazor-colorpicker-swatch-colour)),
+    repeating-conic-gradient(#d9d9d9 0 25%, #fff 0 50%) 0 0 / 8px 8px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12);
+}
+
+/* No colour: white with a red line across */
+.pixata-blazor-colorpicker-swatch.pixata-blazor-colorpicker-none {
+  background: linear-gradient(to top right, transparent calc(50% - 1px), var(--pixata-blazor-error) calc(50% - 1px),
+    var(--pixata-blazor-error) calc(50% + 1px), transparent calc(50% + 1px)), #fff;
+}
+
+.pixata-blazor-colorpicker-popup {
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  padding: calc(var(--pixata-blazor-spacing) * 2);
+  width: var(--pixata-blazor-colorpicker-popup-width, 17rem);
+}
+
+.pixata-blazor-colorpicker-header {
+  display: flex;
+  align-items: center;
+  gap: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-colorpicker-views {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.pixata-blazor-colorpicker-view-button.pixata-blazor-selected {
+  background-color: var(--pixata-blazor-base-active-bg);
+}
+
+.pixata-blazor-colorpicker-header-end {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+  margin-inline-start: auto;
+}
+
+.pixata-blazor-colorpicker-clear .pixata-blazor-colorpicker-swatch {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The new colour, and the current one, which can be clicked to go back to it */
+.pixata-blazor-colorpicker-preview {
+  display: inline-flex;
+}
+
+.pixata-blazor-colorpicker-preview .pixata-blazor-colorpicker-swatch {
+  width: 2rem;
+  height: 1.5rem;
+  border-radius: 0;
+}
+
+.pixata-blazor-colorpicker-preview .pixata-blazor-colorpicker-preview-new {
+  border-start-start-radius: var(--pixata-blazor-border-radius-sm);
+  border-end-start-radius: var(--pixata-blazor-border-radius-sm);
+}
+
+.pixata-blazor-colorpicker-preview .pixata-blazor-colorpicker-preview-current {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-start-end-radius: var(--pixata-blazor-border-radius-sm);
+  border-end-end-radius: var(--pixata-blazor-border-radius-sm);
+  cursor: pointer;
+}
+
+.pixata-blazor-colorpicker-preview-current:focus-visible {
+  outline: 2px solid var(--pixata-blazor-text-color);
+  outline-offset: 1px;
+}
+
+.pixata-blazor-colorpicker-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+/* The gradient: a square of the shades of the hue, from white to the pure hue across and to black down */
+.pixata-blazor-colorgradient-view {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pixata-blazor-spacing) * 2);
+}
+
+.pixata-blazor-colorgradient {
+  position: relative;
+  height: var(--pixata-blazor-colorgradient-height, 10rem);
+  border-radius: var(--pixata-blazor-border-radius-sm);
+  background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
+  outline: 0;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.pixata-blazor-colorgradient:focus-visible {
+  box-shadow: 0 0 0 2px var(--pixata-blazor-text-color);
+}
+
+.pixata-blazor-colorgradient-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(0, 0, 0, .3);
+  pointer-events: none;
+}
+
+/* The hue and opacity sliders are range inputs with their own tracks */
+.pixata-blazor-colorgradient-slider {
+  width: 100%;
+  height: 12px;
+  margin: 0;
+  border-radius: 6px;
+  appearance: none;
+  background: none;
+  cursor: pointer;
+}
+
+.pixata-blazor-colorgradient-slider:focus-visible {
+  outline: 2px solid var(--pixata-blazor-text-color);
+  outline-offset: 2px;
+}
+
+.pixata-blazor-colorgradient-slider::-webkit-slider-runnable-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--pixata-blazor-colorgradient-track);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12);
+}
+
+.pixata-blazor-colorgradient-slider::-moz-range-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--pixata-blazor-colorgradient-track);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12);
+}
+
+.pixata-blazor-colorgradient-slider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -2px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5);
+  appearance: none;
+}
+
+.pixata-blazor-colorgradient-slider::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5);
+}
+
+.pixata-blazor-colorgradient-hue {
+  --pixata-blazor-colorgradient-track: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.pixata-blazor-colorgradient-alpha {
+  --pixata-blazor-colorgradient-track: linear-gradient(to right, transparent, var(--pixata-blazor-colorgradient-colour)),
+    repeating-conic-gradient(#d9d9d9 0 25%, #fff 0 50%) 0 0 / 8px 8px;
+}
+
+/* The boxes to type the colour in, as hex or as red, green, blue and opacity */
+.pixata-blazor-colorgradient-inputs {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pixata-blazor-spacing);
+}
+
+.pixata-blazor-colorgradient-format {
+  flex: none;
+  min-width: 3.25rem;
+  font-size: .75rem;
+}
+
+.pixata-blazor-colorgradient-hex {
+  flex: 1 1 auto;
+}
+
+.pixata-blazor-colorgradient-channel {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+
+.pixata-blazor-colorgradient-channel .pixata-blazor-input-inner {
+  padding-inline: 2px;
+  text-align: center;
+  appearance: textfield;
+}
+
+.pixata-blazor-colorgradient-channel .pixata-blazor-input-inner::-webkit-inner-spin-button,
+.pixata-blazor-colorgradient-channel .pixata-blazor-input-inner::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.pixata-blazor-colorgradient-channel-label {
+  font-size: .75rem;
+  color: var(--pixata-blazor-subtle-color);
+}
+
+/* The palette: a grid of tiles */
+.pixata-blazor-colorpalette {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  gap: 1px;
+  outline: 0;
+}
+
+.pixata-blazor-colorpalette-row {
+  display: flex;
+  gap: 1px;
+}
+
+.pixata-blazor-colorpalette-tile {
+  box-sizing: border-box;
+  flex: none;
+  width: var(--pixata-blazor-colorpalette-tile-width, 1.5rem);
+  height: var(--pixata-blazor-colorpalette-tile-height, 1.5rem);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  cursor: pointer;
+}
+
+.pixata-blazor-colorpalette-tile:hover,
+.pixata-blazor-colorpalette:focus-visible .pixata-blazor-colorpalette-tile.pixata-blazor-focus {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--pixata-blazor-text-color);
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 1px #fff;
+}
+
+.pixata-blazor-colorpalette-tile.pixata-blazor-selected {
+  box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px rgba(0, 0, 0, .5);
+}
+
+/* ========== end of PixataColorPicker ========== */

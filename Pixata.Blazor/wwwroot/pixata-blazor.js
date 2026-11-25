@@ -1231,6 +1231,59 @@ export function initNumericTextBox(input) {
 
 // Scrolls each list box in the element so its selected option is in the middle, without scrolling the page, as
 // scrollIntoView would. The date picker's time lists use it when the popup opens
+// ---------- The colour picker ----------
+
+// Lets the user drag around the colour picker's gradient. The handle follows the pointer straight away, and .NET is told where
+// it is at most one call at a time, with the latest position, so a slow connection doesn't build up a queue of moves
+export function initColourGradient(element, dotNet) {
+  if (!element) {
+    return;
+  }
+  let pending = null;
+  let busy = false;
+  const send = async () => {
+    if (busy || !pending) {
+      return;
+    }
+    busy = true;
+    const [x, y] = pending;
+    pending = null;
+    try {
+      await dotNet.invokeMethodAsync("OnGradientDrag", x, y);
+    } catch {
+      // The picker has gone
+    }
+    busy = false;
+    send();
+  };
+  const move = e => {
+    const r = element.getBoundingClientRect();
+    const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    const y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    const handle = element.querySelector(".pixata-blazor-colorgradient-handle");
+    if (handle) {
+      handle.style.left = `${x * 100}%`;
+      handle.style.top = `${y * 100}%`;
+    }
+    pending = [x, y];
+    send();
+  };
+  element.addEventListener("pointerdown", e => {
+    if (e.button !== 0 || element.closest("fieldset:disabled")) {
+      return;
+    }
+    e.preventDefault();
+    element.focus({ preventScroll: true });
+    element.setPointerCapture(e.pointerId);
+    move(e);
+  });
+  element.addEventListener("pointermove", e => {
+    if (element.hasPointerCapture(e.pointerId)) {
+      move(e);
+    }
+  });
+}
+
 export function scrollSelectedOptionsIntoView(element) {
   if (!element) {
     return;

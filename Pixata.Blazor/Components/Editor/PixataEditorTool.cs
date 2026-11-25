@@ -159,14 +159,8 @@ public class PixataEditorColorTool : PixataEditorTool {
   /// <summary>
   /// The 60 colours in the palette by default: a column of greys, then nine hues, each from a light tint down to a dark shade
   /// </summary>
-  public static IReadOnlyList<string> DefaultColors { get; } = [
-    "#ffffff", "#fcd9d9", "#fce9d9", "#fcf6d9", "#d9fcd9", "#d9fcf5", "#d9f0fc", "#d9e2fc", "#e8d9fc", "#fcd9f0",
-    "#d9d9d9", "#f5a3a3", "#f5c9a3", "#f5e7a3", "#a3f5a3", "#a3f5e4", "#a3daf5", "#a3b8f5", "#c5a3f5", "#f5a3da",
-    "#a6a6a6", "#ed5e5e", "#eda15e", "#edd55e", "#5eed5e", "#5eedd1", "#5ebeed", "#5e82ed", "#9a5eed", "#ed5ebe",
-    "#7f7f7f", "#e61919", "#e67919", "#e6c419", "#19e619", "#19e6bd", "#19a1e6", "#194ce6", "#6e19e6", "#e619a1",
-    "#404040", "#a51212", "#a55712", "#a58d12", "#12a512", "#12a588", "#1274a5", "#1237a5", "#5012a5", "#a51274",
-    "#000000", "#6e0c0c", "#6e3a0c", "#6e5e0c", "#0c6e0c", "#0c6e5b", "#0c4e6e", "#0c256e", "#350c6e", "#6e0c4e"
-  ];
+  public static IReadOnlyList<string> DefaultColors =>
+    PixataColorPicker.DefaultPaletteColors;
 }
 
 /// <summary>

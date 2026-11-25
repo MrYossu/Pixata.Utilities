@@ -1,6 +1,5 @@
 @namespace Pixata.Blazor.Components
 @using System.ComponentModel
-@using System.Globalization
 @using Microsoft.JSInterop
 @attribute [EditorBrowsable(EditorBrowsableState.Never)]
 @inject IJSRuntime Js
@@ -131,41 +130,14 @@
   private static string? Safe(string? colour) =>
     string.IsNullOrWhiteSpace(colour) ? null : PixataHtmlSanitiser.SafeCssValue(colour);
 
-  // The browser reports colours as rgb(...) while palettes usually use #rrggbb, so compare them as #rrggbb
+  // The browser reports colours as rgb(...) while palettes usually use #rrggbb, so compare them as #rrggbb. Anything else
+  // (such as a colour's name) is compared as it is
   internal static string? Hex(string? colour) {
     if (string.IsNullOrWhiteSpace(colour)) {
       return null;
     }
     string value = colour.Trim().ToLowerInvariant();
-    if (value.StartsWith('#')) {
-      string digits = value[1..];
-      if (digits.Length is 3 or 4) {
-        digits = string.Concat(digits[..3].Select(c => $"{c}{c}"));
-      } else if (digits.Length == 8) {
-        digits = digits[..6];
-      }
-      return digits.Length == 6 && digits.All(Uri.IsHexDigit) ? $"#{digits}" : null;
-    }
-    if (value.StartsWith("rgb")) {
-      int open = value.IndexOf('(');
-      int close = value.IndexOf(')');
-      if (open < 0 || close < open) {
-        return null;
-      }
-      string[] parts = value[(open + 1)..close].Split([',', ' ', '/'], StringSplitOptions.RemoveEmptyEntries);
-      if (parts.Length < 3) {
-        return null;
-      }
-      int[] channels = new int[3];
-      for (int i = 0; i < 3; i++) {
-        if (!double.TryParse(parts[i], NumberStyles.Float, CultureInfo.InvariantCulture, out double channel)) {
-          return null;
-        }
-        channels[i] = (int)Math.Round(Math.Clamp(channel, 0, 255));
-      }
-      return $"#{channels[0]:x2}{channels[1]:x2}{channels[2]:x2}";
-    }
-    return value;
+    return PixataColour.Parse(value) is { } parsed ? parsed.Opaque().ToHex() : value.StartsWith('#') || value.StartsWith("rgb") ? null : value;
   }
 
   protected override void OnParametersSet() {
