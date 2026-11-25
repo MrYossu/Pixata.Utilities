@@ -46,8 +46,11 @@ public enum PixataGridFilterMenuType {
 /// What a column's custom filter template is given. Change <see cref="Filter"/> and call <see cref="FilterAsync"/> to apply it
 /// </summary>
 public class PixataGridFilterTemplateContext {
-  internal PixataGridFilterTemplateContext(string field, GridCompositeFilterDescriptor filter, Func<Task> apply, Func<Task> clear) {
+  internal PixataGridFilterTemplateContext(string field, Type fieldType, string title, string? format, GridCompositeFilterDescriptor filter, Func<Task> apply, Func<Task> clear) {
     Field = field;
+    FieldType = fieldType;
+    Title = title;
+    Format = format;
     Filter = filter;
     _apply = apply;
     _clear = clear;
@@ -60,6 +63,24 @@ public class PixataGridFilterTemplateContext {
   /// The column's field, for the descriptors you add to <see cref="Filter"/>
   /// </summary>
   public string Field { get; }
+
+  /// <summary>
+  /// The type of the column's field, as declared, so <c>int?</c> for a nullable int (use <c>Nullable.GetUnderlyingType</c> for
+  /// the int). It's there for a column with no filter yet too, and for a nested field such as <c>Address.City</c>, so one
+  /// template can be shared by columns of different types and pick its inputs to suit, as with Telerik's <c>MemberType</c>
+  /// </summary>
+  public Type FieldType { get; }
+
+  /// <summary>
+  /// The column's title, as shown in its header, so a template can word itself to match
+  /// </summary>
+  public string Title { get; }
+
+  /// <summary>
+  /// The column's format, from its <c>DisplayFormat</c> or the <c>[DisplayFormat]</c> attribute on the field, or null if it
+  /// hasn't one. It's a composite format, such as <c>{0:d}</c>, so use it with <c>string.Format</c>
+  /// </summary>
+  public string? Format { get; }
 
   /// <summary>
   /// The column's filter. Add, change or remove its descriptors, or replace it with a new one (such as one whose descriptors
@@ -274,7 +295,11 @@ public partial class PixataGrid<TItem> {
   internal async Task SetSearch(string text, List<string>? fields) {
     _searchText = text;
     ResetVirtualScroll();
-    List<string> searchFields = fields ?? [.. RenderedColumns().Where(c => c.Field is not null && c.FilterKind == FilterKind.Text).Select(c => c.Field!)];
+    // An empty list is treated like no list, as Telerik's search box does, so a page that binds Fields to a list it never fills
+    // still searches
+    List<string> searchFields = fields is { Count: > 0 }
+      ? fields
+      : [.. RenderedColumns().Where(c => c.Field is not null && c.FilterKind == FilterKind.Text).Select(c => c.Field!)];
     _search = string.IsNullOrEmpty(text) || searchFields.Count == 0
       ? null
       : new(GridFilterLogic.Or, [.. searchFields.Select(f => new GridFilterDescriptor(f, GridFilterOperator.Contains, text))]);
@@ -414,7 +439,7 @@ public partial class PixataGrid<TItem> {
       : new(GridFilterLogic.And, []);
     // The template can replace the filter, so the one applied is whatever the context has by then
     PixataGridFilterTemplateContext context = null!;
-    context = new(column.Field!, filter, async () => {
+    context = new(column.Field!, column.FieldType ?? typeof(object), column.HeaderText, column.Format, filter, async () => {
       await CloseFilterMenu();
       SetFilter(column, context.Filter);
     }, async () => {

@@ -4,7 +4,7 @@
 
 @* A search box for the grid's toolbar. It filters the rows to those where any of the searched fields contain the text,
    ignoring case, as Telerik's GridSearchBox does *@
-<span class="pixata-blazor-grid-search" style="@(Width is null ? null : $"width: {Width}")">
+<span class="@Css.Join("pixata-blazor-grid-search", Class)" style="@(Width is null ? null : $"width: {Width}")" @attributes="AdditionalAttributes">
   <span class="pixata-blazor-grid-search-icon" aria-hidden="true">
     <svg viewBox="0 0 16 16"><path d="M6.5 1a5.5 5.5 0 0 1 4.4 8.8l4 4-.7.7-4-4A5.5 5.5 0 1 1 6.5 1m0 1a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9" /></svg>
   </span>
@@ -16,10 +16,23 @@
   internal PixataGrid<TItem>? Grid { get; set; }
 
   /// <summary>
-  /// The fields to search. If not set, every text column in the grid is searched
+  /// The fields to search. If not set, or empty, every text column in the grid is searched
   /// </summary>
   [Parameter]
   public List<string>? Fields { get; set; }
+
+  /// <summary>
+  /// Classes for the search box's outer element, added to its own, to style it or to find it, such as with
+  /// <c>FocusOnNavigate Selector=".focus input"</c>
+  /// </summary>
+  [Parameter]
+  public string? Class { get; set; }
+
+  /// <summary>
+  /// Any other attributes, such as <c>id</c> or <c>data-</c> attributes, are added to the outer element
+  /// </summary>
+  [Parameter(CaptureUnmatchedValues = true)]
+  public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
   [Parameter]
   public string? Placeholder { get; set; }

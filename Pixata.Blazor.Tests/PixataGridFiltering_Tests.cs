@@ -320,6 +320,37 @@ public class PixataGridFiltering_Tests {
   }
 
   [TestMethod]
+  public void SearchBox_WithNoFields_SearchesEveryTextColumn() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.None, b => {
+      b.OpenComponent<PixataGridSearchBox<Person>>(0);
+      b.AddAttribute(1, "DebounceDelay", 1);
+      b.AddAttribute(2, "Fields", new List<string>());
+      b.CloseComponent();
+    });
+
+    grid.Find(".pixata-blazor-grid-toolbar .pixata-blazor-grid-search input").Input("AR");
+
+    grid.WaitForAssertion(() => Assert.AreEqual("Carol", Names(grid)));
+  }
+
+  [TestMethod]
+  public void SearchBox_AddsItsClassAndAttributesToTheOuterElement() {
+    IRenderedComponent<PixataGrid<Person>> grid = Render(PixataGridFilterMode.None, b => {
+      b.OpenComponent<PixataGridSearchBox<Person>>(0);
+      b.AddAttribute(1, "Class", "focus");
+      b.AddAttribute(2, "id", "people-search");
+      b.AddAttribute(3, "data-test", "search");
+      b.CloseComponent();
+    });
+
+    IElement box = grid.Find(".pixata-blazor-grid-toolbar .pixata-blazor-grid-search");
+    Assert.IsTrue(box.ClassList.Contains("focus"));
+    Assert.AreEqual("people-search", box.Id);
+    Assert.AreEqual("search", box.GetAttribute("data-test"));
+    Assert.AreEqual(1, grid.FindAll(".focus input").Count);
+  }
+
+  [TestMethod]
   public void Filtering_GoesBackToTheFirstPage() {
     int page = 0;
     IRenderedComponent<PixataGrid<Person>> grid = _ctx.Render<PixataGrid<Person>>(p => p
@@ -335,6 +366,58 @@ public class PixataGridFiltering_Tests {
 
     Assert.AreEqual(1, page);
     Assert.AreEqual("Bob", Names(grid));
+  }
+
+  [TestMethod]
+  public void FilterTemplates_AreGivenTheFieldsType_AndTheColumnsTitleAndFormat() {
+    Dictionary<string, PixataGridFilterTemplateContext> contexts = [];
+    Render(PixataGridFilterMode.FilterRow, extra: (b, field, seq) => {
+      b.AddAttribute(seq, "FilterCellTemplate", (RenderFragment<PixataGridFilterTemplateContext>)(context => builder => contexts[context.Field] = context));
+      if (field == "Born") {
+        b.AddAttribute(seq + 1, "Title", "Date of birth");
+        b.AddAttribute(seq + 2, "DisplayFormat", "{0:d}");
+      }
+    });
+
+    Assert.AreEqual(typeof(string), contexts["Name"].FieldType);
+    Assert.AreEqual(typeof(int), contexts["Age"].FieldType);
+    Assert.AreEqual(typeof(bool), contexts["Manager"].FieldType);
+    Assert.AreEqual(typeof(Pet), contexts["Pet"].FieldType);
+    Assert.AreEqual(typeof(DateTime), contexts["Born"].FieldType);
+    Assert.AreEqual("Age", contexts["Age"].Title);
+    Assert.IsNull(contexts["Age"].Format);
+    Assert.AreEqual("Date of birth", contexts["Born"].Title);
+    Assert.AreEqual("{0:d}", contexts["Born"].Format);
+  }
+
+  public class Floor {
+    public int? Number { get; set; }
+  }
+
+  public class Office {
+    public string Name { get; set; } = "";
+    public Floor Floor { get; set; } = new();
+  }
+
+  [TestMethod]
+  public void FilterMenuTemplate_ForANestedFieldWithNoFilter_IsGivenItsType() {
+    PixataGridFilterTemplateContext? menu = null;
+    IRenderedComponent<PixataGrid<Office>> grid = _ctx.Render<PixataGrid<Office>>(p => p
+      .Add(g => g.Data, [new() { Name = "Head office", Floor = new() { Number = 3 } }])
+      .Add(g => g.FilterMode, PixataGridFilterMode.FilterMenu)
+      .Add(g => g.GridColumns, b => {
+        b.OpenComponent<PixataGridColumn<Office>>(0);
+        b.AddAttribute(1, "Field", "Floor.Number");
+        b.AddAttribute(2, "FilterMenuTemplate", (RenderFragment<PixataGridFilterTemplateContext>)(context => builder => menu = context));
+        b.CloseComponent();
+      }));
+
+    grid.Find(".pixata-blazor-grid-filter-menu-button").Click();
+
+    Assert.IsNotNull(menu);
+    Assert.AreEqual(typeof(int?), menu.FieldType);
+    Assert.AreEqual("Number", menu.Title);
+    Assert.AreEqual(0, menu.Filter.Filters.Count);
   }
 
   [TestMethod]
