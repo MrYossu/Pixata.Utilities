@@ -50,6 +50,7 @@
     }
     _closeOnClick = closeOnClick;
     _displayStyle = "block";
+    StateHasChanged();
   }
 
   private void ButtonClicked(bool yes) {
@@ -66,6 +67,7 @@
     _displayStyle = "none";
     _disabled = false;
     _busyIcon = "";
+    StateHasChanged();
   }
 
 }
