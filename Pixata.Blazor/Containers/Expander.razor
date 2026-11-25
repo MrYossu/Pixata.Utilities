@@ -15,7 +15,9 @@
   protected override void OnInitialized() => 
     _display = Expanded ? DisplayBlock : DisplayNone;
 
-  public void Toggle() =>
+  public void Toggle() {
     _display = _display == DisplayBlock ? DisplayNone : DisplayBlock;
+    StateHasChanged();
+  }
 
 }

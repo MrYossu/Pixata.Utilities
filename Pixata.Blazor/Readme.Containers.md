@@ -63,6 +63,16 @@ Replaces the nasty JavaScript `confirm` function with something that looks nicer
 
 See the [sample code](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/ConfirmSample.razor) ([live demo](https://test.pixata.co.uk/ConfirmSample)) for an example of how to use it. You can set the pop-up to disable the entire window, or just one section of it. You can also specify if the pop-up should disappear as soon as a button is clicked, or if it should remain visible, but disabled (with a busy indicator) until you dismiss it.
 
+It can go around part of the page, as in the sample, or have nothing inside it. Either way, calling `Display()` or `Close()` redraws it, so you don't need to call `StateHasChanged()` for that...
+
+```xml
+<button type="button" @onclick="@(() => _confirm.Display("Delete this customer?"))">Delete</button>
+
+<Confirm @ref="_confirm" PopUpDisplayOption="@PopUpDisplayOptions.Window" OnClicked="@DeleteConfirmed" />
+```
+
+>**Changed in v5.43.1.** In .NET 10, a `Confirm` with nothing inside it didn't open, as it relied on being redrawn along with the page.
+
 ## Inform
 
 Similar to `Confirm`, but only has one button. At the moment, the pop-up is dismissed as soon as you click the button, but I intend to add the feature described above to this component as well.
