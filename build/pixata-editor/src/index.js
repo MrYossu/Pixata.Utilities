@@ -17,11 +17,11 @@ import {
 } from "./commands.js";
 import { cleanPastedHtml, defaultPasteSettings } from "./paste.js";
 import { formatHtml } from "./format.js";
+import { contentClass, contentStyles } from "./styles.js";
 
 const instances = new Map();
 let nextId = 1;
 
-const contentClass = "pixata-blazor-editor-document";
 const placeholderClass = "pixata-blazor-editor-placeholder";
 
 // Placeholder
@@ -70,55 +70,6 @@ function buildKeymap(instance) {
     "Shift-Tab": chainCommands(goToNextCell(-1), liftListItem(nodes.list_item)),
     "Alt-F10": () => instance.focusToolbar()
   };
-}
-
-// Copies the content styles (every rule in the page's stylesheets that mentions the content class) and the custom
-// properties they use into an iframe, so the content looks the same in both edit modes while page styles stay out
-function contentStyles(host) {
-  const rules = [];
-  for (const sheet of document.styleSheets) {
-    let cssRules;
-    try {
-      cssRules = sheet.cssRules;
-    } catch {
-      continue;
-    }
-    collectRules(cssRules, rules);
-  }
-  const css = rules.join("\n");
-  const computed = getComputedStyle(host);
-  const variables = [...new Set(css.match(/--pixata-blazor-[a-z0-9-]+/gi) || [])]
-    .map(name => [name, computed.getPropertyValue(name).trim()])
-    .filter(([, value]) => value)
-    .map(([name, value]) => `${name}: ${value};`);
-  return `:root { ${variables.join(" ")} }\n${css}`;
-}
-
-function collectRules(cssRules, rules) {
-  for (const rule of cssRules) {
-    if (rule instanceof CSSStyleRule) {
-      if (rule.selectorText.includes(contentClass)) {
-        rules.push(rule.cssText);
-      }
-    } else if (rule instanceof CSSKeyframesRule) {
-      if (/ProseMirror|pixata-blazor/.test(rule.name)) {
-        rules.push(rule.cssText);
-      }
-    } else if (rule.cssRules) {
-      const inner = [];
-      collectRules(rule.cssRules, inner);
-      if (!inner.length) {
-        continue;
-      }
-      if (rule instanceof CSSMediaRule) {
-        rules.push(`@media ${rule.media.mediaText} { ${inner.join("\n")} }`);
-      } else if (window.CSSSupportsRule && rule instanceof CSSSupportsRule) {
-        rules.push(`@supports ${rule.conditionText} { ${inner.join("\n")} }`);
-      } else {
-        rules.push(...inner);
-      }
-    }
-  }
 }
 
 const iframeBaseStyles = "html, body { margin: 0; padding: 0; height: 100%; } body { overflow-y: auto; }";
