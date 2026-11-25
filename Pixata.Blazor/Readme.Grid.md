@@ -88,6 +88,7 @@ Names such as `GridColumn` are common in component libraries, and an app that us
 | `ScrollMode` | `PixataGridScrollMode` | `Scrollable` (the default) or `Virtual`, which renders only the rows in view. See [virtual scrolling](#virtual-scrolling) |
 | `RowHeight` | `double?` | The height of each row in pixels, for virtual scrolling |
 | `ColumnVirtualization` | `bool` | Renders only the columns in view |
+| `ShowPlaceholders` | `bool` | With virtual scrolling, shows a grey bar in each cell of the rows that haven't arrived yet. Defaults to `true` |
 | `Resizable` | `bool` | Lets the user resize columns. See [columns](#resizing-moving-and-freezing-columns) |
 | `Reorderable` | `bool` | Lets the user move columns by dragging their headers |
 | `ShowColumnMenu` | `bool` | Gives each header a menu. See [the column menu](#the-column-menu) |
@@ -462,7 +463,7 @@ The grid's colours, borders and spacing come from CSS custom properties. To chan
 | `--pixata-grid-picker-bg`, `--pixata-grid-picker-hover-bg` | `#f5f5f5`, `#ebebeb` | The background of dropdowns and solid buttons |
 | `--pixata-grid-chip-bg`, `--pixata-grid-chip-border-color` | `#ebebeb`, `#c2c2c2` | The chips in the group panel |
 | `--pixata-grid-locked-border-color` | `rgba(0, 0, 0, .3)` | The lines either side of frozen columns |
-| `--pixata-grid-skeleton-bg` | `rgba(61, 61, 61, .2)` | The placeholders shown while virtual rows load |
+| `--pixata-grid-skeleton-bg` | `rgba(61, 61, 61, .2)` | The placeholders shown in virtual rows that haven't arrived yet |
 | `--pixata-grid-focus-color` | `rgba(61, 61, 61, .3)` | The ring round the cell the keyboard is on, in a `Navigable` grid |
 | `--pixata-grid-highlight-bg` | `rgba(255, 192, 0, .25)` | Highlighted rows and cells |
 | `--pixata-grid-focus-shadow` | `0 0 0 2px rgba(13, 110, 253, .25)` | The focus ring on inputs and buttons |
@@ -915,7 +916,8 @@ For a lot of rows, set `ScrollMode="PixataGridScrollMode.Virtual"`, with a `Heig
 ```
 
 - Every row is `RowHeight` pixels high, and text in the cells doesn't wrap. Use the height of a normal row (36px for the medium size) unless your templates make rows taller
-- With `OnRead`, the request has a `Skip` (the number of rows before the ones wanted) instead of a page, and a `PageSize` of three pages. `ToGridResult()` and `ToGridResultAsync()` handle it for you. While the rows load, placeholders are shown in their place
+- With `OnRead`, the request has a `Skip` (the number of rows before the ones wanted) instead of a page, and a `PageSize` of three pages. `ToGridResult()` and `ToGridResultAsync()` handle it for you. While the rows load, placeholder rows are shown in their place
+- Rows that haven't arrived yet show a grey bar in each cell, pulsing gently (unless the user's system asks for reduced motion). That covers the rows being loaded with `OnRead`, and the rows scrolled into view before the grid has had time to render them, such as when the user drags the scrollbar a long way, especially in Blazor Server, where the rows come from the server. Set `ShowPlaceholders="false"` to leave those rows blank instead. The loading rows have the class `pixata-blazor-grid-placeholder`, and the cells of the rows not yet rendered have `pixata-blazor-grid-virtual-placeholders`, for styling of your own
 - Filtering and searching go back to the top. Sorting stays where it is
 - There's no pager, so `Pageable` is ignored
 - It can't be combined with grouping, and the grid throws an exception if you try, or if `Height` or `RowHeight` is missing

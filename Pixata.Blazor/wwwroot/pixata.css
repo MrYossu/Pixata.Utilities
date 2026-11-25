@@ -2496,8 +2496,31 @@ select.pixata-form-control:not([multiple]):not([size]) {
   }
 }
 
+/* The rows a virtual grid's spacers stand in for, scrolled into view before the grid has rendered them, show a placeholder in
+   each cell too: a bar the height of .pixata-blazor-grid-skeleton, in the middle of each row. The bars are drawn on a layer of
+   their own, so that a frozen column's background doesn't pulse with them */
+.pixata-blazor-grid-virtual-spacer > td.pixata-blazor-grid-virtual-placeholders:not(.pixata-blazor-grid-locked) {
+  position: relative;
+}
+
+.pixata-blazor-grid-virtual-spacer > td.pixata-blazor-grid-virtual-placeholders::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--pixata-grid-cell-padding-x);
+  background-image: linear-gradient(transparent calc(50% - .4em), var(--pixata-grid-skeleton-bg) calc(50% - .4em), var(--pixata-grid-skeleton-bg) calc(50% + .4em), transparent calc(50% + .4em));
+  background-size: 100% var(--pixata-grid-virtual-row-height, 36px);
+  background-repeat: repeat-y;
+  animation: pixata-blazor-grid-skeleton-pulse 1.5s ease-in-out .5s infinite;
+}
+
+/* A frozen column's placeholders cover the others as they scroll sideways underneath */
+.pixata-blazor-grid-virtual-spacer > td.pixata-blazor-grid-virtual-placeholders.pixata-blazor-grid-locked {
+  background-color: var(--pixata-grid-bg);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pixata-blazor-grid-skeleton {
+  .pixata-blazor-grid-skeleton,
+  .pixata-blazor-grid-virtual-spacer > td.pixata-blazor-grid-virtual-placeholders::before {
     animation: none;
   }
 }

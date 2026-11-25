@@ -38,6 +38,14 @@ public partial class PixataGrid<TItem> {
   [Parameter]
   public bool ColumnVirtualization { get; set; }
 
+  /// <summary>
+  /// With virtual scrolling, shows a grey bar in each cell of the rows that are still loading, and of the rows that haven't
+  /// been rendered yet when the grid is scrolled quickly, so it's clear the rows are on their way rather than empty. Defaults
+  /// to true. When false, those rows are blank
+  /// </summary>
+  [Parameter]
+  public bool ShowPlaceholders { get; set; } = true;
+
   private ElementReference _contentElement;
   private bool _virtualReady;
   private int _skip;
@@ -73,6 +81,10 @@ public partial class PixataGrid<TItem> {
   private string? VirtualRowStyle =>
     VirtualRows ? FormattableString.Invariant($"height: {RowHeight}px;") : null;
 
+  // The spacers draw a placeholder for each row they stand in for, so they need to know how high a row is
+  private string? VirtualBodyStyle =>
+    VirtualRows && ShowPlaceholders ? FormattableString.Invariant($"--pixata-grid-virtual-row-height: {RowHeight}px;") : null;
+
   // The space above and below the rendered rows, so the scrollbar is as if they were all there
   private string SpacerStyle(int rows) =>
     FormattableString.Invariant($"height: {rows * RowHeight!.Value}px;");
@@ -88,7 +100,7 @@ public partial class PixataGrid<TItem> {
     try {
       _module ??= await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
       _self ??= DotNetObjectReference.Create(this);
-      await _module.InvokeVoidAsync("initVirtualScroll", _contentElement, _self);
+      await _module.InvokeVoidAsync("initVirtualScroll", _contentElement, _self, _gridId);
     } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
       // The page has gone
     }

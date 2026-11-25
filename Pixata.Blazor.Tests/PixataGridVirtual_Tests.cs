@@ -214,13 +214,80 @@ public class PixataGridVirtual_Tests {
     grid.InvokeAsync(() => grid.Instance.VirtualScrolled(3600, 0, 600, 400));
 
     Assert.AreEqual(90, requests[^1].Skip);
+    Assert.AreEqual(30, grid.FindAll("tbody tr.pixata-blazor-grid-placeholder").Count);
     Assert.AreEqual(60, grid.FindAll(".pixata-blazor-grid-skeleton").Count);
     Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-loader").Count);
 
     waiting.SetResult();
 
     grid.WaitForAssertion(() => Assert.AreEqual("91", Ids(grid)[0]));
+    Assert.AreEqual(0, grid.FindAll("tbody tr.pixata-blazor-grid-placeholder").Count);
     Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-skeleton").Count);
+  }
+
+  [TestMethod]
+  public void OnRead_PlaceholderRowsHaveTheirOwnClass_AndAreBlankWithoutShowPlaceholders() {
+    TaskCompletionSource waiting = new();
+    IRenderedComponent<PixataGrid<Item>> grid = _ctx.Render<PixataGrid<Item>>(p => p
+      .Add(g => g.OnRead, EventCallback.Factory.Create<PixataGridReadEventArgs<Item>>(this, async args => {
+        await waiting.Task;
+        args.SetResult(Items.ToGridResult(args.Request));
+      }))
+      .Add(g => g.GridColumns, Columns())
+      .Add(g => g.ScrollMode, PixataGridScrollMode.Virtual)
+      .Add(g => g.Height, "400px")
+      .Add(g => g.RowHeight, 36)
+      .Add(g => g.PageSize, 10)
+      .Add(g => g.ShowPlaceholders, false));
+    waiting.SetResult();
+    grid.WaitForAssertion(() => Assert.AreEqual("1", Ids(grid)[0]));
+
+    waiting = new();
+    grid.InvokeAsync(() => grid.Instance.VirtualScrolled(3600, 0, 600, 400));
+
+    Assert.AreEqual(30, grid.FindAll("tbody tr.pixata-blazor-grid-placeholder").Count);
+    Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-skeleton").Count);
+    Assert.AreEqual(0, grid.FindAll(".pixata-blazor-grid-virtual-placeholders").Count);
+
+    waiting.SetResult();
+
+    grid.WaitForAssertion(() => Assert.AreEqual("91", Ids(grid)[0]));
+    Assert.AreEqual(0, grid.FindAll("tbody tr.pixata-blazor-grid-placeholder").Count);
+  }
+
+  [TestMethod]
+  public void Spacers_HaveAPlaceholderCellForEachColumn_SizedByTheRowHeight() {
+    IRenderedComponent<PixataGrid<Item>> grid = Render();
+    grid.InvokeAsync(() => grid.Instance.VirtualScrolled(3600, 0, 600, 400));
+
+    foreach (AngleSharp.Dom.IElement spacer in grid.FindAll("tbody tr.pixata-blazor-grid-virtual-spacer")) {
+      Assert.AreEqual(2, spacer.Children.Length);
+      Assert.IsTrue(spacer.Children.All(td => td.ClassList.Contains("pixata-blazor-grid-virtual-placeholders")));
+    }
+    Assert.AreEqual("--pixata-grid-virtual-row-height: 36px;", grid.Find("tbody").GetAttribute("style"));
+  }
+
+  [TestMethod]
+  public void Spacers_WithoutShowPlaceholders_AreASingleCell() {
+    IRenderedComponent<PixataGrid<Item>> grid = Render(p => p.Add(g => g.ShowPlaceholders, false));
+    grid.InvokeAsync(() => grid.Instance.VirtualScrolled(3600, 0, 600, 400));
+
+    foreach (AngleSharp.Dom.IElement spacer in grid.FindAll("tbody tr.pixata-blazor-grid-virtual-spacer")) {
+      Assert.AreEqual(1, spacer.Children.Length);
+      Assert.AreEqual("2", spacer.Children[0].GetAttribute("colspan"));
+    }
+    Assert.IsNull(grid.Find("tbody").GetAttribute("style"));
+  }
+
+  [TestMethod]
+  public void Disposing_StopsTheScrollListener_BeforeTheGridsReferenceGoes() {
+    IRenderedComponent<PixataGrid<Item>> grid = Render();
+    string gridId = (string)_ctx.JSInterop.Invocations["initVirtualScroll"].Single().Arguments[2]!;
+
+    grid.InvokeAsync(() => grid.Instance.DisposeAsync().AsTask());
+
+    Assert.AreEqual(gridId, _ctx.JSInterop.Invocations["disposeVirtualScroll"].Single().Arguments[0]);
+    StringAssert.StartsWith(gridId, "pixata-grid-");
   }
 
   [TestMethod]
@@ -234,6 +301,10 @@ public class PixataGridVirtual_Tests {
     CollectionAssert.AreEqual(new[] { "[9]", "Item 1", "1", "Item 1", "1", "Item 1", "1", "Item 1", "[4]" }, cells);
     // The header has every column
     Assert.AreEqual(20, grid.FindAll("thead th").Count);
+    // The spacer's placeholders are only for the columns in view too
+    List<string> spacer = [.. grid.Find("tbody tr.pixata-blazor-grid-virtual-spacer").Children.Select(td => td.GetAttribute("colspan") is string span ? $"[{span}]" : td.ClassName ?? "")];
+    List<string> expected = ["[9]", .. Enumerable.Repeat("pixata-blazor-grid-virtual-placeholders", 7), "[4]"];
+    CollectionAssert.AreEqual(expected, spacer);
   }
 
   [TestMethod]

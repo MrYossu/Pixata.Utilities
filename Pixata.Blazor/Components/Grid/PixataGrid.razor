@@ -80,7 +80,7 @@
               </tr>
             }
           </thead>
-          <tbody>
+          <tbody style="@VirtualBodyStyle">
             @{
               int span = Math.Max(columns.Count + LeadingColumns, 1);
               _rowIndex = VirtualRows ? _skip : 0;
@@ -121,7 +121,7 @@
             } else if (_readError is null && VirtualRows) {
               @* Spacers above and below the rows rendered, so the scrollbar is as if all the rows were there *@
               @if (_skip > 0) {
-                <tr class="pixata-blazor-grid-virtual-spacer" style="@SpacerStyle(_skip)" aria-hidden="true"><td colspan="@span"></td></tr>
+                @VirtualSpacer(_skip, columns, span)
               }
               @if (_virtualLoading) {
                 @for (int i = 0; i < Math.Min(VirtualRowCount, _total - _skip); i++) {
@@ -133,9 +133,9 @@
                 }
               }
               @if (!_virtualLoading && RowsAfter > 0) {
-                <tr class="pixata-blazor-grid-virtual-spacer" style="@SpacerStyle(RowsAfter)" aria-hidden="true"><td colspan="@span"></td></tr>
+                @VirtualSpacer(RowsAfter, columns, span)
               } else if (_virtualLoading && _total - _skip - VirtualRowCount > 0) {
-                <tr class="pixata-blazor-grid-virtual-spacer" style="@SpacerStyle(_total - _skip - VirtualRowCount)" aria-hidden="true"><td colspan="@span"></td></tr>
+                @VirtualSpacer(_total - _skip - VirtualRowCount, columns, span)
               }
             } else if (_readError is null) {
               @foreach (TItem item in _items) {
@@ -497,12 +497,43 @@
 
   // A row shown while virtual scrolling waits for the data
   private RenderFragment PlaceholderRow(List<PixataGridColumn<TItem>> columns, int index) =>
-    @<tr class="@(index % 2 == 1 ? "pixata-blazor-grid-row pixata-blazor-grid-alt-row" : "pixata-blazor-grid-row")" style="@VirtualRowStyle" aria-busy="true">
+    @<tr class="@(index % 2 == 1 ? "pixata-blazor-grid-row pixata-blazor-grid-alt-row pixata-blazor-grid-placeholder" : "pixata-blazor-grid-row pixata-blazor-grid-placeholder")" style="@VirtualRowStyle" aria-busy="true">
       @LeadingCells()
       @foreach (PixataGridColumn<TItem> column in columns) {
-        <td class="@column.CellClass" style="@column.StickyStyle"><span class="pixata-blazor-grid-skeleton"></span></td>
+        <td class="@column.CellClass" style="@column.StickyStyle">
+          @if (ShowPlaceholders) {
+            <span class="pixata-blazor-grid-skeleton"></span>
+          }
+        </td>
       }
     </tr>;
+
+  // The space above or below the rows rendered, so the scrollbar is as if all the rows were there. Scrolled into view before
+  // the grid has caught up (a quick drag of the scrollbar, say), it shows a placeholder in each cell of each row, as the rows
+  // that are loading do, rather than being blank. With column virtualisation, only the columns in view have their own cell
+  private RenderFragment VirtualSpacer(int rows, List<PixataGridColumn<TItem>> columns, int span) {
+    (int first, int last) = _columnWindow is (int f, int l) && l < columns.Count ? (f, l) : (0, columns.Count - 1);
+    return
+      @<tr class="pixata-blazor-grid-virtual-spacer" style="@SpacerStyle(rows)" aria-hidden="true">
+        @if (ShowPlaceholders && columns.Count > 0) {
+          @if (LeadingColumns > 0) {
+            <td colspan="@LeadingColumns"></td>
+          }
+          @if (first > 0) {
+            <td colspan="@first"></td>
+          }
+          @for (int i = first; i <= last; i++) {
+            PixataGridColumn<TItem> column = columns[i];
+            <td class="@($"pixata-blazor-grid-virtual-placeholders {column.LockedClass}".TrimEnd())" style="@column.StickyStyle"></td>
+          }
+          @if (last < columns.Count - 1) {
+            <td colspan="@(columns.Count - 1 - last)"></td>
+          }
+        } else {
+          <td colspan="@span"></td>
+        }
+      </tr>;
+  }
 
   // A row for an item: the row template, the row being edited, or the normal cells
   private RenderFragment DataRow(TItem item, List<PixataGridColumn<TItem>> columns) {
