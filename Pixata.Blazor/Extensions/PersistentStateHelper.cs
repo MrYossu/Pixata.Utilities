@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Logging;
 
 namespace Pixata.Blazor.Extensions;
 
@@ -16,6 +17,7 @@ public class PersistentStateHelper<T> : IDisposable {
   private readonly PersistingComponentStateSubscription _subscription;
   private readonly PersistentComponentState _applicationState;
   private readonly NavigationManager _navManager;
+  private readonly ILogger? _logger;
   private string _key = "";
   private bool _claimed;
   private T? _data;
@@ -26,13 +28,31 @@ public class PersistentStateHelper<T> : IDisposable {
   // show the wrong data, so neither is persisted, and both load their data again once the page is interactive
   private static readonly ConditionalWeakTable<PersistentComponentState, Dictionary<string, int>> KeysInUse = new();
 
-  public PersistentStateHelper(PersistentComponentState applicationState, NavigationManager navManager) {
+  // As PersistAsJson serialises the data, so the size measured is the size persisted
+  private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+  /// <summary>
+  /// The most data, in bytes of JSON, to persist. Data bigger than this isn't persisted (and a warning is logged, if there's a
+  /// logger), so it is loaded again once the page is interactive. In Blazor Server, the persisted data goes into the page, and
+  /// the browser sends it back to the server in the message that starts the circuit, so data bigger than SignalR's
+  /// <c>MaximumReceiveMessageSize</c> (32KB by default) stops the page ever becoming interactive. Null, the default, for no limit
+  /// </summary>
+  public int? MaxPersistedBytes { get; set; }
+
+  public PersistentStateHelper(PersistentComponentState applicationState, NavigationManager navManager) : this(applicationState, navManager, null) {
+  }
+
+  /// <param name="applicationState">The page's persistent state</param>
+  /// <param name="navManager">Used for the default key, which is the page's address</param>
+  /// <param name="logger">Where to log a warning when data isn't persisted because it is bigger than <see cref="MaxPersistedBytes"/></param>
+  public PersistentStateHelper(PersistentComponentState applicationState, NavigationManager navManager, ILogger? logger) {
     _applicationState = applicationState;
     // InteractiveAuto, as Blazor only runs a callback for the render modes it was registered for. With InteractiveWebAssembly
     // (as it was before v5.26.0), an app that prerenders InteractiveServer never persisted the data, so every page loaded it
     // twice. Auto is accepted both when the page's state goes to the server and when it goes to WebAssembly
     _subscription = _applicationState.RegisterOnPersisting(Persist, RenderMode.InteractiveAuto);
     _navManager = navManager;
+    _logger = logger;
   }
 
   /// <summary>
@@ -67,7 +87,7 @@ public class PersistentStateHelper<T> : IDisposable {
   }
 
   private Task Persist() {
-    if (_data is not null && (_persistWhen is null || _persistWhen(_data)) && !IsShared()) {
+    if (_data is not null && (_persistWhen is null || _persistWhen(_data)) && !IsShared() && !TooBig(_data)) {
       try {
         _applicationState.PersistAsJson(_key, _data);
       } catch (ArgumentException) {
@@ -75,6 +95,18 @@ public class PersistentStateHelper<T> : IDisposable {
       }
     }
     return Task.CompletedTask;
+  }
+
+  private bool TooBig(T data) {
+    if (MaxPersistedBytes is not int max) {
+      return false;
+    }
+    int size = JsonSerializer.SerializeToUtf8Bytes(data, JsonOptions).Length;
+    if (size <= max) {
+      return false;
+    }
+    _logger?.LogWarning("The data for {Key} wasn't persisted, as it is {Size:N0} bytes, which is more than MaxPersistedBytes ({Max:N0}). It will be loaded again once the page is interactive", _key, size, max);
+    return true;
   }
 
   private Dictionary<string, int> Keys =>

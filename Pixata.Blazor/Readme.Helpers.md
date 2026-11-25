@@ -38,6 +38,14 @@ If you use more than one of these on a page, pass a distinct `key` to each, as t
 
 The data is persisted whichever way the page goes on to run, Server or WebAssembly. Before v5.26.0, it was only persisted for WebAssembly, so a Blazor Server page loaded it twice.
 
+In Blazor Server, the persisted data goes back up to the server in the message that starts the circuit, so data bigger than SignalR's `MaximumReceiveMessageSize` (32KB by default) stops the page becoming interactive. Set `MaxPersistedBytes` to persist only data whose JSON is smaller than that, and pass a logger to the constructor to have a warning logged when data isn't persisted for being too big...
+
+```csharp
+_stateHelper ??= new(ApplicationState, NavigationManager, Logger) { MaxPersistedBytes = 16 * 1024 };
+```
+
+The data that's persisted goes through `System.Text.Json`, so anything marked `[JsonIgnore]` comes back null, and whatever loads it isn't called again once the page is interactive. See [what persisting the data means for your loader](Readme.ApiResponseView.md#what-persisting-the-data-means-for-your-loader).
+
 [`ApiResponseView`](Readme.ApiResponseView.md) uses this internally, so if that is all you need it for, you get it for free.
 
 ## MessageBroker

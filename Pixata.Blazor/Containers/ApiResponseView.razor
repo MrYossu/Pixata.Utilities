@@ -1,4 +1,6 @@
 @using System.Net
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.Extensions.Logging
 @using Pixata.Blazor.Extensions
 @using Pixata.Blazor.Notifications
 @using static Pixata.Extensions.Yunit
@@ -6,6 +8,7 @@
 @implements IDisposable
 @inject PersistentComponentState ApplicationState
 @inject NavigationManager NavigationManager
+@inject IServiceProvider Services
 
 @if (FeedbackType == ApiResponseViewFeedbackType.Notifications) {
   <NotificationArea NotificationHelper="NotificationHelper" Fallback="true" />
@@ -136,6 +139,15 @@
   [Parameter]
   public bool MessageIsHtml { get; set; } = ApiResponseViewConfig.MessageIsHtml;
 
+  /// <summary>
+  /// When true, the data loaded while the page is prerendered is persisted, and used once the page is interactive, rather than
+  /// calling <see cref="LoadApiResponse"/> again. Set it to false for a view whose loader does more than load the data (such as
+  /// setting up a form), whose data doesn't survive a round trip through JSON, or whose data is big. Defaults to
+  /// <see cref="ApiResponseViewConfig.PersistState"/>
+  /// </summary>
+  [Parameter]
+  public bool PersistState { get; set; } = ApiResponseViewConfig.PersistState;
+
   [Parameter]
   public bool ManualLoading { get; set; }
 
@@ -170,8 +182,14 @@
     // the client as the answer, so the user sees the server's bad minute instead of the client simply trying again
     // Each view has a helper of its own. The one registered in the container is scoped, so all the views of one type on a page
     // shared it, and it only remembered the last one's data, which was then handed to the wrong view
-    _stateHelper ??= new(ApplicationState, NavigationManager);
-    _apiResponse = await _stateHelper.Get(LoadApiResponse, Key, response => response.State == ApiResponseStates.Success);
+    if (PersistState) {
+      _stateHelper ??= new(ApplicationState, NavigationManager, ApiResponseViewConfig.MaxPersistedBytes is null ? null : Services.GetService<ILoggerFactory>()?.CreateLogger<ApiResponseView<T>>()) {
+        MaxPersistedBytes = ApiResponseViewConfig.MaxPersistedBytes
+      };
+      _apiResponse = await _stateHelper.Get(LoadApiResponse, Key, response => response.State == ApiResponseStates.Success);
+    } else {
+      _apiResponse = await LoadApiResponse();
+    }
     if (IsUnauthorised(_apiResponse.State, _apiResponse.Message)) {
       NavigationManager.NavigateTo($"{ApiResponseViewConfig.LogInUrl}?returnUrl=/{Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}", forceLoad: true);
     }
