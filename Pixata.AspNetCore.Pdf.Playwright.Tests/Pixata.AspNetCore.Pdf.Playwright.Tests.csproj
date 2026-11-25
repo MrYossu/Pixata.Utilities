@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Pixata.AspNetCore.Pdf.Playwright\Pixata.AspNetCore.Pdf.Playwright.csproj" />
+    <!-- To read back the text of the PDFs the converter makes -->
+    <ProjectReference Include="..\Pixata.Pdf\Pixata.Pdf.csproj" />
   </ItemGroup>
 
   <!-- Copies Chromium into the test output, as an app that uses the package would get it, so the conversion tests use a real browser on

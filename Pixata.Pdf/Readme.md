@@ -2,11 +2,13 @@
 
 ![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Pdf/pdf.png "Pixata")
 
-Helpers for working with PDFs that you already have, such as joining a cover page your app made to a document the user uploaded, or drawing the notes and highlights users added in `PixataPdfViewer` into a copy of a PDF. To make PDFs from Blazor components, see the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md), with the [Playwright converter](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
+Helpers for working with PDFs that you already have, such as joining a cover page your app made to a document the user uploaded, drawing the notes and highlights users added in `PixataPdfViewer` into a copy of a PDF, or reading a PDF's text. To make PDFs from Blazor components, see the `DocumentTemplateHelper` in [Pixata.AspNetCore](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.AspNetCore/Readme.Documents.md), with the [Playwright converter](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
 
 It uses [PdfPig](https://github.com/UglyToad/PdfPig), which is Apache 2.0 licensed, so it's free to use in any app. (PDFsharp, the better known library, moved to the AGPL licence in version 6.5, which would oblige most apps using it to publish their source code.) It doesn't depend on ASP.NET Core, so it can be used in any .NET 8 or 10 app.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Pdf/) is available for this project.
+
+>**Version 1.2.0** adds `PdfText`, which reads the text of each page of a PDF, with the words in reading order, and counts its pages, such as to check in a test that a document your app made says what it should. It replaces Telerik's `PdfFormatProvider` in document tests. See [reading the text of a PDF](#reading-the-text-of-a-pdf) (#184)
 
 >**Version 1.1.0** adds `PdfMarkupFlattener`, which draws mark-up added with Pixata.Blazor.PdfViewer (notes, highlights, strike-through, drawing and text) into a copy of a PDF, with the notes listed on a page at the end. See [drawing mark-up into a PDF](#drawing-mark-up-into-a-pdf) (#140)
 
@@ -40,6 +42,33 @@ A few things to know...
 
 - **Each PDF is read whole**, as a PDF's index is at its end, so combining very large files takes as much memory as they do.
 - **Only the pages are carried over**, with their content and annotations. Bookmarks, the document's properties (such as its title) and interactive form fields belong to the document rather than its pages, so they aren't. If a PDF has a form, fill it in and flatten it first.
+
+## Reading the text of a PDF
+
+`PdfText.Read()` gives the text of each page of a PDF, in order. It's meant for checking that a document your app made says what it should, such as in a test that a quote shows its customer, lines and totals, or that a long report runs onto a second page, as apps moving off Telerik did with its `PdfFormatProvider`...
+
+```csharp
+byte[] pdf = await _documentTemplateHelper.CreatePdfFromTemplate<QuoteTemplate>(("Quote", quote));
+List<string> pages = PdfText.Read(pdf);
+
+Assert.AreEqual(2, pages.Count);
+StringAssert.Contains(pages[0], "Customer: Café Rouge Ltd");
+StringAssert.Contains(pages[0], "Crème brûlée 2 £4.50");
+StringAssert.Contains(pages[0], "Total: £15.60");
+```
+
+On each page, the lines are in order from the top, separated by new lines (`\n`), and the words on a line are in order from the left, separated by single spaces. A PDF can draw its text in any order (Chromium draws a table a cell at a time, for example), so the words are put back in the order they're read, and a table's row comes out as one line, with its cells in order, as above. A page with no text, such as a scanned one, gives `""`.
+
+`PdfText.PageCount()` gives the number of pages, without reading the text. Both have overloads that take a `Stream` and are async, which read it from its current position to the end and leave it open.
+
+| Method | What it gives |
+| --- | --- |
+| `Read(byte[] pdf)`, `Read(Stream pdf, CancellationToken)` | The text of each page, as a `List<string>`, the first page's first |
+| `PageCount(byte[] pdf)`, `PageCount(Stream pdf, CancellationToken)` | The number of pages |
+
+It reads what Chromium makes, through [Pixata.AspNetCore.Pdf.Playwright](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright), including its subset fonts and compressed objects, and text with accents and symbols such as £ and €. Unlike `PdfCombiner` and `PdfMarkupFlattener`, which return an `ApiResponse`, these throw a `PdfTextException` if the PDF can't be read, as a test should fail with the reason. That's when the data isn't a PDF, it's damaged, or it needs a password to open. A PDF with only an owner password (which stops it being changed, but lets anyone open it) is read as usual.
+
+The words on a line are always put in order from the left, so a line in a right-to-left language, such as Hebrew, has its words the wrong way round.
 
 ## Drawing mark-up into a PDF
 
