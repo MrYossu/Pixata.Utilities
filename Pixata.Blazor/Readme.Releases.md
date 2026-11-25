@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.32.1** references `Microsoft.AspNetCore.WebUtilities` 10.0.15 (8.0.34 for .NET 8), as 10.0.0 and 8.0.22 have a known high severity vulnerability ([GHSA-x33c-w48q-qrgc](https://github.com/advisories/GHSA-x33c-w48q-qrgc), CVE-2026-114149, a denial of service). An app that references Pixata.Blazor no longer gets NuGet warning NU1903, and no longer has to reference the patched version itself. Its other dependencies have no known vulnerabilities. No code changes (#190, #198)
+
 >**Version 5.32.0** adds `Satisfies`, a FluentValidation rule to use in place of `Must` and `Custom`. In a published (Release) Blazor WebAssembly app, just constructing a validator that uses `Must` or `Custom` stops the .NET runtime with a Mono assertion (`loader.c:1826`), leaving the form's page stuck on its loading indicator, though it works perfectly in a Debug build. `Satisfies` does the same job as `Must`, with the same overloads and default message, and works. See the [validation documentation](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Validation.md)
 >- The package now references FluentValidation 12.2.0 directly
 
