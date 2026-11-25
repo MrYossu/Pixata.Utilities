@@ -2,15 +2,16 @@
 
 >Part of [Pixata.Blazor](Readme.md)
 
-Three components for choosing from a list...
+Four components for choosing from a list, or typing with suggestions from one...
 
 | Component | What the user does | `Value` is |
 | --- | --- | --- |
 | `PixataDropDownList` | Picks one item from the list. They can't type a value of their own | The selected item's value |
 | `PixataComboBox` | Picks one item from the list, or types to find one. With `AllowCustom`, they can type a value that isn't in the list | The selected item's value (or the typed value) |
 | `PixataMultiSelect` | Picks any number of items, which are shown as removable tags | A `List<TValue>` of the selected items' values |
+| `PixataAutoComplete` | Types anything, and can take one of the suggestions shown as they type | The text, a `string` |
 
-They share the same list, data binding, filtering, grouping, templates, virtual scrolling and keyboard handling, so most of what follows applies to all three.
+They share the same list, data binding, filtering, grouping, templates, virtual scrolling and keyboard handling, so most of what follows applies to them all. The auto complete differs the most, so it has [its own section](#auto-complete).
 
 You can see them in action on the [sample page](https://test.pixata.co.uk/DropDownsSample) ([source](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/DropDownsSample.razor)).
 
@@ -66,7 +67,7 @@ When no item is selected, the `PixataDropDownList` shows its `DefaultText`, whic
 
 ## Filtering
 
-Set `Filterable="true"` to let the user filter the list by typing. The `PixataDropDownList` shows a filter box at the top of the list; the `PixataComboBox` and `PixataMultiSelect` filter by what is typed into the component itself.
+Set `Filterable="true"` to let the user filter the list by typing. The `PixataDropDownList` shows a filter box at the top of the list; the `PixataComboBox` and `PixataMultiSelect` filter by what is typed into the component itself. The `PixataAutoComplete` filters its suggestions by default.
 
 `FilterOperator` says how the typed text is matched against the text of each item, ignoring case...
 
@@ -101,6 +102,28 @@ With `AllowCustom="true"`, the `PixataComboBox` and `PixataMultiSelect` accept v
 
 - In the `PixataComboBox`, the typed text is kept when the user presses Enter or leaves the component. If the text matches an item exactly (ignoring case), that item is selected instead. Without `AllowCustom`, text that doesn't match an item clears the value.
 - In the `PixataMultiSelect`, the typed text is shown at the top of the list with a plus sign; pressing Enter (or clicking it) adds it as a tag.
+
+## Auto complete
+
+`PixataAutoComplete` is a replacement for Telerik's AutoComplete: a text box that suggests values as the user types. Whatever the user types is the value, so it suits a field that is usually, but not always, one of a known set, such as the name of a company...
+
+```razor
+<PixataAutoComplete Data="@_companies" @bind-Value="@_paidBy" Placeholder="Who paid?" FilterOperator="PixataStringFilterOperator.Contains" />
+
+@code {
+  private readonly List<string> _companies = ["Acme Ltd", "Pixata", "Widgets plc"];
+  private string? _paidBy;
+}
+```
+
+It has one type parameter, `TItem`. The suggestions can be strings, or items whose `ValueField` (default `Value`) holds the text, as in Telerik's AutoComplete, which has no `TextField`. They can also come from `OnRead`, which is raised with what the user typed, as for the other components.
+
+- The value is updated as the user types, once they have stopped for `DebounceDelay` milliseconds (150 by default), so set `DebounceDelay="0"` to update it on every key. The value is updated straight away when the user presses Enter, takes a suggestion or leaves the text box, so a form that is submitted from the keyboard has the text that was typed.
+- The suggestions are shown once the user has typed `MinLength` characters (1 by default), and filtered by `FilterOperator`. Unlike Telerik's AutoComplete, `Filterable` is true by default; set it to false to show every suggestion whatever is typed.
+- No suggestion is highlighted as the list opens, so Enter keeps what was typed. Down and Up move through the suggestions, and Enter (or a click) takes the highlighted one, putting its text in the box. Esc closes the list and keeps what was typed. Down opens the list again.
+- `OnChange` is raised when the user presses Enter, takes a suggestion, clears the text or leaves the text box, if the value is different from the last time it was raised.
+- The clear button (`ShowClearButton`, on by default) and deleting all the text both set the value to `""`.
+- There is no button to open the list, and Home and End move the caret in the text box rather than moving around the list.
 
 ## Multi-select options
 
@@ -238,20 +261,20 @@ The list closes when an item is chosen (except in a multi-select with `AutoClose
 | --- | --- | --- |
 | Alt+Down | Opens the list | |
 | Alt+Up | | Closes the list |
-| Down / Up | Drop-down list and combo box: selects the next / previous item. Multi-select: opens the list | Moves to the next / previous item |
-| Home / End | Drop-down list: selects the first / last item | Moves to the first / last item |
+| Down / Up | Drop-down list and combo box: selects the next / previous item. Multi-select and auto complete: opens the list | Moves to the next / previous item |
+| Home / End | Drop-down list: selects the first / last item | Moves to the first / last item (in the auto complete, moves the caret) |
 | Page Down / Page Up | | Moves down / up a page of items |
-| Enter | Drop-down list: opens the list. Combo box: keeps the typed text (see [custom values](#custom-values)). Multi-select: adds the typed text if `AllowCustom`, otherwise opens the list | Chooses the highlighted item (in a multi-select, selects or deselects it) |
+| Enter | Drop-down list: opens the list. Combo box: keeps the typed text (see [custom values](#custom-values)). Multi-select: adds the typed text if `AllowCustom`, otherwise opens the list. Auto complete: keeps the typed text | Chooses the highlighted item (in a multi-select, selects or deselects it). Auto complete, with no item highlighted: keeps the typed text and closes the list |
 | Space | Drop-down list: opens the list | Drop-down list: chooses the highlighted item |
 | Esc | Combo box: puts back the text of the selected item | Closes the list |
 | Backspace | Multi-select, with nothing typed: removes the last value | Multi-select, with nothing typed: removes the last value |
-| Letters | Drop-down list: selects the next item starting with what was typed. Combo box and multi-select: open the list, and filter it or move to the first match | Drop-down list: moves to the next item starting with what was typed. Combo box and multi-select: filter, or move to the first match |
+| Letters | Drop-down list: selects the next item starting with what was typed. Combo box and multi-select: open the list, and filter it or move to the first match. Auto complete: opens the list and filters it | Drop-down list: moves to the next item starting with what was typed. Combo box and multi-select: filter, or move to the first match. Auto complete: filters |
 
 The components use the ARIA combobox pattern: the focusable element has `role="combobox"`, `aria-expanded` and `aria-controls`, the list has `role="listbox"` (with `aria-multiselectable` for the multi-select), each item has `role="option"` and `aria-selected`, and the highlighted item is announced through `aria-activedescendant`, so the focus stays in the component while the user moves through the list. Use `AriaLabel`, `AriaLabelledBy` and `AriaDescribedBy` to label the component.
 
 ## Parameters
 
-These parameters are shared by all three components...
+These parameters are shared by all four components (except that the auto complete has no `TextField`, `ValueMapper` or `Value` of type `TValue`; see [auto complete](#auto-complete))...
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -300,6 +323,19 @@ Only on the `PixataComboBox`...
 | `ShowClearButton` | `bool` | `true` | Whether to show a button that clears the value |
 | `DebounceDelay` | `int` | `150` | Milliseconds to wait after the user stops typing before raising `OnRead` |
 
+Only on the `PixataAutoComplete`...
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `Value` | `string?` | | The text. Bind it with `@bind-Value` |
+| `ValueField` | `string?` | `"Value"` | The field of each suggestion holding its text. Ignored for primitive data |
+| `Filterable` | `bool` | `true` | Whether the suggestions are filtered by what is typed |
+| `MinLength` | `int` | `1` | How many characters must be typed before the suggestions are shown |
+| `DebounceDelay` | `int` | `150` | Milliseconds to wait after the user stops typing before updating `Value` and raising `OnRead` |
+| `Placeholder` | `string?` | | The hint shown when the text box is empty |
+| `ShowClearButton` | `bool` | `true` | Whether to show a button that clears the text |
+| `ClearText` | `string` | `"Clear"` | The clear button's tooltip and accessible name, for translating |
+
 Only on the `PixataMultiSelect`: `Placeholder`, `AllowCustom`, `ShowClearButton` (default `true`) and `DebounceDelay` as for the combo box, plus `AutoClose`, `TagMode`, `MaxAllowedTags`, `EnableCheckBoxes`, `EnableSelectAll`, `ShowArrowButton` (see [multi-select options](#multi-select-options)), `MinLength` and `PersistFilterOnSelect` (see [filtering](#filtering)).
 
 ## Events
@@ -307,7 +343,7 @@ Only on the `PixataMultiSelect`: `Placeholder`, `AllowCustom`, `ShowClearButton`
 | Event | Argument | Description |
 | --- | --- | --- |
 | `ValueChanged` | `TValue` (`List<TValue>` for the multi-select) | Raised when the value changes. Used by `@bind-Value` |
-| `OnChange` | `object` (the new value) | Raised when the user changes the value: by choosing an item, by typing a value and pressing Enter or leaving the component (combo box), by removing a tag, or by clearing it. Unlike `ValueChanged`, it isn't raised when your code sets `Value`, nor when the user chooses the item that is already selected |
+| `OnChange` | `object` (the new value) | Raised when the user changes the value: by choosing an item, by typing a value and pressing Enter or leaving the component (combo box and auto complete), by removing a tag, or by clearing it. Unlike `ValueChanged`, it isn't raised when your code sets `Value`, nor when the user chooses the item that is already selected |
 | `OnOpen` | `PixataDropDownOpenEventArgs` | Raised before the list opens. Set `IsCancelled` to keep it closed |
 | `OnClose` | `PixataDropDownCloseEventArgs` | Raised before the list closes. Set `IsCancelled` to keep it open (it still closes when the focus leaves the component) |
 | `OnBlur` | none | Raised when the focus leaves the component (moving between the component and its list doesn't count) |
@@ -342,19 +378,19 @@ The components use the shared input, popup and list classes from [pixata.css](Re
 
 | Class | Element |
 | --- | --- |
-| `pixata-blazor-dropdown` | The outer element of all three components (which also has `pixata-blazor-dropdownlist`, `pixata-blazor-combobox` or `pixata-blazor-multiselect`) |
+| `pixata-blazor-dropdown` | The outer element of all four components (which also has `pixata-blazor-dropdownlist`, `pixata-blazor-combobox`, `pixata-blazor-multiselect` or `pixata-blazor-autocomplete`) |
 | `pixata-blazor-dropdown-readonly` | Added to the outer element when `ReadOnly` |
 | `pixata-blazor-dropdownlist-value`, `pixata-blazor-input-value-text` | The drop-down list's box, and the selected item's text in it |
 | `pixata-blazor-dropdownlist-default-text` | The text in the drop-down list's box when it shows `DefaultText` |
 | `pixata-blazor-dropdownlist-icon-only` | Added to the drop-down list's outer element when it has an `Icon` or `IconTemplate` |
 | `pixata-blazor-dropdownlist-icon` | The box around the icon in an icon-only drop-down list |
-| `pixata-blazor-combobox-input`, `pixata-blazor-multiselect-input` | The text boxes |
+| `pixata-blazor-combobox-input`, `pixata-blazor-multiselect-input`, `pixata-blazor-autocomplete-input` | The text boxes |
 | `pixata-blazor-dropdownlist-button`, `pixata-blazor-combobox-button`, `pixata-blazor-multiselect-button` | The arrow buttons |
 | `pixata-blazor-clear-value` | The clear button |
 | `pixata-blazor-dropdown-loading` | The loading indicator shown while `OnRead` runs |
 | `pixata-blazor-multiselect-tags`, `pixata-blazor-multiselect-tag`, `pixata-blazor-multiselect-tag-text`, `pixata-blazor-multiselect-tag-remove` | The tags |
 | `pixata-blazor-multiselect-summary-tag` | The summary tag |
-| `pixata-blazor-dropdown-popup` | The popup (which also has `pixata-blazor-dropdownlist-popup`, `pixata-blazor-combobox-popup` or `pixata-blazor-multiselect-popup`, and `pixata-blazor-dropdown-sm`/`-lg` for the small and large sizes) |
+| `pixata-blazor-dropdown-popup` | The popup (which also has `pixata-blazor-dropdownlist-popup`, `pixata-blazor-combobox-popup`, `pixata-blazor-multiselect-popup` or `pixata-blazor-autocomplete-popup`, and `pixata-blazor-dropdown-sm`/`-lg` for the small and large sizes) |
 | `pixata-blazor-dropdown-filter`, `pixata-blazor-dropdown-filter-box` | The drop-down list's filter box |
 | `pixata-blazor-dropdown-header`, `pixata-blazor-dropdown-footer` | Around the header and footer templates |
 | `pixata-blazor-dropdown-content`, `pixata-blazor-dropdown-list` | The scrolling part of the popup, and the list in it |

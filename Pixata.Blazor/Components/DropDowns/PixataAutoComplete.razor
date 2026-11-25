@@ -1,0 +1,47 @@
+@namespace Pixata.Blazor.Components
+@typeparam TItem
+@inherits PixataDropDownBase<TItem, string, string>
+
+@*
+  A text box that suggests values as the user types. Unlike the combo box, the text is the value, whatever the user types, and
+  there is no button to open the list
+*@
+<span @ref="Element"
+      @attributes="AdditionalAttributes"
+      class="@MainClasses()"
+      style="@WidthStyle"
+      data-pixata-dropdown="@Uid"
+      @onclick="HandleClick">
+  <input @ref="_input"
+         id="@Id"
+         type="text"
+         class="pixata-blazor-input-inner pixata-blazor-autocomplete-input"
+         value="@_shownText"
+         placeholder="@Placeholder"
+         autocomplete="off"
+         tabindex="@TabIndex"
+         disabled="@(!Enabled)"
+         readonly="@ReadOnly"
+         role="combobox"
+         aria-autocomplete="list"
+         aria-haspopup="listbox"
+         aria-expanded="@AriaExpanded"
+         aria-controls="@(IsOpen ? ListId : null)"
+         aria-activedescendant="@ActiveDescendant"
+         aria-label="@AriaLabel"
+         aria-labelledby="@AriaLabelledBy"
+         aria-describedby="@AriaDescribedBy"
+         aria-readonly="@(ReadOnly ? "true" : null)"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         aria-busy="@(Loading ? "true" : null)"
+         @oninput="HandleInput"
+         @onkeydown="HandleKeyDown"
+         @onkeydown:stopPropagation="IsOpen" />
+  @LoadingFragment
+  @if (ShowClearButton && _text != "" && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-clear-value" role="button" aria-label="@ClearText" title="@ClearText" @onclick="HandleClear" @onclick:stopPropagation="true">
+      <PixataIcon Icon="@PixataSvgIcons.X" />
+    </span>
+  }
+</span>
+@PopupFragment

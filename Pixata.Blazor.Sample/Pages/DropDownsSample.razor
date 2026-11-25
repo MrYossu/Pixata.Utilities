@@ -7,7 +7,7 @@
 <h3>Drop-downs</h3>
 
 <p>
-  <code>PixataDropDownList</code>, <code>PixataComboBox</code> and <code>PixataMultiSelect</code>. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md">the documentation</a>.
+  <code>PixataDropDownList</code>, <code>PixataComboBox</code>, <code>PixataMultiSelect</code> and <code>PixataAutoComplete</code>. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md">the documentation</a>.
 </p>
 
 <h4 class="mt-4">Drop-down list</h4>
@@ -162,6 +162,37 @@
   </ChildContent>
 </ComponentSample>
 
+<h4 class="mt-4">Auto complete</h4>
+
+<ComponentSample Title="Free text with suggestions">
+  <Description>Type anything: the text is the value, and is updated on every key (<code>DebounceDelay="0"</code>). The suggestions contain what was typed (<code>FilterOperator="Contains"</code>). Press Down to move to one and Enter to take it, or Esc to close the list and keep what you typed.</Description>
+  <ChildContent>
+    <PixataAutoComplete Data="@Fruit" @bind-Value="@_autoFruit" FilterOperator="PixataStringFilterOperator.Contains" DebounceDelay="0" Placeholder="Any fruit..." Width="100%" Id="pixata-ac-fruit" OnChange="@((object v) => Log(_autoLog, $"OnChange: '{v}'"))" />
+    <p class="mt-2"><small>Value: "@_autoFruit"</small></p>
+    <ul class="mt-2 small">
+      @foreach (string line in _autoLog) {
+        <li>@line</li>
+      }
+    </ul>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Items, grouping and a minimum length">
+  <Description>Countries, whose <code>Name</code> is the text (<code>ValueField="Name"</code>), grouped by continent. The suggestions are shown once two characters have been typed (<code>MinLength="2"</code>).</Description>
+  <ChildContent>
+    <PixataAutoComplete Data="@Countries" ValueField="Name" GroupField="Continent" MinLength="2" @bind-Value="@_autoCountry" Placeholder="Type two letters..." Width="100%" Id="pixata-ac-countries" />
+    <p class="mt-2"><small>Value: "@_autoCountry"</small></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Suggestions from the server">
+  <Description><code>OnRead</code> is raised with what was typed, once the user has stopped typing for <code>DebounceDelay</code> (150ms by default). Each read takes half a second, to show the loading indicator.</Description>
+  <ChildContent>
+    <PixataAutoComplete TItem="Product" ValueField="Name" @bind-Value="@_autoProduct" OnRead="@ReadProducts" FilterOperator="PixataStringFilterOperator.Contains" Placeholder="Search products..." Width="100%" Id="pixata-ac-server" />
+    <p class="mt-2"><small>Value: "@_autoProduct". @_lastRead</small></p>
+  </ChildContent>
+</ComponentSample>
+
 <h4 class="mt-4">Lots of data</h4>
 
 <ComponentSample Title="Virtual scrolling">
@@ -244,6 +275,11 @@
   private List<int> _summaryIds = [1, 7, 11, 17];
   private List<string> _customFruits = ["Apple"];
   private List<int> _minLengthIds = [];
+
+  private string? _autoFruit;
+  private string? _autoCountry;
+  private string? _autoProduct;
+  private readonly List<string> _autoLog = [];
 
   private int _productId;
   private List<int> _productIds = [];

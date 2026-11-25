@@ -4652,13 +4652,13 @@ fieldset:disabled :is(.pixata-blazor-numerictextbox, .pixata-blazor-dateinput, .
   }
 }
 
-/* ========== PixataComboBox, PixataDropDownList and PixataMultiSelect ========== */
+/* ========== PixataComboBox, PixataDropDownList, PixataMultiSelect and PixataAutoComplete ========== */
 
 /*
   The drop-downs use the shared input classes (pixata-blazor-input, -input-inner, -input-button, -clear-value) and popup and
   list classes (pixata-blazor-popup, -popup-content, -list, -list-item, -list-group-header, -no-data). Their own element also
-  has pixata-blazor-dropdown plus pixata-blazor-dropdownlist, pixata-blazor-combobox or pixata-blazor-multiselect, and their
-  popup has pixata-blazor-dropdown-popup plus pixata-blazor-dropdownlist-popup (and so on)
+  has pixata-blazor-dropdown plus pixata-blazor-dropdownlist, pixata-blazor-combobox, pixata-blazor-multiselect or
+  pixata-blazor-autocomplete, and their popup has pixata-blazor-dropdown-popup plus pixata-blazor-dropdownlist-popup (and so on)
 */
 :root {
   --pixata-blazor-dropdown-popup-padding: calc(var(--pixata-blazor-spacing) * 2);

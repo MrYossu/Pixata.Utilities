@@ -14,10 +14,10 @@ using Microsoft.JSInterop;
 namespace Pixata.Blazor.Components;
 
 /// <summary>
-/// What <see cref="PixataDropDownList{TItem, TValue}"/>, <see cref="PixataComboBox{TItem, TValue}"/> and
-/// <see cref="PixataMultiSelect{TItem, TValue}"/> have in common: the data (<c>Data</c> or <c>OnRead</c>, with
-/// <c>TextField</c>, <c>ValueField</c> and <c>GroupField</c>), filtering, grouping, virtual scrolling, the popup list and its
-/// templates, and moving around the list with the keyboard
+/// What <see cref="PixataDropDownList{TItem, TValue}"/>, <see cref="PixataComboBox{TItem, TValue}"/>,
+/// <see cref="PixataMultiSelect{TItem, TValue}"/> and <see cref="PixataAutoComplete{TItem}"/> have in common: the data
+/// (<c>Data</c> or <c>OnRead</c>, with <c>TextField</c>, <c>ValueField</c> and <c>GroupField</c>), filtering, grouping, virtual
+/// scrolling, the popup list and its templates, and moving around the list with the keyboard
 /// </summary>
 /// <typeparam name="TItem">The type of the items in the list</typeparam>
 /// <typeparam name="TValue">The type of an item's value (the field named by <c>ValueField</c>)</typeparam>
@@ -367,6 +367,12 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
   private protected virtual bool ShowPopupFilter => false;
 
   private protected virtual string? PopupFilterPlaceholder => null;
+
+  /// <summary>
+  /// Whether filtering the list focuses its first item, so Enter chooses it. The auto complete turns this off, as its text is
+  /// what the user typed until they move to a suggestion
+  /// </summary>
+  private protected virtual bool FocusFirstItemAfterFilter => true;
 
   /// <summary>
   /// The position focused when the popup opens
@@ -723,7 +729,7 @@ public abstract partial class PixataDropDownBase<TItem, TValue, TBound> : Pixata
     } else {
       Rebuild();
     }
-    FocusedPosition = ItemCount > 0 ? LeadingCount : (LeadingCount > 0 ? 0 : -1);
+    FocusedPosition = FocusFirstItemAfterFilter && ItemCount > 0 ? LeadingCount : (LeadingCount > 0 ? 0 : -1);
     _scrollPending = true;
   }
 

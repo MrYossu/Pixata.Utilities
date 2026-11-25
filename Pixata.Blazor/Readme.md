@@ -37,7 +37,7 @@ The documentation is split over the following pages...
 | [Helpers and services](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Helpers.md) | `PersistentStateHelper`, `TemplateHelper`, `MessageBroker`, `PasswordOptionsHelper`, `ScrollStateService`, `PixataBaseClientService`, `PixataFiles` (saving and printing files) and `TryGetQueryString()` |
 | [Payload encryption](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Encryption.md) | Client-side setup for encrypting API traffic between a WASM app and an ASP.NET Core server |
 | [Declarative control flow](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ControlFlow.md) | `If`, `Switch` and `ForEach`, which replace the Razor `@if`, `@switch` and `@foreach` statements |
-| [Drop-downs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md) | `PixataComboBox`, `PixataDropDownList` and `PixataMultiSelect` |
+| [Drop-downs](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DropDowns.md) | `PixataComboBox`, `PixataDropDownList`, `PixataMultiSelect` and `PixataAutoComplete`, a text box that suggests values as you type |
 | [Tab strip](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TabStrip.md) | `PixataTabStrip` and `PixataTab` |
 | [Tree view](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.TreeView.md) | `PixataTreeView`, for showing flat or hierarchical data as a tree, with selection, checkboxes, loading on demand, and drag and drop |
 | [Editor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Editor.md) | `PixataEditor`, a rich (HTML) text editor |

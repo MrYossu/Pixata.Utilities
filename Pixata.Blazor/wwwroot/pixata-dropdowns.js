@@ -1,6 +1,6 @@
-// Browser helpers for PixataDropDownList, PixataComboBox and PixataMultiSelect. Each component marks its own element and its
-// popup with the same data-pixata-dropdown="<id>" attribute, so the listeners below (installed once, on the document) can
-// tell which component an event belongs to
+// Browser helpers for PixataDropDownList, PixataComboBox, PixataMultiSelect and PixataAutoComplete. Each component marks its own
+// element and its popup with the same data-pixata-dropdown="<id>" attribute, so the listeners below (installed once, on the
+// document) can tell which component an event belongs to
 
 const dropDowns = new Map();
 let listening = false;
@@ -43,9 +43,10 @@ function onFocusOut(e) {
 }
 
 // Stops the browser's own action for the keys the component handles: the arrow keys (which would move the caret or scroll the
-// page), and Enter, Escape, Home, End, Page Up and Page Down while the list is open. Space is stopped on the drop-down list
-// itself, where it opens the list rather than scrolling the page. Enter is always stopped in the multi-select's text box, which
-// uses it to open the list or add the typed text, so it doesn't submit a form the multi-select is in
+// page), and Enter, Escape, Home, End, Page Up and Page Down while the list is open (but not Home and End in the auto complete,
+// where they move the caret, as in any text box). Space is stopped on the drop-down list itself, where it opens the list
+// rather than scrolling the page. Enter is always stopped in the multi-select's text box, which uses it to open the list or add
+// the typed text, so it doesn't submit a form the multi-select is in
 function onKeyDown(e) {
   const owner = ownerOf(e.target);
   if (!owner || !dropDowns.has(owner.id)) {
@@ -79,7 +80,7 @@ function onKeyDown(e) {
       break;
     case "Home":
     case "End":
-      prevent = open || !textInput;
+      prevent = !textInput || (open && !owner.root.classList.contains("pixata-blazor-autocomplete"));
       break;
     case " ":
       prevent = !textInput;
