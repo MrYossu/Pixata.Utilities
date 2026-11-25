@@ -13,6 +13,22 @@
   /// </summary>
   public static bool MessageIsHtml = false;
 
+  /// <summary>
+  /// When true, the default, the data an ApiResponseView loads while the page is prerendered is persisted, and the view uses it
+  /// once the page is interactive rather than calling its LoadApiResponse again. Set it to false for every view to call
+  /// LoadApiResponse again once the page is interactive, as they did before v5.26.0. Can be overridden for one view with its
+  /// PersistState parameter
+  /// </summary>
+  public static bool PersistState = true;
+
+  /// <summary>
+  /// The most data, in bytes of JSON, that a view persists. A view whose data is bigger doesn't persist it, logs a warning, and
+  /// loads its data again once the page is interactive. In Blazor Server, the persisted data goes back up to the server when the
+  /// page becomes interactive, and data bigger than SignalR's MaximumReceiveMessageSize (32KB by default) stops that happening,
+  /// so a limit keeps the page working if the data grows. Null, the default, for no limit
+  /// </summary>
+  public static int? MaxPersistedBytes = null;
+
   public static RenderFragment<Yunit> Loader = _ =>@<Loader />;
 
   public static RenderFragment<Yunit> NotFound = _ => @<div>
