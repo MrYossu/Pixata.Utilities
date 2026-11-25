@@ -10,6 +10,8 @@ It's a separate package because PDF.js and the files it needs come to about 5MB.
 
 See the [live demo](https://test.pixata.co.uk/PdfViewerSample) for how it looks, and the [source for that page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PdfViewerSample.razor) for the code.
 
+>**Version 1.1.1** has no changes of its own. It depends on Pixata.Blazor 5.32.1, which references a patched version of `Microsoft.AspNetCore.WebUtilities`, so adding this package on its own no longer brings in one with a known vulnerability ([GHSA-x33c-w48q-qrgc](https://github.com/advisories/GHSA-x33c-w48q-qrgc)) (#190, #198).
+
 >**Version 1.1.0** adds [mark-up](#mark-up): notes, highlights, strike-through, freehand drawing and text, with who added each and when. It's kept apart from the PDF, as a list you store yourself, and Pixata.Pdf's `PdfMarkupFlattener` can draw it into a copy of the PDF (#140).
 >
 >**Version 1.0.0** is the first release (#139).
