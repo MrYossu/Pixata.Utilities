@@ -1,0 +1,73 @@
+@page "/MediaQuerySample"
+
+<SitePageTitle>Media query</SitePageTitle>
+
+<h3>Media query</h3>
+
+<p><code>PixataMediaQuery</code> tells your code whether a CSS media query matches, and tells it again when that changes. Resize the window, or turn your phone round, to see the values below change. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.MediaQuery.md">the documentation</a>.</p>
+
+<ComponentSample Title="Changing the layout below a breakpoint">
+  <Description>
+    <p>Below 720px wide, the people are shown as a list, as a table with every column wouldn't fit. The component renders nothing; it only raises <code>OnChange</code>.</p>
+  </Description>
+  <ChildContent>
+    <PixataMediaQuery Media="(max-width: 720px)" OnChange="@(matches => _narrow = matches)" />
+    @if (_narrow) {
+      <ul id="people-list">
+        @foreach (Person person in _people) {
+          <li><strong>@person.Name</strong>, @person.Role</li>
+        }
+      </ul>
+    } else {
+      <table id="people-table" class="table table-sm" style="width: auto;">
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Office</th><th>Phone</th></tr>
+        </thead>
+        <tbody>
+          @foreach (Person person in _people) {
+            <tr><td>@person.Name</td><td>@person.Role</td><td>@person.Office</td><td>@person.Phone</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Other queries">
+  <Description>
+    <p>Any media query works, with one component for each.</p>
+  </Description>
+  <ChildContent>
+    <PixataMediaQuery Media="(orientation: portrait)" OnChange="@(matches => _portrait = matches)" />
+    <PixataMediaQuery Media="(prefers-color-scheme: dark)" OnChange="@(matches => _dark = matches)" />
+    <PixataMediaQuery Media="(prefers-reduced-motion: reduce)" OnChange="@(matches => _reducedMotion = matches)" />
+    <ul id="media-values">
+      <li><code>(max-width: 720px)</code>: @Text(_narrow)</li>
+      <li><code>(orientation: portrait)</code>: @Text(_portrait)</li>
+      <li><code>(prefers-color-scheme: dark)</code>: @Text(_dark)</li>
+      <li><code>(prefers-reduced-motion: reduce)</code>: @Text(_reducedMotion)</li>
+    </ul>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private record Person(string Name, string Role, string Office, string Phone);
+
+  private readonly List<Person> _people = [
+    new("Alex Smith", "Surveyor", "Manchester", "0161 496 0000"),
+    new("Bobbie Jones", "Engineer", "Leeds", "0113 496 0000"),
+    new("Chris Taylor", "Office manager", "London", "020 7946 0000")
+  ];
+
+  private bool _narrow;
+  private bool? _portrait;
+  private bool? _dark;
+  private bool? _reducedMotion;
+
+  private static string Text(bool? matches) =>
+    matches switch {
+      true => "matches",
+      false => "doesn't match",
+      null => "not known yet"
+    };
+}

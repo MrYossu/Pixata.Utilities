@@ -180,6 +180,34 @@ export function matchesMedia(query) {
   return window.matchMedia(query).matches;
 }
 
+// ---------- PixataMediaQuery ----------
+
+const mediaQueries = new Map();
+let nextMediaQueryId = 1;
+
+// Watches a media query for PixataMediaQuery, telling it whenever the query starts or stops matching. Returns the id to pass
+// to disposeMediaQuery, and whether it matches now (1) or not (0)
+export function initMediaQuery(media, dotNet) {
+  const list = window.matchMedia(media);
+  const id = nextMediaQueryId++;
+  // A call on its way when the component is disposed fails, which doesn't matter
+  const changed = e => dotNet.invokeMethodAsync("MediaChanged", id, e.matches).catch(() => { });
+  if (list.addEventListener) {
+    list.addEventListener("change", changed);
+    mediaQueries.set(id, () => list.removeEventListener("change", changed));
+  } else {
+    // Safari before 14
+    list.addListener(changed);
+    mediaQueries.set(id, () => list.removeListener(changed));
+  }
+  return [id, list.matches ? 1 : 0];
+}
+
+export function disposeMediaQuery(id) {
+  mediaQueries.get(id)?.();
+  mediaQueries.delete(id);
+}
+
 export function clickElement(element) {
   if (element) {
     element.click();
