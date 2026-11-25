@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.37.0** lets you choose how long a notification stays, and take one away from code, as Telerik's `NotificationModel.CloseAfter` and `TelerikNotification.Hide()` did. `NotificationHelper.Send()` takes an optional `closeAfter`, which overrides the usual time for the notification's type (`TimeSpan.Zero` keeps it until it's dismissed), and returns the `Notification` it sent. The new `NotificationHelper.Remove()` takes that notification, or its `Id`, and fades it out of every area showing it. See [how long they stay](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md#how-long-they-stay) (#200)
+
 >**Version 5.36.1** fixes `PixataEditor` in iframe mode (the default) for an app that imports `pixata.css` rather than linking it, such as into a cascade layer so its own rules win (`@import url(".../pixata.css") layer(pixata);`). The editor copies its content styles into the iframe from the page's stylesheets, but it didn't look inside an `@import`, so none of them reached the iframe: the text had no padding, and an empty editor had a scrollbar. It now follows imports, keeping an import's media query. See [edit modes](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Editor.md#edit-modes) (#202)
 
 >**Version 5.36.0** lets `ApiResponseView` load its data again once the page is interactive, rather than using the data persisted while the page was prerendered, which it has done since 5.26.0...
