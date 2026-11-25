@@ -2,6 +2,8 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.39.0** adds `PixataMediaQuery`, which tells your code whether a CSS media query such as `(max-width: 720px)` matches, once the page is interactive and whenever that changes, so a page can show a different layout on a phone. It has the same parameters as Telerik's MediaQuery (`Media` and `OnChange`). See [media query](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.MediaQuery.md) (#183)
+
 >**Version 5.38.0** lets `PixataScheduler` scroll to a time other than the start of the working day. The new `ScrollTime` parameter is used in place of the view's `WorkDayStart` when the day, multi-day, week or timeline view is shown, and is scrolled to again when it changes, so a page can set it to the first appointment's time. The new `ScrollToTime()` method scrolls there once, from code. See [scrolling to a time](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Scheduler.md#scrolling-to-a-time) (#189)
 
 >**Version 5.37.0** lets you choose how long a notification stays, and take one away from code, as Telerik's `NotificationModel.CloseAfter` and `TelerikNotification.Hide()` did. `NotificationHelper.Send()` takes an optional `closeAfter`, which overrides the usual time for the notification's type (`TimeSpan.Zero` keeps it until it's dismissed), and returns the `Notification` it sent. The new `NotificationHelper.Remove()` takes that notification, or its `Id`, and fades it out of every area showing it. See [how long they stay](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Notifications.md#how-long-they-stay) (#200)

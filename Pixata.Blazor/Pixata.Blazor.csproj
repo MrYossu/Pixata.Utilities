@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-    <Version>5.38.0</Version>
-    <AssemblyVersion>5.38.0</AssemblyVersion>
-    <FileVersion>5.38.0</FileVersion>
+    <Version>5.39.0</Version>
+    <AssemblyVersion>5.39.0</AssemblyVersion>
+    <FileVersion>5.39.0</FileVersion>
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Blazor</Product>
