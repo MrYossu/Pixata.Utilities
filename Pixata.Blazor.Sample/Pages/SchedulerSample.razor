@@ -107,6 +107,28 @@
     </ChildContent>
   </ComponentSample>
 
+  <ComponentSample Title="Scrolling to a time">
+    <Description>
+      The day and week views usually open scrolled to the start of the working day. This one opens at the earlier of that and
+      the first appointment in the week, so the 06:30 breakfast meeting isn't hidden above it, and follows along as you move
+      between weeks (next week's first appointment is at 07:15), using <code>ScrollTime</code>. The buttons scroll from code,
+      with <code>ScrollToTime()</code>.
+    </Description>
+    <ChildContent>
+      <div class="scheduler-sample-toggles">
+        <button type="button" class="@PixataCss.Button(null, null, null, null)" @onclick="@(() => _scrollScheduler.ScrollToTime(new(12, 0)))">Scroll to midday</button>
+        <button type="button" class="@PixataCss.Button(null, null, null, null)" @onclick="@(() => _scrollScheduler.ScrollToTime(new(17, 0)))">Scroll to 17:00</button>
+      </div>
+      <PixataScheduler @ref="_scrollScheduler" Data="@_scrollData" @bind-Date="@_scrollDate" View="PixataSchedulerView.Week" Height="400px"
+                       ScrollTime="@ScrollTimeForWeek()">
+        <SchedulerViews>
+          <PixataSchedulerDayView />
+          <PixataSchedulerWeekView />
+        </SchedulerViews>
+      </PixataScheduler>
+    </ChildContent>
+  </ComponentSample>
+
   <h5>Events</h5>
   <ul class="scheduler-sample-log" aria-live="polite">
     @foreach (string entry in _log) {
@@ -295,6 +317,28 @@
   private readonly List<SchedulerSampleAppointment> _pixataCultureData = SampleData();
 
   private readonly List<string> _log = [];
+
+  private PixataScheduler<SchedulerSampleAppointment> _scrollScheduler = null!;
+  private DateTime _scrollDate = Today;
+
+  private readonly List<SchedulerSampleAppointment> _scrollData = [
+    new() { Title = "Breakfast meeting", Start = Today.AddHours(6.5), End = Today.AddHours(7.5) },
+    new() { Title = "Stand-up", Start = Today.AddDays(1).AddHours(9), End = Today.AddDays(1).AddHours(9.25) },
+    new() { Title = "Early train", Start = Today.AddDays(7).AddHours(7.25), End = Today.AddDays(7).AddHours(8.5) },
+    new() { Title = "Review", Start = Today.AddDays(8).AddHours(14), End = Today.AddDays(8).AddHours(15) }
+  ];
+
+  // The earlier of the start of the working day and the first appointment in the week shown
+  private TimeOnly ScrollTimeForWeek() {
+    int offset = (7 + (int)_scrollDate.DayOfWeek - (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek) % 7;
+    DateTime weekStart = _scrollDate.Date.AddDays(-offset);
+    TimeOnly workDayStart = new(8, 0);
+    TimeOnly? first = _scrollData
+      .Where(a => !a.IsAllDay && a.Start >= weekStart && a.Start < weekStart.AddDays(7))
+      .Select(a => (TimeOnly?)TimeOnly.FromDateTime(a.Start))
+      .Min();
+    return first < workDayStart ? first.Value : workDayStart;
+  }
 
   // The same appointments for every scheduler, around the current week
   private static List<SchedulerSampleAppointment> SampleData() {

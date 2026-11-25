@@ -235,6 +235,72 @@ public class Scheduler_Tests {
     Assert.AreEqual("0", Event(cut, "Lunch").GetAttribute("tabindex"));
   }
 
+  // The division the time grid scrolls to, from the marker it scrolls to, which is 30 minutes a division by default
+  private static string ScrollMark(IRenderedComponent<PixataScheduler<Meeting>> cut) =>
+    cut.Find(".pixata-blazor-scheduler-scroll-mark").GetAttribute("style")!;
+
+  private static int Scrolls(BunitContext context) =>
+    context.JSInterop.Invocations.Count(i => i.Identifier == "scrollToSelector");
+
+  [TestMethod]
+  public void TimeViews_ScrollToTheStartOfTheWorkingDay() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [Board]);
+
+    Assert.AreEqual("--pixata-blazor-scheduler-span:16;", ScrollMark(cut));
+    Assert.AreEqual(1, Scrolls(context));
+  }
+
+  [TestMethod]
+  public void ScrollTime_IsScrolledToInPlaceOfTheStartOfTheWorkingDay_AndAgainWhenItChanges() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [Board], p => p.Add(s => s.ScrollTime, new TimeOnly(6, 30)));
+    Assert.AreEqual("--pixata-blazor-scheduler-span:13;", ScrollMark(cut));
+    Assert.AreEqual(1, Scrolls(context));
+
+    cut.Render(p => p.Add(s => s.ScrollTime, new TimeOnly(7, 15)));
+
+    // The slot holding 07:15 starts at 07:00
+    Assert.AreEqual("--pixata-blazor-scheduler-span:14;", ScrollMark(cut));
+    Assert.AreEqual(2, Scrolls(context));
+  }
+
+  [TestMethod]
+  public void ScrollToTime_ScrollsThere_UntilTheViewChanges() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [Board]);
+
+    cut.InvokeAsync(() => cut.Instance.ScrollToTime(new TimeOnly(18, 0)));
+
+    Assert.AreEqual("--pixata-blazor-scheduler-span:36;", ScrollMark(cut));
+    Assert.AreEqual(2, Scrolls(context));
+
+    cut.Render(p => p.Add(s => s.View, PixataSchedulerView.Day));
+
+    Assert.AreEqual("--pixata-blazor-scheduler-span:16;", ScrollMark(cut));
+    Assert.AreEqual(3, Scrolls(context));
+  }
+
+  [TestMethod]
+  public void ScrollTime_BeforeTheFirstTimeShown_ScrollsToTheTop() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [Board], p => p
+      .Add(s => s.ScrollTime, new TimeOnly(6, 0))
+      .Add(s => s.ShowWorkHours, true));
+
+    Assert.AreEqual("--pixata-blazor-scheduler-span:0;", ScrollMark(cut));
+  }
+
+  [TestMethod]
+  public void ScrollTime_InTheTimelineView_MarksTheTimeCellHoldingIt() {
+    using BunitContext context = PixataTestContext.Create();
+    IRenderedComponent<PixataScheduler<Meeting>> cut = Render(context, [Board], p => p.Add(s => s.ScrollTime, new TimeOnly(10, 30)), PixataSchedulerView.Timeline);
+
+    IReadOnlyList<IElement> marked = cut.FindAll(".pixata-blazor-scheduler-time-cell[data-pixata-scroll-to]");
+    Assert.AreEqual(1, marked.Count);
+    StringAssert.StartsWith(marked[0].TextContent.Trim(), "10:");
+  }
+
   #endregion
 
   #region Editing

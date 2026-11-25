@@ -76,7 +76,7 @@
                   PixataCss.Classes(Scheduler.IsWorkTime(view, start) ? null : "pixata-blazor-scheduler-nonwork", slotEnd ? "pixata-blazor-scheduler-slot-end" : null),
                   view.SlotTemplate is null ? null : view.SlotTemplate(new() { Start = slot.Start, End = slot.End, Resources = column.Group.Resources }))
               }
-              @if (c == 0 && ScrollIndex(model, view) is > 0 and int scrollIndex) {
+              @if (c == 0 && Scheduler.ScrollIndex(model.Divisions, view.WorkDayStart) is int scrollIndex) {
                 <span class="pixata-blazor-scheduler-scroll-mark" data-pixata-scroll-to="true" style="@($"--pixata-blazor-scheduler-span:{scrollIndex};")"></span>
               }
               <div class="pixata-blazor-scheduler-event-layer">
@@ -101,10 +101,6 @@
   // Events are handled by the scheduler, so that it renders again (and this with it)
   Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg) =>
     ((IHandleEvent)Scheduler).HandleEventAsync(callback, arg);
-
-  // Where the view scrolls to when it is shown: the division holding the start of the working day
-  private static int ScrollIndex(PixataSchedulerTimeGridModel<TItem> model, PixataSchedulerDayViewBase<TItem> view) =>
-    model.Divisions.FindLastIndex(t => t <= view.WorkDayStart.TimeOfDay);
 
   private RenderFragment DateHeader(DateTime day) {
     CultureInfo culture = Scheduler.CurrentCulture;
