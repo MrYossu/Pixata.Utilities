@@ -139,7 +139,8 @@ public class PixataDatePickerShowTime_Tests {
     DateTime? value = null;
     IRenderedComponent<PixataDatePicker<DateTime?>> picker = Render(d => value = d);
 
-    Assert.AreEqual("10/13/2026 2:30 PM", picker.Find("input").GetAttribute("value"));
+    // Newer versions of ICU, as on Linux, put a narrow no-break space before AM and PM
+    Assert.AreEqual("10/13/2026 2:30 PM", picker.Find("input").GetAttribute("value")?.Replace('\u202f', ' '));
     picker.Find(".pixata-blazor-datepicker-button").Click();
     Assert.AreEqual(12, Options(picker, "Hours").Length);
     Assert.AreEqual("12", Options(picker, "Hours")[0].TextContent.Trim());
