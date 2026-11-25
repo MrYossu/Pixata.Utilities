@@ -30,7 +30,7 @@ public class NotificationHelper {
     }
   }
 
-  private void Deliver(Notification notification) {
+  private Notification Deliver(Notification notification) {
     Receive?.Invoke(notification);
     NotificationArea[] targets;
     lock (_lock) {
@@ -40,24 +40,57 @@ public class NotificationHelper {
     foreach (NotificationArea area in targets) {
       area.Show(notification);
     }
+    return notification;
   }
 
-  public void Send(NotificationType type, string message, DateTime dateTime, Action? onClick = null) =>
-    Deliver(new() { Type = type, Message = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
+  /// <summary>
+  /// Sends a notification. Returns it, so it can be taken away with <see cref="Remove(Notification)"/>
+  /// </summary>
+  /// <param name="type">Sets the notification's icon and colour, and how long it stays if <paramref name="closeAfter"/> isn't given</param>
+  /// <param name="message">The text to show</param>
+  /// <param name="dateTime">When it happened</param>
+  /// <param name="onClick">Run when the user clicks the notification</param>
+  /// <param name="closeAfter">How long the notification stays before it fades out. Null for the usual time for its type (5 seconds for
+  /// Success, until dismissed for Error and 15 seconds for the others), and <see cref="TimeSpan.Zero"/> or
+  /// <see cref="System.Threading.Timeout.InfiniteTimeSpan"/> for until it's dismissed</param>
+  public Notification Send(NotificationType type, string message, DateTime dateTime, Action? onClick = null, TimeSpan? closeAfter = null) =>
+    Deliver(new() { Type = type, Message = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick, CloseAfter = closeAfter });
 
   /// <summary>
   /// Sends a notification whose message is HTML, eg to bold a reference. The HTML is shown as it is, so encode anything in it that came
-  /// from a user. The HTML is also put in the notification's <see cref="Notification.Message"/>
+  /// from a user. The HTML is also put in the notification's <see cref="Notification.Message"/>. Returns the notification, so it can be
+  /// taken away with <see cref="Remove(Notification)"/>
   /// </summary>
-  public void Send(NotificationType type, MarkupString message, DateTime dateTime, Action? onClick = null) =>
-    Deliver(new() { Type = type, Message = message.Value, Content = builder => builder.AddContent(0, message), DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
+  public Notification Send(NotificationType type, MarkupString message, DateTime dateTime, Action? onClick = null, TimeSpan? closeAfter = null) =>
+    Deliver(new() { Type = type, Message = message.Value, Content = builder => builder.AddContent(0, message), DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick, CloseAfter = closeAfter });
 
   /// <summary>
   /// Sends a notification whose message is a render fragment, eg a list of validation problems. As there's no text to compare, these
-  /// aren't removed when an identical one arrives, as plain text ones are
+  /// aren't removed when an identical one arrives, as plain text ones are. Returns the notification, so it can be taken away with
+  /// <see cref="Remove(Notification)"/>
   /// </summary>
-  public void Send(NotificationType type, RenderFragment message, DateTime dateTime, Action? onClick = null) =>
-    Deliver(new() { Type = type, Content = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick });
+  public Notification Send(NotificationType type, RenderFragment message, DateTime dateTime, Action? onClick = null, TimeSpan? closeAfter = null) =>
+    Deliver(new() { Type = type, Content = message, DateTime = dateTime, Id = Guid.NewGuid().ToString(), OnClick = onClick, CloseAfter = closeAfter });
+
+  /// <summary>
+  /// Takes a notification away, fading it out as it does when its time is up. A notification that has already gone is ignored
+  /// </summary>
+  public void Remove(Notification notification) =>
+    Remove(notification.Id);
+
+  /// <summary>
+  /// Takes away the notification with this <see cref="Notification.Id"/>, fading it out as it does when its time is up. A notification
+  /// that has already gone is ignored
+  /// </summary>
+  public void Remove(string id) {
+    NotificationArea[] areas;
+    lock (_lock) {
+      areas = [.. _areas];
+    }
+    foreach (NotificationArea area in areas) {
+      area.Hide(id);
+    }
+  }
 
   /// <summary>
   /// The classes for a notification type's icon, from <see cref="GeneralIcon"/> and the other fields below. This is <c>""</c> for a type

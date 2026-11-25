@@ -33,6 +33,7 @@ public partial class NotificationArea : IDisposable {
   private readonly CancellationTokenSource _disposed = new();
 
   private const int FadeOutMs = 1900;
+  private static readonly TimeSpan MaxCloseAfter = TimeSpan.FromMilliseconds(int.MaxValue);
 
   // The helper this area was added to, so Dispose removes it from the same one even if the parameter has changed since
   private NotificationHelper? _helper;
@@ -47,6 +48,40 @@ public partial class NotificationArea : IDisposable {
 
   internal void Show(Notification notification) =>
     _ = OnNewNotification(notification);
+
+  internal void Hide(string id) =>
+    _ = HideNotification(id);
+
+  // Started from NotificationHelper.Remove, so like OnNewNotification it must never throw
+  private async Task HideNotification(string id) {
+    try {
+      Notification? notification = null;
+      // Not only one that's showing, as a notification in more than one area is one object, so another area fading it out has
+      // already set its Show to false
+      await InvokeAsync(() => notification = Notifications.FirstOrDefault(n => n.Id == id));
+      if (notification is not null) {
+        await FadeOut(notification);
+      }
+    }
+    catch (ObjectDisposedException) {
+      // The component was disposed
+    }
+    catch (Exception ex) {
+      Logger.LogError(ex, "Error removing notification");
+    }
+  }
+
+  // How long a notification stays, or null for until it's dismissed
+  private static TimeSpan? CloseAfter(Notification notification) {
+    TimeSpan? closeAfter = notification.CloseAfter ?? notification.Type switch {
+      NotificationType.Error => null,
+      NotificationType.Success => TimeSpan.FromSeconds(5),
+      _ => TimeSpan.FromSeconds(15)
+    };
+    // Zero and Timeout.InfiniteTimeSpan (minus a millisecond) both mean until it's dismissed, and so does a time too long for
+    // Task.Delay, which is near enough
+    return closeAfter > TimeSpan.Zero && closeAfter <= MaxCloseAfter ? closeAfter : null;
+  }
 
   // This is started from an Action, so it must never throw, or the exception would be unobserved (and in Blazor Server, an exception in
   // async void code ends the circuit)
@@ -67,8 +102,8 @@ public partial class NotificationArea : IDisposable {
       // A newer copy replaces any older ones with the same message
       duplicates.ForEach(d => _ = FadeOut(d));
 
-      if (notification.Type != NotificationType.Error) {
-        await Task.Delay(notification.Type == NotificationType.Success ? 5000 : 15000, cts.Token);
+      if (CloseAfter(notification) is TimeSpan closeAfter) {
+        await Task.Delay(closeAfter, cts.Token);
         await FadeOut(notification);
       }
     }

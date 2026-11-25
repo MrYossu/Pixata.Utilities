@@ -62,7 +62,7 @@ The `NotificationArea` also has an `OpenNotification` event callback, which is r
 
 ## How long they stay
 
-This is deliberately not configurable, as the whole point is that the user doesn't have to dismiss them...
+By default, how long a notification stays depends on its type, so the user doesn't usually have to dismiss them...
 
 | Type | Behaviour |
 | --- | --- |
@@ -70,7 +70,33 @@ This is deliberately not configurable, as the whole point is that the user doesn
 | `Success` | Fades away after about five seconds |
 | Everything else | Fades away after about fifteen seconds |
 
+To give one notification a time of its own, pass `closeAfter`. That's handy when some notifications matter more than others of the same type, such as a sign-in code that someone is waiting for among a stream of new email notifications. `TimeSpan.Zero` (or `Timeout.InfiniteTimeSpan`) keeps it until the user dismisses it, whatever its type...
+
+```csharp
+NotificationHelper.Send(NotificationType.Info, $"New email from {email.From}", DateTime.Now, closeAfter: TimeSpan.FromSeconds(8));
+NotificationHelper.Send(NotificationType.Info, $"Your sign-in code is {code}", DateTime.Now, closeAfter: TimeSpan.FromMinutes(1));
+```
+
 Every notification has a close button, so the user can get rid of one early. If a second notification arrives with the same message as one already on screen, the older one is removed, so a repeated error doesn't stack up.
+
+### Taking a notification away from code
+
+`Send()` returns the `Notification`, so you can take it away yourself once it's done its job, such as when the sign-in code has been copied. `Remove()` fades it out, as it does when its time is up, from every area showing it. It takes the notification or its `Id`, and does nothing if the notification has already gone...
+
+```csharp
+private Notification? _codeNotification;
+
+private void CodeArrived(string code) =>
+  _codeNotification = NotificationHelper.Send(NotificationType.Info, $"Your sign-in code is {code}", DateTime.Now, closeAfter: TimeSpan.FromMinutes(1));
+
+private void CodeCopied() {
+  if (_codeNotification is not null) {
+    NotificationHelper.Remove(_codeNotification);
+  }
+}
+```
+
+These match Telerik's `NotificationModel.CloseAfter` and `TelerikNotification.Hide()`. They were added in v5.37.0, before which `Send()` returned nothing.
 
 As of v4.5.0, dismissing a notification cancels its timers, notifications sent in quick succession (a double-clicked save button, or a list of failures) are handled safely, and the area unsubscribes from the helper when it's disposed. Previously, removing a notification that had already gone threw an exception which, in Blazor Server, ended the circuit. Clicking the close button no longer counts as clicking the notification, and `OpenNotification` is now raised as described above.
 
