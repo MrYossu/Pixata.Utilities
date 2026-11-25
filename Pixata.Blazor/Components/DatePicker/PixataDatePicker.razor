@@ -253,15 +253,8 @@
       return;
     }
     _open = false;
-    if (Module is not null) {
-      try {
-        await Module.InvokeVoidAsync("closePopup", _popup);
-      } catch (JSException) {
-        // The popup has already gone from the page
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
-        // The page has gone
-      }
-    }
+    // The picker may have gone from the page, if the page's handler for the date just picked removed it
+    await InvokeModule("closePopup", _popup);
     await OnClose.InvokeAsync();
     StateHasChanged();
   }
@@ -272,7 +265,7 @@
 
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     await base.OnAfterRenderAsync(firstRender);
-    if (_justOpened && _open && Module is not null) {
+    if (_justOpened && _open && Module is not null && !Disposed) {
       _justOpened = false;
       _pickerRef ??= DotNetObjectReference.Create(this);
       try {
@@ -286,8 +279,8 @@
         }
       } catch (JSException) {
         // The popup was closed again before it could be positioned
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
-        // The page has gone
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
+        // The page has gone, or the picker was removed from it
       }
     }
   }
@@ -368,7 +361,9 @@
     if (_open && Module is not null) {
       try {
         await Module.InvokeVoidAsync("closePopup", _popup);
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
+      } catch (JSException) {
+        // The popup has already gone from the page
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
         // The circuit has gone
       }
     }

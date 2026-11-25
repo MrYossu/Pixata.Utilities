@@ -1,12 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pixata.Blazor.Components;
 
@@ -210,6 +213,74 @@ public class PixataDateRangePicker_Tests {
     Assert.AreEqual(new PixataDateRangePickerChangeEventArgs(start, end), change);
     Assert.AreEqual(1, opened);
     Assert.AreEqual(1, closed);
+  }
+
+  // The text of each state pushed to an input, newest last
+  private static List<DateInputState> PushedStates(RecordingJsRuntime js) =>
+    js.Calls.Where(c => c.Identifier == "setDateInputState").Select(c => (DateInputState)c.Args[1]!).ToList();
+
+  [TestMethod]
+  [DataRow(false, DisplayName = "Start")]
+  [DataRow(true, DisplayName = "End")]
+  public async Task Picker_PickingFromTheCalendarWhileAnInputHasTheFocus_ShowsTheDateInThatInput(bool end) {
+    RecordingJsRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    DateTime start = new(2026, 10, 5);
+    DateTime finish = new(2026, 10, 10);
+    IRenderedComponent<PixataDateRangePicker<DateTime>> picker = RenderPicker(start, finish, d => start = d, d => finish = d);
+    IRenderedComponent<PixataDateInput<DateTime>> input = picker.FindComponents<PixataDateInput<DateTime>>()[end ? 1 : 0];
+
+    picker.Find(end ? ".pixata-blazor-daterangepicker-end" : ".pixata-blazor-daterangepicker-start").Click();
+    await input.InvokeAsync(() => input.Instance.OnInputFocus());
+    Day(picker, end ? "20" : "3").Click();
+
+    DateInputState pushed = PushedStates(js).Last();
+    Assert.AreEqual(end ? "20/10/2026" : "03/10/2026", pushed.Text);
+    Assert.AreEqual(end ? new DateTime(2026, 10, 20) : new DateTime(2026, 10, 3), end ? finish : start);
+  }
+
+  [TestMethod]
+  public async Task Picker_TheStateSentWhenTheInputLosesTheFocus_IsOlderThanTheDatePickedInTheCalendar() {
+    // In WebAssembly, clicking the calendar takes the focus from the input, and the reply to its blur reached the browser
+    // after the date picked had been pushed, putting the old date back (#196). Each state now has a version, and the script
+    // ignores one older than the last it showed
+    RecordingJsRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    DateTime start = new(2026, 10, 5);
+    DateTime finish = new(2026, 10, 10);
+    IRenderedComponent<PixataDateRangePicker<DateTime>> picker = RenderPicker(start, finish, d => start = d, d => finish = d);
+    IRenderedComponent<PixataDateInput<DateTime>> input = picker.FindComponents<PixataDateInput<DateTime>>()[0];
+
+    picker.Find(".pixata-blazor-daterangepicker-start").Click();
+    await input.InvokeAsync(() => input.Instance.OnInputFocus());
+    DateInputState blurred = await input.InvokeAsync(() => input.Instance.OnInputBlur());
+    Day(picker, "3").Click();
+
+    DateInputState pushed = PushedStates(js).Last();
+    Assert.AreEqual("05/10/2026", blurred.Text);
+    Assert.AreEqual("03/10/2026", pushed.Text);
+    Assert.IsTrue(pushed.Version > blurred.Version);
+  }
+
+  [TestMethod]
+  public async Task Picker_RemovedByTheHandlerForTheDatePicked_DoesNotThrow() {
+    // As on a page that shows "Loading..." in place of its filters while it reloads (#193)
+    RecordingJsRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    TaskCompletionSource reloaded = new();
+    IRenderedComponent<RemovedOnChangeHost<PixataDateRangePicker<DateTime>>> host = _ctx.Render<RemovedOnChangeHost<PixataDateRangePicker<DateTime>>>(p => p
+      .Add(c => c.Reload, reloaded.Task));
+
+    host.Find(".pixata-blazor-daterangepicker-end").Click();
+    Task picked = Day(host, "25").ClickAsync(new MouseEventArgs());
+    Assert.AreEqual(0, host.FindAll(".pixata-blazor-daterangepicker").Count);
+    await host.InvokeAsync(() => reloaded.SetResult());
+    await picked;
+
+    Assert.AreEqual(new DateTime(2026, 10, 25), host.Instance.End);
+    Assert.IsTrue(js.Modules.Take(3).All(m => m.Disposed));
+    // The renderer catches an exception from an event handler, and ends the circuit with it
+    Assert.IsFalse(_ctx.Renderer.UnhandledException.IsCompleted, _ctx.Renderer.UnhandledException.IsCompleted ? _ctx.Renderer.UnhandledException.Result.ToString() : "");
   }
 
   [TestMethod]

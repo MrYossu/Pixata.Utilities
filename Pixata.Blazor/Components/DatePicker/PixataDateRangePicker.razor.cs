@@ -189,6 +189,7 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
   private IJSObjectReference? _module;
   private DotNetObjectReference<PixataDateRangePicker<TValue>>? _dotNet;
   private bool _open;
+  private bool _disposed;
   private bool _justOpened;
   private bool _focusCalendar;
   private bool _selectingEnd;
@@ -226,12 +227,18 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
   protected override async Task OnAfterRenderAsync(bool firstRender) {
     if (firstRender) {
       try {
-        _module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
+        IJSObjectReference module = await Js.InvokeAsync<IJSObjectReference>("import", PixataBlazorScript.Path);
+        // The picker can be removed from the page while the module is being imported
+        if (_disposed) {
+          await module.DisposeAsync();
+          return;
+        }
+        _module = module;
       } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The page has gone
       }
     }
-    if (_justOpened && _open && _module is not null) {
+    if (_justOpened && _open && _module is not null && !_disposed) {
       _justOpened = false;
       _dotNet ??= DotNetObjectReference.Create(this);
       try {
@@ -241,8 +248,8 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
         }
       } catch (JSException) {
         // The popup was closed again before it could be positioned
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
-        // The page has gone
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
+        // The page has gone, or the picker was removed from it
       }
     }
   }
@@ -263,13 +270,15 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
       return;
     }
     _open = false;
-    if (_module is not null) {
+    // Not once the picker has gone from the page, as it has if the page's handler for the date just picked removed it, when
+    // its module has been disposed
+    if (_module is not null && !_disposed) {
       try {
         await _module.InvokeVoidAsync("closePopup", _popup);
       } catch (JSException) {
         // The popup has already gone from the page
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
-        // The page has gone
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
+        // The page has gone, or the picker was removed from it while the call was on its way
       }
     }
     await OnClose.InvokeAsync();
@@ -392,13 +401,16 @@ public partial class PixataDateRangePicker<TValue> : IAsyncDisposable {
   }
 
   public async ValueTask DisposeAsync() {
+    _disposed = true;
     if (_module is not null) {
       try {
         if (_open) {
           await _module.InvokeVoidAsync("closePopup", _popup);
         }
         await _module.DisposeAsync();
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
+      } catch (JSException) {
+        // The popup has already gone from the page
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
         // The circuit has gone
       }
     }

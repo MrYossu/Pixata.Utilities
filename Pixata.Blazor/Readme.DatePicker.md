@@ -100,6 +100,20 @@ Both work inside an `EditForm`. Bind with `@bind-Value`, and they tell the form 
 </EditForm>
 ```
 
+### Reloading when the date changes
+
+The page's handler for a new date can take the picker off the page, as one that shows "Loading..." in place of its filters while it reloads does...
+
+```razor
+@if (_loading) {
+  <p>Loading...</p>
+} else {
+  <PixataDatePicker @bind-Value="_from" @bind-Value:after="Reload" />
+}
+```
+
+The picker stops closing its popup and moving the focus back to its input once it has gone, so this is safe with a date picked from the calendar as well as one typed. The same goes for `PixataDateRangePicker`, `PixataDateInput` and `PixataCalendar`.
+
 ## Date range picker
 
 `PixataDateRangePicker` has two date inputs, labelled "Start" and "End", for the start and end of a range. Clicking (or tapping) either input opens a calendar that shows two months side by side, or one on a phone. The first date picked is the start of the range, and the second is the end. Once the end is picked, the calendar closes. The days between the start and end are shaded.
@@ -115,7 +129,7 @@ Both work inside an `EditForm`. Bind with `@bind-Value`, and they tell the form 
 
 Clicking the start input opens the calendar ready to pick the start, and clicking the end input opens it ready to pick just the end (if there's already a start). Picking a new start keeps the end if it's still after the new start, and clears it if not. Picking an end before the start begins a new range from that date, unless `AllowReverse` is set, when the two are swapped round.
 
-The focus stays in the input when the calendar is opened by clicking, so you can still type a date as described above. Alt+Down opens the calendar and moves the focus into it, so the arrow keys move around it. Escape or Alt+Up closes it, as does clicking anywhere else.
+The focus stays in the input when the calendar is opened by clicking, so you can still type a date as described above. A date picked in the calendar shows in its input straight away. Alt+Down opens the calendar and moves the focus into it, so the arrow keys move around it. Escape or Alt+Up closes it, as does clicking anywhere else.
 
 `TValue` can be `DateTime`, `DateOnly`, or a nullable version of either. A non-nullable end can't be cleared, so when a later start is picked, the end keeps its old value until a new end is picked.
 

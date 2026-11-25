@@ -135,6 +135,8 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   private DateTime? _valueAtFocus;
   private bool _initialised;
   private bool _disposed;
+  // Each state sent to the JavaScript is numbered, so it can ignore one that arrives after a newer one (see State())
+  private long _stateVersion;
   private FieldIdentifier? _field;
 
   // The text the input is first rendered with. It never changes, so Blazor never touches the input's value again, which
@@ -226,8 +228,19 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
     }
   }
 
-  public async ValueTask FocusAsync() =>
-    await InputElement.FocusAsync();
+  /// <summary>
+  /// Moves the keyboard focus to the input. Does nothing once the component has been removed from the page
+  /// </summary>
+  public async ValueTask FocusAsync() {
+    if (_disposed) {
+      return;
+    }
+    try {
+      await InputElement.FocusAsync();
+    } catch (JSException) {
+      // The input has gone from the page, as when the page's handler for a new value removes the component
+    }
+  }
 
   [JSInvokable]
   public async Task<DateInputState> OnKey(string key) {
@@ -314,27 +327,46 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
     StateHasChanged();
   }
 
-  // An empty input shows its format while it has focus, and the placeholder (if there is one) when it doesn't
+  // An empty input shows its format while it has focus, and the placeholder (if there is one) when it doesn't. The version
+  // lets the JavaScript ignore a state that's older than the last one it showed. In WebAssembly, the reply to the input's
+  // blur (when a date is clicked in the calendar) can arrive after the date picked has been pushed, and would otherwise put
+  // the old date back in the input
   protected DateInputState State() {
     string text = !Focused && Model.IsEmpty && !string.IsNullOrEmpty(Placeholder) ? "" : Model.Text;
     (int start, int end) = Focused ? Model.Selection : (-1, -1);
-    return new(text, start, end);
+    return new(text, start, end) { Version = ++_stateVersion };
   }
 
-  protected async Task PushState() {
-    if (_module is not null && !_disposed) {
-      try {
-        await _module.InvokeVoidAsync("setDateInputState", InputElement, State());
-      } catch (JSException) {
-        // The input has gone from the page
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
-        // So has the page
-      }
-    }
-  }
+  protected async Task PushState() =>
+    await InvokeModule("setDateInputState", InputElement, State());
 
   protected IJSObjectReference? Module =>
     _module;
+
+  /// <summary>
+  /// Whether the component has been removed from the page. It can be while one of its own event handlers is still running,
+  /// when the page's handler for the new value removes it, so nothing after raising <see cref="ValueChanged"/> should call
+  /// into the JavaScript without checking
+  /// </summary>
+  protected bool Disposed =>
+    _disposed;
+
+  /// <summary>
+  /// Calls a function in the module, unless the component has been removed from the page. Ignores the errors from an element
+  /// or a page that has gone, and from a module that has been disposed, as it is when the component is removed
+  /// </summary>
+  protected async Task InvokeModule(string identifier, params object?[] args) {
+    if (_module is null || _disposed) {
+      return;
+    }
+    try {
+      await _module.InvokeVoidAsync(identifier, args);
+    } catch (JSException) {
+      // The element has gone from the page
+    } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
+      // So has the page, or the component (and with it the module) was disposed while the call was on its way
+    }
+  }
 
   private static DateTime? ToDateTime(TValue? value) => value switch {
     DateTime dateTime => dateTime,
@@ -358,7 +390,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
         await _module.DisposeAsync();
       } catch (JSException) {
         // The input has already gone
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
         // The circuit has gone, so there's nothing to clean up
       }
     }
@@ -370,4 +402,10 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
 /// <summary>
 /// The text and selection for the input, sent to the JavaScript after each key press
 /// </summary>
-public record DateInputState(string Text, int Start, int End);
+public record DateInputState(string Text, int Start, int End) {
+  /// <summary>
+  /// Numbers the states of one input in the order they were made, so the JavaScript can ignore one that arrives after a
+  /// newer one
+  /// </summary>
+  public long Version { get; init; }
+}

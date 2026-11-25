@@ -3,11 +3,14 @@
 
 @* A number input with optional spin buttons, as in Telerik's NumericTextBox *@
 <span class="@WrapperClass" style="@WidthStyle">
-  <input @attributes="AdditionalAttributes"
+  <input @ref="_input"
+         @attributes="AdditionalAttributes"
          class="pixata-blazor-numerictextbox-input"
          id="@Id"
          type="text"
-         value="@_text"
+         @bind-value:get="_text"
+         @bind-value:set="OnInput"
+         @bind-value:event="oninput"
          placeholder="@Placeholder"
          inputmode="@EffectiveInputMode"
          autocomplete="off"
@@ -19,9 +22,10 @@
          aria-valuemin="@MinNumber"
          aria-valuemax="@MaxNumber"
          aria-invalid="@(IsInvalid ? "true" : null)"
+         data-pixata-edit-text="@FocusText"
+         data-pixata-select-on-focus="@(SelectOnFocus ? "true" : null)"
          @onfocus="OnFocus"
          @onblur="OnInputBlur"
-         @oninput="OnInput"
          @onkeydown="OnKeyDown" />
   @if (Arrows) {
     <span class="pixata-blazor-numerictextbox-spinner">

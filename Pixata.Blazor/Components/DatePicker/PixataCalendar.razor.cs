@@ -219,8 +219,17 @@ public partial class PixataCalendar : IAsyncDisposable {
   /// <summary>
   /// Moves the keyboard focus into the calendar, on the focused date
   /// </summary>
-  public async ValueTask FocusAsync() =>
-    await _tables[FocusedViewIndex].FocusAsync();
+  public async ValueTask FocusAsync() {
+    // Not once the calendar has gone from the page, as it has if the page's handler for the date just picked removed it
+    if (_disposed) {
+      return;
+    }
+    try {
+      await _tables[FocusedViewIndex].FocusAsync();
+    } catch (JSException) {
+      // The calendar has gone from the page
+    }
+  }
 
   /// <summary>
   /// Shows the given date in the given view
@@ -566,7 +575,7 @@ public partial class PixataCalendar : IAsyncDisposable {
         await _module.DisposeAsync();
       } catch (JSException) {
         // The calendar has already gone
-      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
         // The circuit has gone
       }
     }
