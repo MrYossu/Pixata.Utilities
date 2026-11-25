@@ -8,6 +8,8 @@ It's written in .NET alone, with no Chromium, Office, LibreOffice or other nativ
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Pdf/) is available for this project.
 
+>**Version 1.3.0** adds `DocumentToPdf`, which turns Word documents (`.docx`), RTF, HTML, text files and pictures into PDFs, keeping headings, bold and italic, lists, tables and pictures. It replaces Telerik Document Processing's Flow format providers for this. See [turning documents into PDFs](#turning-documents-into-pdfs). It brings in the Open XML SDK and AngleSharp, and the fonts it uses, which add about 10MB to an app (#194)
+
 >**Version 1.2.0** adds `PdfText`, which reads the text of each page of a PDF, with the words in reading order, and counts its pages, such as to check in a test that a document your app made says what it should. It replaces Telerik's `PdfFormatProvider` in document tests. See [reading the text of a PDF](#reading-the-text-of-a-pdf) (#184)
 
 >**Version 1.1.0** adds `PdfMarkupFlattener`, which draws mark-up added with Pixata.Blazor.PdfViewer (notes, highlights, strike-through, drawing and text) into a copy of a PDF, with the notes listed on a page at the end. See [drawing mark-up into a PDF](#drawing-mark-up-into-a-pdf) (#140)
