@@ -354,10 +354,19 @@ Put a `PixataGridSearchBox` in the grid's toolbar to let the user search. It sho
 
 | Parameter | Type | What it does |
 | --- | --- | --- |
-| `Fields` | `List<string>` | The fields to search. If not set, every text column in the grid is searched (including ones that can't be filtered) |
+| `Fields` | `List<string>` | The fields to search. If not set, or empty, every text column in the grid is searched (including ones that can't be filtered) |
 | `Placeholder` | `string` | Defaults to "Search..." |
 | `DebounceDelay` | `int` | How long to wait after the last key press, in milliseconds. Defaults to 300 |
 | `Width` | `string` | Defaults to 140px |
+| `Class` | `string` | Classes for the box's outer element, added to its own `pixata-blazor-grid-search` |
+
+Any other attributes, such as an `id` or `data-` attributes, are added to the outer element too. A class is handy for finding the box, such as to put the cursor in it when the page opens...
+
+```razor
+<FocusOnNavigate RouteData="routeData" Selector=".focus input" />
+...
+<PixataGridSearchBox Class="focus" />
+```
 
 ### Custom filters
 
@@ -395,6 +404,31 @@ The descriptors in `Filter` are joined by its `Logic`, which can't be changed, s
   </FilterCellTemplate>
 </PixataGridColumn>
 ```
+
+The context also has the column's `FieldType` (the type of its field as declared, so `int?` for a nullable int, and it works for a nested field such as `Address.City`), its `Title` as shown in the header, and its `Format` (from `DisplayFormat` or the `[DisplayFormat]` attribute, or null). They're there for a column with no filter yet too, so one template can be shared by all your columns, and choose its inputs and wording to suit each one, as Telerik's `MemberType` allowed...
+
+```razor
+<PixataGridColumn Field="@nameof(Person.Pet)" FilterMenuTemplate="GridFilters.Menu" />
+<PixataGridColumn Field="@nameof(Person.Born)" FilterMenuTemplate="GridFilters.Menu" />
+```
+
+```razor
+@* GridFilters.razor *@
+@code {
+  public static RenderFragment<PixataGridFilterTemplateContext> Menu => context => {
+    Type type = Nullable.GetUnderlyingType(context.FieldType) ?? context.FieldType;
+    if (type.IsEnum) {
+      return @<EnumFilter Context="context" EnumType="type" />;
+    }
+    if (type == typeof(DateTime) || type == typeof(DateOnly)) {
+      return @<DateFilter Context="context" Title="@context.Title" />;
+    }
+    return @<TextFilter Context="context" />;
+  };
+}
+```
+
+Here `EnumFilter`, `DateFilter` and `TextFilter` are components of your own, which add descriptors to `context.Filter` and call `context.FilterAsync()`, as in the examples above.
 
 `Filter` starts as the column's current filter, so take the template's value from it, as above, rather than keeping it in a field of your own. That way the template shows the right value when the grid's [state](#state) is restored, such as from local storage. A restored filter is matched to its column by the field of its first descriptor, so make that the column's field.
 
