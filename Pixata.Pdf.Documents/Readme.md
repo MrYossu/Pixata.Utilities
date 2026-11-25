@@ -1,6 +1,6 @@
 # Pixata.Pdf.Documents [![Pixata.Pdf.Documents Nuget package](https://img.shields.io/nuget/v/Pixata.Pdf.Documents)](https://www.nuget.org/packages/Pixata.Pdf.Documents/)
 
-![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Pdf.Documents/pdf.png "Pixata")
+![Pixata](https://raw.githubusercontent.com/MrYossu/Pixata.Utilities/master/Pixata.Pdf.Documents/ordinateuroff.png "Pixata")
 
 Turns a document into a PDF: Word (`.docx`), RTF, HTML, a text file, or a picture (PNG or JPEG). A typical use is a CV uploaded in whatever format the person had, which your app stores as a PDF so that everyone can read it in the browser. It keeps paragraphs, headings, bold, italic and underlined text, colours and sizes, bulleted and numbered lists, tables and pictures, and lays them out on A4 pages (or whatever size you like).
 
