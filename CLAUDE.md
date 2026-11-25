@@ -26,7 +26,7 @@ dotnet test Pixata.Extensions.Tests/Pixata.Extensions.Tests.csproj --filter "Ful
 
 **Solution-wide `dotnet restore`/`build`/`test` needs Telerik feed credentials.** `nuget.config` adds `https://nuget.telerik.com` with `%TELERIK_USERNAME%`/`%TELERIK_PASSWORD%`. Without them the feed answers 401 (not 404) for *any* package it is asked about, which is a hard `NU1301` failure rather than a skipped source — so a solution-level restore fails even for projects that have nothing to do with Telerik. Prefer per-project commands unless the Telerik env vars are set.
 
-Test projects are MSTest (`Pixata.Extensions.Tests`, `Pixata.Blazor.Tests`, `Pixata.SimilarityChooser.Tests`, `Pixata.AspNetCore.Pdf.Playwright.Tests`, `Pixata.Email.Tests`, `Pixata.Pdf.Tests`, `Pixata.Pdf.Documents.Tests`); they target `net8.0` only, even where the package under test multi-targets. The Playwright tests make real PDFs, so they need Chromium: locally that's the one in the Playwright cache, and `master.yml` also runs them in a Linux job (`test_pdf_linux`) to catch container problems.
+Test projects are MSTest (`Pixata.Extensions.Tests`, `Pixata.Blazor.Tests`, `Pixata.SimilarityChooser.Tests`, `Pixata.AspNetCore.Pdf.Playwright.Tests`, `Pixata.Email.Tests`, `Pixata.Pdf.Tests`); they target `net8.0` only, even where the package under test multi-targets. The Playwright tests make real PDFs, so they need Chromium: locally that's the one in the Playwright cache, and `master.yml` also runs them in a Linux job (`test_pdf_linux`) to catch container problems.
 
 ## Package layout and dependency direction
 
@@ -38,10 +38,9 @@ Pixata.Extensions          — no project deps; the shared kernel
   │     ├── Pixata.AspNetCore.Pdf.Playwright  — PdfConverterInterface via Playwright and Chromium
   │     └── Pixata.AspNetCore.Pdf.WkHtmlToPdf — obsolete wkhtmltopdf converter, kept for one release
   ├── Pixata.Email         — MailKit wrapper, plus sending and reading mail in Microsoft 365 with Graph
-  ├── Pixata.Pdf           — PdfCombiner, PdfMarkupFlattener and PdfText, using PdfPig (Apache 2.0; PDFsharp went AGPL in 6.5, so don't use it)
+  ├── Pixata.Pdf           — DocumentToPdf, PdfCombiner, PdfMarkupFlattener and PdfText, using PdfPig (Apache 2.0; PDFsharp went AGPL in 6.5, so don't use it); DocumentToPdf (Pixata.Pdf/Documents) also uses the OpenXml SDK and AngleSharp, with Liberation Sans bundled. It was kept in Pixata.Pdf, rather than made a package of its own, so that there is one PDF package to reference
   └── Pixata.SimilarityChooser
 
-Pixata.Pdf.Documents             — DocumentToPdf: Word, RTF, HTML, text and pictures to PDF in pure .NET (OpenXml SDK, AngleSharp, PdfPig, bundled Liberation Sans), no project deps; kept out of Pixata.Pdf for its dependencies
 Pixata.Blazor.Grid.Excel         — Excel export for PixataGrid (ClosedXML), kept out of Pixata.Blazor
 Pixata.Blazor.PdfViewer          — PixataPdfViewer, PDF.js bundled from build/pixata-pdfviewer (5MB), kept out of Pixata.Blazor; its mark-up types are in Pixata.Extensions/Pdf
 Pixata.Blazor.TelerikComponents  — Telerik components, client-safe

@@ -42,18 +42,11 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwrigh
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
 
 ## Pixata.Pdf
-Helpers for PDFs you already have. `PdfCombiner` joins several PDFs into one, keeping each page's size and orientation, such as a cover page your app made followed by a document the user uploaded. `PdfMarkupFlattener` draws the notes, highlights and drawings users add in `PixataPdfViewer` into a copy of a PDF. `PdfText` reads the text of each page, such as to check in a test that a document your app made says what it should. It uses PdfPig, which is Apache 2.0 licensed, so it needs no licence.
+Helpers for making and working with PDFs. `DocumentToPdf` turns a Word document (`.docx`), RTF, HTML, a text file or a picture (PNG or JPEG) into a PDF, such as a CV uploaded in whatever format the person had, keeping headings, bold and italic, lists, tables and pictures, in place of Telerik Document Processing's Flow format providers. `PdfCombiner` joins several PDFs into one, keeping each page's size and orientation, such as a cover page your app made followed by a document the user uploaded. `PdfMarkupFlattener` draws the notes, highlights and drawings users add in `PixataPdfViewer` into a copy of a PDF. `PdfText` reads the text of each page, such as to check in a test that a document your app made says what it should. It's written in .NET alone, with no Chromium, Office or other native dependency, so it runs on ordinary hosting, and it uses PdfPig, which is Apache 2.0 licensed, so it needs no licence.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Pdf/) is available for this project.
 
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf).
-
-## Pixata.Pdf.Documents
-Turns a Word document (`.docx`), RTF, HTML, a text file or a picture (PNG or JPEG) into a PDF, such as a CV uploaded in whatever format the person had, keeping headings, bold and italic, lists, tables and pictures. It's written in .NET alone, with no Chromium, Office or other native dependency, so it runs on ordinary hosting, and it needs no licence. It replaces Telerik Document Processing's Flow format providers for this.
-
-A [Nuget package](https://www.nuget.org/packages/Pixata.Pdf.Documents/) is available for this project.
-
-You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf.Documents).
 
 ## Pixata.AspNetCore.Pdf.Telerik
 A PDF converter for the `DocumentTemplateHelper` in Pixata.AspNetCore, using Telerik Document Processing, which needs a Telerik licence. Pixata.AspNetCore.Pdf.Playwright is free, and gives much better results, so is recommended instead.

@@ -670,7 +670,7 @@ internal sealed class DocumentLayout {
 
     private static byte[] Resource(string face) {
       using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"Pixata.Pdf.Documents.Fonts.LiberationSans-{face}.ttf")
-                            ?? throw new InvalidOperationException($"The LiberationSans-{face} font is missing from Pixata.Pdf.Documents");
+                            ?? throw new InvalidOperationException($"The LiberationSans-{face} font is missing from Pixata.Pdf");
       using MemoryStream copy = new();
       stream.CopyTo(copy);
       return copy.ToArray();

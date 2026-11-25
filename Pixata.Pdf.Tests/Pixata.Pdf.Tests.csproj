@@ -18,7 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- A cover page made by Pixata.AspNetCore.Pdf.Playwright, as the PDFs being combined will often be -->
+    <!-- A cover page made by Pixata.AspNetCore.Pdf.Playwright, as the PDFs being combined will often be, and the same CV in
+         each format, made with python-docx and saved as RTF, HTML and Word 97-2003 by LibreOffice -->
     <None Include="TestFiles\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

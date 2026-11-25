@@ -8,12 +8,12 @@
     <Company>Pixata Ltd</Company>
     <Authors>Avrohom Yisroel Silver</Authors>
     <Product>Pixata.Pdf</Product>
-    <Description>Combines several PDFs into one, keeping each page's size and orientation, such as a generated cover page followed by a document the user uploaded, draws mark-up from Pixata.Blazor.PdfViewer into a PDF, and reads the text of a PDF, such as in document tests. Uses PdfPig (Apache 2.0), so needs no licence</Description>
+    <Description>Turns Word documents (.docx), RTF, HTML, text files and pictures into PDFs, such as a CV uploaded in whatever format the person had, combines several PDFs into one, keeping each page's size and orientation, draws mark-up from Pixata.Blazor.PdfViewer into a PDF, and reads the text of a PDF, such as in document tests. Pure .NET, using PdfPig (Apache 2.0), so it needs no licence, and no Chromium, Office or other native dependency</Description>
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf</PackageProjectUrl>
     <PackageIcon>pdf.png</PackageIcon>
-    <PackageTags>C# PDF combine merge join markup annotation flatten text extract read</PackageTags>
+    <PackageTags>C# PDF combine merge join markup annotation flatten text extract read convert Word docx RTF HTML image PNG JPEG CV</PackageTags>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -22,9 +22,20 @@
   <ItemGroup>
     <None Include="pdf.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="True" PackagePath="\" />
+    <!-- The licence of the fonts DocumentToPdf uses, which has to go with them -->
+    <None Include="Documents\Fonts\OFL.txt" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Liberation Sans (SIL Open Font License), which DocumentToPdf uses when the caller doesn't give fonts of their own. It has
+         Latin, Greek, Cyrillic and Hebrew letters, which PDF's built-in Helvetica hasn't, and is the same size as Arial -->
+    <EmbeddedResource Include="Documents\Fonts\*.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- DocumentToPdf reads HTML with AngleSharp, and Word documents with the Open XML SDK (both MIT) -->
+    <PackageReference Include="AngleSharp" Version="1.8.1" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
     <PackageReference Include="PdfPig" Version="0.1.16" />
   </ItemGroup>
 

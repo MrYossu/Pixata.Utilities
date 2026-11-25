@@ -6,10 +6,10 @@ namespace Pixata.Pdf;
 /// in first
 /// </summary>
 internal static class Bidi {
-  private static bool IsRightToLeft(char c) =>
+  internal static bool IsRightToLeft(char c) =>
     c is >= '\u0590' and <= '\u08ff' or >= '\ufb1d' and <= '\ufdff' or >= '\ufe70' and <= '\ufeff';
 
-  private static bool IsLeftToRight(char c) =>
+  internal static bool IsLeftToRight(char c) =>
     char.IsLetterOrDigit(c) && !IsRightToLeft(c);
 
   // A bracket in right-to-left text faces the other way

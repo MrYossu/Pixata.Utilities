@@ -2,10 +2,11 @@ using System.Text;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Pixata.Pdf.Documents;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 
-namespace Pixata.Pdf.Documents.Tests;
+namespace Pixata.Pdf.Tests;
 
 [TestClass]
 public class DocumentToPdf_Tests {
