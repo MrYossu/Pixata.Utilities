@@ -1,0 +1,206 @@
+@namespace Pixata.Blazor.Components
+@inherits PixataInputBase<string?>
+@using System.Globalization
+
+@*
+  A button showing a colour, which opens a popup to pick another from a gradient or a palette, as Telerik's ColorPicker. The
+  views are declared in ColorPickerViews (both, by default), and only register themselves here; this renders them
+*@
+<CascadingValue Value="this" IsFixed="true">
+  @ColorPickerViews
+</CascadingValue>
+<span class="@PixataCss.Classes("pixata-blazor-colorpicker-wrapper", _open ? "pixata-blazor-colorpicker-open" : null)" @onkeydown="WrapperKeyDown">
+  <button @ref="_button"
+          type="button"
+          title="@(Value ?? NoColourText)"
+          @attributes="AdditionalAttributes"
+          id="@Id"
+          class="@MainClass"
+          disabled="@(!Enabled)"
+          aria-label="@AriaLabel"
+          aria-haspopup="dialog"
+          aria-expanded="@(_open ? "true" : "false")"
+          aria-controls="@(_open ? PopupId : null)"
+          aria-invalid="@(IsInvalid ? "true" : null)"
+          @onclick="Toggle">
+    <span class="pixata-blazor-input-inner pixata-blazor-colorpicker-value">
+      <span class="@SwatchClass(Current)" style="@SwatchStyle(Current)"></span>
+    </span>
+    <span class="pixata-blazor-input-button pixata-blazor-colorpicker-button" aria-hidden="true">
+      <PixataIcon Icon="@PixataSvgIcons.ChevronDown" />
+    </span>
+  </button>
+  <PixataPopup Visible="_open"
+               AnchorElement="_button"
+               MatchAnchorWidth="false"
+               Id="@PopupId"
+               Role="dialog"
+               AriaLabel="@AriaLabel"
+               Class="@PixataCss.Classes("pixata-blazor-colorpicker-popup", PopupClass)"
+               OnOutsideClick="Cancel">
+    <div class="pixata-blazor-colorpicker-header">
+      @if (AvailableViews.Count > 1) {
+        <span class="pixata-blazor-colorpicker-views" role="group" aria-label="@ViewsText">
+          @foreach (PixataColorPickerView view in AvailableViews) {
+            bool selected = view == _view;
+            string text = view == PixataColorPickerView.Gradient ? GradientText : PaletteText;
+            <button type="button"
+                    class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, PixataThemeConstants.Size.Small, true), "pixata-blazor-colorpicker-view-button", selected ? "pixata-blazor-selected" : null)"
+                    title="@text"
+                    aria-label="@text"
+                    aria-pressed="@(selected ? "true" : "false")"
+                    @onclick="() => ShowView(view)">
+              <PixataIcon Icon="@(view == PixataColorPickerView.Gradient ? PixataSvgIcons.ColourGradient : PixataSvgIcons.ColourPalette)" />
+            </button>
+          }
+        </span>
+      }
+      <span class="pixata-blazor-colorpicker-header-end">
+        @if (ShowClearButton) {
+          <button type="button"
+                  class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, PixataThemeConstants.Size.Small, true), "pixata-blazor-colorpicker-clear")"
+                  title="@ClearText"
+                  aria-label="@ClearText"
+                  @onclick="ClearPending">
+            <span class="pixata-blazor-colorpicker-swatch pixata-blazor-colorpicker-none" aria-hidden="true"></span>
+          </button>
+        }
+        @if (ShowPreview) {
+          <span class="pixata-blazor-colorpicker-preview">
+            <span class="@SwatchClass(_pending, "pixata-blazor-colorpicker-preview-new")" style="@SwatchStyle(_pending)" title="@NewText" role="img" aria-label="@($"{NewText}: {Describe(_pending)}")"></span>
+            <button type="button"
+                    class="@SwatchClass(_atOpen, "pixata-blazor-colorpicker-preview-current")"
+                    style="@SwatchStyle(_atOpen)"
+                    title="@CurrentText"
+                    aria-label="@($"{CurrentText}: {Describe(_atOpen)}")"
+                    @onclick="Revert"></button>
+          </span>
+        }
+      </span>
+    </div>
+    @if (_view == PixataColorPickerView.Gradient) {
+      @GradientFragment
+    } else {
+      @PaletteFragment
+    }
+    @if (ShowButtons) {
+      <div class="pixata-blazor-colorpicker-footer">
+        <button type="button" class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Base, null, null, PixataThemeConstants.Size.Small)" @onclick="CancelAndFocus">@CancelText</button>
+        <button type="button" class="@PixataCss.Button(PixataThemeConstants.Button.ThemeColor.Primary, null, null, PixataThemeConstants.Size.Small)" @onclick="Apply">@ApplyText</button>
+      </div>
+    }
+  </PixataPopup>
+</span>
+
+@code {
+
+  private RenderFragment GradientFragment => __builder => {
+    <div class="pixata-blazor-colorgradient-view">
+      <div @ref="_gradient"
+           class="pixata-blazor-colorgradient"
+           style="@($"background-color: {PixataColour.FromHsv(_hue, 1, 1).ToHex()};")"
+           tabindex="0"
+           role="slider"
+           aria-label="@SaturationText"
+           aria-valuemin="0"
+           aria-valuemax="100"
+           aria-valuenow="@Percent(_saturation)"
+           aria-valuetext="@($"{Percent(_saturation)}%, {Percent(_brightness)}%")"
+           @onkeydown="GradientKeyDown">
+        <span class="pixata-blazor-colorgradient-handle" style="@HandleStyle"></span>
+      </div>
+      <input type="range"
+             class="pixata-blazor-colorgradient-slider pixata-blazor-colorgradient-hue"
+             min="0"
+             max="359"
+             step="1"
+             value="@Number(Math.Round(_hue))"
+             aria-label="@HueText"
+             @oninput="HueInput" />
+      @if (GradientSettings?.ShowOpacityEditor ?? true) {
+        <input type="range"
+               class="pixata-blazor-colorgradient-slider pixata-blazor-colorgradient-alpha"
+               style="@($"--pixata-blazor-colorgradient-colour: {GradientColour.Opaque().ToRgb()};")"
+               min="0"
+               max="100"
+               step="1"
+               value="@Percent(_alpha)"
+               aria-label="@OpacityText"
+               @oninput="AlphaInput" />
+      }
+      <div class="pixata-blazor-colorgradient-inputs">
+        <button type="button"
+                class="@PixataCss.Classes(PixataCss.Button(null, PixataThemeConstants.Button.FillMode.Flat, null, PixataThemeConstants.Size.Small), "pixata-blazor-colorgradient-format")"
+                title="@FormatText"
+                @onclick="ToggleFormat">@(_inputFormat == PixataColorFormat.Hex ? "HEX" : "RGB")</button>
+        @if (_inputFormat == PixataColorFormat.Hex) {
+          <span class="@PixataCss.Classes(PixataCss.Input(PixataThemeConstants.Size.Small, null, null), "pixata-blazor-colorgradient-hex")">
+            <input @key="_inputsVersion"
+                   class="pixata-blazor-input-inner"
+                   type="text"
+                   spellcheck="false"
+                   autocomplete="off"
+                   aria-label="@HexText"
+                   value="@(_pending?.ToHex() ?? "")"
+                   @onchange="HexChanged" />
+          </span>
+        } else {
+          @ChannelInput("R", RedText, _pending?.R, 255, 0)
+          @ChannelInput("G", GreenText, _pending?.G, 255, 1)
+          @ChannelInput("B", BlueText, _pending?.B, 255, 2)
+          @if (GradientSettings?.ShowOpacityEditor ?? true) {
+            @ChannelInput("A", OpacityText, _pending is { } colour ? Percent(colour.A) : null, 100, 3)
+          }
+        }
+      </div>
+    </div>
+  };
+
+  private RenderFragment ChannelInput(string label, string ariaLabel, int? value, int max, int channel) => __builder => {
+    <label class="pixata-blazor-colorgradient-channel">
+      <span class="@PixataCss.Input(PixataThemeConstants.Size.Small, null, null)">
+        <input @key="_inputsVersion"
+               class="pixata-blazor-input-inner"
+               type="number"
+               min="0"
+               max="@max"
+               step="1"
+               aria-label="@ariaLabel"
+               value="@(value is int n ? Number(n) : "")"
+               @onchange="e => ChannelChanged(channel, e)" />
+      </span>
+      <span class="pixata-blazor-colorgradient-channel-label" aria-hidden="true">@label</span>
+    </label>
+  };
+
+  private RenderFragment PaletteFragment => __builder => {
+    int columns = Math.Max(1, PaletteSettings?.Columns ?? 10);
+    <div @ref="_palette"
+         class="pixata-blazor-colorpalette"
+         style="@PaletteStyle"
+         role="grid"
+         tabindex="0"
+         aria-label="@PaletteText"
+         aria-activedescendant="@(_focusedCell >= 0 && _focusedCell < _paletteColours.Count ? CellId(_focusedCell) : null)"
+         @onkeydown="PaletteKeyDown">
+      @for (int row = 0; row * columns < _paletteColours.Count; row++) {
+        <div class="pixata-blazor-colorpalette-row" role="row">
+          @for (int column = 0; column < columns && row * columns + column < _paletteColours.Count; column++) {
+            int index = row * columns + column;
+            PixataColour colour = _paletteColours[index];
+            bool selected = _pending is { } pending && pending.Opaque() == colour.Opaque();
+            <div id="@CellId(index)"
+                 class="@PixataCss.Classes("pixata-blazor-colorpalette-tile", index == _focusedCell ? "pixata-blazor-focus" : null, selected ? "pixata-blazor-selected" : null)"
+                 role="gridcell"
+                 title="@colour.ToHex()"
+                 aria-label="@colour.ToHex()"
+                 aria-selected="@(selected ? "true" : "false")"
+                 style="@($"background-color: {colour.ToRgb()};")"
+                 @onclick="() => PickTile(index)"></div>
+          }
+        </div>
+      }
+    </div>
+  };
+
+}

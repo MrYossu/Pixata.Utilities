@@ -30,6 +30,8 @@ public static partial class PixataSvgIcons {
   public static readonly PixataSvgIcon Pencil = new("pencil", "<path d=\"M4 20h4L19 9l-4-4L4 16z\"/><path d=\"M13 7l4 4\"/>");
   public static readonly PixataSvgIcon Refresh = new("refresh", "<path d=\"M20 12a8 8 0 1 1-2.3-5.7\"/><path d=\"M20 4v5h-5\"/>");
   public static readonly PixataSvgIcon Calendar = new("calendar", "<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M3 10h18M8 3v4M16 3v4\"/>");
+  public static readonly PixataSvgIcon ColourGradient = new("colour-gradient", "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\"/><path d=\"M4 12l8-8\" opacity=\".35\"/><path d=\"M4.5 19.5l15-15\" opacity=\".65\"/><path d=\"M12 20l8-8\"/>");
+  public static readonly PixataSvgIcon ColourPalette = new("colour-palette", "<rect x=\"4\" y=\"4\" width=\"6\" height=\"6\" rx=\"1\"/><rect x=\"14\" y=\"4\" width=\"6\" height=\"6\" rx=\"1\"/><rect x=\"4\" y=\"14\" width=\"6\" height=\"6\" rx=\"1\"/><rect x=\"14\" y=\"14\" width=\"6\" height=\"6\" rx=\"1\"/>");
   public static readonly PixataSvgIcon Clock = new("clock", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 3\"/>");
   public static readonly PixataSvgIcon Info = new("info", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v6M12 7.5v.5\"/>");
   public static readonly PixataSvgIcon Warning = new("warning", "<path d=\"M12 3l10 18H2z\"/><path d=\"M12 10v5M12 18v.5\"/>");

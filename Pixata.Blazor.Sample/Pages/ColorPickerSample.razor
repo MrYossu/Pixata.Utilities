@@ -1,0 +1,79 @@
+@page "/ColorPickerSample"
+@using System.ComponentModel.DataAnnotations
+
+<SitePageTitle>Colour picker</SitePageTitle>
+
+<h3>Colour picker</h3>
+
+<p><code>PixataColorPicker</code> is a replacement for Telerik's <code>ColorPicker</code>. The button shows the colour, and opens a popup with a gradient and a palette. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.ColorPicker.md">the documentation</a>.</p>
+
+<ComponentSample Title="A hex colour">
+  <Description>
+    <p><code>ValueFormat="PixataColorFormat.Hex"</code>, so the value is <code>#rrggbb</code>. Drag in the gradient, or use the arrow keys, then click Apply.</p>
+  </Description>
+  <ChildContent>
+    <PixataColorPicker @bind-Value="_stage" ValueFormat="PixataColorFormat.Hex" Id="colour-hex" />
+    <p>Value: <span id="colour-hex-value">@(_stage ?? "null")</span></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Picking from the palette, without the buttons">
+  <Description>
+    <p>With <code>ShowButtons="false"</code>, the value changes as the user picks, and picking from the palette closes the popup. The value is written as <code>rgb()</code>, which is the default, as in Telerik.</p>
+  </Description>
+  <ChildContent>
+    <PixataColorPicker @bind-Value="_highlight" ShowButtons="false" View="PixataColorPickerView.Palette" Id="colour-rgb" />
+    <p>Value: <span id="colour-rgb-value">@(_highlight ?? "null")</span></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Choosing the views">
+  <Description>
+    <p>Only a palette of your own, four to a row, with bigger tiles.</p>
+  </Description>
+  <ChildContent>
+    <PixataColorPicker @bind-Value="_status" ValueFormat="PixataColorFormat.Hex" Id="colour-palette">
+      <ColorPickerViews>
+        <PixataColorPickerPaletteView Colors="_statusColours" Columns="4" TileWidth="2rem" TileHeight="2rem" />
+      </ColorPickerViews>
+    </PixataColorPicker>
+    <p>Value: <span id="colour-palette-value">@(_status ?? "null")</span></p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="In a form">
+  <Description>
+    <p>The picker is validated as the other inputs are. Disabling the fieldset disables it too.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_form">
+      <DataAnnotationsValidator />
+      <fieldset disabled="@_formDisabled" style="border: 0; margin: 0; padding: 0; min-width: 0;">
+        <label for="colour-form">Colour</label>
+        <PixataColorPicker @bind-Value="_form.Colour" ValueFormat="PixataColorFormat.Hex" Id="colour-form" />
+        <ValidationMessage For="() => _form.Colour" />
+      </fieldset>
+      <div class="d-flex align-items-center gap-3 mt-2">
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        <span>
+          <PixataSwitch Id="colour-form-disabled" @bind-Value="_formDisabled" Size="sm" />
+          <label for="colour-form-disabled">Disable the fieldset</label>
+        </span>
+      </div>
+    </EditForm>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private string? _stage = "#282f89";
+  private string? _highlight;
+  private string? _status = "#2e7d32";
+  private readonly string[] _statusColours = ["#2e7d32", "#f9a825", "#c62828", "#1565c0", "#6a1b9a", "#00838f", "#ef6c00", "#455a64"];
+  private readonly SampleForm _form = new();
+  private bool _formDisabled;
+
+  private class SampleForm {
+    [Required(ErrorMessage = "Please pick a colour")]
+    public string? Colour { get; set; }
+  }
+}
