@@ -31,6 +31,8 @@ The value can be an `int`, `long`, `short`, `decimal`, `double` or `float`, or a
 
 While the input has focus, it shows the plain number (eg `1234.5`), so it's easy to edit. When the user leaves it, it shows the value in the `Format` you give (eg `£1,234.50` for `C2`). Without a `Format`, it shows the plain number.
 
+The formatted text is swapped for the plain number in the browser, the moment the input gets the focus, so the selection survives the swap. Tabbing into the input selects the whole number, as the browser does for any text box, so typing `12.34` replaces `60` rather than giving `6012.34`. Clicking puts the caret where you clicked. Set `SelectOnFocus="true"` to select the whole number however the input gets the focus, a click included. In Blazor Server, nothing waits for a round trip to the server, so text typed straight after tabbing in isn't overwritten either.
+
 The value changes as the user types, so anything bound to it updates straight away. Text that isn't a number leaves the value as it was, and the input shows as invalid until the user fixes it or leaves the input, when it goes back to showing the value. Clearing the input sets a nullable value to null. A non-nullable one keeps its last value.
 
 Pasted text such as `£1,234.50` is accepted, using the current culture's currency symbol, decimal point and thousands separator.
@@ -49,6 +51,7 @@ Pasted text such as `£1,234.50` is accepted, using the current culture's curren
 | `Step` | `TValue` | How much the spin buttons and the up and down arrow keys change the value by. Defaults to 1 |
 | `Decimals` | `int?` | The number of decimal places to round to. Whole number types always round to whole numbers |
 | `Format` | `string?` | A .NET number format, such as `N2` or `C2`, for when the input doesn't have focus |
+| `SelectOnFocus` | `bool` | Selects the whole number whenever the input gets the focus, a click included, so typing replaces it. Defaults to `false`, when only tabbing in selects it |
 | `Arrows` | `bool` | Shows the spin buttons. Defaults to `true` |
 | `IncreaseValueText`, `DecreaseValueText` | `string` | The spin buttons' tooltips and accessible names, for translating. Default to "Increase value" and "Decrease value" |
 | `Placeholder` | `string?` | Shown when the input is empty |
@@ -103,6 +106,6 @@ The numeric text box uses the date input's CSS custom properties (`--pixata-date
 
 The parameters above have the same names and meanings as Telerik's. These Telerik features aren't supported...
 
-- `SelectOnFocus`, `DebounceDelay`, `LargeStep`, `Rounded` and `FillMode`
+- `DebounceDelay`, `LargeStep`, `Rounded` and `FillMode`
 - Blocking keys that can't be part of a number as they're typed. Instead, the input shows as invalid until the text is a number
 - Limiting the number of decimal places as they're typed. Instead, the value is rounded to `Decimals` when the user leaves the input

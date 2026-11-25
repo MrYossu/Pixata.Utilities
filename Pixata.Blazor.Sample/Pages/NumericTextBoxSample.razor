@@ -18,6 +18,16 @@
   </ChildContent>
 </ComponentSample>
 
+<ComponentSample Title="Selecting the number on focus">
+  <Description>
+    <p>Tabbing into a box selects the whole number, so typing replaces it. With <code>SelectOnFocus="true"</code>, clicking in the box selects it too.</p>
+  </Description>
+  <ChildContent>
+    <label for="pixata-select-on-focus">Amount</label>
+    <PixataNumericTextBox Id="pixata-select-on-focus" @bind-Value="_amount" Format="C2" Decimals="2" Width="200px" SelectOnFocus="true" />
+  </ChildContent>
+</ComponentSample>
+
 <ComponentSample Title="Nullable, with a placeholder">
   <Description>
     <p>Bound to an <code>int?</code>. Clearing the box sets the value to null.</p>

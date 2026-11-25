@@ -18,6 +18,9 @@ public class PixataNumericTextBox_Tests {
   [TestInitialize]
   public void Initialise() {
     _ctx = new();
+    // The box sets up its focus script once it's rendered. Without it (as here, where the call returns false), .NET swaps
+    // the formatted text for the plain number itself
+    _ctx.JSInterop.Mode = JSRuntimeMode.Loose;
     _culture = CultureInfo.CurrentCulture;
     CultureInfo.CurrentCulture = new("en-GB", useUserOverride: false);
   }
@@ -42,6 +45,74 @@ public class PixataNumericTextBox_Tests {
     Assert.AreEqual("1234.5", Input(box).GetAttribute("value"));
     Input(box).Blur();
     Assert.AreEqual("1,234.50", Input(box).GetAttribute("value"));
+  }
+
+  [TestMethod]
+  public void WithAFormat_TellsTheScriptThePlainNumber_SoItCanSwapItInOnFocus() {
+    IRenderedComponent<PixataNumericTextBox<decimal>> box = _ctx.Render<PixataNumericTextBox<decimal>>(p => p
+      .Add(c => c.Value, 60m)
+      .Add(c => c.Format, "C2"));
+
+    Assert.AreEqual("£60.00", Input(box).GetAttribute("value"));
+    Assert.AreEqual("60", Input(box).GetAttribute("data-pixata-edit-text"));
+    Assert.IsNull(Input(box).GetAttribute("data-pixata-select-on-focus"));
+
+    box.Render(p => p.Add(c => c.Value, 1234.5m));
+    Assert.AreEqual("1234.5", Input(box).GetAttribute("data-pixata-edit-text"));
+  }
+
+  [TestMethod]
+  public void WithoutAFormat_HasNoTextForTheScriptToSwapIn() {
+    IRenderedComponent<PixataNumericTextBox<decimal>> box = _ctx.Render<PixataNumericTextBox<decimal>>(p => p.Add(c => c.Value, 60m));
+
+    Assert.IsFalse(Input(box).HasAttribute("data-pixata-edit-text"));
+  }
+
+  [TestMethod]
+  public void SelectOnFocus_IsPassedToTheScript() {
+    IRenderedComponent<PixataNumericTextBox<decimal>> box = _ctx.Render<PixataNumericTextBox<decimal>>(p => p
+      .Add(c => c.Value, 60m)
+      .Add(c => c.SelectOnFocus, true));
+
+    Assert.AreEqual("true", Input(box).GetAttribute("data-pixata-select-on-focus"));
+  }
+
+  [TestMethod]
+  public void OnceTheScriptIsSetUp_FocusLeavesTheTextAlone_SoARenderCantPutTheOldNumberBackOverWhatsTyped() {
+    // The script has swapped the text in the browser already, keeping the selection. If .NET rendered the plain number too,
+    // that render would arrive a round trip later in Blazor Server, and replace the first digits typed (#203)
+    BunitJSModuleInterop module = _ctx.JSInterop.SetupModule(PixataBlazorScript.Path);
+    module.Setup<bool>("initNumericTextBox", _ => true).SetResult(true);
+    decimal value = 60m;
+    IRenderedComponent<PixataNumericTextBox<decimal>> box = _ctx.Render<PixataNumericTextBox<decimal>>(p => p
+      .Add(c => c.Value, value)
+      .Add(c => c.Format, "C2")
+      .Add(c => c.ValueChanged, EventCallback.Factory.Create<decimal>(this, v => value = v)));
+
+    Input(box).Focus();
+    Assert.AreEqual("£60.00", Input(box).GetAttribute("value"));
+    Input(box).KeyDown("1");
+    Assert.AreEqual("£60.00", Input(box).GetAttribute("value"));
+
+    Input(box).Input("12.34");
+    Assert.AreEqual(12.34m, value);
+    Assert.AreEqual("12.34", Input(box).GetAttribute("value"));
+    Input(box).Blur();
+    Assert.AreEqual("£12.34", Input(box).GetAttribute("value"));
+  }
+
+  [TestMethod]
+  public void OnceTheScriptIsSetUp_ArrowKeysStillShowThePlainNumber() {
+    BunitJSModuleInterop module = _ctx.JSInterop.SetupModule(PixataBlazorScript.Path);
+    module.Setup<bool>("initNumericTextBox", _ => true).SetResult(true);
+    IRenderedComponent<PixataNumericTextBox<decimal>> box = _ctx.Render<PixataNumericTextBox<decimal>>(p => p
+      .Add(c => c.Value, 60m)
+      .Add(c => c.Format, "C2"));
+
+    Input(box).Focus();
+    Input(box).KeyDown("ArrowUp");
+
+    Assert.AreEqual("61", Input(box).GetAttribute("value"));
   }
 
   [TestMethod]

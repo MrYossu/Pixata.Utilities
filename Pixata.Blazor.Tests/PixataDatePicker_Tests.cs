@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -315,6 +315,56 @@ public class PixataDatePicker_Tests {
 
     Assert.AreEqual(new DateTime(2026, 10, 20), value);
     Assert.AreEqual(0, picker.FindAll(".pixata-blazor-datepicker-popup").Count);
+  }
+
+  [TestMethod]
+  public async Task DatePicker_RemovedByTheHandlerForTheDatePicked_DoesNotThrow() {
+    // As on a page that shows "Loading..." in place of its filters while it reloads. Closing the popup after raising the new
+    // value used the disposed module, and the ObjectDisposedException ended the circuit (#193)
+    RecordingJsRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    TaskCompletionSource reloaded = new();
+    IRenderedComponent<RemovedOnChangeHost<PixataDatePicker<DateTime>>> host = _ctx.Render<RemovedOnChangeHost<PixataDatePicker<DateTime>>>(p => p
+      .Add(c => c.Reload, reloaded.Task));
+
+    host.Find(".pixata-blazor-datepicker-button").Click();
+    Task picked = Day(host, "20").ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
+    Assert.AreEqual(0, host.FindAll(".pixata-blazor-datepicker").Count);
+    await host.InvokeAsync(() => reloaded.SetResult());
+    await picked;
+
+    Assert.AreEqual(new DateTime(2026, 10, 20), host.Instance.Value);
+    Assert.IsTrue(js.Module.Disposed);
+    // The renderer catches an exception from an event handler, and ends the circuit with it
+    Assert.IsFalse(_ctx.Renderer.UnhandledException.IsCompleted, _ctx.Renderer.UnhandledException.IsCompleted ? _ctx.Renderer.UnhandledException.Result.ToString() : "");
+  }
+
+  [TestMethod]
+  public async Task DatePicker_FocusAsync_DoesNothingOnceRemoved() {
+    RecordingJsRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    IRenderedComponent<PixataDatePicker<DateTime>> picker = _ctx.Render<PixataDatePicker<DateTime>>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
+    PixataDatePicker<DateTime> instance = picker.Instance;
+    await _ctx.DisposeComponentsAsync();
+
+    await instance.FocusAsync();
+    await instance.Close();
+  }
+
+  [TestMethod]
+  public void DatePicker_StatesAreNumberedInTheOrderTheyAreMade() {
+    RecordingJsRuntime js = new();
+    _ctx.Services.AddSingleton<IJSRuntime>(js);
+    IRenderedComponent<PixataDateInput<DateTime>> input = _ctx.Render<PixataDateInput<DateTime>>(p => p.Add(c => c.Value, new DateTime(2026, 10, 13)));
+
+    DateInputState first = input.InvokeAsync(() => input.Instance.OnInputFocus()).Result;
+    DateInputState second = input.InvokeAsync(() => input.Instance.OnKey("ArrowUp")).Result;
+    input.Render(p => p.Add(c => c.Value, new DateTime(2026, 1, 1)));
+    DateInputState pushed = (DateInputState)js.Calls.Last(c => c.Identifier == "setDateInputState").Args[1]!;
+
+    Assert.IsTrue(first.Version < second.Version);
+    Assert.IsTrue(second.Version < pushed.Version);
+    Assert.AreEqual("01/01/2026", pushed.Text);
   }
 
   [TestMethod]

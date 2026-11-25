@@ -192,6 +192,8 @@ export function clickElement(element) {
 // noticing clicks outside them, dragging, scrolling and keyboard navigation. The logic itself stays in C#
 
 const dateInputs = new WeakMap();
+// The version of the last state each input was given, so one that arrives late (see applyDateInputState) is ignored
+const dateInputVersions = new WeakMap();
 
 // Keys the date input handles itself. Anything else (Tab, shortcuts such as Ctrl+C) is left to the browser
 const dateInputKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete", "Home", "End"]);
@@ -200,6 +202,13 @@ function applyDateInputState(input, state) {
   if (!input || !state) {
     return;
   }
+  // The states are numbered in the order .NET made them. In WebAssembly, a reply can arrive after a newer state has been
+  // pushed, as the blur's does when a date is picked in the calendar, and would put the old date back in the input
+  const version = state.version ?? 0;
+  if (version < (dateInputVersions.get(input) ?? 0)) {
+    return;
+  }
+  dateInputVersions.set(input, version);
   input.value = state.text;
   if (document.activeElement === input && state.start >= 0) {
     input.setSelectionRange(state.start, state.end);
@@ -1098,6 +1107,69 @@ export function initSlider(input) {
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
   });
+}
+
+// Sets up a numeric text box with a Format: as soon as it gets the focus, its formatted text (such as "£60.00") is swapped
+// for the plain number it's edited as (data-pixata-edit-text), rather than when .NET gets round to it. Replacing the text
+// throws the browser's selection away, so the whole number is selected again if the whole text was, as it is when the box
+// is tabbed into, and typing replaces it rather than adding to it. With data-pixata-select-on-focus, the whole number is
+// selected however the box gets the focus, a click included. Returns true, so .NET knows it needn't swap the text itself
+export function initNumericTextBox(input) {
+  if (!input) {
+    return false;
+  }
+  if (input.pixataNumericTextBox) {
+    return true;
+  }
+  input.pixataNumericTextBox = true;
+  let pointerFocus = false;
+  let selectOnMouseUp = false;
+  // The formatted text taken out, and the plain number put in, so the formatted text can go back if the input is left as it
+  // was. .NET leaves its copy of the text alone when the input gets the focus, so it wouldn't put it back itself
+  let swappedOut = null;
+  let swappedIn = null;
+  input.addEventListener("pointerdown", () => {
+    pointerFocus = document.activeElement !== input;
+  });
+  input.addEventListener("focus", () => {
+    const fromPointer = pointerFocus;
+    pointerFocus = false;
+    const text = input.value;
+    const allSelected = text.length > 0 && input.selectionStart === 0 && input.selectionEnd === text.length;
+    const editText = input.dataset.pixataEditText;
+    const swap = editText !== undefined && editText !== text;
+    swappedOut = swap ? text : null;
+    swappedIn = swap ? editText : null;
+    if (swap) {
+      input.value = editText;
+    }
+    const selectOnFocus = input.dataset.pixataSelectOnFocus === "true";
+    if (fromPointer) {
+      // The browser puts the caret where the box was clicked once the focus has moved, so selecting now would be undone
+      selectOnMouseUp = selectOnFocus;
+    } else if (selectOnFocus || (swap && allSelected)) {
+      input.select();
+    }
+  });
+  input.addEventListener("blur", () => {
+    if (swappedOut !== null && input.value === swappedIn) {
+      input.value = swappedOut;
+    }
+    swappedOut = null;
+    selectOnMouseUp = false;
+  });
+  input.addEventListener("mouseup", e => {
+    if (!selectOnMouseUp) {
+      return;
+    }
+    selectOnMouseUp = false;
+    // Unless the user has dragged across some of the text, to select that
+    if (input.selectionStart === input.selectionEnd) {
+      e.preventDefault();
+      input.select();
+    }
+  });
+  return true;
 }
 
 // Scrolls each list box in the element so its selected option is in the middle, without scrolling the page, as

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 
 namespace Pixata.Blazor.Components;
 
@@ -17,6 +18,9 @@ namespace Pixata.Blazor.Components;
 /// nullable version of any of them
 /// </summary>
 public partial class PixataNumericTextBox<TValue> : IDisposable {
+  [Inject]
+  private IJSRuntime Js { get; set; } = null!;
+
   [CascadingParameter]
   private EditContext? EditContext { get; set; }
 
@@ -76,6 +80,14 @@ public partial class PixataNumericTextBox<TValue> : IDisposable {
   /// </summary>
   [Parameter]
   public string? Format { get; set; }
+
+  /// <summary>
+  /// Selects the whole number whenever the input gets the focus, a click included, so typing replaces it. Without it (the
+  /// default), the whole number is selected when the input is tabbed into, as the browser does for any text box, and a click
+  /// puts the caret where it was clicked. Telerik's NumericTextBox has the same parameter
+  /// </summary>
+  [Parameter]
+  public bool SelectOnFocus { get; set; }
 
   /// <summary>
   /// Shows the up and down spin buttons. Defaults to true
@@ -153,8 +165,12 @@ public partial class PixataNumericTextBox<TValue> : IDisposable {
   private bool _hasMin;
   private bool _hasMax;
   private bool _hasStep;
+  private ElementReference _input;
   private string _text = "";
   private bool _focused;
+  // Once the script is set up, it swaps the formatted text for the plain number the moment the input gets the focus, rather
+  // than .NET doing it (see OnFocus)
+  private bool _scriptSwapsText;
   private bool _invalidText;
   private decimal? _lastValue;
   private decimal? _valueAtFocus;
@@ -183,6 +199,10 @@ public partial class PixataNumericTextBox<TValue> : IDisposable {
 
   private string? WidthStyle =>
     Width is null ? null : $"width: {Width}";
+
+  // What the script puts in the input when it gets the focus. Only needed when the formatted text is different
+  private string? FocusText =>
+    Format is null ? null : EditText(CurrentNumber);
 
   private string EffectiveInputMode =>
     InputMode ?? (IsWholeNumber ? "numeric" : "decimal");
@@ -232,10 +252,22 @@ public partial class PixataNumericTextBox<TValue> : IDisposable {
     }
   }
 
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    if (firstRender) {
+      _scriptSwapsText = await PixataJs.Invoke(Js, "initNumericTextBox", false, _input);
+    }
+  }
+
   private void OnFocus() {
     _focused = true;
     _valueAtFocus = CurrentNumber;
-    _text = EditText(_valueAtFocus);
+    // Once the script is set up, it has already put the plain number in the input, keeping the selection, and puts the
+    // formatted text back if the input is left unchanged. The text is left as it was rendered here, as rendering the plain
+    // number as well would replace the input's text again: harmless in WebAssembly, but in Blazor Server that arrives a round
+    // trip later, when the user may have started typing, and would put the old number back over what they've typed
+    if (!_scriptSwapsText) {
+      _text = EditText(_valueAtFocus);
+    }
   }
 
   private async Task OnInputBlur(FocusEventArgs e) {
@@ -247,8 +279,11 @@ public partial class PixataNumericTextBox<TValue> : IDisposable {
     await RaiseChangeIfNeeded();
   }
 
-  private async Task OnInput(ChangeEventArgs e) {
-    _text = e.Value?.ToString() ?? "";
+  // Bound with @bind-value:set rather than @oninput, so that Blazor keeps its copy of the input's value in step with the
+  // browser's. Otherwise, in Blazor Server, the render for one key can arrive after the next key has been typed, and put the
+  // text back as it was, losing that key
+  private async Task OnInput(string? text) {
+    _text = text ?? "";
     if (_text.Trim() == "") {
       _invalidText = !IsNullable;
       if (IsNullable) {
