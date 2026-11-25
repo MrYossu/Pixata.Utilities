@@ -42,7 +42,7 @@ A [Nuget package](https://www.nuget.org/packages/Pixata.AspNetCore.Pdf.Playwrigh
 You can find more detail on the [project page](https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.AspNetCore.Pdf.Playwright).
 
 ## Pixata.Pdf
-Helpers for PDFs you already have. `PdfCombiner` joins several PDFs into one, keeping each page's size and orientation, such as a cover page your app made followed by a document the user uploaded. `PdfMarkupFlattener` draws the notes, highlights and drawings users add in `PixataPdfViewer` into a copy of a PDF. It uses PdfPig, which is Apache 2.0 licensed, so it needs no licence.
+Helpers for PDFs you already have. `PdfCombiner` joins several PDFs into one, keeping each page's size and orientation, such as a cover page your app made followed by a document the user uploaded. `PdfMarkupFlattener` draws the notes, highlights and drawings users add in `PixataPdfViewer` into a copy of a PDF. `PdfText` reads the text of each page, such as to check in a test that a document your app made says what it should. It uses PdfPig, which is Apache 2.0 licensed, so it needs no licence.
 
 A [Nuget package](https://www.nuget.org/packages/Pixata.Pdf/) is available for this project.
 
