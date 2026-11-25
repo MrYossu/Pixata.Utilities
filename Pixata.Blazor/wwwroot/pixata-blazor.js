@@ -682,26 +682,51 @@ export function autoFitColumns(gridId, keys) {
 
 // ---------- Virtual scrolling ----------
 
+const virtualScrolls = new Map();
+
 // Tells the grid where its content has been scrolled to, at most every 16ms, so it can render the rows and columns in view.
 // A timer is used rather than requestAnimationFrame, which doesn't run while the page isn't being drawn. It also tells the
 // grid once at the start, so it knows how big the content is
-export function initVirtualScroll(element, dotNet) {
+export function initVirtualScroll(element, dotNet, gridId) {
   if (!element) {
     return;
   }
-  let pending = false;
+  disposeVirtualScroll(gridId);
+  let timer = 0;
+  let disposed = false;
   const report = () => {
-    pending = false;
-    // Scrolling sideways in a right-to-left page gives a negative scrollLeft
-    dotNet.invokeMethodAsync("VirtualScrolled", element.scrollTop, Math.abs(element.scrollLeft), element.clientWidth, element.clientHeight);
-  };
-  element.addEventListener("scroll", () => {
-    if (!pending) {
-      pending = true;
-      setTimeout(report, 16);
+    timer = 0;
+    if (disposed) {
+      return;
     }
-  }, { passive: true });
-  new ResizeObserver(() => report()).observe(element);
+    // Scrolling sideways in a right-to-left page gives a negative scrollLeft. A call already on its way when the grid is
+    // disposed fails, which doesn't matter
+    dotNet.invokeMethodAsync("VirtualScrolled", element.scrollTop, Math.abs(element.scrollLeft), element.clientWidth, element.clientHeight)
+      .catch(() => { });
+  };
+  const scrolled = () => {
+    if (!timer) {
+      timer = setTimeout(report, 16);
+    }
+  };
+  element.addEventListener("scroll", scrolled, { passive: true });
+  const observer = new ResizeObserver(() => report());
+  observer.observe(element);
+  if (gridId) {
+    virtualScrolls.set(gridId, () => {
+      disposed = true;
+      clearTimeout(timer);
+      element.removeEventListener("scroll", scrolled);
+      observer.disconnect();
+    });
+  }
+}
+
+// Stops telling the grid about scrolling, before its reference is disposed. The observer fires as the content leaves the
+// page, and would otherwise call a reference that has gone ("There is no tracked object with id ...")
+export function disposeVirtualScroll(gridId) {
+  virtualScrolls.get(gridId)?.();
+  virtualScrolls.delete(gridId);
 }
 
 export function scrollContentTo(element, top) {

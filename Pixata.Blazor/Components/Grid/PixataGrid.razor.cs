@@ -438,6 +438,10 @@ public partial class PixataGrid<TItem> : IAsyncDisposable {
         if (_headerDragReady) {
           await _module.InvokeVoidAsync("disposeHeaderDrag", _gridId);
         }
+        // Before the grid's reference is disposed, or its scroll listener and resize observer would go on calling it
+        if (_virtualReady) {
+          await _module.InvokeVoidAsync("disposeVirtualScroll", _gridId);
+        }
         await _module.DisposeAsync();
       } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException) {
         // The circuit has gone
