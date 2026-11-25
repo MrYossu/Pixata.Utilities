@@ -186,6 +186,19 @@ public class PixataDatePicker_Tests {
   }
 
   [TestMethod]
+  public void DateInput_DateOnly_PastingTheSameDateWithATime_IsNotAChange() {
+    // The pasted time is lost in the DateOnly, so the value hasn't changed
+    int changes = 0;
+    IRenderedComponent<PixataDateInput<DateOnly>> input = _ctx.Render<PixataDateInput<DateOnly>>(p => p
+      .Add(c => c.Value, new DateOnly(2026, 10, 13))
+      .Add(c => c.ValueChanged, EventCallback.Factory.Create<DateOnly>(this, _ => changes++)));
+
+    input.InvokeAsync(() => input.Instance.OnPaste("13/10/2026 14:00")).Wait();
+
+    Assert.AreEqual(0, changes);
+  }
+
+  [TestMethod]
   public void DateInput_OtherTypes_Throw() =>
     Assert.ThrowsException<InvalidOperationException>(() => _ctx.Render<PixataDateInput<string>>());
 

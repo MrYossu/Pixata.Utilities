@@ -63,6 +63,13 @@ internal sealed class DateInputModel {
 
   public DateTime Max { get; set; } = new(2099, 12, 31, 23, 59, 59);
 
+  /// <summary>
+  /// True if the value is a time of day, as in the time picker. <see cref="Min"/> and <see cref="Max"/> then only compare the
+  /// time (and a <see cref="Min"/> later than <see cref="Max"/> is a range that goes over midnight), Up and Down go round
+  /// midnight rather than changing the date, and a pasted time keeps the date
+  /// </summary>
+  public bool TimeOfDayOnly { get; set; }
+
   public IReadOnlyList<Segment> Segments =>
     _segments;
 
@@ -93,7 +100,9 @@ internal sealed class DateInputModel {
       if (year is < 1 or > 9999 || day > DateTime.DaysInMonth(year, month)) {
         return null;
       }
-      int hour = HasType(SegmentType.Hour) ? Hour24(_hour!.Value, _pm ?? _base.Hour >= 12) : _base.Hour;
+      // A 24-hour clock's hour is used as it is. Only a 12-hour one needs AM or PM, which is that of the last value set if the
+      // format has no AM/PM
+      int hour = !HasType(SegmentType.Hour) ? _base.Hour : _twelveHour ? Hour24(_hour!.Value, _pm ?? _base.Hour >= 12) : _hour!.Value;
       if (!HasType(SegmentType.Hour) && HasType(SegmentType.AmPm)) {
         hour = _base.Hour % 12 + (_pm == true ? 12 : 0);
       }
@@ -105,7 +114,20 @@ internal sealed class DateInputModel {
   /// False if the user has typed something that isn't a complete date in range. An empty input counts as valid
   /// </summary>
   public bool IsValid =>
-    IsEmpty || (Value is DateTime value && value >= Min && value <= Max);
+    IsEmpty || (Value is DateTime value && InRange(value));
+
+  /// <summary>
+  /// Whether the date is between <see cref="Min"/> and <see cref="Max"/>, or for <see cref="TimeOfDayOnly"/>, the time is
+  /// </summary>
+  public bool InRange(DateTime value) =>
+    TimeOfDayOnly ? TimeInRange(value.TimeOfDay, Min.TimeOfDay, Max.TimeOfDay) : value >= Min && value <= Max;
+
+  /// <summary>
+  /// Whether a time is between two others, where a range whose start is after its end goes over midnight, so 22:00 to 06:00
+  /// includes 23:00 and 05:00
+  /// </summary>
+  internal static bool TimeInRange(TimeSpan time, TimeSpan min, TimeSpan max) =>
+    min <= max ? time >= min && time <= max : time >= min || time <= max;
 
   public string Text =>
     string.Concat(_segments.Select(Render));
@@ -249,7 +271,7 @@ internal sealed class DateInputModel {
     string format = string.Concat(_segments.Select(s => s.Type == SegmentType.Literal ? $"'{s.Format}'" : s.Format));
     if (DateTime.TryParseExact(text.Trim(), format, _culture, DateTimeStyles.AllowWhiteSpaces, out DateTime date)
         || DateTime.TryParse(text.Trim(), _culture, DateTimeStyles.AllowWhiteSpaces, out date)) {
-      SetValue(date);
+      SetValue(TimeOfDayOnly ? _base.Date + date.TimeOfDay : date);
       return true;
     }
     return false;
@@ -403,7 +425,7 @@ internal sealed class DateInputModel {
     Segment segment = CurrentSegment;
     _typed = "";
     if (IsComplete && Value is DateTime date) {
-      DateTime next = segment.Type switch {
+      DateTime next = TimeOfDayOnly ? StepTime(date, segment.Type, delta) : segment.Type switch {
         SegmentType.Day => date.AddDays(delta),
         SegmentType.Month => date.AddMonths(delta),
         SegmentType.Year => date.AddYears(delta),
@@ -412,7 +434,7 @@ internal sealed class DateInputModel {
         SegmentType.Second => date.AddSeconds(delta),
         _ => date.AddHours(date.Hour < 12 ? 12 : -12)
       };
-      if (next >= Min && next <= Max) {
+      if (InRange(next)) {
         SetValue(next);
       }
       return;
@@ -444,6 +466,19 @@ internal sealed class DateInputModel {
         _pm = _pm is null ? today.Hour >= 12 : !_pm;
         break;
     }
+  }
+
+  // A time of day goes round midnight, so 23:30 plus an hour is 00:30 on the same date, which isn't shown
+  private static DateTime StepTime(DateTime date, SegmentType type, int delta) {
+    TimeSpan change = type switch {
+      SegmentType.Hour => TimeSpan.FromHours(delta),
+      SegmentType.Minute => TimeSpan.FromMinutes(delta),
+      SegmentType.Second => TimeSpan.FromSeconds(delta),
+      SegmentType.AmPm => TimeSpan.FromHours(date.Hour < 12 ? 12 : -12),
+      _ => TimeSpan.Zero
+    };
+    long ticks = (date.TimeOfDay + change).Ticks % TimeSpan.TicksPerDay;
+    return date.Date.AddTicks(ticks < 0 ? ticks + TimeSpan.TicksPerDay : ticks);
   }
 
   private static int Wrap(int value, int min, int max) =>

@@ -8,8 +8,8 @@ namespace Pixata.Blazor.Tests;
 
 /// <summary>
 /// A page that shows a date picker (or range picker) bound to a date, and takes it off the page while it reloads after the
-/// date changes, until <see cref="Reload"/> completes. Supported: <see cref="PixataDatePicker{TValue}"/> and
-/// <see cref="PixataDateRangePicker{TValue}"/> of <see cref="DateTime"/>
+/// date changes, until <see cref="Reload"/> completes. Supported: <see cref="PixataDatePicker{TValue}"/>,
+/// <see cref="PixataDateRangePicker{TValue}"/> and <see cref="PixataTimePicker{TValue}"/> of <see cref="DateTime"/>
 /// </summary>
 public class RemovedOnChangeHost<TPicker> : ComponentBase where TPicker : IComponent {
   [Parameter]

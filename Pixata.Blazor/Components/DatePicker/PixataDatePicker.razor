@@ -167,8 +167,6 @@
   [Parameter]
   public string AmPmText { get; set; } = "AM/PM";
 
-  private static readonly Type UnderlyingType = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
-
   private ElementReference _wrapper;
   private ElementReference _popup;
   private PixataCalendar? _calendar;

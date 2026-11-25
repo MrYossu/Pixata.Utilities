@@ -245,6 +245,62 @@ public class DateInputModel_Tests {
   }
 
   [TestMethod]
+  public void TwentyFourHourFormat_TypingAMorningHour_IntoAnAfternoonTime() {
+    // The hour typed was taken as PM when the value set was, so 08 became 20:00
+    DateInputModel model = Model("dd/MM/yyyy HH:mm", new DateTime(2026, 3, 1, 14, 30, 0));
+
+    Keys(model, "ArrowRight", "ArrowRight", "ArrowRight", "0", "8");
+
+    Assert.AreEqual(new DateTime(2026, 3, 1, 8, 30, 0), model.Value);
+  }
+
+  [TestMethod]
+  public void TwentyFourHourFormat_TypingTwelve_IsMidday() {
+    DateInputModel model = Model("HH:mm", new DateTime(2026, 3, 1, 9, 0, 0));
+
+    Keys(model, "1", "2");
+
+    Assert.AreEqual(new DateTime(2026, 3, 1, 12, 0, 0), model.Value);
+  }
+
+  [TestMethod]
+  public void TimeOfDayOnly_MinAndMaxOnlyCompareTheTime() {
+    DateInputModel model = Model("HH:mm", new DateTime(2026, 3, 1, 12, 0, 0));
+    model.Min = new(1900, 1, 1, 9, 0, 0);
+    model.Max = new(1900, 1, 1, 17, 0, 0);
+
+    Assert.IsFalse(model.IsValid);
+    model.TimeOfDayOnly = true;
+    Assert.IsTrue(model.IsValid);
+    Keys(model, "1", "8");
+    Assert.IsFalse(model.IsValid);
+  }
+
+  [TestMethod]
+  public void TimeOfDayOnly_ARangeCanGoOverMidnight() {
+    TimeSpan min = new(22, 0, 0);
+    TimeSpan max = new(6, 0, 0);
+
+    Assert.IsTrue(DateInputModel.TimeInRange(new(23, 0, 0), min, max));
+    Assert.IsTrue(DateInputModel.TimeInRange(new(5, 0, 0), min, max));
+    Assert.IsFalse(DateInputModel.TimeInRange(new(12, 0, 0), min, max));
+  }
+
+  [TestMethod]
+  public void TimeOfDayOnly_UpAndDownGoRoundMidnight() {
+    DateInputModel model = Model("HH:mm", new DateTime(2026, 3, 1, 23, 45, 0));
+    model.TimeOfDayOnly = true;
+
+    Keys(model, "ArrowRight", "ArrowUp", "ArrowUp");
+
+    Assert.AreEqual(new DateTime(2026, 3, 1, 23, 47, 0), model.Value);
+    Keys(model, "ArrowLeft", "ArrowUp");
+    Assert.AreEqual(new DateTime(2026, 3, 1, 0, 47, 0), model.Value);
+    Keys(model, "ArrowDown");
+    Assert.AreEqual(new DateTime(2026, 3, 1, 23, 47, 0), model.Value);
+  }
+
+  [TestMethod]
   public void Paste_TakesAWholeDate() {
     DateInputModel model = Model();
 

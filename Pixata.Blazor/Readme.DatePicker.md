@@ -1,8 +1,8 @@
-# Date picker, date range picker, date input and calendar
+# Date picker, date range picker, time picker, date input and calendar
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataDatePicker`, `PixataDateRangePicker`, `PixataDateInput` and `PixataCalendar` are a date picker (an input with a calendar popup), a date range picker (start and end inputs with a calendar popup that picks both), a date input on its own, and a calendar on its own. They render on the client or the server, so they can be used in WASM as well as Blazor Server apps. The [date picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor) and [date range picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDateRangePickerSample.razor) show each one.
+`PixataDatePicker`, `PixataDateRangePicker`, `PixataTimePicker`, `PixataDateInput` and `PixataCalendar` are a date picker (an input with a calendar popup), a date range picker (start and end inputs with a calendar popup that picks both), a time picker (an input with a list of times), a date input on its own, and a calendar on its own. They render on the client or the server, so they can be used in WASM as well as Blazor Server apps. The [date picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor), [date range picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDateRangePickerSample.razor) and [time picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataTimePickerSample.razor) show each one.
 
 They are in the `Pixata.Blazor.Components` namespace, and need [the stylesheet](Readme.Styling.md). They use a small JavaScript module (`_content/Pixata.Blazor/pixata-blazor.js`), which they load themselves, so there's nothing to add to your page.
 
@@ -10,6 +10,8 @@ They are in the `Pixata.Blazor.Components` namespace, and need [the stylesheet](
 <PixataDatePicker @bind-Value="_order.Due" Min="DateTime.Today" />
 
 <PixataDateRangePicker @bind-StartValue="_booking.From" @bind-EndValue="_booking.To" />
+
+<PixataTimePicker @bind-Value="_settings.DayStarts" Format="HH:mm" />
 
 <PixataDateInput @bind-Value="_dateOfBirth" Format="dd/MM/yyyy" />
 
@@ -181,6 +183,48 @@ The range picker works inside an `EditForm`. Bind with `@bind-StartValue` and `@
 
 Below 576 pixels wide, the calendar shows one month instead of two. On a touch screen, the inputs and the days in the calendar are bigger, so they are easier to tap.
 
+## Time picker
+
+`PixataTimePicker` is a time input with a button that opens a list of times. It replaces Telerik's `TimePicker`, with the same parameters where they apply, so markup moves across by renaming the tag...
+
+```razor
+<PixataTimePicker @bind-Value="_dayStarts" Format="HH:mm" Width="120px" Id="day-starts" />
+
+@code {
+  private TimeOnly _dayStarts = new(9, 0);
+}
+```
+
+`TValue` can be `TimeOnly`, `DateTime`, or a nullable version of either. A `DateTime` keeps its date, so only the time changes. A `DateTime?` that was null gets today's date.
+
+The time is typed a part at a time, as a date is (see [typing a date](#typing-a-date)), so clicking the hour and typing `9` and `30` gives 09:30. Up and Down change the selected part, and go round midnight, so 23:30 plus an hour is 00:30, and the date of a `DateTime` stays as it was. Pasting a time works too.
+
+The list goes from `Min` to `Max`, `Step` minutes apart, so with the defaults it has every half hour from 00:00 to 23:30. It opens at the value, or the time nearest it, or the time now if there's no value. Clicking a time picks it and closes the list. Alt+Down in the input opens it, the arrow keys, Page Up, Page Down, Home and End move through it, Enter or Space picks the time, and Escape or Alt+Up closes it, as does clicking anywhere else. Any time can still be typed, whatever the `Step`.
+
+### Parameters
+
+| Parameter | Type | What it does |
+| --- | --- | --- |
+| `Value` | `TValue` | The time. Can be two-way bound |
+| `Format` | `string` | A .NET time format, such as `HH:mm` or `h:mm tt`. Defaults to `t`, the culture's short time. The list uses it too |
+| `Min`, `Max` | `DateTime` | The range of times allowed, as in Telerik's. Only the time counts, and the date is ignored. Default to 00:00 and 23:59:59. A `Min` later than `Max` is a range that goes over midnight, so 22:00 to 06:00 is a night shift |
+| `Step` | `int` | The gap in minutes between the times in the list. Defaults to 30 |
+| `Placeholder` | `string` | Shown when the value is null and the input doesn't have focus |
+| `ShowClearButton` | `bool` | Shows an x that clears the value. Only for nullable types |
+| `Enabled`, `ReadOnly` | `bool` | As you'd expect. Neither opens the list |
+| `AutoSwitchParts` | `bool` | Whether the selection moves on once a part is complete. Defaults to true |
+| `Size` | `string` | `sm`, `md` (the default) or `lg`. See `PixataThemeConstants.Size` |
+| `Width`, `Class`, `Id`, `TabIndex`, `InputMode`, `PopupClass` | | Passed to the component's elements |
+| `ListText` | `string` | The accessible name of the list, for translating. Defaults to "Times" |
+| `OnChange` | `EventCallback<object?>` | Fires when the user has finished changing the value: when they press Enter, leave the input, or pick a time from the list |
+| `OnBlur`, `OnOpen`, `OnClose` | `EventCallback` | Fire when the input loses focus, and when the list opens and closes |
+
+It has `Open()`, `Close()` and `FocusAsync()` methods.
+
+A time typed outside `Min` and `Max` shows the input as invalid, as a date does, and a nullable value becomes null until it's fixed. Using a `DateOnly` throws an `InvalidOperationException`, as it has no time.
+
+It works inside an `EditForm` in the same way as the date picker (see [forms](#forms)), and inside a `<fieldset disabled>`.
+
 ## Calendar
 
 | Parameter | Type | What it does |
@@ -232,8 +276,19 @@ The colours and sizes come from these custom properties, which you can override 
 | `--pixata-datepicker-popup-shadow` | A soft two-layer shadow | The calendar popup's shadow |
 | `--pixata-datepicker-border-radius` | `4px` | Rounded corners |
 | `--pixata-datepicker-range-bg` | `--pixata-datepicker-primary` at 15% | The shading of the days in a range |
+| `--pixata-timepicker-list-max-height` | `16em` | The tallest the time picker's list gets before it scrolls |
 
-All the classes start with `pixata-blazor-dateinput-`, `pixata-blazor-datepicker-`, `pixata-blazor-daterangepicker-` or `pixata-blazor-calendar-` (for example `pixata-blazor-calendar-title`, `pixata-blazor-calendar-selected` and `pixata-blazor-datepicker-popup`), so you can target any part of them in your own CSS.
+All the classes start with `pixata-blazor-dateinput-`, `pixata-blazor-datepicker-`, `pixata-blazor-daterangepicker-`, `pixata-blazor-timepicker-` or `pixata-blazor-calendar-` (for example `pixata-blazor-calendar-title`, `pixata-blazor-calendar-selected` and `pixata-blazor-datepicker-popup`), so you can target any part of them in your own CSS.
+
+The time picker has the date picker's classes (so it looks the same), and these of its own...
+
+| Class | What it is |
+| --- | --- |
+| `pixata-blazor-timepicker` | The whole component |
+| `pixata-blazor-timepicker-button` | The button that opens the list |
+| `pixata-blazor-timepicker-popup` | The popup (which also has `pixata-blazor-datepicker-popup`) |
+| `pixata-blazor-timepicker-list` | The list of times |
+| `pixata-blazor-timepicker-option`, `pixata-blazor-timepicker-option-selected` | A time in the list, and the one that is the value |
 
 The date range picker's parts are...
 

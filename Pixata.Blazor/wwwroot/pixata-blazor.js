@@ -251,7 +251,11 @@ export function initDateInput(input, dotNet) {
   const call = async (method, ...args) => applyDateInputState(input, await dotNet.invokeMethodAsync(method, ...args));
   const handlers = {
     keydown: e => {
-      // Alt+arrows open and close a picker's popup, and Enter and Escape are handled in C#, so they're left alone here
+      // Alt+arrows open and close a picker's popup, and Enter and Escape are handled in C#, so they're left alone here. The
+      // browser would scroll the page on Alt+Up and Alt+Down, moving the input away from the popup it's opening
+      if (e.altKey && (e.key === "ArrowDown" || e.key === "ArrowUp") && input.hasAttribute("aria-haspopup")) {
+        e.preventDefault();
+      }
       if (e.altKey || e.ctrlKey || e.metaKey || e.key === "Tab" || e.key === "Enter" || e.key === "Escape" || e.key === "Unidentified") {
         return;
       }

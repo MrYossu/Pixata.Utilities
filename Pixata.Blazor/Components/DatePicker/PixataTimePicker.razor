@@ -1,0 +1,334 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+@inherits PixataDateInputBase<TValue>
+@using System.Globalization
+@using Microsoft.JSInterop
+
+@* A time input with a button that opens a list of times, as a replacement for Telerik's TimePicker. The input is typed into a
+   part at a time, as the date input is *@
+<span @ref="_wrapper" class="@WrapperClass" style="@WidthStyle">
+  <input @ref="InputElement"
+         class="pixata-blazor-dateinput-input"
+         id="@Id"
+         type="text"
+         role="combobox"
+         value="@InitialText"
+         placeholder="@Placeholder"
+         inputmode="@EffectiveInputMode"
+         autocomplete="off"
+         disabled="@(!Enabled)"
+         readonly="@ReadOnly"
+         tabindex="@TabIndex"
+         aria-haspopup="listbox"
+         aria-expanded="@(_open ? "true" : "false")"
+         aria-controls="@(_open ? _listId : null)"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         @onkeydown="OnInputKeyDown" />
+  @if (ShowClearButton && IsNullable && HasValue && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-dateinput-clear" role="button" title="Clear" aria-label="Clear" @onclick="Clear">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 7.3 3.6-3.6.7.7L8.7 8l3.6 3.6-.7.7L8 8.7l-3.6 3.6-.7-.7L7.3 8 3.7 4.4l.7-.7z" /></svg>
+    </span>
+  }
+  <button type="button"
+          class="pixata-blazor-datepicker-button pixata-blazor-timepicker-button"
+          tabindex="-1"
+          aria-label="Open"
+          disabled="@(!Enabled || ReadOnly)"
+          @onclick="Toggle">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 1 0 8 1zm0 1a6 6 0 1 1 0 12A6 6 0 1 1 8 2z" />
+      <path d="M7.5 4h1v3.71l2.6 1.5-.5.87-3.1-1.79z" />
+    </svg>
+  </button>
+  @if (_open) {
+    <div @ref="_popup" class="@DatePickerCss.Join("pixata-blazor-datepicker-popup", "pixata-blazor-timepicker-popup", PopupClass)">
+      <div @ref="_list" id="@_listId" class="pixata-blazor-timepicker-list" role="listbox" aria-label="@ListText" @onkeydown="OnListKeyDown">
+        @for (int i = 0; i < _times.Count; i++) {
+          TimeSpan time = _times[i];
+          bool selected = time == SelectedTime;
+          <button type="button"
+                  role="option"
+                  class="@OptionClass(selected)"
+                  aria-selected="@(selected ? "true" : "false")"
+                  tabindex="@(i == _active ? "0" : "-1")"
+                  @onclick="() => Pick(time)">@TimeText(time)</button>
+        }
+      </div>
+    </div>
+  }
+</span>
+
+@code {
+  /// <summary>
+  /// The gap in minutes between the times in the popup's list, which starts at <see cref="PixataDateInputBase{TValue}.Min"/>.
+  /// Defaults to 30. Any time can still be typed
+  /// </summary>
+  [Parameter]
+  public int Step { get; set; } = 30;
+
+  /// <summary>
+  /// A CSS class for the popup
+  /// </summary>
+  [Parameter]
+  public string? PopupClass { get; set; }
+
+  [Parameter]
+  public EventCallback OnOpen { get; set; }
+
+  [Parameter]
+  public EventCallback OnClose { get; set; }
+
+  /// <summary>
+  /// The accessible name of the list of times, for translating. Defaults to "Times"
+  /// </summary>
+  [Parameter]
+  public string ListText { get; set; } = "Times";
+
+  // The date a TimeOnly is given while the input works with it, which is never shown. It isn't the earliest date there is, so
+  // the arrow keys can't go out of DateTime's range
+  private static readonly DateTime TimeOnlyDate = new(2000, 1, 1);
+  private static readonly TimeSpan OneDay = TimeSpan.FromDays(1);
+
+  private readonly string _listId = $"pixata-timepicker-{Guid.NewGuid():N}";
+  private ElementReference _wrapper;
+  private ElementReference _popup;
+  private ElementReference _list;
+  private DotNetObjectReference<PixataTimePicker<TValue>>? _pickerRef;
+  private bool _open;
+  private bool _justOpened;
+  private bool _focusActive;
+  private bool _formatSet;
+  private List<TimeSpan> _times = [];
+  private int _active;
+
+  protected override Type[] SupportedTypes =>
+    [typeof(TimeOnly), typeof(DateTime)];
+
+  protected override bool TimeOfDayOnly =>
+    true;
+
+  // The culture's short time, unless the page sets a Format
+  protected override string EffectiveFormat =>
+    _formatSet ? Format : "t";
+
+  private string WrapperClass =>
+    DatePickerCss.Join("pixata-blazor-dateinput", "pixata-blazor-datepicker", "pixata-blazor-timepicker", SizeClass,
+                       IsInvalid ? "pixata-blazor-dateinput-invalid" : null, Enabled ? null : "pixata-blazor-dateinput-disabled",
+                       _open ? "pixata-blazor-datepicker-open" : null, Class);
+
+  private string? WidthStyle =>
+    Width is null ? null : $"width: {Width}";
+
+  private TimeSpan? SelectedTime =>
+    CurrentDate?.TimeOfDay;
+
+  private string TimeText(TimeSpan time) =>
+    (TimeOnlyDate + time).ToString(EffectiveFormat, CultureInfo.CurrentCulture);
+
+  private static string OptionClass(bool selected) =>
+    DatePickerCss.Join("pixata-blazor-timepicker-option", selected ? "pixata-blazor-timepicker-option-selected" : null);
+
+  public override Task SetParametersAsync(ParameterView parameters) {
+    _formatSet |= parameters.TryGetValue(nameof(Format), out string? _);
+    return base.SetParametersAsync(parameters);
+  }
+
+  protected override DateTime? ToModelValue(TValue? value) => value switch {
+    TimeOnly time => TimeOnlyDate + time.ToTimeSpan(),
+    DateTime dateTime => dateTime,
+    _ => null
+  };
+
+  // A DateTime keeps its date, which is today's if it was null
+  protected override TValue? FromModelValue(DateTime? date) {
+    if (date is not DateTime value) {
+      return default;
+    }
+    object result = UnderlyingType == typeof(TimeOnly) ? TimeOnly.FromDateTime(value) : value;
+    return (TValue)result;
+  }
+
+  /// <summary>
+  /// The times in the list: from <paramref name="min"/> to <paramref name="max"/>, <paramref name="step"/> minutes apart.
+  /// A <paramref name="min"/> later than <paramref name="max"/> goes over midnight
+  /// </summary>
+  internal static List<TimeSpan> Times(TimeSpan min, TimeSpan max, int step) {
+    TimeSpan gap = TimeSpan.FromMinutes(Math.Max(1, step));
+    TimeSpan span = max >= min ? max - min : max - min + OneDay;
+    List<TimeSpan> times = [];
+    for (TimeSpan offset = TimeSpan.Zero; offset <= span && offset < OneDay; offset += gap) {
+      TimeSpan time = min + offset;
+      times.Add(time >= OneDay ? time - OneDay : time);
+    }
+    return times;
+  }
+
+  /// <summary>
+  /// The index of the time in the list nearest to <paramref name="target"/>, going round midnight, or -1 if the list is empty
+  /// </summary>
+  internal static int NearestIndex(List<TimeSpan> times, TimeSpan target) {
+    int nearest = -1;
+    TimeSpan best = TimeSpan.MaxValue;
+    for (int i = 0; i < times.Count; i++) {
+      TimeSpan distance = (times[i] - target).Duration();
+      if (distance > OneDay / 2) {
+        distance = OneDay - distance;
+      }
+      if (distance < best) {
+        best = distance;
+        nearest = i;
+      }
+    }
+    return nearest;
+  }
+
+  /// <summary>
+  /// Opens the list of times
+  /// </summary>
+  public async Task Open() {
+    if (_open || !Enabled || ReadOnly) {
+      return;
+    }
+    _times = Times(Min.TimeOfDay, Max.TimeOfDay, Step);
+    // The list starts at the time nearest the value, or the time now if there isn't one
+    _active = NearestIndex(_times, SelectedTime ?? DateTime.Now.TimeOfDay);
+    _open = true;
+    _justOpened = true;
+    await OnOpen.InvokeAsync();
+    StateHasChanged();
+  }
+
+  /// <summary>
+  /// Closes the list of times
+  /// </summary>
+  public async Task Close() {
+    // Cleared even when closed, in case the popup is closed before it has been rendered
+    _justOpened = false;
+    _focusActive = false;
+    if (!_open) {
+      return;
+    }
+    _open = false;
+    // The picker may have gone from the page, if the page's handler for the time just picked removed it
+    await InvokeModule("closePopup", _popup);
+    await OnClose.InvokeAsync();
+    StateHasChanged();
+  }
+
+  [JSInvokable]
+  public async Task ClosePopup() =>
+    await Close();
+
+  protected override async Task OnAfterRenderAsync(bool firstRender) {
+    await base.OnAfterRenderAsync(firstRender);
+    if (!_open || Module is null || Disposed) {
+      return;
+    }
+    if (_justOpened) {
+      _justOpened = false;
+      _focusActive = true;
+      _pickerRef ??= DotNetObjectReference.Create(this);
+      await InvokeModule("openPopup", _wrapper, _popup, _pickerRef);
+      // The arrow keys move around the list, rather than scrolling it
+      await InvokeModule("preventNavigationKeys", _list);
+      await InvokeModule("scrollSelectedOptionsIntoView", _popup);
+    }
+    // The keyboard focus goes to the time the list is on, so the arrow keys move from there
+    if (_focusActive) {
+      _focusActive = false;
+      await InvokeModule("focusSelector", _list, ".pixata-blazor-timepicker-option[tabindex='0']");
+    }
+  }
+
+  private async Task Toggle() {
+    if (_open) {
+      await CloseAndFocus();
+    } else {
+      await Open();
+    }
+  }
+
+  private async Task CloseAndFocus() {
+    await Close();
+    await FocusAsync();
+  }
+
+  private async Task Pick(TimeSpan time) {
+    await SetValue((CurrentDate ?? DateTime.Today).Date + time);
+    await CloseAndFocus();
+    await RaiseChangeIfNeeded();
+  }
+
+  private void MoveTo(int index) {
+    if (_times.Count == 0) {
+      return;
+    }
+    _active = Math.Clamp(index, 0, _times.Count - 1);
+    _focusActive = true;
+  }
+
+  // Up and Down move through the list, Enter or Space picks the time, and Escape or Alt+Up closes it, as in Telerik's
+  // drop-downs. Tab closes it and lets the focus move on
+  private async Task OnListKeyDown(KeyboardEventArgs e) {
+    switch (e.Key) {
+      case "ArrowUp" when e.AltKey:
+      case "Escape":
+        await CloseAndFocus();
+        break;
+      case "ArrowDown":
+        MoveTo(_active + 1);
+        break;
+      case "ArrowUp":
+        MoveTo(_active - 1);
+        break;
+      case "PageDown":
+        MoveTo(_active + 5);
+        break;
+      case "PageUp":
+        MoveTo(_active - 5);
+        break;
+      case "Home":
+        MoveTo(0);
+        break;
+      case "End":
+        MoveTo(_times.Count - 1);
+        break;
+      case "Enter" or " " when _active >= 0 && _active < _times.Count:
+        await Pick(_times[_active]);
+        break;
+      case "Tab":
+        await Close();
+        break;
+    }
+  }
+
+  // Alt+Down opens the list, and Alt+Up or Escape closes it, as in Telerik's time picker
+  private async Task OnInputKeyDown(KeyboardEventArgs e) {
+    switch (e.Key) {
+      case "ArrowDown" when e.AltKey:
+        await Open();
+        break;
+      case "ArrowUp" when e.AltKey:
+      case "Escape":
+        await Close();
+        break;
+      case "Enter":
+        await RaiseChangeIfNeeded();
+        break;
+    }
+  }
+
+  public override async ValueTask DisposeAsync() {
+    if (_open && Module is not null) {
+      try {
+        await Module.InvokeVoidAsync("closePopup", _popup);
+      } catch (JSException) {
+        // The popup has already gone from the page
+      } catch (Exception ex) when (ex is JSDisconnectedException or OperationCanceledException or ObjectDisposedException) {
+        // The circuit has gone
+      }
+    }
+    _pickerRef?.Dispose();
+    await base.DisposeAsync();
+  }
+}
