@@ -12,7 +12,7 @@
     <Copyright>Copyright 2026 Pixata Ltd</Copyright>
     <ProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf.Documents</ProjectUrl>
     <PackageProjectUrl>https://github.com/MrYossu/Pixata.Utilities/tree/master/Pixata.Pdf.Documents</PackageProjectUrl>
-    <PackageIcon>pdf.png</PackageIcon>
+    <PackageIcon>ordinateuroff.png</PackageIcon>
     <PackageTags>C# PDF convert Word docx RTF HTML image PNG JPEG CV</PackageTags>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="pdf.png" Pack="true" PackagePath="\" />
+    <None Include="ordinateuroff.png" Pack="true" PackagePath="\" />
     <None Include="Readme.md" Pack="True" PackagePath="\" />
     <!-- The fonts' licence, which has to go with them -->
     <None Include="Fonts\OFL.txt" Pack="true" PackagePath="\" />
