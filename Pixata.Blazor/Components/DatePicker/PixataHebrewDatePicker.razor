@@ -1,0 +1,73 @@
+@namespace Pixata.Blazor.Components
+@typeparam TValue
+@inherits PixataInputBase<TValue>
+
+@*
+  A date picker that shows Hebrew dates as well as Gregorian ones, and shades Shabbos, Yom Tov, other non-working days and bank
+  holidays, as Pixata.Blazor.TelerikComponents' TelerikHebrewDatePicker does. The text box shows the date (Hebrew, Gregorian or
+  both) and can't be typed in; the date is picked from the calendar, which is PixataCalendar with a DayInfo
+*@
+<span @ref="_wrapper" class="@WrapperClass" style="@WidthStyle">
+  <input @ref="_input"
+         @attributes="AdditionalAttributes"
+         class="pixata-blazor-dateinput-input pixata-blazor-hebrewdatepicker-input"
+         id="@Id"
+         type="text"
+         role="combobox"
+         readonly
+         value="@Text"
+         placeholder="@Placeholder"
+         autocomplete="off"
+         disabled="@(!Enabled)"
+         tabindex="@TabIndex"
+         aria-label="@AriaLabel"
+         aria-haspopup="dialog"
+         aria-expanded="@(_open ? "true" : "false")"
+         aria-controls="@(_open ? PopupId : null)"
+         aria-invalid="@(IsInvalid ? "true" : null)"
+         @onclick="OpenFromInput"
+         @onfocus="OnInputFocus"
+         @onblur="() => _refocusing = false"
+         @onkeydown="OnInputKeyDown" />
+  @if (ShowClearButton && IsNullable && CurrentDate is not null && Enabled && !ReadOnly) {
+    <span class="pixata-blazor-dateinput-clear" role="button" title="@ClearText" aria-label="@ClearText" @onclick="Clear">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 7.3 3.6-3.6.7.7L8.7 8l3.6 3.6-.7.7L8 8.7l-3.6 3.6-.7-.7L7.3 8 3.7 4.4l.7-.7z" /></svg>
+    </span>
+  }
+  <button type="button"
+          class="pixata-blazor-datepicker-button"
+          tabindex="-1"
+          aria-label="@OpenText"
+          disabled="@(!Enabled || ReadOnly)"
+          @onclick="Toggle">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 1h1v2h4V1h1v2h3v12H2V3h3zm8 5H3v8h10zM3 5h10V4H3zm1 2h2v2H4zm3 0h2v2H7zm3 0h2v2h-2zm-6 3h2v2H4zm3 0h2v2H7z" /></svg>
+  </button>
+  <PixataPopup Visible="_open"
+               AnchorElement="_wrapper"
+               MatchAnchorWidth="false"
+               Align="@(OpenOnRight ? "end" : "start")"
+               Id="@PopupId"
+               Role="dialog"
+               AriaLabel="@AriaLabel"
+               Class="@PixataCss.Classes("pixata-blazor-hebrewdatepicker-popup", PopupClass)"
+               OnOutsideClick="Close">
+    <div class="pixata-blazor-hebrewdatepicker-content" @onkeydown="PopupKeyDown">
+      @if (_calendarView == PixataCalendarView.Month && PixataHebrewDates.MonthsOf(_calendarDate.Year, _calendarDate.Month) is { Length: > 0 } months) {
+        <div class="pixata-blazor-hebrewdatepicker-months" dir="rtl" lang="he">@months</div>
+      }
+      <PixataCalendar @ref="_calendar"
+                      Value="CurrentDate"
+                      ValueChanged="Pick"
+                      Date="_calendarDate"
+                      DateChanged="date => _calendarDate = date"
+                      View="_calendarView"
+                      ViewChanged="view => _calendarView = view"
+                      Min="EffectiveMin"
+                      Max="EffectiveMax"
+                      DisabledDates="DisabledDates"
+                      DayInfo="DayInfo"
+                      ShowWeekNumbers="ShowWeekNumbers"
+                      OnEscape="CloseAndFocus" />
+    </div>
+  </PixataPopup>
+</span>

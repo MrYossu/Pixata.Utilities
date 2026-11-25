@@ -1,0 +1,109 @@
+@page "/pixata-hebrewdatepicker"
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+
+<SitePageTitle>Pixata Hebrew date picker</SitePageTitle>
+
+<h3>Pixata Hebrew date picker</h3>
+
+<p><code>PixataHebrewDatePicker</code> is a replacement for <code>TelerikHebrewDatePicker</code> that doesn't need Telerik. The text box shows the Hebrew date, the Gregorian date or both, and the calendar can show the Hebrew day under each Gregorian one, and shade Shabbos, Yom Tov, other non-working days and bank holidays. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#hebrew-date-picker">the documentation</a>.</p>
+
+<ComponentSample Title="Shabbos, Yom Tov and bank holidays">
+  <Description>
+    <p>All three kinds of day are shaded, each day has its Hebrew date under it, and hovering over a day shows the Hebrew date and what the day is. The switches below change the parameters.</p>
+  </Description>
+  <ChildContent>
+    <PixataHebrewDatePicker @bind-Value="_date"
+                            Id="hebrew-dp"
+                            InputDisplay="_inputDisplay"
+                            ShowSecondaryDates="_showSecondaryDates"
+                            ShowSecondaryDatesInBrackets="_inBrackets"
+                            ShowTooltips="_showTooltips"
+                            IncludeShabbosOrYomTov="_includeShabbosOrYomTov"
+                            IncludeOtherNonWorkDays="_includeOtherNonWorkDays"
+                            IncludeBankHolidays="_includeBankHolidays"
+                            ClashPriority="_clashPriority"
+                            OpenOnFocus="_openOnFocus"
+                            OpenOnRight="_openOnRight" />
+    <p>Value: <span id="hebrew-dp-value">@_date.ToString("d MMMM yyyy", CultureInfo.CurrentCulture)</span></p>
+    <div class="pixata-hebrew-sample-options">
+      <span>Text box shows</span>
+      <PixataRadioGroup Data="Enum.GetValues<PixataDateInputDisplay>()" @bind-Value="_inputDisplay" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Text box shows" />
+      <span>When a bank holiday clashes</span>
+      <PixataRadioGroup Data="Enum.GetValues<PixataBankHolidayClashPriority>()" @bind-Value="_clashPriority" Layout="PixataRadioGroupLayout.Horizontal" AriaLabel="Clash priority" />
+    </div>
+    <div class="pixata-hebrew-sample-switches">
+      <span><PixataSwitch Id="hebrew-secondary" @bind-Value="_showSecondaryDates" Size="sm" /> <label for="hebrew-secondary">Hebrew dates in the calendar</label></span>
+      <span><PixataSwitch Id="hebrew-brackets" @bind-Value="_inBrackets" Size="sm" /> <label for="hebrew-brackets">In brackets</label></span>
+      <span><PixataSwitch Id="hebrew-tooltips" @bind-Value="_showTooltips" Size="sm" /> <label for="hebrew-tooltips">Tooltips</label></span>
+      <span><PixataSwitch Id="hebrew-shabbos" @bind-Value="_includeShabbosOrYomTov" Size="sm" /> <label for="hebrew-shabbos">Shabbos and Yom Tov</label></span>
+      <span><PixataSwitch Id="hebrew-other" @bind-Value="_includeOtherNonWorkDays" Size="sm" /> <label for="hebrew-other">Other non-working days</label></span>
+      <span><PixataSwitch Id="hebrew-bank" @bind-Value="_includeBankHolidays" Size="sm" /> <label for="hebrew-bank">Bank holidays</label></span>
+      <span><PixataSwitch Id="hebrew-focus" @bind-Value="_openOnFocus" Size="sm" /> <label for="hebrew-focus">Open on focus</label></span>
+      <span><PixataSwitch Id="hebrew-right" @bind-Value="_openOnRight" Size="sm" /> <label for="hebrew-right">Open on the right</label></span>
+    </div>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="A nullable DateOnly in a form, with your own colours">
+  <Description>
+    <p>The value is a <code>DateOnly?</code>, so there is a clear button and the placeholder shows when there is no date. The picker is validated as the other inputs are.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_form">
+      <DataAnnotationsValidator />
+      <label for="hebrew-dp-form">Date</label>
+      <PixataHebrewDatePicker @bind-Value="_form.Date"
+                              Id="hebrew-dp-form"
+                              InputDisplay="PixataDateInputDisplay.Both"
+                              Width="360px"
+                              IncludeShabbosOrYomTov="true"
+                              ShabbosOrYomTovBgColour="#f3d9b1"
+                              IncludeBankHolidays="true"
+                              BankHolidayBgColour="#cfe8fc"
+                              ShowTooltips="true" />
+      <ValidationMessage For="() => _form.Date" />
+      <div class="mt-2">
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      </div>
+    </EditForm>
+    <p>Value: <span id="hebrew-dp-form-value">@(_form.Date?.ToString("d MMMM yyyy", CultureInfo.CurrentCulture) ?? "null")</span></p>
+  </ChildContent>
+</ComponentSample>
+
+<style>
+  .pixata-hebrew-sample-options {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: .5rem 1rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .pixata-hebrew-sample-switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    margin-top: 1rem;
+  }
+</style>
+
+@code {
+  private DateTime _date = new(2026, 9, 14);
+  private PixataDateInputDisplay _inputDisplay = PixataDateInputDisplay.Hebrew;
+  private PixataBankHolidayClashPriority _clashPriority = PixataBankHolidayClashPriority.HebrewFirst;
+  private bool _showSecondaryDates = true;
+  private bool _inBrackets;
+  private bool _showTooltips = true;
+  private bool _includeShabbosOrYomTov = true;
+  private bool _includeOtherNonWorkDays = true;
+  private bool _includeBankHolidays = true;
+  private bool _openOnFocus;
+  private bool _openOnRight;
+  private readonly SampleForm _form = new();
+
+  private class SampleForm {
+    [Required(ErrorMessage = "Please pick a date")]
+    public DateOnly? Date { get; set; }
+  }
+}

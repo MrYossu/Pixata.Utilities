@@ -1,8 +1,8 @@
-# Date picker, date range picker, time picker, date input and calendar
+# Date picker, date range picker, time picker, Hebrew date picker, date input and calendar
 
 >Part of [Pixata.Blazor](Readme.md)
 
-`PixataDatePicker`, `PixataDateRangePicker`, `PixataTimePicker`, `PixataDateInput` and `PixataCalendar` are a date picker (an input with a calendar popup), a date range picker (start and end inputs with a calendar popup that picks both), a time picker (an input with a list of times), a date input on its own, and a calendar on its own. They render on the client or the server, so they can be used in WASM as well as Blazor Server apps. The [date picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor), [date range picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDateRangePickerSample.razor) and [time picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataTimePickerSample.razor) show each one.
+`PixataDatePicker`, `PixataDateRangePicker`, `PixataTimePicker`, `PixataHebrewDatePicker`, `PixataDateInput` and `PixataCalendar` are a date picker (an input with a calendar popup), a date range picker (start and end inputs with a calendar popup that picks both), a time picker (an input with a list of times), a date picker that shows Hebrew dates and shades Shabbos, Yom Tov and bank holidays, a date input on its own, and a calendar on its own. They render on the client or the server, so they can be used in WASM as well as Blazor Server apps. The [date picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDatePickerSample.razor), [date range picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataDateRangePickerSample.razor) [time picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataTimePickerSample.razor) and [Hebrew date picker sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataHebrewDatePickerSample.razor) show each one.
 
 They are in the `Pixata.Blazor.Components` namespace, and need [the stylesheet](Readme.Styling.md). They use a small JavaScript module (`_content/Pixata.Blazor/pixata-blazor.js`), which they load themselves, so there's nothing to add to your page.
 
@@ -12,6 +12,8 @@ They are in the `Pixata.Blazor.Components` namespace, and need [the stylesheet](
 <PixataDateRangePicker @bind-StartValue="_booking.From" @bind-EndValue="_booking.To" />
 
 <PixataTimePicker @bind-Value="_settings.DayStarts" Format="HH:mm" />
+
+<PixataHebrewDatePicker @bind-Value="_booking.Date" ShowSecondaryDates="true" IncludeShabbosOrYomTov="true" />
 
 <PixataDateInput @bind-Value="_dateOfBirth" Format="dd/MM/yyyy" />
 
@@ -62,7 +64,9 @@ The date picker also has...
 | --- | --- | --- |
 | `View`, `BottomView` | `PixataCalendarView` | The view the calendar opens in, and the most detailed one. Set `BottomView` to `Year` to pick a month |
 | `DisabledDates` | `List<DateTime>` | Dates the user can't pick from the calendar |
+| `DayInfo` | `Func<DateTime, PixataCalendarDayInfo?>` | Shades days, gives them tooltips or puts a second line of text under them. See [shading days](#shading-days) |
 | `ShowWeekNumbers`, `ShowOtherMonthDays` | `bool` | Passed to the calendar |
+| `OpenOnFocus` | `bool` | Opens the calendar when the input gets the focus, as well as from the button. Defaults to false |
 | `PopupClass` | `string` | A CSS class for the popup |
 | `OnOpen`, `OnClose` | `EventCallback` | Fire when the calendar opens and closes |
 | `ShowTime` | `bool` | Lets the user pick a time as well. See below. Defaults to false |
@@ -72,7 +76,9 @@ The date picker also has...
 
 and `Open()` and `Close()` methods. Both components have `FocusAsync()`.
 
-The calendar opens from the button, or with Alt+Down in the input. It closes when a date is picked, on Escape or Alt+Up, or when the user clicks somewhere else. It's positioned with fixed positioning, so it isn't cut off by a container with hidden overflow (such as a grid cell), and it stays inside the window.
+The calendar opens from the button, or with Alt+Down in the input. It closes when a date is picked, on Escape or Alt+Up, or when the user clicks somewhere else.
+
+With `OpenOnFocus="true"`, the calendar also opens when the input gets the focus, whether from a click or from Tab. The focus stays in the input, so the user can still type the date, and Alt+Down moves it into the calendar. Tab closes the calendar and goes on to the next field, as it does whenever the calendar is open and the focus is in the input. It's positioned with fixed positioning, so it isn't cut off by a container with hidden overflow (such as a grid cell), and it stays inside the window.
 
 ### Date and time
 
@@ -89,6 +95,30 @@ The time can also be typed into the input, as with the date, whatever the `TimeS
 `ShowTime` only works with `DateTime` and `DateTime?` values. Using it with a `DateOnly` throws an `InvalidOperationException`, as a `DateOnly` has nowhere to keep the time.
 
 Without `ShowTime`, picking a day from the calendar sets the value to that day at midnight, as it always has, even if the value had a time.
+
+### Shading days
+
+`DayInfo` is a function that the calendar calls for each day it shows. It returns a `PixataCalendarDayInfo` to shade the day, give it a tooltip or put a second line of text under its number, or null to show the day as usual. The day can still be picked; use `DisabledDates` for days that can't...
+
+```razor
+<PixataDatePicker @bind-Value="_order.Due" DayInfo="ShadeDays" />
+
+@code {
+  private static PixataCalendarDayInfo? ShadeDays(DateTime date) =>
+    date.Day == 1 ? new() { BackgroundColour = "#fff3b0", Title = $"The first of {date:MMMM}", SecondaryText = "*" }
+    : date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? new() { BackgroundColour = "#e4e6eb" }
+    : null;
+}
+```
+
+| Property | What it does |
+| --- | --- |
+| `BackgroundColour` | A CSS colour to shade the day with. The selected day shows as selected instead |
+| `Class` | A CSS class added to the day's cell, for shading it (or anything else) in your own CSS |
+| `Title` | The day's tooltip, in place of the date in full. Use `\n` for more than one line |
+| `SecondaryText` | A second, smaller line of text under the day's number, such as the date in another calendar |
+
+The date range picker and the calendar on its own have `DayInfo` too. [`PixataHebrewDatePicker`](#hebrew-date-picker) uses it to show the Hebrew dates and shade Shabbos, Yom Tov and bank holidays.
 
 ### Forms
 
@@ -143,6 +173,7 @@ The focus stays in the input when the calendar is opened by clicking, so you can
 | `Format` | `string` | A .NET date format for both inputs. Defaults to `d`, the culture's short date |
 | `Min`, `Max` | `DateTime` | The range of dates allowed. Default to 1st January 1900 and 31st December 2099 |
 | `DisabledDates` | `List<DateTime>` | Dates the user can't pick from the calendar |
+| `DayInfo` | `Func<DateTime, PixataCalendarDayInfo?>` | Shades days, gives them tooltips or puts a second line of text under them. See [shading days](#shading-days) |
 | `AllowReverse` | `bool` | Whether picking an end before the start swaps them round, rather than starting again. Defaults to false |
 | `ShowWeekNumbers` | `bool` | Shows ISO-8601 week numbers in the calendar |
 | `View`, `BottomView` | `PixataCalendarView` | The view the calendar opens in, and the most detailed one. Set `BottomView` to `Year` to pick a range of months |
@@ -225,6 +256,83 @@ A time typed outside `Min` and `Max` shows the input as invalid, as a date does,
 
 It works inside an `EditForm` in the same way as the date picker (see [forms](#forms)), and inside a `<fieldset disabled>`.
 
+## Hebrew date picker
+
+`PixataHebrewDatePicker` is a date picker for apps that work with the Jewish calendar. It does what `TelerikHebrewDatePicker` (in Pixata.Blazor.TelerikComponents) does, without needing Telerik, and takes the same parameters, so moving to it is mostly a rename (see [below](#moving-from-telerikhebrewdatepicker)). The [sample page](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor.Sample/Pages/PixataHebrewDatePickerSample.razor) shows it.
+
+The text box shows the Hebrew date, the Gregorian date or both, and can't be typed in. The calendar is `PixataCalendar`, showing Gregorian months with the Hebrew months they span above it, and optionally the Hebrew day of the month under each day. It can shade Shabbos and Yom Tov, other non-working days, and bank holidays, each in its own colour, and give each day a tooltip saying what it is...
+
+```razor
+<PixataHebrewDatePicker @bind-Value="_booking.Date"
+                        InputDisplay="PixataDateInputDisplay.Both"
+                        ShowSecondaryDates="true"
+                        ShowTooltips="true"
+                        IncludeShabbosOrYomTov="true"
+                        IncludeOtherNonWorkDays="true"
+                        IncludeBankHolidays="true" />
+```
+
+It binds to a `DateTime`, `DateTime?`, `DateOnly` or `DateOnly?`, and any other type throws an `InvalidOperationException`. It works inside an `EditForm` in the same way as the date picker (see [forms](#forms)), and inside a `<fieldset disabled>`.
+
+### Parameters
+
+| Parameter | Type | What it does |
+| --- | --- | --- |
+| `Value` | `TValue` | The date. Can be two-way bound |
+| `InputDisplay` | `PixataDateInputDisplay` | What the text box shows: `Hebrew` (the default, such as ‎3‎ תשרי ‎5787‎), `Gregorian`, or `Both`, which is the Hebrew date with the Gregorian one after it in brackets |
+| `GregorianFormat` | `string` | The .NET format of the Gregorian date in the text box. Defaults to `d MMM yyyy` |
+| `ShowSecondaryDates` | `bool` | Shows the Hebrew day of the month, in letters, under each day in the calendar. `ShowSecondaryDatesInBrackets` puts it in brackets |
+| `ShowTooltips` | `bool` | Gives each day a tooltip with its Hebrew and Gregorian dates, and the names of any of the days being shaded, such as "Shabbos / Chol Hamoed Succos" |
+| `IncludeShabbosOrYomTov`, `ShabbosOrYomTovBgColour` | `bool`, `string` | Shades Shabbos and Yom Tov, as kept outside Israel. The colour defaults to `#b1c1d7` |
+| `IncludeOtherNonWorkDays`, `OtherNonWorkDayBgColour` | `bool`, `string` | Shades Chol Hamoed, Tisha B'Av (on the Sunday, when the 9th of Av is Shabbos) and Purim. The colour defaults to `#d2dae3` |
+| `IncludeBankHolidays`, `BankHolidayBgColour` | `bool`, `string` | Shades the bank holidays of England and Wales, with the substitute days when one falls at a weekend. The colour defaults to `#d4edda` |
+| `ClashPriority` | `PixataBankHolidayClashPriority` | The colour a day gets when it's a bank holiday as well as one of the others: `HebrewFirst` (the default) or `BankHolidayFirst`. It also sets which name comes first in the tooltip |
+| `MinDate`, `MaxDate` | `DateTime` | The range that can be picked. Default to 1st January 1584 and 29th September 2238, and are kept inside the range .NET's `HebrewCalendar` covers |
+| `DisabledDates` | `List<DateTime>` | Dates that can't be picked |
+| `ShowWeekNumbers` | `bool` | Passed to the calendar |
+| `OpenOnFocus` | `bool` | Opens the calendar when the text box gets the focus. See below |
+| `OpenOnRight` | `bool` | Lines the calendar up with the right-hand edge of the text box, rather than the left |
+| `ShowClearButton` | `bool` | Shows an x that clears the date. Only for nullable types. Defaults to true |
+| `Placeholder` | `string` | Shown when there's no date. Defaults to "No date selected" |
+| `Enabled`, `ReadOnly` | `bool` | As you'd expect. Neither opens the calendar |
+| `Size` | `string` | `sm`, `md` (the default) or `lg`. See `PixataThemeConstants.Size` |
+| `Width` | `string` | Defaults to `320px`, as in the Telerik one |
+| `Class`, `Id`, `TabIndex`, `PopupClass` | | Passed to the component's elements. Any other attributes go on the text box |
+| `AriaLabel`, `ClearText`, `OpenText` | `string` | The accessible names of the text box and calendar, and of the clear and calendar buttons, for translating. Default to "Date", "Clear" and "Open" |
+| `OnChange` | `EventCallback<object?>` | Fires with the new value when the user picks a different date or clears it |
+| `OnOpen`, `OnClose` | `EventCallback` | Fire when the calendar opens and closes |
+
+It has `Open()`, `Close()` and `FocusAsync()` methods.
+
+The calendar opens when the text box or the button is clicked, or with Alt+Down or Space in the text box. It closes when a day is picked, on Escape, Alt+Up or Tab, or when the user clicks somewhere else. Delete or Backspace in the text box clears a nullable date.
+
+With `OpenOnFocus="true"`, the calendar opens as soon as the text box gets the focus, and the focus stays in the text box. Alt+Down or Space then moves it into the calendar, and Tab closes the calendar and goes on to the next field.
+
+### The Hebrew dates and holidays
+
+The rules are in the static `PixataHebrewDates` class, which you can use yourself...
+
+| Member | What it gives |
+| --- | --- |
+| `Format(date)` | The Hebrew date, such as ‎3‎ תשרי ‎5787‎, or `""` for a date outside the range .NET supports |
+| `DayInLetters(date)` | The day of the Hebrew month in letters, such as ג׳ |
+| `ToHebrewDate(date)` | The Hebrew year, month and day, with the months counted from Tishrei as in .NET's `HebrewCalendar` |
+| `MonthName(year, month)` | The name of a Hebrew month, with אדר א and אדר ב in a leap year |
+| `MonthsOf(year, month)` | The Hebrew months a Gregorian month spans, such as אלול 5786 / תשרי 5787 |
+| `YomTovName(date)`, `OtherNonWorkDayName(date)`, `BankHolidayName(date)` | The name of the Yom Tov, other non-working day or bank holiday on a date, or null |
+| `DayType(date, ...)`, `DayNames(date, ...)` | How the picker shades a date, and the names in its tooltip, given which kinds of day are wanted and the clash priority |
+| `IsSupported(date)`, `MinSupportedDate`, `MaxSupportedDate` | The range .NET's `HebrewCalendar` covers |
+
+### Moving from TelerikHebrewDatePicker
+
+The parameters have the same names, so most pages only need the component's name changing. The differences are...
+
+- The enums are `PixataDateInputDisplay` and `PixataBankHolidayClashPriority`, as Pixata.Blazor's older `HebrewDatePicker` already has a `DateInputDisplay` and a `BankHolidayClashPriority` in the same namespace.
+- The calendar always shows Gregorian months, with the Gregorian date as the main one in each day, so `GregorianPrimary` can only be true, and defaults to true. Setting it to false throws a `NotSupportedException`, rather than quietly showing something else. A page that used the Telerik picker's default (false) shows Gregorian months now.
+- `ShowDiagnostics` and `AnimationType` aren't there.
+- It binds to `DateOnly` and `DateOnly?` as well.
+- It's styled by [the stylesheet](Readme.Styling.md), like the other date pickers, and its classes all start with `pixata-blazor-` (see [styling](#styling)).
+
 ## Calendar
 
 | Parameter | Type | What it does |
@@ -235,6 +343,7 @@ It works inside an `EditForm` in the same way as the date picker (see [forms](#f
 | `BottomView`, `TopView` | `PixataCalendarView` | How far down and up the user can go. Clicking a cell in the bottom view selects it. Default to `Month` and `Century` |
 | `Min`, `Max` | `DateTime` | The range of dates allowed |
 | `DisabledDates` | `List<DateTime>` | Dates that can't be picked |
+| `DayInfo` | `Func<DateTime, PixataCalendarDayInfo?>` | Called for each day in the month view, to shade it, give it a tooltip or put a second line of text under its number. See [shading days](#shading-days) |
 | `ShowWeekNumbers` | `bool` | Shows ISO-8601 week numbers |
 | `ShowOtherMonthDays` | `bool` | Shows the days from the months either side that fill the first and last weeks. Defaults to true. They are never shown when `Views` is more than 1, so no day appears twice |
 | `Views` | `int` | How many months (or years, decades or centuries) to show side by side. Defaults to 1. Below 576 pixels wide, only the first is shown |
@@ -289,6 +398,23 @@ The time picker has the date picker's classes (so it looks the same), and these 
 | `pixata-blazor-timepicker-popup` | The popup (which also has `pixata-blazor-datepicker-popup`) |
 | `pixata-blazor-timepicker-list` | The list of times |
 | `pixata-blazor-timepicker-option`, `pixata-blazor-timepicker-option-selected` | A time in the list, and the one that is the value |
+
+`DayInfo` adds these to the days it's given something for...
+
+| Class | What it is |
+| --- | --- |
+| `pixata-blazor-calendar-shaded` | A day with a `BackgroundColour`, which is in the cell's `--pixata-blazor-calendar-day-bg` custom property |
+| `pixata-blazor-calendar-day-text`, `pixata-blazor-calendar-secondary` | A day's number and its `SecondaryText`, when it has one |
+
+The Hebrew date picker has the date picker's classes, and these of its own...
+
+| Class | What it is |
+| --- | --- |
+| `pixata-blazor-hebrewdatepicker` | The whole component |
+| `pixata-blazor-hebrewdatepicker-input` | The text box |
+| `pixata-blazor-hebrewdatepicker-popup` | The popup |
+| `pixata-blazor-hebrewdatepicker-months` | The Hebrew months above the calendar |
+| `pixata-blazor-hebrewdatepicker-shabbos-yomtov`, `pixata-blazor-hebrewdatepicker-other-non-work-day`, `pixata-blazor-hebrewdatepicker-bank-holiday` | A day shaded as Shabbos or Yom Tov, another non-working day, or a bank holiday |
 
 The date range picker's parts are...
 

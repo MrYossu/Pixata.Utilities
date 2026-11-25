@@ -90,6 +90,8 @@ If both parameters are set, then `PoliciesType` will be used, and `Policies` wil
 
 A date picker that allows you to select Hebrew dates.
 
+>For new code, use [`PixataHebrewDatePicker`](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#hebrew-date-picker), which is built on the same calendar as the other Pixata date pickers and is styled by [the stylesheet](Readme.Styling.md).
+
 It highlights Shabbos and these Yomim Tovim with a light grey background...
 
 - Pesach (days 1, 2, 7, 8)
