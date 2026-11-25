@@ -109,6 +109,7 @@
   --pixata-datepicker-popup-shadow: 0 8px 10px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .12);
   --pixata-datepicker-border-radius: 4px;
   --pixata-datepicker-range-bg: color-mix(in srgb, var(--pixata-datepicker-primary) 15%, transparent);
+  --pixata-timepicker-list-max-height: 16em;
   --pixata-label-font-size: inherit;
   --pixata-label-font-weight: inherit;
   --pixata-label-color: inherit;
@@ -1276,6 +1277,50 @@ select.pixata-form-control:not([multiple]):not([size]) {
   gap: 8px;
   padding: 8px;
   border-top: 1px solid var(--pixata-datepicker-border-color);
+}
+
+/* The time picker's list of times, which is at least as wide as the input */
+.pixata-blazor-timepicker-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  max-height: var(--pixata-timepicker-list-max-height);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+  font-size: var(--pixata-datepicker-font-size);
+  line-height: var(--pixata-datepicker-line-height);
+  color: var(--pixata-datepicker-color);
+  scrollbar-width: thin;
+}
+
+.pixata-blazor-timepicker-option {
+  flex: none;
+  margin: 0;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: var(--pixata-datepicker-border-radius);
+  color: inherit;
+  background: none;
+  font: inherit;
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pixata-blazor-timepicker-option:hover {
+  background-color: var(--pixata-datepicker-button-hover-bg);
+}
+
+.pixata-blazor-timepicker-option:focus-visible {
+  outline: 0;
+  box-shadow: inset var(--pixata-datepicker-focus-shadow);
+}
+
+.pixata-blazor-timepicker-option-selected,
+.pixata-blazor-timepicker-option-selected:hover {
+  color: var(--pixata-datepicker-primary-color);
+  background-color: var(--pixata-datepicker-primary);
 }
 
 .pixata-blazor-calendar-header {

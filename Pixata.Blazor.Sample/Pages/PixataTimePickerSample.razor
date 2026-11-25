@@ -1,0 +1,84 @@
+@page "/pixata-timepicker"
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+
+<SitePageTitle>Pixata time picker</SitePageTitle>
+
+<h3>Pixata time picker</h3>
+
+<p><code>PixataTimePicker</code> is a time input with a list of times to pick from. Click the hour or minute and type, or use the up and down arrow keys, which go round midnight. Alt+Down opens the list. See <a href="https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#time-picker">the documentation</a>.</p>
+
+<ComponentSample Title="A TimeOnly">
+  <Description>
+    <p>The format defaults to the culture's short time. This one sets <code>Format="HH:mm"</code>, as a replacement for Telerik's <code>TimePicker</code> would.</p>
+  </Description>
+  <ChildContent>
+    <PixataTimePicker @bind-Value="_dayStarts" Format="HH:mm" Width="120px" Id="pixata-tp" />
+    <p>Value: @_dayStarts</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Nullable, with a placeholder, clear button and a 12-hour clock">
+  <Description>
+    <p><code>Format="h:mm tt"</code> and <code>Step="15"</code>, so the list goes up in quarters of an hour.</p>
+  </Description>
+  <ChildContent>
+    <PixataTimePicker @bind-Value="_reminder" Format="h:mm tt" Step="15" Placeholder="Pick a time" ShowClearButton="true" Width="160px" Id="pixata-tp-nullable" />
+    <p>Value: @(_reminder?.ToString() ?? "null")</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="Working hours, with Min and Max">
+  <Description>
+    <p><code>Min</code> and <code>Max</code> are <code>DateTime</code>s, as in Telerik, but only their time counts. The list goes from 08:00 to 18:00, an hour apart, and a time typed outside that shows as invalid.</p>
+  </Description>
+  <ChildContent>
+    <PixataTimePicker @bind-Value="_meeting" Min="_open" Max="_close" Step="60" Width="120px" Id="pixata-tp-range" />
+    <p>Value: @_meeting</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="A DateTime">
+  <Description>
+    <p>Picking a time keeps the date.</p>
+  </Description>
+  <ChildContent>
+    <PixataTimePicker @bind-Value="_appointment" Width="120px" Id="pixata-tp-datetime" />
+    <p>Value: @_appointment.ToString("dd MMM yyyy HH:mm", CultureInfo.CurrentCulture)</p>
+  </ChildContent>
+</ComponentSample>
+
+<ComponentSample Title="In a form">
+  <Description>
+    <p>The time picker is validated as the other inputs are. Disabling the fieldset disables it too.</p>
+  </Description>
+  <ChildContent>
+    <EditForm Model="_form">
+      <DataAnnotationsValidator />
+      <fieldset disabled="@_formDisabled">
+        <PixataTimePicker @bind-Value="_form.Starts" Width="120px" Id="pixata-tp-form" />
+        <ValidationMessage For="() => _form.Starts" />
+      </fieldset>
+    </EditForm>
+    <span>
+      <PixataSwitch Id="form-disabled-switch" @bind-Value="_formDisabled" Size="sm" />
+      <label for="form-disabled-switch">Disable the fieldset</label>
+    </span>
+  </ChildContent>
+</ComponentSample>
+
+@code {
+  private TimeOnly _dayStarts = new(9, 0);
+  private TimeOnly? _reminder;
+  private TimeOnly _meeting = new(10, 0);
+  private DateTime _appointment = new(2026, 10, 13, 14, 30, 0);
+  private readonly DateTime _open = new(1900, 1, 1, 8, 0, 0);
+  private readonly DateTime _close = new(1900, 1, 1, 18, 0, 0);
+  private readonly SampleForm _form = new();
+  private bool _formDisabled;
+
+  private class SampleForm {
+    [Required(ErrorMessage = "Please pick a time")]
+    public TimeOnly? Starts { get; set; }
+  }
+}

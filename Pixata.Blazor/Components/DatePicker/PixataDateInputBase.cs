@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -9,9 +10,10 @@ using Microsoft.JSInterop;
 namespace Pixata.Blazor.Components;
 
 /// <summary>
-/// What <see cref="PixataDateInput{TValue}"/> and <see cref="PixataDatePicker{TValue}"/> have in common: the segmented input,
-/// the value conversion and the form integration. <typeparamref name="TValue"/> can be <see cref="DateTime"/>,
-/// <see cref="DateOnly"/> or a nullable version of either
+/// What <see cref="PixataDateInput{TValue}"/>, <see cref="PixataDatePicker{TValue}"/> and
+/// <see cref="PixataTimePicker{TValue}"/> have in common: the segmented input, the value conversion and the form integration.
+/// <typeparamref name="TValue"/> can be <see cref="DateTime"/> or <see cref="DateOnly"/> (<see cref="TimeOnly"/> rather than
+/// <see cref="DateOnly"/> for the time picker), or a nullable version of either
 /// </summary>
 public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposable {
   [Inject]
@@ -143,13 +145,13 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   // would lose the selection. From then on, the JavaScript sets the text
   protected string InitialText = "";
 
-  private static readonly Type UnderlyingType = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
+  protected static readonly Type UnderlyingType = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
 
   protected static bool IsNullable =>
     Nullable.GetUnderlyingType(typeof(TValue)) is not null;
 
   protected DateTime? CurrentDate =>
-    ToDateTime(Value);
+    ToModelValue(Value);
 
   protected bool IsInvalid =>
     !Model.IsValid || (_field is FieldIdentifier fieldId && EditContext!.GetValidationMessages(fieldId).Any());
@@ -163,9 +165,22 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   protected string? EffectiveInputMode =>
     InputMode ?? (Model.IsNumeric ? "numeric" : null);
 
+  /// <summary>
+  /// The types <typeparamref name="TValue"/> can be, or the nullable versions of
+  /// </summary>
+  protected virtual Type[] SupportedTypes =>
+    [typeof(DateTime), typeof(DateOnly)];
+
+  /// <summary>
+  /// True if the value is a time of day, as in the time picker. <see cref="Min"/> and <see cref="Max"/> then only compare the
+  /// time, and the date isn't changed by the arrow keys or by pasting
+  /// </summary>
+  protected virtual bool TimeOfDayOnly =>
+    false;
+
   protected override void OnInitialized() {
-    if (UnderlyingType != typeof(DateTime) && UnderlyingType != typeof(DateOnly)) {
-      throw new InvalidOperationException($"{GetType().Name.Split('`')[0]} only works with DateTime, DateOnly and their nullable versions, not {typeof(TValue).Name}");
+    if (!SupportedTypes.Contains(UnderlyingType)) {
+      throw new InvalidOperationException($"{GetType().Name.Split('`')[0]} only works with {string.Join(", ", SupportedTypes.Select(t => t.Name))} and their nullable versions, not {typeof(TValue).Name}");
     }
     if (EditContext is not null && ValueExpression is not null) {
       _field = FieldIdentifier.Create(ValueExpression);
@@ -181,7 +196,7 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   protected override async Task OnParametersSetAsync() {
     string format = EffectiveFormat;
     if (format != _modelFormat) {
-      Model = new(format) { AutoSwitchParts = AutoSwitchParts, TwoDigitYearMax = TwoDigitYearMax, Min = Min, Max = Max };
+      Model = new(format) { AutoSwitchParts = AutoSwitchParts, TwoDigitYearMax = TwoDigitYearMax, Min = Min, Max = Max, TimeOfDayOnly = TimeOfDayOnly };
       _modelFormat = format;
       Model.SetValue(CurrentDate);
       _lastValue = CurrentDate;
@@ -309,16 +324,19 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
   }
 
   // A complete, valid date becomes the value. A nullable value becomes null when the input is empty or incomplete, as in
-  // Telerik. A non-nullable one keeps its last good value, and the input shows as invalid until it's fixed
+  // Telerik. A non-nullable one keeps its last good value, and the input shows as invalid until it's fixed. The values are
+  // compared once converted, so a part the value doesn't have (such as the time of a pasted date, for a DateOnly) doesn't
+  // count as a change
   private async Task UpdateValueFromModel() {
     DateTime? date = Model.IsValid ? Model.Value : null;
     if (date is null && !IsNullable) {
       StateHasChanged();
       return;
     }
-    if (date != CurrentDate) {
-      _lastValue = date;
-      Value = FromDateTime(date);
+    TValue? value = FromModelValue(date);
+    if (!EqualityComparer<TValue?>.Default.Equals(value, Value)) {
+      Value = value;
+      _lastValue = CurrentDate;
       await ValueChanged.InvokeAsync(Value);
       if (_field is FieldIdentifier fieldId) {
         EditContext!.NotifyFieldChanged(fieldId);
@@ -368,13 +386,19 @@ public abstract class PixataDateInputBase<TValue> : ComponentBase, IAsyncDisposa
     }
   }
 
-  private static DateTime? ToDateTime(TValue? value) => value switch {
+  /// <summary>
+  /// Converts the value to the <see cref="DateTime"/> the input works with
+  /// </summary>
+  protected virtual DateTime? ToModelValue(TValue? value) => value switch {
     DateTime dateTime => dateTime,
     DateOnly dateOnly => dateOnly.ToDateTime(TimeOnly.MinValue),
     _ => null
   };
 
-  protected static TValue? FromDateTime(DateTime? date) {
+  /// <summary>
+  /// Converts the <see cref="DateTime"/> the input works with back to the value
+  /// </summary>
+  protected virtual TValue? FromModelValue(DateTime? date) {
     if (date is not DateTime value) {
       return default;
     }
