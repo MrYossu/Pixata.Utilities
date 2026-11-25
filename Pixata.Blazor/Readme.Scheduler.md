@@ -102,6 +102,7 @@ A timed appointment that lasts a day or more also goes in the all-day row.
 | `ConfirmDelete` | `bool` | `false` | Asks the user to confirm before an appointment is deleted |
 | `OnModelInit` | `Func<TItem>?` | | Creates the item for a new appointment. Needed if `TItem` has no parameterless constructor, or to give new appointments default values |
 | `ShowWorkHours` | `bool` | `false` | Shows only the working day in the views with time slots. The footer has a button to toggle it; use `@bind-ShowWorkHours` to keep track |
+| `ScrollTime` | `TimeOnly?` | | The time the day, multi-day, week and timeline views scroll to when they're shown, in place of the view's `WorkDayStart` (see [Scrolling to a time](#scrolling-to-a-time)) |
 | `WorkDays` | `IEnumerable<DayOfWeek>?` | Monday to Friday | The working days, which have a different background from the rest of the week |
 | `Culture` | `CultureInfo?` | the current culture | For day and month names, date and time formats and the first day of the week |
 | `FirstDayOfWeek` | `DayOfWeek?` | from the culture | Overrides the culture's first day of the week |
@@ -133,6 +134,7 @@ The items in the events are `object`; cast them to your type. Double-clicking an
 | --- | --- |
 | `Rebind()` | Reads the data again. Call it when you change the list you passed in place (eg `_appointments.Add(...)`), as the scheduler can't see that |
 | `Refresh()` | Renders the scheduler again |
+| `ScrollToTime(TimeOnly)` | Scrolls the day, multi-day, week or timeline view to a time (see [Scrolling to a time](#scrolling-to-a-time)) |
 
 Get hold of the scheduler with `@ref`.
 
@@ -161,6 +163,31 @@ The views with time slots (day, multi-day, week and timeline) also have these pa
 The day, multi-day and week views have `HideAllDayRow`, which puts all-day appointments in the time slots instead.
 
 Overlapping appointments are shown side by side. Appointments that carry on beyond what the view shows have a small arrow at that end.
+
+### Scrolling to a time
+
+The day, multi-day, week and timeline views scroll to the view's `WorkDayStart` when they're shown, which is when the scheduler first appears, when the user changes the view, and when they toggle the working hours. Moving to another date keeps the view where it is.
+
+To scroll somewhere else, set `ScrollTime`. The views scroll to it in place of `WorkDayStart`, and again whenever it changes, so a page can work it out from the appointments in view. This scrolls to the earlier of 08:00 and the first appointment in the week, so an early meeting isn't hidden, and follows the user from week to week...
+
+```razor
+<PixataScheduler Data="@_appointments" @bind-Date="@_date" ScrollTime="@FirstTime()">...</PixataScheduler>
+
+@code {
+  private TimeOnly FirstTime() {
+    DateTime weekStart = _date.AddDays(-(((int)_date.DayOfWeek + 6) % 7));
+    TimeOnly? first = _appointments
+      .Where(a => !a.IsAllDay && a.Start >= weekStart && a.Start < weekStart.AddDays(7))
+      .Select(a => (TimeOnly?)TimeOnly.FromDateTime(a.Start))
+      .Min();
+    return first < new TimeOnly(8, 0) ? first.Value : new TimeOnly(8, 0);
+  }
+}
+```
+
+To scroll once, from code, call `ScrollToTime()` (get hold of the scheduler with `@ref`), such as from a button, or from a `DateChanged` handler to scroll on every change of date. The view stays scrolled there until the user changes the view, when it goes back to `ScrollTime` or `WorkDayStart`.
+
+Either way, the view scrolls to the slot (or division) that holds the time, so 09:10 scrolls to 09:00 with half-hour divisions, and a time before the first one shown scrolls to the top. The month and agenda views don't scroll. See the [live demo](https://test.pixata.co.uk/SchedulerSample).
 
 ## Editing
 

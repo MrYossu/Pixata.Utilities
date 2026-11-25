@@ -204,6 +204,15 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
   [Parameter]
   public bool ShowWorkHours { get; set; }
 
+  /// <summary>
+  /// The time the day, multi-day, week and timeline views scroll to when they're shown, in place of the view's
+  /// <c>WorkDayStart</c>, such as the time of the first appointment in view, so an early one isn't hidden. The views also
+  /// scroll to it whenever it changes. Null, the default, for the view's <c>WorkDayStart</c>. To scroll somewhere once, call
+  /// <see cref="ScrollToTime"/>
+  /// </summary>
+  [Parameter]
+  public TimeOnly? ScrollTime { get; set; }
+
   [Parameter]
   public EventCallback<bool> ShowWorkHoursChanged { get; set; }
 
@@ -280,6 +289,9 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
   private PixataSchedulerView? _lastViewParameter;
   private DateTime? _lastDateParameter;
   private bool? _lastShowWorkHoursParameter;
+  private TimeOnly? _lastScrollTime;
+  // Where ScrollToTime last scrolled to, kept until the view changes, so a render in between doesn't lose it
+  private TimeOnly? _scrollTo;
   private PixataSchedulerView? _view;
   private DateTime _date = DateTime.Today;
   private bool _showWorkHours;
@@ -449,6 +461,7 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
       _view = View;
       _lastViewParameter = View;
       _scrollPending = true;
+      _scrollTo = null;
     }
     if (Date != _lastDateParameter) {
       _date = Date.Date;
@@ -457,6 +470,11 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
     if (ShowWorkHours != _lastShowWorkHoursParameter) {
       _showWorkHours = ShowWorkHours;
       _lastShowWorkHoursParameter = ShowWorkHours;
+    }
+    if (ScrollTime != _lastScrollTime) {
+      _lastScrollTime = ScrollTime;
+      _scrollTo = null;
+      _scrollPending = true;
     }
     PixataSchedulerItemFields fields = new() {
       Id = IdField,
@@ -787,6 +805,7 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
     bool viewChanged = view != CurrentView;
     _view = view;
     _scrollPending = true;
+    _scrollTo = null;
     _stale = true;
     _selectedSlot = null;
     if (viewChanged) {
@@ -814,6 +833,28 @@ public partial class PixataScheduler<TItem> : ComponentBase, IAsyncDisposable {
 
   internal Task GoToToday() =>
     ChangeDate(DateTime.Today);
+
+  /// <summary>
+  /// Scrolls the day, multi-day, week or timeline view to the slot holding a time, such as the first appointment in view, once
+  /// the scheduler has rendered. The view stays scrolled to it (when the work hours are toggled, say) until the view changes,
+  /// when it goes back to <see cref="ScrollTime"/> or the view's <c>WorkDayStart</c>. Does nothing in the other views. A time
+  /// before the first one shown scrolls to the top
+  /// </summary>
+  public async Task ScrollToTime(TimeOnly time) {
+    _scrollTo = time;
+    _scrollPending = true;
+    await InvokeAsync(StateHasChanged);
+  }
+
+  // The time a view scrolls to when it's shown
+  internal TimeSpan ScrollTarget(DateTime workDayStart) =>
+    (_scrollTo ?? ScrollTime)?.ToTimeSpan() ?? workDayStart.TimeOfDay;
+
+  // The division a view scrolls to: the one holding the time, or the first if the time is before the first one shown
+  internal int ScrollIndex(List<TimeSpan> divisions, DateTime workDayStart) {
+    TimeSpan target = ScrollTarget(workDayStart);
+    return Math.Max(divisions.FindLastIndex(t => t <= target), 0);
+  }
 
   internal async Task ToggleWorkHours() {
     _showWorkHours = !_showWorkHours;

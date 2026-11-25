@@ -11,7 +11,7 @@
   int perDay = model.Divisions.Count;
   int count = perDay * model.Days.Count * model.ColumnGroups.Count;
   bool horizontalGroups = model.ColumnGroups.Count > 1 || model.ColumnGroups.Any(g => g.Levels.Count > 0);
-  int scrollIndex = model.Divisions.FindLastIndex(t => t <= view.WorkDayStart.TimeOfDay);
+  int scrollIndex = Scheduler.ScrollIndex(model.Divisions, view.WorkDayStart);
   <div class="pixata-blazor-scheduler-grid pixata-blazor-scheduler-timeline-grid" style="@GridStyle(count, view)">
     <div class="pixata-blazor-scheduler-head">
       @if (horizontalGroups) {
@@ -54,7 +54,7 @@
             @for (int dayIndex = 0; dayIndex < model.Days.Count; dayIndex++) {
               @for (int d = 0; d < perDay; d += model.DivisionsPerSlot) {
                 int span = Math.Min(model.DivisionsPerSlot, perDay - d);
-                bool scrollTo = g == 0 && dayIndex == 0 && scrollIndex > 0 && scrollIndex >= d && scrollIndex < d + span;
+                bool scrollTo = g == 0 && dayIndex == 0 && scrollIndex >= d && scrollIndex < d + span;
                 <div class="pixata-blazor-scheduler-cell pixata-blazor-scheduler-time-cell"
                      style="@($"grid-column:span {span};")"
                      data-pixata-scroll-to="@(scrollTo ? "true" : null)">
