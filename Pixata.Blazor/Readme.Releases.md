@@ -2,6 +2,11 @@
 
 What changed in each version of [Pixata.Blazor](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.md), newest first.
 
+>**Version 5.40.0** adds `PixataTimePicker`, a replacement for Telerik's TimePicker, with the same parameters where they apply. It binds to a `TimeOnly`, a `DateTime` (whose date is kept) or a nullable version of either. The time is typed a part at a time, as a date is, and the button opens a list of times from `Min` to `Max`, `Step` minutes apart (every half hour by default). `Min` and `Max` only compare the time, and can go over midnight. It is validated in a form, and is disabled inside a `<fieldset disabled>`, as the other inputs are. See [time picker](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.DatePicker.md#time-picker) (#185). It also fixes three things in the date inputs...
+>- In a 24-hour format (such as the `ShowTime` date picker's in the UK), typing an hour into an afternoon time gave the afternoon hour, so typing `08` into 14:30 gave 20:30. Typing `12` into a morning time gave 00:00
+>- Alt+Down and Alt+Up in a date picker's input no longer scroll the page as well as opening and closing the calendar. The popup was left where the input used to be
+>- Pasting a date with a time into a date input bound to a `DateOnly` no longer raises `ValueChanged` when the date is the same
+
 >**Version 5.39.0** adds `PixataMediaQuery`, which tells your code whether a CSS media query such as `(max-width: 720px)` matches, once the page is interactive and whenever that changes, so a page can show a different layout on a phone. It has the same parameters as Telerik's MediaQuery (`Media` and `OnChange`). See [media query](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.MediaQuery.md) (#183)
 
 >**Version 5.38.0** lets `PixataScheduler` scroll to a time other than the start of the working day. The new `ScrollTime` parameter is used in place of the view's `WorkDayStart` when the day, multi-day, week or timeline view is shown, and is scrolled to again when it changes, so a page can set it to the first appointment's time. The new `ScrollToTime()` method scrolls there once, from code. See [scrolling to a time](https://github.com/MrYossu/Pixata.Utilities/blob/master/Pixata.Blazor/Readme.Scheduler.md#scrolling-to-a-time) (#189)
