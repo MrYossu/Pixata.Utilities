@@ -17,6 +17,7 @@ const { commands, linkInfo } = await import("../src/commands.js");
 const { cleanPastedHtml } = await import("../src/paste.js");
 const { formatHtml } = await import("../src/format.js");
 const { create, setValue, flush, destroy } = await import("../src/index.js");
+const { collectRules } = await import("../src/styles.js");
 const { EditorState, TextSelection } = await import("prosemirror-state");
 const { history } = await import("prosemirror-history");
 
@@ -295,4 +296,47 @@ test("the toolbar's arrow keys are left to a drop-down that has been asked to op
   keyDown(field, "Home");
   assert.equal(document.activeElement, field);
   destroy(id);
+});
+
+// The styles copied into the iframe in iframe mode
+
+// jsdom doesn't have every rule class a browser has, so a stand-in matches none
+globalThis.CSSStyleRule = dom.window.CSSStyleRule;
+globalThis.CSSKeyframesRule = dom.window.CSSKeyframesRule ?? class { };
+globalThis.CSSMediaRule = dom.window.CSSMediaRule ?? class { };
+globalThis.CSSImportRule = dom.window.CSSImportRule;
+
+// A style sheet that imports another, which has the rules given. jsdom doesn't fetch the import, so its rules are added here
+function sheetImporting(importRule, importedRules) {
+  const style = document.createElement("style");
+  style.textContent = `${importRule}\n.pixata-blazor-editor-document h1 { margin: 0; }`;
+  document.head.appendChild(style);
+  const sheet = style.sheet;
+  importedRules.forEach((rule, index) => sheet.cssRules[0].styleSheet.insertRule(rule, index));
+  style.remove();
+  return sheet;
+}
+
+test("the iframe gets the content rules from the page's style sheets", () => {
+  const rules = [];
+  collectRules(sheetImporting("@import url(\"https://example.com/other.css\");", []).cssRules, rules);
+  assert.equal(rules.length, 1);
+  assert.ok(rules[0].startsWith(".pixata-blazor-editor-document h1"));
+});
+
+test("the iframe gets the content rules from an imported style sheet", () => {
+  const rules = [];
+  collectRules(sheetImporting("@import url(\"https://example.com/pixata.css\");", [
+    ".pixata-blazor-editor-document p { margin: 0; }",
+    ".somewhere-else { color: blue; }"
+  ]).cssRules, rules);
+  assert.equal(rules.length, 2);
+  assert.ok(rules[0].startsWith(".pixata-blazor-editor-document p"));
+  assert.ok(rules[1].startsWith(".pixata-blazor-editor-document h1"));
+});
+
+test("the rules from a style sheet imported for some media only apply to that media", () => {
+  const rules = [];
+  collectRules(sheetImporting("@import url(\"https://example.com/print.css\") print;", [".pixata-blazor-editor-document p { margin: 0; }"]).cssRules, rules);
+  assert.match(rules[0], /^@media print \{ \.pixata-blazor-editor-document p/);
 });

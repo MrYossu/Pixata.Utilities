@@ -224,7 +224,7 @@ The value is sanitised as the editor emits it, so if you give it unsafe HTML, th
 
 ## Edit modes
 
-In `Iframe` mode (the default) the document is in an iframe, so your page's styles can't change how the content looks. The editor copies its own content styles (every CSS rule that mentions `pixata-blazor-editor-document`) and the `--pixata-blazor-*` custom properties they use into the iframe, and uses your page's font, so the content looks the same in both modes. In `Div` mode the document is part of the page and picks up its styles.
+In `Iframe` mode (the default) the document is in an iframe, so your page's styles can't change how the content looks. The editor copies its own content styles (every CSS rule that mentions `pixata-blazor-editor-document`) and the `--pixata-blazor-*` custom properties they use into the iframe, and uses your page's font, so the content looks the same in both modes. It finds them wherever they are in your page's stylesheets, including inside `@media`, `@supports` and `@layer`, and in a stylesheet you `@import`, such as `pixata.css` imported into a cascade layer so your own rules win (`@import url("_content/Pixata.Blazor/pixata.css") layer(pixata);`). A stylesheet from another origin can't be read, unless it is served with CORS headers and linked with `crossorigin`. In `Div` mode the document is part of the page and picks up its styles.
 
 ## Keyboard and accessibility
 

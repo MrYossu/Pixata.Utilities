@@ -11,9 +11,10 @@ ProseMirror. The `.csproj` files don't build it, and nothing here is packed into
 | `src/commands.js` | The commands the toolbar and `ExecuteAsync()` run, keyed by command name |
 | `src/paste.js` | The paste cleaning that `PixataEditorPasteSettings` controls |
 | `src/format.js` | Lays out the HTML for the View HTML dialog |
+| `src/styles.js` | Copies the content styles from the page's stylesheets into the iframe, in iframe mode |
 | `src/index.js` | The functions the .NET component calls: creating the editor, setting the value, running commands, the toolbar's keyboard handling and overflow |
 | `build.mjs` | Builds the bundle, with the licence notices of the bundled packages in its header |
-| `test/` | Tests for the schema, paste cleaning and commands, run in Node with jsdom |
+| `test/` | Tests for the schema, paste cleaning, commands and the styles copied into the iframe, run in Node with jsdom |
 
 ## Rebuilding
 
